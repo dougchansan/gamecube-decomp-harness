@@ -1,59 +1,144 @@
 # Decomp Orchestrator
 
-Production-shaped vertical slice for the Melee decomp orchestration runner.
+Decomp Orchestrator is a package-local runner for coordinating Melee
+decompilation work with Pi agents. It can live inside a Melee checkout at
+`<melee>/decomp-orchestrator`, but it is its own Git repository and command
+surface.
 
-This package lives at repo-root `decomp-orchestrator/`. That is the canonical
-source and command surface. Generated state defaults to
-`.decomp-orchestrator-state/` so runtime files do not mix with source files.
+The runner is intentionally thin: it owns durable state, leases, locks,
+artifacts, process supervision, and Pi invocation. Director and worker Pi
+agents own reasoning. Workers do not chat with each other; they coordinate by
+writing reports, facts, blockers, score candidates, and wake events into the
+shared run state.
 
-The runner stays intentionally thin:
+## Architecture
 
-- SQLite stores runs, targets, queue rows, leases, file locks, events, Pi
-  sessions, director cycles, and worker reports.
-- The runner owns state transitions, locks, artifacts, and Pi invocation.
-- Director and worker Pi agents own reasoning.
-- Workers communicate through durable reports, facts, and wake events, not by
-  talking to each other.
-- The required smoke path uses dry-run Pi agents and fixture board data.
+```mermaid
+flowchart TD
+    operator["Human operator<br/>starts runs, reviews incidents,<br/>restarts babysit if babysit dies"]
 
-## Current Self-Sufficiency
+    subgraph package["Decomp Orchestrator package"]
+        direction TB
 
-The package now owns the runtime knowledge that the director and workers need:
+        subgraph babysit["Outer safety shell: babysit"]
+            direction TB
+            guardian["Guardian loop<br/>runs the child process<br/>captures stdout/stderr<br/>recovers leases<br/>restarts by policy"]
 
-- `knowledge/manifest.json` routes role defaults and worker capabilities to
-  concrete knowledge references and optional workflows.
-- `knowledge/decomp_resources/` stores the local decomp resource library,
-  indexes, data-sheet CSVs, and mirrored hint surfaces.
-- `knowledge/past_prs/` stores the stable PR dump, searchable postmortem
-  library, shared PR-agent prompts, and refresh utilities.
-- `package.json` exposes the PR refresh/postmortem/sync utilities as package
-  scripts.
+            subgraph child["Child process: bootstrap / trigger-agent"]
+                direction TB
+                trigger["Trigger actor<br/>sleeps on durable state<br/>wakes director<br/>fills worker slots"]
+                director["Director Pi agent<br/>reads board snapshot<br/>chooses target packets"]
 
-The package now has both a trigger-agent loop and a guardian wrapper.
-`init-run` records `desired_workers`, queues initial targets, and writes run
-state; `trigger-agent` or its `bootstrap` alias wakes the director on durable
-events, fills worker slots up to the configured worker count, and rests when no
-event, queued work, or active worker remains. `babysit` is an outer process
-guardian for long-running development runs: it launches the decomp system
-process, captures process-health incidents, recovers failed or expired leases,
-and restarts according to policy. PR knowledge refreshes and global
-build/report refreshes remain explicit operator steps.
+                subgraph board["Middle layer: SQLite board + artifacts"]
+                    direction LR
+                    sqlite["orchestrator.sqlite<br/>runs, queue, leases, events,<br/>file locks, sessions, reports"]
+                    artifacts["run artifacts<br/>prompts, logs, reports,<br/>incidents, recovery output"]
+                end
 
-## Documentation
+                subgraph pool["Worker pool"]
+                    direction LR
+                    workers["Worker Pi sessions<br/>one leased target each<br/>research, edit, validate, report"]
+                end
+            end
+        end
 
-Package-local docs live under `docs/`. These are D-Comp Orchestrator docs, not
-top-level Melee repository docs.
+        subgraph maintenance["Explicit maintenance and handoff commands"]
+            direction TB
 
-- `docs/design.html` preserves the original standalone visual design artifact.
-- `docs/00-foundation/` captures purpose, principles, and boundaries.
-- `docs/10-system-design/` captures director, worker, state, knowledge, and
-  score-gate behavior.
-- `docs/20-implementation/` captures current source layout, agent slices, CLI,
-  state, and knowledge implementation details.
+            subgraph prsync["PR sync subsystem"]
+                direction TB
+                gh["GitHub PRs<br/>doldecomp/melee"] --> dump["Fetch dump<br/>PR metadata, comments,<br/>reviews, diffs"]
+                dump --> postmortems["Build postmortems<br/>searchable PR library"]
+                postmortems --> prreview["PR-review agent<br/>review lessons"]
+            end
 
-## Setup
+            regression["regression-check<br/>saved baseline gate<br/>PR-ready report"]
+        end
 
-From this directory:
+        subgraph knowledge["Knowledge layer consumed by agents"]
+            direction LR
+            refs["Docs, references,<br/>workflows"]
+            resources["Decomp resources<br/>data sheets, PowerPC docs,<br/>external indexes"]
+            prlib["Past PR library<br/>knowledge/past_prs"]
+        end
+    end
+
+    subgraph melee["Melee checkout"]
+        direction LR
+        source["source + headers"]
+        reports["objdiff.json<br/>build/GALE01/report.json"]
+        build["ninja, objdiff-cli,<br/>changes_all"]
+    end
+
+    operator -->|"starts / restarts"| guardian
+    guardian -->|"launches child"| trigger
+    guardian -. "process exit or worker error" .-> guardian
+    guardian -->|"incident + recovery records"| artifacts
+
+    trigger -->|"wake event"| director
+    director -->|"queue updates + worker intent"| sqlite
+    trigger -->|"open worker slots"| workers
+    sqlite -->|"leases, write sets,<br/>target packets"| workers
+    workers -->|"reports, facts,<br/>blockers, score candidates"| sqlite
+    sqlite -->|"wakeups + pool state"| trigger
+
+    postmortems --> prlib
+    prreview --> prlib
+    refs --> director
+    refs --> workers
+    resources --> workers
+    prlib --> workers
+
+    workers -->|"read/edit"| source
+    reports -->|"board inputs"| sqlite
+    workers -->|"narrow validation"| build
+    build -->|"objdiff/build signal"| workers
+    regression -->|"global check"| build
+    regression -->|"report artifacts"| artifacts
+
+    classDef shell fill:#eef6ff,stroke:#2563eb,stroke-width:2px,color:#111827;
+    classDef process fill:#f8fafc,stroke:#64748b,color:#111827;
+    classDef boardNode fill:#fff7ed,stroke:#ea580c,stroke-width:2px,color:#111827;
+    classDef knowledge fill:#f0fdf4,stroke:#16a34a,color:#111827;
+    classDef external fill:#f5f5f4,stroke:#78716c,color:#111827;
+    class guardian shell;
+    class trigger,director,workers process;
+    class sqlite,artifacts boardNode;
+    class refs,resources,prlib,postmortems,prreview knowledge;
+    class source,reports,build,gh,operator external;
+```
+
+Read the diagram from the outside in:
+
+- The operator is the escape hatch for starting or restarting `babysit`.
+- `babysit` is the outer runtime safety shell. It owns process health,
+  incident capture, lease recovery, and restart policy.
+- `bootstrap` / `trigger-agent` is the child process that advances the run from
+  durable state: wake the director, start workers, then sleep.
+- SQLite is the middle layer. The director, trigger actor, workers, guardian,
+  and regression gate coordinate through board rows and artifact paths.
+- PR sync, docs, references, and decomp resources feed the knowledge layer that
+  director and worker prompts consume. PR sync is explicit maintenance today,
+  not something the live trigger loop runs automatically.
+
+## What Lives Here
+
+| Area | Purpose |
+| --- | --- |
+| `src/cli/` | CLI commands: `init-run`, `tick`, `worker`, `trigger-agent`, `babysit`, `recover-leases`, `regression-check`, and `status`. |
+| `src/agents/` | Director, worker, PR-review, and shared Pi runtime prompt/output code. |
+| `src/state/` | SQLite schema and durable run-state helpers. |
+| `knowledge/` | Package-owned references, workflows, Melee resource indexes, tools, and past-PR corpus. |
+| `docs/` | The deeper three-layer documentation set: foundation, system design, and implementation details. |
+| `testdata/smoke_repo/` | Fixture Melee-like repo used by the smoke test. |
+
+Generated run state defaults to `<repo-root>/.decomp-orchestrator-state/`, not
+inside this package. Local package outputs such as `node_modules/`, `dist/`, and
+`init-run/` are ignored.
+
+## Quick Start
+
+From `decomp-orchestrator/`:
 
 ```sh
 bun install
@@ -61,182 +146,103 @@ bun run check
 bun run smoke
 ```
 
-`bun run smoke` is the fixture-backed vertical-slice gate. It creates a clean
-temporary state directory, runs the CLI end to end in dry-run mode, and asserts
-the SQLite rows plus artifact files that prove the slice.
+`bun run smoke` uses dry-run Pi agents and fixture board data. It proves the
+vertical slice: load a board, queue targets, run a director cycle, lease a
+worker, write artifacts, recover leases, exercise the trigger loop, and check
+the guardian wrapper path.
 
-## Dependencies
-
-Required for package install, typecheck, and smoke:
-
-- Bun.
-- Python 3.
-- Git.
-
-Required for live Pi sessions:
-
-- `@earendil-works/pi-coding-agent`, installed by `bun install`.
-- Whatever provider/auth setup Pi needs for the selected `--provider`,
-  `--model`, and `--thinking-level`.
-
-Required for a live Melee checkout run:
-
-- A configured doldecomp/melee checkout with the normal decomp toolchain.
-- Generated `objdiff.json` and `build/GALE01/report.json`.
-- The repo's build and verification tools, including `python configure.py`,
-  `ninja`, and `build/tools/objdiff-cli`.
-
-Required for PR knowledge refresh:
-
-- GitHub CLI `gh`, authenticated with access to `doldecomp/melee`.
-- Network access to GitHub.
-
-Optional tools referenced by knowledge references and prompts:
-
-- `pdftotext` for rebuilding the PowerPC PDF page index.
-- `openpyxl` for re-exporting the SSBM data-sheet workbook to CSV.
-- `tools/table-typer` for typed table inference when that repo-local tool is
-  present and built.
-- `decomp-permuter/`, `permuter_settings.toml`, and
-  `tools/permuter/import_func.sh` for permuter handoff workflows.
-
-There is no `decomp-promoter` dependency or installer declared inside this
-package today. If a local promoter-style helper is part of an operator workflow,
-it is external to the orchestrator package until it is added as a package script,
-submodule dependency, or documented optional tool.
-
-## Canonical Command Path
-
-Use the package scripts from repo-root `decomp-orchestrator/`:
+Use the package command entry point for everything else:
 
 ```sh
 bun run orch -- --help
-bun run smoke
 ```
 
-## Run Model
+## Required Tools
 
-The CLI exposes single-step commands plus trigger and guardian process loops:
+Core package work needs:
 
-- `init-run` creates the SQLite state, stores the goal and `desired_workers`,
-  loads `objdiff.json` plus `build/GALE01/report.json`, queues the initial
-  candidate targets, and writes the initial board snapshot. The goal is a run
-  checkpoint: `--goal-value 72` means pause and produce handoff output when the
-  verified score reaches that threshold, not that 72% is the final project
-  objective.
-- `tick` handles one unhandled wake event by launching one director Pi session.
-  The director can return target packets, which the runner uses to update queue
-  priorities.
-- `worker` leases one queued target, launches one worker Pi session, records the
-  durable report/facts/blocker artifacts, releases the lease, and emits the
-  resulting wake event. The worker prompt requires a local regression ledger:
-  before editing, the worker records the target and affected-neighbor baseline;
-  after each attempt, it reruns narrow object/objdiff checks and must undo its
-  own regressing hunks before reporting progress.
-- `trigger-agent` is the resting supervisor loop. It checks durable state for an
-  unhandled event, wakes one director Pi session when needed, starts worker
-  sessions until active leases reach `desired_workers` or `--max-workers`, and
-  then sleeps for `--idle-sleep-ms` before checking state again. `bootstrap` is
-  an alias for this command. Pass `--worker-thinking-level` to run worker Pi
-  sessions at a different thinking level from the director.
-- `babysit` is the guardian wrapper around the decomp system process. It starts
-  `bootstrap` by default, passes through trigger flags, captures each child
-  run's stdout/stderr/result under `state_dir/guardian/`, treats worker-process
-  errors as health incidents, runs lease recovery, and restarts the child when
-  restart policy allows.
-- `recover-leases` writes synthetic stalled reports for interrupted or expired
-  active leases after operator confirmation.
-- `regression-check` runs the repo's global match-regression gate, persists the
-  Ninja stdout/stderr/summary under the state dir, and exits non-zero when the
-  branch has any regression against the saved baseline.
-- `status` prints the current run, queue, lease, event, and report summary.
+- Bun
+- Python 3
+- Git
 
-`desired_workers` is stored on the run and used by the trigger-agent loop as the
-default worker-pool target. Pass `--max-workers` to cap that target for a local
-run or smoke-style dry run.
+Live agent sessions also need `@earendil-works/pi-coding-agent` from
+`bun install` and whatever provider/auth setup Pi needs for the selected
+`--provider`, `--model`, and `--thinking-level`.
 
-`--goal-kind matched_code_percent --goal-value <percent>` sets the checkpoint
-for this run. The long-term target remains `100%`; reaching a checkpoint should
-stop the current batch, preserve the run summary, and let you reallocate,
-increase the checkpoint, or package reviewable output.
+Live Melee runs need a configured doldecomp/melee checkout with the normal
+toolchain, including `python configure.py`, `ninja`, `objdiff.json`,
+`build/GALE01/report.json`, and `build/tools/objdiff-cli`.
 
-Manual fixture run:
+PR knowledge refresh needs authenticated GitHub CLI access to
+`doldecomp/melee`.
+
+## Run Shape
+
+Initialize a run against a Melee checkout:
 
 ```sh
-STATE_DIR="$(mktemp -d)"
-FIXTURE_ROOT="$PWD/testdata/smoke_repo"
+REPO_ROOT="/path/to/melee"
+STATE_DIR="$REPO_ROOT/.decomp-orchestrator-state"
 
-bun run orch -- --repo-root "$FIXTURE_ROOT" --state-dir "$STATE_DIR" --dry-run-agents init-run \
-  --desired-workers 1 \
-  --candidate-limit 8 \
+bun run orch -- --repo-root "$REPO_ROOT" --state-dir "$STATE_DIR" init-run \
+  --desired-workers 16 \
   --goal-kind matched_code_percent \
   --goal-value 72
-
-bun run orch -- --repo-root "$FIXTURE_ROOT" --state-dir "$STATE_DIR" --dry-run-agents tick \
-  --candidate-limit 8
-
-bun run orch -- --repo-root "$FIXTURE_ROOT" --state-dir "$STATE_DIR" --dry-run-agents worker \
-  --worker-id smoke-worker-1 \
-  --report-type stalled_no_useful_guess
-
-bun run orch -- --repo-root "$FIXTURE_ROOT" --state-dir "$STATE_DIR" --dry-run-agents status
 ```
 
-Bounded trigger-agent fixture run:
+Run the evented supervisor loop:
 
 ```sh
-STATE_DIR="$(mktemp -d)"
-FIXTURE_ROOT="$PWD/testdata/smoke_repo"
+bun run orch -- --repo-root "$REPO_ROOT" --state-dir "$STATE_DIR" bootstrap \
+  --max-workers 16 \
+  --idle-sleep-ms 5000
+```
 
-bun run orch -- --repo-root "$FIXTURE_ROOT" --state-dir "$STATE_DIR" --dry-run-agents init-run \
-  --desired-workers 1 \
-  --candidate-limit 8 \
-  --goal-kind matched_code_percent \
-  --goal-value 72
+For long-running development runs, put the guardian around the system process:
 
-bun run orch -- --repo-root "$FIXTURE_ROOT" --state-dir "$STATE_DIR" --dry-run-agents trigger-agent \
+```sh
+bun run orch -- --repo-root "$REPO_ROOT" --state-dir "$STATE_DIR" babysit \
+  --max-workers 16 \
+  --idle-sleep-ms 5000 \
+  --agent-timeout-seconds 7200 \
+  --worker-thinking-level low
+```
+
+`bootstrap` is an alias for `trigger-agent`. It wakes the director when durable
+events exist, starts worker sessions until active leases reach the configured
+worker count, then sleeps when the board is quiet. `babysit` wraps that process,
+captures stdout/stderr/results under `state_dir/guardian/`, records incidents,
+runs lease recovery when appropriate, and restarts according to policy.
+
+Use bounded flags for local dry runs:
+
+```sh
+bun run orch -- --repo-root testdata/smoke_repo --state-dir "$(mktemp -d)" \
+  --dry-run-agents trigger-agent \
   --max-workers 1 \
   --max-iterations 5 \
   --max-idle-iterations 1 \
-  --idle-sleep-ms 1 \
-  --candidate-limit 8
+  --idle-sleep-ms 1
 ```
 
-Bounded guardian fixture run:
+## Command Summary
 
-```sh
-STATE_DIR="$(mktemp -d)"
-FIXTURE_ROOT="$PWD/testdata/smoke_repo"
-
-bun run orch -- --repo-root "$FIXTURE_ROOT" --state-dir "$STATE_DIR" --dry-run-agents init-run \
-  --desired-workers 1 \
-  --candidate-limit 8 \
-  --goal-kind matched_code_percent \
-  --goal-value 72
-
-bun run orch -- --repo-root "$FIXTURE_ROOT" --state-dir "$STATE_DIR" --dry-run-agents babysit \
-  --max-workers 1 \
-  --max-iterations 5 \
-  --max-idle-iterations 1 \
-  --idle-sleep-ms 1 \
-  --candidate-limit 8
-```
-
-For real repo data, set `--repo-root` to the Melee checkout root and pass an
-explicit `--state-dir` while experimenting. If omitted, `--state-dir` defaults
-to `<repo-root>/.decomp-orchestrator-state/`, which is ignored by Git.
+| Command | Role |
+| --- | --- |
+| `init-run` | Create SQLite state, store the run checkpoint, load board data, queue initial targets, and write the initial board snapshot. |
+| `tick` | Handle one wake event by running one director Pi cycle. |
+| `worker` | Lease one queued target, run one worker Pi session, write durable report artifacts, release the lease, and emit a wake event. |
+| `trigger-agent` / `bootstrap` | Resting supervisor loop that wakes the director and fills worker slots from durable state. |
+| `babysit` | Process guardian that wraps `bootstrap`, records health incidents, recovers leases, and restarts the child when policy allows. |
+| `recover-leases` | Convert interrupted or expired active leases into durable stalled reports after operator confirmation. |
+| `regression-check` | Run the saved-baseline match-regression gate and write PR-ready report artifacts. |
+| `status` | Print run, queue, lease, event, and report summaries. |
 
 ## Regression Gate
 
-Regression protection is intentionally two-layered. Workers catch local
-regressions while they work by comparing the leased target and affected
-neighbors with narrow build/objdiff checks. They must not return `progress` or
-`score_candidate` while a retained worker edit has an unresolved local
-regression.
-
-Workers must not refresh global progress reports while leases may still be
-active. After workers are idle and before PR handoff, the operator/orchestrator
-runs the global saved-baseline check from the Melee checkout:
+Workers perform local target validation while they work. Global score and PR
+handoff stay outside the worker loop. Before review, run the saved-baseline gate
+from the Melee checkout:
 
 ```sh
 git switch master
@@ -249,266 +255,81 @@ python configure.py --require-protos
 bun run --cwd decomp-orchestrator regression-check -- --repo-root "$PWD"
 ```
 
-The branch-side command wraps `ninja changes_all`, writes artifacts under
+`regression-check` wraps `ninja changes_all`, writes artifacts under
 `.decomp-orchestrator-state/regression_checks/`, parses
-`build/GALE01/report_changes.json`, and fails if any metric moved backward or
-if the report contains broken matches or unmatched fuzzy regressions. Running
-`ninja changes_all` directly is useful for a raw report, but the enforced gate
-and PR Markdown report live in the orchestrator command.
-
-`regression-check` also generates a PR-style Markdown report at
-`<artifact-dir>/pr_report.md`. Use that report as the PR description under an
-`Expected / local run` heading, because it documents what the saved-baseline
-local run expects CI to confirm. A typical PR body is:
-
-```md
-## Expected / local run
-
-Generated by:
-`bun run --cwd decomp-orchestrator regression-check -- --repo-root "$PWD"`
-
-<paste <artifact-dir>/pr_report.md here>
-```
-
-Do not open or hand off the PR if the report contains any broken matches or
-regressions. If CI later reports different numbers, treat CI as the source of
-truth and rerun the baseline/check flow against the same base revision.
-
-For a custom report title or a longer table, pass:
-
-```sh
-bun run --cwd decomp-orchestrator regression-check -- --repo-root "$PWD" \
-  --report-title "Report for GALE01 (<base> - <head>)" \
-  --report-max-rows 0
-```
-
-If switching branches would disturb local dirty work, make the upstream
-baseline in a separate clean checkout/worktree and copy its
-`build/GALE01/baseline.json` into this checkout before running
-`regression-check`.
-
-## Smoke Fixture
-
-Fixture root:
-
-```text
-decomp-orchestrator/testdata/smoke_repo/
-+-- objdiff.json
-+-- build/GALE01/report.json
-+-- src/melee/ft/chara/ftDemo.c
-```
-
-The fixture contains one fuzzy function and one already-matched function. The
-smoke test proves the board loader queues only the fuzzy function.
-
-## Agent Layout
-
-Agent definitions are centralized under `src/agents/`. Each agent owns its
-prompt builder, output parsing, schema or packet helpers, and templates:
-
-```text
-src/agents/
-+-- registry.ts
-+-- runtime/
-+-- director/
-|   +-- prompt.ts
-|   +-- output.ts
-|   +-- templates/
-+-- worker/
-|   +-- packet.ts
-|   +-- output.ts
-|   +-- prompt.ts
-|   +-- templates/
-+-- pr-review/
-    +-- prompt.ts
-    +-- schema.json
-    +-- templates/
-```
-
-The system prompt defines role, authority, safety rules, and output contract.
-The initial user prompt carries current run state, files to read first,
-available resources/commands, and the concrete director wake event or worker
-target packet. Dry-run and live sessions both write rendered prompt artifacts
-beside the Pi output. Shared Pi invocation, prompt rendering, and JSON-output
-salvage live in `src/agents/runtime/`.
-
-## Agent Knowledge
-
-Runtime Pi agent knowledge lives under `knowledge/`, not under Codex skills:
-
-```text
-knowledge/
-+-- manifest.json
-+-- references/
-+-- workflows/
-+-- tools/
-+-- decomp_resources/
-+-- past_prs/
-```
-
-`manifest.json` maps role defaults and worker capabilities to concrete
-references and optional workflows. `src/knowledge/` builds the selected
-knowledge references and resource map for agent prompt builders. The director
-gets scheduling policy by default; the worker gets Melee overview, source
-standardizations, targeted iteration, matching tactics, resource research, and
-review standards. Experimental search and permuter handoff are opt-in
-capabilities, not the default worker posture.
-
-The decomp resource library and past-PR corpus are also package-owned:
-
-- `knowledge/decomp_resources/` contains the data-sheet CSVs, PowerPC indexes,
-  external hint indexes, manifests, and resource notes.
-- `knowledge/tools/` contains helper scripts such as target ranking, context
-  lookup, and optional experimental-search utilities.
-- `knowledge/past_prs/` contains the stable `current/` PR dump, searchable
-  `prs/` postmortem library, legacy PR-agent prompt mirrors under `agent/`, and
-  refresh utilities under `utils/`. The canonical PR-review agent lives under
-  `src/agents/pr-review/`.
+`build/GALE01/report_changes.json`, fails on regressions, and writes a PR-style
+Markdown report at `<artifact-dir>/pr_report.md`.
 
 ## PR Knowledge Refresh
 
-The PR refresh flow lives inside this package, so it can travel with the
-orchestrator instead of depending on repo-root docs:
+The PR corpus is package-owned and feeds worker prompts plus the PR-review
+agent. Refresh it explicitly before live runs when recent PR knowledge matters:
 
 ```sh
 bun run pr:refresh:dry
 bun run pr:refresh
-bun run pr:refresh -- --postmortem-mode pi --postmortem-scope fetched --postmortem-jobs 16
 bun run pr:postmortems -- --dump-root knowledge/past_prs/current --run-agent --rerun-existing --jobs 16
 ```
 
-For the combined branch sync plus PR-library refresh:
+For combined branch sync plus PR-library refresh:
 
 ```sh
 bun run pr:sync -- --postmortem-jobs 16
 ```
 
-These scripts default to `knowledge/past_prs`, with the refresh window recorded
-in `knowledge/past_prs/current/fetch_metadata.json`.
-
-PR refresh is built into the package command surface, but it is not
-automatically run by `init-run`, `tick`, or `worker`. Run it before starting a
-live orchestration run, or schedule it as a separate operator maintenance step.
+PR refresh is not run automatically by `init-run`, `tick`, `worker`, or
+`trigger-agent`.
 
 ## State And Artifacts
 
-State directory layout:
+Typical state layout:
 
 ```text
 <state-dir>/
 +-- orchestrator.sqlite
 +-- guardian/
-    +-- system_runs/<system_run>/stdout.txt
-    +-- incidents/<incident>.json
-    +-- recoveries/<recovery>/result.json
+|   +-- system_runs/<system_run>/
+|   +-- incidents/<incident>.json
+|   +-- recoveries/<recovery>/result.json
 +-- runs/
     +-- <run_id>/
         +-- snapshots/initial_board.json
-        +-- director_cycles/director_<session>.system.md
-        +-- director_cycles/director_<session>.user.md
-        +-- director_cycles/director_<session>.txt
-        +-- worker_logs/<lease_id>/worker_<session>.system.md
-        +-- worker_logs/<lease_id>/worker_<session>.user.md
-        +-- worker_logs/<lease_id>/worker_<session>.txt
-        +-- worker_logs/<lease_id>/report/worker_report.json
-        +-- worker_logs/<lease_id>/report/facts.json
-        +-- worker_logs/<lease_id>/report/blocker.json
+        +-- director_cycles/
+        +-- worker_logs/<lease_id>/
+        |   +-- worker_<session>.system.md
+        |   +-- worker_<session>.user.md
+        |   +-- worker_<session>.txt
+        |   +-- report/
+        |       +-- worker_report.json
+        |       +-- facts.json
+        |       +-- blocker.json
         +-- smoke_summary.json
 ```
 
-The smoke command asserts row counts in `runs`, `targets`, `queue`, `events`,
-`pi_sessions`, `director_cycles`, `leases`, `file_locks`, and
-`worker_reports`. It also asserts the initial board snapshot, director output,
-director system/user prompts, worker output, worker system/user prompts, worker
-report, trigger-agent wake/refill behavior, and smoke summary artifacts.
-The guardian smoke path also asserts one bounded child system run and its
-captured stdout/stderr/result artifacts.
+The SQLite database is the board memory. Prompt artifacts, Pi output, worker
+reports, guardian incidents, recovery results, and regression reports live beside
+it so runs can be inspected after the process exits.
 
-`recover-leases` is the operator and guardian recovery path for interrupted
-workers. By default it recovers only expired active leases. Pass `--force` only
-after a process scan confirms the run's worker process is gone, or pair
-`--force` with `--worker-id` when the guardian has captured the exact failed
-worker process. Recovery writes a synthetic `stalled_no_useful_guess` report,
-releases the lease, preserves the worker report artifact, removes the transient
-file-lock row, and emits a `worker_stalled` wake event for the director.
+## Current Boundaries
 
-```sh
-bun run orch -- --repo-root "$REPO_ROOT" --state-dir "$STATE_DIR" recover-leases \
-  --run-id "$RUN_ID" \
-  --force \
-  --worker-id "$WORKER_ID" \
-  --reason "operator-confirmed interrupted worker process"
-```
+- Smoke tests use dry-run Pi agents and do not edit Melee source.
+- Live worker sessions depend on the local Pi provider/auth setup.
+- The trigger loop does not refresh PR knowledge or run global regression checks
+  automatically.
+- `matched_code_percent` is the long-term progress metric. Run checkpoints such
+  as `--goal-value 72` are batch pause/handoff thresholds, not the final project
+  goal.
+- PR packaging is a separate handoff step. The orchestrator does not create one
+  PR per worker, lease, target, or file.
 
-## Dry-Run And Live Pi Mode
+## Deeper Docs
 
-`--dry-run-agents` writes the Pi prompt and metadata to an artifact instead of
-calling the Pi SDK. This is the required mode for `bun run smoke`.
-
-Without `--dry-run-agents`, `tick`, `worker`, and the Pi activations launched by
-`trigger-agent` attempt to use `@earendil-works/pi-coding-agent`. The adapter
-passes the rendered system prompt through Pi's `DefaultResourceLoader`
-system-prompt override, then sends the rendered initial user prompt as the
-session prompt. Both director and worker sessions default to `--provider
-codex-lb --model gpt-5.5 --thinking-level xhigh`; those flags remain
-overrideable per CLI invocation. Live Pi execution is not part of the required
-smoke gate yet. The current worker command still writes an explicit runner-side
-report row after the Pi session; parsing a live worker's report is future work.
-
-## Current Limitations
-
-- No Melee source files are edited by the smoke path.
-- No real build, objdiff, score gate, or patch integration runs in this slice.
-- Automatic checkpoint pause/status transition depends on the future score
-  integration path. Today `init-run` records the checkpoint and exposes it to
-  the run state/prompt flow.
-- The trigger-agent loop does not refresh PR knowledge, recover stale leases, or
-  serialize global build/report refreshes. Use `babysit` for process-health
-  wrapping and run PR/build/report maintenance as explicit gate commands.
-- The smoke gate exercises the trigger-agent loop with one worker; broad live
-  multi-worker scheduling still depends on real Pi/toolchain runs.
-- File-lock rows are transient lease guards; worker reports and recovery remove
-  them when a lease is released.
-- `matched_code_percent` is the long-term progress metric. `fuzzy_match_percent`
-  remains target-selection telemetry only.
-
-## Trigger Agent
-
-The trigger agent is a resting supervisor, not a long-lived Pi director. It keeps
-no hidden agent memory. It waits on durable state, activates director or worker
-Pi sessions only when state calls for them, and then returns to rest.
-
-Typical live shape:
-
-```sh
-bun run orch -- --repo-root "$REPO_ROOT" --state-dir "$STATE_DIR" init-run \
-  --desired-workers 16 \
-  --goal-kind matched_code_percent \
-  --goal-value 72
-
-bun run orch -- --repo-root "$REPO_ROOT" --state-dir "$STATE_DIR" bootstrap \
-  --max-workers 16 \
-  --idle-sleep-ms 5000
-```
-
-Use `--max-iterations`, `--max-idle-iterations`, and `--idle-sleep-ms` for
-bounded dry runs. Run PR refresh before starting a live run when fresh PR
-evidence matters.
-
-## Guardian Wrapper
-
-For multi-day development runs, put `babysit` around the decomp system process:
-
-```sh
-bun run orch -- --repo-root "$REPO_ROOT" --state-dir "$STATE_DIR" babysit \
-  --max-workers 16 \
-  --idle-sleep-ms 5000 \
-  --agent-timeout-seconds 7200 \
-  --worker-thinking-level low
-```
-
-`babysit` starts `bootstrap` by default and passes trigger flags through to the
-child process. It adds `--exit-on-worker-error` to the child so worker-process
-failures become process-health events. Clean bounded child exits stop the
-guardian by default; incident exits write `state_dir/guardian/incidents/`, run
-lease recovery, and restart unless `--max-restarts` says to stop.
+- [Docs map](docs/README.md)
+- [Foundation overview](docs/00-foundation/00-overview.md)
+- [System design overview](docs/10-system-design/00-overview.md)
+- [Run director loop](docs/10-system-design/10-run-director-loop.md)
+- [Agent model](docs/10-system-design/20-agent-model.md)
+- [Process guardians](docs/10-system-design/25-process-guardians.md)
+- [Worker lifecycle](docs/10-system-design/40-worker-lifecycle.md)
+- [CLI implementation](docs/20-implementation/cli/00-overview.md)
+- [Original visual design](docs/design.html)
