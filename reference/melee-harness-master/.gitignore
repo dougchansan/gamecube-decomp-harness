@@ -1,0 +1,26 @@
+# objdiff build output (8+ GB) — rebuild via ./setup.sh
+objdiff/target/
+
+# locally-installed objdiff-cli — produced by ./setup.sh
+/bin/
+
+# objdiff fork's own Claude config — not part of the harness
+objdiff/.claude/
+
+# m2c fork's own Claude config — not part of the harness
+/m2c/.claude/
+
+# m2c editable-install / build artifacts (also covered by m2c/.gitignore)
+/m2c/*.egg-info/
+/m2c/venv/
+/m2c/.venv/
+
+# Python
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store
+
+# personal, per-machine — copy from settings.local.json.example
+.claude/settings.local.json

@@ -6,7 +6,7 @@
   "freshness": "generated",
   "description": "Normalized cached outputs from callable external tool integrations.",
   "data_paths": [
-    "knowledge/tools"
+    "tools"
   ],
   "index_outputs": [
     "knowledge/sources/tool_outputs/indexes/tool_findings.jsonl"

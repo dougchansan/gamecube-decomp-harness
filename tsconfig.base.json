@@ -20,6 +20,8 @@
       "@decomp-orchestrator/agents/registry": ["packages/agents/src/registry.ts"],
       "@decomp-orchestrator/agents/runtime": ["packages/agents/src/runtime/index.ts"],
       "@decomp-orchestrator/agents/runtime/*": ["packages/agents/src/runtime/*.ts"],
+      "@decomp-orchestrator/agents/tools": ["packages/agents/src/tools/index.ts"],
+      "@decomp-orchestrator/agents/tools/*": ["packages/agents/src/tools/*.ts"],
       "@decomp-orchestrator/agents/types": ["packages/agents/src/types.ts"],
       "@decomp-orchestrator/agents/worker": ["packages/agents/src/worker/index.ts"],
       "@decomp-orchestrator/agents/worker/*": ["packages/agents/src/worker/*.ts"],

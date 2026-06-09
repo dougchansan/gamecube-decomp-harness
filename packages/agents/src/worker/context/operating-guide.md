@@ -5,8 +5,8 @@ leased Melee decomp target.
 
 ## Work Shape
 
-1. Confirm the lease: target, unit, symbol, source path, write set, budget, stop
-   rule, and worker log directory.
+1. Confirm the lease: target, unit, symbol, source path, write set, stop rule,
+   and worker log directory.
 2. Build a small evidence packet before editing: local source, sibling matched
    functions, relevant headers/macros, symbols/splits, report metadata, first
    mismatch shape, any useful PR/resource hits, and knowledge-tool lookups when
@@ -64,10 +64,25 @@ leased Melee decomp target.
 
 ## Stop Conditions
 
-Stop and report a blocker when progress requires a missing type, field, data
-owner, symbol, verifier, or broader scheduling decision. Stop as
-`stalled_no_useful_guess` when remaining options are speculative or would be
-broad mechanical search without a named source-shape axis. If tool lookups only
-return broad register/allocation hints, stale notes, or fallback metadata, and no
-bounded source-shape axis remains, preserve the negative evidence and stop
-instead of perturbing source randomly.
+Stop as `needs_fact` when the next useful move requires missing information:
+- Missing type
+- Missing field
+- Missing data owner
+- Missing symbol
+- Missing verifier
+- Broader scheduling decision
+
+Stop as `stalled_no_useful_guess` when remaining options are not useful:
+- Speculative
+- Broad mechanical search
+- Missing a named source-shape axis
+
+If tool lookups only return weak hints:
+- Preserve the negative evidence.
+- Stop instead of perturbing source randomly.
+
+Weak hints include:
+- Broad register/allocation hints
+- Stale notes
+- Fallback metadata
+- No bounded source-shape axis remains

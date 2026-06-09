@@ -1,9 +1,9 @@
 # Tool Outputs Source
 
-Indexed source that normalizes cached outputs from `knowledge/tools` into graph
+Indexed source that normalizes cached outputs from `tools` into graph
 facts.
 
-The tools themselves live under `knowledge/tools/<tool_id>`. This source
+The tools themselves live under `tools/<category>/<tool_id>`. This source
 normalizes those caches and generated indexes into graph-searchable facts.
 
 Generated tool-output search chunks are written to

@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "description": "Runtime agent context for D-Comp Orchestrator agents. Paths are relative to the decomp-orchestrator repo root. Knowledge sources, tools, and the resource graph live under knowledge/; role behavior lives beside the agents package.",
+  "description": "Runtime agent context for D-Comp Orchestrator agents. Paths are relative to the decomp-orchestrator repo root. Knowledge sources and the resource graph live under knowledge/; reusable tool suites live under tools/; role behavior lives beside the agents package.",
   "role_defaults": {
     "director": [],
     "worker": [
@@ -63,27 +63,27 @@
   },
   "scripts": {
     "rank_decomp_candidates": {
-      "path": "knowledge/tools/rank_decomp_candidates.py",
+      "path": "tools/operations/rank_decomp_candidates.py",
       "purpose": "Rank fuzzy functions and linked blocker units from build/GALE01/report.json."
     },
     "decomp_context_lookup": {
-      "path": "knowledge/tools/decomp_context_lookup.py",
+      "path": "tools/operations/decomp_context_lookup.py",
       "purpose": "Search local code, report metadata, PR history, and resource CSVs for one target."
     },
     "scaffold_decomp_run": {
-      "path": "knowledge/tools/sweeps/scaffold_decomp_run.py",
+      "path": "tools/operations/sweeps/scaffold_decomp_run.py",
       "purpose": "Create a reproducible decomp-runs/<slug> experimental search bundle."
     },
     "summarize_objdiff_json": {
-      "path": "knowledge/tools/sweeps/summarize_objdiff_json.py",
+      "path": "tools/operations/sweeps/summarize_objdiff_json.py",
       "purpose": "Summarize objdiff JSON for experimental search result rows."
     },
     "analyze_sweep_results": {
-      "path": "knowledge/tools/sweeps/analyze_sweep_results.py",
+      "path": "tools/operations/sweeps/analyze_sweep_results.py",
       "purpose": "Generate sweep_analysis.md and next_sweep_plan.md."
     },
     "render_progress_charts": {
-      "path": "knowledge/tools/sweeps/render_progress_charts.py",
+      "path": "tools/operations/sweeps/render_progress_charts.py",
       "purpose": "Render experimental search progress, Pareto, and mismatch SVG charts."
     },
     "fetch_recent_pr_dump": {

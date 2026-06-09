@@ -17,6 +17,7 @@ import {
   readSourceRegistry,
   readToolRegistry,
   rebuildKnowledgeGraph,
+  resolveToolRoot,
   searchKnowledgeGraph,
 } from "@decomp-orchestrator/knowledge";
 import { rankFeatureForSourcePath } from "@decomp-orchestrator/knowledge/graph/rank";
@@ -63,7 +64,7 @@ export async function kgStatus(globals: GlobalArgs, args: Map<string, string | t
     graph_db: dbPath,
     graph_db_exists: exists,
     sources: readSourceRegistry().map((source) => ({ id: source.id, kind: source.kind, title: source.title })),
-    tools: readToolRegistry().map((tool) => ({ id: tool.id, title: tool.title })),
+    tools: readToolRegistry().map((tool) => ({ id: tool.id, title: tool.title, category: tool.category, path: tool.path })),
   };
   if (exists) {
     const store = openKnowledgeGraph(dbPath);
@@ -187,14 +188,14 @@ export async function runKnowledgeMaintenance(globals: GlobalArgs, args: Map<str
 
 async function runToolRunners(repoRoot: string): Promise<SpawnSummary[]> {
   const runners = [
-    ["ghidra", "knowledge/tools/ghidra/runners/run_headless_probe.py"],
-    ["opseq", "knowledge/tools/opseq/runners/extract_opcode_sequences.py"],
-    ["mismatch_db", "knowledge/tools/mismatch_db/runners/analyze_objdiff_mismatches.py"],
-    ["mwcc_debug", "knowledge/tools/mwcc_debug/runners/probe_mwcc_compiler.py"],
+    ["ghidra", "run_headless_probe.py"],
+    ["opseq", "extract_opcode_sequences.py"],
+    ["mismatch_db", "analyze_objdiff_mismatches.py"],
+    ["mwcc_debug", "probe_mwcc_compiler.py"],
   ] as const;
   return Promise.all(
-    runners.map(async ([toolId, scriptPath]) => {
-      const command = ["python3", resolve(packageRoot(), scriptPath), "--repo-root", repoRoot];
+    runners.map(async ([toolId, scriptName]) => {
+      const command = ["python3", resolve(resolveToolRoot(toolId), "runners", scriptName), "--repo-root", repoRoot];
       const proc = Bun.spawn(command, {
         cwd: packageRoot(),
         stdout: "pipe",
@@ -208,7 +209,7 @@ async function runToolRunners(repoRoot: string): Promise<SpawnSummary[]> {
 }
 
 async function runToolIndexes(repoRoot: string): Promise<SpawnSummary> {
-  const script = resolve(packageRoot(), "knowledge/tools/build_tool_indexes.py");
+  const script = resolve(packageRoot(), "tools/build_tool_indexes.py");
   const command = ["python3", script, "--repo-root", repoRoot];
   const proc = Bun.spawn(command, {
     cwd: packageRoot(),
@@ -538,7 +539,7 @@ function countRows(store: ReturnType<typeof openKnowledgeGraph>, sql: string, ..
 }
 
 async function toolStatus(toolId: string): Promise<Record<string, unknown>> {
-  const command = ["python3", resolve(packageRoot(), "knowledge/tools", toolId, "api/status.py"), "--json"];
+  const command = ["python3", resolve(resolveToolRoot(toolId), "api/status.py"), "--json"];
   const proc = Bun.spawn(command, {
     cwd: packageRoot(),
     stdout: "pipe",

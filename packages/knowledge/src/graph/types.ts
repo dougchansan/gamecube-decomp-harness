@@ -21,8 +21,23 @@ export interface ToolDescriptor {
   trust_tier: TrustTier;
   commands: Record<string, string>;
   capabilities?: string[];
+  category?: string;
   description?: string;
+  path?: string;
+  process_role?: string;
+  usage?: Record<string, unknown>;
 }
+
+export interface ToolRegistryObject {
+  id: string;
+  path?: string;
+  category?: string;
+  process_role?: string;
+  usage?: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
+export type ToolRegistryEntry = string | ToolRegistryObject;
 
 export interface GraphEntity {
   id: string;

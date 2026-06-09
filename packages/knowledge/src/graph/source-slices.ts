@@ -1,7 +1,8 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { basename, dirname, extname, relative, resolve } from "node:path";
-import { knowledgeSourcesRoot, knowledgeToolsRoot, sourceDataRoot } from "../paths.js";
+import { knowledgeSourcesRoot, sourceDataRoot } from "../paths.js";
 import { fileEntityId } from "./code-graph.js";
+import { readToolRegistryEntries, resolveToolRoot } from "./sources.js";
 import type { GraphEdge, GraphEntity, GraphFact, GraphRecords, SearchChunk, TrustTier } from "./types.js";
 import { filesFingerprint, shortHash, stableJson, truncate } from "./util.js";
 
@@ -260,12 +261,12 @@ export function buildExternalMirrorsGraphRecords(): GraphRecords | null {
 
 export function buildToolOutputsGraphRecords(): GraphRecords | null {
   const sourceId = "tool_outputs";
-  const toolsRoot = knowledgeToolsRoot();
   const inputPaths: string[] = [];
   const records: IndexedSliceRecord[] = [];
 
-  for (const toolDir of directoryChildren(toolsRoot)) {
-    const toolId = basename(toolDir);
+  for (const tool of readToolRegistryEntries()) {
+    const toolId = tool.id;
+    const toolDir = resolveToolRoot(toolId);
     const indexesRoot = resolve(toolDir, "indexes");
     const indexFiles = recursiveFiles(indexesRoot).filter((path) => extname(path).toLowerCase() === ".jsonl");
     for (const indexFile of indexFiles) {

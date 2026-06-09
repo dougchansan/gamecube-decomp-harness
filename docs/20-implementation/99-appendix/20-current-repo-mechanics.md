@@ -1,7 +1,7 @@
 ---
 covers: Current Melee repo mechanics that the orchestrator indexes or wraps
 concepts: [repo-mechanics, report-json, objdiff, configure, progress-terms, commands]
-code-ref: decomp-orchestrator/knowledge/tools, decomp-orchestrator/packages/core/src/board, decomp-orchestrator/packages/core/src/shell
+code-ref: decomp-orchestrator/tools, decomp-orchestrator/packages/core/src/board, decomp-orchestrator/packages/core/src/shell
 ---
 
 # Current Repo Mechanics

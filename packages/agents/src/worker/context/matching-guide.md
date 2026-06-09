@@ -42,17 +42,31 @@ compiler shape.
 
 ## Tool-Assisted Matching Loop
 
-1. Use `opseq` before duplicate adaptation or broad local rewrites to find
-   already-matched instruction-shape analogs and near-neighbor functions.
-2. Use `mismatch_db` after the first concrete objdiff/checkdiff mismatch to name
-   the symptom and retrieve known source-shape tactics.
-3. Use `mwcc_debug` notes when the remaining mismatch appears MWCC-specific:
-   register allocation, stack/frame layout, local lifetime, coalescing,
-   scheduling, varargs/assert/report layout, or hard-to-explain compiler shape.
-4. Use Ghidra as a second opinion for names, calls, strings, types, and control
-   context. Do not paste decompiler output or let it outrank source, headers,
-   symbols, splits, assembly, or objdiff.
-5. Do not chase register allocation first. Fix instruction sequence, call shape,
+1. Use `opseq_similar_functions` or `tool_outputs_similar_functions` before
+   duplicate adaptation or broad local rewrites to find already-matched
+   instruction-shape analogs and near-neighbor functions.
+2. Use `mismatch_db_search` or `tool_outputs_mismatch_patterns` after the first
+   concrete objdiff/checkdiff mismatch to name the symptom and retrieve known
+   source-shape tactics.
+3. Use `mwcc_debug_lookup` notes when the remaining mismatch appears
+   MWCC-specific: register allocation, stack/frame layout, local lifetime,
+   coalescing, scheduling, varargs/assert/report layout, or hard-to-explain
+   compiler shape.
+4. Use `mwcc_debug_diagnose_stack`, `mwcc_debug_diagnose_regflow`, or
+   `mwcc_debug_diagnose_inlines` only after a concrete checkdiff/objdiff
+   symptom points at that mode. Use `mwcc_debug_dump_function` or
+   `mwcc_debug_raw_dump` when summarized diagnosis is not enough.
+5. Use `type_oracle_lookup` before extracting a temporary or changing a
+   pointer/value type. Use `struct_infer_from_asm` when a specific pointer
+   register's offset pattern needs layout evidence.
+6. Use `ghidra_lookup` as a second opinion for names, calls, strings, types, and
+   control context. Do not paste decompiler output or let it outrank source,
+   headers, symbols, splits, assembly, or objdiff.
+7. Use `source_mutation_preview`, `source_permuter_run`, or
+   `source_permuter_replay` only as last-resort source-shape exploration. The
+   worker profile uses non-mutating defaults; inspect the diff and keep only
+   understood, reviewable source edits.
+8. Do not chase register allocation first. Fix instruction sequence, call shape,
    source structure, types, and data ownership before treating register diffs as
    the root cause.
 

@@ -138,7 +138,7 @@ function RunDetailsPanel({ loadRunDetails, loadingRunDetails, runDetails }: Pick
 type ReportOutcome = "exact" | "improved_stalled" | "improved_needs_fact" | "no_progress_stalled" | "no_progress_needs_fact" | "failed";
 type ReportFilter = "all" | ReportOutcome;
 type ReportResult = "exact" | "improved" | "no_progress";
-type StopReason = "target_complete" | "needs_fact" | "no_useful_hypothesis";
+type StopReason = "target_complete" | "needs_fact" | "stalled";
 
 const reportsPageSize = 8;
 
@@ -203,10 +203,11 @@ function reportResult(report: JsonObject): ReportResult {
 
 function reportStopReason(report: JsonObject, result = reportResult(report)): StopReason {
   const explicit = text(report.stopReason);
-  if (explicit === "target_complete" || explicit === "needs_fact" || explicit === "no_useful_hypothesis") return explicit;
+  if (explicit === "target_complete" || explicit === "needs_fact" || explicit === "stalled") return explicit;
+  if (explicit === "no_useful_hypothesis") return "stalled";
   if (result === "exact") return "target_complete";
   if (text(report.reportType) === "needs_fact") return "needs_fact";
-  return "no_useful_hypothesis";
+  return "stalled";
 }
 
 function reportOutcome(report: JsonObject): ReportOutcome {

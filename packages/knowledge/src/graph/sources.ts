@@ -7,11 +7,11 @@ import {
   knowledgeToolsRoot,
   packageRoot,
 } from "../paths.js";
-import type { SourceDescriptor, ToolDescriptor } from "./types.js";
+import type { SourceDescriptor, ToolDescriptor, ToolRegistryEntry, ToolRegistryObject } from "./types.js";
 
 interface RegistryFile {
   sources?: string[];
-  tools?: string[];
+  tools?: ToolRegistryEntry[];
 }
 
 export function readSourceRegistry(): SourceDescriptor[] {
@@ -22,10 +22,14 @@ export function readSourceRegistry(): SourceDescriptor[] {
 }
 
 export function readToolRegistry(): ToolDescriptor[] {
+  return readToolRegistryEntries().map((entry) => readToolDescriptor(entry.id));
+}
+
+export function readToolRegistryEntries(): ToolRegistryObject[] {
   const registryPath = knowledgeToolRegistryPath();
   if (!existsSync(registryPath)) return [];
   const registry = JSON.parse(readFileSync(registryPath, "utf8")) as RegistryFile;
-  return (registry.tools ?? []).map((id) => readToolDescriptor(id));
+  return (registry.tools ?? []).map(normalizeToolRegistryEntry);
 }
 
 export function readSourceDescriptor(id: string): SourceDescriptor {
@@ -34,8 +38,32 @@ export function readSourceDescriptor(id: string): SourceDescriptor {
 }
 
 export function readToolDescriptor(id: string): ToolDescriptor {
-  const path = resolve(knowledgeToolsRoot(), id, "tool.json");
-  return JSON.parse(readFileSync(path, "utf8")) as ToolDescriptor;
+  const entry = toolRegistryEntry(id);
+  const path = resolveToolRoot(id);
+  const descriptor = JSON.parse(readFileSync(resolve(path, "tool.json"), "utf8")) as ToolDescriptor;
+  return {
+    ...descriptor,
+    category: descriptor.category ?? entry?.category,
+    path: descriptor.path ?? entry?.path,
+    process_role: descriptor.process_role ?? entry?.process_role,
+    usage: descriptor.usage ?? (descriptor as { workflow?: Record<string, unknown> }).workflow ?? entry?.usage ?? (entry as { workflow?: Record<string, unknown> } | undefined)?.workflow,
+  };
+}
+
+export function toolRegistryEntry(id: string): ToolRegistryObject | undefined {
+  return readToolRegistryEntries().find((entry) => entry.id === id);
+}
+
+export function resolveToolRoot(id: string): string {
+  const entry = toolRegistryEntry(id);
+  return resolve(knowledgeToolsRoot(), entry?.path ?? id);
+}
+
+function normalizeToolRegistryEntry(entry: ToolRegistryEntry): ToolRegistryObject {
+  if (typeof entry === "string") {
+    return { id: entry, path: entry };
+  }
+  return { ...entry, path: entry.path ?? entry.id };
 }
 
 export function resolvePackagePath(path: string): string {

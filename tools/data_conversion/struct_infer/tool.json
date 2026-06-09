@@ -1,0 +1,42 @@
+{
+  "id": "struct_infer",
+  "title": "Assembly struct layout inference",
+  "trust_tier": "tool_evidence",
+  "description": "Infer candidate struct fields by tracing a pointer register through generated assembly.",
+  "operation_mode": "harness_bridge_v1",
+  "runner_status": "on_demand_bridge",
+  "status_message": "Harness bridge v1: APIs delegate to reference/melee-harness-master/tools/infer_struct.py.",
+  "limitations": [
+    "Requires generated assembly under build/GALE01/asm.",
+    "Field names are placeholders; inferred offsets and access sizes need source/header confirmation.",
+    "Pointer-register selection is caller-provided and should come from objdiff, local asm, or register-flow evidence."
+  ],
+  "commands": {
+    "status": "python3 tools/data_conversion/struct_infer/api/status.py --repo-root <repo_root> --json",
+    "infer": "python3 tools/data_conversion/struct_infer/api/infer.py --repo-root <repo_root> --function <symbol> --ptr-reg <rN> --json"
+  },
+  "capabilities": [
+    "struct_layout",
+    "asm_pointer_trace",
+    "field_offset_inference"
+  ],
+  "category": "data_conversion",
+  "path": "data_conversion/struct_infer",
+  "process_role": "asm_layout_inference",
+  "usage": {
+    "invocation_mode": "on_demand",
+    "mutates_source": false,
+    "blocks_on_failure": false,
+    "triggers": [
+      "pointer_register_known",
+      "field_offset_unknown",
+      "struct_layout_hypothesis_needed"
+    ],
+    "outputs": [
+      "field_offsets",
+      "access_sizes",
+      "candidate_struct"
+    ],
+    "agent_guidance": "Use when asm/register evidence identifies a pointer register and field offsets need to be grounded before source edits."
+  }
+}

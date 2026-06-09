@@ -17,6 +17,7 @@ import {
   type WorkerRunnerValidation,
 } from "@decomp-orchestrator/agents/worker";
 import { runPiAgent } from "@decomp-orchestrator/agents/runtime";
+import { defaultWorkerToolProfile } from "@decomp-orchestrator/agents/tools";
 import {
   fileGraphCard,
   globalStandardsContext,
@@ -64,10 +65,10 @@ interface WorkerAttemptEvaluation {
 type PostReturnCheckValidation = WorkerRunnerValidation & { status: "passed" | "failed" | "skipped" };
 
 type WorkerOutcomeResult = "exact" | "improved" | "no_progress";
-type WorkerStopReason = "target_complete" | "needs_fact" | "no_useful_hypothesis";
+type WorkerStopReason = "target_complete" | "needs_fact" | "stalled";
 
 const workerOutcomeResults = new Set<WorkerOutcomeResult>(["exact", "improved", "no_progress"]);
-const workerStopReasons = new Set<WorkerStopReason>(["target_complete", "needs_fact", "no_useful_hypothesis"]);
+const workerStopReasons = new Set<WorkerStopReason>(["target_complete", "needs_fact", "stalled"]);
 
 function shellQuote(value: string): string {
   return `'${value.replace(/'/g, "'\\''")}'`;
@@ -109,9 +110,10 @@ function normalizedWorkerResult(agentReport: Record<string, unknown> | null): Wo
 function normalizedStopReason(agentReport: Record<string, unknown> | null, reportType: WorkerReportType, result: WorkerOutcomeResult): WorkerStopReason {
   const explicit = recordString(agentReport?.stop_reason);
   if (workerStopReasons.has(explicit as WorkerStopReason)) return explicit as WorkerStopReason;
+  if (explicit === "no_useful_hypothesis") return "stalled";
   if (result === "exact") return "target_complete";
   if (reportType === "needs_fact") return "needs_fact";
-  return "no_useful_hypothesis";
+  return "stalled";
 }
 
 function neededFact(agentReport: Record<string, unknown> | null): unknown {
@@ -251,7 +253,6 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
       leased,
       target,
       baselineMeasures: snapshot.measures,
-      dryRunAgents: globals.dryRunAgents,
       knowledgeContext,
     });
     const outputDir = resolve(globals.stateDir, "runs", runId, "worker_logs", leased.leaseId);
@@ -304,6 +305,14 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
           model: globals.model,
           thinkingLevel: globals.thinkingLevel,
           timeoutMs: globals.agentTimeoutSeconds ? globals.agentTimeoutSeconds * 1000 : undefined,
+          toolContext: {
+            repoRoot: globals.repoRoot,
+            stateDir: globals.stateDir,
+            project,
+            packet: attemptPacket,
+            initialBoardPath,
+            workerLogDir: outputDir,
+          },
         });
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
@@ -422,7 +431,6 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
       const repairFeedbackPath = resolve(validationDir, `attempt-${attemptIndex}.repair_request.json`);
       repairRequest = {
         attempt: attemptIndex + 1,
-        max_attempts: repairAttempts,
         previous_agent_output_path: result.outputPath,
         previous_return_gate_path: attemptGatePath,
         previous_post_attempt_diff_path: postAttemptDiffPath,
@@ -579,29 +587,14 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
 export function buildWorkerKnowledgeContext(sourcePath: string, graphDb = resourceGraphDbPath()): Record<string, unknown> {
   const decompStandards = globalStandardsContext();
   const pathFacts = sourcePath ? resolvePathFactsContext(sourcePath, 5) : null;
-  const lookupCommands = [
-    `bun run kg:file-card -- --source ${shellQuote(sourcePath)} --graph-db ${shellQuote(graphDb)}`,
-    "python3 knowledge/sources/decomp_standards/api/search.py --query <query> --limit 10 --json",
-    sourcePath
-      ? `python3 knowledge/sources/path_facts/api/resolve_for_path.py --path ${shellQuote(sourcePath)} --limit 5 --json`
-      : "python3 knowledge/sources/path_facts/api/resolve_for_path.py --path <source_path> --limit 5 --json",
-    "bun run kg:search -- --source past_prs --query <query> --limit 10",
-    "bun run kg:search -- --source discord_knowledge --query <query> --limit 10",
-    "bun run kg:search -- --source ssbm_data_sheet --query <query> --limit 10",
-    "bun run kg:search -- --source powerpc_docs --query <query> --limit 10",
-    "bun run kg:search -- --source external_mirrors --query <query> --limit 10",
-    "python3 knowledge/tools/ghidra/api/lookup.py --query <query> --json",
-    "python3 knowledge/tools/opseq/api/similar_functions.py --query <query> --json",
-    "python3 knowledge/tools/mismatch_db/api/search.py --query <query> --json",
-    "python3 knowledge/tools/mwcc_debug/api/lookup_dump.py --query <query> --json",
-  ];
+  const lookupTools = defaultWorkerToolProfile.filter((toolId) => toolId !== "worker_context_get" && toolId !== "decomp_standards_context");
   if (!sourcePath) {
     return {
       status: "missing_source_path",
       graph_db: graphDb,
       decomp_standards: decompStandards,
       path_facts: { source: "path_facts", status: "missing_source_path" },
-      lookup_commands: lookupCommands,
+      lookup_tools: lookupTools,
     };
   }
   if (!graphDbExists(graphDb)) {
@@ -610,7 +603,7 @@ export function buildWorkerKnowledgeContext(sourcePath: string, graphDb = resour
       graph_db: graphDb,
       decomp_standards: decompStandards,
       path_facts: pathFacts,
-      lookup_commands: lookupCommands,
+      lookup_tools: lookupTools,
     };
   }
   const store = openKnowledgeGraph(graphDb);
@@ -622,7 +615,7 @@ export function buildWorkerKnowledgeContext(sourcePath: string, graphDb = resour
       file_card: fileGraphCard(store, sourcePath),
       decomp_standards: decompStandards,
       path_facts: pathFacts,
-      lookup_commands: lookupCommands,
+      lookup_tools: lookupTools,
     };
   } catch (error) {
     return {
@@ -631,7 +624,7 @@ export function buildWorkerKnowledgeContext(sourcePath: string, graphDb = resour
       reason: error instanceof Error ? error.message : String(error),
       decomp_standards: decompStandards,
       path_facts: pathFacts,
-      lookup_commands: lookupCommands,
+      lookup_tools: lookupTools,
     };
   } finally {
     store.db.close();

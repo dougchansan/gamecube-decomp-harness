@@ -903,7 +903,7 @@ bun run kg:rank-features --report build/GALE01/report.json --limit 256</code></p
       <code>indexes/</code> is generated and deterministic.
       <code>api/</code> is the worker-facing interaction surface.
       <code>commands/</code> is source-local index/refresh/emit plumbing.
-      <code>knowledge/tools</code> owns external tool integrations.
+      <code>tools</code> owns external tool integrations.
       <code>knowledge/resource_graph</code> consumes source slices and tool
       outputs, then stores the shared graph.
     </div>
@@ -951,7 +951,7 @@ bun run kg:rank-features --report build/GALE01/report.json --limit 256</code></p
         </tr>
         <tr>
           <td>tool_outputs</td>
-          <td><code>knowledge/tools/&lt;tool_id&gt;</code> caches and generated indexes.</td>
+          <td><code>tools/&lt;tool_id&gt;</code> caches and generated indexes.</td>
         </tr>
       </tbody>
     </table>
@@ -1182,7 +1182,7 @@ bun run kg:rank-features --report build/GALE01/report.json --limit 256</code></p
     </p>
 
     <h3>External Tool Integrations</h3>
-    <pre><code>knowledge/tools/
+    <pre><code>tools/
   README.md
   registry.json
   ghidra/
@@ -1248,7 +1248,7 @@ bun run kg:rank-features --report build/GALE01/report.json --limit 256</code></p
     <p class="small">
       External tools are callable integrations, not source corpora and not graph
       internals. The graph consumes their cached outputs and emitted findings
-      when useful, but the tool wrappers live at <code>knowledge/tools</code>.
+      when useful, but the tool wrappers live at <code>tools</code>.
     </p>
 
     <h3>Tool Output Source</h3>
@@ -1275,7 +1275,7 @@ bun run kg:rank-features --report build/GALE01/report.json --limit 256</code></p
     fixtures/
     smoke.sh</code></pre>
     <p class="small">
-      This optional source normalizes outputs from <code>knowledge/tools</code>
+      This optional source normalizes outputs from <code>tools</code>
       into graph-searchable facts. It can stay thin until tool usage proves
       valuable.
     </p>
@@ -1773,7 +1773,7 @@ merged_pr_updates(
         <tr>
           <td>0. Scaffold</td>
           <td>
-            Add <code>knowledge/sources</code>, <code>knowledge/tools</code>,
+            Add <code>knowledge/sources</code>, <code>tools</code>,
             and <code>knowledge/resource_graph</code>. Add registries,
             README files, and placeholder descriptors for the initial sources.
           </td>
@@ -1855,7 +1855,7 @@ merged_pr_updates(
         <tr>
           <td>10. External Tools</td>
           <td>
-            Add <code>knowledge/tools</code> wrappers for high-value tool calls
+            Add <code>tools</code> wrappers for high-value tool calls
             such as Ghidra, opseq, mismatch-db, and MWCC debug.
           </td>
           <td>Tool outputs can be cached, searched, and optionally folded into graph facts.</td>
@@ -1902,7 +1902,7 @@ merged_pr_updates(
     <ul>
       <li><code>knowledge/sources/</code> contains source descriptors plus visible <code>data</code>, <code>indexes</code>, <code>api</code>, <code>commands</code>, and <code>tests</code> folders for code graph, past PRs, Discord, data sheet, PowerPC docs, external mirrors, and tool outputs.</li>
       <li>Each source slice has <code>data/</code> so the real corpus paths are visible without moving large or already-established resource trees.</li>
-      <li><code>knowledge/tools/</code> contains external tool descriptors, lightweight CLI API stubs, runner/cache/index/test folders, and descriptors for Ghidra, opseq, mismatch-db, and MWCC debug.</li>
+      <li><code>tools/</code> contains external tool descriptors, lightweight CLI API stubs, runner/cache/index/test folders, and descriptors for Ghidra, opseq, mismatch-db, and MWCC debug.</li>
       <li><code>knowledge/resource_graph/</code> contains graph docs, placeholders, ignored SQLite graph outputs, graph command notes, and internal enrichment artifacts.</li>
       <li><code>packages/knowledge/src/graph/</code> implements graph schema, rebuild, code indexing, PR indexing/synthesis, legacy agent-state enrichment, internal curator ingestion, file cards, search, and rank features.</li>
       <li><code>kg-*</code> CLI commands expose source listing, graph status, legacy agent-state import, curator reduction, maintenance, graph rebuild, search, file-card, and rank-feature output.</li>
@@ -1926,7 +1926,7 @@ merged_pr_updates(
       </li>
       <li>
         <strong>External-tool scaffolding.</strong>
-        Add <code>knowledge/tools/&lt;tool_id&gt;</code> directories for callable
+        Add <code>tools/&lt;tool_id&gt;</code> directories for callable
         integrations such as Ghidra, opseq, mismatch-db, and MWCC debug.
       </li>
       <li>

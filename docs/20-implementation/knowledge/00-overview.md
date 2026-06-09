@@ -139,7 +139,7 @@ The source slices are shallow on purpose. Actual corpora live under each slice's
 | `external_mirrors` | `knowledge/sources/external_mirrors/data` |
 | `resource_guides` | `knowledge/sources/resource_guides/data` |
 | `reference_docs` | `knowledge/sources/reference_docs/data` |
-| `tool_outputs` | `knowledge/sources/tool_outputs/data` and `knowledge/tools/<tool_id>/cache` |
+| `tool_outputs` | `knowledge/sources/tool_outputs/data` and `tools/<category>/<tool_id>/cache` |
 
 Every registered source also has a source-local CLI API under
 `knowledge/sources/<source_id>/api/`:
@@ -196,7 +196,7 @@ Package scripts expose the CLI-first graph surface:
 Registered tools are live-ready only when `api/status.py --json` reports
 `operation_mode: live_runner_v1`, `runner_available: true`, and
 `runner_smoke_passed: true`. The smoke proof is `cache/runner_status.json`;
-generated runner rows under `knowledge/tools/<tool_id>/indexes/*.jsonl` are
+generated runner rows under `tools/<category>/<tool_id>/indexes/*.jsonl` are
 then normalized into the `tool_outputs` source during graph rebuild.
 
 The current live runner paths are:

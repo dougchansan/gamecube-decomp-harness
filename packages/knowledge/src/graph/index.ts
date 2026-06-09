@@ -23,7 +23,15 @@ export {
   buildSsbmDataSheetGraphRecords,
   buildToolOutputsGraphRecords,
 } from "./source-slices.js";
-export { readSourceDescriptor, readSourceRegistry, readToolDescriptor, readToolRegistry } from "./sources.js";
+export {
+  readSourceDescriptor,
+  readSourceRegistry,
+  readToolDescriptor,
+  readToolRegistry,
+  readToolRegistryEntries,
+  resolveToolRoot,
+  toolRegistryEntry,
+} from "./sources.js";
 export type {
   FileGraphCard,
   GraphEdge,
@@ -35,4 +43,6 @@ export type {
   SearchResult,
   SourceDescriptor,
   ToolDescriptor,
+  ToolRegistryEntry,
+  ToolRegistryObject,
 } from "./types.js";

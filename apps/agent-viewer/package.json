@@ -1,0 +1,23 @@
+{
+  "name": "@decomp-orchestrator/agent-viewer",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@decomp-orchestrator/agents": "workspace:*",
+    "@decomp-orchestrator/core": "workspace:*",
+    "@decomp-orchestrator/knowledge": "workspace:*",
+    "@decomp-orchestrator/ui-contract": "workspace:*",
+    "lucide-react": "^1.17.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.0",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.2",
+    "tailwindcss": "^4.3.0",
+    "typescript": "latest",
+    "vite": "^8.0.16"
+  }
+}

@@ -5,6 +5,12 @@
 ```
     </current_state_json>
 
+    <decomp_standards_json>
+```json
+{{DECOMP_STANDARDS_JSON}}
+```
+    </decomp_standards_json>
+
     <primary_file_to_read>
 {{PRIMARY_SOURCE_PATH}}
     </primary_file_to_read>
@@ -15,6 +21,12 @@
 ```
     </files_to_read_first_json>
 
+    <available_pi_tools_json>
+```json
+{{PI_TOOLS_JSON}}
+```
+    </available_pi_tools_json>
+
     <available_resources_json>
 ```json
 {{RESOURCES_JSON}}
@@ -22,48 +34,77 @@
     </available_resources_json>
 
     <task>
-        Research the target, choose an evidence-backed tactic mix inside the
-        lease, and produce the final JSON report required by the system prompt.
-        Use only resources that exist in this checkout or are listed above. If a
-        path or command is unavailable, report that exact blocker.
+        Decompile this one leased target.
 
-        If `current_state.repair_request` is present, the runner rejected your
-        previous return. Read the referenced gate artifact, fix the named
-        regression/validation issues, remove only your own unsafe retained
-        hunks when needed, and return the corrected final JSON report. Do not
-        ignore the repair request or switch targets.
+        Use these inputs to decide what to inspect or run:
+        - Current state
+        - Injected standards
+        - Selected context guides
+        - Available resources
+        - Pi tools
 
-        Only edit files listed in `current_state.lease.write_set`. In dry-run
-        smoke mode, respect the configured one-report stop rule. In live mode,
-        use the configured depth budget: understand the file before editing,
-        retain verified improvements, undo only your own no-op or regression
-        hunks, maintain a local regression ledger for the target and affected
-        neighbors, and continue with local evidence-backed hypotheses while
-        useful progress remains. Do not run whole-file or repo-level
-        destructive git commands such as `git checkout --`, `git restore`,
-        `git reset`, or `git clean`; preserve any pre-existing dirty work in
-        the write set.
+        The tools are composable affordances:
+        - Use the ones that answer the current question.
+        - Do not treat the tool list as a fixed checklist.
 
-        Before the first edit, capture the local baseline you will compare
-        against. After each attempt, rerun the narrow target check and the
-        affected-neighbor checks you identified. If your attempt regresses the
-        target, breaks a previously matched local check, or makes a relevant
-        neighbor worse, undo only your own attempt hunks before continuing. Do
-        not return `progress` or `score_candidate` while a retained edit has an
-        unresolved local regression. The orchestrator accepts those report
-        types only when the final JSON includes a passed
-        `local_regression_check` with no target or neighbor regression and with
-        baseline/final validation artifacts present on disk. The runner then
-        performs an automatic same-unit validation before trusting
-        `progress` or `score_candidate`; official target score movement must
-        hold without same-unit function or section regressions.
+        If `current_state.repair_request` is present:
+        - Fix that rejected return first.
+        - Read the referenced gate artifact.
+        - Repair the named validation/regression issue.
+        - Remove only your own unsafe hunks if needed.
+        - Return the corrected JSON report for this same target.
 
-        Do not run global progress-report refresh commands from a worker:
-        `ninja build/GALE01/report.json`,
-        `ninja all_source build/GALE01/report.json`, or
-        `build/tools/objdiff-cli report generate`. Use narrow object builds and
-        narrow symbol/unit objdiff only. If global progress must be refreshed,
-        report the narrow evidence and let the operator/orchestrator do it when
-        workers are idle.
+        Suggested shape:
+        - Use `worker_context_get` when you want selected guides:
+            - Worker operating guide
+            - Lookup guide
+            - Matching guide
+        - Start by understanding what is going on:
+            - Get the leased file.
+            - Identify local style.
+            - Identify the target mismatch.
+            - Pull in useful context before editing.
+        - Research with the knowledge base when it can constrain the puzzle:
+            - Code graph
+            - Path facts
+            - Injected standards
+            - Indexed past PRs
+            - Curated worker lessons
+            - Resource docs and data sheets
+            - PowerPC notes
+            - External hints
+            - Discord/reference knowledge
+            - Prior tool outputs
+        - Treat the existing codebase as evidence:
+            - Human-written source has recurring conventions.
+            - Nearby matched files can reveal original programmer habits.
+            - Consistent local patterns can suggest the missing type, helper, macro, or shape.
+        - Go deeper only for concrete questions:
+            - Symbol/decompiler context
+            - Similar op sequences
+            - Mismatch patterns
+            - MWCC diagnostics
+            - Type oracle
+            - Struct inference
+            - m2c scaffolds
+            - Bounded source-shape exploration
+        - Edit only `current_state.lease.write_set`.
+        - Preserve existing dirty work and undo only your own failed attempt hunks.
+        - Treat validation/review tools as an attempt-evaluation feedback bundle:
+            - Use them for concrete source attempts.
+            - Do not treat them as a constant workflow.
+        - Before retaining or reporting edits, show local regression status:
+            - The target has no unresolved local regression.
+            - Affected neighbors have no unresolved local regression.
+            - The final JSON includes the `local_regression_check` artifacts.
+        - Do not run global progress-report refreshes from a worker:
+            - Report narrow evidence.
+            - Let the operator/orchestrator handle global refreshes when workers are idle.
+        - Stop according to the system output contract:
+            - `exact` when the target is finished
+            - `improved` when retained score movement exists
+            - `no_progress` when no retained score movement exists
+            - `stalled` when no useful guesses remain
+            - `needs_fact` when missing information blocks the next useful move
     </task>
 </worker_target_context>

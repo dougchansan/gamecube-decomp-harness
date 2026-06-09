@@ -1,38 +1,17 @@
 import { spawn, spawnSync, type ChildProcess } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, watch, writeFileSync, type FSWatcher } from "node:fs";
 import { dirname, resolve } from "node:path";
-import {
-  directorPrompt,
-  knowledgeCuratorPrompt,
-  prReviewPrompt,
-  targetPacketTarget,
-  workerPacket,
-  workerPrompt,
-} from "@decomp-orchestrator/agents";
-import { artifactTimestamp, stableJson } from "@decomp-orchestrator/agents/runtime";
+import { artifactTimestamp } from "@decomp-orchestrator/agents/runtime";
 import { createRunCheckpoint, latestCheckpointSummary } from "@decomp-orchestrator/core/handoff";
 import { listProjects, projectToSummary, resolveProject, type ProjectSummary, type ResolvedProject } from "@decomp-orchestrator/core";
 import { forceReportRun, type ReportRunResult } from "@decomp-orchestrator/core/report";
-import {
-  activeLeasesForRun,
-  activeWorkerCount,
-  getLatestRun,
-  getRun,
-  nextUnhandledEvent,
-  openState,
-  queueStatsSnapshot,
-  statusSnapshot,
-  updateRunStatus,
-} from "@decomp-orchestrator/core/state";
-import type { BoardSnapshot, PiPromptBundle, RunProjectMetadata, RunRecord } from "@decomp-orchestrator/core/types";
-import { loadKnowledgeBoardSnapshot } from "@decomp-orchestrator/knowledge";
-import type { PromptPreviewAgentId, PromptPreviewSource, PromptPreviewStats } from "@decomp-orchestrator/ui-contract";
+import { getLatestRun, getRun, openState, statusSnapshot, updateRunStatus } from "@decomp-orchestrator/core/state";
 import { loadTrustedReport } from "./trusted-report.js";
 
 type JsonObject = Record<string, unknown>;
 type ReportOutcome = "exact" | "improved_stalled" | "improved_needs_fact" | "no_progress_stalled" | "no_progress_needs_fact" | "failed";
 type ReportResult = "exact" | "improved" | "no_progress";
-type StopReason = "target_complete" | "needs_fact" | "no_useful_hypothesis";
+type StopReason = "target_complete" | "needs_fact" | "stalled";
 
 interface ManagedProcess {
   child: ChildProcess;
@@ -808,10 +787,11 @@ function reportResult(report: JsonObject): ReportResult {
 
 function reportStopReason(report: JsonObject, result = reportResult(report)): StopReason {
   const explicit = stringValue(report.stopReason);
-  if (explicit === "target_complete" || explicit === "needs_fact" || explicit === "no_useful_hypothesis") return explicit;
+  if (explicit === "target_complete" || explicit === "needs_fact" || explicit === "stalled") return explicit;
+  if (explicit === "no_useful_hypothesis") return "stalled";
   if (result === "exact") return "target_complete";
   if (stringValue(report.reportType) === "needs_fact") return "needs_fact";
-  return "no_useful_hypothesis";
+  return "stalled";
 }
 
 function reportOutcome(report: JsonObject): ReportOutcome {

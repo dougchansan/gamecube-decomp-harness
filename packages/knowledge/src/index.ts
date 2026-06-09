@@ -14,6 +14,7 @@ export {
   resourceGraphDbPath,
   resourceGraphRoot,
   sourceDataRoot,
+  toolsRoot,
 } from "./paths.js";
 export { loadKnowledgeBoardSnapshot, type LoadKnowledgeBoardSnapshotOptions } from "./board.js";
 export {

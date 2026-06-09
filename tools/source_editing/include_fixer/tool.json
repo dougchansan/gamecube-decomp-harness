@@ -1,0 +1,42 @@
+{
+  "id": "include_fixer",
+  "title": "Missing include proposal preview",
+  "trust_tier": "tool_evidence",
+  "description": "Preview missing include proposals by running clang syntax diagnostics and searching project headers.",
+  "operation_mode": "harness_bridge_v1",
+  "runner_status": "on_demand_bridge",
+  "status_message": "Harness bridge v1: APIs reuse reference/melee-harness-master/tools/fix_includes.py logic without writing source.",
+  "limitations": [
+    "Requires compile_commands.json and clang-compatible syntax diagnostics for the target file.",
+    "Preview proposals are best-effort function declaration matches and need source/header review before applying.",
+    "The API intentionally does not write includes; apply edits manually and verify with build/checkdiff."
+  ],
+  "commands": {
+    "status": "python3 tools/source_editing/include_fixer/api/status.py --repo-root <repo_root> --json",
+    "preview": "python3 tools/source_editing/include_fixer/api/preview.py --repo-root <repo_root> --source-path <src.c> --json"
+  },
+  "capabilities": [
+    "include_fix_preview",
+    "clang_diagnostics",
+    "header_lookup"
+  ],
+  "category": "source_editing",
+  "path": "source_editing/include_fixer",
+  "process_role": "missing_include_preview",
+  "usage": {
+    "invocation_mode": "conditional_attempt_feedback",
+    "mutates_source": false,
+    "blocks_on_failure": false,
+    "triggers": [
+      "compile_undeclared_identifier",
+      "missing_prototype",
+      "header_lookup_needed"
+    ],
+    "outputs": [
+      "include_candidates",
+      "clang_diagnostics",
+      "header_matches"
+    ],
+    "agent_guidance": "Use after a compile diagnostic suggests a missing declaration; review proposed headers before editing."
+  }
+}

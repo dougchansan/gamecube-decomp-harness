@@ -1382,12 +1382,75 @@ async function main(): Promise<void> {
   assertSmoke("worker system prompt names lease write-set rule", workerSystemPrompt.includes("write_set"));
   assertSmoke("worker system prompt requires local regression ledger", workerSystemPrompt.includes("local regression ledger"));
   assertSmoke("worker system prompt has local regression output contract", workerSystemPrompt.includes("local_regression_check"));
+  assertSmoke("worker system prompt is compact", workerSystemPrompt.length < 12000);
+  assertSmoke("worker system prompt keeps structured workflow phases", workerSystemPrompt.includes("<workflow>") && workerSystemPrompt.includes('<phase id="1" name="understand_packet">'));
+  assertSmoke("worker system prompt includes Sudoku board metaphor", workerSystemPrompt.includes("Think like Sudoku"));
+  assertSmoke("worker system prompt does not embed standards section", !workerSystemPrompt.includes("<source_standardization_rules>"));
   assertSmoke("worker user prompt forbids unresolved local regressions", workerUserPrompt.includes("unresolved local regression"));
+  assertSmoke("worker user prompt injects decomp standards", workerUserPrompt.includes("<decomp_standards_json>") && workerUserPrompt.includes("global_standard:natural-loops"));
+  assertSmoke("worker user prompt describes attempt evaluation as optional feedback", workerUserPrompt.includes("attempt-evaluation feedback"));
   assertSmoke("worker user prompt includes primary source path", workerUserPrompt.includes("src/melee/ft/chara/ftDemo.c"));
   assertSmoke("director dry-run uses gpt-5.5", readFileSync(tick.directorOutput, "utf8").includes("model: gpt-5.5"));
   assertSmoke("director dry-run uses medium thinking", readFileSync(tick.directorOutput, "utf8").includes("thinking: medium"));
-  assertSmoke("worker dry-run uses gpt-5.5", readFileSync(worker.workerOutput, "utf8").includes("model: gpt-5.5"));
-  assertSmoke("worker dry-run uses medium thinking", readFileSync(worker.workerOutput, "utf8").includes("thinking: medium"));
+  const workerOutput = readFileSync(worker.workerOutput, "utf8");
+  const workerCustomToolsLine = workerOutput
+    .split("\n")
+    .find((line) => line.startsWith("custom_tools: ")) ?? "";
+  const expectedWorkerTools = [
+    "worker_context_get",
+    "code_graph_file_card",
+    "code_graph_search",
+    "past_prs_search",
+    "discord_knowledge_search",
+    "discord_knowledge_topics_for_terms",
+    "ssbm_data_sheet_search",
+    "ssbm_data_sheet_lookup_address",
+    "ssbm_data_sheet_lookup_offset",
+    "powerpc_docs_search",
+    "powerpc_instruction_lookup",
+    "external_mirrors_search",
+    "external_symbol_lookup",
+    "resource_guides_search",
+    "reference_docs_search",
+    "tool_outputs_search",
+    "tool_outputs_similar_functions",
+    "tool_outputs_mismatch_patterns",
+    "tool_outputs_tool_lookup",
+    "decomp_standards_search",
+    "decomp_standards_context",
+    "path_facts_resolve",
+    "path_facts_search",
+    "ghidra_lookup",
+    "opseq_similar_functions",
+    "mismatch_db_search",
+    "mwcc_debug_lookup",
+    "checkdiff_run",
+    "checkdiff_summary",
+    "direct_compile_tu",
+    "objdiff_score_candidate",
+    "mwcc_debug_dump_function",
+    "mwcc_debug_diagnose_stack",
+    "mwcc_debug_diagnose_regflow",
+    "mwcc_debug_diagnose_inlines",
+    "mwcc_debug_raw_dump",
+    "source_permuter_run",
+    "source_permuter_replay",
+    "source_mutation_preview",
+    "type_oracle_lookup",
+    "struct_infer_from_asm",
+    "m2c_decompile",
+    "include_fixer_preview",
+    "item_state_table_preview",
+    "review_lint_scan",
+  ];
+  assertSmoke("worker dry-run uses gpt-5.5", workerOutput.includes("model: gpt-5.5"));
+  assertSmoke("worker dry-run uses medium thinking", workerOutput.includes("thinking: medium"));
+  assertSmoke("worker dry-run attaches decomposed Pi tools", expectedWorkerTools.every((toolId) => workerCustomToolsLine.includes(toolId)));
+  assertSmoke("worker dry-run omits generic lookup router by default", !workerCustomToolsLine.includes("decomp_lookup"));
+  assertSmoke(
+    "worker knowledge context lists lookup tool ids instead of commands",
+    workerUserPrompt.includes('"lookup_tools"') && workerUserPrompt.includes('"powerpc_instruction_lookup"') && !workerUserPrompt.includes('"lookup_commands"'),
+  );
   assertSmoke("rendered prompts do not reference design doc", !renderedPrompts.includes("decomp-orchestrator-design.html"));
   assertSmoke("rendered prompts do not reference Codex skill paths", !renderedPrompts.includes(".codex/skills"));
   assertSmoke("rendered prompts include structured past PR index", renderedPrompts.includes("decomp-orchestrator/knowledge/sources/past_prs/data/prs/index.jsonl"));
@@ -1395,12 +1458,16 @@ async function main(): Promise<void> {
   assertSmoke("rendered prompts include agent context manifest", renderedPrompts.includes("decomp-orchestrator/packages/agents/src/context/manifest.json"));
   assertSmoke("rendered prompts do not include director scheduling context", !renderedPrompts.includes("packages/agents/src/director/context/scheduling.md"));
   assertSmoke("rendered prompts include worker operating context", renderedPrompts.includes("packages/agents/src/worker/context/operating-guide.md"));
+  assertSmoke(
+    "worker user prompt includes compact Pi tool affordances",
+    workerUserPrompt.includes("<available_pi_tools_json>") && expectedWorkerTools.every((toolId) => workerUserPrompt.includes(toolId)),
+  );
   assertSmoke("rendered prompts do not include old worker overview context", !renderedPrompts.includes("packages/agents/src/worker/context/overview.md"));
   assertSmoke("rendered prompts do not reference old knowledge references", !renderedPrompts.includes("knowledge/references"));
   assertSmoke("rendered prompts do not reference old knowledge workflows", !renderedPrompts.includes("knowledge/workflows"));
   assertSmoke("rendered prompts do not reference targeted iteration workflow file", !renderedPrompts.includes("workflows/targeted-iteration.md"));
   assertSmoke("rendered prompts omit legacy sweep workflow", !renderedPrompts.includes("melee-decomp-sweep"));
-  assertSmoke("rendered prompts include decomp context helper", renderedPrompts.includes("decomp_context_lookup.py"));
+  assertSmoke("worker prompt prefers Pi tools over helper command paths", !workerUserPrompt.includes("decomp_context_lookup.py") && workerUserPrompt.includes("<available_pi_tools_json>"));
 
   const summary = {
     state_dir: stateDir,

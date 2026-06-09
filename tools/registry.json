@@ -1,0 +1,280 @@
+{
+  "schema_version": "tool_registry_v2",
+  "description": "Registry of reusable worker tool suites. Tool ids are stable Pi extension ids; path and category describe where the implementation lives.",
+  "categories": {
+    "research": "Evidence gathering and reverse-engineering lookup tools.",
+    "validation": "After-edit build, checkdiff, and objdiff proof tools.",
+    "compiler": "Compiler behavior and type-analysis tools.",
+    "source_editing": "Source-shape exploration and review guardrail tools.",
+    "data_conversion": "Assembly/data-to-C conversion helpers.",
+    "operations": "Operator-facing scheduling and sweep utilities rather than Pi tool suites."
+  },
+  "tools": [
+    {
+      "id": "ghidra",
+      "category": "research",
+      "path": "research/ghidra",
+      "process_role": "binary_lookup",
+      "mutates_source": false,
+      "blocks_on_failure": false,
+      "triggers": [
+        "needs_symbol_address",
+        "needs_xrefs",
+        "needs_string_or_decompile_hint"
+      ],
+      "outputs": [
+        "symbol_lookup",
+        "address_lookup",
+        "headless_probe_status"
+      ],
+      "agent_guidance": "Use when a symbol, address, string, or binary-derived clue needs corroboration before editing source.",
+      "invocation_mode": "on_demand"
+    },
+    {
+      "id": "opseq",
+      "category": "research",
+      "path": "research/opseq",
+      "process_role": "similar_function_lookup",
+      "mutates_source": false,
+      "blocks_on_failure": false,
+      "triggers": [
+        "needs_analog_function",
+        "has_opcode_pattern",
+        "matching_strategy_unclear"
+      ],
+      "outputs": [
+        "similar_functions",
+        "opcode_fingerprints",
+        "function_shape_rows"
+      ],
+      "agent_guidance": "Use before inventing a source shape when similar opcode or function-shape evidence could point to a local analog.",
+      "invocation_mode": "on_demand"
+    },
+    {
+      "id": "mismatch_db",
+      "category": "research",
+      "path": "research/mismatch_db",
+      "process_role": "mismatch_pattern_lookup",
+      "mutates_source": false,
+      "blocks_on_failure": false,
+      "triggers": [
+        "first_mismatch_known",
+        "needs_matching_tactic",
+        "objdiff_symptom_present"
+      ],
+      "outputs": [
+        "mismatch_patterns",
+        "source_shape_tactics",
+        "known_negative_evidence"
+      ],
+      "agent_guidance": "Use after seeing an objdiff/checkdiff symptom to find known matching tactics and cautions.",
+      "invocation_mode": "on_demand"
+    },
+    {
+      "id": "m2c_decomp",
+      "category": "research",
+      "path": "research/m2c_decomp",
+      "process_role": "control_flow_scaffold",
+      "mutates_source": false,
+      "blocks_on_failure": false,
+      "triggers": [
+        "function_logic_unknown",
+        "asm_control_flow_needed",
+        "needs_initial_c_scaffold"
+      ],
+      "outputs": [
+        "m2c_scaffold",
+        "control_flow_reference"
+      ],
+      "agent_guidance": "Use for understanding control/data flow only; never paste scaffold output as final source without naturalizing and validating it.",
+      "invocation_mode": "on_demand"
+    },
+    {
+      "id": "checkdiff",
+      "category": "validation",
+      "path": "validation/checkdiff",
+      "process_role": "attempt_validation",
+      "mutates_source": "conditional",
+      "blocks_on_failure": true,
+      "triggers": [
+        "attempt_ready_for_evaluation",
+        "worker_claims_match_progress",
+        "explicit_validation_requested"
+      ],
+      "outputs": [
+        "compile_status",
+        "checkdiff_summary",
+        "first_mismatch",
+        "match_percent"
+      ],
+      "agent_guidance": "Use as part of attempt evaluation when a concrete source edit needs compile/checkdiff feedback. Do not treat this as a mandatory action after every small edit.",
+      "invocation_mode": "attempt_evaluation"
+    },
+    {
+      "id": "objdiff_score",
+      "category": "validation",
+      "path": "validation/objdiff_score",
+      "process_role": "candidate_object_scoring",
+      "mutates_source": false,
+      "blocks_on_failure": false,
+      "triggers": [
+        "candidate_object_exists",
+        "attempt_needs_score_breakdown",
+        "permutation_candidate_available"
+      ],
+      "outputs": [
+        "candidate_score",
+        "percent_diff",
+        "mismatch_breakdown"
+      ],
+      "agent_guidance": "Use when a candidate object already exists and a focused score helps decide whether to keep or discard a source-shape hypothesis.",
+      "invocation_mode": "conditional_attempt_evaluation"
+    },
+    {
+      "id": "mwcc_debug",
+      "category": "compiler",
+      "path": "compiler/mwcc_debug",
+      "process_role": "compiler_diagnosis",
+      "mutates_source": false,
+      "blocks_on_failure": false,
+      "triggers": [
+        "stack_mismatch",
+        "register_flow_mismatch",
+        "inline_boundary_unclear",
+        "compiler_pass_evidence_needed"
+      ],
+      "outputs": [
+        "pcdump",
+        "stack_diagnosis",
+        "regflow_diagnosis",
+        "inline_diagnosis"
+      ],
+      "agent_guidance": "Use when validation points to compiler-shape behavior that local source inspection cannot explain.",
+      "invocation_mode": "conditional_attempt_feedback"
+    },
+    {
+      "id": "type_oracle",
+      "category": "compiler",
+      "path": "compiler/type_oracle",
+      "process_role": "expression_type_lookup",
+      "mutates_source": false,
+      "blocks_on_failure": false,
+      "triggers": [
+        "extracting_temporary",
+        "splitting_expression",
+        "pointer_or_value_type_unclear"
+      ],
+      "outputs": [
+        "expression_type",
+        "byte_span",
+        "compile_command_context"
+      ],
+      "agent_guidance": "Use before temporary extraction or expression rewrites when the C type of a subexpression matters.",
+      "invocation_mode": "on_demand"
+    },
+    {
+      "id": "source_permuter",
+      "category": "source_editing",
+      "path": "source_editing/source_permuter",
+      "process_role": "source_shape_exploration",
+      "mutates_source": "conditional",
+      "blocks_on_failure": false,
+      "triggers": [
+        "near_match_stuck",
+        "candidate_search_needed",
+        "mutation_preview_requested"
+      ],
+      "outputs": [
+        "candidate_diff",
+        "score_delta",
+        "replay_recipe"
+      ],
+      "agent_guidance": "Use as a bounded source-shape search surface. Default worker calls should not apply candidates directly.",
+      "invocation_mode": "on_demand"
+    },
+    {
+      "id": "include_fixer",
+      "category": "source_editing",
+      "path": "source_editing/include_fixer",
+      "process_role": "missing_include_preview",
+      "mutates_source": false,
+      "blocks_on_failure": false,
+      "triggers": [
+        "compile_undeclared_identifier",
+        "missing_prototype",
+        "header_lookup_needed"
+      ],
+      "outputs": [
+        "include_candidates",
+        "clang_diagnostics",
+        "header_matches"
+      ],
+      "agent_guidance": "Use after a compile diagnostic suggests a missing declaration; review proposed headers before editing.",
+      "invocation_mode": "conditional_attempt_feedback"
+    },
+    {
+      "id": "review_lint",
+      "category": "source_editing",
+      "path": "source_editing/review_lint",
+      "process_role": "attempt_review_guardrail",
+      "mutates_source": false,
+      "blocks_on_failure": true,
+      "triggers": [
+        "attempt_ready_for_evaluation",
+        "source_snippet_ready",
+        "explicit_review_requested"
+      ],
+      "outputs": [
+        "review_findings",
+        "risk_patterns"
+      ],
+      "agent_guidance": "Use as part of attempt evaluation or source review feedback. It is a guardrail for accepting an attempt, not a command that must run after every edit.",
+      "invocation_mode": "attempt_evaluation"
+    },
+    {
+      "id": "struct_infer",
+      "category": "data_conversion",
+      "path": "data_conversion/struct_infer",
+      "process_role": "asm_layout_inference",
+      "mutates_source": false,
+      "blocks_on_failure": false,
+      "triggers": [
+        "pointer_register_known",
+        "field_offset_unknown",
+        "struct_layout_hypothesis_needed"
+      ],
+      "outputs": [
+        "field_offsets",
+        "access_sizes",
+        "candidate_struct"
+      ],
+      "agent_guidance": "Use when asm/register evidence identifies a pointer register and field offsets need to be grounded before source edits.",
+      "invocation_mode": "on_demand"
+    },
+    {
+      "id": "item_state_table",
+      "category": "data_conversion",
+      "path": "data_conversion/item_state_table",
+      "process_role": "asm_data_conversion_preview",
+      "mutates_source": false,
+      "blocks_on_failure": false,
+      "triggers": [
+        "item_state_table_asm_label",
+        "data_definition_needed"
+      ],
+      "outputs": [
+        "c_table_preview",
+        "asm_label_mapping"
+      ],
+      "agent_guidance": "Use to preview ItemStateTable conversion; apply source changes only after ownership and section placement are verified.",
+      "invocation_mode": "on_demand"
+    }
+  ],
+  "recipes": [
+    {
+      "id": "attempt-evaluation",
+      "path": "recipes/attempt-evaluation.json",
+      "description": "Optional validation bundle that returns feedback for a concrete source-edit attempt; not a scheduler or constant worker loop."
+    }
+  ]
+}

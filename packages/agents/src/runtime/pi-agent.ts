@@ -4,6 +4,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { PiPromptBundle, PiRunResult, RuntimeAgentRole } from "@decomp-orchestrator/core/types";
 import { loadLocalEnv } from "@decomp-orchestrator/core/env";
+import { buildAgentTools, type AgentToolProfileInput, type AgentToolRuntimeContext } from "../tools/index.js";
 
 export interface PiRunOptions {
   role: RuntimeAgentRole;
@@ -16,6 +17,8 @@ export interface PiRunOptions {
   thinkingLevel?: string;
   timeoutMs?: number;
   sessionDir?: string;
+  toolProfile?: AgentToolProfileInput;
+  toolContext?: Partial<Omit<AgentToolRuntimeContext, "role" | "cwd">>;
 }
 
 export const DEFAULT_PI_PROVIDER = "codex-lb";
@@ -48,7 +51,11 @@ function piConfig(options: PiRunOptions): { provider: string; model: string; thi
   };
 }
 
-function dryRunTranscript(options: PiRunOptions, paths: { systemPromptPath: string; userPromptPath: string }): string {
+function dryRunTranscript(
+  options: PiRunOptions,
+  paths: { systemPromptPath: string; userPromptPath: string },
+  customTools: Array<{ name: string }>,
+): string {
   const config = piConfig(options);
   return [
     `[dry-run ${options.role} Pi agent]`,
@@ -61,6 +68,7 @@ function dryRunTranscript(options: PiRunOptions, paths: { systemPromptPath: stri
     `user_template: ${options.prompt.userTemplatePath}`,
     `system_prompt_artifact: ${paths.systemPromptPath}`,
     `user_prompt_artifact: ${paths.userPromptPath}`,
+    `custom_tools: ${customTools.map((tool) => tool.name).join(", ") || "(none)"}`,
     "",
     "=== SYSTEM PROMPT ===",
     options.prompt.systemPrompt,
@@ -108,11 +116,18 @@ export async function runPiAgent(options: PiRunOptions): Promise<PiRunResult> {
   const outputPath = resolve(options.outputDir, `${options.role}_${sessionId}.txt`);
   const systemPromptPath = resolve(options.outputDir, `${options.role}_${sessionId}.system.md`);
   const userPromptPath = resolve(options.outputDir, `${options.role}_${sessionId}.user.md`);
+  const toolContext: AgentToolRuntimeContext = {
+    role: options.role,
+    cwd: options.cwd,
+    repoRoot: options.cwd,
+    ...options.toolContext,
+  };
+  const customTools = buildAgentTools(toolContext, options.toolProfile);
   await writeOutput(systemPromptPath, options.prompt.systemPrompt);
   await writeOutput(userPromptPath, options.prompt.userPrompt);
 
   if (options.dryRun) {
-    const rawText = dryRunTranscript(options, { systemPromptPath, userPromptPath });
+    const rawText = dryRunTranscript(options, { systemPromptPath, userPromptPath }, customTools);
     await writeOutput(outputPath, rawText);
     return {
       sessionId,
@@ -165,6 +180,7 @@ export async function runPiAgent(options: PiRunOptions): Promise<PiRunResult> {
       thinkingLevel: config.thinkingLevel,
       sessionManager,
       resourceLoader,
+      customTools,
     });
     session = created.session;
 

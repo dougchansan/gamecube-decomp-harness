@@ -33,12 +33,16 @@ export function knowledgeSourceRegistryPath(): string {
   return resolve(knowledgeSourcesRoot(), "registry.json");
 }
 
+export function toolsRoot(): string {
+  return resolve(packageRoot(), "tools");
+}
+
 export function knowledgeToolsRoot(): string {
-  return resolve(knowledgeRoot(), "tools");
+  return toolsRoot();
 }
 
 export function knowledgeToolRegistryPath(): string {
-  return resolve(knowledgeToolsRoot(), "registry.json");
+  return resolve(toolsRoot(), "registry.json");
 }
 
 export function resourceGraphRoot(): string {

@@ -1,4 +1,4 @@
-import type { Dashboard, FormState, JsonObject, PromptPreview, PromptPreviewAgentId, PromptPreviewSource, RunDetails, UiConfig } from "@decomp-orchestrator/ui-contract";
+import type { Dashboard, FormState, JsonObject, RunDetails, UiConfig } from "@decomp-orchestrator/ui-contract";
 
 export async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
   const response = await fetch(url, options);
@@ -43,14 +43,6 @@ export function fetchDashboard(form: Pick<FormState, "projectId" | "usePathOverr
 
 export function fetchRunDetails(form: Pick<FormState, "projectId" | "usePathOverrides" | "repoRoot" | "stateDir" | "graphDbPath">, runId: string): Promise<RunDetails> {
   return fetchJson<RunDetails>(`/api/run/details?${new URLSearchParams({ ...Object.fromEntries(dashboardParams(form)), runId })}`);
-}
-
-export function fetchPromptPreview(
-  form: Pick<FormState, "projectId" | "usePathOverrides" | "repoRoot" | "stateDir" | "graphDbPath">,
-  agent: PromptPreviewAgentId,
-  source: PromptPreviewSource,
-): Promise<PromptPreview> {
-  return fetchJson<PromptPreview>(`/api/prompts/render?${new URLSearchParams({ ...Object.fromEntries(dashboardParams(form)), agent, source })}`);
 }
 
 export function postJson<T>(url: string, body: JsonObject): Promise<T> {

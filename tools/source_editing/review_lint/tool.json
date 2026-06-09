@@ -1,0 +1,42 @@
+{
+  "id": "review_lint",
+  "title": "Review lint for decomp source edits",
+  "trust_tier": "tool_evidence",
+  "description": "Scan proposed source text or files for high-risk decomp review anti-patterns ported from the Melee harness hooks.",
+  "operation_mode": "native_api_v1",
+  "runner_status": "on_demand_native",
+  "status_message": "Native API v1: review lint scans text/files directly and mirrors useful harness hook checks.",
+  "limitations": [
+    "The scan is conservative and lexical; findings should prompt source review rather than automatic rejection in isolation.",
+    "Inline-helper pointer-variable checks work best on complete C function text, not small snippets.",
+    "This suite complements, but does not replace, project review lint and local regression validation."
+  ],
+  "commands": {
+    "status": "python3 tools/source_editing/review_lint/api/status.py --json",
+    "scan": "python3 tools/source_editing/review_lint/api/scan.py --file <path> --json"
+  },
+  "capabilities": [
+    "review_lint",
+    "type_erasing_casts",
+    "m2c_residue",
+    "inline_pointer_variable_warning"
+  ],
+  "category": "source_editing",
+  "path": "source_editing/review_lint",
+  "process_role": "attempt_review_guardrail",
+  "usage": {
+    "invocation_mode": "attempt_evaluation",
+    "mutates_source": false,
+    "blocks_on_failure": true,
+    "triggers": [
+      "attempt_ready_for_evaluation",
+      "source_snippet_ready",
+      "explicit_review_requested"
+    ],
+    "outputs": [
+      "review_findings",
+      "risk_patterns"
+    ],
+    "agent_guidance": "Use as part of attempt evaluation or source review feedback. It is a guardrail for accepting an attempt, not a command that must run after every edit."
+  }
+}

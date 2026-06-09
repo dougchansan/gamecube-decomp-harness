@@ -57,7 +57,7 @@ Current corpus locations:
 | `external_mirrors` | `knowledge/sources/external_mirrors/data`. |
 | `resource_guides` | `knowledge/sources/resource_guides/data`. |
 | `reference_docs` | `knowledge/sources/reference_docs/data`. |
-| `tool_outputs` | `knowledge/tools` caches and generated tool indexes. |
+| `tool_outputs` | `tools` caches and generated tool indexes. |
 
 Full PR corpus refresh:
 

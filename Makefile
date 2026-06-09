@@ -17,17 +17,20 @@ QUEUE_TARGET ?= $(CANDIDATE_LIMIT)
 CANDIDATE_WINDOW ?= 256
 IDLE_SLEEP_MS ?= 5000
 DRY_RUN ?= 0
+AGENT_VIEWER_PORT ?= 8797
+PROMPT_VIEWER_PORT ?= $(AGENT_VIEWER_PORT)
 
 DRY_FLAG := $(if $(filter 1 true yes,$(DRY_RUN)),--dry-run-agents,)
 RUN_ID_FLAG := $(if $(RUN_ID),--run-id "$(RUN_ID)",)
 ORCH_GLOBAL_FLAGS := --repo-root "$(REPO_ROOT)" --state-dir "$(STATE_DIR)" $(DRY_FLAG) --provider "$(PROVIDER)" --model "$(MODEL)" --thinking-level "$(THINKING)"
 
-.PHONY: help install check smoke ui status init-run start dry-start recover-leases regression-check pr-split-plan kg-status kg-maintain
+.PHONY: help install check smoke ui agent-viewer prompt-viewer status init-run start dry-start recover-leases regression-check pr-split-plan kg-status kg-maintain
 
 help:
 	@printf '%s\n' \
 	  'Common targets:' \
 	  '  make ui                 Start the hot-reloading dashboard at http://localhost:8787' \
+	  '  make agent-viewer       Start the standalone agent viewer at http://localhost:$(AGENT_VIEWER_PORT)' \
 	  '  make status             Print orchestrator status for REPO_ROOT/STATE_DIR' \
 	  '  make init-run           Create a run with WORKERS/GOAL/CANDIDATE_LIMIT' \
 	  '  make start              Start babysit/trigger-agent for the current run' \
@@ -57,6 +60,11 @@ smoke:
 
 ui:
 	bun run ui:dev
+
+agent-viewer:
+	AGENT_VIEWER_PORT="$(AGENT_VIEWER_PORT)" PROMPT_VIEWER_PORT="$(PROMPT_VIEWER_PORT)" bun run agent-viewer
+
+prompt-viewer: agent-viewer
 
 status:
 	bun run orch -- $(ORCH_GLOBAL_FLAGS) status

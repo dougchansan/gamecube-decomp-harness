@@ -8,5 +8,5 @@ CLI-style worker access:
 - `python3 knowledge/sources/tool_outputs/api/similar_functions.py --query <query> --limit <n> --json`
 - `python3 knowledge/sources/tool_outputs/api/mismatch_patterns.py --query <query> --limit <n> --json`
 
-Workers may also call individual tool APIs directly under `knowledge/tools`
+Workers may also call individual tool APIs directly under `tools`
 when a graph card or target-specific question justifies a narrower lookup.

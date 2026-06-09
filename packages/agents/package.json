@@ -19,6 +19,8 @@
     "./registry": "./src/registry.ts",
     "./runtime": "./src/runtime/index.ts",
     "./runtime/*": "./src/runtime/*.ts",
+    "./tools": "./src/tools/index.ts",
+    "./tools/*": "./src/tools/*.ts",
     "./types": "./src/types.ts",
     "./worker": "./src/worker/index.ts",
     "./worker/*": "./src/worker/*.ts"

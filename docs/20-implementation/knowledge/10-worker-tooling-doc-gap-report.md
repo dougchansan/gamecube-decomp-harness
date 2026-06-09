@@ -1,7 +1,7 @@
 ---
 covers: Worker-facing documentation gaps for Ghidra, opseq, mismatch_db, mwcc_debug, and normalized tool_outputs
 concepts: [worker-context, knowledge-tools, ghidra, opseq, mismatch-db, mwcc-debug, tool-outputs]
-code-ref: packages/agents/src/worker/context, knowledge/tools, knowledge/sources/tool_outputs, knowledge/sources/reference_docs/data/docs
+code-ref: packages/agents/src/worker/context, tools, knowledge/sources/tool_outputs, knowledge/sources/reference_docs/data/docs
 ---
 
 # Worker Tooling Documentation Gap Report
@@ -35,7 +35,7 @@ matching loop.
 - `packages/agents/src/worker/context/matching-guide.md` lists good source-shape levers:
   control flow, locals/registers, stack/frame, types/fields, inlines/macros,
   data/literals, and duplicate adaptation.
-- `knowledge/tools/README.md` and each tool README describe the registered live
+- `tools/README.md` and each tool README describe the registered live
   runners, cache/index artifacts, and readiness criteria.
 - `docs/20-implementation/knowledge/00-overview.md` documents the tool runner
   contract and makes clear that fallback rows such as symbol lookup, function
@@ -91,10 +91,10 @@ Add command snippets:
 ```bash
 python3 knowledge/sources/tool_outputs/api/search.py --query <term> --limit 10 --json
 python3 knowledge/sources/tool_outputs/api/tool_lookup.py --tool <tool_id> --query <term> --limit 10 --json
-python3 knowledge/tools/ghidra/api/lookup.py --query <symbol_or_address_or_path> --limit 10 --json
-python3 knowledge/tools/opseq/api/similar_functions.py --query <symbol_or_path_or_opcode_prefix> --limit 10 --json
-python3 knowledge/tools/mismatch_db/api/search.py --query <mismatch_pattern> --limit 10 --json
-python3 knowledge/tools/mwcc_debug/api/lookup_dump.py --query <compiler_or_mismatch_pattern> --limit 10 --json
+python3 tools/research/ghidra/api/lookup.py --query <symbol_or_address_or_path> --limit 10 --json
+python3 tools/research/opseq/api/similar_functions.py --query <symbol_or_path_or_opcode_prefix> --limit 10 --json
+python3 tools/research/mismatch_db/api/search.py --query <mismatch_pattern> --limit 10 --json
+python3 tools/compiler/mwcc_debug/api/lookup_dump.py --query <compiler_or_mismatch_pattern> --limit 10 --json
 ```
 
 Add an "Output Interpretation" note:
@@ -192,7 +192,7 @@ objdiff/checkdiff.
 This should stay short in the system prompt. The detailed table belongs in
 `lookup-guide.md` and `matching-guide.md`.
 
-### `knowledge/tools/README.md`
+### `tools/README.md`
 
 Add a "Worker Use" subsection after the runner list:
 
@@ -222,14 +222,14 @@ From an orchestrator checkout:
 ```bash
 python3 knowledge/sources/tool_outputs/api/search.py --query <term> --limit 10 --json
 python3 knowledge/sources/tool_outputs/api/tool_lookup.py --tool opseq --query <symbol> --limit 10 --json
-python3 knowledge/tools/ghidra/api/status.py --json
-python3 knowledge/tools/ghidra/api/lookup.py --query <symbol_or_address_or_path> --limit 10 --json
-python3 knowledge/tools/opseq/api/status.py --json
-python3 knowledge/tools/opseq/api/similar_functions.py --query <symbol_or_path_or_opcode_prefix> --limit 10 --json
-python3 knowledge/tools/mismatch_db/api/status.py --json
-python3 knowledge/tools/mismatch_db/api/search.py --query <mismatch_pattern> --limit 10 --json
-python3 knowledge/tools/mwcc_debug/api/status.py --json
-python3 knowledge/tools/mwcc_debug/api/lookup_dump.py --query <compiler_or_mismatch_pattern> --limit 10 --json
+python3 tools/research/ghidra/api/status.py --json
+python3 tools/research/ghidra/api/lookup.py --query <symbol_or_address_or_path> --limit 10 --json
+python3 tools/research/opseq/api/status.py --json
+python3 tools/research/opseq/api/similar_functions.py --query <symbol_or_path_or_opcode_prefix> --limit 10 --json
+python3 tools/research/mismatch_db/api/status.py --json
+python3 tools/research/mismatch_db/api/search.py --query <mismatch_pattern> --limit 10 --json
+python3 tools/compiler/mwcc_debug/api/status.py --json
+python3 tools/compiler/mwcc_debug/api/lookup_dump.py --query <compiler_or_mismatch_pattern> --limit 10 --json
 ```
 
 From the selected project checkout, keep commands rooted in the project repo
@@ -246,7 +246,7 @@ commands.
 3. Add a short default prompt policy in `worker/templates/system.md` so workers
    know the tools exist even without opt-in lookup context.
 4. Update `operating-guide.md` with provenance/stop-condition guardrails.
-5. Add a small worker-use paragraph to `knowledge/tools/README.md` and
+5. Add a small worker-use paragraph to `tools/README.md` and
    `docs/20-implementation/knowledge/00-overview.md`.
 
 Avoid creating a brand-new `tool-usage-guide.md` unless the context manifest is
@@ -269,13 +269,13 @@ files is the lowest-friction route.
   rule but should extend it to all knowledge-tool outputs:
   `packages/agents/src/worker/context/operating-guide.md`.
 - Tool infrastructure and live readiness are documented in:
-  `knowledge/tools/README.md`,
-  `knowledge/tools/ghidra/README.md`,
-  `knowledge/tools/opseq/README.md`,
-  `knowledge/tools/mismatch_db/README.md`,
-  `knowledge/tools/mwcc_debug/README.md`, and
+  `tools/README.md`,
+  `tools/research/ghidra/README.md`,
+  `tools/research/opseq/README.md`,
+  `tools/research/mismatch_db/README.md`,
+  `tools/compiler/mwcc_debug/README.md`, and
   `docs/20-implementation/knowledge/00-overview.md`.
-- Tool API commands are documented in each `knowledge/tools/<tool>/api/README.md`
+- Tool API commands are documented in each `tools/<tool>/api/README.md`
   and in `knowledge/sources/tool_outputs/api/README.md`.
 - MWCC reference behavior comes from:
   `knowledge/sources/reference_docs/data/docs/mwcc-debug.md`,

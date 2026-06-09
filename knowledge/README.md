@@ -1,7 +1,8 @@
 # Decomp Orchestrator Knowledge
 
 This directory is the runtime evidence surface for the orchestrator. It owns
-source corpora, callable tools, and the shared resource graph.
+source corpora, normalized tool-output evidence, and the shared resource graph.
+Callable tool suites live in the top-level `tools/` tree.
 
 Agent role behavior and prompt context live beside the agents under
 `src/agents/*/context/`. Historical role/workflow docs live under
@@ -13,7 +14,6 @@ Reusable corpora:
   graph, past PRs, Discord knowledge, data sheets, PowerPC docs, external
   mirrors, and normalized tool outputs. Each slice has `data/`
   so the actual corpus path is visible from the slice.
-- `tools/` - helper scripts plus callable external tool integration descriptors.
 - `resource_graph/` - generated SQLite graph state, graph schemas/placeholders,
   graph command notes, generated graph-level indexes, and graph-owned
   enrichment artifacts.
@@ -28,7 +28,7 @@ Where the actual corpora live:
 - External mirrors: `knowledge/sources/external_mirrors/data`.
 - Resource guides/manifests: `knowledge/sources/resource_guides/data`.
 - Imported reference docs/legacy skills: `knowledge/sources/reference_docs/data`.
-- Tool integrations: `knowledge/tools/<tool_id>`, with generated caches under
+- Tool integrations: `tools/<category>/<tool_id>`, with generated caches under
   each tool's `cache/` folder.
 - Legacy shared agent-state lessons:
   `knowledge/resource_graph/enrichments/agent_shared_state_lessons.jsonl`.
@@ -69,7 +69,7 @@ Package command surface:
 - `python3 knowledge/sources/<source_id>/api/search.py --query <term> --json`
   searches that source's generated JSONL indexes without going through a graph
   rebuild.
-- `python3 knowledge/tools/<tool_id>/api/status.py --json` and each tool's
+- `python3 tools/<category>/<tool_id>/api/status.py --json` and each tool's
   lookup/search API provide direct CLI access to generated tool evidence.
 - `bun run pr:refresh:dry` previews recent PR discovery.
 - `bun run pr:refresh` refreshes missing PR slices and rebuilds deterministic

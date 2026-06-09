@@ -2,7 +2,9 @@ import { readFileSync } from "node:fs";
 
 export interface PromptTemplateValues {
   CURRENT_STATE_JSON: string;
+  DECOMP_STANDARDS_JSON?: string;
   FILES_TO_READ_JSON: string;
+  PI_TOOLS_JSON?: string;
   RESOURCES_JSON: string;
   PRIMARY_SOURCE_PATH?: string;
 }

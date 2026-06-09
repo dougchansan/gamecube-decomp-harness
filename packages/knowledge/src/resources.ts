@@ -309,7 +309,7 @@ export function resourceMap(repoRoot: string, options: ResourceMapOptions): Reco
         purpose: "look up PowerPC PDF page chunks for ABI and instruction questions",
       },
       {
-        command: "python3 knowledge/tools/mismatch_db/api/search.py --query <mismatch_pattern> --limit 10 --json",
+        command: "python3 tools/research/mismatch_db/api/search.py --query <mismatch_pattern> --limit 10 --json",
         cwd: packageRoot(),
         purpose: "search local mismatch-pattern/tool evidence",
       },

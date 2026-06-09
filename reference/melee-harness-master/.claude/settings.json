@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run \"$CLAUDE_PROJECT_DIR/.claude/hooks/check_inline_vars.py\"",
+            "timeout": 10,
+            "statusMessage": "Checking for inlined functions..."
+          },
+          {
+            "type": "command",
+            "command": "uv run \"$CLAUDE_PROJECT_DIR/.claude/hooks/check_type_erasing_casts.py\"",
+            "timeout": 10,
+            "statusMessage": "Checking for type-erasing casts..."
+          }
+        ]
+      }
+    ]
+  }
+}
