@@ -131,22 +131,6 @@
     margin: 8px 0 10px;
   }
 
-  .control-group {
-    border: 1px solid #292d2b;
-    border-radius: 6px;
-    background: #181a19;
-    padding: 9px;
-    margin-bottom: 9px;
-  }
-
-  .control-group-title {
-    margin-bottom: 7px;
-    color: #969b97;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-  }
-
   .control-disclosure {
     margin-top: 8px;
     border: 1px solid #292d2b;
@@ -175,6 +159,19 @@
     text-overflow: ellipsis;
     text-transform: none;
     white-space: nowrap;
+  }
+
+  .project-disclosure {
+    margin-top: 0;
+  }
+
+  .project-disclosure > summary {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: baseline;
+  }
+
+  .project-disclosure > summary small {
+    text-align: right;
   }
 
   .control-disclosure[open] > summary {

@@ -26,11 +26,13 @@ interface DetailsRailProps {
   runDetails: RunDetails | null;
 }
 
+type DetailsTab = "logs" | "active-run";
+
 function LogLines({ dashboard }: { dashboard: Dashboard | null }) {
   const logs = asArray(asObject(dashboard?.process).logs).map(asObject).slice(-120);
-  if (logs.length === 0) return <pre className="min-h-44 max-h-[520px] overflow-auto rounded-md border border-[#292d2b] bg-[#101110] p-2 text-[#cfd4cf] whitespace-pre-wrap" />;
+  if (logs.length === 0) return <pre className="min-h-[360px] max-h-[calc(100vh-132px)] overflow-auto rounded-md border border-[#292d2b] bg-[#101110] p-2 text-[#cfd4cf] whitespace-pre-wrap max-[1180px]:max-h-[540px]" />;
   return (
-    <pre className="min-h-44 max-h-[520px] overflow-auto rounded-md border border-[#292d2b] bg-[#101110] p-2 text-[#cfd4cf] whitespace-pre-wrap">
+    <pre className="min-h-[360px] max-h-[calc(100vh-132px)] overflow-auto rounded-md border border-[#292d2b] bg-[#101110] p-2 text-[#cfd4cf] whitespace-pre-wrap max-[1180px]:max-h-[540px]">
       {logs.map((line, index) => (
         <span key={index}>
           <span className={line.stream === "stderr" ? "text-[#ff8f8f]" : line.stream === "stdout" ? "text-[#b8dabf]" : "text-[#969b97]"}>[{text(line.stream)}]</span> {text(line.text)}
@@ -38,6 +40,22 @@ function LogLines({ dashboard }: { dashboard: Dashboard | null }) {
         </span>
       ))}
     </pre>
+  );
+}
+
+function TabButton({ active, children, onClick }: { active: boolean; children: ReactNode; onClick: () => void }) {
+  return (
+    <button
+      aria-selected={active}
+      className={`min-h-8 rounded-[5px] border px-2.5 py-1 text-xs font-bold uppercase ${
+        active ? "border-[#2a7d38] bg-[#152018] text-[#45e05e]" : "border-[#292d2b] bg-[#171918] text-[#969b97] hover:bg-[#222624]"
+      }`}
+      onClick={onClick}
+      role="tab"
+      type="button"
+    >
+      {children}
+    </button>
   );
 }
 
@@ -540,7 +558,27 @@ function RailDetails({ children, open, summary, onToggle }: { children: ReactNod
   );
 }
 
+function ActiveRunTab({ dashboard, loadRunDetails, loadingRunDetails, runDetails }: Pick<DetailsRailProps, "dashboard" | "loadRunDetails" | "loadingRunDetails" | "runDetails">) {
+  const run = asObject(dashboard?.status?.run);
+  if (!run.id) {
+    return <div className="p-3 text-[#969b97]">No active run</div>;
+  }
+
+  return (
+    <>
+      <RailDetails open summary="Worker Reports">
+        <WorkerReports dashboard={dashboard} loadRunDetails={loadRunDetails} loadingRunDetails={loadingRunDetails} runDetails={runDetails} />
+      </RailDetails>
+      <RailDetails summary="Full Run" onToggle={(open) => open && !runDetails && loadRunDetails()}>
+        <RunDetailsPanel loadRunDetails={loadRunDetails} loadingRunDetails={loadingRunDetails} runDetails={runDetails} />
+      </RailDetails>
+    </>
+  );
+}
+
 export function DetailsRail({ collapsed, dashboard, loadRunDetails, loadingRunDetails, onCollapsedChange, runDetails }: DetailsRailProps) {
+  const [activeTab, setActiveTab] = useState<DetailsTab>("logs");
+
   return (
     <aside className={`details-rail ${collapsed ? "details-rail-collapsed" : "details-rail-open"} grid min-w-0 border-l border-[#363a38] bg-[#1d1f1e] ${collapsed ? "grid-rows-[minmax(0,1fr)]" : "grid-rows-[auto_minmax(0,1fr)]"} overflow-hidden max-[1180px]:col-span-2 max-[1180px]:border-t max-[780px]:block`}>
       <div className={`details-rail-tab z-10 flex items-center gap-2 border-b border-[#292d2b] bg-[#181a19] px-2 py-1.5 ${collapsed ? "h-full flex-col justify-start" : "sticky top-0 min-h-[42px]"} max-[1180px]:static max-[1180px]:h-[42px] max-[1180px]:flex-row`}>
@@ -554,16 +592,26 @@ export function DetailsRail({ collapsed, dashboard, loadRunDetails, loadingRunDe
         >
           <span className="sr-only">{collapsed ? "Show" : "Hide"}</span>
         </Button>
-        <span className={`text-xs font-bold uppercase text-[#c0c5c1] ${collapsed ? "[writing-mode:vertical-rl] rotate-180" : ""} max-[1180px]:[writing-mode:initial] max-[1180px]:rotate-0`}>Reports</span>
+        <span className={`text-xs font-bold uppercase text-[#c0c5c1] ${collapsed ? "[writing-mode:vertical-rl] rotate-180" : ""} max-[1180px]:[writing-mode:initial] max-[1180px]:rotate-0`}>Details</span>
       </div>
-      <div className={`details-rail-content ${collapsed ? "hidden" : ""} min-h-0 overflow-auto`}>
-        <RailDetails open summary="Worker Reports">
-          <WorkerReports dashboard={dashboard} loadRunDetails={loadRunDetails} loadingRunDetails={loadingRunDetails} runDetails={runDetails} />
-        </RailDetails>
-        <RailDetails summary="Full Run" onToggle={(open) => open && !runDetails && loadRunDetails()}>
-          <RunDetailsPanel loadRunDetails={loadRunDetails} loadingRunDetails={loadingRunDetails} runDetails={runDetails} />
-        </RailDetails>
-        <RailDetails summary="Logs"><LogLines dashboard={dashboard} /></RailDetails>
+      <div className={`details-rail-content ${collapsed ? "hidden" : ""} grid min-h-0 grid-rows-[auto_minmax(0,1fr)]`}>
+        <div className="flex gap-1.5 border-b border-[#292d2b] bg-[#181a19] p-2" role="tablist" aria-label="Details rail">
+          <TabButton active={activeTab === "logs"} onClick={() => setActiveTab("logs")}>
+            Logs
+          </TabButton>
+          <TabButton active={activeTab === "active-run"} onClick={() => setActiveTab("active-run")}>
+            Active Run
+          </TabButton>
+        </div>
+        <div className="min-h-0 overflow-auto" role="tabpanel">
+          {activeTab === "logs" ? (
+            <section className="p-3">
+              <LogLines dashboard={dashboard} />
+            </section>
+          ) : (
+            <ActiveRunTab dashboard={dashboard} loadRunDetails={loadRunDetails} loadingRunDetails={loadingRunDetails} runDetails={runDetails} />
+          )}
+        </div>
       </div>
     </aside>
   );

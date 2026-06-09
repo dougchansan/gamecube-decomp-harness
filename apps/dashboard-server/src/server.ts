@@ -1,11 +1,32 @@
 import { spawn, spawnSync, type ChildProcess } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, watch, writeFileSync, type FSWatcher } from "node:fs";
 import { dirname, resolve } from "node:path";
-import { artifactTimestamp } from "@decomp-orchestrator/agents/runtime";
+import {
+  directorPrompt,
+  knowledgeCuratorPrompt,
+  prReviewPrompt,
+  targetPacketTarget,
+  workerPacket,
+  workerPrompt,
+} from "@decomp-orchestrator/agents";
+import { artifactTimestamp, stableJson } from "@decomp-orchestrator/agents/runtime";
 import { createRunCheckpoint, latestCheckpointSummary } from "@decomp-orchestrator/core/handoff";
 import { listProjects, projectToSummary, resolveProject, type ProjectSummary, type ResolvedProject } from "@decomp-orchestrator/core";
 import { forceReportRun, type ReportRunResult } from "@decomp-orchestrator/core/report";
-import { getLatestRun, getRun, openState, statusSnapshot, updateRunStatus } from "@decomp-orchestrator/core/state";
+import {
+  activeLeasesForRun,
+  activeWorkerCount,
+  getLatestRun,
+  getRun,
+  nextUnhandledEvent,
+  openState,
+  queueStatsSnapshot,
+  statusSnapshot,
+  updateRunStatus,
+} from "@decomp-orchestrator/core/state";
+import type { BoardSnapshot, PiPromptBundle, RunProjectMetadata, RunRecord } from "@decomp-orchestrator/core/types";
+import { loadKnowledgeBoardSnapshot } from "@decomp-orchestrator/knowledge";
+import type { PromptPreviewAgentId, PromptPreviewSource, PromptPreviewStats } from "@decomp-orchestrator/ui-contract";
 import { loadTrustedReport } from "./trusted-report.js";
 
 type JsonObject = Record<string, unknown>;
@@ -1437,20 +1458,28 @@ function cliPrefix(paths: DashboardProjectContext): string[] {
   return command;
 }
 
+function dashboardScheduling(maxWorkersValue: unknown): { candidateLimit: number; candidateWindow: number; maxWorkers: number; queueLowWatermark: number; queueTargetSize: number } {
+  const maxWorkers = intValue(maxWorkersValue, 16, 1);
+  const queueTargetSize = maxWorkers * 4;
+  return {
+    candidateLimit: queueTargetSize,
+    candidateWindow: queueTargetSize,
+    maxWorkers,
+    queueLowWatermark: maxWorkers,
+    queueTargetSize,
+  };
+}
+
 function commandFromBody(body: JsonObject): { command: string[]; name: string; repoRoot: string; stateDir: string; graphDbPath: string; project: ResolvedProject | null; runId: string } {
   const paths = resolveDashboardProject(body, { useDefaultProject: true });
   const { graphDbPath, project, repoRoot, stateDir } = paths;
   const runId = stringValue(body.runId);
-  const name = processName(stringValue(body.processName, project?.processName ?? "melee-live"));
+  const name = processName(project?.processName ?? stringValue(body.processName, "melee-live"));
   const provider = stringValue(body.provider, "codex-lb");
   const model = stringValue(body.model, "gpt-5.5");
   const thinkingLevel = stringValue(body.thinkingLevel, "medium");
   const workerThinkingLevel = stringValue(body.workerThinkingLevel, "medium");
-  const maxWorkers = intValue(body.maxWorkers, 16, 1);
-  const candidateLimit = intValue(body.candidateLimit, project?.dashboard.candidateLimit ?? 64, 1);
-  const queueTargetSize = intValue(body.queueTargetSize, project?.dashboard.queueTargetSize ?? candidateLimit, 1);
-  const queueLowWatermark = Math.min(queueTargetSize, intValue(body.queueLowWatermark, project?.dashboard.queueLowWatermark ?? Math.ceil(queueTargetSize * 0.25), 1));
-  const candidateWindow = intValue(body.candidateWindow, project?.dashboard.candidateWindow ?? Math.max(candidateLimit, queueTargetSize * 8), 1);
+  const { candidateLimit, candidateWindow, maxWorkers, queueLowWatermark, queueTargetSize } = dashboardScheduling(body.maxWorkers);
   const idleSleepMs = intValue(body.idleSleepMs, 5000, 100);
   const command = [
     ...cliPrefix(paths),
@@ -1681,7 +1710,7 @@ async function stopManaged(body: JsonObject): Promise<JsonObject> {
   const paths = resolveDashboardProject(body, { useDefaultProject: true });
   const { repoRoot, stateDir } = paths;
   const runId = stringValue(body.runId) || latestRunId(stateDir);
-  const name = processName(stringValue(body.processName, paths.project?.processName ?? "melee-live"));
+  const name = processName(paths.project?.processName ?? stringValue(body.processName, "melee-live"));
   let stopped = false;
 
   if (managed && managed.state !== "exited") {
@@ -1758,7 +1787,7 @@ async function stopManaged(body: JsonObject): Promise<JsonObject> {
 async function drainManaged(body: JsonObject): Promise<JsonObject> {
   const paths = resolveDashboardProject(body, { useDefaultProject: true });
   const stateDir = paths.stateDir;
-  const name = processName(stringValue(body.processName, paths.project?.processName ?? "melee-live"));
+  const name = processName(paths.project?.processName ?? stringValue(body.processName, "melee-live"));
   const saved = savedProcessRecords(stateDir).find((record) => stringValue(record.name) === name);
   const pid = managed && managed.state !== "exited" ? managed.pid : intValue(saved?.pid, 0, 0);
   if (!pid || !processGroupAlive(pid)) return { draining: false, reason: "not_running", process: processStatus(stateDir, paths.project) };
@@ -1814,18 +1843,19 @@ function latestRunId(stateDir: string): string {
 function initRunCommand(body: JsonObject): { command: string[]; repoRoot: string; stateDir: string; graphDbPath: string; project: ResolvedProject | null } {
   const paths = resolveDashboardProject(body, { useDefaultProject: true });
   const { graphDbPath, project, repoRoot, stateDir } = paths;
+  const { candidateLimit, maxWorkers } = dashboardScheduling(body.maxWorkers);
   const command = [
     ...cliPrefix(paths),
     ...(boolValue(body.dryRunAgents) ? ["--dry-run-agents"] : []),
     "init-run",
     "--desired-workers",
-    String(intValue(body.desiredWorkers, intValue(body.maxWorkers, 16, 1), 1)),
+    String(maxWorkers),
     "--candidate-limit",
-    String(intValue(body.candidateLimit, project?.dashboard.candidateLimit ?? 64, 1)),
+    String(candidateLimit),
     "--goal-kind",
     stringValue(body.goalKind, "matched_code_percent"),
     "--goal-value",
-    String(numberValue(body.goalValue, project?.dashboard.goalValue ?? 100)),
+    String(project?.dashboard.goalValue ?? numberValue(body.goalValue, 100)),
     "--graph-db",
     graphDbPath,
   ];
@@ -2097,7 +2127,7 @@ async function freshRun(body: JsonObject): Promise<JsonObject> {
   const paths = resolveDashboardProject(body, { useDefaultProject: true });
   const { repoRoot, stateDir } = paths;
   try {
-    const name = processName(stringValue(body.processName, paths.project?.processName ?? "melee-live"));
+    const name = processName(paths.project?.processName ?? stringValue(body.processName, "melee-live"));
     const activeManaged = managed?.state === "running" || managed?.state === "stopping" || managed?.state === "draining";
     const activeSaved = savedProcessRecords(stateDir).find((record) => record.alive === true);
     if (activeManaged || activeSaved) {

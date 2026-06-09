@@ -105,3 +105,32 @@ export interface RunDetails {
   improvements?: JsonObject[];
   improvedFiles?: JsonObject[];
 }
+
+export type PromptPreviewAgentId = "director" | "worker" | "pr-review" | "knowledge-curator";
+export type PromptPreviewSource = "latest" | "sample";
+
+export interface PromptPreviewStats {
+  characters: number;
+  lines: number;
+  words: number;
+  unresolvedPlaceholders: string[];
+}
+
+export interface PromptPreview {
+  agent: PromptPreviewAgentId;
+  requestedSource: PromptPreviewSource;
+  contextSource: PromptPreviewSource;
+  generatedAt: string;
+  project: ProjectSummary | null;
+  repoRoot: string;
+  stateDir: string;
+  graphDbPath: string;
+  systemPrompt: string;
+  userPrompt: string;
+  systemTemplatePath: string;
+  userTemplatePath: string;
+  systemStats: PromptPreviewStats;
+  userStats: PromptPreviewStats;
+  context: JsonObject;
+  warnings: string[];
+}

@@ -138,11 +138,14 @@ window. Graph maintenance can therefore move newly informative targets upward
 without waiting for the old queue to drain completely.
 
 The trigger writes a prioritized `pool_below_target` event when deterministic
-refill is not enough and capacity is becoming inefficient. The defaults wake the
-director when total queued work falls to 25% of `--queue-target-size`, when
+refill is not enough and capacity is becoming inefficient. The CLI defaults wake
+the director when total queued work falls to 25% of `--queue-target-size`, when
 unlocked distinct-file work falls below `--max-workers`, when queued work is
 blocked by active file locks, or when a long-tail drain persists for five
-minutes. Operators can tune this with:
+minutes. The dashboard uses a stricter preset policy: ready queue is always
+`4 * workers`, and `--queue-low-watermark` is always `workers`, so a 16-worker
+dashboard run keeps a 64-target queue and asks for fresh priority work when 16
+queued targets remain. Operators using the CLI directly can tune this with:
 
 | Flag | Meaning |
 | --- | --- |

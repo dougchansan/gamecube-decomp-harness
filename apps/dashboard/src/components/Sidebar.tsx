@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import { Ban, ChevronLeft, ChevronRight, Download, FileCheck, Flag, GitBranch, GitPullRequest, Pause, Play, RefreshCw, RotateCcw, ShieldCheck, Square, Undo2, Zap } from "lucide-react";
 import { asArray, asObject, clock, num, text, type Dashboard, type FormState, type UiConfig } from "@decomp-orchestrator/ui-contract";
 import { Button, CheckboxField, Field, PanelSection, PanelTitle, SelectField } from "./primitives";
@@ -20,6 +19,29 @@ function processName(value: unknown): string {
   return raw.replace(/[^A-Za-z0-9_.-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80) || "melee-live";
 }
 
+const schedulingPresets = [
+  { id: "small", label: "Small", workers: 4 },
+  { id: "medium", label: "Medium", workers: 8 },
+  { id: "large", label: "Large", workers: 16 },
+  { id: "xl", label: "XL", workers: 32 },
+] as const;
+
+function schedulingForWorkers(workers: number): Pick<FormState, "candidateLimit" | "candidateWindow" | "maxWorkers" | "queueLowWatermark" | "queueTargetSize"> {
+  const maxWorkers = Math.max(1, Math.trunc(workers));
+  const queueTargetSize = maxWorkers * 4;
+  return {
+    maxWorkers,
+    candidateLimit: queueTargetSize,
+    candidateWindow: queueTargetSize,
+    queueLowWatermark: maxWorkers,
+    queueTargetSize,
+  };
+}
+
+function schedulingPresetForWorkers(workers: unknown) {
+  return schedulingPresets.find((preset) => preset.workers === Number(workers)) ?? schedulingPresets[2];
+}
+
 function useProcessView(dashboard: Dashboard | null, selectedName: string) {
   const proc = asObject(dashboard?.process);
   const saved = asArray(proc.knownProcesses).map(asObject);
@@ -36,8 +58,7 @@ function useProcessView(dashboard: Dashboard | null, selectedName: string) {
 function ProcessPanel({
   dashboard,
   form,
-  setForm,
-}: Pick<SidebarProps, "dashboard" | "form" | "setForm">) {
+}: Pick<SidebarProps, "dashboard" | "form">) {
   const selectedName = processName(form.processName);
   const { display, pillState, saved } = useProcessView(dashboard, selectedName);
   const facts: Array<[string, unknown]> = [
@@ -68,18 +89,16 @@ function ProcessPanel({
       <div className="mt-3 text-[11px] uppercase text-[#969b97]">Saved Processes</div>
       <div className="mt-1.5 grid gap-1.5">
         {saved.slice(0, 8).map((item) => (
-          <button
+          <div
             className={`grid min-h-7 w-full grid-cols-[minmax(0,1fr)_64px_68px] items-center gap-2 rounded-[5px] border px-2 py-1 text-left ${
               text(item.name) === selectedName ? "border-[#2a7d38]" : "border-[#363a38]"
             } bg-[#151715]`}
             key={text(item.name)}
-            onClick={() => setForm({ processName: text(item.name, "melee-live") })}
-            type="button"
           >
             <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-[#e2e5e2]">{text(item.name, "-")}</span>
             <span className={`text-right ${item.alive ? "text-[#45e05e]" : "text-[#969b97]"}`}>{item.alive ? "alive" : text(item.state, "saved")}</span>
             <span className="text-right">{String(item.pid || "-")}</span>
-          </button>
+          </div>
         ))}
         {saved.length === 0 ? <div className="pt-1 text-[#969b97]">No saved process files</div> : null}
       </div>
@@ -107,15 +126,6 @@ function ProjectPathRow({ exists, label, path }: { exists?: unknown; label: stri
       <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-[#cfd4d0]" title={text(path)}>
         {text(path, "-")}
       </span>
-    </div>
-  );
-}
-
-function ControlGroup({ children, title }: { children: ReactNode; title: string }) {
-  return (
-    <div className="control-group">
-      <div className="control-group-title">{title}</div>
-      {children}
     </div>
   );
 }
@@ -240,6 +250,7 @@ export function Sidebar({ activityMessage, busy, collapsed, config, dashboard, f
   const actionBusy = busy;
   const projects = config?.availableProjects ?? [];
   const selectedProject = projects.find((project) => project.id === form.projectId) ?? dashboard?.project ?? config?.selectedProject ?? null;
+  const schedulingPreset = schedulingPresetForWorkers(form.maxWorkers);
 
   if (collapsed) {
     return (
@@ -282,52 +293,52 @@ export function Sidebar({ activityMessage, busy, collapsed, config, dashboard, f
           </div>
         </PanelSection>
 
-        <PanelSection>
-          <PanelTitle>Project</PanelTitle>
-          <SelectField
-            label="Project"
-            onChange={(event) => {
-              const project = projects.find((item) => item.id === event.currentTarget.value);
-              setForm({
-                projectId: event.currentTarget.value,
-                usePathOverrides: false,
-                repoRoot: project?.repoRoot ?? form.repoRoot,
-                stateDir: project?.stateDir ?? form.stateDir,
-                graphDbPath: project?.graphDbPath ?? form.graphDbPath,
-                processName: project?.processName ?? form.processName,
-                prBaseRef: project?.baseRef ?? form.prBaseRef,
-              });
-            }}
-            options={projects.length ? projects.map((project) => project.id) : [form.projectId || ""]}
-            value={form.projectId}
-          />
-          <div className="mb-2 grid grid-cols-[auto_minmax(0,1fr)] gap-x-2.5 gap-y-1 text-xs">
-            <span className="text-[#969b97]">Name</span>
-            <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">{selectedProject?.displayName ?? text(form.projectId, "-")}</span>
-            <span className="text-[#969b97]">Kind</span>
-            <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">{selectedProject?.kind ?? "-"}</span>
-          </div>
-          <details className="control-disclosure">
-            <summary>Edit project</summary>
-            <div className="project-paths">
-              <ProjectPathRow exists={selectedProject?.repoRootExists} label="Repo" path={form.repoRoot || selectedProject?.repoRoot} />
-              <ProjectPathRow exists={selectedProject?.stateDirExists} label="State" path={form.stateDir || selectedProject?.stateDir} />
-              <ProjectPathRow exists={selectedProject?.graphDbExists} label="Graph" path={form.graphDbPath || selectedProject?.graphDbPath} />
+        <PanelSection className="py-2">
+          <details className="control-disclosure project-disclosure">
+            <summary>
+              <span>Project</span>
+              <small>{text(form.projectId || selectedProject?.id, "-")}</small>
+            </summary>
+            <SelectField
+              label="Project"
+              onChange={(event) => {
+                const project = projects.find((item) => item.id === event.currentTarget.value);
+                setForm({
+                  projectId: event.currentTarget.value,
+                  usePathOverrides: false,
+                  repoRoot: project?.repoRoot ?? form.repoRoot,
+                  stateDir: project?.stateDir ?? form.stateDir,
+                  graphDbPath: project?.graphDbPath ?? form.graphDbPath,
+                  processName: project?.processName ?? form.processName,
+                  prBaseRef: project?.baseRef ?? form.prBaseRef,
+                });
+              }}
+              options={projects.length ? projects.map((project) => project.id) : [form.projectId || ""]}
+              value={form.projectId}
+            />
+            <div className="mb-2 grid grid-cols-[auto_minmax(0,1fr)] gap-x-2.5 gap-y-1 text-xs">
+              <span className="text-[#969b97]">Name</span>
+              <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">{selectedProject?.displayName ?? text(form.projectId, "-")}</span>
+              <span className="text-[#969b97]">Kind</span>
+              <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">{selectedProject?.kind ?? "-"}</span>
             </div>
-            <CheckboxField checked={form.usePathOverrides} label="Use custom paths" onChange={(event) => setForm({ usePathOverrides: event.currentTarget.checked })} />
-            <Field disabled={!form.usePathOverrides} label="Repo root" onChange={(event) => setForm({ repoRoot: event.currentTarget.value })} spellCheck={false} value={form.repoRoot} />
-            <Field disabled={!form.usePathOverrides} label="State dir" onChange={(event) => setForm({ stateDir: event.currentTarget.value })} spellCheck={false} value={form.stateDir} />
-            <Field disabled={!form.usePathOverrides} label="Graph DB" onChange={(event) => setForm({ graphDbPath: event.currentTarget.value })} spellCheck={false} value={form.graphDbPath} />
+            <details className="control-disclosure">
+              <summary>Edit project</summary>
+              <div className="project-paths">
+                <ProjectPathRow exists={selectedProject?.repoRootExists} label="Repo" path={form.repoRoot || selectedProject?.repoRoot} />
+                <ProjectPathRow exists={selectedProject?.stateDirExists} label="State" path={form.stateDir || selectedProject?.stateDir} />
+                <ProjectPathRow exists={selectedProject?.graphDbExists} label="Graph" path={form.graphDbPath || selectedProject?.graphDbPath} />
+              </div>
+              <CheckboxField checked={form.usePathOverrides} label="Use custom paths" onChange={(event) => setForm({ usePathOverrides: event.currentTarget.checked })} />
+              <Field disabled={!form.usePathOverrides} label="Repo root" onChange={(event) => setForm({ repoRoot: event.currentTarget.value })} spellCheck={false} value={form.repoRoot} />
+              <Field disabled={!form.usePathOverrides} label="State dir" onChange={(event) => setForm({ stateDir: event.currentTarget.value })} spellCheck={false} value={form.stateDir} />
+              <Field disabled={!form.usePathOverrides} label="Graph DB" onChange={(event) => setForm({ graphDbPath: event.currentTarget.value })} spellCheck={false} value={form.graphDbPath} />
+            </details>
           </details>
         </PanelSection>
 
       <PanelSection>
         <PanelTitle>Run Setup</PanelTitle>
-        <ControlGroup title="Basics">
-          <Field label="Process name" onChange={(event) => setForm({ processName: event.currentTarget.value })} spellCheck={false} value={form.processName} />
-          <Field label="Goal value" min={0} onChange={(event) => setForm({ goalValue: Number(event.currentTarget.value) })} step={0.01} type="number" value={form.goalValue} />
-        </ControlGroup>
-
         <div className="run-disclosure-grid">
           <details className="control-disclosure">
             <summary>
@@ -342,10 +353,24 @@ export function Sidebar({ activityMessage, busy, collapsed, config, dashboard, f
           <details className="control-disclosure">
             <summary>
               <span>Scheduling</span>
-              <small>{`${num(form.maxWorkers)} workers · queue ${num(form.queueTargetSize)}`}</small>
+              <small>{`${schedulingPreset.label} · ${num(form.maxWorkers)} workers · queue ${num(form.queueTargetSize)}`}</small>
             </summary>
-            <Field label="Workers" min={1} onChange={(event) => setForm({ maxWorkers: Number(event.currentTarget.value) })} type="number" value={form.maxWorkers} />
-            <Field label="Ready queue" min={1} onChange={(event) => setForm({ queueTargetSize: Number(event.currentTarget.value) })} type="number" value={form.queueTargetSize} />
+            <label className="mb-2 block text-xs text-[#969b97]">
+              <span>Size</span>
+              <select className="mt-1" onChange={(event) => setForm(schedulingForWorkers(Number(event.currentTarget.value)))} value={schedulingPreset.workers}>
+                {schedulingPresets.map((preset) => (
+                  <option key={preset.id} value={preset.workers}>
+                    {preset.label} / {preset.workers} workers
+                  </option>
+                ))}
+              </select>
+            </label>
+            <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-2.5 gap-y-1 text-xs">
+              <span className="text-[#969b97]">Ready queue</span>
+              <span className="text-right">{num(form.queueTargetSize)}</span>
+              <span className="text-[#969b97]">Refill at</span>
+              <span className="text-right">{num(form.queueLowWatermark)}</span>
+            </div>
           </details>
         </div>
 
@@ -387,7 +412,7 @@ export function Sidebar({ activityMessage, busy, collapsed, config, dashboard, f
 
       <HandoffPanel busy={busy} dashboard={dashboard} form={form} onAction={onAction} running={running} setForm={setForm} />
 
-      <ProcessPanel dashboard={dashboard} form={form} setForm={setForm} />
+      <ProcessPanel dashboard={dashboard} form={form} />
       </div>
     </aside>
   );

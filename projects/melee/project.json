@@ -15,10 +15,10 @@
     "objdiffPath": "objdiff.json"
   },
   "dashboard": {
-    "candidateLimit": 80,
-    "queueTargetSize": 24,
-    "queueLowWatermark": 12,
-    "candidateWindow": 80,
+    "candidateLimit": 64,
+    "queueTargetSize": 64,
+    "queueLowWatermark": 16,
+    "candidateWindow": 64,
     "goalValue": 100
   },
   "pr": {

@@ -67,12 +67,12 @@ when stable state changes and compact tick payloads for elapsed-time updates.
 
 The React app has three regions:
 
-- Left controls rail: project selector, advanced path overrides, run/process
-  controls, and PR handoff controls.
+- Left controls rail: compact project disclosure, run/process controls, and PR
+  handoff controls.
 - Center work area: progress metrics, trusted report or worker-score movement,
   improved files/symbols, and active/queued work.
-- Right details rail: worker report filters, full run details, and process
-  logs.
+- Right details rail: `Logs` and `Active Run` tabs. Logs are the default process
+  view; Active Run holds worker report filters and full run details.
 
 Both side rails are collapsible. The open left controls rail uses the same
 responsive track as the open right details rail, `minmax(440px, 560px)`, so
@@ -91,6 +91,23 @@ The Run section manages the long-running decomp process:
 | `Force Stop` | `POST /api/process/stop` | Stops the process group and runs `recover-leases --force` by default. |
 | `Report Now` | `POST /api/report/run` | Runs the trusted report refresh flow through `forceReportRun`. |
 | `Fresh Run` | `POST /api/run/fresh` | Optionally checkpoints the current run, resets the report baseline, initializes a new run, and refreshes PR knowledge. |
+
+Run Setup exposes scheduling as a size preset instead of independent queue
+numbers. The dashboard server derives `--max-workers`, `--queue-target-size`,
+`--queue-low-watermark`, `--candidate-limit`, and `--candidate-window` from that
+preset so the browser state cannot leave a mismatched worker/queue policy:
+
+| Preset | Workers | Ready queue | Refill watermark |
+| --- | ---: | ---: | ---: |
+| Small | 4 | 16 | 4 |
+| Medium | 8 | 32 | 8 |
+| Large | 16 | 64 | 16 |
+| XL | 32 | 128 | 32 |
+
+The ready queue is the pool of queued targets that workers can lease. The
+trigger refills that pool deterministically whenever it is below the target, and
+requests a director replan when queued work falls to the refill watermark while
+workers are active.
 
 Fresh Run has a `Checkpoint before fresh` option enabled by default. This
 preserves PR candidates and carry-forward work before the next baseline/session

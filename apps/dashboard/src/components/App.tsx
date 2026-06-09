@@ -7,6 +7,18 @@ import { ProgressPanel } from "./ProgressPanel";
 import { Sidebar } from "./Sidebar";
 import { type ImprovedMode, type WorkMode, WorkTables } from "./WorkTables";
 
+function schedulingForWorkers(workers: number) {
+  const maxWorkers = Number.isFinite(workers) && workers > 0 ? Math.trunc(workers) : 16;
+  const queueTargetSize = maxWorkers * 4;
+  return {
+    maxWorkers,
+    candidateLimit: queueTargetSize,
+    candidateWindow: queueTargetSize,
+    queueLowWatermark: maxWorkers,
+    queueTargetSize,
+  };
+}
+
 const defaultForm: FormState = {
   projectId: "",
   usePathOverrides: false,
@@ -14,12 +26,8 @@ const defaultForm: FormState = {
   stateDir: "",
   graphDbPath: "",
   processName: "melee-live",
-  maxWorkers: 16,
+  ...schedulingForWorkers(16),
   idleSleepMs: 5000,
-  candidateLimit: 64,
-  queueTargetSize: 64,
-  queueLowWatermark: 16,
-  candidateWindow: 512,
   goalValue: 100,
   provider: "codex-lb",
   model: "gpt-5.5",
@@ -156,16 +164,13 @@ export function App() {
         setConfig(loaded);
         setFormState((current) => ({
           ...current,
+          ...schedulingForWorkers(current.maxWorkers),
           projectId: loaded.defaultProjectId,
           usePathOverrides: false,
           repoRoot: loaded.defaultRepoRoot,
           stateDir: loaded.defaultStateDir,
           graphDbPath: loaded.defaultGraphDbPath,
           processName: String(projectDefaults.processName || current.processName),
-          candidateLimit: Number(dashboardDefaults.candidateLimit || current.candidateLimit),
-          queueTargetSize: Number(dashboardDefaults.queueTargetSize || current.queueTargetSize),
-          queueLowWatermark: Number(dashboardDefaults.queueLowWatermark || current.queueLowWatermark),
-          candidateWindow: Number(dashboardDefaults.candidateWindow || current.candidateWindow),
           goalValue: Number(dashboardDefaults.goalValue || current.goalValue),
           qaTarget: String(validationDefaults.qaTarget || current.qaTarget),
           prBaseRef: String(projectDefaults.baseRef || current.prBaseRef),
