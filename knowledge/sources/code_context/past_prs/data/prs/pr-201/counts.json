@@ -1,0 +1,17 @@
+{
+  "number": 201,
+  "title": "Finish splitting sdata, remove list.s",
+  "state": "MERGED",
+  "createdAt": "2021-12-18T18:10:50Z",
+  "updatedAt": "2021-12-18T18:10:59Z",
+  "mergedAt": "2021-12-18T18:10:57Z",
+  "closedAt": "2021-12-18T18:10:57Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/201",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 64494
+  }
+}

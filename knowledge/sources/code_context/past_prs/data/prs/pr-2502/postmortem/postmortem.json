@@ -1,0 +1,340 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2502",
+  "pr": {
+    "number": 2502,
+    "title": "gr: fix Zebes Route param store",
+    "url": "https://github.com/doldecomp/melee/pull/2502",
+    "state": "MERGED",
+    "author": "itsgrimetime",
+    "created_at": "2026-05-15T17:42:23Z",
+    "merged_at": "2026-05-15T17:49:40Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2502 updates src/melee/gr/grzebesroute.c to model grZe_Route_804D6A60 as an 8-byte Zebes Route parameter store, with a params pointer and pad field, and names two understood route parameters: camera_timer and zako_spawn_chance. The PR body says this brought grzebesroute data sections including .sbss to 100%; the bot report specifically records a new .sbss match for main/melee/gr/grzebesroute from 50% to 100% with +4 bytes.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "fix",
+      "data-section-cleanup",
+      "naming",
+      "type-recovery"
+    ],
+    "systems": [
+      "stage",
+      "ground",
+      "grzebesroute"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gr/grzebesroute.c",
+      "role": "Only changed source file; introduces grZebesRoute_Params and grZebesRoute_ParamStore, changes grZe_Route_804D6A60 from an anonymous pointer-style struct to a concrete param-store object, and updates uses to named fields.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gr/grzebesroute.c added 15 deleted 8 hunks 5",
+        "raw_diff: adds grZebesRoute_Params with camera_timer and zako_spawn_chance",
+        "raw_diff: adds grZebesRoute_ParamStore with params pointer and u32 pad",
+        "raw_diff: replaces anonymous static pointer grZe_Route_804D6A60 with grZebesRoute_ParamStore grZe_Route_804D6A60"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Added typedef grZebesRoute_Params containing int camera_timer and int zako_spawn_chance.",
+      "evidence_refs": [
+        "raw_diff: typedef struct grZebesRoute_Params"
+      ]
+    },
+    {
+      "text": "Added typedef grZebesRoute_ParamStore containing grZebesRoute_Params* params and u32 pad, matching the PR body's description of an 8-byte Zebes Route param store.",
+      "evidence_refs": [
+        "raw_diff: typedef struct grZebesRoute_ParamStore",
+        "human_pr_text: model grZe_Route_804D6A60 as the 8-byte Zebes Route param store"
+      ]
+    },
+    {
+      "text": "Changed grZe_Route_804D6A60 from an anonymous pointer to a concrete grZebesRoute_ParamStore global.",
+      "evidence_refs": [
+        "raw_diff: removed static anonymous struct pointer grZe_Route_804D6A60",
+        "raw_diff: added grZebesRoute_ParamStore grZe_Route_804D6A60"
+      ]
+    },
+    {
+      "text": "Updated initialization in grZebesRoute_8020B164 to store Ground_801C49F8() into grZe_Route_804D6A60.params instead of assigning the global directly.",
+      "evidence_refs": [
+        "raw_diff: grZe_Route_804D6A60.params = Ground_801C49F8()"
+      ]
+    },
+    {
+      "text": "Updated uses of the old x4 field in grZebesRoute_8020B1F4 to grZe_Route_804D6A60.params->zako_spawn_chance, including the HSD_Randi argument.",
+      "evidence_refs": [
+        "raw_diff: val = grZe_Route_804D6A60.params->zako_spawn_chance",
+        "raw_diff: HSD_Randi(grZe_Route_804D6A60.params->zako_spawn_chance)"
+      ]
+    },
+    {
+      "text": "Updated use of the old x0 field in grZebesRoute_8020B3C0 to grZe_Route_804D6A60.params->camera_timer when assigning gp->gv.zebes2.xC4.",
+      "evidence_refs": [
+        "raw_diff: gp->gv.zebes2.xC4 = (s16) grZe_Route_804D6A60.params->camera_timer"
+      ]
+    },
+    {
+      "text": "Reported data-section improvement: PR body claims grzebesroute data sections including .sbss are 100%; bot report records .sbss for main/melee/gr/grzebesroute moving from 50% to 100% with +4 bytes.",
+      "evidence_refs": [
+        "human_pr_text: bring grzebesroute data sections, including .sbss, to 100%",
+        "text_corpus issue_comment decomp-dev[bot]: main/melee/gr/grzebesroute .sbss +4 50.00% to 100.00%"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Recovered a small data-store shape rather than leaving the symbol as an anonymous pointer with x0/x4 fields.",
+      "evidence_refs": [
+        "raw_diff: anonymous struct pointer replaced with grZebesRoute_ParamStore",
+        "human_pr_text: model grZe_Route_804D6A60 as the 8-byte Zebes Route param store"
+      ]
+    },
+    {
+      "text": "Named only the currently understood parameter fields, camera_timer and zako_spawn_chance, while retaining an address-style name for the global grZe_Route_804D6A60.",
+      "evidence_refs": [
+        "human_pr_text: name the currently understood route params (`camera_timer`, `zako_spawn_chance`)",
+        "raw_diff: grZe_Route_804D6A60 name retained"
+      ]
+    },
+    {
+      "text": "Used a pad member in the store struct to model the observed 8-byte storage without inventing an unsupported second semantic field.",
+      "evidence_refs": [
+        "raw_diff: grZebesRoute_ParamStore has grZebesRoute_Params* params and u32 pad",
+        "human_pr_text: 8-byte Zebes Route param store"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a stage global is actually a small store containing a parameter pointer plus unused or unknown storage, model the store explicitly instead of treating the global itself as the parameter pointer.",
+      "scope": [
+        "src/melee/gr/grzebesroute.c",
+        "stage parameter storage",
+        "small data or sbss-backed globals"
+      ],
+      "evidence_refs": [
+        "raw_diff: grZe_Route_804D6A60 changed from anonymous pointer to grZebesRoute_ParamStore",
+        "raw_diff: Ground_801C49F8() now stored in grZe_Route_804D6A60.params",
+        "text_corpus issue_comment decomp-dev[bot]: .sbss +4 from 50.00% to 100.00%"
+      ]
+    },
+    {
+      "lesson": "Recovering a real container type can improve data-section matching while also making parameter field accesses more readable.",
+      "scope": [
+        "grzebesroute",
+        "data-section matching",
+        "type recovery"
+      ],
+      "evidence_refs": [
+        "human_pr_text: bring grzebesroute data sections, including .sbss, to 100%",
+        "raw_diff: x0/x4 accesses replaced with camera_timer/zako_spawn_chance",
+        "text_corpus issue_comment decomp-dev[bot]: 1 new match, .sbss 100.00%"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "grZebesRoute_Params",
+      "kind": "type",
+      "convention": "Stage-specific type name with grZebesRoute prefix and Params suffix for route parameter data.",
+      "evidence_refs": [
+        "raw_diff: typedef struct grZebesRoute_Params"
+      ]
+    },
+    {
+      "name": "grZebesRoute_ParamStore",
+      "kind": "type",
+      "convention": "Stage-specific type name with ParamStore suffix for a wrapper/global storage object that contains a params pointer and padding.",
+      "evidence_refs": [
+        "raw_diff: typedef struct grZebesRoute_ParamStore"
+      ]
+    },
+    {
+      "name": "camera_timer",
+      "kind": "field",
+      "convention": "Semantic field name used for former x0 parameter when assigned to gp->gv.zebes2.xC4.",
+      "evidence_refs": [
+        "human_pr_text: name the currently understood route params (`camera_timer`, `zako_spawn_chance`)",
+        "raw_diff: params->camera_timer"
+      ]
+    },
+    {
+      "name": "zako_spawn_chance",
+      "kind": "field",
+      "convention": "Semantic field name used for former x4 parameter controlling the HSD_Randi spawn-chance path.",
+      "evidence_refs": [
+        "human_pr_text: name the currently understood route params (`camera_timer`, `zako_spawn_chance`)",
+        "raw_diff: params->zako_spawn_chance used with HSD_Randi"
+      ]
+    },
+    {
+      "name": "grZe_Route_804D6A60",
+      "kind": "global",
+      "convention": "Address-style global name retained; PR did not rename it to a speculative semantic global name.",
+      "evidence_refs": [
+        "raw_diff: grZebesRoute_ParamStore grZe_Route_804D6A60"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Represented grZe_Route_804D6A60 as an 8-byte struct in storage, with the first word as params pointer and the second word as u32 pad.",
+      "evidence_refs": [
+        "raw_diff: grZebesRoute_ParamStore fields params and pad",
+        "human_pr_text: model grZe_Route_804D6A60 as the 8-byte Zebes Route param store"
+      ]
+    },
+    {
+      "tactic": "Used typed field access through grZe_Route_804D6A60.params to replace raw x0/x4-style accesses.",
+      "evidence_refs": [
+        "raw_diff: x4 replaced by params->zako_spawn_chance",
+        "raw_diff: x0 replaced by params->camera_timer"
+      ]
+    },
+    {
+      "tactic": "Focused on data-section closure for this translation unit; bot report confirms .sbss gained a new match.",
+      "evidence_refs": [
+        "human_pr_text: data sections are now 100%",
+        "text_corpus issue_comment decomp-dev[bot]: main/melee/gr/grzebesroute .sbss +4, 50.00% to 100.00%"
+      ]
+    }
+  ],
+  "review_feedback": [],
+  "searchable_terms": [
+    "PR2502",
+    "gr: fix Zebes Route param store",
+    "src/melee/gr/grzebesroute.c",
+    "grzebesroute",
+    "grZebesRoute_Params",
+    "grZebesRoute_ParamStore",
+    "grZe_Route_804D6A60",
+    "Ground_801C49F8",
+    "camera_timer",
+    "zako_spawn_chance",
+    "HSD_Randi",
+    "grZakoGenerator_801CAE04",
+    "grZebesRoute_8020B164",
+    "grZebesRoute_8020B1F4",
+    "grZebesRoute_8020B3C0",
+    "gp->gv.zebes2.xC4",
+    ".sbss",
+    "data sections 100%",
+    "main/melee/gr/grzebesroute"
+  ],
+  "follow_up_queries": [
+    "grZe_Route_804D6A60 params pad",
+    "grZebesRoute_ParamStore",
+    "grZebesRoute_Params camera_timer zako_spawn_chance",
+    "Ground_801C49F8 stage param pointer grzebesroute",
+    "main/melee/gr/grzebesroute .sbss 100%",
+    "gp->gv.zebes2.xC4 camera_timer"
+  ],
+  "evidence_quality": {
+    "status": "strong",
+    "evidence_refs": [
+      "metadata_json: PR #2502 title, author, state, URL, timestamps, changed file counts",
+      "human_pr_text: summary, verification, and match notes",
+      "raw_diff: complete diff for src/melee/gr/grzebesroute.c",
+      "changed_files.jsonl: single changed file with added/deleted counts",
+      "text_corpus.jsonl: bot report with .sbss match details"
+    ],
+    "notes": [
+      "No review comments are present in the loaded slice, so review_feedback is intentionally empty.",
+      "Verification commands are author-reported in the PR body; the loaded bot report independently supports only the .sbss data-match improvement shown in the issue comment.",
+      "The PR body claims all grzebesroute data sections are 100%, while the bot excerpt specifically enumerates the .sbss improvement; this intake does not independently validate other data sections.",
+      "The semantic meanings of camera_timer and zako_spawn_chance are supported by the PR body and diff usage, but no broader stage data schema is proven by this slice."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "kind": "decomp_lesson",
+        "title": "Model small parameter stores explicitly when evidence shows the global is a wrapper, not the pointed-to parameter data",
+        "text": "In grzebesroute, grZe_Route_804D6A60 was changed from an anonymous parameter pointer with x0/x4 fields into grZebesRoute_ParamStore, an 8-byte store whose first word is a grZebesRoute_Params* and whose second word is padding. Uses now access grZe_Route_804D6A60.params->camera_timer and ->zako_spawn_chance. The PR body and bot report connect this type recovery to data-section/.sbss matching progress.",
+        "scope": [
+          "src/melee/gr/grzebesroute.c",
+          "stage parameter storage",
+          "data-section matching"
+        ],
+        "evidence_refs": [
+          "raw_diff: grZebesRoute_Params and grZebesRoute_ParamStore added",
+          "raw_diff: grZe_Route_804D6A60 changed to grZebesRoute_ParamStore",
+          "human_pr_text: model grZe_Route_804D6A60 as 8-byte Zebes Route param store",
+          "text_corpus issue_comment decomp-dev[bot]: .sbss +4 from 50.00% to 100.00%"
+        ]
+      },
+      {
+        "kind": "naming_lesson",
+        "title": "Name only understood fields while leaving uncertain globals address-style",
+        "text": "This PR names the understood parameter fields camera_timer and zako_spawn_chance but keeps the global as grZe_Route_804D6A60. That pattern fits conservative naming: add semantics where field usage and PR evidence support it, without inventing a semantic global name.",
+        "scope": [
+          "grzebesroute",
+          "field naming",
+          "conservative naming"
+        ],
+        "evidence_refs": [
+          "human_pr_text: name the currently understood route params",
+          "raw_diff: params->camera_timer and params->zako_spawn_chance",
+          "raw_diff: grZe_Route_804D6A60 retained"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "grzebesroute.c owns Zebes Route param-store modeling around grZe_Route_804D6A60",
+        "text": "PR #2502 changed src/melee/gr/grzebesroute.c so grZe_Route_804D6A60 is modeled as grZebesRoute_ParamStore, an 8-byte store containing grZebesRoute_Params* params and u32 pad; known parameter fields are camera_timer and zako_spawn_chance.",
+        "source_path": "src/melee/gr/grzebesroute.c",
+        "scope": [
+          "grzebesroute",
+          "grZe_Route_804D6A60",
+          "stage params"
+        ],
+        "evidence_refs": [
+          "raw_diff: added grZebesRoute_Params and grZebesRoute_ParamStore",
+          "human_pr_text: model grZe_Route_804D6A60 as the 8-byte Zebes Route param store"
+        ],
+        "reason": "May be useful as a source-owned path fact for future work in this file, but should be reviewed against current source before promotion."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Prefer explicit wrapper structs over mis-typed globals when small data storage includes a pointer plus unknown padding",
+        "text": "This PR provides an example where modeling a global as an explicit wrapper struct with a pointer and padding improved readability and .sbss matching. Curator may consider whether this should become an example under typed-fields-over-pointer-math or data-sections-and-tu-splits, not a new standalone rule unless similar cases recur.",
+        "source_path": null,
+        "scope": [
+          "typed-fields-over-pointer-math",
+          "data-sections-and-tu-splits",
+          "small data globals"
+        ],
+        "evidence_refs": [
+          "raw_diff: grZebesRoute_ParamStore params plus pad",
+          "text_corpus issue_comment decomp-dev[bot]: .sbss +4, 50.00% to 100.00%"
+        ],
+        "reason": "The lesson aligns with existing standards, but one PR slice is not enough to establish a broad new global standard without curator review."
+      }
+    ],
+    "rejection_notes": [
+      "Do not generalize from this PR that all stage parameter globals should be modeled as 8-byte ParamStore wrappers; the evidence is specific to grzebesroute and grZe_Route_804D6A60.",
+      "Do not claim full independent verification of the author-reported ninja commands from the loaded slice; only the bot .sbss report is directly present.",
+      "Do not infer reviewer intent or review acceptance rationale; no review comments or review records are loaded."
+    ]
+  },
+  "confidence": 0.88,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

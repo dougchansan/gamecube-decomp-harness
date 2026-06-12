@@ -3,7 +3,7 @@
 Lookup surface for cached MWCC pcdump output, compiler-pass summaries, and
 last-mile compiler behavior notes.
 
-Current state: live runner v1 plus harness bridge APIs.
+Current state: live runner v1 plus tool-local dump/diagnose APIs.
 `bun run kg:tool-runner:mwcc-debug` runs the
 local `GC/1.2.5n` MWCC executable through Wine with `-version`, captures the
 compiler output, extracts representative build-rule snippets from
@@ -14,10 +14,10 @@ compiler output, extracts representative build-rule snippets from
 - `cache/mwcc_build_rule_snippets.json`
 - `indexes/mwcc_probes.jsonl`
 
-`build_tool_indexes.py` still generates `indexes/dumps.jsonl` from imported
-MWCC reference docs.
+`build_tool_indexes.py` keeps `indexes/dumps.jsonl` present for compatibility,
+but the deleted legacy-doc archive no longer contributes fallback rows.
 
-Harness bridge APIs add target-specific live evidence:
+Tool-local APIs add target-specific live evidence:
 
 - `api/dump_function.py` runs `mwcc_dump.py` and returns the function-filtered
   pcdump plus shape analysis.
@@ -28,11 +28,5 @@ Harness bridge APIs add target-specific live evidence:
 - `api/diagnose.py --mode inlines` looks for inline extraction boundaries.
 - `api/diagnose.py --mode raw` returns the raw filtered pcdump.
 
-These calls require the instrumented `mwcceppc_debug.exe` built from the
-reference harness and a current Melee build tree.
-
-Reference material:
-
-- `reference/SKILL.md`
-- `reference/mwcc-inspect-SKILL.md`
-- `knowledge/sources/reference_docs/data/docs/mwcc-debug.md`
+These calls require the instrumented `mwcceppc_debug.exe` built from
+`tools/_impl/melee/mwcc_debug` and a current Melee build tree.

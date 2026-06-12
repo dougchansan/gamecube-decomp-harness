@@ -1,0 +1,17 @@
+{
+  "number": 1304,
+  "title": "Match 3.09% of `ft_081B` (14.05 KB)",
+  "state": "MERGED",
+  "createdAt": "2024-02-22T14:20:03Z",
+  "updatedAt": "2024-02-22T17:01:02Z",
+  "mergedAt": "2024-02-22T14:52:31Z",
+  "closedAt": "2024-02-22T14:52:31Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1304",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 434363
+  }
+}

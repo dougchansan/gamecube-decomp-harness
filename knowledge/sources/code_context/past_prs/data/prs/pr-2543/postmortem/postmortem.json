@@ -1,0 +1,337 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2543",
+  "pr": {
+    "number": 2543,
+    "title": "Decompile grCastle_801CE19C",
+    "url": "https://github.com/doldecomp/melee/pull/2543",
+    "state": "MERGED",
+    "author": "Erotemic",
+    "created_at": "2026-05-26T13:42:40Z",
+    "merged_at": "2026-05-26T17:43:33Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2543 decompiled grCastle_801CE19C by replacing small MWERKS inline-asm bit manipulation with C, backed by a grCastle_GroundVars9 bitfield for gp+DE bit 0. The same xDE_b0 field was then used in nearby grCastle code to set, clear, and test the flag. The PR also adjusted PAD_STACK usage and kept offset-style naming rather than accepting speculative semantic names.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "types-structs",
+      "bitfield-cleanup",
+      "inline-asm-removal"
+    ],
+    "systems": [
+      "stage",
+      "ground",
+      "grCastle"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gr/grcastle.c",
+      "role": "Replaced xDE raw masks, temporary register variables, and rlwimi inline asm with gp->gv.castle9.xDE_b0 boolean bitfield accesses in grCastle_801CD658, grCastle_801CDFD8, grCastle_801CE19C, and grCastle_801CE578; decompiled grCastle_801CE19C body uses GET_GROUND, a timer decrement, grCastle_801CD4D0, and clears the flag.",
+      "evidence_refs": [
+        "raw_diff:src/melee/gr/grcastle.c hunks around grCastle_801CD658",
+        "raw_diff:src/melee/gr/grcastle.c hunks around grCastle_801CDFD8",
+        "raw_diff:src/melee/gr/grcastle.c hunks around grCastle_801CE19C",
+        "raw_diff:src/melee/gr/grcastle.c hunks around grCastle_801CE578"
+      ]
+    },
+    {
+      "path": "src/melee/gr/types.h",
+      "role": "Changed grCastle_GroundVars9 field at gp+DE from u8 xDE to a one-bit bitfield named xDE_b0, preserving surrounding offset comments and layout.",
+      "evidence_refs": [
+        "raw_diff:src/melee/gr/types.h hunk around struct grCastle_GroundVars9",
+        "human_pr_text:ribbanya issue comment says the struct needed to be modified to use a bitfield"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "grCastle_801CE19C was converted from assembly-heavy bit tests/updates on castle9.xDE into C using gp->gv.castle9.xDE_b0, with the countdown timer logic kept explicit.",
+      "evidence_refs": [
+        "raw_diff:grCastle_801CE19C",
+        "human_pr_text:PR body says it replaces a small bit of ASM with equivalent C code"
+      ]
+    },
+    {
+      "text": "The raw byte field castle9.xDE became a named bitfield xDE_b0 in grCastle_GroundVars9.",
+      "evidence_refs": [
+        "raw_diff:src/melee/gr/types.h",
+        "human_pr_text:ribbanya issue comment"
+      ]
+    },
+    {
+      "text": "Nearby xDE flag set/clear sites were updated from masks, local casted bitfield structs, and rlwimi inline asm to xDE_b0 assignments.",
+      "evidence_refs": [
+        "raw_diff:grCastle_801CD658",
+        "raw_diff:grCastle_801CDFD8",
+        "raw_diff:grCastle_801CE578"
+      ]
+    },
+    {
+      "text": "PAD_STACK usage changed from PAD_STACK(8) to PAD_STACK(4) in grCastle_801CE19C and a PAD_STACK(4) was added in grCastle_801CE578.",
+      "evidence_refs": [
+        "raw_diff:grCastle_801CE19C",
+        "raw_diff:grCastle_801CE578"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Model the flag as a real struct bitfield instead of preserving raw byte masks or inline asm; this made multiple sites simpler and addressed reviewer feedback.",
+      "evidence_refs": [
+        "raw_diff:xDE_b0 replacements",
+        "human_pr_text:ribbanya issue comment"
+      ]
+    },
+    {
+      "text": "Kept the recovered bitfield name offset-based as xDE_b0 rather than using speculative semantic labels such as armed, pending, or active from the PR body's AI-assisted interpretation.",
+      "evidence_refs": [
+        "raw_diff:types.h xDE_b0 name",
+        "human_pr_text:PR body marks semantic interpretation as a best guess"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "text": "When matching code manipulates a single bit in a known struct byte, try representing the byte as a bitfield in the owning struct; this can remove rlwimi inline asm, register temporaries, raw masks, and local casted bitfield structs.",
+      "scope": [
+        "src/melee/gr/types.h",
+        "src/melee/gr/grcastle.c",
+        "grCastle_GroundVars9",
+        "castle9.xDE_b0"
+      ],
+      "evidence_refs": [
+        "raw_diff:types.h xDE -> xDE_b0",
+        "raw_diff:grCastle_801CDFD8 asm removed",
+        "raw_diff:grCastle_801CE19C asm removed",
+        "raw_diff:grCastle_801CE578 local bitfield cast removed",
+        "human_pr_text:ribbanya issue comment"
+      ]
+    },
+    {
+      "text": "For decompilation review, mechanical or AI-assisted semantic guesses should not drive names unless corroborated; this PR kept an address/offset-style bitfield name despite a speculative description in the PR body.",
+      "scope": [
+        "conservative naming",
+        "AI-assisted PR interpretation",
+        "grCastle_GroundVars9"
+      ],
+      "evidence_refs": [
+        "human_pr_text:PR body says the functional interpretation was a best guess",
+        "raw_diff:field named xDE_b0 rather than a semantic name"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "Use offset-and-bit names such as xDE_b0 for recovered bitfields when the bit's semantic role is not proven.",
+      "evidence_refs": [
+        "raw_diff:types.h field comment /* +1A:0 gp+DE:0 */ u8 xDE_b0 : 1",
+        "human_pr_text:PR body presents armed/pending/active as guesswork"
+      ]
+    },
+    {
+      "text": "Temporary locals named tmp, byte, one, and zero were removed once the typed bitfield made the operation expressible directly.",
+      "evidence_refs": [
+        "raw_diff:grCastle_801CDFD8",
+        "raw_diff:grCastle_801CE19C",
+        "human_pr_text:PR body says removing tmp variables seemed necessary"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "text": "Replacing rlwimi bit insertion inline asm with a C bitfield assignment matched the intended bit manipulation at xDE_b0.",
+      "evidence_refs": [
+        "raw_diff:grCastle_801CDFD8",
+        "raw_diff:grCastle_801CE19C"
+      ]
+    },
+    {
+      "text": "PAD_STACK remained necessary in the submitted diff, but only narrow evidence is present: PAD_STACK(4) appears in grCastle_801CE19C and grCastle_801CE578. No independent verifier log in the slice explains why the padding was required.",
+      "evidence_refs": [
+        "raw_diff:grCastle_801CE19C",
+        "raw_diff:grCastle_801CE578"
+      ]
+    },
+    {
+      "text": "The author reported that nicer-looking variants regressed and that generated bytes matched 100%, but the loaded slice does not include objdiff output specific to grCastle_801CE19C.",
+      "evidence_refs": [
+        "human_pr_text:PR body",
+        "text_corpus:decomp-dev bot report appears to list unrelated gm units rather than grCastle_801CE19C"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "author": "ribbanya",
+      "text": "Thanks for the contribution. The struct just needed to be modified to use a bitfield. You can see the difference in 545c43ab01894354eb53792742588675a3cf9ad9.",
+      "evidence_refs": [
+        "human_pr_text:ribbanya issue comment",
+        "text_corpus issue_comment 2026-05-26T17:38:34Z"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2543",
+    "Decompile grCastle_801CE19C",
+    "Erotemic",
+    "ribbanya",
+    "grCastle_801CE19C",
+    "grCastle_GroundVars9",
+    "xDE",
+    "xDE_b0",
+    "gp+DE:0",
+    "bitfield",
+    "rlwimi",
+    "MWERKS_GEKKO",
+    "NOT_IMPLEMENTED",
+    "PAD_STACK",
+    "GET_GROUND",
+    "Ground_GObj",
+    "Ground",
+    "grCastle_801CDFD8",
+    "grCastle_801CD658",
+    "grCastle_801CE578",
+    "grCastle_801CD4D0",
+    "grCastle_801CE054",
+    "Ground_801C5440",
+    "grCs_804D6970"
+  ],
+  "follow_up_queries": [
+    "grCastle_GroundVars9 xDE_b0 bitfield",
+    "rlwimi byte one zero grCastle",
+    "site:src/melee/gr xDE_b0",
+    "PAD_STACK(4) grCastle_801CE19C",
+    "grCastle_801CDFD8 MWERKS_GEKKO asm",
+    "grCastle_801CE578 local bitfield cast xDE",
+    "545c43ab01894354eb53792742588675a3cf9ad9 bitfield"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json:PR #2543 merged metadata",
+      "changed_files.jsonl:2 changed files",
+      "raw_diff:full diff",
+      "human_pr_text:PR body and issue comment",
+      "text_corpus:bot report and issue comments"
+    ],
+    "notes": [
+      "Changed files and code edits are well supported by the raw diff.",
+      "Reviewer feedback is available only as an issue comment, with no inline review comments.",
+      "The author's 100% byte-match claim is present, but the loaded bot report lists unrelated gm units and does not independently verify grCastle_801CE19C.",
+      "The PR body includes AI-assisted semantic guesses about the function's purpose; those are treated as speculation, not accepted naming or behavior facts.",
+      "PAD_STACK changes are visible in the diff, but the slice does not include a narrow explanation or verifier evidence for the exact stack-padding requirements."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "kind": "decomp_lesson_candidate",
+        "title": "Use owning-struct bitfields to remove raw bit manipulation and inline asm",
+        "text": "In PR #2543, changing grCastle_GroundVars9's xDE byte into a bitfield xDE_b0 let the code replace rlwimi inline asm, masks, and local casted bitfield structs with direct boolean field assignments.",
+        "scope": [
+          "grCastle",
+          "GroundVars",
+          "bitfield recovery",
+          "inline asm cleanup"
+        ],
+        "evidence_refs": [
+          "raw_diff:types.h xDE -> xDE_b0",
+          "raw_diff:grcastle.c xDE_b0 uses",
+          "human_pr_text:ribbanya issue comment"
+        ],
+        "confidence": 0.9
+      },
+      {
+        "kind": "naming_lesson_candidate",
+        "title": "Prefer offset-style bitfield names when semantics are speculative",
+        "text": "The PR retained xDE_b0 instead of adopting speculative names from the PR body's AI-assisted explanation, matching conservative naming guidance when behavior is not proven.",
+        "scope": [
+          "conservative naming",
+          "bitfields",
+          "AI-assisted decomp"
+        ],
+        "evidence_refs": [
+          "raw_diff:types.h xDE_b0",
+          "human_pr_text:PR body marks semantic role as best guess"
+        ],
+        "confidence": 0.82
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "grCastle_GroundVars9 has a recovered bitfield at gp+DE:0",
+        "text": "PR #2543 changed src/melee/gr/types.h so grCastle_GroundVars9 stores gp+DE bit 0 as `u8 xDE_b0 : 1`, replacing the previous `u8 xDE` byte field and enabling direct accesses in src/melee/gr/grcastle.c.",
+        "source_path": "src/melee/gr/types.h",
+        "scope": [
+          "src/melee/gr/types.h",
+          "src/melee/gr/grcastle.c",
+          "grCastle_GroundVars9",
+          "xDE_b0"
+        ],
+        "evidence_refs": [
+          "raw_diff:src/melee/gr/types.h",
+          "raw_diff:src/melee/gr/grcastle.c",
+          "human_pr_text:ribbanya issue comment"
+        ],
+        "reason": "This is a source/path-owned struct layout fact visible in the PR diff; curator should decide whether to add it to path facts."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Consider bitfield recovery before keeping rlwimi asm for single-bit flags",
+        "text": "When a function uses inline asm or raw masks only to set, clear, or test one bit of a known struct byte, check whether the owning struct should expose that bit as a bitfield before preserving the asm.",
+        "source_path": null,
+        "scope": [
+          "bitfield recovery",
+          "inline asm cleanup",
+          "typed fields over pointer math",
+          "avoid pragmas/register/asm"
+        ],
+        "evidence_refs": [
+          "raw_diff:grCastle_801CDFD8",
+          "raw_diff:grCastle_801CE19C",
+          "raw_diff:grCastle_801CE578",
+          "human_pr_text:ribbanya issue comment"
+        ],
+        "reason": "The case reinforces existing standards about typed fields and avoiding inline asm; curator can decide whether it warrants an explicit standard note."
+      }
+    ],
+    "rejection_notes": [
+      {
+        "text": "Do not promote the PR body's AI-generated description of grCastle_801CE19C as a one-shot/timer-driven object spawner into accepted behavior or naming facts; the author explicitly framed it as a best guess.",
+        "evidence_refs": [
+          "human_pr_text:PR body"
+        ]
+      },
+      {
+        "text": "Do not treat the loaded decomp-dev bot report as direct validation of grCastle_801CE19C, because the listed matches/regressions are for gm units rather than the changed grCastle file.",
+        "evidence_refs": [
+          "text_corpus:decomp-dev bot report"
+        ]
+      },
+      {
+        "text": "Do not generalize PAD_STACK(4) as a style rule from this PR alone; the diff shows the tactic but does not include verifier evidence explaining it.",
+        "evidence_refs": [
+          "raw_diff:grCastle_801CE19C",
+          "raw_diff:grCastle_801CE578"
+        ]
+      }
+    ]
+  },
+  "confidence": 0.86,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

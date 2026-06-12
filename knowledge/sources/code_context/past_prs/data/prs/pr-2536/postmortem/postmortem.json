@@ -1,0 +1,374 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2536",
+  "pr": {
+    "number": 2536,
+    "title": "Jj/mncharsel3",
+    "url": "https://github.com/doldecomp/melee/pull/2536",
+    "state": "MERGED",
+    "author": "jurrejelle",
+    "created_at": "2026-05-25T15:54:54Z",
+    "merged_at": "2026-05-31T13:11:05Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Large mncharsel decomp/matching PR focused on src/melee/mn/mncharsel.c, adding a substantial implementation for mnCharSel_802640A0 and adjusting several existing character-select functions, headers, types, and target_funcs. Evidence includes changed-file metadata, a truncated diff excerpt, and a bot match report showing mncharsel improvements plus one mncharsel broken match and unrelated report movement in gr units.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "types",
+      "target-functions"
+    ],
+    "systems": [
+      "melee-menu",
+      "mncharsel",
+      "repo-root"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/mn/mncharsel.c",
+      "role": "Primary implementation file; 974 additions and 74 deletions across 34 hunks, including a large new mnCharSel_802640A0 body and many local matching/type/control-flow adjustments.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mncharsel.c added=974 deleted=74 hunks=34",
+        "raw_diff: mncharsel.c include additions and hunks around mnCharSel_8025D1C4, mnCharSel_8025DB34, fn_8025F0E0, mnCharSel_8025FB50, mnCharSel_8025FDEC, mnCharSel_CursorThink, fn_80262648, fn_802633B0, fn_8026407C/mnCharSel_802640A0"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mncharsel.static.h",
+      "role": "Static header updated alongside mncharsel implementation.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mncharsel.static.h added=17 deleted=1 hunks=2"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mncharsel.h",
+      "role": "Public mncharsel header touched for one-line prototype or declaration adjustment.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mncharsel.h added=1 deleted=1 hunks=1"
+      ]
+    },
+    {
+      "path": "src/melee/mn/types.h",
+      "role": "Menu types header touched for one-line type adjustment.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/types.h added=1 deleted=1 hunks=1"
+      ]
+    },
+    {
+      "path": "target_funcs.txt",
+      "role": "Target-function list expanded for this matching work.",
+      "evidence_refs": [
+        "changed_files.jsonl: target_funcs.txt added=13 deleted=0 hunks=1"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Added required baselib includes to mncharsel.c, including forward, cobj, gobj, gobjobject, gobjproc, gobjuserdata, lobj, and memory headers.",
+      "evidence_refs": [
+        "raw_diff: include block additions near top of src/melee/mn/mncharsel.c"
+      ]
+    },
+    {
+      "text": "Introduced static GXColor data mnCharSel_804DC580 through mnCharSel_804DC594 plus MODELS and ANIM macros before adding a large mnCharSel_802640A0 implementation.",
+      "evidence_refs": [
+        "raw_diff: additions after fn_8026407C include MenMain_cam extern, six static GXColor initializers, MODELS/ANIM macros, and mnCharSel_802640A0"
+      ]
+    },
+    {
+      "text": "Adjusted local variable widths and casts in several functions, especially changing small unsigned locals to s32 or int where comparisons and casts required that shape.",
+      "evidence_refs": [
+        "raw_diff: hval/hval2/hval3/hval4 u8 to s32 in mnCharSel_8025DB34",
+        "raw_diff: val u8 to s32 in fn_8025F0E0",
+        "raw_diff: player and icon_idx changes in mnCharSel_8025FB50 and mnCharSel_8025FDEC",
+        "raw_diff: grabbed u8 to int in mnCharSel_CursorThink",
+        "raw_diff: port u8 to int in fn_802633B0"
+      ]
+    },
+    {
+      "text": "Replaced some temporary pointer aliases and raw pointer reinterpretations with direct typed field access in mnCharSel_803F0DFC and related CSS structures.",
+      "evidence_refs": [
+        "raw_diff: removed scroll_flag/page_target/page_current pointer locals in fn_8025F0E0",
+        "raw_diff: HSD_SisLib_803A746C argument changed from *(HSD_Text**) &mnCharSel_803F0DFC.xd3 to mnCharSel_803F0DFC.xd3",
+        "raw_diff: TextKerning* tmp cast replacing UNK_T in mnCharSel_8025D1C4"
+      ]
+    },
+    {
+      "text": "Changed some matching/control-flow shapes, including a costume-selection loop rewritten as while(1) with an explicit break once isDuplicateCostume is false.",
+      "evidence_refs": [
+        "raw_diff: mnCharSel_8025FB50 costume loop changed from while (isDuplicateCostume(door)) to while (1) with break"
+      ]
+    },
+    {
+      "text": "Bot report recorded overall matched-code improvement of +1600 bytes and matched-data improvement of +32 bytes, with mncharsel improvements led by mnCharSel_802640A0 rising from 0.00% to 86.22%.",
+      "evidence_refs": [
+        "text_corpus.jsonl issue_comment decomp-dev[bot]: Report for GALE01 matched code 69.17% (+0.04%, +1600 bytes), matched data 41.19% (+0.00%, +32 bytes)",
+        "text_corpus.jsonl issue_comment: mnCharSel_802640A0 +8811 bytes, 0.00% to 86.22%"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "The PR routes newly needed declarations through headers/includes rather than relying only on source-local unknown declarations, as shown by added baselib includes and touched mncharsel/type headers.",
+      "evidence_refs": [
+        "raw_diff: baselib include additions",
+        "changed_files.jsonl: mncharsel.h, mncharsel.static.h, and types.h changed"
+      ]
+    },
+    {
+      "text": "Several edits improve typed access and reviewability by replacing UNK_T or pointer-to-field aliases with typed locals or direct struct fields.",
+      "evidence_refs": [
+        "raw_diff: TextKerning* tmp in mnCharSel_8025D1C4",
+        "raw_diff: direct mnCharSel_803F0DFC.scroll_flag/xcd/xce/xd3 access in fn_8025F0E0"
+      ]
+    },
+    {
+      "text": "The large new function was landed with a visible automated diff report rather than only a source diff; the report identifies both progress and regressions.",
+      "evidence_refs": [
+        "text_corpus.jsonl issue_comment decomp-dev[bot]: improvements, broken match, and regressions sections"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "text": "For mncharsel matching, signedness and local width can be more important than nominal storage width: values sourced from u8 fields or cast to u8 were sometimes kept in s32/int locals to match surrounding comparisons and codegen.",
+      "evidence_refs": [
+        "raw_diff: hval variables changed to s32 while assignments retain (u8) casts",
+        "raw_diff: player/grabbed/port locals changed from u8/s8 to int",
+        "raw_diff: val changed from u8 to s32"
+      ],
+      "confidence": 0.79
+    },
+    {
+      "text": "When a global struct field is known and reused, direct field access can be a better decomp form than creating pointer aliases to adjacent u8 fields.",
+      "evidence_refs": [
+        "raw_diff: fn_8025F0E0 removed u8* scroll_flag/page_target/page_current and used mnCharSel_803F0DFC.scroll_flag/xcd/xce directly"
+      ],
+      "confidence": 0.84
+    },
+    {
+      "text": "Local typed aliases can make large menu code more tractable, but the evidence only shows specific uses, not a general rule: examples include CSSData* css and CSSIcon* icons.",
+      "evidence_refs": [
+        "raw_diff: CSSData* css = mnCharSel_804D6CB0 in fn_80262648",
+        "raw_diff: CSSIcon* icons = (CSSIcon*) (&mnCharSel_803F0A48 + 1) in mnCharSel_8025FB50 and mnCharSel_8025FDEC"
+      ],
+      "confidence": 0.67
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "Recovered or introduced locals use short role names already common in decomp work, such as css, icons, text, jobj, gobj, color, num_players, row_a, and row_b.",
+      "evidence_refs": [
+        "raw_diff: mnCharSel_802640A0 local declarations",
+        "raw_diff: CSSData* css in fn_80262648",
+        "raw_diff: CSSIcon* icons in mnCharSel_8025FB50 and mnCharSel_8025FDEC"
+      ],
+      "confidence": 0.72
+    },
+    {
+      "text": "Address-style names remain for not-yet-semantically-named globals and functions, including mnCharSel_804DC580-style color statics and mnCharSel_802640A0.",
+      "evidence_refs": [
+        "raw_diff: static GXColor mnCharSel_804DC580 through mnCharSel_804DC594",
+        "raw_diff: s32 mnCharSel_802640A0(void)"
+      ],
+      "confidence": 0.86
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "text": "Local declaration order was adjusted in mnCharSel_8025D1C4 by moving temp_r30 assignment after temp_r29 and var_f31.",
+      "evidence_refs": [
+        "raw_diff: mnCharSel_8025D1C4 temp_r30 assignment moved"
+      ],
+      "confidence": 0.68
+    },
+    {
+      "text": "A narrow PAD_STACK tactic remains in mnCharSel_8025FB50, reduced from PAD_STACK(16) to PAD_STACK(8), but the slice does not include explicit objdiff rationale for the stack padding itself.",
+      "evidence_refs": [
+        "raw_diff: mnCharSel_8025FB50 PAD_STACK(16) changed to PAD_STACK(8)",
+        "decomp_standards: matching-tactics-need-evidence"
+      ],
+      "confidence": 0.63
+    },
+    {
+      "text": "The PR uses typed casts around helper returns and table bases, such as casting HSD_SisLib_803A6478 to TextKerning* and deriving CSSIcon* from &mnCharSel_803F0A48 + 1.",
+      "evidence_refs": [
+        "raw_diff: TextKerning* tmp = (TextKerning*) HSD_SisLib_803A6478(...)",
+        "raw_diff: CSSIcon* icons = (CSSIcon*) (&mnCharSel_803F0A48 + 1)"
+      ],
+      "confidence": 0.74
+    },
+    {
+      "text": "The bot report gives verification-style evidence of progress but not a clean all-green result: it lists mncharsel improvements, one broken mncharsel match, and two unrelated gr regressions.",
+      "evidence_refs": [
+        "text_corpus.jsonl issue_comment: broken match mnCharSel_8026688C_OnEnter 100.00% to 99.90%",
+        "text_corpus.jsonl issue_comment: regressions grGreens_80215ED8 and fn_80215B84"
+      ],
+      "confidence": 0.9
+    }
+  ],
+  "review_feedback": [
+    {
+      "text": "No human review comments or review records are present in the loaded slice.",
+      "evidence_refs": [
+        "metadata_json: review_comments=0, reviews=0",
+        "text_corpus.jsonl: only pr_body and decomp-dev[bot] issue_comment records"
+      ]
+    },
+    {
+      "text": "Automated report feedback flagged one broken mncharsel match: mnCharSel_8026688C_OnEnter decreased from 100.00% to 99.90%.",
+      "evidence_refs": [
+        "text_corpus.jsonl issue_comment decomp-dev[bot]: broken match table"
+      ]
+    },
+    {
+      "text": "Automated report feedback also flagged two unmatched-item regressions outside the changed mncharsel source paths: grGreens_80215ED8 and fn_80215B84.",
+      "evidence_refs": [
+        "text_corpus.jsonl issue_comment decomp-dev[bot]: regressions table"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2536",
+    "Jj/mncharsel3",
+    "jurrejelle",
+    "mncharsel",
+    "mnCharSel_802640A0",
+    "mnCharSel_8025D1C4",
+    "mnCharSel_8025DB34",
+    "fn_8025F0E0",
+    "mnCharSel_8025FB50",
+    "mnCharSel_8025FDEC",
+    "mnCharSel_CursorThink",
+    "fn_80262648",
+    "fn_802633B0",
+    "mnCharSel_8026688C_OnEnter",
+    "CSSIcon",
+    "CSSData",
+    "CSSDoor",
+    "TextKerning",
+    "PAD_STACK",
+    "HSD_SisLib_803A6478",
+    "HSD_GObjGXLink_803909D8",
+    "HSD_JObjSetFlagsAll",
+    "MenMain_cam",
+    "mnCharSel_804DC580",
+    "target_funcs.txt"
+  ],
+  "follow_up_queries": [
+    "mncharsel PAD_STACK(8) mnCharSel_8025FB50 objdiff rationale",
+    "mnCharSel_802640A0 86.22% follow-up PR",
+    "mnCharSel_8026688C_OnEnter broken match 99.90 PR 2536",
+    "CSSIcon icons = (CSSIcon*) (&mnCharSel_803F0A48 + 1)",
+    "mnCharSel_803F0DFC scroll_flag xcd xce direct field access",
+    "TextKerning HSD_SisLib_803A6478 mnCharSel_8025D1C4"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR identity, state, author, timestamps, changed files",
+      "changed_files.jsonl: exact changed-file list and line counts",
+      "raw_diff: truncated diff excerpt with major hunks",
+      "text_corpus.jsonl: empty PR body and decomp-dev[bot] report"
+    ],
+    "notes": [
+      "PR body is empty, and there are no human review comments in the loaded slice.",
+      "The raw diff is truncated; the large mnCharSel_802640A0 body and header/type/target_funcs details are not fully visible.",
+      "The bot report provides match-progress evidence but includes unrelated gr unit movements despite changed-file metadata listing mncharsel and target_funcs/header files only.",
+      "No explicit author explanation, objdiff command output, or rationale is available for tactics such as PAD_STACK or specific declaration-order changes."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson_candidate",
+        "title": "Use typed field access instead of pointer aliases when recovering mncharsel state",
+        "text": "PR 2536 supports a narrow lesson for mncharsel: when fields in mnCharSel_803F0DFC are known, direct field access can replace local u8* aliases and reinterpret casts, improving typed-source recovery while matching work proceeds.",
+        "scope": [
+          "src/melee/mn/mncharsel.c",
+          "mnCharSel_803F0DFC",
+          "fn_8025F0E0"
+        ],
+        "evidence_refs": [
+          "raw_diff: removed scroll_flag/page_target/page_current pointer aliases",
+          "raw_diff: mnCharSel_803F0DFC.xd3 used directly as HSD_Text* argument"
+        ],
+        "confidence": 0.82
+      },
+      {
+        "record_type": "matching_tactic_candidate",
+        "title": "Local width changes can be matching-sensitive in mncharsel",
+        "text": "PR 2536 repeatedly changes locals from u8/s8 to s32/int while preserving casts at assignment or use sites, suggesting that local width and signedness should be tested deliberately in mncharsel matching rather than inferred only from field storage.",
+        "scope": [
+          "src/melee/mn/mncharsel.c",
+          "mnCharSel_8025DB34",
+          "fn_8025F0E0",
+          "mnCharSel_8025FB50",
+          "mnCharSel_8025FDEC",
+          "mnCharSel_CursorThink",
+          "fn_802633B0"
+        ],
+        "evidence_refs": [
+          "raw_diff: hval variables changed to s32",
+          "raw_diff: player/grabbed/port locals changed to int",
+          "raw_diff: c_kind changed to s8 and icon_idx to int"
+        ],
+        "confidence": 0.78
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Document that small field values may need wider locals for MWCC codegen",
+        "text": "Consider adding a note under matching tactics or authored-source style: for MWCC matching, values loaded from u8/s8 fields may still need s32/int locals with explicit casts at assignment or comparison sites. PR 2536 shows this pattern in mncharsel, but broader acceptance should require more examples.",
+        "source_path": null,
+        "scope": [
+          "matching tactics",
+          "local variable width",
+          "MWCC codegen"
+        ],
+        "evidence_refs": [
+          "raw_diff: hval/hval2/hval3/hval4 u8 to s32",
+          "raw_diff: val u8 to s32",
+          "raw_diff: grabbed and port u8 to int"
+        ],
+        "reason": "The pattern is repeated in the PR and may be reusable, but the slice lacks explicit objdiff rationale and should be curator-reviewed before becoming a global standard."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "mncharsel.c PR 2536 introduced large partial mnCharSel_802640A0 recovery",
+        "text": "Record as a candidate path fact that PR 2536 substantially implemented mnCharSel_802640A0 in src/melee/mn/mncharsel.c and improved its report score from 0.00% to 86.22%.",
+        "source_path": "src/melee/mn/mncharsel.c",
+        "scope": [
+          "main/melee/mn/mncharsel",
+          "mnCharSel_802640A0"
+        ],
+        "evidence_refs": [
+          "raw_diff: added s32 mnCharSel_802640A0(void)",
+          "text_corpus.jsonl issue_comment: mnCharSel_802640A0 +8811 bytes, 0.00% to 86.22%"
+        ],
+        "reason": "Useful historical path fact for future mncharsel work, but should be checked against current source and later PRs before source-corpus promotion."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote PAD_STACK(8) in mnCharSel_8025FB50 as accepted style from this slice alone; the diff shows the tactic but not the required narrow verifier rationale.",
+      "Do not infer human reviewer approval or intent; no human review comments are present.",
+      "Do not claim all touched mncharsel functions matched; the bot report shows improvements plus one broken mncharsel match, not a clean completion.",
+      "Do not treat the unrelated gr unit match movements in the bot report as authored changes in this PR without further evidence; changed-file metadata does not list gr source files."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

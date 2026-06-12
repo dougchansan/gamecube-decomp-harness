@@ -1,0 +1,17 @@
+{
+  "number": 1636,
+  "title": "ftSk_SpecialHi_80113838 nearly completely matched",
+  "state": "MERGED",
+  "createdAt": "2025-06-26T01:58:00Z",
+  "updatedAt": "2025-06-26T07:45:23Z",
+  "mergedAt": "2025-06-26T04:01:48Z",
+  "closedAt": "2025-06-26T04:01:48Z",
+  "author": "Gelatart",
+  "url": "https://github.com/doldecomp/melee/pull/1636",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 2,
+    "reviews": 2,
+    "diff_bytes": 5898
+  }
+}

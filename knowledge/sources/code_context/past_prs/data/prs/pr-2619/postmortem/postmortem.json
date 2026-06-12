@@ -1,0 +1,243 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2619",
+  "pr": {
+    "number": 2619,
+    "title": "Improvements to split up: CM",
+    "url": "https://github.com/doldecomp/melee/pull/2619",
+    "state": "CLOSED",
+    "author": "fjooord",
+    "created_at": "2026-06-08T14:30:25Z",
+    "merged_at": null
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2619 was a closed, unmerged split-out matching-improvement slice scoped to src/melee/cm, with the PR body listing src/melee/cm/camera.c. The loaded raw diff and bot report show no changes for the slice, but a review comment on camera.c flags a proposed replacement of HSD_ASSERTMSG calls with raw __assert calls using cm_803BCBD0/cm_803BCC14/cm_803BCC30 as a data-section-matching regression.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "split-pr",
+      "review-feedback",
+      "data-regression",
+      "assert-cleanup"
+    ],
+    "systems": [
+      "cm",
+      "camera"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/cm/camera.c",
+      "role": "Only file listed in PR scope/files and the file targeted by the review comment; concrete loaded hunk concerns Camera_80029CF8 assert handling.",
+      "evidence_refs": [
+        "human_pr_text.md: Files lists src/melee/cm/camera.c",
+        "review_comments.md: Path src/melee/cm/camera.c, hunk in Camera_80029CF8",
+        "text_corpus.jsonl: review_comment path src/melee/cm/camera.c"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "The PR was presented as a directory/subsystem split from #2617 for src/melee/cm matching improvements.",
+      "evidence_refs": [
+        "human_pr_text.md: Split from #2617 by directory/subsystem",
+        "human_pr_text.md: Scope `src/melee/cm`"
+      ]
+    },
+    {
+      "text": "The PR body reported the full unsplit source branch had matching improvements, but stated per-PR CI/decomp-dev reporting would be authoritative for the slice.",
+      "evidence_refs": [
+        "human_pr_text.md: Preliminary Report",
+        "human_pr_text.md: Per-PR CI/decomp-dev reporting on this draft is the authoritative slice score once it completes"
+      ]
+    },
+    {
+      "text": "Loaded slice evidence contains no raw diff content and the decomp-dev bot reported 'No changes' for GALE01.",
+      "evidence_refs": [
+        "raw_diff: original_chars 0",
+        "text_corpus.jsonl: decomp-dev[bot] issue_comment body 'No changes'"
+      ]
+    },
+    {
+      "text": "The review hunk shows an attempted replacement of two HSD_ASSERTMSG calls for fov_r/fov_l bounds with explicit if blocks calling __assert and address-style cm_* data symbols.",
+      "evidence_refs": [
+        "review_comments.md: hunk replacing HSD_ASSERTMSG at lines 0x508 and 0x509 with __assert(cm_803BCBD0, ..., cm_803BCC14/cm_803BCC30)"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Splitting the broader #2617 work by directory/subsystem was intended to make matching improvements easier to review.",
+      "evidence_refs": [
+        "human_pr_text.md: Split from #2617 by directory/subsystem so the matching improvements are easier to review"
+      ]
+    },
+    {
+      "text": "The PR body explicitly separated preliminary unsplit-branch stats from authoritative per-slice CI/decomp-dev reporting.",
+      "evidence_refs": [
+        "human_pr_text.md: Per-PR CI/decomp-dev reporting on this draft is the authoritative slice score once it completes"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "Do not replace assert/report macros with raw __assert calls and data-symbol operands merely to improve data-section matching; this can be considered a regression even if data percentage improves.",
+      "scope": [
+        "src/melee/cm/camera.c",
+        "assert/report cleanup",
+        "data-section matching"
+      ],
+      "evidence_refs": [
+        "review_comments.md: reviewer says not to make changes with the intention of matching data sections and calls the highlighted change a regression",
+        "review_comments.md: hunk replacing HSD_ASSERTMSG with __assert and cm_* symbols",
+        "decomp_standards: assert-report-macros",
+        "decomp_standards: text-before-data-matching"
+      ]
+    },
+    {
+      "lesson": "For matching PRs, text-section progress should not be mixed with unrelated data-section symbol churn unless the PR evidence explains why the data change is required.",
+      "scope": [
+        "matching PRs",
+        "data-section edits"
+      ],
+      "evidence_refs": [
+        "review_comments.md: change highlighted as made with intention of matching data sections",
+        "decomp_standards: text-before-data-matching",
+        "decomp_standards: literals-and-data-ownership"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Keep readable macro-level assert message strings when represented by HSD_ASSERTMSG; do not convert them to address-style cm_803BCBD0/cm_803BCC14/cm_803BCC30 symbols without data ownership evidence.",
+      "evidence_refs": [
+        "review_comments.md: original HSD_ASSERTMSG strings 'fov_r<MTXDegToRad(90.0F)' and 'fov_l<MTXDegToRad(90.0F)' replaced by cm_* symbols",
+        "decomp_standards: no-string-literal-symbol-regression",
+        "decomp_standards: conservative-naming"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Avoid using expanded raw __assert forms as a data matching tactic when the source-level HSD_ASSERTMSG macro expresses the operation.",
+      "evidence_refs": [
+        "review_comments.md: reviewer calls the __assert replacement a regression even if it improves data %",
+        "decomp_standards: assert-report-macros",
+        "decomp_standards: matching-tactics-need-evidence"
+      ]
+    },
+    {
+      "tactic": "Treat per-slice decomp-dev/checkdiff output as authoritative for split PR scoring; do not rely solely on full unsplit-branch stats.",
+      "evidence_refs": [
+        "human_pr_text.md: Per-PR CI/decomp-dev reporting on this draft is the authoritative slice score once it completes",
+        "text_corpus.jsonl: decomp-dev[bot] reports 'No changes'"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "reviewer": "ribbanya",
+      "state": "CHANGES_REQUESTED",
+      "path": "src/melee/cm/camera.c",
+      "feedback": "Do not make changes with the intention of matching data sections; the highlighted HSD_ASSERTMSG-to-__assert change is a regression even if it improves data percentage.",
+      "evidence_refs": [
+        "review_comments.md: reviewer text",
+        "text_corpus.jsonl: review state CHANGES_REQUESTED"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR 2619",
+    "Improvements to split up: CM",
+    "src/melee/cm",
+    "src/melee/cm/camera.c",
+    "Camera_80029CF8",
+    "HSD_ASSERTMSG",
+    "__assert",
+    "cm_803BCBD0",
+    "cm_803BCC14",
+    "cm_803BCC30",
+    "fov_r<MTXDegToRad(90.0F)",
+    "fov_l<MTXDegToRad(90.0F)",
+    "data section regression",
+    "matching data sections",
+    "CHANGES_REQUESTED",
+    "ribbanya",
+    "fjooord"
+  ],
+  "follow_up_queries": [
+    "Find PRs where HSD_ASSERTMSG or HSD_ASSERTREPORT was replaced by raw __assert for data-section matching.",
+    "Search camera.c history for cm_803BCBD0 cm_803BCC14 cm_803BCC30 and assert message ownership.",
+    "Find review comments mentioning 'matching data sections' and 'regression even if it improves the data %'.",
+    "Search split PRs from #2617 with decomp-dev 'No changes' reports."
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "human_pr_text.md: PR body, scope, preliminary report, local checks, listed file",
+      "review_comments.md: concrete reviewer feedback and diff hunk",
+      "text_corpus.jsonl: decomp-dev bot 'No changes' and review state CHANGES_REQUESTED",
+      "raw_diff: empty"
+    ],
+    "notes": [
+      "Changed-file metadata reports 0 files and raw_diff is empty, so the intake cannot reconstruct a full code diff for the PR.",
+      "The only concrete code hunk is from a review comment, not a complete loaded diff.",
+      "The PR body reports full unsplit-branch improvements, but explicitly says per-PR CI/decomp-dev reporting is authoritative; the loaded bot report says 'No changes'.",
+      "merged_at is null and state is CLOSED, so no merge or accepted-code status is inferred."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "type": "review_lesson",
+        "title": "Raw __assert expansion for data-section matching can be a regression",
+        "text": "In PR #2619, a reviewer rejected replacing HSD_ASSERTMSG calls in src/melee/cm/camera.c with explicit __assert calls and cm_* data symbols, stating that changes intended to match data sections are not acceptable and that the highlighted change was a regression even if it improved data percentage.",
+        "scope": [
+          "src/melee/cm/camera.c",
+          "assert macros",
+          "data-section matching",
+          "matching PR review"
+        ],
+        "evidence_refs": [
+          "review_comments.md: ribbanya review comment",
+          "text_corpus.jsonl: review state CHANGES_REQUESTED"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Cross-reference assert macro cleanup with data-section matching regressions",
+        "text": "Consider adding or cross-linking an example: replacing HSD_ASSERTMSG with raw __assert plus generated/address-style data symbols to chase data-section percentage is a regression unless explicit source/data ownership evidence justifies it.",
+        "source_path": null,
+        "scope": [
+          "assert-report-macros",
+          "text-before-data-matching",
+          "no-string-literal-symbol-regression"
+        ],
+        "evidence_refs": [
+          "review_comments.md: reviewer says the highlighted data-section-matching change is a regression",
+          "review_comments.md: hunk shows HSD_ASSERTMSG replaced by __assert(cm_803BCBD0, ..., cm_803BCC14/cm_803BCC30)"
+        ],
+        "reason": "The loaded standards already cover this in general terms; the PR provides a concrete review example that may be useful as an illustrative source-owned standard note."
+      }
+    ],
+    "rejection_notes": [
+      "Do not record the full unsplit-branch percentage gains as achieved by this PR slice; loaded per-slice bot output says 'No changes' and raw diff is empty.",
+      "Do not infer that camera.c changes were merged or accepted; PR is closed with merged_at null.",
+      "Do not infer reviewer intent beyond the explicit comment against data-section-matching changes and the CHANGES_REQUESTED review state."
+    ]
+  },
+  "confidence": 0.74,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

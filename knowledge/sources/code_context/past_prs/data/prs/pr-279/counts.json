@@ -1,0 +1,17 @@
+{
+  "number": 279,
+  "title": "Align .data sections",
+  "state": "MERGED",
+  "createdAt": "2022-02-18T18:10:23Z",
+  "updatedAt": "2022-02-18T18:10:32Z",
+  "mergedAt": "2022-02-18T18:10:29Z",
+  "closedAt": "2022-02-18T18:10:29Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/279",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 67170
+  }
+}

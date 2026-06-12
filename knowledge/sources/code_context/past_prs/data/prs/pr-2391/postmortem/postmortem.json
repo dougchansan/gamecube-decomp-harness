@@ -1,0 +1,406 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2391",
+  "pr": {
+    "number": 2391,
+    "title": "onett + mute city work",
+    "url": "https://github.com/doldecomp/melee/pull/2391",
+    "state": "MERGED",
+    "author": "lukechampine",
+    "created_at": "2026-04-07T15:55:28Z",
+    "merged_at": "2026-04-07T16:45:08Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Large stage decomp PR for Onett and Mute City. It replaces many placeholder functions with C implementations, expands stage-specific GroundVars and helper structs, updates several prototypes and includes, and changes grLib_801C9808 to return the HSD_Generator produced by hsd_8039EFAC. No PR body or review comments were present in the slice.",
+  "change_classification": {
+    "primary_type": "stage_decomp",
+    "categories": [
+      "headers",
+      "ground_vars",
+      "stage_logic",
+      "prototype_cleanup"
+    ],
+    "systems": [
+      "stage",
+      "ground",
+      "Onett",
+      "Mute City"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gr/grmutecity.c",
+      "role": "Main Mute City implementation; adds includes, local command/track structs, initialization, command dispatch, spline/car track logic, and several previously placeholder grMuteCity functions.",
+      "evidence_refs": [
+        "changed_files.jsonl: grmutecity.c +1122/-75 in 8 hunks",
+        "diff.diff: grMuteCity_801EFDF8, grMuteCity_801F0290, grMuteCity_801F04B8, grMuteCity_801F094C, grMuteCity_801F0D20, grMuteCity_801F0F4C, grMuteCity_801F106C, grMuteCity_801F1328, grMuteCity_801F1A34, grMuteCity_801F290C implemented"
+      ]
+    },
+    {
+      "path": "src/melee/gr/gronett.c",
+      "role": "Main Onett implementation; expands callbacks/stage data, implements awnings, cars, building state logic, item/material interactions, and generator timing.",
+      "evidence_refs": [
+        "changed_files.jsonl: gronett.c +670/-56 in 13 hunks",
+        "diff.diff: grOnett_801E3A34, grOnett_801E3DA0, grOnett_801E41C8, grOnett_801E43E0, grOnett_801E5030, grOnett_801E5194, grOnett_801E5214, grOnett_801E5538 implemented"
+      ]
+    },
+    {
+      "path": "src/melee/gr/types.h",
+      "role": "Ground type recovery for Mute City and Onett; adds typed fields for HSD_GObj, HSD_JObj, HSD_LObj, CmSubject, HSD_Generator, Item_GObj, GXColor, Onett awning/building/car vars, and Mute City camera/blast-zone fields.",
+      "evidence_refs": [
+        "changed_files.jsonl: types.h +79/-31 in 5 hunks",
+        "diff.diff: grMuteCity_GroundVars, grMuteCity_GroundVars2, grOnett_AwningData, grOnett_GroundVars, grOnett_Building_GroundVars, grOnett_Car_GroundVars updated"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grmutecity.static.h",
+      "role": "Replaces a huge monolithic float-field Mute City car-storage struct with a compact typed grMc_CarEntry array of 30 entries.",
+      "evidence_refs": [
+        "changed_files.jsonl: grmutecity.static.h +21/-334 in 1 hunk",
+        "diff.diff: grMc_8049F4B8_t removed; grMc_CarEntry typedef, STATIC_ASSERT(sizeof(grMc_CarEntry) == 0x2C), and grMc_8049F4B8[30] added"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grlib.c",
+      "role": "Updates grLib_801C9808 body to return the HSD_Generator from hsd_8039EFAC.",
+      "evidence_refs": [
+        "diff.diff: grLib_801C9808 changed from void to HSD_Generator* and returns hsd_8039EFAC"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grlib.h",
+      "role": "Header prototype synchronized with grLib_801C9808 return type.",
+      "evidence_refs": [
+        "diff.diff: grLib_801C9808 prototype changed from void to HSD_Generator*"
+      ]
+    },
+    {
+      "path": "src/melee/gr/gronett.h",
+      "role": "Header prototypes updated for recovered Onett function signatures and item forward declaration.",
+      "evidence_refs": [
+        "diff.diff: adds it/forward.h; replaces UNK_RET/UNK_PARAMS for grOnett_801E5030, grOnett_801E5194, grOnett_801E5214"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grmutecity.h",
+      "role": "Header touched for Mute City signature/prototype surface.",
+      "evidence_refs": [
+        "changed_files.jsonl: grmutecity.h +6/-6 in 2 hunks"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Mute City placeholders were replaced with implementations covering stage init, animation/command dispatch, spline wrapping, track collision line updates, car entry initialization and update helpers, and material/light interactions.",
+      "evidence_refs": [
+        "diff.diff: grmutecity.c placeholder markers removed for multiple grMuteCity functions",
+        "diff.diff: grMc_CmdEntry, grMc_TrackInitData, grMc_SplineEvalWrapped, grMc_CarEntry introduced"
+      ]
+    },
+    {
+      "text": "Onett placeholders were replaced with implementations for stage callbacks, awning physics, building damage/state transitions, traffic car state machines, car/item callbacks, SFX lookup, and generator spawning.",
+      "evidence_refs": [
+        "diff.diff: gronett.c placeholder markers removed for multiple grOnett functions",
+        "diff.diff: StageCallbacks expanded from 2 to 6 entries and StageData grOt_803E2858 added"
+      ]
+    },
+    {
+      "text": "GroundVars were made more specific for these stages: Onett gained separate awning, building, and car var structs; Mute City fields were typed as HSD_GObj/HSD_JObj/HSD_LObj/Vec3/f32 instead of broad padding or u32 placeholders.",
+      "evidence_refs": [
+        "diff.diff: types.h updates around grMuteCity_GroundVars and Onett structs"
+      ]
+    },
+    {
+      "text": "Prototype surfaces were updated where implementation evidence recovered signatures, including grLib_801C9808 returning HSD_Generator* and Onett functions replacing UNK_RET/UNK_PARAMS.",
+      "evidence_refs": [
+        "diff.diff: grlib.c/grlib.h grLib_801C9808 return type",
+        "diff.diff: gronett.h grOnett_801E5030, grOnett_801E5194, grOnett_801E5214 signatures"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Converted a single massive generated-looking Mute City car data block into a small typed car-entry struct plus a 30-element array, matching the looped initialization pattern in grMuteCity_801F0F4C.",
+      "evidence_refs": [
+        "diff.diff: grmutecity.static.h grMc_CarEntry[30]",
+        "diff.diff: grMuteCity_801F0F4C loops i < 30 over grMc_803E3B7C and grMc_8049F4B8"
+      ]
+    },
+    {
+      "text": "Recovered Onett stage-specific union arms instead of reusing unrelated GroundVars: building code moved from kongo3/unk fields to onett_building, and car code uses onettcar fields.",
+      "evidence_refs": [
+        "diff.diff: grOnett_801E3CE4 changes gp->gv.kongo3/gp->gv.unk to gp->gv.onett_building",
+        "diff.diff: types.h adds grOnett_Building_GroundVars and grOnett_Car_GroundVars"
+      ]
+    },
+    {
+      "text": "Introduced small local helper inlines for repeated logic: Mute City spline wrap evaluation and Onett SFX table lookup.",
+      "evidence_refs": [
+        "diff.diff: static inline grMc_SplineEvalWrapped",
+        "diff.diff: static inline grOnett_SfxLookup"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When repeated stage state is clearly indexed, recover the array shape instead of preserving a long flat generated struct.",
+      "scope": [
+        "stage ground vars",
+        "Mute City car data"
+      ],
+      "evidence_refs": [
+        "diff.diff: grMc_8049F4B8 changed from one 0x528 struct to grMc_CarEntry[30]",
+        "diff.diff: grMuteCity_801F0F4C loops over 30 entries"
+      ],
+      "related_standard_ids": [
+        "natural-loops",
+        "typed-fields-over-pointer-math"
+      ]
+    },
+    {
+      "lesson": "Stage-specific GroundVars can be split by gobj role when callbacks and code paths show distinct state ownership.",
+      "scope": [
+        "Onett GroundVars",
+        "stage gobj roles"
+      ],
+      "evidence_refs": [
+        "diff.diff: grOnett_GroundVars labeled Traffic/awning gobj ID 5",
+        "diff.diff: grOnett_Building_GroundVars labeled gobj ID 4",
+        "diff.diff: grOnett_Car_GroundVars labeled gobj ID 3"
+      ],
+      "related_standard_ids": [
+        "typed-fields-over-pointer-math"
+      ]
+    },
+    {
+      "lesson": "Recovered function bodies should drive header signature cleanup rather than leaving UNK_RET/UNK_PARAMS.",
+      "scope": [
+        "headers",
+        "prototypes"
+      ],
+      "evidence_refs": [
+        "diff.diff: gronett.h replaces UNK_RET/UNK_PARAMS signatures",
+        "diff.diff: grlib.h synchronized with grlib.c return type"
+      ],
+      "related_standard_ids": [
+        "truthful-headers-and-includes"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "Address-style function names were preserved for unrecovered semantic names, while local variables used short role names such as gp, jobj, lobj, entry, src, dst, idx, car, and awn.",
+      "evidence_refs": [
+        "diff.diff: grMuteCity_801EFDF8 uses gp/lobj",
+        "diff.diff: grMuteCity_801F04B8 uses entry/cmd/param/fval",
+        "diff.diff: grOnett_801E5214 uses awn"
+      ]
+    },
+    {
+      "text": "Semantic struct names were introduced when usage made the role clearer: grMc_CmdEntry, grMc_TrackInitData, grMc_CarEntry, grOnett_AwningData, grOnett_Building_GroundVars, and grOnett_Car_GroundVars.",
+      "evidence_refs": [
+        "diff.diff: typedef struct grMc_CmdEntry",
+        "diff.diff: typedef struct grMc_TrackInitData",
+        "diff.diff: typedef struct grMc_CarEntry",
+        "diff.diff: types.h Onett struct additions"
+      ]
+    },
+    {
+      "text": "Partially understood fields kept x-offset-style names such as x24, x28, xD0_flags, x108, and x110 instead of inventing unsupported semantics.",
+      "evidence_refs": [
+        "diff.diff: grOnett_StageParam keeps several xNN fields",
+        "diff.diff: grMuteCity_GroundVars keeps xNN field names"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "text": "PAD_STACK appears in several recovered functions, suggesting narrow stack-shape steering was used in this PR slice.",
+      "evidence_refs": [
+        "diff.diff: PAD_STACK(12) in grMuteCity_801EFDF8",
+        "diff.diff: PAD_STACK(24) in grMuteCity_801F04B8",
+        "diff.diff: PAD_STACK(24) in grOnett_801E3A34",
+        "diff.diff: PAD_STACK(32) in grOnett_801E43E0"
+      ],
+      "caveat": "No build, objdiff, or regression ledger was included in the PR slice, so this is observed tactic use only, not validated justification."
+    },
+    {
+      "text": "Switch-based command and state machines were used for stage script commands and object behavior rather than preserving branch ladders.",
+      "evidence_refs": [
+        "diff.diff: grMuteCity_801F04B8 switch(cmd)",
+        "diff.diff: grOnett_801E3DA0 switch(onett_building.state)",
+        "diff.diff: grOnett_801E43E0 switch(state_a) and switch(state_b)"
+      ]
+    },
+    {
+      "text": "Natural loops were used for repeated state initialization/update: Onett awnings loop over two entries, Mute City cars loop over thirty entries, and entity iteration walks fighter lists.",
+      "evidence_refs": [
+        "diff.diff: grOnett_801E5214 for (i = 0; i < 2; i++)",
+        "diff.diff: grMuteCity_801F0F4C for (i = 0; i < 30; i++)",
+        "diff.diff: grOnett_801E43E0 while iterating HSD_GObj_Entities->fighters"
+      ]
+    },
+    {
+      "text": "Header helper/accessor use appears in recovered source, including GET_GROUND, GET_JOBJ, HSD_JObjSet*/Get*, HSD_ASSERT, OSReport, ABS, and M_PI.",
+      "evidence_refs": [
+        "diff.diff: grOnett_801E37F4 changes user_data access to GET_GROUND",
+        "diff.diff: grMuteCity_801EFDF8 uses OSReport and HSD_ASSERT",
+        "diff.diff: grOnett_801E5030 uses ABS",
+        "diff.diff: grOnett_801E43E0 uses M_PI"
+      ]
+    }
+  ],
+  "review_feedback": [],
+  "searchable_terms": [
+    "PR2391",
+    "onett + mute city work",
+    "lukechampine",
+    "src/melee/gr/grmutecity.c",
+    "src/melee/gr/gronett.c",
+    "src/melee/gr/types.h",
+    "src/melee/gr/grmutecity.static.h",
+    "grMuteCity_801EFDF8",
+    "grMuteCity_801F04B8",
+    "grMuteCity_801F0F4C",
+    "grMuteCity_801F106C",
+    "grMuteCity_801F290C",
+    "grOnett_801E3A34",
+    "grOnett_801E3DA0",
+    "grOnett_801E41C8",
+    "grOnett_801E43E0",
+    "grOnett_801E5214",
+    "grOnett_801E5538",
+    "grMc_CarEntry",
+    "grMc_CmdEntry",
+    "grMc_TrackInitData",
+    "grOnett_AwningData",
+    "grOnett_Building_GroundVars",
+    "grOnett_Car_GroundVars",
+    "grLib_801C9808",
+    "HSD_Generator",
+    "PAD_STACK",
+    "GroundVars",
+    "StageCallbacks"
+  ],
+  "follow_up_queries": [
+    "grMc_CarEntry grMc_8049F4B8 array 30",
+    "grOnett_AwningData awnings counter cooldown",
+    "grOnett_Car_GroundVars state_a state_b traffic",
+    "grMuteCity_801F04B8 command table grMc_803E34E0",
+    "grLib_801C9808 HSD_Generator return hsd_8039EFAC",
+    "Onett building state onett_building kongo3 unk migration",
+    "PAD_STACK grmutecity gronett objdiff evidence"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR 2391 merged, no issue comments, no review comments, no reviews",
+      "changed_files.jsonl: 8 changed files",
+      "raw/diff.diff: 88786-byte diff; loaded excerpt truncated but targeted local reads covered key Onett, Mute City, and types.h regions",
+      "text_corpus.jsonl: empty PR body"
+    ],
+    "notes": [
+      "The diff strongly supports changed files, recovered functions, type/header edits, and observed tactics.",
+      "There is no PR body, review discussion, or validation output in the slice; do not infer reviewer intent, match status, or objdiff/build results.",
+      "Some large grmutecity.c regions remain summarized from function names and visible snippets rather than exhaustively inspected line-by-line."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "type": "decomp_lesson_candidate",
+        "title": "Recover indexed stage state as arrays when loop shape is evident",
+        "text": "PR 2391 supports a reusable lesson: a large flat generated-looking stage data struct can often be replaced by a small typed entry plus an array when initialization/update code naturally iterates a fixed count, as with grMc_CarEntry[30] and grMuteCity_801F0F4C.",
+        "scope": [
+          "stage",
+          "GroundVars",
+          "arrays"
+        ],
+        "evidence_refs": [
+          "diff.diff: grmutecity.static.h grMc_CarEntry[30]",
+          "diff.diff: grMuteCity_801F0F4C for loop over 30 entries"
+        ]
+      },
+      {
+        "type": "decomp_lesson_candidate",
+        "title": "Split stage GroundVars by gobj role when code paths prove ownership",
+        "text": "PR 2391 supports a reusable lesson: for multi-object stages, separate union arms can improve accuracy when callbacks and state machines show distinct ownership, as Onett split awning, building, and car GroundVars.",
+        "scope": [
+          "stage",
+          "GroundVars",
+          "Onett"
+        ],
+        "evidence_refs": [
+          "diff.diff: grOnett_GroundVars, grOnett_Building_GroundVars, grOnett_Car_GroundVars",
+          "diff.diff: grOnett building code moved from kongo3/unk to onett_building"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "Onett stage state is split into traffic/awning, building, and car GroundVars",
+        "text": "PR 2391 adds separate Onett GroundVars structs in src/melee/gr/types.h: grOnett_GroundVars for traffic/awning gobj ID 5, grOnett_Building_GroundVars for building gobj ID 4, and grOnett_Car_GroundVars for car gobj ID 3.",
+        "source_path": "src/melee/gr/types.h",
+        "scope": [
+          "src/melee/gr/gronett.c",
+          "src/melee/gr/types.h"
+        ],
+        "evidence_refs": [
+          "diff.diff: types.h comments and struct additions for Onett",
+          "diff.diff: gronett.c uses gp->gv.onett, gp->gv.onett_building, gp->gv.onettcar"
+        ],
+        "reason": "Useful path-specific type ownership fact for future Onett decomp work; should be curated as a source/path fact, not a global standard."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "grLib_801C9808 returns HSD_Generator*",
+        "text": "PR 2391 changes grLib_801C9808 from void to HSD_Generator* in both grlib.c and grlib.h and returns hsd_8039EFAC(0, arg1, arg0, arg2).",
+        "source_path": "src/melee/gr/grlib.h",
+        "scope": [
+          "src/melee/gr/grlib.c",
+          "src/melee/gr/grlib.h",
+          "stage generator callers"
+        ],
+        "evidence_refs": [
+          "diff.diff: grlib.c return type/body change",
+          "diff.diff: grlib.h prototype change"
+        ],
+        "reason": "Concrete recovered prototype fact that affects stage generator callers such as Onett."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "Mute City car storage uses grMc_CarEntry[30]",
+        "text": "PR 2391 replaces the previous large grMc_8049F4B8_t static object with grMc_CarEntry, STATIC_ASSERT(sizeof(grMc_CarEntry) == 0x2C), and static grMc_CarEntry grMc_8049F4B8[30].",
+        "source_path": "src/melee/gr/grmutecity.static.h",
+        "scope": [
+          "src/melee/gr/grmutecity.c",
+          "src/melee/gr/grmutecity.static.h"
+        ],
+        "evidence_refs": [
+          "diff.diff: grmutecity.static.h car entry typedef and array",
+          "diff.diff: grMuteCity_801F0F4C initializes 30 entries"
+        ],
+        "reason": "Path-specific data layout fact for future Mute City car logic work."
+      }
+    ],
+    "rejection_notes": [
+      "Do not record any claimed match percentage or successful objdiff/build validation; none appears in the PR slice.",
+      "Do not infer that PAD_STACK uses are generally approved style from this PR alone; the slice shows use but no verifier evidence.",
+      "Do not infer reviewer intent or review acceptance reasons; there were no reviews or comments in the loaded evidence."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

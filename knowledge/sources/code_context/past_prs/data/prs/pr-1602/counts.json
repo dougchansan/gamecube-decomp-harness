@@ -1,0 +1,17 @@
+{
+  "number": 1602,
+  "title": "Mass rename scene callback functions from scene tables",
+  "state": "MERGED",
+  "createdAt": "2025-06-17T01:12:41Z",
+  "updatedAt": "2025-06-17T02:31:27Z",
+  "mergedAt": "2025-06-17T02:31:24Z",
+  "closedAt": "2025-06-17T02:31:24Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1602",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 102063
+  }
+}

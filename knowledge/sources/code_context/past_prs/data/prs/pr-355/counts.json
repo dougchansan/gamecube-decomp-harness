@@ -1,0 +1,17 @@
+{
+  "number": 355,
+  "title": "ci: Also build non-matching dol",
+  "state": "MERGED",
+  "createdAt": "2022-04-11T02:45:53Z",
+  "updatedAt": "2022-04-11T02:56:37Z",
+  "mergedAt": "2022-04-11T02:55:28Z",
+  "closedAt": "2022-04-11T02:55:28Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/355",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 1546
+  }
+}

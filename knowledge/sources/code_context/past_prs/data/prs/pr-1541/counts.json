@@ -1,0 +1,17 @@
+{
+  "number": 1541,
+  "title": "Partially match `gm_801B0FF8`",
+  "state": "MERGED",
+  "createdAt": "2025-05-29T03:46:30Z",
+  "updatedAt": "2025-05-29T03:49:35Z",
+  "mergedAt": "2025-05-29T03:49:34Z",
+  "closedAt": "2025-05-29T03:49:34Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1541",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 11783
+  }
+}

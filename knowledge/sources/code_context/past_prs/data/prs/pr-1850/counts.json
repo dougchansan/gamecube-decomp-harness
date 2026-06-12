@@ -1,0 +1,17 @@
+{
+  "number": 1850,
+  "title": "Partially match `gm_1601`",
+  "state": "MERGED",
+  "createdAt": "2025-08-18T00:17:55Z",
+  "updatedAt": "2025-08-18T00:21:49Z",
+  "mergedAt": "2025-08-18T00:21:47Z",
+  "closedAt": "2025-08-18T00:21:47Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1850",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 9587
+  }
+}

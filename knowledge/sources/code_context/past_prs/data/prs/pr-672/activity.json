@@ -1,0 +1,10 @@
+{
+  "pr": 672,
+  "title": "Fix context syntax",
+  "url": "https://github.com/doldecomp/melee/pull/672",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 29,
+  "added_lines": 167,
+  "deleted_lines": 245
+}

@@ -1,0 +1,17 @@
+{
+  "number": 1063,
+  "title": "Clean up `debug.c` nonsense",
+  "state": "MERGED",
+  "createdAt": "2024-01-15T16:50:21Z",
+  "updatedAt": "2024-01-15T17:00:42Z",
+  "mergedAt": "2024-01-15T17:00:42Z",
+  "closedAt": "2024-01-15T17:00:42Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1063",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 3651
+  }
+}

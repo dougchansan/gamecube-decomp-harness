@@ -1,0 +1,17 @@
+{
+  "number": 2064,
+  "title": "Ft crazy hand clean",
+  "state": "CLOSED",
+  "createdAt": "2026-01-05T22:26:09Z",
+  "updatedAt": "2026-01-05T22:26:32Z",
+  "mergedAt": null,
+  "closedAt": "2026-01-05T22:26:15Z",
+  "author": "itsgrimetime",
+  "url": "https://github.com/doldecomp/melee/pull/2064",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 321337
+  }
+}

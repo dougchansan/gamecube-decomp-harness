@@ -1,0 +1,324 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2416",
+  "pr": {
+    "number": 2416,
+    "title": "decomp: fn_801D8134 (grkongo), fn_802159B4 (grgreens)",
+    "url": "https://github.com/doldecomp/melee/pull/2416",
+    "state": "MERGED",
+    "author": "ik3rurru",
+    "created_at": "2026-04-14T20:28:42Z",
+    "merged_at": "2026-04-14T21:50:38Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2416 decompiled grkongo fn_801D8134 as a Kongo Jungle gorilla activation callback and moved the grgreens fn_802159B4 empty stub to the correct source position. The PR body claims fn_801D8134 is a 79-instruction 100% match; no review comments or independent verifier logs are present in the slice.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "stub-reposition",
+      "types-structs"
+    ],
+    "systems": [
+      "stage",
+      "grkongo",
+      "grgreens"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gr/grkongo.c",
+      "role": "Replaced the fn_801D8134 decomp placeholder with C source for the Kongo Jungle gorilla activation callback and added needed efSync/ftLib includes.",
+      "evidence_refs": [
+        "changed_files: src/melee/gr/grkongo.c added 41 deleted 1",
+        "raw_diff: grkongo.c include additions for ef/efsync.h and ft/ftlib.h",
+        "raw_diff: /// #fn_801D8134 replaced by static int fn_801D8134(HSD_GObj* arg0, HSD_GObj* arg1)",
+        "human_pr_text: fn_801D8134 described as Kongo Jungle gorilla activation callback, 79 instructions, 100% match"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grgreens.c",
+      "role": "Moved the empty fn_802159B4(Item_GObj*, Ground*) stub from an earlier location to the address-aligned placeholder location before grGreens_802159B8.",
+      "evidence_refs": [
+        "changed_files: src/melee/gr/grgreens.c added 4 deleted 6",
+        "raw_diff: earlier fn_802159B4 empty stub removed near grGreens_80213C10",
+        "raw_diff: /// #fn_802159B4 replaced with empty return stub near grGreens_80215358/grGreens_802159B8",
+        "human_pr_text: fn_802159B4 reposition stub to correct address offset in grgreens.c"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "fn_801D8134 in grkongo.c was implemented as a static int callback that returns 0 when the gorilla activation flag is already set or when the fighter is outside a squared-distance range check, and returns 1 after setting activation state and triggering related material/effect/fighter calls.",
+      "evidence_refs": [
+        "raw_diff: fn_801D8134 body checks gp->gv.kongo3.xC6, calls Ground_801C4DA0 and ftLib_80086644, performs squared distance comparison against grKg_804D6980->unk28",
+        "raw_diff: fn_801D8134 sets gp->gv.kongo3.xCA, xD0, xC6 and calls Ground_801C5440, grMaterial_801C9604, efSync_Spawn, ftLib_80086C18",
+        "human_pr_text: checks if a fighter is within range of the gorilla spawn point, then activates the gorilla with a randomized delay"
+      ]
+    },
+    {
+      "text": "grkongo.c gained includes for ef/efsync.h and ft/ftlib.h to support efSync_Spawn and ftLib calls used by the new function body.",
+      "evidence_refs": [
+        "raw_diff: +#include \"ef/efsync.h\"",
+        "raw_diff: +#include \"ft/ftlib.h\""
+      ]
+    },
+    {
+      "text": "fn_802159B4 in grgreens.c remained an empty return stub but was moved from an earlier source location to replace its decomp placeholder at the correct address offset.",
+      "evidence_refs": [
+        "raw_diff: removal of void fn_802159B4(Item_GObj* item_gobj, Ground* gp) { return; } near line 381",
+        "raw_diff: replacement of /// #fn_802159B4 with the same empty stub near line 580",
+        "human_pr_text: reposition stub to correct address offset in grgreens.c"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "The implementation used existing typed stage/fighter helpers and structs rather than raw pointer arithmetic for the recovered behavior.",
+      "evidence_refs": [
+        "raw_diff: gp = GET_GROUND(arg0)",
+        "raw_diff: Ground_801C4DA0(&pos_gnd, &unk)",
+        "raw_diff: ftLib_80086644(arg1, &pos_ft)",
+        "raw_diff: gp->gv.kongo3.xCA/xD0/xC6 field accesses"
+      ]
+    },
+    {
+      "text": "The range check was expressed as a squared-distance comparison, avoiding an unnecessary square-root style operation in source.",
+      "evidence_refs": [
+        "raw_diff: (pos_gnd.x - pos_ft.x)^2 + y^2 + z^2 < grKg_804D6980->unk28 * grKg_804D6980->unk28"
+      ]
+    },
+    {
+      "text": "The grgreens stub fix was minimal and address-position focused, moving the stub without adding unrelated behavior.",
+      "evidence_refs": [
+        "raw_diff: fn_802159B4 body remains only return;",
+        "human_pr_text: reposition stub to correct address offset in grgreens.c"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For stage callbacks that depend on proximity, a matchable source shape may use typed position helpers plus an explicit squared-distance expression against a squared radius field.",
+      "scope": [
+        "stage callbacks",
+        "ground proximity checks",
+        "grkongo"
+      ],
+      "evidence_refs": [
+        "raw_diff: Ground_801C4DA0(&pos_gnd, &unk)",
+        "raw_diff: ftLib_80086644(arg1, &pos_ft)",
+        "raw_diff: squared distance comparison against grKg_804D6980->unk28 * grKg_804D6980->unk28",
+        "human_pr_text: fn_801D8134 checks if a fighter is within range of the gorilla spawn point"
+      ]
+    },
+    {
+      "lesson": "A decomp PR can include a no-op stub relocation when the function body is already trivial but the source placement must match the correct address order.",
+      "scope": [
+        "function ordering",
+        "stub positioning",
+        "grgreens"
+      ],
+      "evidence_refs": [
+        "raw_diff: fn_802159B4 empty stub removed from earlier location and inserted at placeholder",
+        "human_pr_text: reposition stub to correct address offset in grgreens.c"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "pos_gnd",
+      "kind": "local variable",
+      "convention": "Ground position Vec3 local uses a short role suffix identifying the source of the position.",
+      "evidence_refs": [
+        "raw_diff: Vec3 pos_gnd;",
+        "raw_diff: Ground_801C4DA0(&pos_gnd, &unk)"
+      ]
+    },
+    {
+      "name": "pos_ft",
+      "kind": "local variable",
+      "convention": "Fighter position Vec3 local uses a short role suffix identifying the source of the position.",
+      "evidence_refs": [
+        "raw_diff: Vec3 pos_ft;",
+        "raw_diff: ftLib_80086644(arg1, &pos_ft)"
+      ]
+    },
+    {
+      "name": "rand_val",
+      "kind": "local variable",
+      "convention": "Random float result was named by its local role rather than kept as a temp_rXX-style name.",
+      "evidence_refs": [
+        "raw_diff: f32 rand_val;",
+        "raw_diff: rand_val = HSD_Randf()"
+      ]
+    },
+    {
+      "name": "diff",
+      "kind": "local variable",
+      "convention": "Difference between two config fields was named generically as diff; the slice does not prove a more semantic name for the grKg_804D6980 unk20/unk24 range.",
+      "evidence_refs": [
+        "raw_diff: f32 diff;",
+        "raw_diff: diff = grKg_804D6980->unk24 - grKg_804D6980->unk20"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Used early exits via a shared done label for failure cases before the success path.",
+      "evidence_refs": [
+        "raw_diff: if (gp->gv.kongo3.xC6 != 0) { goto done; }",
+        "raw_diff: failed range check goes to done",
+        "raw_diff: done: return 0"
+      ]
+    },
+    {
+      "tactic": "Computed the randomized delay as a float range interpolation followed by an s16 cast into gp->gv.kongo3.xCA.",
+      "evidence_refs": [
+        "raw_diff: rand_val = HSD_Randf()",
+        "raw_diff: diff = grKg_804D6980->unk24 - grKg_804D6980->unk20",
+        "raw_diff: gp->gv.kongo3.xCA = (s16)(diff * rand_val + grKg_804D6980->unk20)"
+      ]
+    },
+    {
+      "tactic": "Added only the headers needed for newly referenced helpers instead of local declarations.",
+      "evidence_refs": [
+        "raw_diff: +#include \"ef/efsync.h\"",
+        "raw_diff: +#include \"ft/ftlib.h\"",
+        "raw_diff: calls to efSync_Spawn, ftLib_80086644, and ftLib_80086C18"
+      ]
+    }
+  ],
+  "review_feedback": [],
+  "searchable_terms": [
+    "pr-2416",
+    "fn_801D8134",
+    "fn_802159B4",
+    "grkongo",
+    "grgreens",
+    "Kongo Jungle",
+    "gorilla activation callback",
+    "Ground_801C4DA0",
+    "ftLib_80086644",
+    "ftLib_80086C18",
+    "efSync_Spawn",
+    "grMaterial_801C9604",
+    "Ground_801C5440",
+    "grKg_804D6980",
+    "GET_GROUND",
+    "gp->gv.kongo3.xC6",
+    "gp->gv.kongo3.xCA",
+    "gp->gv.kongo3.xD0",
+    "squared distance",
+    "randomized delay",
+    "stub reposition",
+    "address offset"
+  ],
+  "follow_up_queries": [
+    "fn_801D8134 grkongo gorilla activation callback",
+    "grKg_804D6980 unk20 unk24 unk28 unk84 kongo",
+    "gp->gv.kongo3 xC6 xCA xD0",
+    "Ground_801C4DA0 ftLib_80086644 squared distance stage callback",
+    "fn_802159B4 grgreens stub correct address offset",
+    "efSync_Spawn 0x405 grkongo"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR state MERGED, author ik3rurru, created_at 2026-04-14T20:28:42Z, merged_at 2026-04-14T21:50:38Z",
+      "changed_files.jsonl: two changed files with additions/deletions",
+      "human_pr_text: PR body claims fn_801D8134 79 instructions, 100% match and describes behavior",
+      "raw_diff: complete 2238-byte diff excerpt loaded",
+      "metadata_json: review_comments 0, issue_comments 0, reviews 0"
+    ],
+    "notes": [
+      "Changed files and source edits are directly evidenced by the loaded diff and changed-files metadata.",
+      "The 100% match and 79-instruction statement comes from the PR body; no objdiff/checkdiff/build log is included in the slice.",
+      "There are no review comments, issue comments, or reviews in the provided evidence, so reviewer feedback and reviewer intent cannot be inferred.",
+      "The grgreens change is evidenced as a stub relocation, but the slice does not include map/assembly output proving the address offset."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson_candidate",
+        "title": "Stage proximity callbacks can match with typed helpers and squared-distance checks",
+        "text": "In PR 2416, grkongo fn_801D8134 used GET_GROUND, Ground_801C4DA0, ftLib_80086644, and a direct squared-distance expression against a squared config radius to implement a Kongo Jungle gorilla activation callback. Consider this as a searchable example for stage callback proximity checks, not as proof that all similar callbacks should use the same exact shape.",
+        "scope": [
+          "src/melee/gr/grkongo.c",
+          "stage callbacks",
+          "proximity checks"
+        ],
+        "evidence_refs": [
+          "raw_diff: fn_801D8134 implementation",
+          "human_pr_text: Kongo Jungle gorilla activation callback, 100% match claim"
+        ]
+      },
+      {
+        "record_type": "matching_tactic_candidate",
+        "title": "No-op stub relocation for correct function address order",
+        "text": "PR 2416 moved grgreens fn_802159B4, an empty return stub, from an earlier source location to replace the matching placeholder near grGreens_802159B8. This is a small example of function-order/source-position cleanup without behavior changes.",
+        "scope": [
+          "src/melee/gr/grgreens.c",
+          "function ordering",
+          "stub positioning"
+        ],
+        "evidence_refs": [
+          "raw_diff: fn_802159B4 removed near grGreens_80213C10 and inserted at /// #fn_802159B4",
+          "human_pr_text: reposition stub to correct address offset in grgreens.c"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "grkongo.c contains Kongo Jungle gorilla activation callback fn_801D8134",
+        "text": "PR 2416 identifies fn_801D8134 in src/melee/gr/grkongo.c as a Kongo Jungle gorilla activation callback that checks fighter proximity to the gorilla spawn point and activates the gorilla with a randomized delay.",
+        "source_path": "src/melee/gr/grkongo.c",
+        "scope": [
+          "grkongo",
+          "fn_801D8134",
+          "Kongo Jungle",
+          "stage"
+        ],
+        "evidence_refs": [
+          "human_pr_text: fn_801D8134 description",
+          "raw_diff: fn_801D8134 implemented in src/melee/gr/grkongo.c"
+        ],
+        "reason": "Useful path-level fact for future searches, but should be curated before promotion because the behavioral description comes from PR body and diff inspection."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "grgreens.c fn_802159B4 is an empty stub positioned before grGreens_802159B8",
+        "text": "PR 2416 moved fn_802159B4(Item_GObj*, Ground*) in src/melee/gr/grgreens.c to the placeholder location immediately before grGreens_802159B8 while keeping the body as a no-op return.",
+        "source_path": "src/melee/gr/grgreens.c",
+        "scope": [
+          "grgreens",
+          "fn_802159B4",
+          "function ordering"
+        ],
+        "evidence_refs": [
+          "raw_diff: fn_802159B4 stub relocation",
+          "human_pr_text: reposition stub to correct address offset in grgreens.c"
+        ],
+        "reason": "Potential source/path fact about function placement; address correctness is asserted by PR body but not independently verified in the loaded slice."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote the PR body's 100% match claim as independently verified tooling evidence; no objdiff/checkdiff output is loaded.",
+      "Do not infer semantic names for grKg_804D6980 fields unk20, unk24, unk28, or unk84 from this slice alone.",
+      "Do not infer reviewer approval rationale or requested changes; the slice has zero review comments and reviews."
+    ]
+  },
+  "confidence": 0.86,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

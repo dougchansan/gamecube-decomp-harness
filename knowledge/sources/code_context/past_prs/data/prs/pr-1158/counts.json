@@ -1,0 +1,17 @@
+{
+  "number": 1158,
+  "title": "Re-link `sysdolphin`",
+  "state": "MERGED",
+  "createdAt": "2024-01-31T18:12:45Z",
+  "updatedAt": "2024-01-31T18:44:47Z",
+  "mergedAt": "2024-01-31T18:44:46Z",
+  "closedAt": "2024-01-31T18:44:46Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1158",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 0
+  }
+}

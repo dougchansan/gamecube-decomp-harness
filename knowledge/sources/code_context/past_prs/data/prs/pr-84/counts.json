@@ -1,0 +1,17 @@
+{
+  "number": 84,
+  "title": "Incbin and Pointers",
+  "state": "MERGED",
+  "createdAt": "2021-09-28T03:40:50Z",
+  "updatedAt": "2021-09-28T03:41:00Z",
+  "mergedAt": "2021-09-28T03:40:57Z",
+  "closedAt": "2021-09-28T03:40:57Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/84",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 93512
+  }
+}

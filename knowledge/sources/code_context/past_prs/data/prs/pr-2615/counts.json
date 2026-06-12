@@ -1,0 +1,17 @@
+{
+  "number": 2615,
+  "title": "Attempt to link `gmopening`",
+  "state": "MERGED",
+  "createdAt": "2026-06-08T11:39:31Z",
+  "updatedAt": "2026-06-08T11:51:51Z",
+  "mergedAt": "2026-06-08T11:51:49Z",
+  "closedAt": "2026-06-08T11:51:49Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/2615",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 5129
+  }
+}

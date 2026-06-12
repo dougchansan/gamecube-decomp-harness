@@ -1,0 +1,17 @@
+{
+  "number": 606,
+  "title": "Misc MetroTRK labeling",
+  "state": "MERGED",
+  "createdAt": "2022-12-10T09:55:21Z",
+  "updatedAt": "2022-12-10T10:15:47Z",
+  "mergedAt": "2022-12-10T10:15:42Z",
+  "closedAt": "2022-12-10T10:15:42Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/606",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 2,
+    "diff_bytes": 68088
+  }
+}

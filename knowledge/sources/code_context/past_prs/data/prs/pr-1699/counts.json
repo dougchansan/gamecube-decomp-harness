@@ -1,0 +1,17 @@
+{
+  "number": 1699,
+  "title": "Matched the rest of ftSk_SpecialLw",
+  "state": "MERGED",
+  "createdAt": "2025-07-17T14:06:10Z",
+  "updatedAt": "2025-07-19T13:25:30Z",
+  "mergedAt": "2025-07-18T01:47:00Z",
+  "closedAt": "2025-07-18T01:47:00Z",
+  "author": "Gelatart",
+  "url": "https://github.com/doldecomp/melee/pull/1699",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 2768
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 834,
+  "title": "Match more of `ftPe_SpecialLw`",
+  "state": "MERGED",
+  "createdAt": "2023-05-06T19:03:30Z",
+  "updatedAt": "2023-05-06T19:36:20Z",
+  "mergedAt": "2023-05-06T19:10:51Z",
+  "closedAt": "2023-05-06T19:10:51Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/834",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 11931
+  }
+}

@@ -1,7 +1,9 @@
 import { existsSync } from "node:fs";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { copyFile, mkdir, readFile, writeFile } from "node:fs/promises";
+import { dirname, isAbsolute, resolve } from "node:path";
+import { runQaScanDiff, type QaScanFinding, type QaScanInvocation, type RunQaScanDiffOptions } from "@decomp-orchestrator/core/qa";
 import { runCommand, type CommandResult } from "@decomp-orchestrator/core/shell";
+import { packageRoot } from "@decomp-orchestrator/knowledge";
 import type { WorkerRunnerValidation } from "./output.js";
 
 const SCORE_EPSILON = 0.000001;
@@ -41,7 +43,27 @@ export interface WorkerChangeBaseline {
   objectTarget?: string | null;
   objectBuild?: WorkerValidationCommandResult;
   unitDiff?: WorkerValidationCommandResult;
+  /** Directory holding pre-attempt copies of the target source files (repo-relative layout). */
+  sourceSnapshotDir?: string;
+  /** Repo-relative paths that were actually copied into sourceSnapshotDir. */
+  sourceSnapshotPaths?: string[];
 }
+
+/** Injectable scan_diff runner so tests (and callers) can fake the QA scanner. */
+export type QaScanRunner = (options: RunQaScanDiffOptions) => Promise<QaScanInvocation>;
+
+export interface WorkerQaLint {
+  status: "clean" | "warnings" | "violations" | "tool_unavailable" | "skipped";
+  /** scan_diff.py exit code; null when the scanner was never invoked. */
+  exitCode: number | null;
+  findings: QaScanFinding[];
+  /** Path to the attempt's qa_diff.patch handed to the scanner; null when no scan ran. */
+  scanPath: string | null;
+  /** Scanner/diff infrastructure failure detail; L1 fails open but records it. */
+  toolError: string | null;
+}
+
+export type WorkerChangeValidation = WorkerRunnerValidation & { qaLint: WorkerQaLint | null };
 
 interface ObjdiffSideRows {
   functions: WorkerUnitScore[];
@@ -212,11 +234,37 @@ async function runValidationCommand(repoRoot: string, command: string[], stdoutP
   return { ...result, command, stdoutPath, stderrPath };
 }
 
+function isSafeRepoRelativePath(path: string): boolean {
+  return Boolean(path) && !isAbsolute(path) && !path.split(/[\\/]/).includes("..");
+}
+
+async function snapshotPreWorkerSources(params: { repoRoot: string; outputDir: string; paths: string[] }): Promise<{ dir: string; copied: string[] }> {
+  const dir = resolve(params.outputDir, "pre_worker_source");
+  const copied: string[] = [];
+  for (const relPath of new Set(params.paths)) {
+    if (!isSafeRepoRelativePath(relPath)) continue;
+    const source = resolve(params.repoRoot, relPath);
+    if (!existsSync(source)) continue;
+    const destination = resolve(dir, relPath);
+    try {
+      await mkdir(dirname(destination), { recursive: true });
+      await copyFile(source, destination);
+      copied.push(relPath);
+    } catch {
+      // A failed copy only degrades the QA lint scan to "skipped" later;
+      // baseline capture must never fail on it.
+    }
+  }
+  return { dir, copied };
+}
+
 export async function captureWorkerChangeBaseline(params: {
   repoRoot: string;
   outputDir: string;
   target: Record<string, unknown>;
   dryRun?: boolean;
+  /** Additional repo-relative paths to snapshot for the L1 QA lint diff. */
+  extraPaths?: string[];
 }): Promise<WorkerChangeBaseline> {
   await mkdir(params.outputDir, { recursive: true });
   const unit = stringValue(params.target.unit);
@@ -234,12 +282,20 @@ export async function captureWorkerChangeBaseline(params: {
     };
   }
 
+  const sourceSnapshot = await snapshotPreWorkerSources({
+    repoRoot: params.repoRoot,
+    outputDir: params.outputDir,
+    paths: [sourcePath, ...(params.extraPaths ?? [])],
+  });
+  const sourceSnapshotDir = sourceSnapshot.dir;
+  const sourceSnapshotPaths = sourceSnapshot.copied;
+
   if (!unit) reasons.push("target unit is missing");
   if (!symbol) reasons.push("target symbol is missing");
   if (!sourcePath) reasons.push("target source_path is missing");
   if (!objectTarget) reasons.push("could not derive object target from target source_path");
   if (reasons.length > 0 || !objectTarget) {
-    return { status: "snapshot_unavailable", reasons, snapshot: null, objectTarget };
+    return { status: "snapshot_unavailable", reasons, snapshot: null, objectTarget, sourceSnapshotDir, sourceSnapshotPaths };
   }
 
   const objectBuild = await runValidationCommand(
@@ -255,6 +311,8 @@ export async function captureWorkerChangeBaseline(params: {
       snapshot: null,
       objectTarget,
       objectBuild,
+      sourceSnapshotDir,
+      sourceSnapshotPaths,
     };
   }
 
@@ -274,6 +332,8 @@ export async function captureWorkerChangeBaseline(params: {
       objectTarget,
       objectBuild,
       unitDiff,
+      sourceSnapshotDir,
+      sourceSnapshotPaths,
     };
   }
 
@@ -293,6 +353,8 @@ export async function captureWorkerChangeBaseline(params: {
       objectTarget,
       objectBuild,
       unitDiff,
+      sourceSnapshotDir,
+      sourceSnapshotPaths,
     };
   }
 
@@ -307,6 +369,8 @@ export async function captureWorkerChangeBaseline(params: {
     objectTarget,
     objectBuild,
     unitDiff,
+    sourceSnapshotDir,
+    sourceSnapshotPaths,
   };
 }
 
@@ -355,9 +419,13 @@ export function compareWorkerUnitSnapshots(params: {
   const afterTarget = params.after.targetScore;
   const targetHasScores = beforeTarget !== null && afterTarget !== null;
   const targetImproved = targetHasScores && afterTarget > beforeTarget + SCORE_EPSILON;
-  const targetReachedExact = targetHasScores && params.claimedExact && beforeTarget < EXACT_SCORE && afterTarget >= EXACT_SCORE;
+  const targetReachedExact = targetHasScores && beforeTarget < EXACT_SCORE && afterTarget >= EXACT_SCORE;
   const targetRegressed = targetHasScores && afterTarget + SCORE_EPSILON < beforeTarget;
-  const targetAccepted = params.claimedExact ? targetReachedExact : targetImproved;
+  // The runner owns the durable outcome: a measured official improvement is
+  // accepted progress even when the model over-claimed exact. The over-claim
+  // is surfaced in reasons and target.exact stays truthful, so the recorded
+  // result downgrades to "improved" instead of discarding real score movement.
+  const targetAccepted = targetImproved || targetReachedExact;
 
   compareRows({ kind: "unit", unit: params.before.unit, beforeRows: params.before.metrics, afterRows: params.after.metrics, regressions, improvements, reasons });
   compareRows({ kind: "function", unit: params.before.unit, beforeRows: params.before.functions, afterRows: params.after.functions, regressions, improvements, reasons });
@@ -380,6 +448,10 @@ export function compareWorkerUnitSnapshots(params: {
         ? `target ${params.before.symbol} did not reach exact in runner-owned same-unit validation`
         : `target ${params.before.symbol} did not improve in runner-owned same-unit validation`,
     );
+  } else if (params.claimedExact && targetHasScores && afterTarget < EXACT_SCORE) {
+    reasons.push(
+      `target ${params.before.symbol} improved from ${beforeTarget} to ${afterTarget} but did not reach exact as claimed; runner records improved progress`,
+    );
   }
 
   return {
@@ -401,6 +473,138 @@ export function compareWorkerUnitSnapshots(params: {
   };
 }
 
+/**
+ * Rewrite a `git diff --no-index <preCopy> <current>` header so scan_diff.py
+ * sees the repo-relative path (`a/src/melee/... b/src/melee/...`) instead of
+ * the absolute snapshot/worktree paths. Returns "" when the diff has no hunks
+ * (identical or binary files).
+ */
+export function rewriteNoIndexDiffPaths(diffText: string, repoRelativePath: string): string {
+  const lines = diffText.split("\n");
+  const hunkStart = lines.findIndex((line) => line.startsWith("@@"));
+  if (hunkStart === -1) return "";
+  while (lines.length > 0 && lines[lines.length - 1] === "") lines.pop();
+  return [
+    `diff --git a/${repoRelativePath} b/${repoRelativePath}`,
+    `--- a/${repoRelativePath}`,
+    `+++ b/${repoRelativePath}`,
+    ...lines.slice(hunkStart),
+  ].join("\n");
+}
+
+export function qaLintFromInvocation(invocation: QaScanInvocation, scanPath: string | null): WorkerQaLint {
+  const findings = invocation.result?.findings ?? [];
+  if (invocation.toolError !== null) {
+    // L1 fails open on scanner infrastructure failure (L2 fails closed): a
+    // broken environment must not mass-reject worker attempts, but the failure
+    // is recorded so operators can see the gate was blind.
+    return { status: "tool_unavailable", exitCode: invocation.exitCode, findings, scanPath, toolError: invocation.toolError };
+  }
+  const hasErrorFindings = findings.some((finding) => finding.severity === "error");
+  if (invocation.exitCode === 1 || hasErrorFindings) {
+    return { status: "violations", exitCode: invocation.exitCode, findings, scanPath, toolError: null };
+  }
+  if (invocation.exitCode === 2) {
+    return { status: "warnings", exitCode: invocation.exitCode, findings, scanPath, toolError: null };
+  }
+  return { status: "clean", exitCode: invocation.exitCode, findings, scanPath, toolError: null };
+}
+
+export const QA_LINT_REPAIR_INSTRUCTION =
+  "Remove the violation; a lower match % without it is the correct outcome. Do not re-add maintainer-rejected patterns.";
+
+/** Worker-facing repair feedback: one verbatim reason per finding plus the standing instruction. */
+export function qaLintRepairReasons(qaLint: WorkerQaLint | null | undefined): string[] {
+  if (!qaLint || qaLint.status !== "violations") return [];
+  const reasons = qaLint.findings.map(
+    (finding) =>
+      `qa_lint_violation: ${finding.rule_id} at ${finding.file}:${finding.line} — ${finding.message} [standard: ${finding.standard_id ?? "unknown"}] excerpt: ${finding.excerpt}`,
+  );
+  if (reasons.length === 0) {
+    reasons.push(`qa_lint_violation: scan_diff gate failed (exit ${qaLint.exitCode ?? "unknown"}) without parseable findings`);
+  }
+  reasons.push(QA_LINT_REPAIR_INSTRUCTION);
+  return reasons;
+}
+
+/**
+ * Fold the L1 QA lint outcome into the runner validation verdict. A
+ * score-improving attempt that re-adds a maintainer-rejected pattern is the
+ * exact failure mode L1 exists to stop — the violation is what inflates the
+ * score — so "passed" demotes to "failed" on violations. tool_unavailable,
+ * warnings, and clean never change the score verdict.
+ */
+export function applyQaLintToValidation(validation: WorkerRunnerValidation, qaLint: WorkerQaLint | null): WorkerChangeValidation {
+  if (!qaLint || qaLint.status !== "violations") return { ...validation, qaLint };
+  return {
+    ...validation,
+    status: validation.status === "passed" ? "failed" : validation.status,
+    reasons: [
+      ...validation.reasons,
+      `qa lint found ${qaLint.findings.length} maintainer-rejected pattern finding(s) (gate exit ${qaLint.exitCode ?? "unknown"})`,
+    ],
+    qaLint,
+  };
+}
+
+async function runWorkerQaLintScan(params: {
+  repoRoot: string;
+  outputDir: string;
+  attemptIndex: number;
+  baseline: WorkerChangeBaseline;
+  orchestratorRoot: string;
+  qaScanRunner: QaScanRunner;
+}): Promise<WorkerQaLint> {
+  const unavailable = (toolError: string): WorkerQaLint => ({ status: "tool_unavailable", exitCode: null, findings: [], scanPath: null, toolError });
+  const snapshotDir = params.baseline.sourceSnapshotDir;
+  const snapshotPaths = params.baseline.sourceSnapshotPaths ?? [];
+  if (!snapshotDir || snapshotPaths.length === 0) {
+    return { status: "skipped", exitCode: null, findings: [], scanPath: null, toolError: "pre-worker source snapshot is unavailable" };
+  }
+
+  const sections: string[] = [];
+  // Scratch file for git's raw per-file output: --output is used instead of a
+  // stdout pipe because piped git stdout has proven unreliable under bun test.
+  const rawDiffPath = resolve(params.outputDir, `attempt-${params.attemptIndex}.qa_diff.raw.patch`);
+  for (const relPath of snapshotPaths) {
+    const preWorkerCopy = resolve(snapshotDir, relPath);
+    const currentPath = resolve(params.repoRoot, relPath);
+    // A file the worker deleted (or a copy that vanished) has no post-edit
+    // content to scan; the score validation owns judging that situation.
+    if (!existsSync(preWorkerCopy) || !existsSync(currentPath)) continue;
+    let diff: CommandResult;
+    try {
+      diff = await runCommand(params.repoRoot, ["git", "diff", "--no-index", `--output=${rawDiffPath}`, preWorkerCopy, currentPath]);
+    } catch (error) {
+      return unavailable(`git diff --no-index failed for ${relPath}: ${error instanceof Error ? error.message : String(error)}`);
+    }
+    // git diff --no-index exits 0 (identical) or 1 (differences); anything else is a tool failure.
+    if (diff.exitCode !== 0 && diff.exitCode !== 1) {
+      return unavailable(`git diff --no-index exited ${diff.exitCode} for ${relPath}: ${diff.stderr.trim().slice(0, 400)}`);
+    }
+    let rawDiff = "";
+    try {
+      rawDiff = await readFile(rawDiffPath, "utf8");
+    } catch {
+      rawDiff = "";
+    }
+    const section = rewriteNoIndexDiffPaths(rawDiff, relPath);
+    if (section) sections.push(section);
+  }
+  if (sections.length === 0) {
+    return { status: "clean", exitCode: null, findings: [], scanPath: null, toolError: null };
+  }
+
+  const scanPath = resolve(params.outputDir, `attempt-${params.attemptIndex}.qa_diff.patch`);
+  await writeFile(scanPath, `${sections.join("\n")}\n`);
+  const invocation = await params.qaScanRunner({
+    repoRoot: params.repoRoot,
+    orchestratorRoot: params.orchestratorRoot,
+    diffFile: scanPath,
+  });
+  return qaLintFromInvocation(invocation, scanPath);
+}
+
 export async function validateWorkerChange(params: {
   repoRoot: string;
   outputDir: string;
@@ -410,13 +614,46 @@ export async function validateWorkerChange(params: {
   dryRun: boolean;
   shouldRun: boolean;
   claimedExact: boolean;
-}): Promise<WorkerRunnerValidation> {
+  /** Root containing tools/source_editing/review_lint; defaults to the orchestrator repo root. */
+  orchestratorRoot?: string;
+  /** Injectable scan_diff runner; defaults to runQaScanDiff. */
+  qaScanRunner?: QaScanRunner;
+}): Promise<WorkerChangeValidation> {
   await mkdir(params.outputDir, { recursive: true });
   const summaryPath = resolve(params.outputDir, `attempt-${params.attemptIndex}.runner_validation.summary.json`);
-  const skipped = (reason: string): WorkerRunnerValidation => ({ status: "skipped", reasons: [reason], summaryPath });
+  const skipped = (reason: string): WorkerChangeValidation => ({ status: "skipped", reasons: [reason], summaryPath, qaLint: null });
 
   if (params.dryRun) return skipped("dry-run agents do not execute runner-owned worker-change validation");
   if (!params.shouldRun) return skipped("structured acceptance gate did not pass for progress/score_candidate");
+
+  // The QA lint scan runs even when the score comparison below cannot (build
+  // failure, missing snapshot): a violation must be reported regardless of
+  // whether the attempt's score evidence is usable.
+  const qaLint = await runWorkerQaLintScan({
+    repoRoot: params.repoRoot,
+    outputDir: params.outputDir,
+    attemptIndex: params.attemptIndex,
+    baseline: params.baseline,
+    orchestratorRoot: params.orchestratorRoot ?? packageRoot(),
+    qaScanRunner: params.qaScanRunner ?? runQaScanDiff,
+  });
+  const scoreValidation = await validateWorkerScoreChange(params, summaryPath);
+  const validation = applyQaLintToValidation(scoreValidation, qaLint);
+  await writeFile(summaryPath, JSON.stringify(validation, null, 2));
+  return validation;
+}
+
+async function validateWorkerScoreChange(
+  params: {
+    repoRoot: string;
+    outputDir: string;
+    attemptIndex: number;
+    baseline: WorkerChangeBaseline;
+    target: Record<string, unknown>;
+    claimedExact: boolean;
+  },
+  summaryPath: string,
+): Promise<WorkerRunnerValidation> {
   if (!params.baseline.snapshot) {
     return {
       status: "snapshot_unavailable",
@@ -447,7 +684,7 @@ export async function validateWorkerChange(params: {
     resolve(params.outputDir, `attempt-${params.attemptIndex}.object_build.stderr.txt`),
   );
   if (objectBuild.exitCode !== 0) {
-    const validation: WorkerRunnerValidation = {
+    return {
       status: "build_failed",
       reasons: [`post-worker object build exited ${objectBuild.exitCode}`],
       summaryPath,
@@ -457,8 +694,6 @@ export async function validateWorkerChange(params: {
       stdoutPath: objectBuild.stdoutPath,
       stderrPath: objectBuild.stderrPath,
     };
-    await writeFile(summaryPath, JSON.stringify(validation, null, 2));
-    return validation;
   }
 
   const diffPath = resolve(params.outputDir, `attempt-${params.attemptIndex}.unit_diff.json`);
@@ -469,7 +704,7 @@ export async function validateWorkerChange(params: {
     resolve(params.outputDir, `attempt-${params.attemptIndex}.unit_diff.stderr.txt`),
   );
   if (unitDiff.exitCode !== 0 || !existsSync(diffPath)) {
-    const validation: WorkerRunnerValidation = {
+    return {
       status: "snapshot_unavailable",
       reasons: [`post-worker unit diff exited ${unitDiff.exitCode}`],
       summaryPath,
@@ -480,8 +715,6 @@ export async function validateWorkerChange(params: {
       stdoutPath: unitDiff.stdoutPath,
       stderrPath: unitDiff.stderrPath,
     };
-    await writeFile(summaryPath, JSON.stringify(validation, null, 2));
-    return validation;
   }
 
   let after: WorkerUnitScoreSnapshot | null = null;
@@ -492,15 +725,13 @@ export async function validateWorkerChange(params: {
     after = null;
   }
   if (!after) {
-    const validation: WorkerRunnerValidation = {
+    return {
       status: "snapshot_unavailable",
       reasons: ["post-worker unit diff did not contain usable same-unit scores"],
       summaryPath,
       baselinePath: params.baseline.snapshotPath,
       reportPath: diffPath,
     };
-    await writeFile(summaryPath, JSON.stringify(validation, null, 2));
-    return validation;
   }
 
   const snapshotPath = resolve(params.outputDir, `attempt-${params.attemptIndex}.unit_snapshot.json`);
@@ -519,6 +750,5 @@ export async function validateWorkerChange(params: {
   validation.stderrPath = unitDiff.stderrPath;
   validation.diffPath = diffPath;
   validation.objectTarget = objectTarget;
-  await writeFile(summaryPath, JSON.stringify(validation, null, 2));
   return validation;
 }

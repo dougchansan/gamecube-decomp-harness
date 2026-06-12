@@ -1,0 +1,17 @@
+{
+  "number": 1145,
+  "title": "Re-link `player`",
+  "state": "MERGED",
+  "createdAt": "2024-01-28T14:34:15Z",
+  "updatedAt": "2024-01-28T14:35:19Z",
+  "mergedAt": "2024-01-28T14:35:18Z",
+  "closedAt": "2024-01-28T14:35:18Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1145",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 2442
+  }
+}

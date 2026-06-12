@@ -1,0 +1,10 @@
+{
+  "pr": 498,
+  "title": "Use symbol names from Zoids VS debug elf",
+  "url": "https://github.com/doldecomp/melee/pull/498",
+  "text_records_with_body": 0,
+  "review_comments": 0,
+  "changed_files": 9,
+  "added_lines": 33,
+  "deleted_lines": 36
+}

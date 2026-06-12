@@ -1,0 +1,17 @@
+{
+  "number": 1769,
+  "title": "Item type cleanup",
+  "state": "MERGED",
+  "createdAt": "2025-07-30T00:28:36Z",
+  "updatedAt": "2025-07-30T01:15:36Z",
+  "mergedAt": "2025-07-30T01:15:35Z",
+  "closedAt": "2025-07-30T01:15:36Z",
+  "author": "AaronB-Hub",
+  "url": "https://github.com/doldecomp/melee/pull/1769",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 4,
+    "reviews": 4,
+    "diff_bytes": 15928
+  }
+}

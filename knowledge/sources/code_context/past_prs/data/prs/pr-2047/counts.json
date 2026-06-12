@@ -1,0 +1,17 @@
+{
+  "number": 2047,
+  "title": "ef: Match effect library functions (part 2)",
+  "state": "MERGED",
+  "createdAt": "2025-12-30T17:21:25Z",
+  "updatedAt": "2026-01-06T16:43:41Z",
+  "mergedAt": "2026-01-03T02:13:15Z",
+  "closedAt": "2026-01-03T02:13:15Z",
+  "author": "itsgrimetime",
+  "url": "https://github.com/doldecomp/melee/pull/2047",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 5073
+  }
+}

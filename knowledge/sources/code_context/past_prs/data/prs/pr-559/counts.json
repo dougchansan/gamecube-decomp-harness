@@ -1,0 +1,17 @@
+{
+  "number": 559,
+  "title": "Match HSD gobj, gobjgxlink, gobjplink",
+  "state": "MERGED",
+  "createdAt": "2022-09-10T02:28:05Z",
+  "updatedAt": "2022-09-10T03:13:21Z",
+  "mergedAt": "2022-09-10T03:01:06Z",
+  "closedAt": "2022-09-10T03:01:06Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/559",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 1,
+    "diff_bytes": 88101
+  }
+}

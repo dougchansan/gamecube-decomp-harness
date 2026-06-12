@@ -1,0 +1,17 @@
+{
+  "number": 2168,
+  "title": "Various 100% matches of incomplete functions",
+  "state": "MERGED",
+  "createdAt": "2026-02-10T23:55:04Z",
+  "updatedAt": "2026-02-11T01:14:29Z",
+  "mergedAt": "2026-02-11T00:04:12Z",
+  "closedAt": "2026-02-11T00:04:12Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/2168",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 1,
+    "diff_bytes": 4162
+  }
+}

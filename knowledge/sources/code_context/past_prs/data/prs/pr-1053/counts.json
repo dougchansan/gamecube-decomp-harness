@@ -1,0 +1,17 @@
+{
+  "number": 1053,
+  "title": "Ifmagnify initial match",
+  "state": "MERGED",
+  "createdAt": "2024-01-10T18:00:42Z",
+  "updatedAt": "2024-01-10T18:10:54Z",
+  "mergedAt": "2024-01-10T18:10:26Z",
+  "closedAt": "2024-01-10T18:10:26Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/1053",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 6832
+  }
+}

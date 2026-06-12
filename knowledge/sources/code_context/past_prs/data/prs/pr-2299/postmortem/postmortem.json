@@ -1,0 +1,378 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2299",
+  "pr": {
+    "number": 2299,
+    "title": "Finish data match and linking of multiple Ness items",
+    "url": "https://github.com/doldecomp/melee/pull/2299",
+    "state": "MERGED",
+    "author": "PsiLupan",
+    "created_at": "2026-03-15T22:31:26Z",
+    "merged_at": "2026-03-15T22:35:11Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2299 renamed Ness PK Flash item files and symbols from pkflush/pkflushexplode to pkflash/pkflashexplode, updated fighter and item include users, added ItemStateTable/data definitions for several Ness items, marked multiple Ness item objects as Matching in configure.py, and adjusted splits/symbol metadata. The bot report showed net linked-code/data progress, while also reporting broken matches under the old pkflush unit names caused by the rename.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "symbol-metadata",
+      "split-metadata",
+      "item-data-linking",
+      "rename-cleanup"
+    ],
+    "systems": [
+      "config",
+      "fighter",
+      "item",
+      "Ness",
+      "Kirby copy abilities"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "configure.py",
+      "role": "Changed Ness item object entries from NonMatching to Matching and renamed pkflush object paths to pkflash paths.",
+      "evidence_refs": [
+        "raw_diff:configure.py hunk at lines 1158-1176",
+        "changed_files.jsonl:configure.py"
+      ]
+    },
+    {
+      "path": "config/GALE01/splits.txt",
+      "role": "Renamed split entries from itnesspkflush.c and itnesspkflushexplode.c to itnesspkflash.c and itnesspkflashexplode.c.",
+      "evidence_refs": [
+        "diff_excerpt:splits.txt rename hunks",
+        "changed_files.jsonl:config/GALE01/splits.txt"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Renamed Ness PK Flash function symbols, adjusted some item/ground function scopes to local, and converted several data/string/jumptable symbols to local generated labels.",
+      "evidence_refs": [
+        "diff_excerpt:symbols.txt Ness pkflush to pkflash hunks",
+        "diff_excerpt:symbols.txt scope changes for grLast/grTSamus/grTSeak and item coll functions",
+        "changed_files.jsonl:config/GALE01/symbols.txt"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itnesspkflash.c",
+      "role": "Renamed from itnesspkflush.c, updated function names/includes, and added ItemStateTable it_803F6B70.",
+      "evidence_refs": [
+        "raw_diff:rename from src/melee/it/items/itnesspkflush.c to src/melee/it/items/itnesspkflash.c",
+        "raw_diff:ItemStateTable it_803F6B70 addition"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itnesspkflash.h",
+      "role": "New header replacing itnesspkflush.h with pkflash prototypes and extern ItemStateTable declaration.",
+      "evidence_refs": [
+        "raw_diff:new file src/melee/it/items/itnesspkflash.h",
+        "raw_diff:deleted file src/melee/it/items/itnesspkflush.h"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itnesspkflashexplode.c",
+      "role": "Renamed from itnesspkflushexplode.c, updated symbols to PKFlashExplode, and added ItemStateTable it_803F6F40.",
+      "evidence_refs": [
+        "raw_diff:rename from src/melee/it/items/itnesspkflushexplode.c to src/melee/it/items/itnesspkflashexplode.c",
+        "raw_diff:ItemStateTable it_803F6F40 addition"
+      ]
+    },
+    {
+      "path": "src/melee/it/it_2725.c",
+      "role": "Updated item logic table references and includes from PKFlush to PKFlash symbols.",
+      "evidence_refs": [
+        "raw_diff:it_2725.c include replacements",
+        "raw_diff:it_803F3100 logic callbacks updated to itNesspkflash and itNessPKFlashExplode"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/*.c and src/melee/ft/chara/ftNess/ftNs_SpecialN.c",
+      "role": "Updated include users from itnesspkflush.h to itnesspkflash.h.",
+      "evidence_refs": [
+        "raw_diff:ftKb_Init.c include replacement",
+        "raw_diff:ftKb_SpecialNNs.c include replacement",
+        "raw_diff:ftKb_SpecialNPk.c include replacement",
+        "raw_diff:ftKb_SpecialNZd.c include replacement",
+        "raw_diff:ftkirbyspecialfox.c include replacement",
+        "raw_diff:ftNs_SpecialN.c include replacement"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itnessbat.c",
+      "role": "Added ItemStateTable it_803F6C68.",
+      "evidence_refs": [
+        "raw_diff:itnessbat.c ItemStateTable addition"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itnesspkfire.c",
+      "role": "Added ItemStateTable it_803F6B28.",
+      "evidence_refs": [
+        "raw_diff:itnesspkfire.c ItemStateTable addition"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itnesspkthunderball.c",
+      "role": "Added ItemStateTable it_803F6BC8.",
+      "evidence_refs": [
+        "raw_diff:itnesspkthunderball.c ItemStateTable addition"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itnesspkthundertrail.c",
+      "role": "Added ItemStateTable it_803F6C08, local kind array it_803F6C18, and it/forward.h include.",
+      "evidence_refs": [
+        "raw_diff:itnesspkthundertrail.c additions"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itnesspkthundertrail.h",
+      "role": "Removed extern declaration for it_803F6C18 while retaining ItemStateTable extern.",
+      "evidence_refs": [
+        "raw_diff:itnesspkthundertrail.h hunk"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Renamed the Ness PK Flash translation-unit split and source/header paths from itnesspkflush/itnesspkflushexplode to itnesspkflash/itnesspkflashexplode.",
+    "Updated fighter and item source includes to include it/items/itnesspkflash.h and it/items/itnesspkflashexplode.h.",
+    "Updated item logic table callbacks in it_2725.c from itNessPKFlush* names to itNesspkflash* and itNessPKFlashExplode* names.",
+    "Added ItemStateTable definitions for itnessbat, itnesspkfire, itnesspkflash, itnesspkflashexplode, itnesspkthunderball, and itnesspkthundertrail.",
+    "Marked itnesspkfire, itnesspkflash, itnesspkthunderball, itnesspkthundertrail, itnessbat, and itnesspkflashexplode objects as Matching in configure.py.",
+    "Adjusted symbols.txt function names, local/global scope metadata, and several local data/string/jumptable labels.",
+    "Bot report recorded linked code +12020 bytes, matched data +336 bytes, linked data +552 bytes, and 41 new matches; it also listed 35 broken matches under the old pkflush unit names."
+  ],
+  "smart_moves": [
+    "The rename was propagated through splits.txt, symbols.txt, source file paths, headers, include users, configure.py object paths, and item logic callback references instead of leaving alias headers or duplicate names.",
+    "ItemStateTable definitions were added in owning item source files and exposed via headers where needed, aligning code and data ownership for the newly matching objects.",
+    "The PR used symbol/split metadata changes alongside source renames, which is necessary for a file-level rename to show as linked/matched progress rather than unresolved old-unit symbols."
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a decomp unit has been named with an incorrect game-term spelling, a successful cleanup may require coordinated renames across splits, symbols, source paths, headers, includes, configure object entries, and logic table references.",
+      "evidence_refs": [
+        "diff_excerpt:splits.txt pkflush to pkflash",
+        "raw_diff:configure.py pkflush paths changed to pkflash paths",
+        "raw_diff:source/header renames and include replacements"
+      ]
+    },
+    {
+      "lesson": "Data matching for item units may involve moving ItemStateTable arrays into the item source file and matching symbols.txt data ownership/scopes at the same time.",
+      "evidence_refs": [
+        "raw_diff:ItemStateTable it_803F6B70 addition",
+        "raw_diff:ItemStateTable it_803F6F40 addition",
+        "raw_diff:ItemStateTable additions for itnessbat, itnesspkfire, itnesspkthunderball, itnesspkthundertrail",
+        "text_corpus:bot report new .data matches for Ness item units"
+      ]
+    },
+    {
+      "lesson": "Rename-heavy PRs can produce bot reports with both new matches under the new unit name and broken matches under the old unit name; intake should distinguish rename churn from true regressions unless additional review evidence says otherwise.",
+      "evidence_refs": [
+        "text_corpus:bot report 41 new matches",
+        "text_corpus:bot report 35 broken matches under main/melee/it/items/itnesspkflush and itnesspkflushexplode"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Use 'pkflash' / 'PKFlash' rather than 'pkflush' / 'PKFlush' for Ness PK Flash item file names, headers, and symbols in this PR's affected units.",
+      "evidence_refs": [
+        "raw_diff:itnesspkflush.c renamed to itnesspkflash.c",
+        "raw_diff:itnesspkflush.h deleted and itnesspkflash.h added",
+        "diff_excerpt:symbols.txt itNesspkflush to itNesspkflash and itNessPKFlushExplode to itNessPKFlashExplode"
+      ]
+    },
+    {
+      "convention": "This PR used lower-case 'pkflash' in non-Explode function names such as itNesspkflash_Logic102_Reflected, while using 'PKFlashExplode' capitalization for explode symbols.",
+      "evidence_refs": [
+        "raw_diff:itnesspkflash.h prototypes",
+        "raw_diff:itnesspkflashexplode.h prototypes"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Promote item data tables from external/unowned data into C source definitions when adding the item object to Matching.",
+      "evidence_refs": [
+        "raw_diff:configure.py object status changes",
+        "raw_diff:ItemStateTable additions",
+        "text_corpus:bot report new .data matches for multiple Ness item units"
+      ]
+    },
+    {
+      "tactic": "Keep split and symbol metadata synchronized with source-path renames so object identity follows the new translation-unit name.",
+      "evidence_refs": [
+        "diff_excerpt:splits.txt pkflush to pkflash",
+        "diff_excerpt:symbols.txt pkflush function symbol renames",
+        "raw_diff:configure.py object path renames"
+      ]
+    },
+    {
+      "tactic": "Adjust local/global scope for small callback/collision functions and generated local data labels in symbols.txt as part of data/linking cleanup.",
+      "evidence_refs": [
+        "diff_excerpt:symbols.txt itNesspkflash_UnkMotion1_Coll and UnkMotion2_Coll changed to local",
+        "diff_excerpt:symbols.txt itNessPKFlashExplode_UnkMotion0_Coll changed to local",
+        "diff_excerpt:symbols.txt local @ labels and ...data labels"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "author": "decomp-dev[bot]",
+      "kind": "status_report",
+      "feedback": "Reported GALE01 progress: linked code 33.25% (+0.31%, +12020 bytes), matched data 37.68% (+0.03%, +336 bytes), linked data 32.18% (+0.05%, +552 bytes), with 41 new matches and 35 broken matches listed under old pkflush unit names.",
+      "evidence_refs": [
+        "text_corpus:issue_comment by decomp-dev[bot] at 2026-03-15T22:34:53Z"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2299",
+    "PsiLupan",
+    "Finish data match and linking of multiple Ness items",
+    "itnesspkflash",
+    "itnesspkflush",
+    "itnesspkflashexplode",
+    "itnesspkflushexplode",
+    "itNesspkflash_Logic102_Reflected",
+    "itNessPKFlashExplode_Logic103_EvtUnk",
+    "ItemStateTable",
+    "it_803F6B70",
+    "it_803F6F40",
+    "it_803F6BC8",
+    "it_803F6C08",
+    "it_803F6C18",
+    "configure.py Matching",
+    "splits.txt",
+    "symbols.txt",
+    "Ness PK Flash",
+    "Ness items",
+    "rename churn",
+    "linked code +12020",
+    "matched data +336"
+  ],
+  "follow_up_queries": [
+    "itnesspkflush pkflash rename",
+    "itNesspkflash_Logic102_Reflected",
+    "itNessPKFlashExplode_UnkMotion0_Anim",
+    "ItemStateTable it_803F6B70 it_803F6F40",
+    "configure.py itnesspkflash Matching",
+    "decomp-dev bot broken matches old unit rename",
+    "symbols.txt local scope item collision callbacks",
+    "Ness PK Flash item data match"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json:PR metadata and changed file counts",
+      "raw_diff:source/config diffs",
+      "changed_files.jsonl:20 changed files",
+      "text_corpus:empty PR body and bot issue comment"
+    ],
+    "notes": [
+      "Diff evidence is strong for changed files, renames, ItemStateTable additions, configure.py Matching status, and symbol/split metadata edits.",
+      "There were no loaded human review comments and the PR body was empty, so reviewer intent and author rationale are not supported.",
+      "The bot report provides progress numbers and lists both new and broken matches, but the slice does not include independent build logs beyond that report.",
+      "The raw diff loaded in the prompt was truncated, but targeted local reads covered the main code hunks relevant to the changed files and lessons."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson_candidate",
+        "title": "Coordinated rename for decomp unit identity",
+        "text": "A file/unit rename in a matching PR should be propagated through splits, symbols, source/header paths, includes, configure object entries, and callback tables; otherwise old and new unit identities can appear as broken/new match churn in reports.",
+        "scope": [
+          "config/GALE01/splits.txt",
+          "config/GALE01/symbols.txt",
+          "configure.py",
+          "src/melee/it/items",
+          "src/melee/it/it_2725.c"
+        ],
+        "evidence_refs": [
+          "PR 2299 diff: pkflush to pkflash split/source/header/configure/symbol renames",
+          "PR 2299 bot report: new pkflash matches and broken old pkflush matches"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "Ness PK Flash item paths use itnesspkflash naming after PR 2299",
+        "text": "PR 2299 renamed the Ness PK Flash item units from src/melee/it/items/itnesspkflush.c and itnesspkflushexplode.c to src/melee/it/items/itnesspkflash.c and itnesspkflashexplode.c, with matching header/include/configure/split/symbol updates.",
+        "source_path": "src/melee/it/items",
+        "scope": [
+          "src/melee/it/items/itnesspkflash.c",
+          "src/melee/it/items/itnesspkflash.h",
+          "src/melee/it/items/itnesspkflashexplode.c",
+          "src/melee/it/items/itnesspkflashexplode.h"
+        ],
+        "evidence_refs": [
+          "raw_diff:rename from itnesspkflush.c to itnesspkflash.c",
+          "raw_diff:deleted itnesspkflush.h and added itnesspkflash.h",
+          "raw_diff:rename from itnesspkflushexplode.c to itnesspkflashexplode.c",
+          "diff_excerpt:splits.txt pkflush to pkflash"
+        ],
+        "reason": "Useful path fact for future PR intake and search; requires curator validation against current repository state before promotion."
+      },
+      {
+        "target_source_id": "ssbm_data_sheet",
+        "update_kind": "source_update",
+        "title": "Ness item data tables matched/linked in PR 2299",
+        "text": "PR 2299 added ItemStateTable definitions for Ness bat, PK Fire, PK Flash, PK Flash Explode, PK Thunder Ball, and PK Thunder Trail and the bot report showed new .data matches for these item units.",
+        "source_path": null,
+        "scope": [
+          "it_803F6C68",
+          "it_803F6B28",
+          "it_803F6B70",
+          "it_803F6F40",
+          "it_803F6BC8",
+          "it_803F6C08"
+        ],
+        "evidence_refs": [
+          "raw_diff:ItemStateTable additions",
+          "text_corpus:bot report new .data matches for itnessbat, itnesspkfire, itnesspkflash, itnesspkflashexplode, itnesspkthunderball, itnesspkthundertrail"
+        ],
+        "reason": "Possible data-sheet update for item table ownership/matching status; do not promote without curator checking current data sources."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Rename-heavy matching reports need rename-aware interpretation",
+        "text": "When a PR renames a decomp unit, bot reports may show old-unit broken matches and new-unit matches for the same underlying text/data. Curators may consider adding guidance to distinguish rename churn from regressions when diff evidence shows synchronized split/symbol/source/configure renames.",
+        "source_path": null,
+        "scope": [
+          "matching reports",
+          "unit renames",
+          "symbols.txt",
+          "splits.txt",
+          "configure.py"
+        ],
+        "evidence_refs": [
+          "PR 2299 bot report: 41 new matches and 35 broken matches",
+          "PR 2299 diff: pkflush to pkflash synchronized renames"
+        ],
+        "reason": "Potential standard refinement; PR evidence supports this as a candidate, not an accepted global rule."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that all broken matches in the bot report were harmless solely from the intake slice; the rename evidence explains many old-unit broken entries, but no human review comment states a policy.",
+      "Do not promote the exact symbols.txt scope changes for grLast/grTSamus/grTSeak as a general rule; the slice shows edits but not the rationale.",
+      "Do not claim this PR fully validated with objdiff/build beyond the decomp-dev bot report included in the issue comment."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

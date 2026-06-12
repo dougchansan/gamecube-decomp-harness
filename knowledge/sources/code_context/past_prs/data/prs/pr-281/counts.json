@@ -1,0 +1,17 @@
+{
+  "number": 281,
+  "title": "Match some ftMario functions",
+  "state": "MERGED",
+  "createdAt": "2022-02-19T03:01:11Z",
+  "updatedAt": "2022-02-19T23:42:47Z",
+  "mergedAt": "2022-02-19T04:56:11Z",
+  "closedAt": "2022-02-19T04:56:11Z",
+  "author": "nicolasrmerz",
+  "url": "https://github.com/doldecomp/melee/pull/281",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 2,
+    "reviews": 2,
+    "diff_bytes": 12394
+  }
+}

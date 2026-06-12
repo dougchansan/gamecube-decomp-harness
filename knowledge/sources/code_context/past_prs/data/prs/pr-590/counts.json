@@ -1,0 +1,17 @@
+{
+  "number": 590,
+  "title": "Purge `functions.h` from this Earth",
+  "state": "MERGED",
+  "createdAt": "2022-11-06T04:24:49Z",
+  "updatedAt": "2022-11-06T04:26:53Z",
+  "mergedAt": "2022-11-06T04:26:53Z",
+  "closedAt": "2022-11-06T04:26:53Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/590",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 9931
+  }
+}

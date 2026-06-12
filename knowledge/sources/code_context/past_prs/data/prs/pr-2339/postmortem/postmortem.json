@@ -1,0 +1,482 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2339",
+  "pr": {
+    "number": 2339,
+    "title": "ef work",
+    "url": "https://github.com/doldecomp/melee/pull/2339",
+    "state": "MERGED",
+    "author": "Savestate2A03",
+    "created_at": "2026-03-21T04:41:36Z",
+    "merged_at": "2026-03-21T20:00:02Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Effect-system decomp and metadata PR: renamed efSpecial to efAlt, added efdata.c/efdata.h for ef static data, adjusted ef splits and symbols, improved or matched efSync/efAsync items, and applied descriptive names across many efLib/efAsync symbols. Bot report showed 9 new matches, 2 unmatched-item improvements, and one efasync .data regression attributed by the author to jumptable-related work.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "data-section-split",
+      "symbol-renaming",
+      "headers",
+      "configure-update"
+    ],
+    "systems": [
+      "effect",
+      "config",
+      "MSL",
+      "fighter",
+      "game-mode",
+      "item",
+      "stage",
+      "baselib",
+      "debug"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/ef/efasync.c",
+      "role": "Large efAsync source update; PR body claims efAsync_Spawn now matches, .sdata now matches, and efAsync_Dispatch has a slightly better match.",
+      "evidence_refs": [
+        "changed_files: src/melee/ef/efasync.c added 603 deleted 685 hunks 17",
+        "pr_body: efasync.c efAsync_Spawn now matches; efasync.c .sdata now matches; efAsync_Dispatch slightly better match",
+        "bot_report: efAsync_Spawn 99.88% to 100.00%; efAsync .sdata 95.24% to 100.00%; efAsync_Dispatch 98.46% to 98.60%; efasync .data regression 65.93% to 24.82%"
+      ]
+    },
+    {
+      "path": "src/melee/ef/efsync.c",
+      "role": "efSync source update; PR body claims .sdata now matches and efSync_Spawn has a slightly better match.",
+      "evidence_refs": [
+        "changed_files: src/melee/ef/efsync.c added 291 deleted 340 hunks 5",
+        "pr_body: efsync.c .sdata now matches; efSync_Spawn slightly better match",
+        "bot_report: efSync .sdata 74.29% to 100.00%; efSync_Spawn 95.90% to 98.28%"
+      ]
+    },
+    {
+      "path": "src/melee/ef/efalt.c",
+      "role": "New efAlt implementation replacing efSpecial naming/split for the same 0x80061D70 text range.",
+      "evidence_refs": [
+        "changed_files: src/melee/ef/efalt.c added 519 deleted 0 hunks 1",
+        "pr_body: efSpecial -> efAlt",
+        "diff: splits.txt melee/ef/efspecial.c changed to melee/ef/efalt.c",
+        "diff: symbols.txt efSpecial_SpawnSpecial renamed to efAlt_Spawn at .text:0x80061D70"
+      ]
+    },
+    {
+      "path": "src/melee/ef/efspecial.c",
+      "role": "Removed old efSpecial source as part of efSpecial -> efAlt rename/split change.",
+      "evidence_refs": [
+        "changed_files: src/melee/ef/efspecial.c added 0 deleted 521 hunks 1",
+        "pr_body: efSpecial -> efAlt"
+      ]
+    },
+    {
+      "path": "src/melee/ef/efdata.c",
+      "role": "New ef static-data holder replacing eflib_alloc split ownership for selected bss/sbss data.",
+      "evidence_refs": [
+        "changed_files: src/melee/ef/efdata.c added 8 deleted 0 hunks 1",
+        "pr_body: efdata.c New file that holds static data for ef, moved from eflib_alloc and other data regions",
+        "diff: splits.txt melee/ef/eflib_alloc.c changed to melee/ef/efdata.c and .sbss start 0x804D64E8 end 0x804D64F4 added"
+      ]
+    },
+    {
+      "path": "src/melee/ef/efdata.h",
+      "role": "New header paired with efdata.c.",
+      "evidence_refs": [
+        "changed_files: src/melee/ef/efdata.h added 15 deleted 0 hunks 1"
+      ]
+    },
+    {
+      "path": "src/melee/ef/eflib.c",
+      "role": "Large efLib source update aligned with descriptive ef-related symbol names and data ownership changes.",
+      "evidence_refs": [
+        "changed_files: src/melee/ef/eflib.c added 396 deleted 362 hunks 47",
+        "pr_body: Gave descriptive naming to ef-related functions",
+        "diff: symbols.txt many efLib_8005xxxx/fn_8005xxxx symbols renamed to efLib_Init, efLib_Create, efLib_Cb_* and related names"
+      ]
+    },
+    {
+      "path": "src/melee/ef/eflib.h",
+      "role": "Header updates corresponding to efLib symbol/signature naming work.",
+      "evidence_refs": [
+        "changed_files: src/melee/ef/eflib.h added 110 deleted 65 hunks 1"
+      ]
+    },
+    {
+      "path": "src/melee/ef/types.h",
+      "role": "Effect type definition updates supporting ef source changes.",
+      "evidence_refs": [
+        "changed_files: src/melee/ef/types.h added 63 deleted 42 hunks 2"
+      ]
+    },
+    {
+      "path": "config/GALE01/splits.txt",
+      "role": "Split ownership update for efdata, efAlt, efSync .sdata, and efAsync .sdata ranges.",
+      "evidence_refs": [
+        "changed_files: config/GALE01/splits.txt added 5 deleted 5 hunks 2",
+        "diff: eflib_alloc.c split renamed to efdata.c; efspecial.c split renamed to efalt.c; efsync .sdata end adjusted 0x804D39D8 to 0x804D39D5; efasync .sdata end adjusted 0x804D3A00 to 0x804D39FA"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Symbol metadata and naming updates for efLib, efAlt, efAsync, efdata-owned data, bss/sbss, and jumptable labels.",
+      "evidence_refs": [
+        "changed_files: config/GALE01/symbols.txt added 76 deleted 78 hunks 7",
+        "diff: efLib_8005xxxx/fn_8005xxxx symbols renamed to descriptive efLib_* names",
+        "diff: efSpecial_SpawnSpecial renamed to efAlt_Spawn",
+        "diff: efAsync_80063930 and related symbols renamed to efAsync_Dispatch, efAsync_LoadAsync, efAsync_OnLoad, efAsync_LoadSync, efAsync_Queue*",
+        "diff: efLib_LoadKind, efLib_EffectCount, efLib_AnimCount sbss symbols introduced"
+      ]
+    },
+    {
+      "path": "configure.py",
+      "role": "Build object list updated from eflib_alloc.c to efdata.c and efspecial.c to efalt.c.",
+      "evidence_refs": [
+        "changed_files: configure.py added 2 deleted 2 hunks 1",
+        "diff: Matching object melee/ef/eflib_alloc.c changed to melee/ef/efdata.c; melee/ef/efspecial.c changed to melee/ef/efalt.c"
+      ]
+    },
+    {
+      "path": "src/MSL/math.h",
+      "role": "Added float and long pi/tau-style math macros used by touched code or future matching.",
+      "evidence_refs": [
+        "changed_files: src/MSL/math.h added 9 deleted 0 hunks 1",
+        "diff: added M_PI_F, M_PI_2_F, M_PI_3_F, M_PI_L, M_TAU_L, M_PI_2_L, M_PI_3_L"
+      ]
+    },
+    {
+      "path": "other touched files",
+      "role": "Small reference/include/prototype or callsite updates across db, fighter, game-mode, ground, item, lb, vi, gobj, and particle files.",
+      "evidence_refs": [
+        "changed_files: src/melee/db/dballoc.c; src/melee/ft/chara/ftCommon/ftCo_Guard.c; src/melee/ft/chara/ftKirby/ftKb_SpecialN.c; src/melee/ft/fighter.c; src/melee/ft/ftdata.c; src/melee/ft/ftdemo.c; src/melee/ft/ftlib.c; src/melee/gm/gm_16AE.c; src/melee/gm/gm_1832.c; src/melee/gm/gmregtyfall.c; src/melee/gm/gmstaffroll.c; src/melee/gr/grlib.c; src/melee/it/item.c; src/melee/lb/lbdvd.c; src/melee/vi/vi0102.c; src/melee/vi/vi0401.c; src/melee/vi/vi0402.c; src/melee/vi/vi0501.c; src/melee/vi/vi0502.c; src/melee/vi/vi0601.c; src/melee/vi/vi0801.c; src/melee/vi/vi1201v1.c; src/melee/vi/vi1202.c; src/sysdolphin/baselib/gobj.h; src/sysdolphin/baselib/particle.c; src/sysdolphin/baselib/particle.h"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Renamed the efSpecial unit to efAlt in source, headers, configure.py, splits.txt, and symbols.txt.",
+    "Added efdata.c and efdata.h to hold static ef data that the PR body says was moved from eflib_alloc and other data regions.",
+    "Removed efspecial.c/efspecial.h and eflib_alloc.h content from the changed file set; eflib_alloc.c lost a small amount of source.",
+    "Adjusted GALE01 split ranges for efdata .bss/.sbss, eflib .sbss removal, efsync .sdata, efalt, and efasync .sdata.",
+    "Renamed many efLib and efAsync symbols from address-style names to descriptive names such as efLib_Init, efLib_Create, efLib_Cb_*, efAsync_Dispatch, efAsync_LoadAsync, and efAsync_Queue*.",
+    "Bot report recorded new matches for efAlt_Spawn, efAlt data sections, efdata .bss/.sbss, efsync .sdata, efAsync_Spawn, and efasync .sdata.",
+    "Bot report recorded improvements for unmatched efSync_Spawn and efAsync_Dispatch, and a regression for unmatched efasync .data.",
+    "Added MSL math macros for float and long pi-derived constants.",
+    "Touched many downstream files with small one-to-five-line changes, likely to follow renamed ef symbols or header/prototype changes; the slice does not include enough diff to classify each small callsite edit precisely."
+  ],
+  "smart_moves": [
+    {
+      "text": "The PR paired source-unit renames with configure.py, splits.txt, and symbols.txt updates, avoiding a source-only rename that would leave build/split metadata stale.",
+      "evidence_refs": [
+        "diff: configure.py object list updates",
+        "diff: splits.txt efSpecial->efAlt and eflib_alloc->efdata",
+        "diff: symbols.txt efSpecial_SpawnSpecial->efAlt_Spawn"
+      ]
+    },
+    {
+      "text": "Data ownership was made explicit by introducing efdata.c and reflecting its .bss/.sbss ownership in splits.txt instead of leaving static ef data under eflib_alloc.",
+      "evidence_refs": [
+        "pr_body: efdata.c New file that holds static data for ef",
+        "diff: splits.txt efdata.c .bss and .sbss ranges",
+        "bot_report: efdata .bss and .sbss new matches"
+      ]
+    },
+    {
+      "text": "Descriptive ef symbol names were applied broadly enough to include symbol metadata and likely callsite/header updates, which improves searchability while preserving addresses in symbols.txt.",
+      "evidence_refs": [
+        "pr_body: Gave descriptive naming to ef-related functions",
+        "diff: symbols.txt efLib_* and efAsync_* rename block",
+        "changed_files: multiple small downstream callsite/header files"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a decomp PR renames or re-splits a translation unit, update source files, configure object entries, split ranges, and symbol names together so validation reports describe moved ownership rather than unexplained broken matches.",
+      "evidence_refs": [
+        "diff: configure.py eflib_alloc.c->efdata.c and efspecial.c->efalt.c",
+        "diff: splits.txt matching unit-name changes",
+        "bot_report: broken efSpecial/eflib_alloc matches correspond to new efAlt/efdata matches"
+      ],
+      "confidence": 0.86
+    },
+    {
+      "lesson": "Small data-section range corrections can convert section matches even when text functions remain unmatched; in this PR, efsync .sdata and efasync .sdata reached 100% while efSync_Spawn and efAsync_Dispatch were still only improved.",
+      "evidence_refs": [
+        "pr_body: efsync.c .sdata now matches; efasync.c .sdata now matches",
+        "bot_report: efSync_Spawn 98.28%; efAsync_Dispatch 98.60%; efsync .sdata and efasync .sdata 100%"
+      ],
+      "confidence": 0.8
+    },
+    {
+      "lesson": "Jumptable-associated data regressions may appear while the owning dispatch function is still unmatched; treat the regression as requiring follow-up evidence rather than assuming it is final cleanup.",
+      "evidence_refs": [
+        "bot_report: efasync .data regression 65.93% to 24.82%",
+        "author_comment: this is jumptable related, it will be inherently fixed once the associated function matches i believe"
+      ],
+      "confidence": 0.55
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "The PR uses efAlt_* for the renamed alternative effect unit, replacing efSpecial_* at the same text/data range.",
+      "evidence_refs": [
+        "pr_body: efSpecial -> efAlt",
+        "diff: symbols.txt efSpecial_SpawnSpecial -> efAlt_Spawn"
+      ]
+    },
+    {
+      "text": "The PR changes many efLib address-style functions to verb/action names with efLib_ prefix, including Init, SetFlags, Destroy, Create, CreateGenerator, SpawnParticleEffect, and SetParam* forms.",
+      "evidence_refs": [
+        "diff: symbols.txt efLib_8005B4B8 -> efLib_Init and related rename block"
+      ]
+    },
+    {
+      "text": "Callback-like efLib names use an efLib_Cb_ prefix in this PR, e.g. efLib_Cb_SPtcl, efLib_Cb_ParticleRender, and efLib_Cb_SetOffsetY_FromParamY.",
+      "evidence_refs": [
+        "diff: symbols.txt efLib_Cb_* entries"
+      ]
+    },
+    {
+      "text": "efAsync queue/load functions are named by operation, including efAsync_Dispatch, efAsync_LoadAsync, efAsync_OnLoad, efAsync_LoadSync, efAsync_QueueProcessDeferred, efAsync_QueueFlush, efAsync_QueueClear, and efAsync_QueueInit.",
+      "evidence_refs": [
+        "diff: symbols.txt efAsync_80063930 and related symbols renamed"
+      ]
+    },
+    {
+      "text": "The author explicitly stated they were not attached to the descriptive ef names, so these names should be treated as PR-applied names rather than externally proven canonical semantics.",
+      "evidence_refs": [
+        "pr_body: Feel free to change any of these, I am not attached to them"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "text": "Use split and symbol metadata changes to move section ownership when static data belongs in a new unit; here efdata.c receives ef .bss/.sbss ranges and corresponding symbols.",
+      "evidence_refs": [
+        "pr_body: efdata.c holds static data for ef",
+        "diff: splits.txt efdata.c .bss and .sbss ranges",
+        "bot_report: efdata .bss and .sbss new matches"
+      ]
+    },
+    {
+      "text": "For unit renames, expect validation to show old-unit broken matches paired with new-unit matches; compare the byte totals and ranges before treating them as real regressions.",
+      "evidence_refs": [
+        "bot_report: efSpecial_SpawnSpecial -7104 broken and efAlt_Spawn +7104 new match",
+        "bot_report: eflib_alloc .bss -44 broken and efdata .bss +44 new match"
+      ]
+    },
+    {
+      "text": "Jumptable data should be tracked with its owning function; author indicated a displayed issue was jumptable-related and likely tied to the associated function reaching match.",
+      "evidence_refs": [
+        "author_comment: jumptable related; inherently fixed once associated function matches",
+        "diff: symbols.txt jumptable_803BF9F8 and jumptable_803BFB28 metadata near efAlt/efAsync data"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "text": "GALE01 report showed matched code +656 bytes, total data -13 bytes, matched data +27 bytes, 9 new matches, 6 broken matches, 2 unmatched improvements, and 1 unmatched regression.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev[bot] issuecomment-4102270622"
+      ]
+    },
+    {
+      "kind": "author_followup",
+      "text": "Author responded that a reported image/issue was jumptable-related and believed it would be fixed once the associated function matches.",
+      "evidence_refs": [
+        "human_pr_text: issuecomment-4102277867"
+      ]
+    },
+    {
+      "kind": "missing_review",
+      "text": "No review comments or formal reviewer feedback were present in the loaded slice.",
+      "evidence_refs": [
+        "metadata_json: review_comments 0, reviews 0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2339",
+    "ef work",
+    "Savestate2A03",
+    "efSpecial",
+    "efAlt",
+    "efAlt_Spawn",
+    "efdata.c",
+    "efdata.h",
+    "eflib_alloc",
+    "efsync .sdata",
+    "efasync .sdata",
+    "efAsync_Spawn",
+    "efSync_Spawn",
+    "efAsync_Dispatch",
+    "efAsync_DatEntries",
+    "efLib_Init",
+    "efLib_Create",
+    "efLib_CreateGenerator",
+    "efLib_SpawnParticleEffect",
+    "efLib_Cb_ParticleRender",
+    "efLib_LoadKind",
+    "efLib_EffectCount",
+    "efLib_AnimCount",
+    "jumptable_803BF9F8",
+    "jumptable_803BFB28",
+    "M_PI_F",
+    "M_TAU_L"
+  ],
+  "follow_up_queries": [
+    "PR 2339 efAsync .data regression jumptable associated function matches",
+    "efAsync_Dispatch jumptable_803BFB28 data regression",
+    "efAlt_Spawn efSpecial_SpawnSpecial rename split ownership",
+    "efdata.c eflib_alloc static data .bss .sbss ownership",
+    "efLib descriptive symbol names author not attached",
+    "efSync_Spawn slightly better match PR 2339",
+    "efAsync_Spawn 100% match PR 2339"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "raw_pr_json: PR metadata and body",
+      "human_pr_text: PR body and author issue comment",
+      "raw_diff: truncated diff excerpt with splits/symbols/configure/math changes",
+      "changed_files.jsonl: complete changed file list",
+      "text_corpus.jsonl: bot report and author comment"
+    ],
+    "notes": [
+      "The diff file is truncated in loaded_files, so detailed code-level tactics inside efasync.c, efsync.c, eflib.c, and efalt.c were not fully inspected.",
+      "The bot validation report provides useful match/regression evidence, but no build command, objdiff command, or reviewer approval details are present in the slice.",
+      "There are no review comments; reviewer intent and acceptance rationale are not available.",
+      "The author's jumptable explanation is phrased as belief and should not be promoted as a proven fix path without later function-match evidence.",
+      "Many small downstream files changed, but the loaded diff excerpt does not show their exact edits; they are recorded as touched files rather than individually interpreted."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "pr_lesson",
+        "title": "Unit rename or split moves should update source, configure, split, and symbol metadata together",
+        "text": "PR 2339 shows efSpecial->efAlt and eflib_alloc->efdata changes made across source files, configure.py, GALE01 splits, and symbols. The bot report then reflects paired old-unit broken matches and new-unit matches rather than an isolated source rename.",
+        "scope": [
+          "config/GALE01/splits.txt",
+          "config/GALE01/symbols.txt",
+          "configure.py",
+          "src/melee/ef"
+        ],
+        "evidence_refs": [
+          "diff: configure.py object substitutions",
+          "diff: splits.txt unit substitutions",
+          "diff: symbols.txt efSpecial_SpawnSpecial -> efAlt_Spawn",
+          "bot_report: efSpecial/efAlt and eflib_alloc/efdata paired results"
+        ],
+        "confidence": 0.86
+      },
+      {
+        "record_type": "pr_lesson",
+        "title": "Treat jumptable data regressions as tied to the owning dispatch match unless later evidence proves otherwise",
+        "text": "In PR 2339, efasync .data regressed while efAsync_Dispatch only improved; the author identified the issue as jumptable-related and expected it to be fixed when the associated function matches. This is a follow-up heuristic, not proof of correctness.",
+        "scope": [
+          "src/melee/ef/efasync.c",
+          "config/GALE01/symbols.txt"
+        ],
+        "evidence_refs": [
+          "bot_report: efasync .data regression and efAsync_Dispatch improvement",
+          "author_comment: jumptable related"
+        ],
+        "confidence": 0.55
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "efSpecial unit renamed to efAlt in PR 2339",
+        "text": "PR 2339 changed the effect split/source naming from melee/ef/efspecial.c to melee/ef/efalt.c and renamed efSpecial_SpawnSpecial to efAlt_Spawn at .text:0x80061D70.",
+        "source_path": "src/melee/ef/efalt.c",
+        "scope": [
+          "src/melee/ef/efalt.c",
+          "src/melee/ef/efalt.h",
+          "config/GALE01/splits.txt",
+          "config/GALE01/symbols.txt",
+          "configure.py"
+        ],
+        "evidence_refs": [
+          "pr_body: efSpecial -> efAlt",
+          "diff: splits.txt efspecial.c -> efalt.c",
+          "diff: symbols.txt efSpecial_SpawnSpecial -> efAlt_Spawn"
+        ],
+        "reason": "Possible path-history fact for future searches; curator should verify against current tree before adding."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "efdata.c introduced for ef static data ownership",
+        "text": "PR 2339 introduced efdata.c/efdata.h and moved ef static data ownership from eflib_alloc and other data regions, with efdata.c receiving .bss 0x80458EB0-0x80458EDC and .sbss 0x804D64E8-0x804D64F4 in the shown split excerpt.",
+        "source_path": "src/melee/ef/efdata.c",
+        "scope": [
+          "src/melee/ef/efdata.c",
+          "src/melee/ef/efdata.h",
+          "src/melee/ef/eflib_alloc.c",
+          "src/melee/ef/eflib_alloc.h",
+          "config/GALE01/splits.txt"
+        ],
+        "evidence_refs": [
+          "pr_body: efdata.c New file that holds static data for ef",
+          "diff: splits.txt efdata.c .bss and .sbss ranges",
+          "bot_report: efdata .bss/.sbss new matches"
+        ],
+        "reason": "Potential source/path ownership note; should be verified against final current splits before becoming a path fact."
+      },
+      {
+        "target_source_id": "ssbm_data_sheet",
+        "update_kind": "source_update",
+        "title": "efLib and efAsync descriptive symbol names from PR 2339",
+        "text": "PR 2339 renamed many efLib and efAsync symbols from address-style names to descriptive names. The author noted they were not attached to the names, so these should be curated cautiously as historical PR-applied names rather than independently proven canonical semantics.",
+        "source_path": "config/GALE01/symbols.txt",
+        "scope": [
+          "efLib_*",
+          "efAsync_*",
+          "config/GALE01/symbols.txt"
+        ],
+        "evidence_refs": [
+          "pr_body: Gave descriptive naming to ef-related functions; Feel free to change any of these",
+          "diff: symbols.txt efLib and efAsync rename blocks"
+        ],
+        "reason": "May help symbol history/search, but author caveat means curator should avoid treating each semantic name as proven."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Do not overinterpret PR author beliefs about jumptable regressions",
+        "text": "A PR author may identify a data regression as jumptable-related and likely fixed by matching the associated function. Record this as a follow-up hypothesis until later objdiff/checkdiff evidence confirms the function and data relationship.",
+        "source_path": null,
+        "scope": [
+          "jumptables",
+          "data regressions",
+          "dispatch functions"
+        ],
+        "evidence_refs": [
+          "bot_report: efasync .data regression",
+          "author_comment: jumptable related; fixed once associated function matches i believe"
+        ],
+        "reason": "Possible refinement to verification/regression guidance; current standards already require evidence for claimed matches, so curator may decide this is redundant."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote the added efLib/efAsync descriptive names as globally canonical semantics solely from this slice; the author explicitly invited changing them.",
+      "Do not claim efAsync_Dispatch or efSync_Spawn matched; the bot report only shows improvements to 98.60% and 98.28%.",
+      "Do not claim the efasync .data regression was fixed in this PR; the loaded report shows a regression and only an author hypothesis about jumptables.",
+      "Do not infer exact edits for the many small downstream files because their diff hunks are not loaded in detail."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

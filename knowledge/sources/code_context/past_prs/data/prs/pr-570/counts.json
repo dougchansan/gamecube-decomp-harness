@@ -1,0 +1,17 @@
+{
+  "number": 570,
+  "title": "Finish matching GXMisc",
+  "state": "MERGED",
+  "createdAt": "2022-09-17T22:04:42Z",
+  "updatedAt": "2022-09-17T23:42:22Z",
+  "mergedAt": "2022-09-17T23:42:18Z",
+  "closedAt": "2022-09-17T23:42:18Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/570",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 1,
+    "diff_bytes": 9276
+  }
+}

@@ -1,0 +1,469 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2564",
+  "pr": {
+    "number": 2564,
+    "title": "Match mn menu record functions",
+    "url": "https://github.com/doldecomp/melee/pull/2564",
+    "state": "MERGED",
+    "author": "itsgrimetime",
+    "created_at": "2026-05-31T21:14:10Z",
+    "merged_at": "2026-06-01T05:53:50Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2564 matched a batch of src/melee/mn menu/records functions across mnruleplus, mnnamenew, mndiagram2, mnvibration, mnsoundtest, mndatadel, mninfo, mnsnap, and mncount, with accompanying header/prototype adjustments and small data/static-header edits. The PR body claims require-protos plus ninja verification; the bot report records 21 new matches and several unmatched-item improvements.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "naming",
+      "data-layout",
+      "menu-records"
+    ],
+    "systems": [
+      "melee-core",
+      "src/melee/mn"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/mn/mnvibration.c",
+      "role": "Largest changed source file; PR body claims matches for mnVibration_80248444, mnVibration_80248644, mnVibration_80248ED4, and mnVibration_80249174; bot report also records mnvibration .data and .sdata completion.",
+      "evidence_refs": [
+        "changed_files.jsonl: mnvibration.c added 156 deleted 121 hunks 13",
+        "human_pr_text: mnVibration match list",
+        "text_corpus: decomp-dev bot report 21 new matches"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mninfo.c",
+      "role": "Matched mnInfo_80251D58, mnInfo_80251F04, mnInfo_802522B8 and improved adjacent info logic using data-layout struct access, adjusted signatures, local slot pointer arithmetic, and dont_inline pragmas.",
+      "evidence_refs": [
+        "changed_files.jsonl: mninfo.c added 84 deleted 65 hunks 12",
+        "diff_excerpt: MnInfoDataLayout, mnInfo_80251D58 signature/layout->date_format/time_format, mnInfo_80251F04 slot handling",
+        "human_pr_text: mnInfo match list",
+        "text_corpus: bot report mnInfo matches and improvements"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnruleplus.c",
+      "role": "Matched mn_80232D4C and improved related mnruleplus data/sdata/sdata2 items per bot report.",
+      "evidence_refs": [
+        "changed_files.jsonl: mnruleplus.c added 77 deleted 59 hunks 7",
+        "human_pr_text: Match mn_80232D4C",
+        "text_corpus: bot report mnruleplus function and data improvements"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mncount.c",
+      "role": "Improved adjacent count-row logic by extracting repeated unlocked-character/map loops into static inline helpers and removing a PAD_STACK use.",
+      "evidence_refs": [
+        "changed_files.jsonl: mncount.c added 31 deleted 28 hunks 3",
+        "diff_excerpt: mnCount_CountUnlockedChars, mnCount_CountUnlockedMaps, PAD_STACK removal",
+        "human_pr_text: mnCount_GetRowValue_Character and adjacent count-row logic"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mndiagram2.c",
+      "role": "Matched mnDiagram2_GetStatValue and mnDiagram2_UpdateScrollArrows; used a u16 temporary for repeated stat reads and a temporary data-layout struct for animation settings.",
+      "evidence_refs": [
+        "changed_files.jsonl: mndiagram2.c added 38 deleted 19 hunks 10",
+        "diff_excerpt: val16 in mnDiagram2_GetStatValue and MnDiagram2DataLayout in mnDiagram2_UpdateScrollArrows",
+        "human_pr_text: mnDiagram2 match list",
+        "text_corpus: bot report mndiagram2 matches"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mndatadel.c",
+      "role": "Matched mnDataDel_80250170 by introducing archive/assets locals and indexing a contiguous StaticModelDesc asset layout in lbArchive_LoadSections.",
+      "evidence_refs": [
+        "changed_files.jsonl: mndatadel.c added 15 deleted 13 hunks 1",
+        "diff_excerpt: archive/assets locals and assets[0..2] StaticModelDesc indexing",
+        "human_pr_text: mnDataDel_80250170 match"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mndiagram.c",
+      "role": "Adjusted diagram helper signatures and casts for is_name_mode, with MNDIAGRAM_SOURCE guarding header-visible prototype differences.",
+      "evidence_refs": [
+        "changed_files.jsonl: mndiagram.c added 6 deleted 5 hunks 4",
+        "diff_excerpt: MNDIAGRAM_SOURCE define and int/u8 signature changes"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mndiagram.h",
+      "role": "Header prototype updates, including conditional prototype surface for mnDiagram_GetPlayPercentage.",
+      "evidence_refs": [
+        "changed_files.jsonl: mndiagram.h added 7 deleted 2 hunks 1",
+        "diff_excerpt: MNDIAGRAM_SOURCE conditional prototype"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mndatadel.static.h",
+      "role": "Static data literal cleanup using explicit float suffixes in AnimLoopSettings and Vec3 initializers.",
+      "evidence_refs": [
+        "changed_files.jsonl: mndatadel.static.h added 3 deleted 3 hunks 2",
+        "diff_excerpt: -0.1F, -5.5F, -2.8F changes"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnnamenew.c",
+      "role": "Matched AddCharacterToName and mnNameNew_8023E0D8 per PR body and bot report.",
+      "evidence_refs": [
+        "changed_files.jsonl: mnnamenew.c added 39 deleted 19 hunks 8",
+        "human_pr_text: AddCharacterToName and mnNameNew_8023E0D8",
+        "text_corpus: bot report mnnamenew matches"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnsoundtest.c",
+      "role": "Matched mnSoundTest_8024A790 per PR body and bot report.",
+      "evidence_refs": [
+        "changed_files.jsonl: mnsoundtest.c added 12 deleted 10 hunks 1",
+        "human_pr_text: mnSoundTest_8024A790",
+        "text_corpus: bot report mnSoundTest_8024A790"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnsnap.c",
+      "role": "Matched mnSnap_80253BE0 and fn_80257D7C per PR body and bot report.",
+      "evidence_refs": [
+        "changed_files.jsonl: mnsnap.c added 16 deleted 11 hunks 3",
+        "human_pr_text: mnSnap_80253BE0 and fn_80257D7C",
+        "text_corpus: bot report mnsnap matches"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mninfo.h",
+      "role": "Header/prototype surface changed for mninfo matched functions.",
+      "evidence_refs": [
+        "changed_files.jsonl: mninfo.h added 6 deleted 2 hunks 2"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnruleplus.h",
+      "role": "Header/prototype surface changed for mnruleplus matched function work.",
+      "evidence_refs": [
+        "changed_files.jsonl: mnruleplus.h added 8 deleted 0 hunks 1"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnvibration.h",
+      "role": "Header/prototype surface changed for mnvibration matched function work.",
+      "evidence_refs": [
+        "changed_files.jsonl: mnvibration.h added 2 deleted 9 hunks 2"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnnamenew.h",
+      "role": "Header/prototype surface changed for mnnamenew matched function work.",
+      "evidence_refs": [
+        "changed_files.jsonl: mnnamenew.h added 1 deleted 1 hunks 1"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Matched 21 items per bot report, including mnvibration functions/data, AddCharacterToName, mnNameNew_8023E0D8, mnDiagram2_GetStatValue, mnDiagram2_UpdateScrollArrows, mnSoundTest_8024A790, mnDataDel_80250170, mnInfo_80251D58, mnInfo_80251F04, mnInfo_802522B8, mnSnap_80253BE0, fn_80257D7C, mnCount_GetRowValue_Character, and mn_80232D4C.",
+    "Updated headers for diagram/info/ruleplus/vibration/name-new functions, with PR verification explicitly naming `python configure.py --require-protos && ninja`.",
+    "Extracted repeated unlocked-character and unlocked-map loops in mncount into static inline helpers and reused them from multiple switch cases.",
+    "Introduced temporary local layout structs in mninfo and mndiagram2 to access mixed static data blobs as structured fields rather than isolated raw globals.",
+    "Adjusted function signatures and casts around `is_name_mode` in mndiagram/mndiagram2, including a conditional header prototype guarded by MNDIAGRAM_SOURCE.",
+    "Used locals for archive/assets in mnDataDel_80250170 and indexed contiguous StaticModelDesc entries in an lbArchive_LoadSections call.",
+    "Kept or introduced narrow matching controls in mninfo with `#pragma push`, `#pragma dont_inline on`, and `#pragma pop` around specific functions."
+  ],
+  "smart_moves": [
+    "Moved repeated count loops into static inline helpers instead of preserving duplicate switch-case bodies; this also removed an existing PAD_STACK in mnCount_GetRowValue_Number.",
+    "Used a `u16 val16` temporary in mnDiagram2_GetStatValue for several name-vs-fighter stat cases, reducing repeated direct returns and likely matching a common load/return shape.",
+    "Modeled static data layout locally with MnDiagram2DataLayout and MnInfoDataLayout so code could address animation settings and format strings through typed fields.",
+    "Passed the dereferenced gmMainLib_8015D804 result into mnInfo_80251D58, changing the signature to carry the value used for datetime formatting.",
+    "Documented narrow verification in the PR body with require-protos plus ninja, and the bot report recorded concrete function-level match deltas."
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When repeated switch cases count unlocked menu entities with the same loop shape, extracting a static inline helper can both improve readability and preserve matchability.",
+      "scope": [
+        "src/melee/mn/mncount.c",
+        "menu record counters"
+      ],
+      "evidence_refs": [
+        "diff_excerpt: mnCount_CountUnlockedChars and mnCount_CountUnlockedMaps reused in SHORTEST_TIME, AVAILABLE_CHARACTERS, AVAILABLE_MAPS",
+        "text_corpus: bot report mnCount_GetRowValue_Character reaches 100% and mnCount_GetRowValue_Number improves"
+      ],
+      "confidence": 0.86
+    },
+    {
+      "lesson": "For menu static-data blobs that combine IDs, animation settings, and strings, a small local layout struct can express intended offsets better than unrelated globals or repeated raw address access.",
+      "scope": [
+        "src/melee/mn/mninfo.c",
+        "src/melee/mn/mndiagram2.c"
+      ],
+      "evidence_refs": [
+        "diff_excerpt: MnInfoDataLayout date_format/time_format",
+        "diff_excerpt: MnDiagram2DataLayout stat_name_ids and anim[2]"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "Prototype changes should be paired with header updates and require-protos verification when matching recovered function bodies.",
+      "scope": [
+        "src/melee/mn/*.h",
+        "matched menu functions"
+      ],
+      "evidence_refs": [
+        "human_pr_text: Verification `python configure.py --require-protos && ninja`",
+        "changed_files.jsonl: mndiagram.h, mninfo.h, mnruleplus.h, mnvibration.h, mnnamenew.h changed"
+      ],
+      "confidence": 0.81
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "mnCount_CountUnlockedChars / mnCount_CountUnlockedMaps",
+      "kind": "static inline helper",
+      "lesson": "Names describe the recovered local role of duplicated loops without over-renaming external gm_* calls.",
+      "evidence_refs": [
+        "diff_excerpt: new static inline helper names in mncount.c"
+      ]
+    },
+    {
+      "name": "MnDiagram2DataLayout / MnInfoDataLayout",
+      "kind": "local layout typedef",
+      "lesson": "Temporary data-layout typedefs were named by owning module and role, then scoped to the source file.",
+      "evidence_refs": [
+        "diff_excerpt: typedef struct MnDiagram2DataLayout",
+        "diff_excerpt: typedef struct MnInfoDataLayout"
+      ]
+    },
+    {
+      "name": "archive / assets / data / text / slot",
+      "kind": "local variables",
+      "lesson": "Local variable names in shown hunks use short role names for clear object categories rather than temp_rXX names.",
+      "evidence_refs": [
+        "diff_excerpt: mnDataDel_80250170 archive/assets locals",
+        "diff_excerpt: mnInfo_80251D58 and mnInfo_80251F04 data/text/slot locals"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Extract duplicate loops into static inline helpers while preserving exact integer counters and casts to u8 where needed.",
+      "evidence_refs": [
+        "diff_excerpt: `for (i = 0; i < NUM_CHARACTERS; i++)` with `gm_8016400C((u8) i)`",
+        "diff_excerpt: `for (i = 0; i < NUM_STAGES; i++)` with `gm_801641CC((u8) i)`"
+      ],
+      "related_standards": [
+        "natural-loops",
+        "infer-authored-source-style"
+      ]
+    },
+    {
+      "tactic": "Use a narrow local data-layout struct to recover offset-based access into static data.",
+      "evidence_refs": [
+        "diff_excerpt: `base = (MnDiagram2DataLayout*) &mnDiagram2_803EEAD0; ... &base->anim[1]`",
+        "diff_excerpt: `layout = (MnInfoDataLayout*) mnInfo_803EFC08; ... layout->date_format`"
+      ],
+      "related_standards": [
+        "typed-fields-over-pointer-math",
+        "data-sections-and-tu-splits"
+      ]
+    },
+    {
+      "tactic": "Adjust function signatures to int for callsite match while casting to u8 at branch/use sites.",
+      "evidence_refs": [
+        "diff_excerpt: mnDiagram_GetHitPercentage and mnDiagram_GetAveragePlayerCount changed from u8 to int for is_name_mode",
+        "diff_excerpt: calls from mnDiagram2_GetStatValue pass is_name_mode without u8 cast"
+      ],
+      "related_standards": [
+        "truthful-headers-and-includes"
+      ]
+    },
+    {
+      "tactic": "Use narrow `#pragma dont_inline` blocks around specific mninfo functions.",
+      "evidence_refs": [
+        "diff_excerpt: `#pragma push`, `#pragma dont_inline on`, `#pragma pop` around mnInfo_80251D58 and mnInfo_80251F04"
+      ],
+      "related_standards": [
+        "avoid-pragmas-register-asm",
+        "matching-tactics-need-evidence"
+      ]
+    },
+    {
+      "tactic": "Remove PAD_STACK where refactoring made it unnecessary for the adjacent count-row value function.",
+      "evidence_refs": [
+        "diff_excerpt: deleted `PAD_STACK(8);` in mnCount_GetRowValue_Number",
+        "text_corpus: bot report mnCount_GetRowValue_Number improvement"
+      ],
+      "related_standards": [
+        "matching-tactics-need-evidence"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "author": "decomp-dev[bot]",
+      "summary": "Initial report showed +0.19% matched code, +0.05% matched data, 21 new matches, and 6 improvements in unmatched items.",
+      "evidence_refs": [
+        "text_corpus: issue_comment by decomp-dev[bot] at 2026-05-31T21:23:11Z"
+      ]
+    },
+    {
+      "kind": "author_status",
+      "author": "itsgrimetime",
+      "summary": "Author stated they were cleaning up regressions and would mark ready once the report was clean.",
+      "evidence_refs": [
+        "human_pr_text: issue comment 'cleaning up regressions now. will mark ready once report is clean'",
+        "text_corpus: issue_comment by itsgrimetime at 2026-05-31T21:30:45Z"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2564",
+    "Match mn menu record functions",
+    "src/melee/mn",
+    "mnvibration",
+    "mninfo",
+    "mnruleplus",
+    "mncount",
+    "mndiagram",
+    "mndiagram2",
+    "mndatadel",
+    "mnnamenew",
+    "mnsnap",
+    "mnsoundtest",
+    "mn_80232D4C",
+    "AddCharacterToName",
+    "mnNameNew_8023E0D8",
+    "mnDiagram2_GetStatValue",
+    "mnDiagram2_UpdateScrollArrows",
+    "mnVibration_80248444",
+    "mnVibration_80248644",
+    "mnVibration_80248ED4",
+    "mnVibration_80249174",
+    "mnSoundTest_8024A790",
+    "mnDataDel_80250170",
+    "mnInfo_80251D58",
+    "mnInfo_80251F04",
+    "mnInfo_802522B8",
+    "mnSnap_80253BE0",
+    "fn_80257D7C",
+    "mnCount_GetRowValue_Character",
+    "mnCount_GetRowValue_Number",
+    "mnCount_CountUnlockedChars",
+    "mnCount_CountUnlockedMaps",
+    "MnDiagram2DataLayout",
+    "MnInfoDataLayout",
+    "MNDIAGRAM_SOURCE",
+    "PAD_STACK removal",
+    "require-protos",
+    "dont_inline"
+  ],
+  "follow_up_queries": [
+    "PR 2564 mnInfo_80251D58 MnInfoDataLayout date_format time_format",
+    "PR 2564 mndiagram MNDIAGRAM_SOURCE conditional prototype",
+    "PR 2564 mnCount_CountUnlockedChars PAD_STACK removed",
+    "PR 2564 MnDiagram2DataLayout anim[1] UpdateScrollArrows",
+    "PR 2564 mnvibration .data .sdata 100% matched",
+    "PR 2564 cleaning up regressions report clean"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR identity, state MERGED, changed files and counts",
+      "human_pr_text: PR body summary and verification",
+      "text_corpus: decomp-dev bot report and author issue comment",
+      "diff_excerpt/raw_diff: representative hunks for mncount, mndatadel, mndiagram, mndiagram2, mninfo",
+      "changed_files.jsonl: complete file list"
+    ],
+    "notes": [
+      "Evidence is strong for PR identity, changed files, claimed functions, bot-reported match deltas, and representative tactics visible in the loaded diff excerpt.",
+      "The raw diff is truncated in loaded context, so detailed tactics for later portions of mninfo plus mnnamenew, mnruleplus, mnsnap, mnsoundtest, and mnvibration are only summarized from PR body, changed-file metadata, and bot report unless visible in excerpts.",
+      "There are no loaded human review comments; review feedback is limited to the bot report and the author's regression-cleanup status comment.",
+      "The PR body claims `python configure.py --require-protos && ninja`; no separate full build log is loaded beyond the PR statement and bot report."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "type": "decomp_lesson",
+        "title": "Repeated menu count loops may become static inline helpers",
+        "text": "In PR #2564, duplicated unlocked-character/map counting loops in mncount were extracted into static inline helpers and reused by multiple row-value cases; the bot report recorded mnCount_GetRowValue_Character reaching 100% and mnCount_GetRowValue_Number improving.",
+        "scope": [
+          "src/melee/mn/mncount.c",
+          "menu records"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: mnCount_CountUnlockedChars and mnCount_CountUnlockedMaps",
+          "text_corpus: bot report mncount rows"
+        ]
+      },
+      {
+        "type": "decomp_lesson",
+        "title": "Local layout structs can clarify mixed menu static-data blobs",
+        "text": "PR #2564 used MnInfoDataLayout and MnDiagram2DataLayout to access animation settings and format strings through typed fields, avoiding less-informative raw data access in the shown hunks.",
+        "scope": [
+          "src/melee/mn/mninfo.c",
+          "src/melee/mn/mndiagram2.c"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: MnInfoDataLayout",
+          "diff_excerpt: MnDiagram2DataLayout"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Require evidence when retaining local dont_inline pragmas for matching",
+        "text": "PR #2564 shows narrow `#pragma dont_inline on` blocks around matched mninfo functions. This supports reminding curators that pragma-based matching tactics should stay tightly scoped and tied to function-level match evidence.",
+        "source_path": null,
+        "scope": [
+          "matching tactics",
+          "pragmas",
+          "src/melee/mn/mninfo.c"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: pragma push/dont_inline/pop around mnInfo_80251D58 and mnInfo_80251F04",
+          "text_corpus: bot report mnInfo_80251D58 and mnInfo_80251F04 100%"
+        ],
+        "reason": "This is already aligned with loaded standards avoid-pragmas-register-asm and matching-tactics-need-evidence; curator may decide whether this PR is useful as an example."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "src/melee/mn menu record functions often share static data layout and helper patterns",
+        "text": "In PR #2564, menu record matches touched mncount, mndiagram2, mninfo, mndatadel, mnnamenew, mnruleplus, mnsnap, mnsoundtest, and mnvibration. Visible hunks used static inline helpers for repeated counts and local data-layout structs for static menu data.",
+        "source_path": "src/melee/mn",
+        "scope": [
+          "menu records",
+          "matching",
+          "static data layout"
+        ],
+        "evidence_refs": [
+          "changed_files.jsonl: complete changed file list",
+          "diff_excerpt: mncount helpers and data-layout structs",
+          "text_corpus: bot report 21 new matches"
+        ],
+        "reason": "Candidate path fact only; do not promote without curator checking more mn menu PRs or current source patterns."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer reviewer intent or review approval details; no review comments or reviews were loaded.",
+      "Do not generalize the MNDIAGRAM_SOURCE conditional-prototype pattern as a standard from this single PR; it may be a local matching workaround.",
+      "Do not treat the large odd float table in mninfo as semantically understood; the visible diff only supports that it was moved/used as a data-layout base for matching.",
+      "Do not claim all touched files' internal tactics from the truncated diff; for several files only changed-file metadata, PR body claims, and bot match rows are loaded."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

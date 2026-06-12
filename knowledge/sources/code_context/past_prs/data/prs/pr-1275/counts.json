@@ -1,0 +1,17 @@
+{
+  "number": 1275,
+  "title": "Match ittogepy",
+  "state": "MERGED",
+  "createdAt": "2024-02-20T16:46:53Z",
+  "updatedAt": "2024-02-20T16:49:22Z",
+  "mergedAt": "2024-02-20T16:49:02Z",
+  "closedAt": "2024-02-20T16:49:02Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/1275",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 25119
+  }
+}

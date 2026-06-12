@@ -1,0 +1,491 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2462",
+  "pr": {
+    "number": 2462,
+    "title": "Match 22 functions across stage, fighter, menu, match-end, and synth TUs",
+    "url": "https://github.com/doldecomp/melee/pull/2462",
+    "state": "MERGED",
+    "author": "davidfeira",
+    "created_at": "2026-05-06T17:20:08Z",
+    "merged_at": "2026-05-06T21:28:58Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2462 matched a broad batch of functions across stage, fighter, menu, match-end/game-mode, vi, and sysdolphin synth translation units, alongside typed header refinements and one file-local layout struct needed by the new matches. The PR body reports a SHA1-matching ninja build, per-function objdiff-cli 100.0% matches for the claimed 22 functions, and an adjacent-regression fix involving removal of a cherry-picked dont_inline pragma.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "cleanup",
+      "decomp-matching",
+      "headers",
+      "naming",
+      "types-structs",
+      "verification"
+    ],
+    "systems": [
+      "fighter",
+      "stage",
+      "game-mode",
+      "menu",
+      "vi",
+      "sysdolphin-baselib"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_Attack100.c",
+      "role": "Matched throw-release effect dispatcher fn_800D84D4.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "diff_excerpt",
+        "human_pr_text: ftCo_Attack100.c — fn_800D84D4"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_Init.c",
+      "role": "Matched ftKb_SpecialN_800F1DAC and updated caller to pass gobj.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "diff_excerpt",
+        "human_pr_text: ftKb_Init.c — ftKb_SpecialN_800F1DAC"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_Init.h",
+      "role": "Replaced UNK prototype with void ftKb_SpecialN_800F1DAC(HSD_GObj*).",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "diff_excerpt",
+        "human_pr_text: Header refinements"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_SpecialN.c",
+      "role": "Matched Kirby Special-Lw collision handlers and added file-local layout struct for ftKb_Init_803CB490 data access.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "diff_excerpt",
+        "human_pr_text: ftKb_SpecialN.c — ftKb_SpecialLw_Coll / ftKb_SpecialLwEnd_Coll"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_SpecialNYs.c",
+      "role": "Matched Yoshi-egg shrink animation tick fn_8010AA64.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "diff_excerpt",
+        "human_pr_text: ftKb_SpecialNYs.c — fn_8010AA64"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1601.c",
+      "role": "Matched multiple match-end reducers/accumulators/tiebreaker helpers and fn_80169F50 in diff excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "diff_excerpt",
+        "human_pr_text: gm_1601.c functions"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1601.h",
+      "role": "Typed prototypes for fn_80161004, fn_80162068, and fn_80161C90.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "diff_excerpt",
+        "human_pr_text: Header refinements"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1BA8.c",
+      "role": "Matched tournament-event slot initializer and end-of-round arbiter.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "diff_excerpt",
+        "human_pr_text: gm_1BA8.c functions"
+      ]
+    },
+    {
+      "path": "src/melee/gr/granime.c",
+      "role": "Matched per-stage anime applier grAnime_801C8138.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "diff_excerpt",
+        "human_pr_text: granime.c — grAnime_801C8138"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grhomerun.c",
+      "role": "Matched Home-Run Contest stage initializer and score readout builder.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "human_pr_text: grhomerun.c functions"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grhomerun.h",
+      "role": "Typed prototype for grHomeRun_8021EC58.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "human_pr_text: Header refinements"
+      ]
+    },
+    {
+      "path": "src/melee/gr/gricemt.c",
+      "role": "Matched Ice Mountain animation tracker, scroll state machine, and per-frame scroll driver.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "human_pr_text: gricemt.c functions"
+      ]
+    },
+    {
+      "path": "src/melee/gr/gricemt.h",
+      "role": "Updated grIceMt_801FA364 signature to bool return and typed arguments.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "human_pr_text: Header refinements"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mndatadel.c",
+      "role": "Matched warning-dialog text setter and input handler.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "human_pr_text: mndatadel.c functions"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mndatadel.h",
+      "role": "Typed prototype for mnDataDel_8024EBC8.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "human_pr_text: Header refinements"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnmainrule.c",
+      "role": "Matched match-rule snapshot collector.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "human_pr_text: mnmainrule.c — mn_80230D18"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnmainrule.h",
+      "role": "Typed prototype for mn_80230D18.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "human_pr_text: Header refinements"
+      ]
+    },
+    {
+      "path": "src/melee/vi/vi1101.c",
+      "role": "Matched Mushroom-Kingdom-Route demo-character setup un_8031F294.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "human_pr_text: vi1101.c — un_8031F294"
+      ]
+    },
+    {
+      "path": "src/melee/vi/vi1101.h",
+      "role": "Typed prototype for un_8031F294.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "human_pr_text: Header refinements"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/synth.c",
+      "role": "Matched SFX-bank stream-prefetch finalizer and prefetched-stream header callback.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "human_pr_text: synth.c functions"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/synth.static.h",
+      "role": "Header/static definition refinement associated with synth matches.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "human_pr_text: Summary mentions inline struct/header refinements; changed file metadata"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Replaced placeholder function markers with matched C implementations across 13 translation units: gricemt, grhomerun, granime, ftCo_Attack100, ftKb_Init, ftKb_SpecialN, ftKb_SpecialNYs, mndatadel, mnmainrule, gm_1601, gm_1BA8, vi1101, and synth.",
+    "Refined headers by replacing UNK_RET/UNK_PARAMS or speculative signatures with typed prototypes in gricemt.h, mnmainrule.h, vi1101.h, ftKb_Init.h, gm_1601.h, grhomerun.h, and mndatadel.h.",
+    "Added a file-local struct ftKb_Init_803CB490_layout with padding to offset 0x74 and a Vec3 field so Kirby Special-Lw code could dereference a known data layout instead of raw untyped access.",
+    "Used explicit gameplay-state logic in matched bodies: collision edge detection from env_flags/prev_env_flags, match-end standings loops, tournament event flag unpacking, menu input masks, JObj animation/scale operations, and AX/synth voice setup.",
+    "Verification reported in the PR body: ninja produced build-linux/GALE01/main.dol OK with SHA1 match; per-function objdiff-cli reported 100.0% for each of the 22 claimed functions; an adjacent fuzzy regression caused by a dont_inline pragma was corrected by removing the pragma."
+  ],
+  "smart_moves": [
+    "Updated owning headers when matched bodies proved real signatures, rather than hiding typed calls behind source-local declarations.",
+    "Kept a narrow file-local data layout for ftKb_Init_803CB490 access, making the recovered Vec3 offset explicit without claiming a broader global type than the PR evidence proves.",
+    "Checked adjacent regression impact from a pragma/partial-match side effect and removed the dont_inline pragma when it degraded fn_800DAD18, preserving the upstream partial for ftCo_CaptureWaitLw_Phys instead of landing a noisy local win.",
+    "Grouped broad function matches with a detailed PR body that records what each recovered function does and what verification was run."
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a matched body proves a function signature, update the owning header prototypes at the same time so call sites can use typed arguments and return values.",
+      "evidence_refs": [
+        "human_pr_text: Header refinements",
+        "diff_excerpt: ftKb_Init.h and gm_1601.h prototype changes"
+      ],
+      "confidence": 0.92
+    },
+    {
+      "lesson": "A temporary, file-local layout struct can be a reviewable bridge for known data offsets when the match needs typed field access but the full global type is not recovered.",
+      "evidence_refs": [
+        "human_pr_text: ftKb_SpecialN.c inline struct definition",
+        "diff_excerpt: struct ftKb_Init_803CB490_layout"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "Pragma or inlining tactics should be checked against adjacent functions; if a tactic regresses a neighbor, remove it even if it was bundled with another partial match.",
+      "evidence_refs": [
+        "human_pr_text: Verification paragraph about fn_800DAD18 regression and dont_inline pragma removal"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "lesson": "For broad multi-TU match batches, record per-function objdiff evidence and a whole-build SHA1 result because the blast radius spans unrelated systems.",
+      "evidence_refs": [
+        "human_pr_text: Verification",
+        "changed_files.jsonl: 21 changed files across multiple subsystems"
+      ],
+      "confidence": 0.86
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Preserve address-style names such as fn_800D84D4, fn_8010AA64, fn_80161004, and un_8031F294 where semantic names are not proven by the PR evidence.",
+      "evidence_refs": [
+        "diff_excerpt",
+        "human_pr_text: function list"
+      ]
+    },
+    {
+      "convention": "Use short role locals for common object pointers such as fp, gobj, jobj, coll, src, and match_end when the role is clear.",
+      "evidence_refs": [
+        "diff_excerpt: ftCo_Attack100.c, ftKb_Init.c, gm_1BA8.c, granime.c"
+      ]
+    },
+    {
+      "convention": "For temporary recovered data layouts tied to a known symbol, a symbol-derived name with _layout suffix was used: ftKb_Init_803CB490_layout.",
+      "evidence_refs": [
+        "diff_excerpt: ftKb_SpecialN.c",
+        "human_pr_text: Header refinements"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "PAD_STACK was used in several matched functions to preserve stack shape, including fn_800D84D4, ftKb_SpecialN_800F1DAC, ftKb_SpecialLw_Coll, ftKb_SpecialLwEnd_Coll, and gm_801BD46C.",
+      "evidence_refs": [
+        "diff_excerpt"
+      ],
+      "caveat": "The PR body reports per-function 100.0% objdiff matches, but the loaded diff is truncated and does not independently show every claimed use."
+    },
+    {
+      "tactic": "Typed header cleanup accompanied matched implementation work, replacing UNK prototypes with signatures required by call sites and bodies.",
+      "evidence_refs": [
+        "human_pr_text: Header refinements",
+        "diff_excerpt: ftKb_Init.h, gm_1601.h"
+      ],
+      "caveat": "Header refinements are described by the PR author and partially visible in the diff excerpt."
+    },
+    {
+      "tactic": "A file-local padded struct exposed a Vec3 at offset 0x74 for ftKb_Init_803CB490, avoiding repeated raw offset spelling in the two Kirby Special-Lw handlers.",
+      "evidence_refs": [
+        "diff_excerpt: ftKb_SpecialN.c",
+        "human_pr_text: ftKb_SpecialN.c inline struct definition"
+      ],
+      "caveat": "The evidence supports this as a local bridge, not a fully recovered global data type."
+    },
+    {
+      "tactic": "Adjacent-function regression checking was used to reject a dont_inline pragma that reduced fn_800DAD18 from 100% to 90.31%.",
+      "evidence_refs": [
+        "human_pr_text: Verification"
+      ],
+      "caveat": "No separate review comment is loaded; this is from the PR body verification note."
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "human_review",
+      "feedback": "No human review comments or reviews are present in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata_json: review_comments 0, reviews 0"
+      ]
+    },
+    {
+      "kind": "automated_report",
+      "feedback": "decomp-dev[bot] issue comment reported matched code improvement to 66.21% (+0.25%, +9608 bytes) and matched data to 38.70% (+0.00%, +8 bytes); the loaded bot report is truncated but lists new matches.",
+      "evidence_refs": [
+        "text_corpus.jsonl: issue_comment by decomp-dev[bot]"
+      ]
+    },
+    {
+      "kind": "author_verification_note",
+      "feedback": "Author reported an initial CI/fuzzy regression from a dont_inline pragma, removed the pragma, restored fn_800DAD18 to 100%, and left ftCo_CaptureWaitLw_Phys at upstream's 49.25% partial.",
+      "evidence_refs": [
+        "human_pr_text: Verification"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR 2462",
+    "davidfeira",
+    "Match 22 functions",
+    "grAnime_801C8138",
+    "grIceMt_801F929C",
+    "grIceMt_801FA364",
+    "grIceMt_801F7A2C",
+    "grHomeRun_8021C914",
+    "grHomeRun_8021EC58",
+    "fn_800D84D4",
+    "ftKb_SpecialN_800F1DAC",
+    "ftKb_SpecialLw_Coll",
+    "ftKb_SpecialLwEnd_Coll",
+    "fn_8010AA64",
+    "mnDataDel_8024EBC8",
+    "fn_8024F1D4",
+    "mn_80230D18",
+    "un_8031F294",
+    "fn_80161004",
+    "fn_80162068",
+    "fn_801661E0",
+    "fn_80169F50",
+    "gm_801BAB40",
+    "gm_801BD46C",
+    "HSD_Synth_8038B120",
+    "HSD_SynthPStreamHeaderCallback",
+    "ftKb_Init_803CB490_layout",
+    "PAD_STACK",
+    "dont_inline pragma",
+    "fn_800DAD18 regression",
+    "objdiff-cli 100.0%",
+    "GALE01 main.dol OK"
+  ],
+  "follow_up_queries": [
+    "PR 2462 dont_inline fn_800DAD18 ftCo_CaptureWaitLw_Phys regression",
+    "ftKb_Init_803CB490_layout Vec3 offset 0x74 Kirby SpecialLw",
+    "gm_1601 header typed prototypes MatchEnd fn_80162068 fn_80161C90",
+    "HSD_SynthPStreamHeaderCallback stereo AX voice resampler 0.00003125",
+    "grIceMt_801FA364 bool return delay lerp state machine",
+    "decomp PR PAD_STACK objdiff 100 adjacent regressions"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json",
+      "human_pr_text.md",
+      "changed_files.jsonl",
+      "diff_excerpt",
+      "raw_diff truncated",
+      "text_corpus.jsonl truncated"
+    ],
+    "notes": [
+      "The PR body is detailed and the changed-file list is complete, but the raw diff and text corpus are truncated in the loaded slice.",
+      "The PR body claims 22 matched functions, while the automated bot excerpt says 25 new matches; because the bot report is truncated, this record preserves the PR title/body claim and notes the discrepancy only as evidence quality context.",
+      "No human review comments are loaded, so no reviewer intent or acceptance rationale is inferred.",
+      "Verification claims are author-provided in the PR body; no independent build logs or full objdiff outputs are loaded beyond the bot report excerpt."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson",
+        "title": "Header signatures should follow proven matched bodies",
+        "text": "PR #2462 updated multiple owning headers from UNK_RET/UNK_PARAMS or speculative signatures to typed prototypes when the matched bodies and call sites proved the arguments and return types.",
+        "scope": [
+          "headers",
+          "decomp-matching",
+          "truthful-headers"
+        ],
+        "evidence_refs": [
+          "human_pr_text: Header refinements",
+          "diff_excerpt: ftKb_Init.h",
+          "diff_excerpt: gm_1601.h"
+        ]
+      },
+      {
+        "record_type": "matching_tactic",
+        "title": "Reject pragma tactics that regress adjacent functions",
+        "text": "PR #2462 reports that a dont_inline pragma cherry-picked with a partial match regressed fn_800DAD18 from 100% to 90.31%; the pragma was removed and the adjacent function restored, while the partial match reverted to upstream's score.",
+        "scope": [
+          "verification",
+          "avoid-pragmas",
+          "adjacent-regression-checks"
+        ],
+        "evidence_refs": [
+          "human_pr_text: Verification"
+        ]
+      },
+      {
+        "record_type": "matching_tactic",
+        "title": "Use narrow local layout structs as temporary typed-offset bridges",
+        "text": "PR #2462 introduced a file-local ftKb_Init_803CB490_layout with padding to 0x74 and a Vec3 field so two Kirby Special-Lw handlers could access the same recovered constant Vec3 layout.",
+        "scope": [
+          "types-structs",
+          "typed-fields",
+          "fighter-kirby"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: ftKb_SpecialN.c",
+          "human_pr_text: Header refinements"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Use PR #2462 as an example for pragma regression checks",
+        "text": "Potential example for the avoid-pragmas/register-asm or verification ledger standard: a dont_inline pragma bundled with partial decomp work caused an adjacent function regression, so the tactic was removed and the adjacent 100% match restored.",
+        "source_path": null,
+        "scope": [
+          "avoid-pragmas-register-asm",
+          "verification-and-regression-ledger",
+          "adjacent functions"
+        ],
+        "evidence_refs": [
+          "human_pr_text: Verification"
+        ],
+        "reason": "The existing standards already cover this principle; the PR provides a concrete historical example for curator consideration."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Use PR #2462 as an example for typed headers after body recovery",
+        "text": "Potential example for truthful-headers-and-includes: this PR matched functions and updated owning headers such as ftKb_Init.h and gm_1601.h from unknown or stale prototypes to signatures used by the recovered bodies.",
+        "source_path": null,
+        "scope": [
+          "truthful-headers-and-includes",
+          "headers",
+          "matched bodies"
+        ],
+        "evidence_refs": [
+          "human_pr_text: Header refinements",
+          "diff_excerpt: ftKb_Init.h and gm_1601.h"
+        ],
+        "reason": "The standards already say to update owning headers; this PR is a candidate illustrative source, not a new accepted rule."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote the PR's temporary ftKb_Init_803CB490_layout as a complete global type; the evidence only supports a file-local bridge with a Vec3 at offset 0x74.",
+      "Do not infer human reviewer approval details; the loaded slice has no human reviews or review comments.",
+      "Do not treat the bot's truncated '25 new matches' line as replacing the PR's '22 matched functions' claim without the full automated report."
+    ]
+  },
+  "confidence": 0.84,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

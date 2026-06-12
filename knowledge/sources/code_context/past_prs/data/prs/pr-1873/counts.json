@@ -1,0 +1,17 @@
+{
+  "number": 1873,
+  "title": "ft_0D14 matches",
+  "state": "MERGED",
+  "createdAt": "2025-08-28T09:32:24Z",
+  "updatedAt": "2025-08-28T09:59:14Z",
+  "mergedAt": "2025-08-28T09:59:11Z",
+  "closedAt": "2025-08-28T09:59:11Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1873",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 20280
+  }
+}

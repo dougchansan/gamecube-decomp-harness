@@ -1,0 +1,397 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2465",
+  "pr": {
+    "number": 2465,
+    "title": "Fix local `melee-issues`",
+    "url": "https://github.com/doldecomp/melee/pull/2465",
+    "state": "MERGED",
+    "author": "ribbanya",
+    "created_at": "2026-05-07T21:38:24Z",
+    "merged_at": "2026-05-07T21:48:42Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Code-quality PR across fighter, game-mode, stage, item, and menu files to satisfy local `melee-issues`: mostly prototype cleanup for no-argument functions, removal of unused or duplicate declarations/includes, callback table formatting/cast cleanup, and broad formatting normalization. The PR body is empty and there are no review comments; the only loaded issue comment is a bot report saying `No changes` for GALE01.",
+  "change_classification": {
+    "primary_type": "code_quality_lint_fix",
+    "categories": [
+      "fix",
+      "headers",
+      "formatting",
+      "prototype_cleanup",
+      "include_cleanup"
+    ],
+    "systems": [
+      "fighter",
+      "game-mode",
+      "item",
+      "menu",
+      "stage"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_Attack100.c",
+      "role": "Removed an unused mp/mplib include and converted K&R-style fn_800DBED4 parameter declaration to a normal typed prototype.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:ftCo_Attack100.c"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftPopo/ftPp_SpecialS.c",
+      "role": "Formatting-only brace split in checkNanaInRange condition.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:ftPp_SpecialS.c"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftdynamics.c",
+      "role": "Formatting normalization for casts, condition wrapping, and helper-call argument layout in dynamic bone code.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:ftdynamics.c"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_16F1.c",
+      "role": "Changed empty parameter list to explicit void for fn_80171DC4.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:gm_16F1.c"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1832.c",
+      "role": "Changed fn_80188644 to explicit void and collapsed fn_8018846C_noInline forward declaration plus definition into a static function definition.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:gm_1832.c"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1A4C.c",
+      "role": "Changed inline no-argument helpers fn_801A7FB4_inline and fn_801A7FB4_inline2 to explicit void parameter lists.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:gm_1A4C.c"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmtitle.c",
+      "role": "Changed static inline no-argument helper isActiveTitle to explicit void parameter list.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:gmtitle.c"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grbigblueroute.c",
+      "role": "Formatting normalization in StageCallbacks initializer and pointer-cast spacing in route selection code.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:grbigblueroute.c"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grcastle.c",
+      "role": "Changed no-argument functions grCastle_801D0BBC and grCastle_801D0D24 to explicit void parameter lists.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:grcastle.c"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grgreens.c",
+      "role": "Reordered itwhispyapple include with other item includes and normalized long-line formatting across Greens stage logic.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:grgreens.c"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grmaterial.h",
+      "role": "Removed an extra blank line in declarations.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:grmaterial.h"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grshrineroute.c",
+      "role": "Changed inline no-argument random helper to explicit void parameter list.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:grshrineroute.c"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grzebes.c",
+      "role": "Moved early Zebes function definitions below data declarations, removed local forward declarations and callback casts/compound flag braces, and reformatted callback initializers.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:grzebes.c"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/ithitodeman.c",
+      "role": "Changed static no-argument ordering_func to explicit void parameter list.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:ithitodeman.c"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnname.c",
+      "role": "Changed inline no-argument GetNumNameList to explicit void parameter list.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:mnname.c"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Converted many no-argument C functions from empty parameter lists to explicit `(void)`, including game-mode, stage, item, and menu helpers.",
+    "Replaced a K&R-style function definition for `fn_800DBED4` with a normal typed parameter declaration.",
+    "Removed an unused include from `ftCo_Attack100.c` and reordered an item include in `grgreens.c`.",
+    "Changed `fn_8018846C_noInline` from a separate non-static prototype plus definition to a single `static int fn_8018846C_noInline(void)` definition.",
+    "In `grzebes.c`, moved several function definitions after data declarations and simplified `StageCallbacks` entries by removing explicit function-pointer casts and `{ 0 }` flag initializers.",
+    "Performed broad formatting cleanup: cast spacing, brace placement, long-line wrapping, callback table wrapping, and removal of an extra blank line.",
+    "Loaded bot issue comment reported `No changes` for GALE01; no human review comments were present in the slice."
+  ],
+  "smart_moves": [
+    {
+      "text": "The PR limits itself to lint/code-quality surface changes rather than mixing in decomp rewrites or semantic renames.",
+      "evidence_refs": [
+        "PR title: Fix local `melee-issues`",
+        "changed_files.jsonl",
+        "raw_diff"
+      ]
+    },
+    {
+      "text": "Converting empty no-argument lists to `(void)` makes function signatures explicit without changing symbol names or bodies.",
+      "evidence_refs": [
+        "raw_diff:gm_16F1.c",
+        "raw_diff:gm_1832.c",
+        "raw_diff:gm_1A4C.c",
+        "raw_diff:gmtitle.c",
+        "raw_diff:grcastle.c",
+        "raw_diff:grshrineroute.c",
+        "raw_diff:ithitodeman.c",
+        "raw_diff:mnname.c"
+      ]
+    },
+    {
+      "text": "Removing local clutter such as an unused include, an extra blank line, and a redundant forward declaration keeps the patch focused on issue cleanup.",
+      "evidence_refs": [
+        "raw_diff:ftCo_Attack100.c",
+        "raw_diff:gm_1832.c",
+        "raw_diff:grmaterial.h"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "Local lint-fix PRs can safely improve reviewability by making no-argument functions explicit with `(void)` while preserving address-style or unknown-meaning symbol names.",
+      "evidence_refs": [
+        "raw_diff:gm_16F1.c",
+        "raw_diff:gm_1832.c",
+        "raw_diff:grcastle.c",
+        "raw_diff:mnname.c"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "lesson": "When a helper is only needed in its translation unit, replacing a separate declaration plus definition with a `static` definition can reduce exposed surface area.",
+      "evidence_refs": [
+        "raw_diff:gm_1832.c"
+      ],
+      "confidence": 0.68
+    },
+    {
+      "lesson": "Callback table cleanup should be kept mechanical: remove unnecessary casts only where function signatures already match the table shape, and avoid semantic changes in the same patch.",
+      "evidence_refs": [
+        "raw_diff:grzebes.c"
+      ],
+      "confidence": 0.62
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "The patch keeps existing address-style and subsystem-style names such as `fn_80171DC4`, `grZebes_801D84A4`, and `GetNumNameList`; it does not introduce speculative semantic renames.",
+      "evidence_refs": [
+        "raw_diff:gm_16F1.c",
+        "raw_diff:grzebes.c",
+        "raw_diff:mnname.c"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "No assembly-specific matching tactic is evidenced. Existing `PAD_STACK(4)` in `fn_800DBED4` remains unchanged; this PR only changes that function's declaration style.",
+      "evidence_refs": [
+        "raw_diff:ftCo_Attack100.c"
+      ]
+    },
+    {
+      "tactic": "The available bot comment says `No changes` for GALE01, but the slice does not include detailed objdiff/checkdiff output or per-symbol validation.",
+      "evidence_refs": [
+        "text_corpus.jsonl:issue_comment"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "feedback": "No human review comments are present in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata_json:counts.review_comments=0",
+        "metadata_json:counts.reviews=0"
+      ]
+    },
+    {
+      "feedback": "Automated issue comment from `decomp-dev[bot]` reported `No changes` for GALE01.",
+      "evidence_refs": [
+        "text_corpus.jsonl:issue_comment"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2465",
+    "Fix local melee-issues",
+    "melee-issues",
+    "code-quality",
+    "explicit void parameter list",
+    "empty parameter list",
+    "K&R style parameter declaration",
+    "fn_800DBED4",
+    "fn_80171DC4",
+    "fn_80188644",
+    "fn_8018846C_noInline",
+    "fn_801A7FB4_inline",
+    "isActiveTitle",
+    "grCastle_801D0BBC",
+    "grCastle_801D0D24",
+    "grShrineRoute_8020A8A4_rand",
+    "ordering_func",
+    "GetNumNameList",
+    "grZebes_801D84A4",
+    "StageCallbacks",
+    "callback casts",
+    "include cleanup",
+    "grgreens formatting",
+    "ftdynamics formatting"
+  ],
+  "follow_up_queries": [
+    "Find later PRs touching `melee-issues` or local lint rules for explicit `(void)` function signatures.",
+    "Search for remaining empty no-argument definitions in `src/melee` after PR 2465.",
+    "Search for callback tables still using unnecessary function-pointer casts or `{ 0 }` flag initializers.",
+    "Search for K&R-style function definitions in decomp source, especially address-style `fn_` functions.",
+    "Check whether `decomp-dev[bot] No changes` comments are used as accepted regression evidence in other PR intakes."
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json",
+      "changed_files.jsonl",
+      "raw_diff",
+      "text_corpus.jsonl"
+    ],
+    "notes": [
+      "Strong file-level evidence for changed files and mechanical code edits.",
+      "PR body is empty, so intent is inferred mainly from title, label, and diff shape.",
+      "No human review comments are available.",
+      "Raw diff in the loaded excerpt was truncated, but targeted local reads covered the omitted grmaterial, grshrineroute, grzebes, ithitodeman, and mnname portions.",
+      "No detailed build, objdiff, or checkdiff artifact is loaded beyond the bot comment saying `No changes`."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "lesson",
+        "title": "Use explicit `(void)` for no-argument C functions in lint cleanup",
+        "text": "PR 2465 repeatedly converts no-argument functions from `func()` to `func(void)` across gm, gr, it, and mn files as part of local `melee-issues` cleanup.",
+        "scope": [
+          "src/melee"
+        ],
+        "evidence_refs": [
+          "raw_diff:gm_16F1.c",
+          "raw_diff:gm_1832.c",
+          "raw_diff:gm_1A4C.c",
+          "raw_diff:gmtitle.c",
+          "raw_diff:grcastle.c",
+          "raw_diff:grshrineroute.c",
+          "raw_diff:ithitodeman.c",
+          "raw_diff:mnname.c"
+        ],
+        "confidence": 0.82
+      },
+      {
+        "record_type": "lesson",
+        "title": "Avoid speculative renames during code-quality cleanup",
+        "text": "The PR fixes signatures, includes, casts, and formatting while preserving existing address-style names, keeping lint cleanup separate from semantic naming work.",
+        "scope": [
+          "src/melee"
+        ],
+        "evidence_refs": [
+          "raw_diff",
+          "changed_files.jsonl"
+        ],
+        "confidence": 0.74
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Document explicit `(void)` no-argument function style for C lint cleanup",
+        "text": "Consider adding a source-owned code-quality convention that C functions taking no parameters should be declared/defined with `(void)`, especially when touching local `melee-issues` fixes.",
+        "source_path": null,
+        "scope": [
+          "src/melee",
+          "code-quality",
+          "headers/prototypes"
+        ],
+        "evidence_refs": [
+          "PR title: Fix local `melee-issues`",
+          "raw_diff:gm_16F1.c",
+          "raw_diff:gm_1832.c",
+          "raw_diff:grcastle.c",
+          "raw_diff:mnname.c"
+        ],
+        "reason": "This pattern is repeated across many files in the PR, but the intake slice does not prove it is already an accepted global standard."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Prefer narrow mechanical lint PRs over mixed semantic decomp edits",
+        "text": "Consider documenting that local issue/lint cleanup should stay mechanical: prototypes, includes, declarations, casts, and formatting, without speculative renames or matching rewrites.",
+        "source_path": null,
+        "scope": [
+          "code-quality",
+          "reviewability"
+        ],
+        "evidence_refs": [
+          "raw_diff",
+          "changed_files.jsonl"
+        ],
+        "reason": "PR 2465 is a useful example of narrow lint cleanup, but broader policy belongs in curated standards."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that every callback-table cast can be removed globally; the PR only shows this in `grzebes.c` where the edited entries apparently match expected signatures.",
+      "Do not treat the bot `No changes` comment as detailed per-symbol objdiff evidence; no detailed validation log is loaded.",
+      "Do not promote any claim about why functions were moved in `grzebes.c` beyond the observable diff and title."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 784,
+  "title": "Run `make format`",
+  "state": "CLOSED",
+  "createdAt": "2023-04-17T06:53:35Z",
+  "updatedAt": "2023-10-09T07:35:00Z",
+  "mergedAt": null,
+  "closedAt": "2023-04-17T07:12:34Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/784",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 301237
+  }
+}

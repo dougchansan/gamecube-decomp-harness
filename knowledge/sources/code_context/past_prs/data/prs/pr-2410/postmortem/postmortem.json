@@ -1,0 +1,328 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2410",
+  "pr": {
+    "number": 2410,
+    "title": "Jj/gmmain lib",
+    "url": "https://github.com/doldecomp/melee/pull/2410",
+    "state": "MERGED",
+    "author": "jurrejelle",
+    "created_at": "2026-04-12T16:30:32Z",
+    "merged_at": "2026-04-16T22:51:21Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2410 decompiled and typed several routines in src/melee/gm/gmmain_lib, updated matching signatures in the public header, added required includes, and introduced a small static sdata2 byte. Automated report evidence says 4 new matches landed: gmMainLib_8015F260, InitializePersistentNameData, .sdata2, and gmMainLib_8015FA34; four additional gmmain_lib functions improved but remained partial.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "naming",
+      "matching-tactics"
+    ],
+    "systems": [
+      "game-mode",
+      "persistent-name-data",
+      "vs-mode-data"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gm/gmmain_lib.c",
+      "role": "Main implementation changes: added includes, decompiled several gmmain_lib routines, used loops/macros for repeated name-tag and stat initialization, added PAD_STACK and inline_depth tactics, and introduced static u8 gmMainLib_804D3EE4.",
+      "evidence_refs": [
+        "changed_files: src/melee/gm/gmmain_lib.c added 274 deleted 12 hunks 7",
+        "raw_diff: gmmain_lib.c include additions for placeholder.h, textlib.h, mnname.h, tylist.h",
+        "raw_diff: bodies added for gmMainLib_8015DBF4, gmMainLib_8015EA80, InitializePersistentNameData, gmMainLib_8015F150, gmMainLib_8015F260, gmMainLib_8015F600",
+        "raw_diff: gmMainLib_8015FA34 changed to s32 arg, PAD_STACK(50), pragma inline_depth(3), x186C assignment 0xFF",
+        "text_corpus: decomp-dev bot report lists matched/improved items"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmmain_lib.h",
+      "role": "Header signature cleanup for recovered routines, replacing UNK_RET/UNK_PARAMS and changing gmMainLib_8015FA34 parameter type.",
+      "evidence_refs": [
+        "changed_files: src/melee/gm/gmmain_lib.h added 5 deleted 5 hunks 3",
+        "raw_diff: gmMainLib_8015DBF4 s32(s32), gmMainLib_8015EA80 void(void), gmMainLib_8015F150 void(void), gmMainLib_8015F260 void(void), gmMainLib_8015FA34 void(s32)"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Added implementations for formerly stubbed/comment-only gmmain_lib routines: gmMainLib_8015DBF4, gmMainLib_8015EA80, InitializePersistentNameData, gmMainLib_8015F150, gmMainLib_8015F260, and gmMainLib_8015F600.",
+      "evidence_refs": [
+        "raw_diff: replacement of /// #gmMainLib_8015DBF4, /// #gmMainLib_8015EA80, /// #gmMainLib_8015EF84, /// #gmMainLib_8015F150, /// #gmMainLib_8015F260, /// #gmMainLib_8015F600 with function bodies"
+      ]
+    },
+    {
+      "text": "Updated gmMainLib_8015FA34 from int to s32 argument, added PAD_STACK(50), wrapped it in pragma push/inline_depth(3)/pop, changed x186C assignment from -1 to 0xFF, and removed an inline-related todo comment.",
+      "evidence_refs": [
+        "raw_diff: gmMainLib_8015FA34 hunk",
+        "raw_diff: gmmain_lib.h gmMainLib_8015FA34 prototype changed from int to s32"
+      ]
+    },
+    {
+      "text": "Recovered public header prototypes for several functions by replacing UNK_RET/UNK_PARAMS with concrete signatures.",
+      "evidence_refs": [
+        "raw_diff: gmmain_lib.h prototype changes around 15DBF4, 15EA80, 15F150, 15F260, 15FA34"
+      ]
+    },
+    {
+      "text": "Automated report credited new 100% matches for gmMainLib_8015F260, InitializePersistentNameData, .sdata2, and gmMainLib_8015FA34; it also reported improvements for gmMainLib_8015DBF4, gmMainLib_8015F600, gmMainLib_8015EA80, and gmMainLib_8015F150.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev bot report for GALE01 fb8058d - e37dfb7"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Header prototypes were updated alongside recovered bodies instead of leaving UNK_RET/UNK_PARAMS in the exported gmmain_lib interface.",
+      "evidence_refs": [
+        "raw_diff: gmmain_lib.h prototype updates",
+        "decomp_standards: truthful-headers-and-includes"
+      ]
+    },
+    {
+      "text": "Repeated persistent-name and fighter-stat clearing patterns were expressed as loops over typed struct fields rather than copied blocks.",
+      "evidence_refs": [
+        "raw_diff: InitializePersistentNameData loops over vs_kos and play_time_by_fighter",
+        "raw_diff: gmMainLib_8015F150 loops over FighterData and fighter_kos",
+        "raw_diff: gmMainLib_8015F260 loops over 120 NameTagData entries",
+        "decomp_standards: natural-loops"
+      ]
+    },
+    {
+      "text": "The repeated name-tag adjustment condition in gmMainLib_8015DBF4 was factored through local macros and a loop for VsModeData player slots.",
+      "evidence_refs": [
+        "raw_diff: ADJ_NAMETAG_78 and ADJ_VMD macros in gmMainLib_8015DBF4"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a recovered game-mode function proves its signature, update the owning header in the same PR rather than leaving UNK_RET or UNK_PARAMS.",
+      "scope": [
+        "src/melee/gm/gmmain_lib.c",
+        "src/melee/gm/gmmain_lib.h"
+      ],
+      "evidence_refs": [
+        "raw_diff: gmmain_lib.c added bodies for functions previously represented by comments",
+        "raw_diff: gmmain_lib.h replaced UNK_RET/UNK_PARAMS for 15DBF4, 15EA80, 15F150, 15F260"
+      ]
+    },
+    {
+      "lesson": "Bulk initialization of repeated stat arrays in gmmain_lib can be represented with ordinary counted loops over recovered fields such as vs_kos, fighter_kos, play_time_by_fighter, and sd_count.",
+      "scope": [
+        "src/melee/gm/gmmain_lib.c"
+      ],
+      "evidence_refs": [
+        "raw_diff: InitializePersistentNameData zeroes vs_kos[120], play_time_by_fighter[25], initializes sd_count, sets x1A2",
+        "raw_diff: gmMainLib_8015F150 zeroes fighter_kos[25] and initializes sd_count",
+        "raw_diff: gmMainLib_8015F260 repeats NameTagData initialization over 120 entries",
+        "text_corpus: bot report says InitializePersistentNameData and gmMainLib_8015F260 reached 100%"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "The recovered semantic name InitializePersistentNameData is used for the function at 15EF84 in both source and header.",
+      "evidence_refs": [
+        "raw_diff: /// #gmMainLib_8015EF84 replaced with void InitializePersistentNameData(s32 arg0)",
+        "raw_diff: gmmain_lib.h keeps /* 15EF84 */ void InitializePersistentNameData(s32)"
+      ]
+    },
+    {
+      "text": "Most unrecovered or unclear globals and fields kept address/offset-style names such as gmMainLib_804D3EE4, gmMainLib_804D3EE0, unk_590, x1F2C, x2FF8, and x1A2.",
+      "evidence_refs": [
+        "raw_diff: added static u8 gmMainLib_804D3EE4",
+        "raw_diff: new bodies retain offset-style field names throughout gmmain_lib.c",
+        "decomp_standards: conservative-naming"
+      ]
+    },
+    {
+      "text": "Short loop and pointer locals such as i, j, k, data, bank, base, src, gr, and val were used where local roles were clear.",
+      "evidence_refs": [
+        "raw_diff: local declarations in gmMainLib_8015DBF4, gmMainLib_8015EA80, InitializePersistentNameData, gmMainLib_8015F260, gmMainLib_8015F600"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "PAD_STACK was used in multiple recovered or adjusted routines, including gmMainLib_8015D984, InitializePersistentNameData, gmMainLib_8015F150, gmMainLib_8015F260, and gmMainLib_8015FA34.",
+      "evidence_refs": [
+        "raw_diff: PAD_STACK(16) in gmMainLib_8015D984 already present with comment removal",
+        "raw_diff: PAD_STACK(16) in InitializePersistentNameData",
+        "raw_diff: PAD_STACK(8) in gmMainLib_8015F150",
+        "raw_diff: PAD_STACK(16) in gmMainLib_8015F260",
+        "raw_diff: PAD_STACK(50) in gmMainLib_8015FA34"
+      ],
+      "caveat": "The PR evidence includes bot match/improvement results but no human explanation for each PAD_STACK use."
+    },
+    {
+      "tactic": "gmMainLib_8015FA34 was wrapped with #pragma push, #pragma inline_depth(3), and #pragma pop, apparently to affect inlining/matching for that function.",
+      "evidence_refs": [
+        "raw_diff: pragma push/inline_depth(3)/pop surrounding gmMainLib_8015FA34",
+        "text_corpus: bot report says gmMainLib_8015FA34 improved from 98.30% to 100.00%"
+      ],
+      "caveat": "No review discussion or author note explains why this pragma was required or whether adjacent functions were checked."
+    },
+    {
+      "tactic": "Local macros ADJ_NAMETAG_78 and ADJ_VMD encoded repeated compare/decrement/0x78 sentinel logic and repeated six-player VsModeData traversal.",
+      "evidence_refs": [
+        "raw_diff: gmMainLib_8015DBF4 macro definitions and calls"
+      ],
+      "caveat": "The bot report lists gmMainLib_8015DBF4 as improved to 59.65%, not fully matched."
+    },
+    {
+      "tactic": "do-while loops were used for fixed-count bank and fighter iterations in gmMainLib_8015F600.",
+      "evidence_refs": [
+        "raw_diff: gmMainLib_8015F600 do while (j < 25) and do while (j < 19)",
+        "text_corpus: bot report says gmMainLib_8015F600 improved to 86.01%"
+      ],
+      "caveat": "The function remained partial per bot report."
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "automated_report",
+      "text": "decomp-dev bot reported +0.03% matched code, +1284 bytes, +0.00% matched data, +8 bytes, with 4 new matches and 4 improvements.",
+      "evidence_refs": [
+        "text_corpus: issue_comment by decomp-dev[bot] created 2026-04-12T16:33:55Z"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2410",
+    "Jj/gmmain lib",
+    "jurrejelle",
+    "src/melee/gm/gmmain_lib.c",
+    "src/melee/gm/gmmain_lib.h",
+    "gmMainLib_8015DBF4",
+    "gmMainLib_8015EA80",
+    "InitializePersistentNameData",
+    "gmMainLib_8015F150",
+    "gmMainLib_8015F260",
+    "gmMainLib_8015F600",
+    "gmMainLib_8015FA34",
+    "NameTagData",
+    "NameTagDataBank",
+    "FighterData",
+    "VsModeData",
+    "ADJ_NAMETAG_78",
+    "ADJ_VMD",
+    "PAD_STACK",
+    "inline_depth",
+    "gmMainLib_804D3EE4",
+    "mnName_8023749C",
+    "lbLang_GetLanguageSetting",
+    "Trophy_SetUnlockState"
+  ],
+  "follow_up_queries": [
+    "gmMainLib_8015DBF4 ADJ_NAMETAG_78 0x78",
+    "gmMainLib_8015F600 NameTagData namedata gmMainLib_804D3EE4",
+    "gmMainLib_8015FA34 inline_depth PAD_STACK 50",
+    "InitializePersistentNameData vs_kos play_time_by_fighter x1A2",
+    "gmmain_lib.h UNK_RET UNK_PARAMS gmMainLib_8015F150 gmMainLib_8015F260",
+    "gmMainLib_8015EA80 handicap base unk_590"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR identity, state, author, changed file counts",
+      "raw_diff: complete diff excerpt for two changed files",
+      "text_corpus: PR body empty; one automated issue comment; no review comments",
+      "text_corpus: bot report with match percentages"
+    ],
+    "notes": [
+      "The PR body is empty, so author intent is inferred only from changed code and automated report output.",
+      "There are no human review comments or reviews in the loaded slice.",
+      "The bot report provides match/improvement evidence, but only four items are reported as new 100% matches; several newly implemented functions remained partial.",
+      "PAD_STACK and pragma inline_depth tactics are visible, but the slice does not include narrow build commands, objdiff logs beyond the bot report, or adjacent-function regression evidence.",
+      "No claim is made that partial functions such as gmMainLib_8015DBF4, gmMainLib_8015EA80, gmMainLib_8015F150, or gmMainLib_8015F600 were fully matched."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "kind": "decomp_lesson",
+        "title": "Update game-mode headers when bodies prove signatures",
+        "text": "In gmmain_lib, recovered function bodies were paired with header prototype cleanup: UNK_RET/UNK_PARAMS were replaced for gmMainLib_8015DBF4, gmMainLib_8015EA80, gmMainLib_8015F150, and gmMainLib_8015F260, and gmMainLib_8015FA34 was changed from int to s32.",
+        "scope": [
+          "src/melee/gm/gmmain_lib.c",
+          "src/melee/gm/gmmain_lib.h"
+        ],
+        "evidence_refs": [
+          "raw_diff: gmmain_lib.c recovered function bodies",
+          "raw_diff: gmmain_lib.h prototype changes"
+        ]
+      },
+      {
+        "kind": "matching_note",
+        "title": "gmmain_lib persistent-name initialization matches with typed loops",
+        "text": "InitializePersistentNameData and gmMainLib_8015F260 reached 100% in the automated report while using loops over NameTagData fields such as vs_kos, sd_count, play_time_by_fighter, and x1A2.",
+        "scope": [
+          "src/melee/gm/gmmain_lib.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: InitializePersistentNameData body",
+          "raw_diff: gmMainLib_8015F260 body",
+          "text_corpus: bot report lists both as 100.00%"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "gmmain_lib contains persistent name/stat initialization routines",
+        "text": "src/melee/gm/gmmain_lib.c includes routines that initialize persistent name and fighter stat data, including InitializePersistentNameData, gmMainLib_8015F150, gmMainLib_8015F260, and gmMainLib_8015F600.",
+        "source_path": "src/melee/gm/gmmain_lib.c",
+        "scope": [
+          "game-mode",
+          "persistent-name-data",
+          "fighter-stat-data"
+        ],
+        "evidence_refs": [
+          "raw_diff: InitializePersistentNameData, gmMainLib_8015F150, gmMainLib_8015F260, gmMainLib_8015F600 bodies",
+          "text_corpus: bot report items for gmmain_lib"
+        ],
+        "reason": "This is a path ownership/classification candidate for curator review, not an accepted global standard."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Pragma and PAD_STACK tactics in accepted PRs still need narrow evidence",
+        "text": "PR 2410 visibly used PAD_STACK and inline_depth pragmas and received automated match/improvement results, but the slice lacks human explanation or adjacent-regression proof for each tactic. This supports preserving the existing standard that such tactics require explicit verification, rather than weakening it.",
+        "source_path": null,
+        "scope": [
+          "matching-tactics",
+          "pragma",
+          "PAD_STACK"
+        ],
+        "evidence_refs": [
+          "raw_diff: PAD_STACK uses and inline_depth pragma in gmmain_lib.c",
+          "text_corpus: bot report match/improvement results",
+          "decomp_standards: matching-tactics-need-evidence",
+          "decomp_standards: avoid-pragmas-register-asm"
+        ],
+        "reason": "Route to curator as reinforcement/annotation candidate only; the PR does not provide enough explanation to establish a new standard."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that all added functions fully matched; the bot report marks only gmMainLib_8015F260, InitializePersistentNameData, .sdata2, and gmMainLib_8015FA34 as new 100% matches.",
+      "Do not promote inline_depth(3), PAD_STACK(50), or other stack/pragma steering as normal style from this PR alone.",
+      "Do not infer reviewer approval rationale; the loaded slice has no human reviews or review comments.",
+      "Do not treat gmMainLib_804D3EE4 semantics as known beyond being a static u8 used as a terminator in the added namedata copy loop."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

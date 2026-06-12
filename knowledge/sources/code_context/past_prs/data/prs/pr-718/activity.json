@@ -1,0 +1,10 @@
+{
+  "pr": 718,
+  "title": "Migrate `ftdata` `.data` section to C",
+  "url": "https://github.com/doldecomp/melee/pull/718",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 63,
+  "added_lines": 6571,
+  "deleted_lines": 7507
+}

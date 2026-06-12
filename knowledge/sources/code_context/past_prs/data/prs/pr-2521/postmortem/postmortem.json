@@ -1,0 +1,92 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2521",
+  "pr": {
+    "number": 2521,
+    "title": "Link CrazyHand",
+    "url": "https://github.com/doldecomp/melee/pull/2521",
+    "state": "CLOSED",
+    "author": "jellejurre",
+    "created_at": "2026-05-23T12:07:37Z",
+    "merged_at": null
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2521 was titled \"Link CrazyHand\" and closed without merge evidence in the loaded slice. The slice contains no PR body text, no issue or review comments, no changed-file metadata, and an empty diff, so no concrete code changes, matching tactics, review feedback, or reusable decomp lessons can be extracted beyond the PR identity and title-level topic.",
+  "change_classification": {
+    "primary_type": "unknown",
+    "categories": [
+      "code-change"
+    ],
+    "systems": [
+      "CrazyHand"
+    ]
+  },
+  "key_files": [],
+  "what_changed": [
+    {
+      "text": "No changed files or diff hunks are present in the loaded PR slice; the metadata reports changed_files=0, added_lines=0, deleted_lines=0, and diff_bytes=0.",
+      "evidence_refs": [
+        "metadata_json.counts.counts.changed_files",
+        "metadata_json.activity.changed_files",
+        "loaded_files.raw_diff"
+      ]
+    }
+  ],
+  "smart_moves": [],
+  "decomp_lessons": [],
+  "naming_conventions": [],
+  "assembly_or_matching_tactics": [],
+  "review_feedback": [],
+  "searchable_terms": [
+    "pr-2521",
+    "Link CrazyHand",
+    "CrazyHand",
+    "link_ftch_init",
+    "jellejurre",
+    "closed-unmerged",
+    "empty-diff"
+  ],
+  "follow_up_queries": [
+    "PR 2521 Link CrazyHand changed files",
+    "link_ftch_init CrazyHand",
+    "jellejurre link_ftch_init",
+    "CrazyHand initialization decomp"
+  ],
+  "evidence_quality": {
+    "status": "weak",
+    "evidence_refs": [
+      "metadata_json.pr",
+      "metadata_json.counts",
+      "metadata_json.activity",
+      "loaded_files.raw_pr_json",
+      "loaded_files.raw_diff",
+      "loaded_files.text_corpus"
+    ],
+    "notes": [
+      "The loaded raw PR JSON is truncated but the metadata summary preserves PR identity, state, author, timestamps, branch, and counts.",
+      "The PR body is null/empty in the loaded evidence.",
+      "There are no review comments, issue comments, reviews, changed files, added lines, deleted lines, or diff bytes in the loaded slice.",
+      "The title suggests a CrazyHand-related topic, but no file paths, symbols, functions, validation results, or implementation details are available.",
+      "No merge evidence is present; merged_at is null and state is closed."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [],
+    "source_update_candidates": [],
+    "rejection_notes": [
+      "Do not promote any decomp lesson, matching tactic, naming convention, path fact, or source standard from this PR because the slice has no code diff, comments, or review evidence.",
+      "Do not infer that CrazyHand source files changed; the loaded metadata reports zero changed files.",
+      "Do not infer validation, matching status, or reviewer intent from the title alone."
+    ]
+  },
+  "confidence": 0.36,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

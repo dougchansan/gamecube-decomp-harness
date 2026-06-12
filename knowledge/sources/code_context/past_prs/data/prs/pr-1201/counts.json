@@ -1,0 +1,17 @@
+{
+  "number": 1201,
+  "title": "Match 95.36% of `lb_00B0` (7.64 KB)",
+  "state": "MERGED",
+  "createdAt": "2024-02-12T12:22:06Z",
+  "updatedAt": "2024-02-12T12:23:44Z",
+  "mergedAt": "2024-02-12T12:23:44Z",
+  "closedAt": "2024-02-12T12:23:44Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1201",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 16971
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 626,
+  "title": "ft/chara cleanup",
+  "state": "MERGED",
+  "createdAt": "2022-12-26T00:53:01Z",
+  "updatedAt": "2022-12-26T02:39:20Z",
+  "mergedAt": "2022-12-26T02:39:17Z",
+  "closedAt": "2022-12-26T02:39:17Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/626",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 2,
+    "reviews": 2,
+    "diff_bytes": 110832
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 2642,
+  "title": "fix: upgrade mio to 0.8.11 (CVE-2024-27308)",
+  "state": "MERGED",
+  "createdAt": "2026-06-10T01:32:21Z",
+  "updatedAt": "2026-06-10T12:32:46Z",
+  "mergedAt": "2026-06-10T12:32:46Z",
+  "closedAt": "2026-06-10T12:32:46Z",
+  "author": "orbisai0security",
+  "url": "https://github.com/doldecomp/melee/pull/2642",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 645
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "pr": 843,
+  "title": "Clean up `ftCl` types",
+  "url": "https://github.com/doldecomp/melee/pull/843",
+  "text_records_with_body": 0,
+  "review_comments": 0,
+  "changed_files": 3,
+  "added_lines": 35,
+  "deleted_lines": 80
+}

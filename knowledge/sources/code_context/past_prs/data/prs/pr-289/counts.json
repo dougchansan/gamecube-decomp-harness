@@ -1,0 +1,17 @@
+{
+  "number": 289,
+  "title": "More ftmario",
+  "state": "MERGED",
+  "createdAt": "2022-02-20T01:51:16Z",
+  "updatedAt": "2022-02-23T21:14:26Z",
+  "mergedAt": "2022-02-20T02:00:20Z",
+  "closedAt": "2022-02-20T02:00:20Z",
+  "author": "nicolasrmerz",
+  "url": "https://github.com/doldecomp/melee/pull/289",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 13263
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 1126,
+  "title": "Remove deprecated shell scripts",
+  "state": "MERGED",
+  "createdAt": "2024-01-26T10:44:35Z",
+  "updatedAt": "2024-01-26T10:45:58Z",
+  "mergedAt": "2024-01-26T10:45:57Z",
+  "closedAt": "2024-01-26T10:45:57Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1126",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 7755
+  }
+}

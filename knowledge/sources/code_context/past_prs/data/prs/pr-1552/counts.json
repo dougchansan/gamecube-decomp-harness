@@ -1,0 +1,17 @@
+{
+  "number": 1552,
+  "title": "Finish matching run/dash phys functions",
+  "state": "MERGED",
+  "createdAt": "2025-05-31T19:54:08Z",
+  "updatedAt": "2025-06-01T17:59:55Z",
+  "mergedAt": "2025-06-01T16:32:47Z",
+  "closedAt": "2025-06-01T16:32:47Z",
+  "author": "Giga-Bowser",
+  "url": "https://github.com/doldecomp/melee/pull/1552",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 6202
+  }
+}

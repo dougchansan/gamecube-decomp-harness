@@ -1,0 +1,10 @@
+{
+  "pr": 2034,
+  "title": "ft: Match core fighter functions (ftAnim, ftColl, ft_0892, ft_0D31)",
+  "url": "https://github.com/doldecomp/melee/pull/2034",
+  "text_records_with_body": 3,
+  "review_comments": 1,
+  "changed_files": 7,
+  "added_lines": 114,
+  "deleted_lines": 13
+}

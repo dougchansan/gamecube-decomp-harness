@@ -1,0 +1,17 @@
+{
+  "number": 1456,
+  "title": "Partially match `lgunbeam`",
+  "state": "MERGED",
+  "createdAt": "2024-09-22T22:56:28Z",
+  "updatedAt": "2024-09-22T22:59:04Z",
+  "mergedAt": "2024-09-22T22:59:03Z",
+  "closedAt": "2024-09-22T22:59:03Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1456",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 25729
+  }
+}

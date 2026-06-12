@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Report readiness for the struct inference harness bridge."""
+"""Report readiness for the tool-local struct inference helper."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from pathlib import Path
 import sys
 
 sys.path.append(str(Path(__file__).resolve().parents[3] / "_shared"))
-from harness import print_json, resolve_repo_root, tool_bridge_status
+from melee_tooling import print_json, resolve_repo_root, tool_impl_status
 
 
 def main() -> None:
@@ -19,7 +19,7 @@ def main() -> None:
 
     repo_root = resolve_repo_root(args.repo_root)
     print_json(
-        tool_bridge_status(
+        tool_impl_status(
             tool="struct_infer",
             scripts=("infer_struct.py",),
             repo_root=repo_root,

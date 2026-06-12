@@ -1,0 +1,17 @@
+{
+  "number": 723,
+  "title": "migrate `lbcollision` to C",
+  "state": "MERGED",
+  "createdAt": "2023-01-26T05:27:12Z",
+  "updatedAt": "2023-01-26T05:43:59Z",
+  "mergedAt": "2023-01-26T05:43:58Z",
+  "closedAt": "2023-01-26T05:43:59Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/723",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 1,
+    "diff_bytes": 601480
+  }
+}

@@ -1,0 +1,318 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2253",
+  "pr": {
+    "number": 2253,
+    "title": "ftKirby: match 5 functions",
+    "url": "https://github.com/doldecomp/melee/pull/2253",
+    "state": "MERGED",
+    "author": "johnwinston",
+    "created_at": "2026-03-10T13:27:09Z",
+    "merged_at": "2026-03-10T18:52:26Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2253 decompiled five Kirby neutral-special-related fighter functions across four ftKirby source files. The PR body claimed clean ninja build and 100% fuzzy match for all five functions; the decomp-dev bot reported five new 100% matches totaling +776 matched bytes.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "fighter-source"
+    ],
+    "systems": [
+      "fighter",
+      "ftKirby",
+      "specialN"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_SpecialN.c",
+      "role": "Implemented ftKb_EatWalk_IASA, including jump-input handling, EatJump1/EatWait motion transitions, and fallback walk-common IASA handling.",
+      "evidence_refs": [
+        "changed_files.jsonl: ftKb_SpecialN.c added 35 deleted 1",
+        "raw_diff: ftKb_EatWalk_IASA body",
+        "text_corpus: decomp-dev bot reported ftKb_EatWalk_IASA 0.00% -> 100.00%, +256 bytes"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_SpecialNPk.c",
+      "role": "Implemented ftKb_LkSpecialAirNEnd_Anim and ftKb_SpecialNSs_800FCC6C.",
+      "evidence_refs": [
+        "changed_files.jsonl: ftKb_SpecialNPk.c added 52 deleted 2",
+        "raw_diff: ftKb_LkSpecialAirNEnd_Anim and ftKb_SpecialNSs_800FCC6C bodies",
+        "text_corpus: decomp-dev bot reported ftKb_LkSpecialAirNEnd_Anim +256 bytes and ftKb_SpecialNSs_800FCC6C +80 bytes, both 100.00%"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_SpecialNYs.c",
+      "role": "Added ftCo_Bury include and implemented fn_8010B16C under a narrow dont_inline pragma block.",
+      "evidence_refs": [
+        "changed_files.jsonl: ftKb_SpecialNYs.c added 13 deleted 1",
+        "raw_diff: include ft/chara/ftCommon/ftCo_Bury.h and fn_8010B16C body",
+        "text_corpus: decomp-dev bot reported fn_8010B16C 0.00% -> 100.00%, +104 bytes"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_SpecialNZd.c",
+      "role": "Implemented ftKb_SpecialNMt_80106F9C as a motion-id predicate for Mewtwo copied neutral-special states.",
+      "evidence_refs": [
+        "changed_files.jsonl: ftKb_SpecialNZd.c added 26 deleted 1",
+        "raw_diff: ftKb_SpecialNMt_80106F9C body",
+        "text_corpus: decomp-dev bot reported ftKb_SpecialNMt_80106F9C 0.00% -> 100.00%, +80 bytes"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Replaced five placeholder decomp markers with C implementations: ftKb_EatWalk_IASA, ftKb_SpecialNSs_800FCC6C, ftKb_LkSpecialAirNEnd_Anim, fn_8010B16C, and ftKb_SpecialNMt_80106F9C.",
+      "evidence_refs": [
+        "human_pr_text: Summary",
+        "raw_diff"
+      ]
+    },
+    {
+      "text": "Added an include for ftCo_Bury.h in ftKb_SpecialNYs.c to support the newly implemented fn_8010B16C dependency surface.",
+      "evidence_refs": [
+        "raw_diff: ftKb_SpecialNYs.c include hunk"
+      ]
+    },
+    {
+      "text": "Used PAD_STACK in ftKb_EatWalk_IASA and ftKb_LkSpecialAirNEnd_Anim, and a scoped #pragma dont_inline on/reset around fn_8010B16C.",
+      "evidence_refs": [
+        "raw_diff: PAD_STACK(8), PAD_STACK(24), #pragma dont_inline on/reset"
+      ]
+    },
+    {
+      "text": "Bot verification reported five new 100% matches and +776 matched bytes for GALE01.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev bot issue_comment created_at 2026-03-10T15:24:29Z"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Kept matching tactics narrow: PAD_STACK appears only inside two new matched functions, and dont_inline is scoped immediately around fn_8010B16C with a reset after the function.",
+      "evidence_refs": [
+        "raw_diff: ftKb_EatWalk_IASA",
+        "raw_diff: ftKb_LkSpecialAirNEnd_Anim",
+        "raw_diff: fn_8010B16C pragma block"
+      ]
+    },
+    {
+      "text": "Implemented motion-state predicates as explicit switch statements over known motion IDs or named motion-state constants, returning the x2071_b6 flag only for selected state ranges and true otherwise.",
+      "evidence_refs": [
+        "raw_diff: ftKb_SpecialNSs_800FCC6C",
+        "raw_diff: ftKb_SpecialNMt_80106F9C"
+      ]
+    },
+    {
+      "text": "Used typed Fighter and Kirby data accesses such as fp->motion_id, fp->x2070.x2071_b6, fp->fv.kb.hat.kind, fp->dat_attrs, and fp->grab_timer instead of raw pointer arithmetic in the shown implementations.",
+      "evidence_refs": [
+        "raw_diff"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For small copied-character predicate helpers, a null-gobj early true return plus a switch over the copied character's relevant motion states can be a compact matching shape; within selected states, the predicate may reduce to fp->x2070.x2071_b6.",
+      "scope": [
+        "ftKirby",
+        "copied specialN predicate helpers"
+      ],
+      "evidence_refs": [
+        "raw_diff: ftKb_SpecialNSs_800FCC6C",
+        "raw_diff: ftKb_SpecialNMt_80106F9C",
+        "text_corpus: bot reported both predicate helpers 100.00%"
+      ]
+    },
+    {
+      "lesson": "When matching Kirby copied Link aerial neutral-special end animation, evidence from this PR supports cleanup calls to unset arrow and bow before choosing fall/freefall behavior based on Link-vs-Young-Link dat_attrs freefall toggles.",
+      "scope": [
+        "ftKirby",
+        "Link copied neutral special",
+        "animation end handlers"
+      ],
+      "evidence_refs": [
+        "raw_diff: ftKb_LkSpecialAirNEnd_Anim",
+        "text_corpus: bot reported ftKb_LkSpecialAirNEnd_Anim 100.00%"
+      ]
+    },
+    {
+      "lesson": "For Kirby EatWalk IASA matching, this PR used ftCo_Jump_GetInput first, stored non-none jump input into fp->mv.kb.specialhi fields before changing to ftKb_MS_EatJump1, and otherwise checked ft_8008A1FC before falling back to ftWalkCommon_800DFEC8.",
+      "scope": [
+        "ftKirby",
+        "EatWalk IASA"
+      ],
+      "evidence_refs": [
+        "raw_diff: ftKb_EatWalk_IASA",
+        "text_corpus: bot reported ftKb_EatWalk_IASA 100.00%"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "Local Fighter pointers are named fp and Fighter_GObj parameters are named gobj in the new implementations.",
+      "evidence_refs": [
+        "raw_diff"
+      ]
+    },
+    {
+      "text": "The PR preserved address-style names where semantics were not recovered, including fn_8010B16C and helper references such as ftKb_SpecialNYs_80109380.",
+      "evidence_refs": [
+        "human_pr_text: summary includes fn_8010B16C",
+        "raw_diff: fn_8010B16C body"
+      ]
+    },
+    {
+      "text": "The PR used a short dat_attrs local name da in ftKb_LkSpecialAirNEnd_Anim.",
+      "evidence_refs": [
+        "raw_diff: ftKb_LkSpecialAirNEnd_Anim"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "PAD_STACK(8) was used in ftKb_EatWalk_IASA.",
+      "evidence_refs": [
+        "raw_diff: ftKb_EatWalk_IASA",
+        "text_corpus: bot reported ftKb_EatWalk_IASA 100.00%"
+      ]
+    },
+    {
+      "tactic": "PAD_STACK(24) was used in ftKb_LkSpecialAirNEnd_Anim.",
+      "evidence_refs": [
+        "raw_diff: ftKb_LkSpecialAirNEnd_Anim",
+        "text_corpus: bot reported ftKb_LkSpecialAirNEnd_Anim 100.00%"
+      ]
+    },
+    {
+      "tactic": "A scoped #pragma dont_inline on/reset block was used around fn_8010B16C.",
+      "evidence_refs": [
+        "raw_diff: fn_8010B16C",
+        "text_corpus: bot reported fn_8010B16C 100.00%"
+      ]
+    },
+    {
+      "tactic": "A goto label end_true was used in ftKb_SpecialNSs_800FCC6C for the null-gobj true path.",
+      "evidence_refs": [
+        "raw_diff: ftKb_SpecialNSs_800FCC6C"
+      ]
+    }
+  ],
+  "review_feedback": [],
+  "searchable_terms": [
+    "PR2253",
+    "ftKirby",
+    "ftKb_EatWalk_IASA",
+    "ftKb_SpecialNSs_800FCC6C",
+    "ftKb_LkSpecialAirNEnd_Anim",
+    "fn_8010B16C",
+    "ftKb_SpecialNMt_80106F9C",
+    "ftKb_SpecialN.c",
+    "ftKb_SpecialNPk.c",
+    "ftKb_SpecialNYs.c",
+    "ftKb_SpecialNZd.c",
+    "PAD_STACK",
+    "dont_inline",
+    "ftCo_Jump_GetInput",
+    "JumpInput_None",
+    "ftKb_MS_EatJump1",
+    "ftKb_MS_EatWait",
+    "ftWalkCommon_800DFEC8",
+    "x2071_b6",
+    "specialn_lk_freefall_toggle",
+    "specialn_cl_freefall_toggle",
+    "ftCo_80096900",
+    "grab_timer",
+    "ftCo_800C0C88"
+  ],
+  "follow_up_queries": [
+    "ftKb_EatWalk_IASA PAD_STACK",
+    "ftKb_LkSpecialAirNEnd_Anim PAD_STACK",
+    "fn_8010B16C dont_inline",
+    "ftKb_SpecialNSs_800FCC6C x2071_b6",
+    "ftKb_SpecialNMt_80106F9C motion_id switch",
+    "ftKirby copied neutral special predicates"
+  ],
+  "evidence_quality": {
+    "status": "strong",
+    "evidence_refs": [
+      "metadata_json: PR number/title/state/author/timestamps",
+      "human_pr_text: claimed five decompiled functions, ninja clean, fuzzy_match_percent 100.0",
+      "raw_diff: complete diff excerpt for all four changed files",
+      "changed_files.jsonl: changed-file metadata",
+      "text_corpus: decomp-dev bot match report"
+    ],
+    "notes": [
+      "No review comments or human reviewer feedback were loaded for this slice.",
+      "changed_files metadata appears duplicated in metadata_json and changed_files.jsonl; unique changed paths are four files.",
+      "The PR body claims ninja builds clean and fuzzy_match_percent 100.0; bot report independently lists five 100.00% new matches, but no full local build log or objdiff output is included in the slice.",
+      "Use of Claude Code is present in PR body; this is evidence of generation note only, not evidence about correctness beyond the included verification and bot report."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "kind": "matching_tactic_record",
+        "title": "Scoped dont_inline around a single matched fighter helper",
+        "text": "PR #2253 used #pragma dont_inline on/reset only around fn_8010B16C in ftKb_SpecialNYs.c; the bot report listed fn_8010B16C as a new 100.00% match (+104 bytes).",
+        "scope": [
+          "src/melee/ft/chara/ftKirby/ftKb_SpecialNYs.c",
+          "fn_8010B16C"
+        ],
+        "evidence_refs": [
+          "raw_diff: fn_8010B16C pragma block",
+          "text_corpus: decomp-dev bot report"
+        ]
+      },
+      {
+        "kind": "matching_tactic_record",
+        "title": "PAD_STACK use in two matched ftKirby functions",
+        "text": "PR #2253 used PAD_STACK(8) in ftKb_EatWalk_IASA and PAD_STACK(24) in ftKb_LkSpecialAirNEnd_Anim; the bot report listed both functions as new 100.00% matches.",
+        "scope": [
+          "src/melee/ft/chara/ftKirby/ftKb_SpecialN.c",
+          "src/melee/ft/chara/ftKirby/ftKb_SpecialNPk.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: PAD_STACK uses",
+          "text_corpus: decomp-dev bot report"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "ftKirby copied neutral-special predicate helpers matched in PR #2253",
+        "text": "src/melee/ft/chara/ftKirby/ftKb_SpecialNPk.c contains ftKb_SpecialNSs_800FCC6C and src/melee/ft/chara/ftKirby/ftKb_SpecialNZd.c contains ftKb_SpecialNMt_80106F9C; both were reported as 100.00% new matches in PR #2253.",
+        "source_path": null,
+        "scope": [
+          "src/melee/ft/chara/ftKirby/ftKb_SpecialNPk.c",
+          "src/melee/ft/chara/ftKirby/ftKb_SpecialNZd.c",
+          "ftKb_SpecialNSs_800FCC6C",
+          "ftKb_SpecialNMt_80106F9C"
+        ],
+        "evidence_refs": [
+          "raw_diff",
+          "text_corpus: decomp-dev bot report"
+        ],
+        "reason": "Potential path-fact update for function ownership and location; curator should verify against current source before promoting."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote PAD_STACK or dont_inline as preferred style from this PR alone; they are narrow matching tactics with limited evidence.",
+      "Do not infer reviewer approval rationale because no review comments or reviews were loaded.",
+      "Do not generalize the numeric motion IDs in ftKb_SpecialNSs_800FCC6C into named constants without additional source or symbol evidence."
+    ]
+  },
+  "confidence": 0.87,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

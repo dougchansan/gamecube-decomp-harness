@@ -1,0 +1,17 @@
+{
+  "number": 131,
+  "title": "Split lbcollision code out properly based on sdata usage",
+  "state": "MERGED",
+  "createdAt": "2021-11-29T05:14:38Z",
+  "updatedAt": "2021-11-29T05:14:45Z",
+  "mergedAt": "2021-11-29T05:14:43Z",
+  "closedAt": "2021-11-29T05:14:43Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/131",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 288527
+  }
+}

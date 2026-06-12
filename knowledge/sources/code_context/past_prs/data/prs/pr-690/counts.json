@@ -1,0 +1,17 @@
+{
+  "number": 690,
+  "title": "Fix `clang` errors",
+  "state": "MERGED",
+  "createdAt": "2023-01-16T15:46:32Z",
+  "updatedAt": "2023-01-16T21:19:55Z",
+  "mergedAt": "2023-01-16T21:19:54Z",
+  "closedAt": "2023-01-16T21:19:54Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/690",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 4,
+    "reviews": 2,
+    "diff_bytes": 148331
+  }
+}

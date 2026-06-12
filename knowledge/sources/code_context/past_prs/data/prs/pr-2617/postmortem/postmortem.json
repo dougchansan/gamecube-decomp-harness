@@ -1,0 +1,490 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2617",
+  "pr": {
+    "number": 2617,
+    "title": "Improvements to split up",
+    "url": "https://github.com/doldecomp/melee/pull/2617",
+    "state": "CLOSED",
+    "author": "fjooord",
+    "created_at": "2026-06-08T14:10:20Z",
+    "merged_at": null
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Broad draft PR improving split-up matching/source shape across Dolphin/SysDolphin and many Melee subsystems. The PR body reports 26 new matches, 79 unmatched-item improvements, matched code +11944 bytes, matched data +448 bytes, and zero broken/fuzzy/metric regressions after local checks. The PR was closed unmerged and explicitly superseded by directory-split draft PRs #2619-#2630 and #2632.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "source-shape-cleanup",
+      "data-matching",
+      "workflow-regrouping"
+    ],
+    "systems": [
+      "external-sdk",
+      "sysdolphin",
+      "fighter",
+      "game-mode",
+      "stage",
+      "item",
+      "library",
+      "menu",
+      "interface",
+      "collision",
+      "toy",
+      "video"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "extern/dolphin/src/dolphin/thp/THPDec.c",
+      "role": "Changed Dolphin THP decoder source; diff shows replacing raw THPFileInfo offset access with typed MCU buffer view casts and reuse of local info pointer.",
+      "evidence_refs": [
+        "changed_files:extern/dolphin/src/dolphin/thp/THPDec.c",
+        "diff_excerpt:__THPDecompressiMCURowNxN"
+      ]
+    },
+    {
+      "path": "src/melee/cm/camera.c",
+      "role": "Changed camera matching/source shape; diff shows local declaration ordering, expression splitting, assert expansion, and PAD_STACK adjustment.",
+      "evidence_refs": [
+        "changed_files:src/melee/cm/camera.c",
+        "diff_excerpt:Camera_80029CF8",
+        "diff_excerpt:Camera_80030CFC"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_0A01.c",
+      "role": "Changed common fighter source; diff shows direct field access, helper reuse, and replacement of M2C_FIELD with typed struct field access.",
+      "evidence_refs": [
+        "changed_files:src/melee/ft/chara/ftCommon/ftCo_0A01.c",
+        "diff_excerpt:ftCo_800A9CB4",
+        "diff_excerpt:ftCo_800AB224",
+        "diff_excerpt:ftCo_800AF290"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_Attack100.c",
+      "role": "Changed common fighter attack source; diff shows declaration/lifetime changes, extern float use, semantic type ftCo_LinkCatchAttrs, and direct item access through fighter vars.",
+      "evidence_refs": [
+        "changed_files:src/melee/ft/chara/ftCommon/ftCo_Attack100.c",
+        "diff_excerpt:ftCo_800D730C",
+        "diff_excerpt:fn_800D8EC8"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_DamageIce.c",
+      "role": "Changed fighter damage ice initialization; diff expands JObjRotMtx inline into explicit quaternion/rotation matrix operations.",
+      "evidence_refs": [
+        "changed_files:src/melee/ft/chara/ftCommon/ftCo_DamageIce.c",
+        "diff_excerpt:ftCo_DamageIce_Init"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_DownBound.c",
+      "role": "Changed fighter down-bound effect spawn call; diff removes temporary JObj local and passes field expression directly with PAD_STACK retained.",
+      "evidence_refs": [
+        "changed_files:src/melee/ft/chara/ftCommon/ftCo_DownBound.c",
+        "diff_excerpt:ftCo_800978D4"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_Guard.c",
+      "role": "Changed guard source; diff shows GET_FIGHTER use and PAD_STACK tuning.",
+      "evidence_refs": [
+        "changed_files:src/melee/ft/chara/ftCommon/ftCo_Guard.c",
+        "diff_excerpt:ftCo_80092908",
+        "diff_excerpt:ftCo_80093BC0",
+        "diff_excerpt:ftCo_GuardReflect_Anim"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftkirbyyoshiegg.c",
+      "role": "Changed Kirby/Yoshi egg source; diff shows local pointer to co_attrs.xBC and PAD_STACK use.",
+      "evidence_refs": [
+        "changed_files:src/melee/ft/chara/ftKirby/ftkirbyyoshiegg.c",
+        "diff_excerpt:inlineB0"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftNana/ftNn_Init.c",
+      "role": "Changed Nana init source; diff shows narrow local alias introduced around ftCommon_8007D5D4 call.",
+      "evidence_refs": [
+        "changed_files:src/melee/ft/chara/ftNana/ftNn_Init.c",
+        "diff_excerpt:ftPp_SpecialS_0_Coll_inline3"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftcoll.c",
+      "role": "Changed fighter collision source; diff shows call argument order change, declaration order change, and float-zero comparison rewritten as negation.",
+      "evidence_refs": [
+        "changed_files:src/melee/ft/ftcoll.c",
+        "diff_excerpt:ftColl_80077C60"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftmaterial.c",
+      "role": "Changed fighter material data/source; diff adds static HSD_TevDesc and HSD_TECnst data before force_active region.",
+      "evidence_refs": [
+        "changed_files:src/melee/ft/ftmaterial.c",
+        "diff_excerpt:ftMaterial_803C69D0",
+        "human_pr_text:26 new matches"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1601.c",
+      "role": "Changed game-mode source; diff shows direct gmMainLib field access, ternary bool return, and replacing manual unlock search with helper call.",
+      "evidence_refs": [
+        "changed_files:src/melee/gm/gm_1601.c",
+        "diff_excerpt:gm_80164330",
+        "diff_excerpt:gm_80164910"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/particle.c",
+      "role": "Largest changed file by metadata; PR report lists new matches for Exception_ReportCodeline and Exception_ReportStackTrace and .data improvement.",
+      "evidence_refs": [
+        "changed_files:src/sysdolphin/baselib/particle.c",
+        "human_pr_text:26 new matches",
+        "human_pr_text:79 improvements"
+      ]
+    },
+    {
+      "path": "src/melee/gr/gricemt.c",
+      "role": "Large stage-source change; PR report lists grIceMt_801F686C and .sdata reaching 100%.",
+      "evidence_refs": [
+        "changed_files:src/melee/gr/gricemt.c",
+        "human_pr_text:26 new matches"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mncount.c",
+      "role": "Menu count source changed; PR report lists mnCount_8025092C as an unmatched-item improvement.",
+      "evidence_refs": [
+        "changed_files:src/melee/mn/mncount.c",
+        "human_pr_text:79 improvements"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnitemsw.c",
+      "role": "Menu item-switch source/data changed; PR report lists .sdata new match plus .data and function improvements.",
+      "evidence_refs": [
+        "changed_files:src/melee/mn/mnitemsw.c",
+        "human_pr_text:26 new matches",
+        "human_pr_text:79 improvements"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_18A5.c",
+      "role": "Game-mode source changed; PR report lists one new match and multiple function improvements.",
+      "evidence_refs": [
+        "changed_files:src/melee/gm/gm_18A5.c",
+        "human_pr_text:26 new matches",
+        "human_pr_text:79 improvements"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grmutecity.c",
+      "role": "Stage source changed; PR report lists grMuteCity_801F1A34 and grMuteCity_801F290C improvements.",
+      "evidence_refs": [
+        "changed_files:src/melee/gr/grmutecity.c",
+        "human_pr_text:79 improvements"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itseakchain.c",
+      "role": "Item source/data changed; PR report lists .sdata2 new match and function improvements.",
+      "evidence_refs": [
+        "changed_files:src/melee/it/items/itseakchain.c",
+        "human_pr_text:26 new matches",
+        "human_pr_text:79 improvements"
+      ]
+    },
+    {
+      "path": "src/melee/vi/vi0502.c",
+      "role": "Video/source changed; PR report lists un_8031E444_OnEnter improvement.",
+      "evidence_refs": [
+        "changed_files:src/melee/vi/vi0502.c",
+        "human_pr_text:79 improvements"
+      ]
+    },
+    {
+      "path": "multiple other changed source files",
+      "role": "Additional changed files span gm, gr, if, it, lb, mn, mp, pl, ty, and sysdolphin. Complete file list is in changed_files evidence.",
+      "evidence_refs": [
+        "changed_files.jsonl:67 entries",
+        "metadata_json:changed_files"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Changed 67 files with 941 additions and 757 deletions according to PR metadata.",
+    "PR body reports broad split-up matching/source-shape work across stage, item, fighter, menu, game-mode, and SysDolphin units.",
+    "PR body reports 26 new matches and 79 improvements in unmatched items for GALE01 after rebase from base 07bb71f to head b6cc733.",
+    "Changed files include external Dolphin THP decoder code, SysDolphin baselib files, and many src/melee subsystems.",
+    "Issue comments state the PR was superseded by directory split drafts #2619 through #2630 plus #2632, and that docs/standards.md was removed from the upstream PR branch."
+  ],
+  "smart_moves": [
+    "The author reported a fresh baseline build and a clean temp-worktree regression gate before presenting the broad matching PR.",
+    "The author later split the broad PR by directory, reducing review surface for subsystem-specific changes.",
+    "The diff excerpt shows several generated-looking or raw-access forms replaced with project fields/helpers where evidence in the code already existed, such as Fighter_804D64FC->x20 instead of M2C_FIELD and ftCo_800A1AB4 instead of repeated distance math.",
+    "The THP decoder excerpt avoids repeated direct __THPInfo access by keeping a local info pointer and uses a typed MCU buffer view instead of raw byte-offset pointer arithmetic."
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For split-up cleanup PRs, broad multi-directory progress can be validated locally, but reviewability may still require regrouping into smaller directory-scoped PRs.",
+      "evidence_refs": [
+        "human_pr_text:Summary",
+        "human_pr_text:Verification",
+        "issue_comment:Superseded by directory split drafts"
+      ],
+      "confidence": 0.88
+    },
+    {
+      "lesson": "When a known typed view exists for a raw offset, using the typed view can improve source shape while preserving matching intent; this PR's THP excerpt changes a raw ((u8*) info + 0x10) mcuBuffer access into THPFileInfoMCUBufferView casts.",
+      "evidence_refs": [
+        "diff_excerpt:__THPDecompressiMCURowNxN",
+        "decomp_standards:typed-fields-over-pointer-math"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "lesson": "Replacing repeated local math with an existing helper can reduce generated-looking code when the helper's role is already established locally; this PR replaces explicit dx/dy/sqrt distance checks with ftCo_800A1AB4 in ftCo_800AF290.",
+      "evidence_refs": [
+        "diff_excerpt:ftCo_800AF290",
+        "decomp_standards:infer-authored-source-style"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "Data additions can be part of a matching PR when reported as data matches, but they should remain tied to explicit match/report evidence because static data ownership is high-risk.",
+      "evidence_refs": [
+        "diff_excerpt:ftMaterial_803C69D0",
+        "human_pr_text:matched data +448 bytes",
+        "human_pr_text:ftmaterial .data 100%",
+        "decomp_standards:text-before-data-matching",
+        "decomp_standards:data-sections-and-tu-splits"
+      ],
+      "confidence": 0.74
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Prefer already-established typed names over anonymous or misleading generated struct names when a recovered type exists; the diff changes struct ftLk_DatAttrs* attrs to ftCo_LinkCatchAttrs* attrs.",
+      "evidence_refs": [
+        "diff_excerpt:fn_800D8EC8",
+        "decomp_standards:conservative-naming"
+      ],
+      "confidence": 0.7
+    },
+    {
+      "convention": "Use short local role names for clear pointer aliases only when they clarify access or codegen, as shown by xBCp for &fp->co_attrs.xBC in ftkirbyyoshiegg.c.",
+      "evidence_refs": [
+        "diff_excerpt:inlineB0",
+        "decomp_standards:conservative-naming"
+      ],
+      "confidence": 0.62
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Declaration order and temporary lifetime tuning: camera.c, ftCo_Attack100.c, ftCo_DamageIce.c, and ftcoll.c move declarations or introduce locals to affect source shape.",
+      "evidence_refs": [
+        "diff_excerpt:Camera_80029CF8",
+        "diff_excerpt:ftCo_800D730C",
+        "diff_excerpt:ftCo_DamageIce_Init",
+        "diff_excerpt:ftColl_80077C60",
+        "decomp_standards:matching-tactics-need-evidence"
+      ]
+    },
+    {
+      "tactic": "PAD_STACK tuning appears in several excerpts, including Camera_80030CFC, ftCo_Guard, ftCo_DownBound, and ftkirbyyoshiegg.c.",
+      "evidence_refs": [
+        "diff_excerpt:Camera_80030CFC",
+        "diff_excerpt:ftCo_80092908",
+        "diff_excerpt:ftCo_GuardReflect_Anim",
+        "diff_excerpt:inlineB0",
+        "decomp_standards:matching-tactics-need-evidence"
+      ]
+    },
+    {
+      "tactic": "Typed field recovery: replace raw pointer/M2C_FIELD access with typed struct fields where available, e.g. THPFileInfoMCUBufferView and Fighter_804D64FC->x20.",
+      "evidence_refs": [
+        "diff_excerpt:__THPDecompressiMCURowNxN",
+        "diff_excerpt:ftCo_800AF78C_inline0",
+        "decomp_standards:typed-fields-over-pointer-math"
+      ]
+    },
+    {
+      "tactic": "Control-flow/expression shaping: gm_80164330 uses a ternary bool return, and camera.c splits a larger pitch_angle expression through temp_f31.",
+      "evidence_refs": [
+        "diff_excerpt:gm_80164330",
+        "diff_excerpt:Camera_80029CF8",
+        "decomp_standards:canonical-control-flow-and-macros"
+      ]
+    },
+    {
+      "tactic": "Assert shape was changed from HSD_ASSERTMSG macros to explicit __assert calls in the camera excerpt; this is matching evidence for this PR but conflicts with the general cleanup preference unless verifier evidence justifies it.",
+      "evidence_refs": [
+        "diff_excerpt:Camera_80029CF8",
+        "decomp_standards:assert-report-macros",
+        "human_pr_text:Verification"
+      ]
+    },
+    {
+      "tactic": "Function/helper inlining tradeoff appears both directions: ftCo_800AB224 replaces a repeated command sequence with ftCo_800AD54C_inline0, while ftCo_DamageIce_Init expands JObjRotMtx into explicit rotation/quaternion steps.",
+      "evidence_refs": [
+        "diff_excerpt:ftCo_800AB224",
+        "diff_excerpt:ftCo_DamageIce_Init",
+        "decomp_standards:infer-authored-source-style",
+        "decomp_standards:matching-tactics-need-evidence"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "issue_comment",
+      "feedback": "No review comments or reviews are present in the loaded metadata. Author/bot comments state the PR was superseded by directory split draft PRs.",
+      "evidence_refs": [
+        "metadata_json:counts.review_comments=0",
+        "metadata_json:counts.reviews=0",
+        "issue_comment:Superseded by directory split drafts"
+      ]
+    },
+    {
+      "kind": "issue_comment",
+      "feedback": "The author states docs/standards.md was removed from the upstream PR branch and kept as a local PR-workflow reference outside the upstream Melee PR surface.",
+      "evidence_refs": [
+        "issue_comment:docs/standards.md was removed"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2617",
+    "Improvements to split up",
+    "fjooord",
+    "split-up matching",
+    "directory split drafts",
+    "THPDec",
+    "__THPDecompressiMCURowNxN",
+    "THPFileInfoMCUBufferView",
+    "Camera_80029CF8",
+    "Camera_80030CFC",
+    "HSD_ASSERTMSG",
+    "__assert",
+    "PAD_STACK",
+    "ftCo_800A9CB4",
+    "ftCo_800AB224",
+    "ftCo_800AF290",
+    "M2C_FIELD",
+    "Fighter_804D64FC->x20",
+    "ftCo_800D730C",
+    "fn_800D8EC8",
+    "ftCo_LinkCatchAttrs",
+    "ftCo_DamageIce_Init",
+    "JOBJ_USE_QUATERNION",
+    "ftMaterial_803C69D0",
+    "ftMaterial_803C6A44",
+    "gm_80164330",
+    "gm_80164910",
+    "Exception_ReportCodeline",
+    "Exception_ReportStackTrace",
+    "grIceMt_801F686C"
+  ],
+  "follow_up_queries": [
+    "PR #2632 Dolphin support split THPDec particle sysdolphin",
+    "PR #2620 FT split ftCo_0A01 ftCo_Attack100 ftCo_DamageIce ftmaterial",
+    "PR #2621 GM split gm_1601 gm_18A5 gm_1A4C gmtou",
+    "PR #2622 GR split gricemt grmutecity grbigblue grvenom",
+    "PR #2626 MN split mncount mnitemsw mnnamenew",
+    "THPFileInfoMCUBufferView mcuBuffer raw offset 0x10",
+    "camera HSD_ASSERTMSG __assert cm_803BCBD0",
+    "PAD_STACK matching tactics Camera_80030CFC ftCo_GuardReflect_Anim",
+    "ftMaterial static HSD_TevDesc HSD_TECnst data match"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json",
+      "human_pr_text",
+      "changed_files.jsonl",
+      "diff_excerpt",
+      "raw_diff truncated",
+      "text_corpus truncated"
+    ],
+    "notes": [
+      "Changed-file metadata and PR body are complete enough to preserve PR identity, file list, scope, reported verification, and supersession status.",
+      "The loaded diff excerpt is truncated, so file-specific code observations are limited to shown excerpts and should not be generalized to all 67 files.",
+      "The PR was closed with merged_at null and was superseded by split drafts, so this intake should not treat the broad PR as accepted upstream work.",
+      "There are no loaded review comments or reviews; review feedback is limited to issue comments and PR/body report text.",
+      "Verification claims are from PR body and bot report text; this intake did not rerun builds or objdiff."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "postmortem_lesson",
+        "title": "Broad matching PRs may need directory-split follow-up even when local reports are clean",
+        "text": "PR #2617 reported 26 new matches, 79 improvements, and zero regressions, but was closed unmerged and superseded by directory-split drafts. Curators may preserve this as a workflow lesson about review surface, not as evidence that every individual source change was accepted.",
+        "scope": [
+          "PR workflow",
+          "large decomp-matching changes"
+        ],
+        "evidence_refs": [
+          "human_pr_text:Verification",
+          "issue_comment:Superseded by directory split drafts",
+          "metadata_json:merged_at=null"
+        ],
+        "confidence": 0.88
+      },
+      {
+        "record_type": "postmortem_lesson",
+        "title": "Typed access can replace raw offset/M2C_FIELD access when the local type view is known",
+        "text": "The excerpted THP and fighter changes replace raw offset or M2C_FIELD-style access with THPFileInfoMCUBufferView and Fighter_804D64FC->x20 field access. This supports the existing typed-fields-over-pointer-math standard for the shown cases.",
+        "scope": [
+          "extern/dolphin/src/dolphin/thp/THPDec.c",
+          "src/melee/ft/chara/ftCommon/ftCo_0A01.c"
+        ],
+        "evidence_refs": [
+          "diff_excerpt:__THPDecompressiMCURowNxN",
+          "diff_excerpt:ftCo_800AF78C_inline0",
+          "decomp_standards:typed-fields-over-pointer-math"
+        ],
+        "confidence": 0.82
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "other",
+        "update_kind": "source_update",
+        "title": "Keep PR workflow checklist outside upstream Melee PR surface",
+        "text": "Issue comment states docs/standards.md was removed from the upstream PR branch and the checklist was kept as a local PR-workflow reference under .codex/skills/melee-pr-workflow/references/. Curator may decide whether workflow-source documentation should record this placement rule.",
+        "source_path": null,
+        "scope": [
+          "workflow documentation",
+          "PR branch hygiene"
+        ],
+        "evidence_refs": [
+          "issue_comment:docs/standards.md was removed"
+        ],
+        "reason": "This is a workflow/source-corpus placement note, not a decomp code standard proven by the PR diff."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote the broad PR's code changes as merged or accepted upstream; metadata shows merged_at null and issue comments say superseded.",
+      "Do not infer reviewer intent because there are no loaded reviews or review comments.",
+      "Do not turn the explicit __assert changes in camera.c into a global preference; the loaded standards prefer assert/report macros unless matching evidence requires otherwise.",
+      "Do not generalize PAD_STACK or declaration-order churn as normal style; the standards require narrow verifier evidence, and this intake only has PR-reported verification, not fresh objdiff runs."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

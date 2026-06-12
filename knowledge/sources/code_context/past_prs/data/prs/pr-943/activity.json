@@ -1,0 +1,10 @@
+{
+  "pr": 943,
+  "title": "Split out known pl files from pl_0371",
+  "url": "https://github.com/doldecomp/melee/pull/943",
+  "text_records_with_body": 0,
+  "review_comments": 0,
+  "changed_files": 6,
+  "added_lines": 11984,
+  "deleted_lines": 11926
+}

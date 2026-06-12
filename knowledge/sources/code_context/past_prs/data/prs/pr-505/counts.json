@@ -1,0 +1,17 @@
+{
+  "number": 505,
+  "title": "Match `mtx44`",
+  "state": "MERGED",
+  "createdAt": "2022-08-27T22:55:10Z",
+  "updatedAt": "2022-08-27T22:57:11Z",
+  "mergedAt": "2022-08-27T22:57:11Z",
+  "closedAt": "2022-08-27T22:57:11Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/505",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 11778
+  }
+}

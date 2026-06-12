@@ -68,23 +68,59 @@ def run_diff(
     candidate_obj: Path,
     func_name: str,
     capture: bool = False,
+    strict: bool = False,
 ):
-    """Run objdiff-cli. Returns CompletedProcess."""
+    """Run objdiff-cli. Returns CompletedProcess.
+
+    The relaxed mode (default) ignores data-relocation symbol diffs so the
+    instruction diff stays readable while data splitting is incomplete. The
+    strict mode scores exactly like the official runner/report pipeline; PASS
+    verdicts must come from the strict score, otherwise a function can read
+    "100%" here while the official score is still below exact.
+    """
     ref_obj = f"./build/GALE01/obj/{obj_path}.o"
+    command = [
+        objdiff_cli(), "diff",
+        "--format", "json",
+        "--output", "-",
+    ]
+    if not strict:
+        command += ["-c", "functionRelocDiffs=data_value"]
+    command += [
+        "-1", ref_obj,
+        "-2", str(candidate_obj),
+        func_name,
+    ]
     return subprocess.run(
-        [
-            objdiff_cli(), "diff",
-            "--format", "json",
-            "--output", "-",
-            "-c", "functionRelocDiffs=data_value",
-            "-1", ref_obj,
-            "-2", str(candidate_obj),
-            func_name,
-        ],
+        command,
         cwd=ROOT,
         capture_output=capture,
         text=capture,
     )
+
+
+def strict_match_percent(obj_path: str, candidate_obj: Path, func_name: str) -> Optional[float]:
+    """Official-equivalent score for one function (no relocation relaxation)."""
+    result = run_diff(obj_path, candidate_obj, func_name, capture=True, strict=True)
+    if result.returncode != 0:
+        return None
+    return symbol_match_percent(result.stdout, func_name)
+
+
+def verdict_line(func_name: str, strict_percent: Optional[float], relaxed_percent: Optional[float]) -> tuple[str, bool]:
+    """One-line PASS/FAIL verdict driven by the strict (official) score."""
+    if strict_percent is None:
+        return f"{func_name}: ERROR (objdiff JSON did not include match_percent)", False
+    passed = strict_percent >= 99.99999
+    if passed:
+        return f"{func_name}: PASS ({strict_percent:.5f}%)", True
+    if relaxed_percent is not None and relaxed_percent >= 99.99999:
+        return (
+            f"{func_name}: FAIL ({strict_percent:.5f}% official; instructions match but "
+            "relocation/data references still differ, so the official score is below exact)",
+            False,
+        )
+    return f"{func_name}: FAIL ({strict_percent:.5f}%)", False
 
 
 def symbol_match_percent(diff_json: str, func_name: str) -> Optional[float]:
@@ -247,15 +283,16 @@ def check_single(func_name: str, full_diff: bool) -> int:
     if result.returncode != 0:
         print(result.stdout, end="")
         return result.returncode
-    percent = symbol_match_percent(result.stdout, func_name)
-    if percent is None:
-        print(f"{func_name}: ERROR (objdiff JSON did not include match_percent)")
+    relaxed_percent = symbol_match_percent(result.stdout, func_name)
+    strict_percent = strict_match_percent(obj_path, compiled.obj, func_name)
+    line, passed = verdict_line(func_name, strict_percent, relaxed_percent)
+    print(line)
+    if strict_percent is None:
         return 1
-    print(f"{func_name}: {'PASS' if percent >= 99.99999 else 'FAIL'} ({percent:.5f}%)")
     if full_diff:
-        for line in first_diff_lines(result.stdout, func_name):
-            print(line)
-    return 0 if percent >= 99.99999 else 1
+        for diff_line in first_diff_lines(result.stdout, func_name):
+            print(diff_line)
+    return 0 if passed else 1
 
 
 def check_multiple(func_names: list[str]) -> int:
@@ -277,12 +314,16 @@ def check_multiple(func_names: list[str]) -> int:
 
         for func_name in funcs:
             result = run_diff(obj_path, compiled.obj, func_name, capture=True)
-            percent = symbol_match_percent(result.stdout, func_name) if result.returncode == 0 else None
-            if percent is not None and percent >= 99.99999:
-                print(f"{func_name}: PASS")
-            else:
+            relaxed_percent = symbol_match_percent(result.stdout, func_name) if result.returncode == 0 else None
+            strict_percent = strict_match_percent(obj_path, compiled.obj, func_name)
+            if strict_percent is None:
                 label = "objdiff error" if result.returncode != 0 else "unknown"
-                print(f"{func_name}: FAIL ({percent:.5f}%)" if percent is not None else f"{func_name}: ERROR ({label})")
+                print(f"{func_name}: ERROR ({label})")
+                rc = 1
+                continue
+            line, passed = verdict_line(func_name, strict_percent, relaxed_percent)
+            print(line if not passed else f"{func_name}: PASS")
+            if not passed:
                 rc = 1
 
     return rc

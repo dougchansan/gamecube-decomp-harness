@@ -1,0 +1,17 @@
+{
+  "number": 2646,
+  "title": "Match grGreatBay_801F499C and grGreatBay_801F4300",
+  "state": "MERGED",
+  "createdAt": "2026-06-10T16:30:14Z",
+  "updatedAt": "2026-06-10T16:59:03Z",
+  "mergedAt": "2026-06-10T16:59:02Z",
+  "closedAt": "2026-06-10T16:59:03Z",
+  "author": "MFS-code",
+  "url": "https://github.com/doldecomp/melee/pull/2646",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 4295
+  }
+}

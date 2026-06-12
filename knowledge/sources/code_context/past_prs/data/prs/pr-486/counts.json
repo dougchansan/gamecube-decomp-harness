@@ -1,0 +1,17 @@
+{
+  "number": 486,
+  "title": "Support logging (`-l`) in `build.sh`",
+  "state": "MERGED",
+  "createdAt": "2022-08-24T04:31:09Z",
+  "updatedAt": "2022-08-25T14:09:41Z",
+  "mergedAt": "2022-08-24T04:31:13Z",
+  "closedAt": "2022-08-24T04:31:13Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/486",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 3209
+  }
+}

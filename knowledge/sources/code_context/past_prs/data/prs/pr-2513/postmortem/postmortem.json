@@ -1,0 +1,257 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2513",
+  "pr": {
+    "number": 2513,
+    "title": "Add `pull_request_template` and AI guidelines",
+    "url": "https://github.com/doldecomp/melee/pull/2513",
+    "state": "MERGED",
+    "author": "ribbanya",
+    "created_at": "2026-05-19T19:24:51Z",
+    "merged_at": "2026-05-19T19:28:37Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Documentation-only PR adding a GitHub pull request template that points contributors to CONTRIBUTING.md, and replacing the prior Discord PR-notification note in CONTRIBUTING.md with AI assistance guidelines for matching work.",
+  "change_classification": {
+    "primary_type": "documentation",
+    "categories": [
+      "docs",
+      "contributing-guidelines",
+      "process"
+    ],
+    "systems": [
+      ".github",
+      "contribution workflow",
+      "AI assistance guidelines"
+    ]
+  },
+  "key_files": [
+    {
+      "path": ".github/CONTRIBUTING.md",
+      "role": "Updated contributor documentation with an AI Assistance section covering acceptable AI use, naming restrictions, data-section matching discouragement, and PR/comment etiquette for AI output.",
+      "evidence_refs": [
+        "metadata_json.changed_files[0]",
+        "raw_diff:.github/CONTRIBUTING.md"
+      ]
+    },
+    {
+      "path": ".github/pull_request_template.md",
+      "role": "New one-line PR template directing submitters to read the contributing guidelines before submitting.",
+      "evidence_refs": [
+        "metadata_json.changed_files[1]",
+        "raw_diff:.github/pull_request_template.md"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Added an `AI Assistance` section to `.github/CONTRIBUTING.md` stating that using AI to match functions is acceptable and frequently practiced.",
+      "evidence_refs": [
+        "raw_diff:.github/CONTRIBUTING.md"
+      ]
+    },
+    {
+      "text": "Added guidance to refrain from allowing AI to name struct fields or other globally accessible identifiers.",
+      "evidence_refs": [
+        "raw_diff:.github/CONTRIBUTING.md"
+      ]
+    },
+    {
+      "text": "Added guidance to discourage AI from attempting to match data sections and to focus AI-assisted work solely on code matches.",
+      "evidence_refs": [
+        "raw_diff:.github/CONTRIBUTING.md"
+      ]
+    },
+    {
+      "text": "Added guidance to avoid including AI output in PR or issue bodies/comments and to avoid automated code reviews, with a narrow allowance for relevant concise AI summaries wrapped as markdown comments.",
+      "evidence_refs": [
+        "raw_diff:.github/CONTRIBUTING.md"
+      ]
+    },
+    {
+      "text": "Created `.github/pull_request_template.md` with a link to the contributing guidelines.",
+      "evidence_refs": [
+        "raw_diff:.github/pull_request_template.md"
+      ]
+    },
+    {
+      "text": "Removed the previous line stating that opening a PR notifies the `#smash-bros-melee` Discord channel.",
+      "evidence_refs": [
+        "raw_diff:.github/CONTRIBUTING.md"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Centralized PR-submission guidance by adding a pull request template that links back to CONTRIBUTING.md rather than duplicating process rules in the template.",
+      "evidence_refs": [
+        "raw_diff:.github/pull_request_template.md"
+      ]
+    },
+    {
+      "text": "Scoped AI guidance to concrete high-risk areas: global naming, data-section matching, and review/PR communication noise.",
+      "evidence_refs": [
+        "raw_diff:.github/CONTRIBUTING.md"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "text": "AI assistance is acceptable for function matching, but the PR evidence frames it as something to constrain around source-ownership and reviewability risks.",
+      "evidence_refs": [
+        "raw_diff:.github/CONTRIBUTING.md"
+      ],
+      "confidence": 0.92
+    },
+    {
+      "text": "For AI-assisted matching, code matches are the intended focus; data-section matching should be discouraged unless separately justified.",
+      "evidence_refs": [
+        "raw_diff:.github/CONTRIBUTING.md"
+      ],
+      "confidence": 0.9
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "Do not let AI name struct fields or other globally accessible identifiers.",
+      "scope": [
+        "AI-assisted contributions",
+        "struct fields",
+        "global identifiers"
+      ],
+      "evidence_refs": [
+        "raw_diff:.github/CONTRIBUTING.md"
+      ],
+      "confidence": 0.95
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "text": "When using AI, direct it toward function/code matching rather than data-section matching.",
+      "evidence_refs": [
+        "raw_diff:.github/CONTRIBUTING.md"
+      ],
+      "confidence": 0.9
+    }
+  ],
+  "review_feedback": [],
+  "searchable_terms": [
+    "PR 2513",
+    "pull_request_template",
+    ".github/CONTRIBUTING.md",
+    ".github/pull_request_template.md",
+    "AI Assistance",
+    "AI guidelines",
+    "AI to match functions",
+    "AI naming fields",
+    "globally accessible identifiers",
+    "data sections",
+    "code matches",
+    "AI output",
+    "automated code reviews",
+    "markdown comments",
+    "contributing guidelines",
+    "ribbanya"
+  ],
+  "follow_up_queries": [
+    "AI Assistance CONTRIBUTING.md",
+    "Refrain from allowing AI to name fields in structs",
+    "Discourage AI from attempting to match data sections",
+    "avoid including AI output in PR body comments automated code reviews",
+    ".github/pull_request_template.md contributing guidelines"
+  ],
+  "evidence_quality": {
+    "status": "strong",
+    "evidence_refs": [
+      "metadata_json.pr",
+      "metadata_json.changed_files",
+      "raw_diff",
+      "text_corpus:empty_pr_body"
+    ],
+    "notes": [
+      "The diff is small, complete, and directly supports the changed-file and guideline claims.",
+      "There were no issue comments, review comments, or reviews in the supplied slice, so no reviewer feedback or reviewer intent is inferred.",
+      "The raw PR JSON is truncated, but the loaded metadata and raw diff contain the fields needed for this intake."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "type": "process_lesson",
+        "title": "AI assistance is allowed for matching functions with guardrails",
+        "text": "PR 2513 documents that AI use for matching functions is acceptable and frequently practiced, but should be constrained around naming, data-section matching, and PR/review communication.",
+        "scope": [
+          "AI-assisted decompilation",
+          "function matching",
+          "contribution workflow"
+        ],
+        "evidence_refs": [
+          "raw_diff:.github/CONTRIBUTING.md"
+        ],
+        "confidence": 0.9
+      },
+      {
+        "type": "naming_guardrail",
+        "title": "AI should not name global identifiers or struct fields",
+        "text": "For AI-assisted work, contributors are told to refrain from allowing AI to name fields in structs or other globally accessible identifiers.",
+        "scope": [
+          "AI-assisted naming",
+          "struct fields",
+          "global identifiers"
+        ],
+        "evidence_refs": [
+          "raw_diff:.github/CONTRIBUTING.md"
+        ],
+        "confidence": 0.95
+      },
+      {
+        "type": "matching_scope_guardrail",
+        "title": "AI-assisted work should focus on code matches rather than data sections",
+        "text": "The added guidelines discourage AI from attempting to match data sections and instead focus AI assistance solely on code matches.",
+        "scope": [
+          "AI-assisted matching",
+          "code matching",
+          "data-section matching"
+        ],
+        "evidence_refs": [
+          "raw_diff:.github/CONTRIBUTING.md"
+        ],
+        "confidence": 0.9
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "AI-assisted matching guardrails",
+        "text": "Consider adding or cross-linking an AI-specific global standard: AI may be used to assist with function/code matching, but should not be treated as authoritative for naming struct fields or globally accessible identifiers, should not be used to chase data-section matches, and should not generate PR/review discussion except for concise clearly marked summaries when appropriate.",
+        "source_path": null,
+        "scope": [
+          "AI-assisted decompilation",
+          "naming",
+          "data sections",
+          "review etiquette"
+        ],
+        "evidence_refs": [
+          "PR 2513 raw_diff:.github/CONTRIBUTING.md"
+        ],
+        "reason": "The merged CONTRIBUTING.md update is source evidence of project guidance; curator may decide whether to mirror this as a decomp standard or leave it as repository contribution documentation."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer any code-match validation, build status, or objdiff result from this PR; it only changes documentation.",
+      "Do not infer reviewer rationale because the supplied slice has zero reviews and zero review comments.",
+      "Do not generalize the AI guidance beyond the exact areas documented: function/code matching, naming of fields/global identifiers, data-section matching, and PR/comment/review output etiquette."
+    ]
+  },
+  "confidence": 0.94,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 943,
+  "title": "Split out known pl files from pl_0371",
+  "state": "MERGED",
+  "createdAt": "2023-06-29T01:59:38Z",
+  "updatedAt": "2023-06-29T02:12:41Z",
+  "mergedAt": "2023-06-29T02:12:38Z",
+  "closedAt": "2023-06-29T02:12:38Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/943",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 1167473
+  }
+}

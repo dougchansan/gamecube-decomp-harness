@@ -1,0 +1,17 @@
+{
+  "number": 1783,
+  "title": "HSD Synth & AXDriver work",
+  "state": "MERGED",
+  "createdAt": "2025-08-03T03:56:25Z",
+  "updatedAt": "2025-08-03T04:04:01Z",
+  "mergedAt": "2025-08-03T04:03:58Z",
+  "closedAt": "2025-08-03T04:03:58Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1783",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 76732
+  }
+}

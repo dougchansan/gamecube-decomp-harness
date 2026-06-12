@@ -1,0 +1,10 @@
+{
+  "pr": 542,
+  "title": "Replace all instances of `fighterObj` with `fighter_gobj`",
+  "url": "https://github.com/doldecomp/melee/pull/542",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 74,
+  "added_lines": 2722,
+  "deleted_lines": 2722
+}

@@ -1,0 +1,17 @@
+{
+  "number": 388,
+  "title": "Pikachu cleanup",
+  "state": "CLOSED",
+  "createdAt": "2022-05-25T07:02:26Z",
+  "updatedAt": "2022-05-25T18:23:53Z",
+  "mergedAt": null,
+  "closedAt": "2022-05-25T18:22:33Z",
+  "author": "snuffysasa",
+  "url": "https://github.com/doldecomp/melee/pull/388",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 521885
+  }
+}

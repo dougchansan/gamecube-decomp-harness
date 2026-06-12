@@ -2,12 +2,40 @@
 
 @theme {
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+
+  /* Surfaces: cold slate, dark but not pitch */
+  --color-ink: #0e1116;
+  --color-panel: #131820;
+  --color-raised: #1b222c;
+  --color-card: #161c25;
+  --color-inset: #0b0e13;
+
+  /* Hairlines */
+  --color-line: #29323e;
+  --color-line2: #3b4655;
+
+  /* Text ramp */
+  --color-fg: #e8edf2;
+  --color-soft: #c6cfd8;
+  --color-dim: #95a2af;
+  --color-faint: #67737f;
+
+  /* Tape colors */
+  --color-up: #3fe283;
+  --color-down: #ff6b6b;
+  --color-cyan: #4fd2f2;
+  --color-warn: #e8c052;
+  --color-accent: #5ec1f7;
+  --color-purple: #a39af2;
+  --color-path: #93c4e8;
 }
 
 @layer base {
   :root {
     color-scheme: dark;
     font-family: var(--font-mono);
+    /* Lets block-size animate to/from auto, enabling smooth <details> expansion. */
+    interpolate-size: allow-keywords;
   }
 
   * {
@@ -18,9 +46,33 @@
     min-width: 320px;
     min-height: 100vh;
     margin: 0;
-    background: #171817;
-    color: #e2e5e2;
-    font-size: 14px;
+    background: var(--color-ink);
+    color: var(--color-fg);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  ::selection {
+    background: rgba(94, 193, 247, 0.30);
+    color: #fff;
+  }
+
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: var(--color-inset);
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: var(--color-line2);
+    border: 2px solid var(--color-inset);
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: var(--color-faint);
   }
 
   button,
@@ -29,19 +81,41 @@
     font: inherit;
   }
 
+  button {
+    transition:
+      background-color 140ms ease,
+      border-color 140ms ease,
+      color 140ms ease,
+      opacity 140ms ease;
+  }
+
   input,
   select {
     width: 100%;
     min-height: 28px;
-    border: 1px solid #101110;
-    border-radius: 4px;
-    background: #0f100f;
-    color: #e2e5e2;
+    border: 1px solid var(--color-line);
+    border-radius: 0;
+    background: var(--color-inset);
+    color: var(--color-fg);
     padding: 4px 7px;
+    transition:
+      border-color 140ms ease,
+      box-shadow 140ms ease;
+  }
+
+  input:focus-visible,
+  select:focus-visible {
+    outline: none;
+    border-color: rgba(94, 193, 247, 0.55);
+    box-shadow: 0 0 0 1px rgba(94, 193, 247, 0.25), 0 0 10px rgba(94, 193, 247, 0.12);
   }
 
   select {
-    background: #222523;
+    background: var(--color-raised);
+  }
+
+  input[type="checkbox"] {
+    accent-color: var(--color-accent);
   }
 
   table {
@@ -52,8 +126,8 @@
 
   th,
   td {
-    border-bottom: 1px solid #292d2b;
-    padding: 6px 8px;
+    border-bottom: 1px solid var(--color-line);
+    padding: 5px 8px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -62,67 +136,254 @@
   }
 
   th {
-    background: #202321;
-    color: #969b97;
-    font-weight: 600;
+    background: var(--color-raised);
+    color: var(--color-dim);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--color-line2);
+  }
+
+  tbody tr:nth-child(even) td {
+    background: rgba(255, 255, 255, 0.015);
+  }
+
+  /* Fixed-rhythm work tables: the matches table runs on a 32px baseline and
+     the work-status table on 64px units (44px main + 20px activity row, or one
+     64px queue row), so 2 match rows always line up with 1 work entry and the
+     containers keep a constant height as rows page in and out. Row heights are
+     exact: cell content is single-block nowrap/hidden, so rows cannot grow. */
+  .row-rhythm-1 td {
+    height: 32px;
+    vertical-align: middle;
+  }
+
+  .row-rhythm-main td {
+    height: 44px;
+    padding-bottom: 0;
+    line-height: 1.25;
+    /* The main row and its activity sub-row read as one entry: no divider
+       inside the pair, a stronger divider between entries. */
+    border-bottom: none;
+  }
+
+  .row-rhythm-main td span {
+    line-height: 1.25;
+  }
+
+  .row-rhythm-sub td {
+    height: 20px;
+    padding-top: 0;
+    line-height: 14px;
+    border-bottom: 1px solid var(--color-line2);
+  }
+
+  /* Per-entry tint instead of the default per-row zebra, so a symbol row and
+     its status row always share a background. */
+  .active-table tbody tr:nth-child(even) td {
+    background: transparent;
+  }
+
+  .active-table tbody tr.entry-alt td {
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .active-table tbody tr.placeholder-row td {
+    background: rgba(255, 255, 255, 0.008);
+  }
+
+  .row-rhythm-2 td {
+    height: 64px;
+    vertical-align: middle;
+  }
+
+  .placeholder-row td,
+  tbody tr.placeholder-row:nth-child(even) td,
+  tbody tr.placeholder-row:hover td {
+    background: rgba(255, 255, 255, 0.008);
+    color: var(--color-faint);
+  }
+
+  tbody tr:hover td {
+    background: rgba(255, 255, 255, 0.03);
   }
 
   summary {
     cursor: pointer;
-    color: #c0c5c1;
-    font-size: 12px;
+    color: var(--color-soft);
+    font-size: 11px;
     font-weight: 700;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
   }
 
   details > :not(summary) {
     margin-top: 8px;
   }
+
+  details::details-content {
+    block-size: 0;
+    overflow-y: clip;
+    transition:
+      content-visibility 240ms allow-discrete,
+      block-size 240ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  details[open]::details-content {
+    block-size: auto;
+  }
 }
 
 @layer components {
+  /* Rail tracks are plain lengths (min()/px), so this interpolates smoothly.
+     Keep minmax() out of the track lists or the transition degrades to a snap. */
   .app-shell {
     grid-template-columns: var(--app-grid-columns);
-    transition: grid-template-columns 360ms cubic-bezier(0.22, 1, 0.36, 1);
+    transition: grid-template-columns 280ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 
+  /* Live drag-resize must track the pointer exactly; the open/close
+     transition would lag behind the handle otherwise. */
+  .app-shell-resizing {
+    transition: none;
+    user-select: none;
+    cursor: col-resize;
+  }
+
+  .details-rail-resize-handle {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: -3px;
+    width: 7px;
+    cursor: col-resize;
+    z-index: 20;
+  }
+
+  .details-rail-resize-handle:hover,
+  .app-shell-resizing .details-rail-resize-handle {
+    background: var(--color-line2);
+  }
+
+  @media (max-width: 1180px) {
+    .details-rail-resize-handle {
+      display: none;
+    }
+  }
+
+  /* Section header: LABEL ───────── */
+  .panel-heading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+    color: var(--color-fg);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .panel-heading::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--color-line2), transparent);
+  }
+
+  /* Status tag: square, hard, with a state lamp */
+  .status-tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 76px;
+    padding: 3px 9px;
+    border: 1px solid var(--color-line2);
+    background: var(--color-inset);
+    color: var(--color-dim);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .status-tag .lamp {
+    width: 6px;
+    height: 6px;
+    background: currentColor;
+  }
+
+  .status-tag-live {
+    border-color: rgba(63, 226, 131, 0.5);
+    color: var(--color-up);
+  }
+
+  .status-tag-live .lamp {
+    animation: lamp-pulse 1.6s ease-in-out infinite;
+  }
+
+  .status-tag-warn {
+    border-color: rgba(232, 192, 82, 0.5);
+    color: var(--color-warn);
+  }
+
+  @keyframes lamp-pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+
+    50% {
+      opacity: 0.35;
+    }
+  }
+
+  /* overflow-x clip keeps the fixed-width content from flashing a horizontal
+     scrollbar while its track animates; the rail acts as a sliding reveal. */
   .sidebar-rail,
   .details-rail {
+    overflow-x: clip;
     transition:
-      background-color 180ms ease,
-      border-color 180ms ease,
-      opacity 240ms ease,
-      transform 360ms cubic-bezier(0.22, 1, 0.36, 1);
-    will-change: transform, opacity;
-  }
-
-  .sidebar-rail-open,
-  .details-rail-open {
-    opacity: 1;
-    transform: translateX(0);
-  }
-
-  .sidebar-rail-collapsed {
-    opacity: 0.88;
-    transform: translateX(-8px);
-  }
-
-  .details-rail-collapsed {
-    opacity: 0.88;
-    transform: translateX(8px);
-  }
-
-  .sidebar-rail-tab,
-  .details-rail-tab {
-    transition:
-      background-color 180ms ease,
-      gap 180ms ease,
-      padding 180ms ease;
+      background-color 140ms ease,
+      border-color 140ms ease;
   }
 
   .sidebar-rail-content,
   .details-rail-content {
-    animation: rail-content-enter 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: rail-content-enter 240ms cubic-bezier(0.4, 0, 0.2, 1) both;
+  }
+
+  /* Pin open-rail content at its final width so the slide reveals it
+     instead of reflowing it mid-animation. */
+  .sidebar-rail-open .sidebar-rail-content {
+    min-width: min(425px, 30vw);
+  }
+
+  .details-rail-open .details-rail-content {
+    min-width: var(--details-rail-width, min(425px, 30vw));
+  }
+
+  @media (max-width: 1180px) {
+    /* Medium layout: sidebar track is min(425px, 42vw); details rail spans full width. */
+    .sidebar-rail-open .sidebar-rail-content {
+      min-width: min(425px, 42vw);
+    }
+
+    .details-rail-open .details-rail-content {
+      min-width: 0;
+    }
+  }
+
+  @media (max-width: 780px) {
+    .app-shell {
+      transition: none;
+    }
+
+    .sidebar-rail-open .sidebar-rail-content {
+      min-width: 0;
+    }
   }
 
   .project-paths {
@@ -133,9 +394,9 @@
 
   .control-disclosure {
     margin-top: 8px;
-    border: 1px solid #292d2b;
-    border-radius: 6px;
-    background: #181a19;
+    border: 1px solid var(--color-line);
+    border-radius: 0;
+    background: var(--color-card);
     overflow: hidden;
   }
 
@@ -143,19 +404,40 @@
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     gap: 2px;
-    min-height: 34px;
-    padding: 9px 10px;
-    background: #202321;
+    min-height: 36px;
+    padding: 10px 30px 10px 12px;
+    background: var(--color-raised);
     border-bottom: 1px solid transparent;
+    position: relative;
+    cursor: pointer;
+  }
+
+  .control-disclosure > summary:hover {
+    background: var(--color-card);
+  }
+
+  .control-disclosure > summary::after {
+    content: "▸";
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-dim);
+    font-size: 11px;
+  }
+
+  .control-disclosure[open] > summary::after {
+    transform: translateY(-50%) rotate(90deg);
   }
 
   .control-disclosure > summary small {
     display: block;
     min-width: 0;
     overflow: hidden;
-    color: #969b97;
+    color: var(--color-dim);
     font-size: 11px;
     font-weight: 500;
+    letter-spacing: normal;
     text-overflow: ellipsis;
     text-transform: none;
     white-space: nowrap;
@@ -175,16 +457,16 @@
   }
 
   .control-disclosure[open] > summary {
-    border-bottom-color: #292d2b;
+    border-bottom-color: var(--color-line);
   }
 
   .control-disclosure > :not(summary) {
-    margin-right: 9px;
-    margin-left: 9px;
+    margin-right: 12px;
+    margin-left: 12px;
   }
 
   .control-disclosure > :last-child {
-    margin-bottom: 9px;
+    margin-bottom: 12px;
   }
 
   .run-disclosure-grid {
@@ -198,67 +480,19 @@
     margin-top: 0;
   }
 
-  .activity-panel {
-    margin-top: 10px;
-    border: 1px solid #2f3832;
-    border-radius: 6px;
-    background: #121513;
-    padding: 9px;
-  }
-
-  .activity-headline {
-    color: #cfd4d0;
-    font-size: 12px;
-    font-weight: 700;
-  }
-
-  .activity-log {
-    display: grid;
-    gap: 4px;
-    margin-top: 8px;
-  }
-
-  .activity-log-line {
-    display: grid;
-    grid-template-columns: 44px minmax(0, 1fr);
-    gap: 6px;
-    min-width: 0;
-    color: #969b97;
-    font-size: 11px;
-    line-height: 1.35;
-  }
-
-  .activity-log-line span:last-child {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
   @keyframes rail-content-enter {
     from {
       opacity: 0;
-      transform: translateX(8px);
     }
 
     to {
       opacity: 1;
-      transform: translateX(0);
     }
   }
 
   @media (max-width: 780px) {
-    .app-shell {
-      transition: none;
-    }
-
     .run-disclosure-grid {
       grid-template-columns: minmax(0, 1fr);
-    }
-
-    .sidebar-rail,
-    .details-rail {
-      transform: none;
     }
   }
 
@@ -272,13 +506,13 @@
     .app-shell,
     .sidebar-rail,
     .details-rail,
-    .sidebar-rail-tab,
-    .details-rail-tab {
+    details::details-content {
       transition: none;
     }
 
     .sidebar-rail-content,
-    .details-rail-content {
+    .details-rail-content,
+    .status-tag-live .lamp {
       animation: none;
     }
   }

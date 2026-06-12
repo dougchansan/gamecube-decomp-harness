@@ -1,0 +1,10 @@
+{
+  "pr": 1441,
+  "title": "Finish match of grlib, fix fabsf declaration, fixup Fighter's x1860 naming based on usages, improved WIPs in ftCo_DamageFall and ftwaitanim",
+  "url": "https://github.com/doldecomp/melee/pull/1441",
+  "text_records_with_body": 0,
+  "review_comments": 0,
+  "changed_files": 19,
+  "added_lines": 137,
+  "deleted_lines": 921
+}

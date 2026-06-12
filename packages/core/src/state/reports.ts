@@ -6,8 +6,25 @@ import { workerWakeEvent } from "./events.js";
 function releasedLeaseStatus(reportType: WorkerReportType): string {
   if (reportType === "progress" || reportType === "score_candidate") return "released_complete";
   if (reportType === "needs_fact") return "released_needs_fact";
+  if (reportType === "needs_rework") return "released_needs_rework";
   if (reportType === "tool_error") return "released_error";
+  if (reportType === "provider_error") return "released_provider_error";
   return "released_stalled";
+}
+
+// needs_rework (gate rejected the return — the work or our understanding needs another
+// look) and error (infrastructure broke) get distinct terminal-for-now statuses instead
+// of "reported" so they stay visible and the director can re-queue them later
+// (prioritizeQueuedTargets re-queues any target with no open queue row).
+// provider_error means the LLM provider failed before the target was really attempted,
+// so the queue row goes straight back to "queued" — quarantining it would silently drain
+// the run's target pool during an outage (refill dedupes by symbol and never re-adds it).
+export function reportedTargetStatus(reportType: WorkerReportType): string {
+  if (reportType === "stalled_no_useful_guess") return "stalled";
+  if (reportType === "needs_rework") return "needs_rework";
+  if (reportType === "tool_error") return "error";
+  if (reportType === "provider_error") return "queued";
+  return "reported";
 }
 
 export function recordWorkerReport(params: {
@@ -52,7 +69,7 @@ export function recordWorkerReport(params: {
           WHERE id = (SELECT queue_id FROM leases WHERE id = ?)
         `,
       )
-      .run(params.reportType === "stalled_no_useful_guess" ? "stalled" : "reported", params.leaseId);
+      .run(reportedTargetStatus(params.reportType), params.leaseId);
     params.store.db
       .query(
         `
@@ -66,7 +83,7 @@ export function recordWorkerReport(params: {
           )
         `,
       )
-      .run(params.reportType === "stalled_no_useful_guess" ? "stalled" : "reported", params.leaseId);
+      .run(reportedTargetStatus(params.reportType), params.leaseId);
 
     params.store.db
       .query("INSERT INTO events (id, run_id, event_type, producer, payload_json, created_at) VALUES (?, ?, ?, ?, ?, ?)")

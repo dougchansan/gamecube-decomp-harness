@@ -1,0 +1,363 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2501",
+  "pr": {
+    "number": 2501,
+    "title": "lb: improve lbshadow matching",
+    "url": "https://github.com/doldecomp/melee/pull/2501",
+    "state": "MERGED",
+    "author": "itsgrimetime",
+    "created_at": "2026-05-15T15:47:26Z",
+    "merged_at": "2026-05-15T16:27:50Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Improved matching for two functions in src/melee/lb/lbshadow.c: spline tangent handling in lbShadow_8000E9F0 and shadow update logic in lbShadow_8000F38C. The PR body reports checkdiff scores of 95.80645% and 99.69586%, and the bot report shows unmatched-item improvements for both functions.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "library",
+      "math-codegen",
+      "stack-local-shape"
+    ],
+    "systems": [
+      "lb",
+      "lbshadow",
+      "library"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/lb/lbshadow.c",
+      "role": "Only changed source file; contains matching edits for lbShadow_8000E9F0, lbShadow_8000F38C, and a new local inline lbShadow_Sqrtf helper.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/lb/lbshadow.c added 38 deleted 16 hunks 11",
+        "raw_diff: diff --git a/src/melee/lb/lbshadow.c",
+        "human_pr_text: Functions list and verification commands"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "lbShadow_8000E9F0 now preserves the original spline parameter in orig_u before scaling u by spline->numcv - 1, and case 0 compares orig_u against 1.0F before adjusting idx.",
+      "evidence_refs": [
+        "raw_diff: added f32 orig_u; orig_u = u; u *= spline->numcv - 1; if (orig_u == 1.0F)"
+      ]
+    },
+    {
+      "text": "lbShadow_8000E9F0 rewrote one Bezier tangent expression from -((4.0F * t) - 1.0F) to 1.0F - (4.0F * t), with assignment order changed around t2.",
+      "evidence_refs": [
+        "raw_diff: case 1 bez1 expression and t2 ordering"
+      ]
+    },
+    {
+      "text": "Added static inline lbShadow_Sqrtf using __frsqrte refinement, static f64 constants, a local 0x38 byte zeroed array, and volatile f32 y, then replaced the prior conditional sqrtf call in lbShadow_8000F38C.",
+      "evidence_refs": [
+        "raw_diff: static inline f32 lbShadow_Sqrtf(f32 x)",
+        "raw_diff: dist = lbShadow_Sqrtf(dist)"
+      ]
+    },
+    {
+      "text": "lbShadow_8000F38C changed stack padding from PAD_STACK(0x48) to PAD_STACK(0x10) and widened several locals to outer function scope: nextGx, hasObj, i, and shadow2.",
+      "evidence_refs": [
+        "raw_diff: added HSD_GObj* nextGx; s32 hasObj; s32 i; HSD_Shadow* shadow2",
+        "raw_diff: PAD_STACK(0x48) to PAD_STACK(0x10)"
+      ]
+    },
+    {
+      "text": "lbShadow_8000F38C adjusted local declaration and assignment shape in several blocks, including reusing nextGx, hasObj, shadow2, and i, reordering upVec assignments, and introducing a temporary HSD_JObj* jobj for HSD_ShadowAddObject.",
+      "evidence_refs": [
+        "raw_diff: nextGx = lgobj->next_gx",
+        "raw_diff: hasObj = 0",
+        "raw_diff: HSD_JObj* jobj = (HSD_JObj*) gobj->hsd_obj",
+        "raw_diff: shadow2 = fp->x20A4.shadow",
+        "raw_diff: i = 0"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Preserved the unscaled spline parameter separately as orig_u so endpoint logic could still test the caller's original u value while allowing scaled u to drive idx and t.",
+      "evidence_refs": [
+        "raw_diff: orig_u = u; u *= spline->numcv - 1; if (orig_u == 1.0F)"
+      ]
+    },
+    {
+      "text": "Localized a math-codegen workaround into an inline helper rather than spreading the __frsqrte refinement sequence at the call site.",
+      "evidence_refs": [
+        "raw_diff: added lbShadow_Sqrtf and replaced conditional sqrtf block"
+      ]
+    },
+    {
+      "text": "Changed local lifetime and declaration placement narrowly inside the touched function, which coincides with a reported checkdiff improvement for lbShadow_8000F38C.",
+      "evidence_refs": [
+        "raw_diff: widened nextGx, hasObj, i, shadow2 locals",
+        "human_pr_text: tools/checkdiff.py lbShadow_8000F38C",
+        "text_corpus issue_comment: lbShadow_8000F38C before 99.15% after 99.70%"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "text": "When a parameter is both transformed for indexing and still needed for endpoint behavior, preserving the original value in a separate local can improve matching while keeping the source intent readable.",
+      "scope": [
+        "spline interpolation",
+        "lbShadow_8000E9F0",
+        "parameter scaling"
+      ],
+      "evidence_refs": [
+        "raw_diff: orig_u added and used for endpoint comparison",
+        "text_corpus issue_comment: lbShadow_8000E9F0 improved from 93.27% to 95.81%"
+      ]
+    },
+    {
+      "text": "For MWCC matching, algebraically equivalent float expressions and assignment ordering can matter; the PR changed bez1 from a negated subtraction form to 1.0F - (4.0F * t) and moved it after t2.",
+      "scope": [
+        "float expression shape",
+        "Bezier tangent math",
+        "lbShadow_8000E9F0"
+      ],
+      "evidence_refs": [
+        "raw_diff: bez1 expression change",
+        "human_pr_text: lbShadow_8000E9F0 checkdiff score"
+      ]
+    },
+    {
+      "text": "Local lifetime and declaration scope can affect matching in large update functions; this PR moved several block-local temporaries to the outer function scope in lbShadow_8000F38C alongside a reported score improvement.",
+      "scope": [
+        "local variable lifetime",
+        "shadow update matching",
+        "lbShadow_8000F38C"
+      ],
+      "evidence_refs": [
+        "raw_diff: nextGx, hasObj, i, shadow2 moved to outer declaration list",
+        "text_corpus issue_comment: lbShadow_8000F38C improved from 99.15% to 99.70%"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "orig_u",
+      "kind": "local variable",
+      "text": "Used for the original unscaled u parameter after u is repurposed as the scaled spline coordinate.",
+      "evidence_refs": [
+        "raw_diff: f32 orig_u; orig_u = u; if (orig_u == 1.0F)"
+      ]
+    },
+    {
+      "name": "lbShadow_Sqrtf",
+      "kind": "static inline helper",
+      "text": "File-local helper name uses the lbShadow_ prefix and describes the sqrtf replacement used by lbShadow_8000F38C.",
+      "evidence_refs": [
+        "raw_diff: static inline f32 lbShadow_Sqrtf(f32 x)"
+      ]
+    },
+    {
+      "name": "nextGx",
+      "kind": "local variable",
+      "text": "Camel-case local corresponding to the next_gx field value from HSD_GObj.",
+      "evidence_refs": [
+        "raw_diff: HSD_GObj* nextGx; nextGx = lgobj->next_gx"
+      ]
+    },
+    {
+      "name": "jobj",
+      "kind": "local variable",
+      "text": "Short role name for an HSD_JObj* temporary passed to HSD_ShadowAddObject.",
+      "evidence_refs": [
+        "raw_diff: HSD_JObj* jobj = (HSD_JObj*) gobj->hsd_obj"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "text": "Used PAD_STACK, but reduced the explicit padding in lbShadow_8000F38C from 0x48 to 0x10 while adding a custom sqrt helper with its own local padding.",
+      "evidence_refs": [
+        "raw_diff: PAD_STACK(0x48) to PAD_STACK(0x10)",
+        "raw_diff: u8 _[0x38] = { 0 } inside lbShadow_Sqrtf"
+      ],
+      "caution": "PAD_STACK and dummy padding are matching tactics that should remain tied to narrow objdiff/checkdiff evidence."
+    },
+    {
+      "text": "Replaced library sqrtf call shape with an inline __frsqrte Newton-refinement sequence and a volatile f32 return temporary.",
+      "evidence_refs": [
+        "raw_diff: __frsqrte sequence in lbShadow_Sqrtf",
+        "raw_diff: volatile f32 y",
+        "human_pr_text: tools/checkdiff.py lbShadow_8000F38C"
+      ],
+      "caution": "This evidence supports that the tactic was used in this PR, not that it is a general replacement for sqrtf."
+    },
+    {
+      "text": "Adjusted local variable lifetimes by hoisting temporaries to the function-level declaration list.",
+      "evidence_refs": [
+        "raw_diff: nextGx, hasObj, i, shadow2 added near top of lbShadow_8000F38C"
+      ],
+      "caution": "Useful as a matching tactic candidate only when backed by local checkdiff evidence."
+    },
+    {
+      "text": "Used expression reshaping and assignment order changes for float math in spline tangent calculation.",
+      "evidence_refs": [
+        "raw_diff: bez1 and t2 ordering changes"
+      ],
+      "caution": "Do not infer semantic change beyond the shown algebraic source rewrite and reported matching improvement."
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "text": "decomp-dev[bot] reported two improvements in unmatched items for GALE01: lbShadow_8000E9F0 improved by +22 bytes from 93.27% to 95.81%, and lbShadow_8000F38C improved by +9 bytes from 99.15% to 99.70%.",
+      "evidence_refs": [
+        "text_corpus issue_comment: Report for GALE01, 2 improvements in unmatched items"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2501",
+    "lbshadow",
+    "src/melee/lb/lbshadow.c",
+    "lbShadow_8000E9F0",
+    "lbShadow_8000F38C",
+    "lbShadow_Sqrtf",
+    "__frsqrte",
+    "sqrtf",
+    "PAD_STACK",
+    "orig_u",
+    "HSD_Spline",
+    "Vec3",
+    "HSD_Shadow",
+    "HSD_GObjGXLinkHead",
+    "next_gx",
+    "nextGx",
+    "HSD_LObj",
+    "HSD_JObj",
+    "HSD_ShadowAddObject",
+    "HSD_ShadowDeleteObject",
+    "Ground_801C0508",
+    "HSD_ViewingRectInit",
+    "lbVector_Diff",
+    "lbVector_Normalize",
+    "volatile f32 y"
+  ],
+  "follow_up_queries": [
+    "lbShadow_Sqrtf __frsqrte volatile f32 y",
+    "lbShadow_8000F38C PAD_STACK local lifetime nextGx hasObj shadow2",
+    "lbShadow_8000E9F0 orig_u spline endpoint",
+    "lbshadow sqrtf checkdiff",
+    "src/melee/lb/lbshadow.c HSD_Spline tangent matching"
+  ],
+  "evidence_quality": {
+    "status": "strong",
+    "evidence_refs": [
+      "metadata_json: PR #2501 title, author, merged_at, changed_files counts",
+      "human_pr_text: PR body with function scores and verification commands",
+      "raw_diff: complete 4761-byte diff for src/melee/lb/lbshadow.c",
+      "changed_files.jsonl: one changed file",
+      "text_corpus.jsonl: bot report with before/after score improvements"
+    ],
+    "notes": [
+      "The loaded slice includes the full raw diff and PR body, enough to identify file-level changes and matching tactics.",
+      "There were no loaded human review comments or review records; review_feedback is limited to the bot report.",
+      "Verification commands and percentage scores are PR-reported and bot-reported; no independent build or objdiff was run during intake.",
+      "The PR was merged according to metadata, but intake does not infer broader acceptance of all tactics as standards."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "kind": "decomp_lesson",
+        "title": "Preserve original parameter when reused scaled value changes endpoint behavior",
+        "text": "In lbShadow_8000E9F0, the PR introduced orig_u before scaling u for spline indexing, then used orig_u for the endpoint check. This is a reusable matching pattern when the original argument and transformed coordinate both affect codegen or behavior.",
+        "scope": [
+          "src/melee/lb/lbshadow.c",
+          "lbShadow_8000E9F0",
+          "spline parameter handling"
+        ],
+        "evidence_refs": [
+          "raw_diff: orig_u addition and endpoint comparison",
+          "text_corpus issue_comment: lbShadow_8000E9F0 score improvement"
+        ]
+      },
+      {
+        "kind": "matching_tactic",
+        "title": "Float expression spelling and assignment order can be material to MWCC matching",
+        "text": "The PR changed a Bezier tangent expression from -((4.0F * t) - 1.0F) to 1.0F - (4.0F * t) and reordered nearby assignments in a function whose checkdiff score improved.",
+        "scope": [
+          "lbShadow_8000E9F0",
+          "float expression matching"
+        ],
+        "evidence_refs": [
+          "raw_diff: bez1/t2 hunk",
+          "human_pr_text: checkdiff command for lbShadow_8000E9F0"
+        ]
+      },
+      {
+        "kind": "matching_tactic",
+        "title": "Local lifetime hoisting was used for lbShadow_8000F38C matching",
+        "text": "The PR hoisted nextGx, hasObj, i, and shadow2 to the outer local declaration area in lbShadow_8000F38C, alongside a reported checkdiff improvement. Treat as a narrow tactic requiring verifier evidence, not general style.",
+        "scope": [
+          "lbShadow_8000F38C",
+          "local lifetime",
+          "stack/register matching"
+        ],
+        "evidence_refs": [
+          "raw_diff: outer declarations and removed block-local declarations",
+          "text_corpus issue_comment: lbShadow_8000F38C score improvement"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "other",
+        "update_kind": "source_update",
+        "title": "Document lbshadow-local sqrt matching helper if it remains in current source",
+        "text": "PR #2501 added a file-local lbShadow_Sqrtf helper using __frsqrte refinement, static f64 constants, local padding, and volatile f32 y to replace a conditional sqrtf call in lbShadow_8000F38C. Curator may want a source-owned note near lbshadow or a path-specific tactic entry if this helper remains relevant.",
+        "source_path": "src/melee/lb/lbshadow.c",
+        "scope": [
+          "lbShadow_Sqrtf",
+          "lbShadow_8000F38C",
+          "math-codegen matching"
+        ],
+        "evidence_refs": [
+          "raw_diff: added static inline f32 lbShadow_Sqrtf",
+          "raw_diff: dist = lbShadow_Sqrtf(dist)",
+          "human_pr_text: checkdiff command for lbShadow_8000F38C"
+        ],
+        "reason": "The helper is a concrete PR tactic, but broader guidance about custom sqrt/frsqrte helpers belongs in source/path documentation rather than being promoted globally from one PR."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Consider adding this PR as an example under matching-tactics evidence requirements",
+        "text": "PR #2501 is a useful example of PAD_STACK, dummy local padding, volatile local, expression spelling, and local-lifetime edits being tied to narrow checkdiff-reported improvements. It could be referenced as an example, not as a blanket endorsement of those tactics.",
+        "source_path": null,
+        "scope": [
+          "matching-tactics-need-evidence",
+          "verification-and-regression-ledger"
+        ],
+        "evidence_refs": [
+          "raw_diff: PAD_STACK and local lifetime changes",
+          "raw_diff: u8 _[0x38] and volatile f32 y",
+          "human_pr_text: verification commands",
+          "text_corpus issue_comment: before/after report"
+        ],
+        "reason": "The loaded standards already require evidence for these tactics; this PR may serve as a concrete case study if curator wants examples."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote lbShadow_Sqrtf or __frsqrte refinement as a general sqrtf replacement; the evidence only shows a lbshadow-local matching edit.",
+      "Do not infer human reviewer approval or rationale beyond merge metadata and the absence of loaded review comments.",
+      "Do not treat PAD_STACK, dummy byte arrays, or volatile locals as accepted style; standards require narrow verification evidence.",
+      "Do not claim full function matches: the PR body reports 95.80645% for lbShadow_8000E9F0 and 99.69586% for lbShadow_8000F38C, not 100%."
+    ]
+  },
+  "confidence": 0.88,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 579,
+  "title": "Migrate `os` to C",
+  "state": "MERGED",
+  "createdAt": "2022-10-26T00:57:25Z",
+  "updatedAt": "2022-10-27T17:31:32Z",
+  "mergedAt": "2022-10-27T17:31:31Z",
+  "closedAt": "2022-10-27T17:31:31Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/579",
+  "counts": {
+    "issue_comments": 2,
+    "review_comments": 0,
+    "reviews": 1,
+    "diff_bytes": 386958
+  }
+}

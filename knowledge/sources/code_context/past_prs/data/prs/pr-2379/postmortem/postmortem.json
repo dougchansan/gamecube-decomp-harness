@@ -1,0 +1,300 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2379",
+  "pr": {
+    "number": 2379,
+    "title": "Link Ifnametag",
+    "url": "https://github.com/doldecomp/melee/pull/2379",
+    "state": "MERGED",
+    "author": "jellejurre",
+    "created_at": "2026-04-02T22:22:06Z",
+    "merged_at": "2026-04-03T05:42:03Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2379 linked the melee/if/ifnametag object by changing configure.py from NonMatching to Matching, updating symbol metadata/local labels for ifnametag-related text/data/sdata/sdata2/bss entries, and adjusting un_802FD4C8 source shape. The bot report records one new match for main/melee/if/ifnametag un_802FD4C8, improving that item from 90.18% to 100.00%. No human review comments or PR body rationale were present in the loaded slice.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "linking",
+      "symbol-metadata",
+      "naming"
+    ],
+    "systems": [
+      "melee/if",
+      "ifnametag",
+      "config/GALE01",
+      "build-config"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/if/ifnametag.c",
+      "role": "Source changes for un_802FD4C8: added inline GObj_Create wrapper, introduced HSD_CObj temp, and changed expression shape around memzero, GObj creation, camera descriptor conversion, and object attachment.",
+      "evidence_refs": [
+        "raw_diff: src/melee/if/ifnametag.c hunk around un_802FD4C8",
+        "text_corpus: decomp-dev[bot] report lists main/melee/if/ifnametag un_802FD4C8 as 100.00%"
+      ]
+    },
+    {
+      "path": "configure.py",
+      "role": "Build/link configuration changed melee/if/ifnametag.c from NonMatching to Matching.",
+      "evidence_refs": [
+        "raw_diff: configure.py hunk changes Object(NonMatching, \"melee/if/ifnametag.c\") to Object(Matching, \"melee/if/ifnametag.c\")"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Symbol metadata updates for ifnametag-related function scope, local data labels, named local camera descriptor data, local strings, and local float/double constants.",
+      "evidence_refs": [
+        "raw_diff: symbols.txt hunks for NameTag_RenderCallback, nametag_eyepos, nametag_interest, nametag_CObjDesc, @197/@378/@379, @263/@264, @163/@184/@185/@262/@265/@316/@317/@318/@319/@322/@380"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Marked melee/if/ifnametag.c as Matching in configure.py.",
+      "evidence_refs": [
+        "raw_diff: configure.py"
+      ]
+    },
+    {
+      "text": "Adjusted un_802FD4C8 by adding inline HSD_GObj* un_802FD4C8_inline(int arg0) returning GObj_Create(0xE, arg0, 0).",
+      "evidence_refs": [
+        "raw_diff: src/melee/if/ifnametag.c"
+      ]
+    },
+    {
+      "text": "Changed un_802FD4C8 local/source expression shape: added HSD_CObj* new_var, assigned i inside memzero size argument, assigned gobj through the inline helper, stored lb_80013B14 result in new_var, then passed new_var to HSD_GObjObject_80390A70.",
+      "evidence_refs": [
+        "raw_diff: src/melee/if/ifnametag.c"
+      ]
+    },
+    {
+      "text": "Updated symbols for local scope and local labels across .text, .data, .bss, .sdata, and .sdata2 near ifnametag/ifmagnify/ifstock ranges.",
+      "evidence_refs": [
+        "raw_diff: config/GALE01/symbols.txt"
+      ]
+    },
+    {
+      "text": "Renamed or localized several ifnametag data entries, including nametag_eyepos, nametag_interest, nametag_CObjDesc, and compiler-style @number literals/constants.",
+      "evidence_refs": [
+        "raw_diff: config/GALE01/symbols.txt"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "The PR paired the source match with configure.py status and symbols.txt metadata changes, which is consistent with linking a previously NonMatching object rather than changing only C source.",
+      "evidence_refs": [
+        "raw_diff: configure.py",
+        "raw_diff: config/GALE01/symbols.txt",
+        "text_corpus: decomp-dev[bot] report"
+      ]
+    },
+    {
+      "text": "Localizing compiler-style literals/constants as @number symbols and marking NameTag_RenderCallback local kept symbol metadata aligned with the linked translation unit boundary.",
+      "evidence_refs": [
+        "raw_diff: config/GALE01/symbols.txt"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For object-linking PRs, a successful source match may require synchronized symbol metadata changes for local functions, local labels, and local literals/constants in addition to the C edit and Matching configuration flip.",
+      "scope": [
+        "object linking",
+        "symbols.txt",
+        "configure.py"
+      ],
+      "evidence_refs": [
+        "raw_diff: configure.py marks ifnametag.c Matching",
+        "raw_diff: symbols.txt local scope/label updates",
+        "text_corpus: bot report records one new match for ifnametag un_802FD4C8"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "Small expression-shape changes, including preserving an existing PAD_STACK, adding a narrow inline wrapper, splitting a helper result into a temporary, and using assignment within an argument, can be part of the final matching shape for a stubborn function.",
+      "scope": [
+        "src/melee/if/ifnametag.c",
+        "un_802FD4C8"
+      ],
+      "evidence_refs": [
+        "raw_diff: src/melee/if/ifnametag.c",
+        "text_corpus: bot report lists un_802FD4C8 at 100.00%"
+      ],
+      "confidence": 0.7
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "Recovered local ifnametag data names used a nametag_ prefix for semantic local camera-related objects: nametag_eyepos, nametag_interest, nametag_CObjDesc.",
+      "evidence_refs": [
+        "raw_diff: config/GALE01/symbols.txt .data hunk"
+      ]
+    },
+    {
+      "text": "Anonymous local literals/constants were represented with compiler-style @number names such as @197, @263, @322, and @380 rather than semantic global un_ names.",
+      "evidence_refs": [
+        "raw_diff: config/GALE01/symbols.txt .data/.sdata/.sdata2 hunks"
+      ]
+    },
+    {
+      "text": "NameTag_RenderCallback retained its existing name but gained scope:local metadata.",
+      "evidence_refs": [
+        "raw_diff: config/GALE01/symbols.txt .text hunk"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Added a narrow inline wrapper un_802FD4C8_inline around GObj_Create(0xE, arg0, 0), replacing a direct GObj_Create(HSD_GOBJ_CLASS_UI, 15, 0) call at the callsite.",
+      "evidence_refs": [
+        "raw_diff: src/melee/if/ifnametag.c"
+      ],
+      "caution": "The slice shows the tactic and the bot match report, but does not include objdiff output explaining why the inline wrapper was necessary."
+    },
+    {
+      "tactic": "Introduced HSD_CObj* new_var to hold lb_80013B14((HSD_CameraDescPerspective*) (&nametag_CObjDesc)) before passing it to HSD_GObjObject_80390A70.",
+      "evidence_refs": [
+        "raw_diff: src/melee/if/ifnametag.c"
+      ],
+      "caution": "Local variable name new_var is mechanically descriptive and may be match-driven; no review discussion explains naming intent."
+    },
+    {
+      "tactic": "Changed memzero(un_804D6D70, sizeof(un_804D6D70)) to memzero(un_804D6D70, i = sizeof(un_804D6D70)), reusing the loop counter local in an assignment expression.",
+      "evidence_refs": [
+        "raw_diff: src/melee/if/ifnametag.c"
+      ],
+      "caution": "This is a match-shape tactic supported by the final bot match report, not a general style recommendation."
+    },
+    {
+      "tactic": "Retained PAD_STACK(0x10) in un_802FD4C8 while making the function match.",
+      "evidence_refs": [
+        "raw_diff: src/melee/if/ifnametag.c",
+        "text_corpus: bot report"
+      ],
+      "caution": "The diff shows PAD_STACK was already present; this PR does not prove it was newly discovered or generally required."
+    }
+  ],
+  "review_feedback": [],
+  "searchable_terms": [
+    "PR2379",
+    "Link Ifnametag",
+    "ifnametag",
+    "src/melee/if/ifnametag.c",
+    "configure.py Matching",
+    "config/GALE01/symbols.txt",
+    "un_802FD4C8",
+    "un_802FD4C8_inline",
+    "GObj_Create",
+    "HSD_GOBJ_CLASS_UI",
+    "HSD_CObj",
+    "new_var",
+    "lb_80013B14",
+    "nametag_CObjDesc",
+    "nametag_eyepos",
+    "nametag_interest",
+    "NameTag_RenderCallback",
+    "PAD_STACK",
+    "memzero assignment expression",
+    "@322",
+    "sdata2 local constants"
+  ],
+  "follow_up_queries": [
+    "un_802FD4C8 inline GObj_Create match shape",
+    "ifnametag.c Matching configure.py symbols local scope",
+    "nametag_CObjDesc nametag_eyepos nametag_interest symbols.txt",
+    "NameTag_RenderCallback scope local",
+    "memzero i = sizeof(un_804D6D70)",
+    "HSD_CObj new_var lb_80013B14 HSD_GObjObject_80390A70"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR number/title/author/state/timestamps/changed files",
+      "raw_diff: full diff for changed files",
+      "text_corpus: decomp-dev[bot] report with match/link deltas",
+      "text_corpus: empty PR body",
+      "metadata_json: review_comments=0, reviews=0"
+    ],
+    "notes": [
+      "Strong evidence for changed files, exact source/symbol/config edits, merged state, and bot-reported match result.",
+      "No PR body or human review comments were present, so author rationale and reviewer intent cannot be inferred.",
+      "The slice does not include objdiff/checkdiff transcript beyond the decomp-dev bot summary; match tactics should be treated as PR-specific evidence, not a broad standard.",
+      "Several symbols.txt edits touch data-section metadata; the diff supports that they changed, but not the full historical reasoning for each local label."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "pr_specific_matching_case",
+        "title": "ifnametag un_802FD4C8 linked with source-shape and symbol metadata updates",
+        "text": "PR 2379 changed ifnametag.c to Matching and the bot reported un_802FD4C8 improved from 90.18% to 100.00%. The source diff added an inline GObj_Create wrapper, a temporary HSD_CObj*, and an assignment expression in the memzero size argument; symbols.txt also localized related function/data/literal/constant metadata.",
+        "scope": [
+          "src/melee/if/ifnametag.c",
+          "un_802FD4C8",
+          "config/GALE01/symbols.txt",
+          "configure.py"
+        ],
+        "evidence_refs": [
+          "raw_diff",
+          "text_corpus: decomp-dev[bot] report"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "ifnametag.c object linked as Matching by PR 2379",
+        "text": "PR 2379 changed Object(NonMatching, \"melee/if/ifnametag.c\") to Object(Matching, \"melee/if/ifnametag.c\") and the bot report lists one new match for main/melee/if/ifnametag un_802FD4C8.",
+        "source_path": "src/melee/if/ifnametag.c",
+        "scope": [
+          "melee/if",
+          "ifnametag",
+          "build configuration"
+        ],
+        "evidence_refs": [
+          "raw_diff: configure.py",
+          "text_corpus: decomp-dev[bot] report"
+        ],
+        "reason": "Candidate path fact for curator review; do not promote solely from intake."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "ifnametag local data names and local literal labels used in symbols.txt",
+        "text": "The PR changed symbols.txt entries near ifnametag data to local names/labels including nametag_eyepos, nametag_interest, nametag_CObjDesc, @197, @378, @379, @263, @264, and several @number sdata2 constants.",
+        "source_path": "config/GALE01/symbols.txt",
+        "scope": [
+          "ifnametag",
+          "symbol metadata",
+          ".data",
+          ".sdata",
+          ".sdata2"
+        ],
+        "evidence_refs": [
+          "raw_diff: config/GALE01/symbols.txt"
+        ],
+        "reason": "May be useful as path-specific symbol metadata context; needs curator verification against current symbols/source before becoming a maintained path fact."
+      }
+    ],
+    "rejection_notes": [
+      "Do not generalize the un_802FD4C8_inline wrapper, new_var temporary, or memzero assignment expression as preferred style; the slice only supports them as match tactics in this function.",
+      "Do not infer human reviewer approval details or requested changes; there were no loaded human review comments.",
+      "Do not claim all symbols.txt localizations were independently validated by objdiff/checkdiff beyond the bot's summarized match/link report."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

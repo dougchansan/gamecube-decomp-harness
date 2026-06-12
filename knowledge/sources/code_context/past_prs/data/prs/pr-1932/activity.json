@@ -1,0 +1,10 @@
+{
+  "pr": 1932,
+  "title": "Match all remaining 28-byte functions",
+  "url": "https://github.com/doldecomp/melee/pull/1932",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 21,
+  "added_lines": 139,
+  "deleted_lines": 34
+}

@@ -1,6 +1,6 @@
 ---
 covers: Worker target packet lifecycle, research loop, capabilities, validation, and stall policy
-concepts: [worker, target-packet, capabilities, validation, write-safety, stall-policy]
+concepts: [worker, target-packet, capabilities, validation, qa-lint, write-safety, stall-policy]
 ---
 
 # Worker Lifecycle
@@ -111,6 +111,25 @@ record the worker report, release file locks, and emit the wake event. An
 optional runner-owned post-return command can be configured for additional
 narrow validation before accepting `progress` or `score_candidate`.
 
+Runner-owned validation also runs the worker-side QA lint (the QA ship gate's
+L1 layer; see [score and PR handoff](60-score-and-pr-handoff.md)). The runner
+diffs the attempt's touched files against the pre-worker source snapshot and
+runs the deterministic `review_lint` maintainer-rejection scan over that diff,
+producing one of `clean`, `warnings`, `violations`, or `tool_unavailable`.
+Violations demote an otherwise passing attempt to failed — a score-improving
+attempt that re-adds a maintainer-rejected pattern is the exact failure mode
+this layer exists to stop, because the violation is what inflates the score.
+Each finding is fed verbatim into the next repair prompt (rule, `file:line`,
+message, violated standard, excerpt) plus the standing instruction that
+removing the violation is correct even when it lowers the match percentage.
+If violations survive the final attempt, the report is classified
+`runner_validation_qa_lint_failed` — a rework kind, so the target routes to
+`needs_rework` and stays re-queueable; it is never `tool_error` and never hits
+the error-target quarantine path. The lint itself fails open: on scanner
+infrastructure errors the attempt's score verdict is unchanged
+(`tool_unavailable` is recorded so operators can see the gate was blind),
+unlike the L2 ship gate, which fails closed.
+
 Global score integration happens outside the worker's local loop. A worker can
 surface a score candidate, but the run baseline changes only after the
 integration gate validates it.
@@ -140,15 +159,22 @@ The UI renders these as combined outcome filters:
 - No Progress / Needs: `result: "no_progress"` and
   `stop_reason: "needs_fact"`. The worker did not retain positive score movement
   because a specific missing fact/resource blocks progress.
-- Failed: the report failed the structured acceptance gate or runner-owned
-  validation. Failed progress-like returns are treated as stalls after repair
-  attempts are exhausted.
+- Needs Rework: the runner could not verify the return — the report failed the
+  structured acceptance gate or runner-owned validation, or repair attempts
+  were exhausted with reasons outstanding. The claim and the canonical
+  measurement disagree; the direction may still be promising, so the target
+  stays visible and re-queueable rather than being treated as failed.
+- Tool Error: a tool, build, parse, or session infrastructure failure blocked
+  trustworthy evaluation. This is the only category treated as a system
+  failure (it trips `--exit-on-worker-error` and babysit incident recovery).
 
 `report_type` remains the runner compatibility field for acceptance and wake
 events. `progress` and `score_candidate` describe accepted progress-style
 returns; they are not proof of score movement by themselves. `needs_fact` is used
 when the missing fact is the primary no-edit outcome. `stalled_no_useful_guess`
 is used when no retained progress remains and no specific missing fact is known.
+`needs_rework` is runner-assigned only — agents never self-report it — and marks
+gate-rejected returns. `tool_error` is reserved for infrastructure failures.
 
 ## Stall Policy
 

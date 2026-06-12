@@ -1,0 +1,17 @@
+{
+  "number": 142,
+  "title": "Fix copy paste mistake on postprocess.py",
+  "state": "MERGED",
+  "createdAt": "2021-12-03T19:12:04Z",
+  "updatedAt": "2021-12-03T19:12:12Z",
+  "mergedAt": "2021-12-03T19:12:08Z",
+  "closedAt": "2021-12-03T19:12:08Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/142",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 655
+  }
+}

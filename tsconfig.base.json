@@ -30,6 +30,8 @@
       "@decomp-orchestrator/core/board/*": ["packages/core/src/board/*.ts"],
       "@decomp-orchestrator/core/env": ["packages/core/src/env/local.ts"],
       "@decomp-orchestrator/core/env/*": ["packages/core/src/env/*.ts"],
+      "@decomp-orchestrator/core/epoch": ["packages/core/src/epoch/index.ts"],
+      "@decomp-orchestrator/core/epoch/*": ["packages/core/src/epoch/*.ts"],
       "@decomp-orchestrator/core/handoff": ["packages/core/src/handoff/checkpoint.ts"],
       "@decomp-orchestrator/core/handoff/*": ["packages/core/src/handoff/*.ts"],
       "@decomp-orchestrator/core/objdiff": ["packages/core/src/objdiff/report.ts"],

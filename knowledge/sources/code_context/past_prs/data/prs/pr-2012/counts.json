@@ -1,0 +1,17 @@
+{
+  "number": 2012,
+  "title": "Match various functions across ft, gm, if, it, lb modules",
+  "state": "MERGED",
+  "createdAt": "2025-12-27T12:05:07Z",
+  "updatedAt": "2026-01-06T16:42:12Z",
+  "mergedAt": "2025-12-30T03:00:00Z",
+  "closedAt": "2025-12-30T03:00:00Z",
+  "author": "itsgrimetime",
+  "url": "https://github.com/doldecomp/melee/pull/2012",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 3,
+    "reviews": 3,
+    "diff_bytes": 8985
+  }
+}

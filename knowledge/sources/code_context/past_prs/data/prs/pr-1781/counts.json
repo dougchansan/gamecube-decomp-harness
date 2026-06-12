@@ -1,0 +1,17 @@
+{
+  "number": 1781,
+  "title": "Match ftCo_80091854 and improve ftCo_80090594",
+  "state": "MERGED",
+  "createdAt": "2025-08-02T05:03:53Z",
+  "updatedAt": "2025-08-03T06:32:24Z",
+  "mergedAt": "2025-08-03T06:32:24Z",
+  "closedAt": "2025-08-03T06:32:24Z",
+  "author": "AlexanderHarrison",
+  "url": "https://github.com/doldecomp/melee/pull/1781",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 15267
+  }
+}

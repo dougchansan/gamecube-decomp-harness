@@ -1,0 +1,17 @@
+{
+  "number": 1142,
+  "title": "Manage `m2c` and `asm-differ` via `pip`",
+  "state": "MERGED",
+  "createdAt": "2024-01-28T10:10:05Z",
+  "updatedAt": "2024-01-28T11:04:41Z",
+  "mergedAt": "2024-01-28T11:04:40Z",
+  "closedAt": "2024-01-28T11:04:40Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1142",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 0
+  }
+}

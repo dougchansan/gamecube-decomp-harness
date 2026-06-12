@@ -10,7 +10,7 @@ import sys
 from typing import Any
 
 sys.path.append(str(Path(__file__).resolve().parents[3] / "_shared"))
-from harness import import_harness_module, print_json, resolve_repo_root
+from melee_tooling import import_tool_module, print_json, resolve_repo_root
 
 
 def main() -> None:
@@ -23,7 +23,7 @@ def main() -> None:
     repo_root = resolve_repo_root(args.repo_root)
     payload: dict[str, Any] = {"operation": "item_state_table:preview", "repo_root": str(repo_root), "label": args.label}
     try:
-        gen = import_harness_module("gen_item_state_table", repo_root)
+        gen = import_tool_module("gen_item_state_table", repo_root)
         source_file = gen.find_source_file(args.label)
         asm_file = gen.find_asm_file(source_file)
         entries = gen.parse_asm_table(asm_file, args.label)
@@ -43,7 +43,7 @@ def main() -> None:
             }
         )
     except Exception as error:  # noqa: BLE001 - API boundary should report every preview failure.
-        payload.update({"status": "bridge_error", "error": str(error)})
+        payload.update({"status": "tool_impl_error", "error": str(error)})
     print_json(payload)
 
 

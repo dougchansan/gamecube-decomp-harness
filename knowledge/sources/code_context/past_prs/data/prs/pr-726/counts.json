@@ -1,0 +1,17 @@
+{
+  "number": 726,
+  "title": "Combine `generate_context.sh` into `m2ctx.py`",
+  "state": "MERGED",
+  "createdAt": "2023-01-27T13:48:34Z",
+  "updatedAt": "2023-01-28T09:19:46Z",
+  "mergedAt": "2023-01-28T09:19:45Z",
+  "closedAt": "2023-01-28T09:19:45Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/726",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 1,
+    "reviews": 3,
+    "diff_bytes": 8590
+  }
+}

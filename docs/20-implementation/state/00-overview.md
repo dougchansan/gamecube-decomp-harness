@@ -46,6 +46,8 @@ packages/core/src/state/
 | `integrations` | Score-gate integration records. |
 | `run_checkpoints` | End-of-run checkpoint records that separate PR candidates from carried-forward work. |
 | `checkpoint_items` | Per-report checkpoint items with dispositions such as PR candidate, deferred patch, needs-fact, or stalled. |
+| `campaigns` | One canonical campaign per state dir: the long-lived timeline, session branch, and base ref that runs and save points hang off. |
+| `save_points` | Commit-anchored position records: commit/base SHAs, trigger kind, matched-code percent, report/board artifact paths, and dirty/committed flags. Rows with trigger kind `epoch` are written automatically by the epoch cycle and form the run's measured progress history. |
 
 ## Module Responsibilities
 
@@ -79,7 +81,10 @@ packages/core/src/state/
 - Refill prefers fresh candidates that are not already represented in the run
   and skips source paths with active locks.
 - Director-selected target packets can add a fresh queued row for a previously
-  attempted target when it is not already queued or leased.
+  attempted target when it is not already queued or leased. The epoch
+  pipeline's regression repairs use the same `prioritizeQueuedTargets` path,
+  which is how a regressed previously-completed function re-enters the queue
+  despite refill's ever-seen dedupe.
 - Schedulable queue depth is counted by distinct unlocked source path, not raw
   queued row count.
 - Events are handled only after the follow-up state transition is persisted.

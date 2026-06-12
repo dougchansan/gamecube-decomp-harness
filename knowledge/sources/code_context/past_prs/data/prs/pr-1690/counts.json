@@ -1,0 +1,17 @@
+{
+  "number": 1690,
+  "title": "Add translation unit support for decomp.py",
+  "state": "MERGED",
+  "createdAt": "2025-07-14T14:53:14Z",
+  "updatedAt": "2025-07-16T01:02:28Z",
+  "mergedAt": "2025-07-16T01:02:28Z",
+  "closedAt": "2025-07-16T01:02:28Z",
+  "author": "thefoxcam",
+  "url": "https://github.com/doldecomp/melee/pull/1690",
+  "counts": {
+    "issue_comments": 3,
+    "review_comments": 0,
+    "reviews": 1,
+    "diff_bytes": 3208
+  }
+}

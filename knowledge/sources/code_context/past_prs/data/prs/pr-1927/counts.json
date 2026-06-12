@@ -1,0 +1,17 @@
+{
+  "number": 1927,
+  "title": "mplib matches",
+  "state": "MERGED",
+  "createdAt": "2025-09-20T03:39:24Z",
+  "updatedAt": "2025-09-20T03:45:56Z",
+  "mergedAt": "2025-09-20T03:45:54Z",
+  "closedAt": "2025-09-20T03:45:54Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1927",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 73141
+  }
+}

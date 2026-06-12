@@ -1,0 +1,17 @@
+{
+  "number": 971,
+  "title": "Match psInitAppSRT, add/fix up psstructs",
+  "state": "MERGED",
+  "createdAt": "2023-09-21T16:46:49Z",
+  "updatedAt": "2023-09-21T17:07:39Z",
+  "mergedAt": "2023-09-21T17:07:34Z",
+  "closedAt": "2023-09-21T17:07:34Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/971",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 6645
+  }
+}

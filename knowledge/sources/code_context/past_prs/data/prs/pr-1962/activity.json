@@ -1,0 +1,10 @@
+{
+  "pr": 1962,
+  "title": "Match all ftKb_Init functions < 60B",
+  "url": "https://github.com/doldecomp/melee/pull/1962",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 4,
+  "added_lines": 433,
+  "deleted_lines": 82
+}

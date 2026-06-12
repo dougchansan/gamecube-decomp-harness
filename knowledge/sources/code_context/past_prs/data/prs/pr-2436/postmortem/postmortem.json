@@ -1,0 +1,462 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2436",
+  "pr": {
+    "number": 2436,
+    "title": "Jj/groldkongo",
+    "url": "https://github.com/doldecomp/melee/pull/2436",
+    "state": "MERGED",
+    "author": "jurrejelle",
+    "created_at": "2026-04-28T15:06:35Z",
+    "merged_at": "2026-04-30T18:37:32Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2436 primarily decompiled and improved Old Kongo stage code in src/melee/gr/groldkongo.c, replacing placeholders for grOldKongo_80210454 and grOldKongo_80210650, adding large partial implementations for grOldKongo_8020F888 and grOldKongo_802100FC, refining Old Kongo data layout, and updating groldkongo.h prototypes. The slice also contains small formatting or style cleanups across fighter, stage, item, library, menu, and baselib files. The bot report records 5 new matches and 3 unmatched-item improvements for main/melee/gr/groldkongo.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "formatting-cleanup",
+      "stage-code"
+    ],
+    "systems": [
+      "stage",
+      "ground",
+      "fighter",
+      "item",
+      "library",
+      "menu",
+      "baselib"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gr/groldkongo.c",
+      "role": "primary decomp target; Old Kongo stage implementations, data layout refinement, includes, callback setup expansion",
+      "evidence_refs": [
+        "changed_files: +596/-11 in 8 hunks",
+        "diff:grolkongo includes and grOk_804D6A90 struct fields",
+        "diff:grOldKongo_8020F888 placeholder replaced with large implementation",
+        "diff:grOldKongo_802100FC placeholder replaced",
+        "diff:grOldKongo_80210454 placeholder replaced",
+        "diff:grOldKongo_80210650 placeholder replaced",
+        "bot_report: groldkongo new matches and improvements"
+      ]
+    },
+    {
+      "path": "src/melee/gr/groldkongo.h",
+      "role": "header prototypes updated for recovered Old Kongo functions",
+      "evidence_refs": [
+        "diff:grOldKongo_80210454 UNK_RET/UNK_PARAMS to s32(HSD_GObj*, HSD_GObj*)",
+        "diff:grOldKongo_80210650 UNK_RET/UNK_PARAMS to f32(void)"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itoldkuri.c",
+      "role": "formatting cleanup for ItemStateTable entries",
+      "evidence_refs": [
+        "changed_files: +22/-11",
+        "diff:it_803F8320 multiline initializer formatting"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grflatzone.c",
+      "role": "inline helper pointer-style and indentation cleanup",
+      "evidence_refs": [
+        "diff:grFlatzone_80216F48_inline Ground_GObj* style and indentation"
+      ]
+    },
+    {
+      "path": "src/melee/gr/groldyoshi.c",
+      "role": "inline helper pointer-style and indentation cleanup",
+      "evidence_refs": [
+        "diff:grOldYoshi_8020EFCC_inline Ground_GObj* style and indentation"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/hsd_3AA7.c",
+      "role": "line wrapping cleanup",
+      "evidence_refs": [
+        "diff:fn_803AC634 remaining calculation reformatted"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_Init.c",
+      "role": "pointer-style formatting cleanup",
+      "evidence_refs": [
+        "diff:Fighter *fp to Fighter* fp"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftPopo/ftPp_SpecialS.c",
+      "role": "line wrapping cleanup in existing matched/tactic-containing function",
+      "evidence_refs": [
+        "diff:Fighter_ChangeMotionState call wrapped; PAD_STACK already present in context"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grfourside.c",
+      "role": "line wrapping cleanup",
+      "evidence_refs": [
+        "diff:Stage_GetCamBoundsTopOffset expression wrapped"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grkongo.c",
+      "role": "blank-line cleanup",
+      "evidence_refs": [
+        "diff:blank line removed in fn_801D7700"
+      ]
+    },
+    {
+      "path": "src/melee/gr/groldpupupu.c",
+      "role": "pointer-style formatting cleanup",
+      "evidence_refs": [
+        "diff:void *new_var to void* new_var"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itlinkboomerang.c",
+      "role": "line wrapping cleanup",
+      "evidence_refs": [
+        "diff:itLinkBoomerangAttributes assignment wrapped"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itmewtwoshadowball.h",
+      "role": "prototype line wrapping cleanup",
+      "evidence_refs": [
+        "diff:it_802C519C prototype wrapped"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/ittaru.c",
+      "role": "pointer-style formatting cleanup",
+      "evidence_refs": [
+        "diff:HSD_JObj * to HSD_JObj*"
+      ]
+    },
+    {
+      "path": "src/melee/it/types.h",
+      "role": "comment spacing cleanup",
+      "evidence_refs": [
+        "diff:ItemCommonData x124 comment alignment"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lb_0192.c",
+      "role": "empty block formatting cleanup",
+      "evidence_refs": [
+        "diff:empty if block expanded with braces"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lbsnap.c",
+      "role": "for-loop spacing cleanup",
+      "evidence_refs": [
+        "diff:for loop spacing in lbSnap_8001D4A4"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mndatadel.c",
+      "role": "blank-line cleanup",
+      "evidence_refs": [
+        "diff:blank line removed before fn_8024FC48_inline"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Replaced groldkongo.c placeholder comment for grOldKongo_8020F888 with a large implementation using Old Kongo ground vars, rotation updates, animation/material calls, random timer ranges, tau/radian constants, and fighter interaction calls.",
+    "Replaced grOldKongo_802100FC placeholder with a function that handles an Old Kongo timer, random Y position, camera-bound-aware X positioning, animation visibility, and timer reset.",
+    "Replaced grOldKongo_80210454 placeholder with a function returning s32 that checks fighter proximity, starts Old Kongo state, stores fighter object, triggers animation/material/effect calls, and calls ftLib_80086C18.",
+    "Replaced grOldKongo_80210650 placeholder with an f32-returning weighted random angle selector using grOk_804D6A90 fields and HSD_Randi.",
+    "Updated groldkongo.h to declare recovered signatures for grOldKongo_80210454 and grOldKongo_80210650 instead of UNK_RET/UNK_PARAMS.",
+    "Expanded the Old Kongo static data pointer layout from byte padding to typed f32, s16, and s32 fields, and added a small static grOk_803B8408 struct used to seed stack parameters.",
+    "Expanded grOldKongo_8020F52C callback setup inline instead of calling Ground_SetupStageCallbacks, and changed the OSReport file argument from a string literal to __FILE__.",
+    "Added includes in groldkongo.c for placeholder.h, baselib/debug.h, cm/camera.h, ef/efsync.h, ft/ftlib.h, and ftCommon/ftCo_BarrelWait.h.",
+    "Applied small pointer-style, indentation, blank-line, line-wrapping, and empty-block formatting cleanups across the non-primary changed files.",
+    "Bot report recorded matched-code increase of +800 bytes, matched-data increase of +112 bytes, 5 new matches in main/melee/gr/groldkongo, and improvements for grOldKongo_8020F888, grOldKongo_802100FC, and .data."
+  ],
+  "smart_moves": [
+    {
+      "text": "Header prototypes were updated in the owning groldkongo.h when function bodies recovered concrete signatures.",
+      "evidence_refs": [
+        "diff:groldkongo.h grOldKongo_80210454",
+        "diff:groldkongo.h grOldKongo_80210650"
+      ]
+    },
+    {
+      "text": "The primary TU data layout was refined from opaque byte arrays into typed fields used by the recovered functions, improving reviewability over raw byte padding.",
+      "evidence_refs": [
+        "diff:grOk_804D6A90 u8 padding replaced by f32/s16/s32 fields",
+        "diff:grOldKongo_8020F888 and grOldKongo_80210650 field uses"
+      ]
+    },
+    {
+      "text": "The PR kept many nearby non-primary edits to formatting-only changes rather than broad semantic churn outside the Old Kongo target.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "diff:formatting-only hunks in ftKb_Init.c, grflatzone.c, groldyoshi.c, itoldkuri.c, lbsnap.c"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a recovered body proves a function signature, update the owning header instead of leaving UNK_RET/UNK_PARAMS.",
+      "scope": [
+        "headers",
+        "decomp-matching"
+      ],
+      "evidence_refs": [
+        "diff:groldkongo.h updates for grOldKongo_80210454 and grOldKongo_80210650",
+        "decomp_standard:truthful-headers-and-includes"
+      ]
+    },
+    {
+      "lesson": "Typed local data-layout recovery can make a stage file's matching work more tractable than retaining broad u8 padding once offsets are actively used by recovered functions.",
+      "scope": [
+        "stage",
+        "ground",
+        "data-layout"
+      ],
+      "evidence_refs": [
+        "diff:grOk_804D6A90 field expansion",
+        "diff:field uses in grOldKongo_8020F888, grOldKongo_802100FC, grOldKongo_80210454, grOldKongo_80210650",
+        "decomp_standard:typed-fields-over-pointer-math"
+      ]
+    },
+    {
+      "lesson": "Bot match reports can distinguish complete function closure from partial score progress; in this slice grOldKongo_80210454 and grOldKongo_80210650 were reported as 100%, while grOldKongo_8020F888 and grOldKongo_802100FC remained improved but not fully matched.",
+      "scope": [
+        "verification",
+        "postmortem-intake"
+      ],
+      "evidence_refs": [
+        "text_corpus:decomp-dev bot report new matches",
+        "text_corpus:decomp-dev bot report unmatched item improvements"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Recovered Old Kongo functions keep address-style names such as grOldKongo_80210454 and grOldKongo_80210650 when semantic names are not established by the PR evidence.",
+      "evidence_refs": [
+        "diff:groldkongo.c function definitions",
+        "diff:groldkongo.h prototypes",
+        "decomp_standard:conservative-naming"
+      ]
+    },
+    {
+      "convention": "Local decomp variables in the large partial functions remain temp_rXX/var_rXX-style, indicating register-shaped names were not fully cleaned up in this PR slice.",
+      "evidence_refs": [
+        "diff:grOldKongo_8020F888 local declarations",
+        "diff:grOldKongo_80210650 local declarations"
+      ]
+    },
+    {
+      "convention": "Formatting cleanups consistently prefer pointer stars attached to the type, for example Fighter* fp, Ground_GObj*, void*, and HSD_JObj*.",
+      "evidence_refs": [
+        "diff:ftKb_Init.c",
+        "diff:grflatzone.c",
+        "diff:groldyoshi.c",
+        "diff:groldpupupu.c",
+        "diff:ittaru.c"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Used explicit f64 casts and named constants for tau/radian angle handling in Old Kongo rotation code.",
+      "evidence_refs": [
+        "diff:#define DegToRad(a)",
+        "diff:#define M_TAU",
+        "diff:grOldKongo_8020F888 tau range updates",
+        "diff:grOldKongo_80210650 angle literals"
+      ],
+      "caution": "The PR evidence shows this code shape and bot score improvements, but no human explanation proving this is original source style."
+    },
+    {
+      "tactic": "Preserved some goto labels and fall-through switch-like generated structure in grOldKongo_8020F888 while still achieving a large bot-reported improvement rather than a full match.",
+      "evidence_refs": [
+        "diff:grOldKongo_8020F888 block_16 and block_123",
+        "bot_report:grOldKongo_8020F888 91.05%"
+      ],
+      "caution": "Do not generalize this as preferred style; standards still say generated branch ladders/gotos should be checked against ordinary C forms."
+    },
+    {
+      "tactic": "Used explicit HSD_ASSERT and OSReport forms in recovered or adjusted code.",
+      "evidence_refs": [
+        "diff:HSD_ASSERT in grOldKongo_8020F888",
+        "diff:HSD_ASSERT in grOldKongo_80210650",
+        "diff:OSReport in grOldKongo_8020F52C"
+      ],
+      "caution": "No reviewer comments in the slice confirm whether these exact macro/file forms were discussed."
+    },
+    {
+      "tactic": "Retained narrow stack/local shaping in existing non-primary code where present, such as PAD_STACK in ftPp_SpecialS and groldpupupu context, without adding evidence of new tactic justification in comments.",
+      "evidence_refs": [
+        "diff:ftPp_SpecialS context shows PAD_STACK(8)",
+        "diff:groldpupupu context shows PAD_STACK(8)"
+      ],
+      "caution": "PAD_STACK use needs explicit verifier evidence under current standards; this slice only shows formatting around existing contexts, not a justification."
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "author": "decomp-dev[bot]",
+      "feedback": "Report for GALE01 recorded matched code 65.27% (+0.02%, +800 bytes), matched data 38.61% (+0.01%, +112 bytes), 5 new matches, and 3 improvements in unmatched items.",
+      "evidence_refs": [
+        "text_corpus:issue_comment by decomp-dev[bot] at 2026-04-28T15:11:06Z"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2436",
+    "Jj/groldkongo",
+    "jurrejelle",
+    "groldkongo",
+    "grOldKongo_8020F888",
+    "grOldKongo_802100FC",
+    "grOldKongo_80210454",
+    "grOldKongo_80210650",
+    "grOldKongo_8020F52C",
+    "grOk_804D6A90",
+    "grOk_803B8408",
+    "oldkongo",
+    "Ground_GetStageGObj",
+    "GET_GROUND",
+    "Ground_801C4DA0",
+    "Ground_801C4D70",
+    "Ground_801C5440",
+    "grAnime_801C7FF8",
+    "grMaterial_801C9604",
+    "efSync_Spawn",
+    "ftLib_80086644",
+    "ftLib_80086C18",
+    "ftCo_8009EC70",
+    "HSD_Randi",
+    "HSD_Randf",
+    "HSD_ASSERT",
+    "DegToRad",
+    "M_TAU",
+    "truthful headers",
+    "UNK_RET",
+    "UNK_PARAMS",
+    "typed fields",
+    "stage callbacks",
+    "ItemStateTable formatting"
+  ],
+  "follow_up_queries": [
+    "groldkongo grOldKongo_8020F888 91.05 goto block_16 block_123 cleanup",
+    "groldkongo grOldKongo_802100FC 97.57 remaining mismatch",
+    "grOk_804D6A90 field names Old Kongo data layout",
+    "grOldKongo_80210454 ftLib_80086644 efSync_Spawn ftLib_80086C18",
+    "grOldKongo_80210650 weighted random angle HSD_Randi",
+    "groldkongo.h UNK_RET UNK_PARAMS signature recovery",
+    "Old Kongo .sdata .sdata2 matched bot report PR 2436",
+    "PAD_STACK existing formatting-only PR 2436"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json:PR identity, state, author, changed file counts",
+      "changed_files.jsonl:18 changed files",
+      "raw diff excerpt and targeted raw diff reads: function and formatting hunks",
+      "text_corpus:bot report",
+      "decomp_standards:truthful-headers-and-includes, typed-fields-over-pointer-math, conservative-naming, matching-tactics-need-evidence"
+    ],
+    "notes": [
+      "PR body is empty and there are no human review comments in the loaded text corpus.",
+      "The bot report provides quantitative match evidence but not author intent or rationale.",
+      "The raw diff was truncated in the inline evidence; targeted reads filled in groldkongo.h, grOldKongo_80210454, grOldKongo_80210650, and later formatting hunks.",
+      "No local build, objdiff command output, or review approvals are included beyond the bot report; avoid claiming more validation than the report states.",
+      "Several helper inlines in grOldKongo_8020F888 are added but not visibly used in the shown implementation, so no lesson is drawn from them."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "type": "lesson_candidate",
+        "title": "Recovered bodies should update owning header prototypes",
+        "text": "PR 2436 replaces UNK_RET/UNK_PARAMS prototypes in groldkongo.h for grOldKongo_80210454 and grOldKongo_80210650 after adding matching bodies in groldkongo.c. This is evidence for the existing truthful-header practice in stage decomp work.",
+        "scope": [
+          "headers",
+          "stage",
+          "decomp-matching"
+        ],
+        "evidence_refs": [
+          "diff:src/melee/gr/groldkongo.c grOldKongo_80210454",
+          "diff:src/melee/gr/groldkongo.c grOldKongo_80210650",
+          "diff:src/melee/gr/groldkongo.h prototype updates",
+          "decomp_standard:truthful-headers-and-includes"
+        ]
+      },
+      {
+        "type": "lesson_candidate",
+        "title": "Bot reports should be recorded with exact match scope",
+        "text": "The PR evidence distinguishes full matches for grOldKongo_80210454 and grOldKongo_80210650 from partial improvements for grOldKongo_8020F888 and grOldKongo_802100FC. Intake records should preserve that distinction instead of calling all touched functions matched.",
+        "scope": [
+          "verification",
+          "postmortem-intake"
+        ],
+        "evidence_refs": [
+          "text_corpus:decomp-dev bot report"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "src/melee/gr/groldkongo.c is Old Kongo stage decomp target",
+        "text": "PR 2436 shows src/melee/gr/groldkongo.c as the primary Old Kongo stage translation unit, with recovered functions grOldKongo_80210454 and grOldKongo_80210650 and partial improvements for grOldKongo_8020F888 and grOldKongo_802100FC.",
+        "source_path": "src/melee/gr/groldkongo.c",
+        "scope": [
+          "stage",
+          "ground",
+          "oldkongo"
+        ],
+        "evidence_refs": [
+          "changed_files:+596/-11 in groldkongo.c",
+          "diff:groldkongo.c function implementations",
+          "bot_report:main/melee/gr/groldkongo"
+        ],
+        "reason": "Potentially useful path-scoped fact for routing Old Kongo stage decomp queries; curator should verify against current source before promotion."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Do not overstate bot-reported partial improvements as full matches",
+        "text": "When a bot report lists both new 100% matches and unmatched-item improvements, postmortems and source notes should preserve the distinction. PR 2436 reports grOldKongo_80210454 and grOldKongo_80210650 as 100%, but grOldKongo_8020F888 at 91.05% and grOldKongo_802100FC at 97.57%.",
+        "source_path": null,
+        "scope": [
+          "verification",
+          "reporting",
+          "decomp-matching"
+        ],
+        "evidence_refs": [
+          "text_corpus:decomp-dev bot report"
+        ],
+        "reason": "This may be worth adding as reporting guidance if not already covered by verification-ledger standards."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote the added goto-heavy shape in grOldKongo_8020F888 as accepted style; the slice only shows partial improvement and no reviewer rationale.",
+      "Do not claim all 18 changed files contain decomp progress; most non-groldkongo hunks are formatting-only in the evidence.",
+      "Do not infer human reviewer approval, requested changes, or rationale because review comments and reviews are absent from the loaded PR slice.",
+      "Do not infer exact current source state from this historical PR without checking current source; this intake only records PR evidence."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

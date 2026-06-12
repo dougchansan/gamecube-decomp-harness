@@ -1,0 +1,339 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2472",
+  "pr": {
+    "number": 2472,
+    "title": "hsd_803A949C",
+    "url": "https://github.com/doldecomp/melee/pull/2472",
+    "state": "MERGED",
+    "author": "jurrejelle",
+    "created_at": "2026-05-09T18:33:42Z",
+    "merged_at": "2026-05-18T14:58:25Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2472 added a decompilation of src/sysdolphin/baselib/hsd_3A94.c centered on hsd_803A949C and exposed its prototype in hsd_3A94.h. The implementation defines local card-state/command/block structs, helper routines for command entry lookup, retrying CARDClose, icon-size selection, and card-block file-id extraction, then handles multiple command cases for memory-card read/verify/status flows. The only loaded comment is an automated decomp report showing hsd_803A949C improved from 0.00% to 58.78%, not a full match claim.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "card-io",
+      "partial-progress"
+    ],
+    "systems": [
+      "src/sysdolphin/baselib"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/sysdolphin/baselib/hsd_3A94.c",
+      "role": "Adds the hsd_803A949C implementation plus local structs and static helper functions for card command callback handling.",
+      "evidence_refs": [
+        "changed_files: src/sysdolphin/baselib/hsd_3A94.c added 491 deleted 0",
+        "raw_diff: hsd_3A94.c includes hsd_3A94.h, hsd_3AA7.h, hsd_3B2B.h, hsd_3B2E.h, dolphin/card.h, string.h",
+        "raw_diff: typedefs CardStateExt, CardCmdEntry, CardBlock",
+        "raw_diff: static helpers hsd_803A949C_GetEntry, hsd_803A949C_Close, hsd_803A949C_IconSize, hsd_803A949C_FileId",
+        "raw_diff: void hsd_803A949C(s32 arg1) with switch on entry->x0"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/hsd_3A94.h",
+      "role": "Adds the public prototype for hsd_803A949C.",
+      "evidence_refs": [
+        "changed_files: src/sysdolphin/baselib/hsd_3A94.h added 2 deleted 0",
+        "raw_diff: adds /* 3A949C */ void hsd_803A949C(s32 arg1);"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Created the previously empty hsd_3A94.c body for hsd_803A949C, using local struct definitions to describe card state, command entry, and card block layouts.",
+      "evidence_refs": [
+        "raw_diff: hsd_3A94.c changes from one blank line to 492 lines",
+        "raw_diff: typedef struct CardStateExt",
+        "raw_diff: typedef struct CardCmdEntry",
+        "raw_diff: typedef struct CardBlock"
+      ]
+    },
+    {
+      "text": "Factored repeated operations into static helpers: command-entry lookup through hsd_804D1148/hsd_804D7980, CARDClose retry loop, icon-size mapping from state->x3B0, and a two-byte card-block file id calculation.",
+      "evidence_refs": [
+        "raw_diff: hsd_803A949C_GetEntry returns &((CardCmdEntry*) hsd_804D1148)[hsd_804D7980]",
+        "raw_diff: hsd_803A949C_Close retries CARDClose while result == -1 and i < 10",
+        "raw_diff: hsd_803A949C_IconSize switch returns 0x1800 for case 2, 0xE00 for case 1, otherwise 0",
+        "raw_diff: hsd_803A949C_FileId returns (block->x10 << 8) | block->x11"
+      ]
+    },
+    {
+      "text": "Implemented a large command dispatcher over entry->x0 with cases 1, 2, 5, 7, 8, 9, 10, 11, 13, 15, and 16, using CARD close handling, validation helpers hsd_803B31CC/hsd_803B2B20, memcpy/memcmp, slot state updates, and final queue/index cleanup.",
+      "evidence_refs": [
+        "raw_diff: switch (entry->x0)",
+        "raw_diff: cases 1, 2, 5, 7, 8, 9, 10, 11, 13, 15, 16",
+        "raw_diff: calls hsd_803B31CC, hsd_803B2B20, memcpy, memcmp, hsd_803AC558",
+        "raw_diff: final entry->x0 = 0; hsd_804D799C = 0; hsd_804D7980 = (hsd_804D7980 + 1) % 128"
+      ]
+    },
+    {
+      "text": "Added hsd_803A949C(s32 arg1) to hsd_3A94.h.",
+      "evidence_refs": [
+        "raw_diff: hsd_3A94.h adds /* 3A949C */ void hsd_803A949C(s32 arg1);"
+      ]
+    },
+    {
+      "text": "Automated report recorded partial decomp progress for hsd_803A949C, improving from 0.00% to 58.78% and adding 2852 bytes in main/sysdolphin/baselib/hsd_3A94.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev[bot] report for GALE01 shows hsd_803A949C +2852 bytes, Before 0.00%, After 58.78%"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Used temporary typed structs with offset comments instead of expressing the whole function as raw byte-offset pointer math.",
+      "evidence_refs": [
+        "raw_diff: CardStateExt fields include x0, x8, xC, x20, x24, x170, x270, x370, x3B0, x430, x460",
+        "raw_diff: CardCmdEntry fields include state and x8/xC/x10/x14/x18/x20",
+        "raw_diff: CardBlock fields include x10, x11, x12, x20"
+      ]
+    },
+    {
+      "text": "Extracted repeated computations and behaviors into small static helpers, making the large dispatcher easier to review.",
+      "evidence_refs": [
+        "raw_diff: hsd_803A949C_Close used throughout error and normal paths",
+        "raw_diff: hsd_803A949C_IconSize reused in cases 10 and 11",
+        "raw_diff: hsd_803A949C_FileId reused in cases 5 and 13"
+      ]
+    },
+    {
+      "text": "Updated the owning header with the recovered function prototype rather than leaving the function only source-local.",
+      "evidence_refs": [
+        "raw_diff: hsd_3A94.h adds hsd_803A949C prototype"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For large callback/dispatcher functions, introducing narrow local structs with offset-preserving fields can turn repeated raw card-buffer and command-entry accesses into reviewable typed accesses while semantics are still incomplete.",
+      "scope": [
+        "src/sysdolphin/baselib",
+        "memory-card callback code",
+        "large dispatcher decompilation"
+      ],
+      "evidence_refs": [
+        "raw_diff: local CardStateExt/CardCmdEntry/CardBlock typedefs",
+        "raw_diff: hsd_803A949C uses state->x24, state->x8, entry->x10, block->x12 instead of only raw offsets"
+      ],
+      "confidence": 0.76
+    },
+    {
+      "lesson": "When a dispatcher repeats small operations such as close/retry, icon-size lookup, or ID extraction across multiple cases, factoring those into static helpers can clarify structure without requiring fully semantic global names.",
+      "scope": [
+        "dispatcher decompilation",
+        "helper extraction"
+      ],
+      "evidence_refs": [
+        "raw_diff: hsd_803A949C_Close, hsd_803A949C_IconSize, hsd_803A949C_FileId",
+        "raw_diff: helper calls appear in multiple switch cases"
+      ],
+      "confidence": 0.72
+    },
+    {
+      "lesson": "A PR can land useful partial progress without claiming a full match; intake should preserve the bot-reported percent rather than converting it into a matched-symbol claim.",
+      "scope": [
+        "PR intake",
+        "decomp progress reporting"
+      ],
+      "evidence_refs": [
+        "text_corpus: hsd_803A949C Before 0.00%, After 58.78%"
+      ],
+      "confidence": 0.9
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "The exported function and static helpers keep the address-style hsd_803A949C prefix, with semantic suffixes only for local helper roles such as GetEntry, Close, IconSize, and FileId.",
+      "evidence_refs": [
+        "raw_diff: void hsd_803A949C(s32 arg1)",
+        "raw_diff: static CardCmdEntry* hsd_803A949C_GetEntry(void)",
+        "raw_diff: static s32 hsd_803A949C_Close(CardStateExt* state)",
+        "raw_diff: static s32 hsd_803A949C_IconSize(CardStateExt* state)",
+        "raw_diff: static s32 hsd_803A949C_FileId(CardBlock* block)"
+      ]
+    },
+    {
+      "convention": "Incomplete struct fields retain offset-like names with offset comments, while clear local variables use role names such as entry, state, block, result, offset, remaining, data_offset, hdr_plus_icon, slot, and sector_size.",
+      "evidence_refs": [
+        "raw_diff: struct fields x0, x8, x24, x3B0, x430 with offset comments",
+        "raw_diff: local variables entry, state, block, result, icon_size, offset, remaining, data_offset, hdr_plus_icon, slot, sector_size"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Used a do-while loop for the CARDClose retry behavior, retrying while result is -1 and the count is below 10.",
+      "evidence_refs": [
+        "raw_diff: hsd_803A949C_Close initializes i = 0 and uses do { result = CARDClose(...); ... i++; } while (i < 10)"
+      ]
+    },
+    {
+      "tactic": "Used a switch over entry->x0 for adjacent command cases instead of a generated branch ladder.",
+      "evidence_refs": [
+        "raw_diff: switch (entry->x0) with cases 1, 2, 5, 7, 8, 9, 10, 11, 13, 15, 16"
+      ]
+    },
+    {
+      "tactic": "Centralized common end-of-callback queue cleanup after the switch.",
+      "evidence_refs": [
+        "raw_diff: after switch, entry->x0 = 0; hsd_804D799C = 0; hsd_804D7980 = (hsd_804D7980 + 1) % 128"
+      ]
+    },
+    {
+      "tactic": "Used explicit casts for command-entry payload fields when they serve as destination/source pointers for memcpy and memcmp.",
+      "evidence_refs": [
+        "raw_diff: memcpy((void*) entry->x18, ...)",
+        "raw_diff: memcmp((void*) entry->x18, block->x20, entry->x20)",
+        "raw_diff: memcpy((u8*) entry->x14 + data_offset, ...)"
+      ]
+    }
+  ],
+  "review_feedback": [],
+  "searchable_terms": [
+    "pr-2472",
+    "hsd_803A949C",
+    "src/sysdolphin/baselib/hsd_3A94.c",
+    "src/sysdolphin/baselib/hsd_3A94.h",
+    "CardStateExt",
+    "CardCmdEntry",
+    "CardBlock",
+    "hsd_803A949C_GetEntry",
+    "hsd_803A949C_Close",
+    "hsd_803A949C_IconSize",
+    "hsd_803A949C_FileId",
+    "CARDClose",
+    "CARDFileInfo",
+    "hsd_804D1148",
+    "hsd_804D7980",
+    "hsd_804D7988",
+    "hsd_804D799C",
+    "hsd_803B31CC",
+    "hsd_803B2B20",
+    "hsd_803AC558",
+    "memory card",
+    "GALE01",
+    "58.78%"
+  ],
+  "follow_up_queries": [
+    "hsd_803A949C hsd_3A94 CardCmdEntry",
+    "CardStateExt x170 x270 x430 x460",
+    "hsd_804D1148 hsd_804D7980 command queue",
+    "hsd_803B31CC hsd_803B2B20 card checksum",
+    "hsd_803AC558 hsd_803AC3E0_arg0_t",
+    "PR 2472 hsd_803A949C 58.78"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR 2472 title hsd_803A949C, author jurrejelle, state MERGED, merged_at 2026-05-18T14:58:25Z",
+      "changed_files.jsonl: two changed files, 493 added lines, 0 deleted lines",
+      "raw_diff: complete diff loaded, not truncated",
+      "text_corpus: PR body empty",
+      "text_corpus: one bot issue comment with progress report",
+      "metadata_json: review_comments 0 and reviews 0"
+    ],
+    "notes": [
+      "The diff evidence is strong for changed files, code structure, helpers, and header update.",
+      "There is no human PR body or review discussion in the loaded slice, so reviewer intent and rationale are unavailable.",
+      "The bot report supports partial progress only: hsd_803A949C improved to 58.78%, not a full match or validation pass.",
+      "No build, objdiff, or regression logs beyond the bot percentage report are loaded.",
+      "Local struct field semantics remain mostly offset-style; semantic names should not be inferred beyond what the diff shows."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson_candidate",
+        "title": "Use offset-preserving temporary structs to make large dispatcher decompilation reviewable",
+        "text": "In PR 2472, hsd_803A949C introduced local CardStateExt, CardCmdEntry, and CardBlock structs with offset comments and used them throughout a large card-command dispatcher. This supports a reusable candidate lesson: when real global types are not fully recovered, narrow temporary structs can improve reviewability over raw pointer math while preserving unknown field names.",
+        "scope": [
+          "src/sysdolphin/baselib",
+          "large dispatchers",
+          "memory-card code"
+        ],
+        "evidence_refs": [
+          "raw_diff: typedef struct CardStateExt",
+          "raw_diff: typedef struct CardCmdEntry",
+          "raw_diff: typedef struct CardBlock",
+          "raw_diff: hsd_803A949C accesses state, entry, and block fields throughout switch cases"
+        ],
+        "confidence": 0.76
+      },
+      {
+        "record_type": "decomp_lesson_candidate",
+        "title": "Do not inflate partial score reports into full match claims",
+        "text": "The only validation-like evidence for PR 2472 is the bot report showing hsd_803A949C improved from 0.00% to 58.78%. Curated records should retain that as partial decomp progress unless separate objdiff/build evidence is found.",
+        "scope": [
+          "PR intake",
+          "validation evidence"
+        ],
+        "evidence_refs": [
+          "text_corpus: decomp-dev[bot] report shows Before 0.00%, After 58.78%"
+        ],
+        "confidence": 0.9
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "hsd_3A94.c contains memory-card command callback code around hsd_803A949C",
+        "text": "PR 2472 added hsd_803A949C in src/sysdolphin/baselib/hsd_3A94.c. The function uses dolphin CARD APIs, CARDFileInfo, hsd_803B31CC, hsd_803B2B20, hsd_803AC558, memcpy/memcmp, and command-entry state fields, indicating this path contains sysdolphin baselib memory-card command callback/decomp work.",
+        "source_path": "src/sysdolphin/baselib/hsd_3A94.c",
+        "scope": [
+          "src/sysdolphin/baselib/hsd_3A94.c",
+          "hsd_803A949C",
+          "memory-card command handling"
+        ],
+        "evidence_refs": [
+          "raw_diff: includes <dolphin/card.h>",
+          "raw_diff: CARDFileInfo xC in CardStateExt",
+          "raw_diff: hsd_803A949C_Close calls CARDClose",
+          "raw_diff: hsd_803A949C switch uses hsd_803B31CC, hsd_803B2B20, hsd_803AC558"
+        ],
+        "reason": "May help future path/symbol routing for sysdolphin baselib memory-card callback work; curator should verify against current source before adding as a path fact."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Temporary local structs can be acceptable bridge code when fields are offset-preserving and semantics are not proven",
+        "text": "PR 2472 is an example of replacing raw offsets in a large partially matched function with local temporary structs that keep offset comments and conservative xNN field names. This aligns with typed-fields-over-pointer-math and conservative-naming but may be worth a small explicit note if repeated across PRs.",
+        "source_path": null,
+        "scope": [
+          "temporary structs",
+          "typed-fields-over-pointer-math",
+          "conservative-naming"
+        ],
+        "evidence_refs": [
+          "raw_diff: CardStateExt/CardCmdEntry/CardBlock local typedefs",
+          "raw_diff: xNN field names retained for unknown fields",
+          "raw_diff: role locals entry/state/block used in hsd_803A949C"
+        ],
+        "reason": "This is a possible standards clarification, not an accepted new rule from this PR alone."
+      }
+    ],
+    "rejection_notes": [
+      "Do not record hsd_803A949C as fully matched from this slice; the loaded bot report says 58.78%.",
+      "Do not infer semantic names for CardStateExt fields such as x170, x270, x370, x430, or x460 beyond the offset-style names shown in the diff.",
+      "Do not infer reviewer approval rationale or requested changes; no human review comments are loaded.",
+      "Do not treat the local CardStateExt/CardCmdEntry/CardBlock definitions as canonical global types without checking current source and headers."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

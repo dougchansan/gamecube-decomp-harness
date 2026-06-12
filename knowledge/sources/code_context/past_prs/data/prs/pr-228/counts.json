@@ -1,0 +1,17 @@
+{
+  "number": 228,
+  "title": "Split up some of the interface code from text_4",
+  "state": "MERGED",
+  "createdAt": "2021-12-27T03:07:01Z",
+  "updatedAt": "2021-12-27T03:07:29Z",
+  "mergedAt": "2021-12-27T03:07:26Z",
+  "closedAt": "2021-12-27T03:07:26Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/228",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 1111739
+  }
+}

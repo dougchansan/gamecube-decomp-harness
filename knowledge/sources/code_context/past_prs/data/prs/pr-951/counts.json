@@ -1,0 +1,17 @@
+{
+  "number": 951,
+  "title": "Clean up item article data types and accesses",
+  "state": "MERGED",
+  "createdAt": "2023-07-01T08:26:26Z",
+  "updatedAt": "2023-07-01T08:38:47Z",
+  "mergedAt": "2023-07-01T08:38:44Z",
+  "closedAt": "2023-07-01T08:38:44Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/951",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 6486
+  }
+}

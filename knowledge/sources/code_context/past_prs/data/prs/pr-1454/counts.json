@@ -1,0 +1,17 @@
+{
+  "number": 1454,
+  "title": "Link `itlgun` and `itlgunray`",
+  "state": "MERGED",
+  "createdAt": "2024-09-22T18:12:29Z",
+  "updatedAt": "2024-09-22T18:19:45Z",
+  "mergedAt": "2024-09-22T18:19:44Z",
+  "closedAt": "2024-09-22T18:19:44Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1454",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 91452
+  }
+}

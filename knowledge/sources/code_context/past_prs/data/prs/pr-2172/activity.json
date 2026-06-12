@@ -1,0 +1,10 @@
+{
+  "pr": 2172,
+  "title": "particle.c: decompile 35 stubs, push 5 to 100%, improve 52 functions",
+  "url": "https://github.com/doldecomp/melee/pull/2172",
+  "text_records_with_body": 8,
+  "review_comments": 0,
+  "changed_files": 10,
+  "added_lines": 7301,
+  "deleted_lines": 741
+}

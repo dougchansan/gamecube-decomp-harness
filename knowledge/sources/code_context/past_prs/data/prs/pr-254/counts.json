@@ -1,0 +1,17 @@
+{
+  "number": 254,
+  "title": "add stage.c function declarations to the header file",
+  "state": "MERGED",
+  "createdAt": "2022-02-05T02:17:57Z",
+  "updatedAt": "2022-02-05T02:18:46Z",
+  "mergedAt": "2022-02-05T02:18:46Z",
+  "closedAt": "2022-02-05T02:18:46Z",
+  "author": "snuffysasa",
+  "url": "https://github.com/doldecomp/melee/pull/254",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 1649
+  }
+}

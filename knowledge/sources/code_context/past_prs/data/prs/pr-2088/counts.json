@@ -1,0 +1,17 @@
+{
+  "number": 2088,
+  "title": "Link itlucky",
+  "state": "MERGED",
+  "createdAt": "2026-01-12T04:34:47Z",
+  "updatedAt": "2026-01-12T04:40:16Z",
+  "mergedAt": "2026-01-12T04:40:12Z",
+  "closedAt": "2026-01-12T04:40:12Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/2088",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 1717
+  }
+}

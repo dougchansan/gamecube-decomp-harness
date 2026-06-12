@@ -1,0 +1,17 @@
+{
+  "number": 1430,
+  "title": "Match 16.76% of `ftCo_0A01` (81.08 KB)",
+  "state": "MERGED",
+  "createdAt": "2024-08-13T06:31:22Z",
+  "updatedAt": "2024-08-13T06:34:18Z",
+  "mergedAt": "2024-08-13T06:34:16Z",
+  "closedAt": "2024-08-13T06:34:16Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1430",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 28025
+  }
+}

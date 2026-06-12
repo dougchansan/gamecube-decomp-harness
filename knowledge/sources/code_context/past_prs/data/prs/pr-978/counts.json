@@ -1,0 +1,17 @@
+{
+  "number": 978,
+  "title": "Finish matching lobj.c",
+  "state": "MERGED",
+  "createdAt": "2023-09-27T23:17:15Z",
+  "updatedAt": "2023-09-27T23:32:58Z",
+  "mergedAt": "2023-09-27T23:31:02Z",
+  "closedAt": "2023-09-27T23:31:02Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/978",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 86433
+  }
+}

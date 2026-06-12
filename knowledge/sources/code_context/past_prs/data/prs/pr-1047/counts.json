@@ -1,0 +1,17 @@
+{
+  "number": 1047,
+  "title": "Fix `check-issues` error output and existing code issues",
+  "state": "MERGED",
+  "createdAt": "2024-01-08T12:09:18Z",
+  "updatedAt": "2024-01-08T12:20:17Z",
+  "mergedAt": "2024-01-08T12:20:16Z",
+  "closedAt": "2024-01-08T12:20:16Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1047",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 3998
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 1131,
+  "title": "Create `revert_asm.py` to unlink C files from `make`",
+  "state": "MERGED",
+  "createdAt": "2024-01-26T11:47:22Z",
+  "updatedAt": "2024-01-26T11:48:29Z",
+  "mergedAt": "2024-01-26T11:48:28Z",
+  "closedAt": "2024-01-26T11:48:28Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1131",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 1309
+  }
+}

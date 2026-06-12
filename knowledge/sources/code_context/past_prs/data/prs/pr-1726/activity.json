@@ -1,0 +1,10 @@
+{
+  "pr": 1726,
+  "title": "fix outstanding cror comparisons",
+  "url": "https://github.com/doldecomp/melee/pull/1726",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 4,
+  "added_lines": 12,
+  "deleted_lines": 26
+}

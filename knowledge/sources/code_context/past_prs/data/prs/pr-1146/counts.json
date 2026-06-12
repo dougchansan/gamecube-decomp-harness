@@ -1,0 +1,17 @@
+{
+  "number": 1146,
+  "title": "Use `Unknown` in `configure.py` until status is confirmed",
+  "state": "MERGED",
+  "createdAt": "2024-01-28T14:41:34Z",
+  "updatedAt": "2024-01-28T14:42:34Z",
+  "mergedAt": "2024-01-28T14:42:33Z",
+  "closedAt": "2024-01-28T14:42:33Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1146",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 97464
+  }
+}

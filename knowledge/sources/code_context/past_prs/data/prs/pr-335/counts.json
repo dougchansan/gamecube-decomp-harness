@@ -1,0 +1,17 @@
+{
+  "number": 335,
+  "title": "Fighter.c [WIP]  and [NON_MATCHING]",
+  "state": "CLOSED",
+  "createdAt": "2022-03-26T02:25:59Z",
+  "updatedAt": "2022-05-25T07:00:34Z",
+  "mergedAt": null,
+  "closedAt": "2022-04-22T18:39:53Z",
+  "author": "snuffysasa",
+  "url": "https://github.com/doldecomp/melee/pull/335",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 1593474
+  }
+}

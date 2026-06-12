@@ -1,0 +1,487 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2622",
+  "pr": {
+    "number": 2622,
+    "title": "Improvements to split up: GR",
+    "url": "https://github.com/doldecomp/melee/pull/2622",
+    "state": "MERGED",
+    "author": "fjooord",
+    "created_at": "2026-06-08T14:30:33Z",
+    "merged_at": "2026-06-08T15:59:43Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Stage/ground matching-improvement slice for src/melee/gr, split from PR #2617 for easier review. The loaded diff and bot report show small code-match gains across multiple GR translation units, including three new matches and fifteen unmatched-item improvements. One reviewer comment flags a gricemt assert-related change as a regression, but gricemt is not present in the changed_files metadata for this slice.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "matching cleanup",
+      "stage subsystem"
+    ],
+    "systems": [
+      "stage",
+      "ground",
+      "src/melee/gr"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gr/granime.c",
+      "role": "Adjusted grAnime_801C7C1C local declarations and replaced ternary local initialization with explicit if/else assignments for HSD_MatAnim and HSD_ShapeAnimDObj.",
+      "evidence_refs": [
+        "changed_files.jsonl: granime.c added 12 deleted 2 hunks 2",
+        "raw_diff: grAnime_801C7C1C hunk",
+        "decomp-dev issue comment: grAnime_801C7C1C improved 97.16% to 98.05%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grbigblue.c",
+      "role": "Improved grBigBlue_801E6C60 field accesses and expression staging; bot report also lists grBigBlue_801E8D64 as a new match.",
+      "evidence_refs": [
+        "changed_files.jsonl: grbigblue.c added 11 deleted 9 hunks 6",
+        "raw_diff: x8 to x4 field substitutions and left_x/right_x temporaries",
+        "decomp-dev issue comment: grBigBlue_801E6C60 improved 95.24% to 97.20%; grBigBlue_801E8D64 new match"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grcastle.c",
+      "role": "Improved grCastle_801CFBD4 by replacing direct callback table indexing with source pointer locals while retaining PAD_STACK.",
+      "evidence_refs": [
+        "changed_files.jsonl: grcastle.c added 12 deleted 11 hunks 2",
+        "raw_diff: cb1_src and cb2_src introduced in grCastle_801CFBD4",
+        "decomp-dev issue comment: grCastle_801CFBD4 improved 95.19% to 96.33%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grcorneria.c",
+      "role": "Adjusted declaration order and introduced side local for corneria cannon branch.",
+      "evidence_refs": [
+        "changed_files.jsonl: grcorneria.c added 3 deleted 2 hunks 2",
+        "raw_diff: grCorneria_801DED50 declaration order; grCorneria_801E1348 side local",
+        "decomp-dev issue comment: grCorneria_801E1348 improved 97.62% to 99.02%; grCorneria_801DED50 improved 96.49% to 96.50%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grgreens.c",
+      "role": "Renamed loop locals to row/col in a 5x6 grid traversal and cleaned HSD_ASSERT spacing.",
+      "evidence_refs": [
+        "changed_files.jsonl: grgreens.c added 9 deleted 7 hunks 4",
+        "raw_diff: grGreens_80214FA8 row/col nested loops; grGreens_80215358 assert spacing",
+        "decomp-dev issue comment: grGreens_80214FA8 improved 99.28% to 99.63%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grinishie1.c",
+      "role": "Reordered GET_JOBJ/GET_GROUND setup and simplified block-status search by testing loop exhaustion instead of a separate boolean.",
+      "evidence_refs": [
+        "changed_files.jsonl: grinishie1.c added 4 deleted 6 hunks 2",
+        "raw_diff: grInishie1_801FAC58 declaration/order change; grInishie1_801FB0AC bool match removed",
+        "decomp-dev issue comment: grInishie1_801FB0AC improved 97.36% to 98.51%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grinishie2.c",
+      "role": "Set temp_vec to the GroundVars translation field before HSD_JObjGetTranslation.",
+      "evidence_refs": [
+        "changed_files.jsonl: grinishie2.c added 1 deleted 0 hunks 1",
+        "raw_diff: grInishie2_801FD9EC temp_vec = &gp->gv.inishie23.xD8",
+        "decomp-dev issue comment: grInishie2_801FD9EC new match, 99.66% to 100.00%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grmutecity.c",
+      "role": "Adjusted pointer/integer checks, comparison ordering, direct speed-function table indexing, and light-object loop locals in Mute City functions.",
+      "evidence_refs": [
+        "changed_files.jsonl: grmutecity.c added 31 deleted 35 hunks 7",
+        "raw_diff: grMuteCity_801F1A34 and grMuteCity_801F290C hunks",
+        "decomp-dev issue comment: grMuteCity_801F1A34 improved 96.67% to 97.30%; grMuteCity_801F290C improved 99.30% to 99.44%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/ground.c",
+      "role": "Introduced archive/stage_id temporaries, float literal cleanup, assignment-in-condition shape, and Vec3 pointer reuse for light object position/interest updates.",
+      "evidence_refs": [
+        "changed_files.jsonl: ground.c added 12 deleted 7 hunks 4",
+        "raw_diff: Ground_801C1E94 and Ground_801C466C hunks",
+        "decomp-dev issue comment: Ground_801C1E94 new match; Ground_801C466C improved 97.89% to 99.18%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grrcruise.c",
+      "role": "Changed grRCruise_801FFADC in the truncated portion of the diff; bot report shows a match-score improvement.",
+      "evidence_refs": [
+        "changed_files.jsonl: grrcruise.c added 6 deleted 12 hunks 1",
+        "raw_diff: grrcruise.c excerpt is truncated after start of grRCruise_801FFADC hunk",
+        "decomp-dev issue comment: grRCruise_801FFADC improved 98.59% to 99.20%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grvenom.c",
+      "role": "Changed several Venom functions, but the loaded diff excerpt is truncated before these hunks; bot report lists three unmatched-item improvements.",
+      "evidence_refs": [
+        "changed_files.jsonl: grvenom.c added 15 deleted 25 hunks 8",
+        "decomp-dev issue comment: grVenom_80205AD4, grVenom_80205F30, and grVenom_80206874 listed as improvements"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grzebes.c",
+      "role": "Changed grZebes_801D9798, but the loaded diff excerpt is truncated before this hunk.",
+      "evidence_refs": [
+        "changed_files.jsonl: grzebes.c added 3 deleted 2 hunks 1",
+        "decomp-dev issue comment: grZebes_801D9798 improved 99.24% to 99.92%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/gricemt.c",
+      "role": "Mentioned in PR body and review feedback, but absent from loaded changed_files metadata; reviewer flags an assert-related hunk as a regression.",
+      "evidence_refs": [
+        "human_pr_text: Files list includes src/melee/gr/gricemt.c",
+        "review_comments.md: PsiLupan comment on grIceMt_801F686C says this is a regression",
+        "changed_files.jsonl: gricemt.c absent"
+      ]
+    }
+  ],
+  "what_changed": [
+    "PR was a src/melee/gr directory/subsystem slice split from #2617 for reviewability.",
+    "Metadata lists 12 changed files with 119 additions and 118 deletions; PR body also lists gricemt.c, creating a path-list discrepancy with changed_files metadata.",
+    "Bot report for this PR slice reports matched code +3188 bytes, 3 new matches, and 15 improvements in unmatched items.",
+    "New matches reported: grInishie2_801FD9EC, Ground_801C1E94, and grBigBlue_801E8D64.",
+    "Loaded diff shows mostly small code-shape changes: declaration order, explicit temporaries, field selection, pointer casts for integer-stored object handles, loop-local naming, assignment-in-condition, and HSD_ASSERT formatting.",
+    "Reviewer feedback flagged a gricemt change as a regression, specifically around an HSD_ASSERT line in grIceMt_801F686C."
+  ],
+  "smart_moves": [
+    {
+      "title": "Split a broad matching branch by subsystem/pathspec for review",
+      "text": "The PR body says the work was split from #2617 by directory/subsystem so matching improvements are easier to review, scoped to src/melee/gr.",
+      "evidence_refs": [
+        "human_pr_text: Split from #2617 by directory/subsystem",
+        "human_pr_text: Scope src/melee/gr"
+      ]
+    },
+    {
+      "title": "Use bot slice report instead of full-branch report as authoritative score",
+      "text": "The PR body preserves full unsplit source-branch numbers but explicitly says per-PR CI/decomp-dev reporting is authoritative for the draft slice once it completes.",
+      "evidence_refs": [
+        "human_pr_text: Preliminary Report",
+        "human_pr_text: Per-PR CI/decomp-dev reporting is the authoritative slice score"
+      ]
+    },
+    {
+      "title": "Prefer clear local roles where evidence is direct",
+      "text": "The diff uses row/col for a 5x6 grid traversal and side for a branch on gp->gv.corneria.x11A, making local roles easier to review without broad symbol renames.",
+      "evidence_refs": [
+        "raw_diff: grGreens_80214FA8 row/col",
+        "raw_diff: grCorneria_801E1348 side local"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "Small source-shape edits can close or improve near-matching GR functions, but each should be tied to narrow bot/build evidence rather than treated as a global style.",
+      "evidence_refs": [
+        "decomp-dev issue comment: 3 new matches and 15 improvements",
+        "raw_diff: examples include declaration order, temporary locals, assignment-in-condition, and pointer reuse"
+      ],
+      "scope": [
+        "src/melee/gr",
+        "matching cleanup"
+      ]
+    },
+    {
+      "lesson": "When a loop scans for any matching element, comparing the index to the bound after the loop can replace a separate boolean flag and may improve match shape.",
+      "evidence_refs": [
+        "raw_diff: grInishie1_801FB0AC removes bool match and checks i == 0x13",
+        "decomp-dev issue comment: grInishie1_801FB0AC improved 97.36% to 98.51%"
+      ],
+      "scope": [
+        "src/melee/gr/grinishie1.c",
+        "search loops"
+      ]
+    },
+    {
+      "lesson": "Grid traversal locals can be renamed to semantic row/col when callsites and index math directly establish the roles.",
+      "evidence_refs": [
+        "raw_diff: grGreens_80214FA8 changes k/j to row/col and passes col,row to grGreens_80215358",
+        "decomp standard: conservative-naming"
+      ],
+      "scope": [
+        "src/melee/gr/grgreens.c",
+        "local naming"
+      ]
+    },
+    {
+      "lesson": "Recovered field selection matters: changing repeated accesses from one unknown offset field to another can be a match-relevant type/field correction, but the PR evidence only proves this specific Big Blue edit, not the semantic meaning of x4 or x8.",
+      "evidence_refs": [
+        "raw_diff: grBigBlue_801E6C60 repeated gp->gv.bigblue.data[i].x8 to x4 changes",
+        "decomp-dev issue comment: grBigBlue_801E6C60 improved 95.24% to 97.20%",
+        "decomp standard: typed-fields-over-pointer-math"
+      ],
+      "scope": [
+        "src/melee/gr/grbigblue.c",
+        "GroundVars field recovery"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "row / col",
+      "meaning": "Loop indices for a 5-row by 6-column grid in grGreens_80214FA8.",
+      "evidence_refs": [
+        "raw_diff: for row < 5, for col < 6, index row * 6 + col"
+      ]
+    },
+    {
+      "name": "side",
+      "meaning": "Local copy of gp->gv.corneria.x11A used to choose Corneria cannon placement/lookup branch.",
+      "evidence_refs": [
+        "raw_diff: grCorneria_801E1348 s32 side = gp->gv.corneria.x11A"
+      ]
+    },
+    {
+      "name": "left_x / right_x",
+      "meaning": "Temporaries for horizontal range arguments to grBigBlue_801E8B84.",
+      "evidence_refs": [
+        "raw_diff: grBigBlue_801E6C60 computes left_x and right_x before grBigBlue_801E8B84"
+      ]
+    },
+    {
+      "name": "cb1_src / cb2_src",
+      "meaning": "Local source pointers for castle callback tables grCs_803B7F28 and grCs_803B7F3C.",
+      "evidence_refs": [
+        "raw_diff: grCastle_801CFBD4 introduces const unkCastleCallback* cb1_src and const unkCastleCallback2* cb2_src"
+      ]
+    },
+    {
+      "name": "lobj2 / j",
+      "meaning": "Separate light-object iterator and counter in grMuteCity_801F290C, avoiding reuse of earlier lobj/i locals in the shown block.",
+      "evidence_refs": [
+        "raw_diff: grMuteCity_801F290C introduces HSD_LObj* lobj2 and s32 j"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Declaration order and widened local lifetime changes",
+      "examples": [
+        "grAnime_801C7C1C moves manim and sdobj declarations to outer scope before explicit assignment.",
+        "grCorneria_801DED50 moves grCn_Data* data after pos initialization.",
+        "grInishie1_801FAC58 reorders GET_JOBJ and GET_GROUND assignments."
+      ],
+      "evidence_refs": [
+        "raw_diff: granime.c, grcorneria.c, grinishie1.c hunks",
+        "decomp standard: matching-tactics-need-evidence"
+      ],
+      "caution": "These are match-shaping tactics; do not promote as general style without narrow objdiff/build evidence."
+    },
+    {
+      "tactic": "Introduce temporaries for reused expressions or argument setup",
+      "examples": [
+        "grBigBlue_801E6C60 uses left_x/right_x before calling grBigBlue_801E8B84.",
+        "ground.c uses archive and stage_id before accessing callbacks and archive fields.",
+        "ground.c assigns sp10p = &sp10 and passes sp10p to HSD_LObjSetPosition/Interest."
+      ],
+      "evidence_refs": [
+        "raw_diff: grbigblue.c and ground.c hunks"
+      ],
+      "caution": "Useful as local codegen shaping, but the PR does not prove a global rule to prefer extra temporaries."
+    },
+    {
+      "tactic": "Use loop-exhaustion index instead of boolean flag",
+      "examples": [
+        "grInishie1_801FB0AC uses u32 i and tests i == 0x13 after the loop."
+      ],
+      "evidence_refs": [
+        "raw_diff: grInishie1_801FB0AC",
+        "decomp-dev issue comment: function improved by +10 bytes"
+      ],
+      "caution": "Appropriate when the loop bound and break condition are clear."
+    },
+    {
+      "tactic": "Assignment inside null-check condition",
+      "examples": [
+        "Ground_801C466C changes separate assignment and NULL check to if ((var_r28_2 = Ground_801C466C_inline()) == NULL)."
+      ],
+      "evidence_refs": [
+        "raw_diff: Ground_801C466C",
+        "decomp-dev issue comment: Ground_801C466C improved 97.89% to 99.18%"
+      ],
+      "caution": "Treat as local MWCC shape tactic rather than readability default."
+    },
+    {
+      "tactic": "Retain explicit PAD_STACK only where present in matching source",
+      "examples": [
+        "grCastle_801CFBD4 retains PAD_STACK(12) after removing u8 _pad_top[8].",
+        "grCorneria_801DED50 retains PAD_STACK(12).",
+        "grGreens_80215358 retains PAD_STACK(0x10)."
+      ],
+      "evidence_refs": [
+        "raw_diff: grcastle.c, grcorneria.c, grgreens.c hunks",
+        "decomp standard: matching-tactics-need-evidence"
+      ],
+      "caution": "PAD_STACK requires explicit matching evidence and should stay narrow."
+    }
+  ],
+  "review_feedback": [
+    {
+      "author": "PsiLupan",
+      "path": "src/melee/gr/gricemt.c",
+      "comment": "As mentioned on another PR, this is a regression.",
+      "evidence_refs": [
+        "review_comments.md: discussion_r3374261835",
+        "text_corpus.jsonl: review_comment path src/melee/gr/gricemt.c",
+        "review hunk: removal context includes HSD_ASSERT(0x258, i<ICEMT_FIELD_MAX)"
+      ],
+      "status": "reviewer flagged regression; exact resolution not shown in loaded evidence"
+    }
+  ],
+  "searchable_terms": [
+    "pr-2622",
+    "Improvements to split up: GR",
+    "src/melee/gr",
+    "fjooord",
+    "decomp-matching",
+    "stage",
+    "ground",
+    "grAnime_801C7C1C",
+    "grBigBlue_801E6C60",
+    "grBigBlue_801E8D64",
+    "grCastle_801CFBD4",
+    "grCorneria_801DED50",
+    "grCorneria_801E1348",
+    "grGreens_80214FA8",
+    "grGreens_80215358",
+    "grInishie1_801FAC58",
+    "grInishie1_801FB0AC",
+    "grInishie2_801FD9EC",
+    "grMuteCity_801F1A34",
+    "grMuteCity_801F290C",
+    "Ground_801C1E94",
+    "Ground_801C466C",
+    "grRCruise_801FFADC",
+    "grVenom_80205AD4",
+    "grVenom_80205F30",
+    "grVenom_80206874",
+    "grZebes_801D9798",
+    "grIceMt_801F686C",
+    "HSD_ASSERT",
+    "PAD_STACK",
+    "row col",
+    "left_x right_x",
+    "cb1_src cb2_src",
+    "assignment in condition",
+    "loop exhaustion index"
+  ],
+  "follow_up_queries": [
+    "PR 2622 gricemt regression HSD_ASSERT ICEMT_FIELD_MAX resolution",
+    "grBigBlue_801E6C60 x4 x8 GroundVars field correction",
+    "grInishie1_801FB0AC loop exhaustion boolean match removal",
+    "Ground_801C466C sp10p Vec3 pointer match tactic",
+    "grCastle_801CFBD4 cb1_src cb2_src PAD_STACK",
+    "grGreens_80214FA8 row col grid traversal",
+    "PR 2617 split up GR source branch context"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR identity, merge status, changed file counts",
+      "human_pr_text.md: scope, preliminary report, local checks, file list",
+      "text_corpus.jsonl: decomp-dev bot report and review comment",
+      "changed_files.jsonl: 12 changed files",
+      "raw_diff.diff: truncated loaded diff with detailed hunks for several files",
+      "review_comments.md: gricemt regression comment"
+    ],
+    "notes": [
+      "Loaded diff is truncated, so grrcruise is only partially visible and grvenom/grzebes hunks are not visible in the excerpt.",
+      "PR body lists src/melee/gr/gricemt.c, and review feedback targets gricemt.c, but changed_files metadata lists 12 files and does not include gricemt.c.",
+      "The PR body includes full unsplit source-branch numbers, while the bot issue comment provides the narrower per-PR slice report; the postmortem treats the bot report as the stronger PR-slice evidence.",
+      "No loaded evidence shows exact objdiff output, compiler logs, or final resolution of the reviewer-flagged regression.",
+      "Several tactics improve scores in this slice but remain local matching tactics rather than accepted global source style."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "type": "lesson",
+        "title": "Loop exhaustion can replace a flag when the bound proves no match",
+        "text": "In grInishie1_801FB0AC, the PR removes a separate boolean match flag, uses a u32 loop index, breaks on status == 3, and tests i == 0x13 afterward. The bot report records a score improvement for this function.",
+        "scope": [
+          "src/melee/gr/grinishie1.c",
+          "matching cleanup",
+          "loop shape"
+        ],
+        "evidence_refs": [
+          "raw_diff: grInishie1_801FB0AC",
+          "decomp-dev issue comment: grInishie1_801FB0AC improved 97.36% to 98.51%"
+        ]
+      },
+      {
+        "type": "naming_convention",
+        "title": "Use row/col for directly evidenced grid loops",
+        "text": "In grGreens_80214FA8, loop variables over a 5x6 array are renamed to row and col, with indexing row * 6 + col and call arguments col,row, directly supporting the local roles.",
+        "scope": [
+          "src/melee/gr/grgreens.c",
+          "local variable naming"
+        ],
+        "evidence_refs": [
+          "raw_diff: grGreens_80214FA8 row/col hunk",
+          "decomp standard: conservative-naming"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Clarify assignment-in-condition as a narrow MWCC matching tactic",
+        "text": "Ground_801C466C improved after changing a separate assignment and null check into if ((var_r28_2 = Ground_801C466C_inline()) == NULL). Consider documenting assignment-in-condition as a permissible local matching tactic only when narrow objdiff/checkdiff evidence supports it, not as general style.",
+        "source_path": null,
+        "scope": [
+          "matching tactics",
+          "MWCC control-flow shape"
+        ],
+        "evidence_refs": [
+          "raw_diff: Ground_801C466C assignment-in-condition",
+          "decomp-dev issue comment: Ground_801C466C improved 97.89% to 99.18%",
+          "decomp standard: matching-tactics-need-evidence"
+        ],
+        "reason": "The current standards mention matching tactics generally but do not explicitly call out assignment-in-condition; curator should decide whether this pattern is common enough to document."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "src/melee/gr is stage/ground subsystem matching scope",
+        "text": "PR #2622 scopes a directory/subsystem split to src/melee/gr and the initial classification marks systems stage/ground. Candidate path fact: src/melee/gr contains stage/ground GR matching work.",
+        "source_path": "src/melee/gr",
+        "scope": [
+          "src/melee/gr",
+          "stage",
+          "ground"
+        ],
+        "evidence_refs": [
+          "human_pr_text: Scope src/melee/gr",
+          "metadata_json.initial_classification: systems stage",
+          "changed_files.jsonl: gr*.c and ground.c paths"
+        ],
+        "reason": "Useful for routing future PR intake and decomp searches, but should be curated against existing path facts before promotion."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote the full unsplit branch report as the result of this PR slice; the PR body says per-PR CI/decomp-dev reporting is authoritative.",
+      "Do not infer semantic names for x4, x8, x22_flags, xD0_flags, or other unknown fields beyond the exact field changes shown.",
+      "Do not treat pointer/integer casts on car->x24 and car->x28 as preferred style; evidence only shows they were used for this match.",
+      "Do not mark gricemt.c as a changed file from changed_files metadata; it is only supported by the PR body file list and reviewer comment in the loaded evidence.",
+      "Do not claim reviewer intent or final fix for the gricemt regression; loaded evidence only contains the regression comment."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

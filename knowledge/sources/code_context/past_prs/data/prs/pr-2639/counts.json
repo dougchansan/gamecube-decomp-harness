@@ -1,0 +1,17 @@
+{
+  "number": 2639,
+  "title": "Low hanging fruit",
+  "state": "MERGED",
+  "createdAt": "2026-06-09T19:11:09Z",
+  "updatedAt": "2026-06-10T01:13:42Z",
+  "mergedAt": "2026-06-10T01:13:42Z",
+  "closedAt": "2026-06-10T01:13:42Z",
+  "author": "jellejurre",
+  "url": "https://github.com/doldecomp/melee/pull/2639",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 1,
+    "reviews": 1,
+    "diff_bytes": 12032
+  }
+}

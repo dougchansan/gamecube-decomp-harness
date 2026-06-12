@@ -1,0 +1,10 @@
+{
+  "pr": 1846,
+  "title": "Identify remaining functions in lbl tables",
+  "url": "https://github.com/doldecomp/melee/pull/1846",
+  "text_records_with_body": 7,
+  "review_comments": 5,
+  "changed_files": 20,
+  "added_lines": 349,
+  "deleted_lines": 189
+}

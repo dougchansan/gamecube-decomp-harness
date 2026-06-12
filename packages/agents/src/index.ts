@@ -1,12 +1,15 @@
 export { agentRegistry, type RegisteredAgentId } from "./registry.js";
 export { directorPrompt, directorQueuedTargets, type DirectorPromptOptions } from "./director/index.js";
 export { knowledgeCuratorAgent, knowledgeCuratorPrompt, type KnowledgeCuratorPromptOptions } from "./knowledge-curator/index.js";
-export { prReviewAgent, prReviewPrompt, type PrReviewPromptOptions } from "./pr-review/index.js";
+export { prContextPromptXml, prReviewAgent, prReviewPrompt, type PrReviewPromptOptions } from "./pr-review/index.js";
+export { reconcileAgent, reconcilePrompt, type ReconcileMode, type ReconcilePromptOptions } from "./reconcile/index.js";
 export {
   agentToolProfileSummary,
   agentToolRegistry,
   buildAgentTools,
   defaultAgentToolProfiles,
+  defaultKnowledgeCuratorToolProfile,
+  defaultPrReviewToolProfile,
   defaultWorkerToolProfile,
   resolveAgentToolIds,
   type AgentToolProfileInput,
@@ -20,5 +23,8 @@ export {
   targetPacketTarget,
   workerPacket,
   workerPrompt,
+  workerPromptInputXml,
+  type WorkerPromptInputXml,
+  type WorkerPromptInputXmlOptions,
   type WorkerPromptOptions,
 } from "./worker/index.js";

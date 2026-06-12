@@ -1,7 +1,6 @@
 import { resolve } from "node:path";
 import type { RunProjectMetadata } from "@decomp-orchestrator/core/types";
 import {
-  decompResourcesRoot,
   knowledgeSourcesRoot,
   knowledgeToolsRoot,
   packageRoot,
@@ -10,6 +9,7 @@ import {
   resourceGraphRoot,
   sourceDataRoot,
 } from "./paths.js";
+import { readSourceRegistry, readToolRegistry } from "./graph/sources.js";
 
 export interface ResourceMapScriptDefinition {
   path: string;
@@ -29,12 +29,26 @@ export function resourceMap(repoRoot: string, options: ResourceMapOptions): Reco
   const stateDir = project?.stateDir ?? "";
   const projectFlag = project?.projectId ? ` --project ${project.projectId}` : "";
   const pastPrs = pastPrsRoot();
-  const decompResources = decompResourcesRoot();
   const dataSheetData = sourceDataRoot("ssbm_data_sheet");
   const dataSheetCsvDir = resolve(dataSheetData, "csv");
   const powerpcData = sourceDataRoot("powerpc_docs");
   const externalMirrorsData = sourceDataRoot("external_mirrors");
   const scripts = options.scripts;
+  const activeSources = readSourceRegistry();
+  const activeSourceIds = activeSources.map((source) => source.id);
+  const registeredTools = readToolRegistry();
+  const registeredToolIds = registeredTools.map((tool) => tool.id);
+  const sourceSections = {
+    injectable: activeSources
+      .filter((source) => source.section === "injectable")
+      .map((source) => ({ id: source.id, title: source.title, access_modes: source.access_modes ?? [] })),
+    rag_search: activeSources
+      .filter((source) => source.section === "rag_search")
+      .map((source) => ({ id: source.id, title: source.title, access_modes: source.access_modes ?? [] })),
+    code_context: activeSources
+      .filter((source) => source.section === "code_context")
+      .map((source) => ({ id: source.id, title: source.title, access_modes: source.access_modes ?? [] })),
+  };
   return {
     roots: {
       project_id: project?.projectId ?? null,
@@ -90,43 +104,41 @@ export function resourceMap(repoRoot: string, options: ResourceMapOptions): Reco
     ],
     past_prs: {
       structured_index: {
-        path: resolve(pastPrs, "prs/index.jsonl"),
+        path: resolve(pastPrs, "library/index.jsonl"),
         fields: ["pr", "title", "summary", "searchable_terms", "postmortem_json"],
         purpose: "distilled searchable PR lessons and pointers to per-PR postmortems",
       },
-      known_fixes: resolve(pastPrs, "prs/known_fixes.md"),
+      known_fixes: resolve(pastPrs, "library/known_fixes.md"),
       raw_analysis: [
         {
-          path: resolve(pastPrs, "current/analysis/changed_files.jsonl"),
+          path: resolve(pastPrs, "aggregate/changed_files.jsonl"),
           purpose: "find PRs that touched a concrete source/config path",
         },
         {
-          path: resolve(pastPrs, "current/analysis/text_corpus.jsonl"),
+          path: resolve(pastPrs, "aggregate/text_corpus.jsonl"),
           purpose: "PR bodies, bot reports, comments, and reviews keyed by PR number",
         },
         {
-          path: resolve(pastPrs, "current/analysis/human_pr_text.md"),
+          path: resolve(pastPrs, "aggregate/human_pr_text.md"),
           purpose: "human-authored PR bodies and issue comments",
         },
         {
-          path: resolve(pastPrs, "current/analysis/review_comments.md"),
+          path: resolve(pastPrs, "aggregate/review_comments.md"),
           purpose: "review feedback, naming corrections, and review warnings",
         },
         {
-          path: resolve(pastPrs, "current/analysis/decomp_tips_library.md"),
+          path: resolve(pastPrs, "aggregate/decomp_tips_library.md"),
           purpose: "cross-PR matching and review lessons",
         },
       ],
-      per_pr_detail_pattern: resolve(pastPrs, "prs/pr-<number>/postmortem.json"),
+      per_pr_detail_pattern: resolve(pastPrs, "prs/pr-<number>/postmortem/postmortem.json"),
       search_examples: [
-        `rg -n "<symbol>|<source_path>|<subsystem>|<mismatch_term>" "${resolve(pastPrs, "prs/index.jsonl")}" "${resolve(pastPrs, "prs/known_fixes.md")}"`,
-        `jq 'select(.file=="<source_path>")' "${resolve(pastPrs, "current/analysis/changed_files.jsonl")}"`,
-        `jq 'select(.pr == <number>)' "${resolve(pastPrs, "current/analysis/text_corpus.jsonl")}"`,
+        `rg -n "<symbol>|<source_path>|<subsystem>|<mismatch_term>" "${resolve(pastPrs, "library/index.jsonl")}" "${resolve(pastPrs, "library/known_fixes.md")}"`,
+        `jq 'select(.file=="<source_path>")' "${resolve(pastPrs, "aggregate/changed_files.jsonl")}"`,
+        `jq 'select(.pr == <number>)' "${resolve(pastPrs, "aggregate/text_corpus.jsonl")}"`,
       ],
     },
     decomp_resources: {
-      index: resolve(decompResources, "index.md"),
-      notes: resolve(decompResources, "guides/resource_notes.md"),
       data_sheet_csv_dir: dataSheetCsvDir,
       data_sheet_csvs: [
         resolve(dataSheetCsvDir, "cells.csv"),
@@ -159,25 +171,14 @@ export function resourceMap(repoRoot: string, options: ResourceMapOptions): Reco
       graph_root: resourceGraphRoot(),
       graph_db: graphDb,
       cli_policy: "CLI-first; no MCP server wrapper in v1.",
-      source_ids: [
-        "code_graph",
-        "past_prs",
-        "discord_knowledge",
-        "ssbm_data_sheet",
-        "powerpc_docs",
-        "external_mirrors",
-        "resource_guides",
-        "reference_docs",
-        "tool_outputs",
-        "decomp_standards",
-        "path_facts",
-      ],
-      tool_ids: ["ghidra", "opseq", "mismatch_db", "mwcc_debug"],
+      source_ids: activeSourceIds,
+      source_sections: sourceSections,
+      graph_owned_enrichments: ["agent_shared_state", "curator_enrichment", "mismatch_patterns"],
       commands: [
         {
           command: "bun run kg:sources",
           cwd: packageRoot(),
-          purpose: "list registered knowledge source slices and external tool integrations",
+          purpose: "list active knowledge source sections and external tool integrations",
         },
         {
           command: `bun run kg:rebuild --${projectFlag} --repo-root <repo_root> --graph-db <graph_db>`,
@@ -205,24 +206,34 @@ export function resourceMap(repoRoot: string, options: ResourceMapOptions): Reco
           purpose: "search indexed graph chunks for a source slice such as past_prs",
         },
         {
-          command: "python3 knowledge/sources/<source_id>/api/search.py --query <term> --limit 10 --json",
+          command: "python3 knowledge/sources/<section>/<source_id>/api/search.py --query <term> --limit 10 --json",
           cwd: packageRoot(),
-          purpose: "source-local search for registered source slices using generated JSONL indexes",
+          purpose: "source-local search for active source slices using generated JSONL indexes",
         },
         {
-          command: "python3 knowledge/sources/decomp_standards/api/search.py --query <term> --limit 10 --json",
+          command: "python3 knowledge/sources/rag_search/<source_id>/commands/vectorize.py --json",
           cwd: packageRoot(),
-          purpose: "search global decomp standards that are injected into worker/writer and QA/PR-review contexts",
+          purpose: "embed a RAG source's generated JSONL chunks into its source-local vector.sqlite index",
         },
         {
-          command: "python3 knowledge/sources/path_facts/api/resolve_for_path.py --path <source_path> --limit 5 --json",
+          command: "python3 knowledge/sources/rag_search/<source_id>/api/semantic_search.py --query <question> --limit 10 --json",
           cwd: packageRoot(),
-          purpose: "resolve bounded path-scoped decomp hints for worker/writer packets",
+          purpose: "hybrid semantic lookup over a vectorized RAG source with citation-preserving snippets",
         },
         {
-          command: "python3 knowledge/sources/<source_id>/api/status.py --json",
+          command: "python3 knowledge/sources/injectable/decomp_standards/api/search.py --query <term> --limit 10 --json",
           cwd: packageRoot(),
-          purpose: "source-local readiness and index-count check for registered source slices",
+          purpose: "operator/curator focused lookup over global standards that are otherwise injected into worker context",
+        },
+        {
+          command: "python3 knowledge/sources/injectable/path_facts/api/resolve_for_path.py --path <source_path> --limit 5 --json",
+          cwd: packageRoot(),
+          purpose: "resolve bounded path-scoped decomp hints selected for worker packets",
+        },
+        {
+          command: "python3 knowledge/sources/<section>/<source_id>/api/status.py --json",
+          cwd: packageRoot(),
+          purpose: "source-local readiness and index-count check for active source slices",
         },
         {
           command: "bun run kg:rank-features -- --repo-root <repo_root> --limit 30",
@@ -231,10 +242,18 @@ export function resourceMap(repoRoot: string, options: ResourceMapOptions): Reco
         },
       ],
     },
+    tooling: {
+      tools_root: knowledgeToolsRoot(),
+      tool_ids: registeredToolIds,
+      cache_policy:
+        "Tool caches and generated indexes live under tools/<category>/<tool_id>/{cache,indexes}; each tool API decides whether cached evidence is fresh enough for the current query.",
+      index_command: "python3 tools/build_tool_indexes.py --repo-root <repo_root>",
+      runner_policy: "Runners are operator/maintenance surfaces; workers normally call first-class Pi tools or tools/<category>/<tool_id>/api/*.py.",
+    },
     helper_scripts: [
       {
         path: scripts.decomp_context_lookup.path,
-        purpose: "first-pass target packet across local source, report metadata, PR corpus, and decomp resources",
+        purpose: "first-pass target packet across local source, report metadata, PR corpus, data sheets, PowerPC docs, and external mirrors",
       },
       {
         path: scripts.rank_decomp_candidates.path,
@@ -290,23 +309,33 @@ export function resourceMap(repoRoot: string, options: ResourceMapOptions): Reco
         purpose: "search data-sheet offsets, IDs, states, attributes, and lookup terms",
       },
       {
-        command: `rg -n "<symbol>|<file>|<mismatch_term>" "${resolve(pastPrs, "prs/index.jsonl")}" "${resolve(pastPrs, "current/analysis")}"`,
+        command: `rg -n "<symbol>|<file>|<mismatch_term>" "${resolve(pastPrs, "library/index.jsonl")}" "${resolve(pastPrs, "aggregate")}"`,
         purpose: "search past PR summaries, comments, reviews, and diffs",
       },
       {
-        command: "python3 knowledge/sources/discord_knowledge/api/search.py --query <compiler_or_review_term> --limit 10 --json",
+        command: "python3 knowledge/sources/rag_search/discord_knowledge/api/search.py --query <compiler_or_review_term> --limit 10 --json",
         cwd: packageRoot(),
         purpose: "search Discord-derived compiler and workflow knowledge with citations",
       },
       {
-        command: "python3 knowledge/sources/ssbm_data_sheet/api/search.py --query <address_or_offset_or_id> --limit 10 --json",
+        command: "python3 knowledge/sources/rag_search/discord_knowledge/api/semantic_search.py --query <question> --limit 10 --json",
+        cwd: packageRoot(),
+        purpose: "semantic RAG lookup over vectorized Discord-derived compiler and workflow knowledge",
+      },
+      {
+        command: "python3 knowledge/sources/code_context/ssbm_data_sheet/api/search.py --query <address_or_offset_or_id> --limit 10 --json",
         cwd: packageRoot(),
         purpose: "search normalized data-sheet cells with row and CSV provenance",
       },
       {
-        command: "python3 knowledge/sources/powerpc_docs/api/lookup_instruction.py --mnemonic <mnemonic> --limit 10 --json",
+        command: "python3 knowledge/sources/rag_search/powerpc_docs/api/lookup_instruction.py --mnemonic <mnemonic> --limit 10 --json",
         cwd: packageRoot(),
         purpose: "look up PowerPC PDF page chunks for ABI and instruction questions",
+      },
+      {
+        command: "python3 knowledge/sources/rag_search/powerpc_docs/api/semantic_search.py --query <question> --limit 10 --json",
+        cwd: packageRoot(),
+        purpose: "semantic RAG lookup over vectorized PowerPC ABI, compiler-guide, and ISA page chunks",
       },
       {
         command: "python3 tools/research/mismatch_db/api/search.py --query <mismatch_pattern> --limit 10 --json",
@@ -324,7 +353,7 @@ export function resourceMap(repoRoot: string, options: ResourceMapOptions): Reco
         purpose: "refresh missing recent PRs and rebuild deterministic PR knowledge records",
       },
       {
-        command: "bun run pr:postmortems -- --dump-root knowledge/sources/past_prs/data/current --run-agent --pending-only --complete-only --jobs 16",
+        command: "bun run pr:postmortems -- --dump-root knowledge/sources/code_context/past_prs/data --run-agent --pending-only --complete-only --jobs 16",
         cwd: packageRoot(),
         purpose: "run Pi-reviewed PR postmortems for missing, draft, or failed records in the orchestrator-owned PR dump",
       },

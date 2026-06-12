@@ -317,8 +317,8 @@ def main() -> int:
 </goal>
 
 <context_refresh>
-- Reread `decomp-orchestrator/src/agents/worker/context/last-resort-sweeps.md` and `decomp-orchestrator/src/agents/worker/context/operating-guide.md`.
-- Use `decomp-orchestrator/docs/archive/experimental-sweeps/` only as historical implementation notes when the compact sweep context is not enough.
+- Reread `decomp-orchestrator/packages/agents/src/worker/templates/system.md` and the generated worker `<available_tools>` block when refreshing active worker constraints.
+- Use `decomp-orchestrator/docs/archive/experimental-sweeps/` only as historical implementation notes.
 - Reread `decomp-runs/{run_slug}/current_state.md`, `decomp-runs/{run_slug}/run.md`, and the files under `decomp-runs/{run_slug}/context/`.
 - Inspect `decomp-runs/{run_slug}/artifacts/target_packet.json`, `target_manifest.csv`, `config_matrix.csv`, `sweep_results.csv`, `pareto_frontier.csv`, `artifacts/analysis/sweep_analysis.md`, and `artifacts/analysis/next_sweep_plan.md` if present.
 </context_refresh>

@@ -1,0 +1,17 @@
+{
+  "number": 2647,
+  "title": "Match pl_80037C60, mpJointListAdd and mnCount_8025092C",
+  "state": "MERGED",
+  "createdAt": "2026-06-10T16:38:36Z",
+  "updatedAt": "2026-06-10T17:07:50Z",
+  "mergedAt": "2026-06-10T17:07:50Z",
+  "closedAt": "2026-06-10T17:07:50Z",
+  "author": "MFS-code",
+  "url": "https://github.com/doldecomp/melee/pull/2647",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 2433
+  }
+}

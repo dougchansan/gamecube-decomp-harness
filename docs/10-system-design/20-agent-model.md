@@ -21,6 +21,15 @@ board reasoning.
 | Director | Board-level scheduling, target-packet selection, wake-event decisions | Source edits, local decomp research, direct worker supervision |
 | Worker | One leased target packet, research, edits, local validation, durable report | Board strategy, cross-worker coordination, unleased file edits |
 | PR-review | PR postmortem/review analysis and reusable review knowledge | Live decomp worker execution, director scheduling |
+| Knowledge-curator | Reducing worker/PR evidence into graph-safe lessons and proposal-only source updates | Direct graph mutation, scheduling, decomp attempts |
+| Reconcile | Making a bundle safe at run-cycle boundaries: fixing QA regressions before PR handoff (`ship-validate`) and resolving merge conflicts, duplicate work, and build errors after an upstream sync (`sync-merge`) | Board scheduling, lease-scoped worker tactics, knowledge graph mutation, publishing PRs |
+
+The reconcile agent is deliberately not a worker capability. It needs
+whole-checkout authority — merging, rebuilding, multi-file regression fixes —
+that the lease/write-set model denies workers, and it only runs while
+director/worker scheduling is locked (run paused or no session active). When
+upstream already matched a function held locally, upstream wins; the local
+attempt is preserved as lesson evidence for the curator pipeline, not as code.
 
 ## Process Actors
 

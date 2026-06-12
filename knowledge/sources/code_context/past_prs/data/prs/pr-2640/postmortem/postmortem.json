@@ -1,0 +1,448 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2640",
+  "pr": {
+    "number": 2640,
+    "title": "Improve mnDiagram matches",
+    "url": "https://github.com/doldecomp/melee/pull/2640",
+    "state": "MERGED",
+    "author": "itsgrimetime",
+    "created_at": "2026-06-09T23:51:27Z",
+    "merged_at": "2026-06-10T01:19:09Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2640 reworked VS Records mnDiagram source shapes in src/melee/mn/mndiagram.c and made a small static header update, improving the mndiagram TU fuzzy text match from 92.70628% to 96.47131% and increasing matched functions from 30 to 33. The evidence emphasizes sorting, popup, cursor, and table-rendering rewrites, with local materialization of mndiagram constants to avoid .sdata2 regression.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "menus",
+      "headers",
+      "data-section-awareness"
+    ],
+    "systems": [
+      "melee-core",
+      "mn",
+      "mndiagram",
+      "VS Records"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/mn/mndiagram.c",
+      "role": "Primary decomp source update for mnDiagram sorting, popup, cursor, table rendering, local helpers, struct field naming, stack/local-shape changes, and assert/report shape changes.",
+      "evidence_refs": [
+        "changed_files: src/melee/mn/mndiagram.c added 435 deleted 431 hunks 43",
+        "diff_excerpt: adds GET_DIAGRAM macro, mnDiagram_SumFighterKOs, mnDiagram_AllPlayTimesZero, mnDiagram_SumNameKOs, mnDiagram_MainOverlay, STATIC_ASSERT, renamed arrow_anim/cursor_anim fields",
+        "human_pr_text: rework VS Records diagram sorting, popup, cursor, and table-rendering source shapes"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mndiagram2.static.h",
+      "role": "Small static header update associated with mndiagram matching work; exact changes are not present in the loaded diff excerpt.",
+      "evidence_refs": [
+        "changed_files: src/melee/mn/mndiagram2.static.h added 2 deleted 0 hunks 1"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Added GET_DIAGRAM(gobj) as a typed wrapper around HSD_GObjGetUserData(gobj), replacing several direct mnDiagram_804D6C10->user_data accesses in loaded hunks.",
+      "evidence_refs": [
+        "diff_excerpt: #define GET_DIAGRAM(gobj) ((Diagram*) HSD_GObjGetUserData(gobj))",
+        "diff_excerpt: Diagram* data = GET_DIAGRAM(mnDiagram_804D6C10)",
+        "diff_excerpt: Diagram* d = GET_DIAGRAM(mnDiagram_804D6C10)"
+      ]
+    },
+    {
+      "text": "Split repeated KO and play-time scans into static inline helpers: mnDiagram_SumFighterKOs, mnDiagram_SumNameKOs, and mnDiagram_AllPlayTimesZero.",
+      "evidence_refs": [
+        "diff_excerpt: static inline int mnDiagram_SumFighterKOs(u8 field_index)",
+        "diff_excerpt: static inline int mnDiagram_SumNameKOs(u8 field_index)",
+        "diff_excerpt: static inline int mnDiagram_AllPlayTimesZero(u8 name)"
+      ]
+    },
+    {
+      "text": "Reshaped fighter and name sorting code in mnDiagram_8023FA6C and mnDiagram_8023FC28 using explicit iterator pointers, totals arrays, selection/insertion-style movement, and PAD_STACK(12).",
+      "evidence_refs": [
+        "diff_excerpt: mnDiagram_8023FA6C changes totals setup, dst_iter, candidate, max_idx shifting, PAD_STACK(12)",
+        "diff_excerpt: mnDiagram_8023FC28 changes dst_iter, tp, mnDiagram_SumNameKOs, and max_idx shifting"
+      ]
+    },
+    {
+      "text": "Renamed mnDiagram_AnimTable fields x58 and x64 to arrow_anim and cursor_anim, and updated popup/arrow animation callsites to use the clearer field names.",
+      "evidence_refs": [
+        "diff_excerpt: /* 0x58 */ AnimLoopSettings arrow_anim; /* 0x64 */ AnimLoopSettings cursor_anim",
+        "diff_excerpt: mn_8022EFD8(data->jobjs[12], &tbl->cursor_anim)",
+        "diff_excerpt: mn_8022ED6C(jobj, &tbl->arrow_anim)"
+      ]
+    },
+    {
+      "text": "Separated popup user-data and main-overlay layout concerns by changing mnDiagram_PopupData text count, adding a size STATIC_ASSERT, and adding mnDiagram_MainOverlay for a six-text layout use.",
+      "evidence_refs": [
+        "diff_excerpt: mnDiagram_PopupData text[5]",
+        "diff_excerpt: STATIC_ASSERT(sizeof(mnDiagram_PopupData) == 0x4C)",
+        "diff_excerpt: typedef struct mnDiagram_MainOverlay ... HSD_Text* text[6]",
+        "diff_excerpt: mnDiagram_80241668 uses mnDiagram_MainOverlay* data"
+      ]
+    },
+    {
+      "text": "Adjusted mnDiagram_80241310 allocation/assert shape: allocation now uses sizeof(mnDiagram_PopupData), and NULL handling expands to OSReport plus __assert using strings from the animation table.",
+      "evidence_refs": [
+        "diff_excerpt: user_data = HSD_MemAlloc(sizeof(mnDiagram_PopupData))",
+        "diff_excerpt: if (user_data == NULL) { OSReport(tbl->x70); __assert(tbl->x88, 0x5F8, tbl->x94); }"
+      ]
+    },
+    {
+      "text": "Converted several labeled/goto-style arrow visibility scans in mnDiagram_802417D0 into while/do-while loops with targeted gotos for exit labels, and added explanatory comments for arrow visibility behavior.",
+      "evidence_refs": [
+        "diff_excerpt: added @brief/@details for mnDiagram_802417D0",
+        "diff_excerpt: loop1/loop2 rewritten as while(count > 0) with do-while and right_done label",
+        "diff_excerpt: loop3/loop4 rewritten as do-while with fc_right_done label"
+      ]
+    },
+    {
+      "text": "The PR body reports three new matched functions and ten additional unmatched-item improvements, with bot report confirming the same three new matches and ten improvements.",
+      "evidence_refs": [
+        "human_pr_text: matched functions 30 -> 33",
+        "text_corpus issue_comment: ✅ 3 new matches",
+        "text_corpus issue_comment: 📈 10 improvements in unmatched items"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Kept constants materialized locally rather than chasing only text-shape changes, explicitly tying the choice to avoiding .sdata2 regression.",
+      "evidence_refs": [
+        "human_pr_text: Keep mndiagram constants materialized locally so `.sdata2` does not regress.",
+        "human_pr_text: .sdata2 84.09090% -> 88.63636%"
+      ]
+    },
+    {
+      "text": "Used small static inline helpers to isolate repeated sum/check logic while preserving callsite-specific matching shapes in the sorting functions.",
+      "evidence_refs": [
+        "diff_excerpt: mnDiagram_SumFighterKOs used in mnDiagram_8023FA6C",
+        "diff_excerpt: mnDiagram_SumNameKOs used in mnDiagram_8023FC28",
+        "diff_excerpt: mnDiagram_AllPlayTimesZero used in mnDiagram_GetLeastPlayedFighter"
+      ]
+    },
+    {
+      "text": "Improved reviewability by naming animation-table fields according to observed use sites, without renaming unrelated address-style globals.",
+      "evidence_refs": [
+        "diff_excerpt: x58 -> arrow_anim",
+        "diff_excerpt: x64 -> cursor_anim",
+        "diff_excerpt: callsites use arrow_anim for arrow JObjs and cursor_anim for cursor animation"
+      ]
+    },
+    {
+      "text": "Added a struct-size assertion after narrowing popup text storage, making the recovered layout assumption explicit in source.",
+      "evidence_refs": [
+        "diff_excerpt: HSD_Text* text[5]",
+        "diff_excerpt: STATIC_ASSERT(sizeof(mnDiagram_PopupData) == 0x4C)"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For menu/UI matching code, separating repeated aggregate scans into static inline helpers can improve matches while making the intended data operation clearer, as shown by KO and play-time helper extraction in mnDiagram.",
+      "scope": [
+        "src/melee/mn/mndiagram.c",
+        "menu decomp matching",
+        "aggregate loops"
+      ],
+      "evidence_refs": [
+        "diff_excerpt: mnDiagram_SumFighterKOs",
+        "diff_excerpt: mnDiagram_SumNameKOs",
+        "diff_excerpt: mnDiagram_AllPlayTimesZero",
+        "human_pr_text: mnDiagram_8023FA6C 85.61261% -> 100.00000%",
+        "human_pr_text: mnDiagram_GetLeastPlayedFighter 96.87500% -> 100.00000%"
+      ]
+    },
+    {
+      "lesson": "When recovering struct layouts used by multiple UI objects, split distinct layouts instead of forcing one struct to cover all cases; this PR narrowed popup data and added a separate main-overlay struct.",
+      "scope": [
+        "src/melee/mn/mndiagram.c",
+        "struct layout recovery",
+        "JObj/Text user data"
+      ],
+      "evidence_refs": [
+        "diff_excerpt: mnDiagram_PopupData text[5]",
+        "diff_excerpt: mnDiagram_MainOverlay text[6]",
+        "diff_excerpt: mnDiagram_80241668 changes to mnDiagram_MainOverlay*"
+      ]
+    },
+    {
+      "lesson": "For code-matching PRs that touch local constants, track data-section impact explicitly; this PR states local materialization was retained to avoid .sdata2 regression and reports .sdata2 improvement.",
+      "scope": [
+        "src/melee/mn/mndiagram.c",
+        ".sdata2",
+        "code matching with local constants"
+      ],
+      "evidence_refs": [
+        "human_pr_text: Keep mndiagram constants materialized locally so `.sdata2` does not regress.",
+        "human_pr_text: .sdata2 84.09090% -> 88.63636%",
+        "text_corpus issue_comment: main/melee/mn/mndiagram .sdata2 +4 84.09% -> 88.64%"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "GET_DIAGRAM(gobj)",
+      "kind": "local macro",
+      "rationale": "Typed local shorthand for HSD_GObjGetUserData when retrieving Diagram user data.",
+      "evidence_refs": [
+        "diff_excerpt: #define GET_DIAGRAM(gobj) ((Diagram*) HSD_GObjGetUserData(gobj))"
+      ]
+    },
+    {
+      "name": "arrow_anim",
+      "kind": "struct field",
+      "rationale": "Renames AnimTable x58 based on arrow animation callsites in mnDiagram_802417D0.",
+      "evidence_refs": [
+        "diff_excerpt: x58 renamed arrow_anim",
+        "diff_excerpt: mn_8022ED6C(jobj, &tbl->arrow_anim)"
+      ]
+    },
+    {
+      "name": "cursor_anim",
+      "kind": "struct field",
+      "rationale": "Renames AnimTable x64 based on cursor animation callsites in mnDiagram_PopupAnimProc.",
+      "evidence_refs": [
+        "diff_excerpt: x64 renamed cursor_anim",
+        "diff_excerpt: mn_8022EFD8(data->jobjs[12], &tbl->cursor_anim)"
+      ]
+    },
+    {
+      "name": "mnDiagram_SumFighterKOs / mnDiagram_SumNameKOs / mnDiagram_AllPlayTimesZero",
+      "kind": "static inline helper names",
+      "rationale": "Helper names describe local aggregate/check behavior observed in the extracted loops.",
+      "evidence_refs": [
+        "diff_excerpt: helper definitions and uses"
+      ]
+    },
+    {
+      "name": "mnDiagram_PopupData / mnDiagram_MainOverlay",
+      "kind": "local struct names",
+      "rationale": "Separate names distinguish popup user data from main overlay data where text array sizes differ.",
+      "evidence_refs": [
+        "diff_excerpt: typedef struct mnDiagram_PopupData with text[5]",
+        "diff_excerpt: typedef struct mnDiagram_MainOverlay with text[6]"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Used narrow PAD_STACK adjustments in sorting functions, changing PAD_STACK(16) to PAD_STACK(12) in loaded hunks.",
+      "evidence_refs": [
+        "diff_excerpt: mnDiagram_8023FA6C PAD_STACK(16) -> PAD_STACK(12)",
+        "diff_excerpt: mnDiagram_8023FC28 PAD_STACK(16) -> PAD_STACK(12)",
+        "human_pr_text: mnDiagram_8023FA6C 85.61261% -> 100.00000%",
+        "human_pr_text: mnDiagram_8023FC28 81.20370% -> 97.82407%"
+      ],
+      "notes": "Loaded PR evidence reports build/validation and score improvements, but does not isolate PAD_STACK as the sole cause."
+    },
+    {
+      "tactic": "Adjusted local declaration order and lifetimes in mnDiagram_InputProc, mnDiagram_80241310, mnDiagram_802417D0, and sorting code to alter generated code shape.",
+      "evidence_refs": [
+        "diff_excerpt: local declarations reordered in mnDiagram_InputProc",
+        "diff_excerpt: local declarations reordered in mnDiagram_80241310",
+        "diff_excerpt: local declarations reordered in mnDiagram_802417D0"
+      ],
+      "notes": "This is supported by diff shape and score improvements, but no per-local objdiff rationale is loaded."
+    },
+    {
+      "tactic": "Replaced generated-looking label ladders with while/do-while loops while preserving targeted exit labels for matching in mnDiagram_802417D0.",
+      "evidence_refs": [
+        "diff_excerpt: loop1/loop2 removed and while/do-while introduced",
+        "diff_excerpt: right_done, fc_right_done, dn_name_done labels remain"
+      ]
+    },
+    {
+      "tactic": "Used explicit pointer iterators and offset-based accesses to shape sorting loops for mnDiagram_8023FA6C and mnDiagram_8023FC28.",
+      "evidence_refs": [
+        "diff_excerpt: dst_iter, candidate, tp variables",
+        "diff_excerpt: p += sizeof(mnDiagram_804A0750_t)"
+      ]
+    },
+    {
+      "tactic": "Expanded HSD_ASSERTREPORT into OSReport plus __assert using table-backed strings in mnDiagram_80241310.",
+      "evidence_refs": [
+        "diff_excerpt: HSD_ASSERTREPORT removed",
+        "diff_excerpt: OSReport(tbl->x70); __assert(tbl->x88, 0x5F8, tbl->x94)"
+      ],
+      "notes": "This is an observed source-shape tactic for this PR, not a general recommendation to expand assert macros."
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "author": "decomp-dev[bot]",
+      "text": "Bot report for GALE01 showed matched code 71.77% (+0.04%, +1716 bytes), 3 new matches in main/melee/mn/mndiagram, and 10 improvements in unmatched items including .sdata2.",
+      "evidence_refs": [
+        "text_corpus issue_comment created_at 2026-06-09T23:55:10Z",
+        "text_corpus issue_comment: ✅ 3 new matches",
+        "text_corpus issue_comment: 📈 10 improvements in unmatched items"
+      ]
+    },
+    {
+      "kind": "absence",
+      "author": null,
+      "text": "No human review comments or review records are present in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata_json counts: review_comments 0, reviews 0",
+        "metadata_json activity: review_comments 0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2640",
+    "Improve mnDiagram matches",
+    "itsgrimetime",
+    "src/melee/mn/mndiagram.c",
+    "src/melee/mn/mndiagram2.static.h",
+    "mnDiagram",
+    "VS Records",
+    "mnDiagram_8023FA6C",
+    "mnDiagram_8023FC28",
+    "mnDiagram_80241310",
+    "mnDiagram_GetLeastPlayedFighter",
+    "mnDiagram_CursorProc",
+    "mnDiagram_802417D0",
+    "mnDiagram_InputProc",
+    "mnDiagram_OnFrame",
+    "GET_DIAGRAM",
+    "HSD_GObjGetUserData",
+    "mnDiagram_SumFighterKOs",
+    "mnDiagram_SumNameKOs",
+    "mnDiagram_AllPlayTimesZero",
+    "mnDiagram_PopupData",
+    "mnDiagram_MainOverlay",
+    "arrow_anim",
+    "cursor_anim",
+    "PAD_STACK",
+    ".sdata2",
+    "local constants",
+    "STATIC_ASSERT",
+    "OSReport",
+    "__assert"
+  ],
+  "follow_up_queries": [
+    "mnDiagram PAD_STACK(12) sorting loop",
+    "GET_DIAGRAM HSD_GObjGetUserData Diagram",
+    "mnDiagram_PopupData mnDiagram_MainOverlay text[5] text[6]",
+    "mnDiagram arrow_anim cursor_anim AnimLoopSettings",
+    "mndiagram constants materialized locally sdata2 regression",
+    "mnDiagram_802417D0 arrow visibility do while",
+    "mnDiagram_80241310 OSReport __assert tbl->x70"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "human_pr_text: PR body with summary, function deltas, section deltas, verification commands",
+      "text_corpus: bot report confirming 3 new matches and 10 improvements",
+      "changed_files: exact changed file list and line counts",
+      "diff_excerpt/raw_diff: loaded diff excerpt for src/melee/mn/mndiagram.c",
+      "metadata_json: PR state MERGED, timestamps, author, counts"
+    ],
+    "notes": [
+      "Evidence is strong for PR identity, changed files, broad match-score results, and many concrete mndiagram.c source changes.",
+      "The raw diff is truncated in loaded_files, and the visible diff excerpt does not include the exact src/melee/mn/mndiagram2.static.h changes.",
+      "No human review comments are present; reviewer intent cannot be inferred.",
+      "Verification commands are reported in the PR body, but no full build logs or per-function objdiff output are loaded.",
+      "PAD_STACK and local declaration-order changes are visible tactics, but the loaded evidence does not isolate each tactic's individual effect."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson",
+        "title": "Separate local aggregate scans into static inline helpers when it improves menu matching and readability",
+        "text": "In mnDiagram, repeated fighter/name KO summations and an all-play-times-zero check were extracted to static inline helpers, contributing to reported improvements including full matches for mnDiagram_8023FA6C and mnDiagram_GetLeastPlayedFighter.",
+        "scope": [
+          "src/melee/mn/mndiagram.c",
+          "menu decomp matching",
+          "aggregate loops"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: mnDiagram_SumFighterKOs",
+          "diff_excerpt: mnDiagram_SumNameKOs",
+          "diff_excerpt: mnDiagram_AllPlayTimesZero",
+          "human_pr_text: mnDiagram_8023FA6C 85.61261% -> 100.00000%",
+          "human_pr_text: mnDiagram_GetLeastPlayedFighter 96.87500% -> 100.00000%"
+        ]
+      },
+      {
+        "record_type": "decomp_lesson",
+        "title": "Use separate local structs when UI user-data layouts diverge",
+        "text": "PR #2640 split mnDiagram popup user data from main overlay data after recovering different HSD_Text array sizes, adding STATIC_ASSERT coverage for the popup layout.",
+        "scope": [
+          "src/melee/mn/mndiagram.c",
+          "struct layout recovery",
+          "menu UI user data"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: mnDiagram_PopupData text[5]",
+          "diff_excerpt: STATIC_ASSERT(sizeof(mnDiagram_PopupData) == 0x4C)",
+          "diff_excerpt: mnDiagram_MainOverlay text[6]"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Code-matching PRs should document local constant materialization when needed to avoid data-section regression",
+        "text": "PR #2640 explicitly kept mndiagram constants materialized locally so .sdata2 would not regress while improving text-section matches. Consider adding this as an example under literals/data ownership or text-before-data matching: local constants may be retained when PR evidence ties them to section stability and reports the section delta.",
+        "source_path": null,
+        "scope": [
+          "code matching",
+          ".sdata2",
+          "local constants",
+          "literals-and-data-ownership",
+          "text-before-data-matching"
+        ],
+        "evidence_refs": [
+          "human_pr_text: Keep mndiagram constants materialized locally so `.sdata2` does not regress.",
+          "human_pr_text: .text 92.70628% -> 96.47131%",
+          "human_pr_text: .sdata2 84.09090% -> 88.63636%",
+          "text_corpus issue_comment: .sdata2 +4 84.09% -> 88.64%"
+        ],
+        "reason": "This is consistent with existing standards about not chasing data blindly, but the PR provides a concrete positive example of preserving local constants to avoid section regression."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "mnDiagram path owns VS Records diagram sorting/popup/cursor/table rendering work",
+        "text": "src/melee/mn/mndiagram.c was the primary file for VS Records diagram sorting, popup, cursor, and table-rendering source-shape work in PR #2640.",
+        "source_path": "src/melee/mn/mndiagram.c",
+        "scope": [
+          "mn",
+          "mndiagram",
+          "VS Records",
+          "menu UI"
+        ],
+        "evidence_refs": [
+          "human_pr_text: Rework VS Records diagram sorting, popup, cursor, and table-rendering source shapes.",
+          "changed_files: src/melee/mn/mndiagram.c added 435 deleted 431 hunks 43"
+        ],
+        "reason": "Could improve path-level search/routing for future mnDiagram decomp work; should be curated as a path fact only if source corpus accepts PR-derived path descriptions."
+      }
+    ],
+    "rejection_notes": [
+      "Do not generalize the OSReport plus __assert expansion as a preferred style; this PR only shows it as a local matching shape for mnDiagram_80241310.",
+      "Do not infer human reviewer approval beyond merge status; no human review comments are loaded.",
+      "Do not treat PAD_STACK(12) as a general rule for mnDiagram sorting; loaded evidence shows use and score improvements but not isolated proof.",
+      "Do not record exact src/melee/mn/mndiagram2.static.h semantics from this slice because the header diff content is not loaded."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

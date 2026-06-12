@@ -1,0 +1,17 @@
+{
+  "number": 1872,
+  "title": "ftparts matches",
+  "state": "MERGED",
+  "createdAt": "2025-08-28T06:02:14Z",
+  "updatedAt": "2025-08-28T06:06:39Z",
+  "mergedAt": "2025-08-28T06:06:36Z",
+  "closedAt": "2025-08-28T06:06:37Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1872",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 58041
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 1117,
+  "title": "Re-link `dolphin/os`",
+  "state": "MERGED",
+  "createdAt": "2024-01-25T17:09:56Z",
+  "updatedAt": "2024-01-25T17:11:03Z",
+  "mergedAt": "2024-01-25T17:11:02Z",
+  "closedAt": "2024-01-25T17:11:02Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1117",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 13354
+  }
+}

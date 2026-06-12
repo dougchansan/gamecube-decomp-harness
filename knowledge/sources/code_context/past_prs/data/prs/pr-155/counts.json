@@ -1,0 +1,17 @@
+{
+  "number": 155,
+  "title": "improve frank efficiency",
+  "state": "MERGED",
+  "createdAt": "2021-12-06T18:10:41Z",
+  "updatedAt": "2021-12-06T22:53:19Z",
+  "mergedAt": "2021-12-06T22:53:19Z",
+  "closedAt": "2021-12-06T22:53:19Z",
+  "author": "EpochFlame",
+  "url": "https://github.com/doldecomp/melee/pull/155",
+  "counts": {
+    "issue_comments": 2,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 5070
+  }
+}

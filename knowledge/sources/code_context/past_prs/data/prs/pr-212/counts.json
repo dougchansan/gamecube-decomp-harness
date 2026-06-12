@@ -1,0 +1,17 @@
+{
+  "number": 212,
+  "title": "Label some previously unknown AObj functions and add structs",
+  "state": "MERGED",
+  "createdAt": "2021-12-20T03:35:53Z",
+  "updatedAt": "2021-12-20T03:35:59Z",
+  "mergedAt": "2021-12-20T03:35:56Z",
+  "closedAt": "2021-12-20T03:35:56Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/212",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 118678
+  }
+}

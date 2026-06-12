@@ -1,0 +1,407 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2561",
+  "pr": {
+    "number": 2561,
+    "title": "Jj/remaining unstubbed",
+    "url": "https://github.com/doldecomp/melee/pull/2561",
+    "state": "MERGED",
+    "author": "jurrejelle",
+    "created_at": "2026-05-31T17:55:49Z",
+    "merged_at": "2026-06-01T17:27:59Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Large unstubbing/decomp PR across THP, fighter, game-mode, stage, interface, library, player, and baselib code. Evidence shows 28 changed files, 3659 additions, 193 deletions, 10 new matches, many partial-score improvements, and 4 unmatched-item regressions reported by the bot. The loaded diff excerpt mainly supports details for THPDec.c/thp.h and ftCo_Attack100.c; other files are supported primarily by changed-file metadata and bot match report.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "unstubbing",
+      "partial-matching"
+    ],
+    "systems": [
+      "external-sdk",
+      "fighter",
+      "game-mode",
+      "stage",
+      "interface",
+      "library",
+      "player",
+      "sysdolphin-baselib"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "extern/dolphin/include/dolphin/thp/thp.h",
+      "role": "THP header updates: added THPFileInfo x0C field and prototypes for newly decompiled THPDec functions.",
+      "evidence_refs": [
+        "changed_files.jsonl: extern/dolphin/include/dolphin/thp/thp.h added 6 deleted 1",
+        "diff_excerpt: thp.h adds x0C and THPDec_8032F8D4/80330158/80331340/803313D0 prototypes"
+      ]
+    },
+    {
+      "path": "extern/dolphin/src/dolphin/thp/THPDec.c",
+      "role": "Added THP/JPEG marker parsing, scan setup, decode-row wrappers, temporary local structs, and MWERKS inline asm for GQR setup.",
+      "evidence_refs": [
+        "changed_files.jsonl: extern/dolphin/src/dolphin/thp/THPDec.c added 274 deleted 0",
+        "diff_excerpt: adds THPDec_8032F8D4, THPDec_80330158, THPDec_803310CC, THPDec_80331340, THPDec_803313D0",
+        "text_corpus: bot report lists THPDec .sdata2 new match and partial improvements for THPDec_8032F8D4, THPDec_803310CC, THPDec_80330158, THPDec_80331340"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_Attack100.c",
+      "role": "Unstubbed several common fighter catch/hook/grapple/jump-related functions and added needed includes.",
+      "evidence_refs": [
+        "changed_files.jsonl: ftCo_Attack100.c added 476 deleted 3",
+        "diff_excerpt: adds includes ft_0D27.h, ftCo_ItemScrew.h, mplib.h and functions ftCo_800D730C, fn_800D9558, fn_800D8EC8, fn_800D9930",
+        "text_corpus: bot report lists new matches fn_800D9CE8, fn_800DA8E4, fn_800DA054, ftCo_CapturePulledHi_Phys and high partial improvements for fn_800D9558, fn_800D8EC8, fn_800D9930, ftCo_800D730C"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_SpecialN.c",
+      "role": "Large Kirby SpecialN unstubbing/matching work; exact code details are not in loaded excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl: ftKb_SpecialN.c added 586 deleted 6",
+        "text_corpus: bot report lists new matches ftKb_SpecialLw1_Coll, ftKb_SpecialAirLwEnd_Coll, ftKb_SpecialNSpit0_Anim, ftKb_SpecialNSpit1_Anim and multiple partial improvements"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1601.c",
+      "role": "Game-mode decomp progress; exact code details are not in loaded excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl: gm_1601.c added 523 deleted 2",
+        "text_corpus: bot report lists partial improvements for fn_80161154 and gm_80166378"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1BA8.c",
+      "role": "Game-mode decomp progress with one .sdata2 regression reported.",
+      "evidence_refs": [
+        "changed_files.jsonl: gm_1BA8.c added 485 deleted 2",
+        "text_corpus: bot report lists partial improvements for gm_801BAD70 and gm_801BDE94 and regression for main/melee/gm/gm_1BA8 .sdata2"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_18A5.c",
+      "role": "Game-mode decomp progress; exact code details are not in loaded excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl: gm_18A5.c added 400 deleted 1",
+        "text_corpus: bot report lists fn_8018B090 improvement from 0.00% to 63.37%"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/synth.c",
+      "role": "Baselib synth decomp progress; exact code details are not in loaded excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl: synth.c added 315 deleted 6",
+        "text_corpus: bot report lists partial improvements for HSD_Synth_8038A000, HSD_Synth_8038ADD0, and HSD_SynthSFXSampleLoadCallback"
+      ]
+    },
+    {
+      "path": "src/melee/if/soundtest.c",
+      "role": "Sound test decomp progress with one unmatched-item regression reported.",
+      "evidence_refs": [
+        "changed_files.jsonl: soundtest.c added 124 deleted 23",
+        "text_corpus: bot report lists improvements for un_802FFF2C and un_802FF9DC and regression for un_80300B58"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lbaudio_ax.c",
+      "role": "Audio library edits with partial improvement and two unmatched-item regressions reported.",
+      "evidence_refs": [
+        "changed_files.jsonl: lbaudio_ax.c added 24 deleted 64",
+        "text_corpus: bot report lists improvement for fn_80023254 and regressions for lbAudioAx_80028690 and lbAudioAx_8002838C"
+      ]
+    },
+    {
+      "path": "other changed files",
+      "role": "Additional touched headers/source: ftCaptain/types.h, ftLink/types.h, ftSamus/types.h, ftYoshi/types.h, ftcoll.c, ftdynamics.c, gm_1601.h, gm_1B03.c, gm_1BA8.static.h, grflatzone.c, grinishie1.c, soundtest.h, lbmthp.h, plbonuslib.c, plbonuslib.h, pl/types.h, synth.h, synth.static.h.",
+      "evidence_refs": [
+        "changed_files.jsonl: full 28-file list",
+        "text_corpus: bot report lists selected matches/improvements/regressions among these files"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Replaced multiple stubs with C implementations across THP, fighter, game-mode, stage, interface, audio, player, and baselib files.",
+    "Updated headers/types alongside body work, including THP prototypes, THPFileInfo layout, fighter motion vars/type structs, and public/static header signatures.",
+    "Added local temporary structs in THPDec.c for scan/decode info layouts with offset-style fields and padding.",
+    "Added or changed includes in ftCo_Attack100.c to support recovered calls and types.",
+    "Bot report recorded 10 new matches, including several ftCo_Attack100 functions, Kirby functions, grInishie1_801FC664, and THPDec .sdata2.",
+    "Bot report recorded 39 improvements in unmatched items and 4 regressions in unmatched items."
+  ],
+  "smart_moves": [
+    "Body and header changes were paired where prototypes or struct layout were needed, especially in thp.h and THPDec.c.",
+    "The PR used typed local structs with explicit offsets for THP scan/decode work instead of only raw pointer arithmetic.",
+    "Several fighter functions used existing typed accessors/macros such as GET_FIGHTER, GET_ITEM, HSD_JObjSetupMatrix, and fighter/item variable fields in the loaded excerpt.",
+    "The bot report makes the blast radius visible by listing both new matches/improvements and regressions."
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For broad unstubbing PRs, a bot report can establish which edits produced full matches versus partial improvements, but it does not by itself prove every new body is fully matched.",
+      "scope": [
+        "large decomp PRs",
+        "partial matching",
+        "review triage"
+      ],
+      "evidence_refs": [
+        "text_corpus: 10 new matches, 39 improvements, 4 regressions",
+        "metadata_json: changed_files 28, added_lines 3659"
+      ],
+      "confidence": 0.86
+    },
+    {
+      "lesson": "When recovering a function body exposes a signature or struct field, update the owning header/type definition in the same PR rather than relying only on source-local declarations.",
+      "scope": [
+        "headers",
+        "struct layout",
+        "prototypes"
+      ],
+      "evidence_refs": [
+        "diff_excerpt: thp.h adds x0C and THPDec prototypes used by THPDec.c",
+        "changed_files.jsonl: multiple source/header pairs changed"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "Temporary offset-named structs can make large unknown binary layouts more reviewable than raw byte offsets, but semantics should remain conservative until stronger evidence exists.",
+      "scope": [
+        "THPDec.c",
+        "typed-fields-over-pointer-math",
+        "conservative-naming"
+      ],
+      "evidence_refs": [
+        "diff_excerpt: THPScanComp, THPScanInfo, THPDecodeInfo with xNN/padNN fields",
+        "decomp_standards: typed-fields-over-pointer-math",
+        "decomp_standards: conservative-naming"
+      ],
+      "confidence": 0.72
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Address-style function names were retained for uncertain functions, such as THPDec_8032F8D4, THPDec_80330158, THPDec_803310CC, fn_800D9558, and fn_800D8EC8.",
+      "evidence_refs": [
+        "diff_excerpt: added functions retain address-style names",
+        "decomp_standards: conservative-naming"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "convention": "Unknown struct fields use offset-style xNN names and explicit padNN arrays until semantic names are supported.",
+      "evidence_refs": [
+        "diff_excerpt: THPFileInfo x0C, THPScanInfo x70/x72/x8BC/x8CC/x8CE/x8D0, THPDecodeInfo x8D4/x8EA/x8EE/x8F0/x8F4/x8F8",
+        "diff_excerpt: ftCaptain speciallw adds x4"
+      ],
+      "confidence": 0.88
+    },
+    {
+      "convention": "Common local role names in loaded code include fp, gobj, item, jobj, attrs, vel, bonePos, effPos, and grav when roles are locally clear.",
+      "evidence_refs": [
+        "diff_excerpt: ftCo_Attack100.c added functions use fp/gobj/item/jobj/attrs/vel/bonePos/effPos/grav"
+      ],
+      "confidence": 0.78
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "THP decode wrappers use MWERKS-gated inline assembly to write GQR5/GQR6 before calling shared THP bitstream/decompress helpers.",
+      "evidence_refs": [
+        "diff_excerpt: THPDec_80331340 and THPDec_803313D0 contain #ifdef __MWERKS__ asm mtspr GQR5/GQR6"
+      ],
+      "related_standard": "avoid-pragmas-register-asm",
+      "confidence": 0.82
+    },
+    {
+      "tactic": "PAD_STACK and UNUSED locals appear in recovered fighter functions, apparently as stack/codegen steering tactics, but the PR slice does not include reviewer justification beyond score output.",
+      "evidence_refs": [
+        "diff_excerpt: fn_800D9558 uses PAD_STACK(0x14)",
+        "diff_excerpt: fn_800D9930 uses PAD_STACK(0x8)",
+        "diff_excerpt: fn_800D8EC8 uses UNUSED locals",
+        "decomp_standards: matching-tactics-need-evidence"
+      ],
+      "related_standard": "matching-tactics-need-evidence",
+      "confidence": 0.7
+    },
+    {
+      "tactic": "Natural for-loops are used for repeated component/signature scans and scan component expansion in THP and fighter code.",
+      "evidence_refs": [
+        "diff_excerpt: THPDec_8032F8D4 loops over ncomp and segment length",
+        "diff_excerpt: THPDec_803310CC loops over x7C components and count",
+        "diff_excerpt: ftCo functions loop over grapple effect frames"
+      ],
+      "related_standard": "natural-loops",
+      "confidence": 0.76
+    },
+    {
+      "tactic": "String literals such as \"JFIF\" and the THP OSReport text remain inline in the loaded THP code rather than being promoted to external symbol names.",
+      "evidence_refs": [
+        "diff_excerpt: char jfif[] = \"JFIF\" and OSReport(\"THP does not support anything other than 4:2:0!\\n\")"
+      ],
+      "related_standard": "no-string-literal-symbol-regression",
+      "confidence": 0.8
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "author": "decomp-dev[bot]",
+      "created_at": "2026-05-31T18:00:56Z",
+      "text": "Matched code increased by 0.09% (+3428 bytes); matched data increased by 48 bytes. Report listed 10 new matches, 39 improvements in unmatched items, and 4 regressions in unmatched items.",
+      "evidence_refs": [
+        "text_corpus: issue_comment by decomp-dev[bot]"
+      ]
+    },
+    {
+      "kind": "regression_notice",
+      "author": "decomp-dev[bot]",
+      "created_at": "2026-05-31T18:00:56Z",
+      "text": "Regressions reported for lbAudioAx_80028690, gm_1BA8 .sdata2, un_80300B58, and lbAudioAx_8002838C.",
+      "evidence_refs": [
+        "text_corpus: 4 regressions in unmatched items"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2561",
+    "Jj/remaining unstubbed",
+    "jurrejelle",
+    "THPDec.c",
+    "thp.h",
+    "THPFileInfo x0C",
+    "THPDec_8032F8D4",
+    "THPDec_80330158",
+    "THPDec_803310CC",
+    "THPDec_80331340",
+    "THPDec_803313D0",
+    "THPScanComp",
+    "THPScanInfo",
+    "THPDecodeInfo",
+    "JFIF",
+    "GQR5",
+    "GQR6",
+    "ftCo_Attack100.c",
+    "ftCo_800D730C",
+    "fn_800D9558",
+    "fn_800D8EC8",
+    "fn_800D9930",
+    "PAD_STACK",
+    "ftKb_SpecialN",
+    "grInishie1_801FC664",
+    "HSD_Synth_8038A000",
+    "lbAudioAx_80028690 regression",
+    "gm_1BA8 .sdata2 regression"
+  ],
+  "follow_up_queries": [
+    "PR 2561 THPDec_80331340 inline asm GQR5 GQR6",
+    "PR 2561 PAD_STACK ftCo_Attack100 fn_800D9558 fn_800D9930",
+    "PR 2561 gm_1BA8 .sdata2 regression",
+    "PR 2561 lbAudioAx_80028690 regression",
+    "PR 2561 THPScanInfo THPDecodeInfo offset fields",
+    "PR 2561 remaining unstubbed bot report 10 new matches"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR identity, merge state, counts, changed files",
+      "changed_files.jsonl: complete 28-file changed-file list",
+      "diff_excerpt/raw_diff: detailed excerpt for thp.h, THPDec.c, ftCaptain/types.h, part of ftCo_Attack100.c",
+      "text_corpus: empty PR body and decomp-dev bot report"
+    ],
+    "notes": [
+      "PR body is empty and there are no loaded human review comments.",
+      "The raw diff is truncated in loaded_files; only some files have detailed code evidence in the excerpt.",
+      "Many changed files are represented only by changed-file metadata and bot score output, so file-specific tactics for those files are not inferred.",
+      "The bot report gives score movement and new matches but is not a complete substitute for local build/objdiff evidence for every changed symbol.",
+      "Merge state is supported by metadata, but no human acceptance rationale is available in the slice."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "pr_lesson",
+        "title": "Large unstubbing PRs need per-symbol score triage",
+        "text": "PR 2561 shows a broad unstubbing change can include full matches, partial improvements, and regressions in the same bot report; downstream curation should distinguish these categories rather than treating all added bodies as matched.",
+        "scope": [
+          "decomp-matching",
+          "large PR triage",
+          "bot reports"
+        ],
+        "evidence_refs": [
+          "text_corpus: 10 new matches, 39 improvements, 4 regressions",
+          "metadata_json: 28 changed files, 3659 additions"
+        ],
+        "confidence": 0.86
+      },
+      {
+        "record_type": "naming_pattern",
+        "title": "Conservative offset/address names in remaining-unstubbed work",
+        "text": "In PR 2561, uncertain recovered functions and fields kept address-style or offset-style names such as THPDec_8032F8D4, fn_800D9558, x8CC, and pad8D6, while local variables used clear role names where evident.",
+        "scope": [
+          "conservative-naming",
+          "THPDec.c",
+          "fighter code"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: THP and ftCo_Attack100 added bodies",
+          "diff_excerpt: THP temporary structs and ftCaptain/types.h x4"
+        ],
+        "confidence": 0.84
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Require explicit notes for MWERKS inline asm exceptions in non-SDK-like decomp bodies",
+        "text": "PR 2561 includes MWERKS-gated inline asm in THPDec_80331340 and THPDec_803313D0 to set GQR registers. This may be acceptable for THP/SDK-adjacent code, but curator may consider whether standards should ask PRs to state why inline asm is unavoidable and what adjacent checks were done.",
+        "source_path": null,
+        "scope": [
+          "inline assembly",
+          "THP",
+          "avoid-pragmas-register-asm",
+          "verification-and-regression-ledger"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: THPDec_80331340 and THPDec_803313D0 asm blocks",
+          "decomp_standards: avoid-pragmas-register-asm"
+        ],
+        "reason": "Loaded evidence shows inline asm use but no human rationale; route as a possible standards clarification, not an accepted rule."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Large decomp PRs should annotate known bot regressions",
+        "text": "PR 2561 bot output reports four regressions alongside broad progress. Curator may consider a source update encouraging broad decomp PRs to explicitly acknowledge and justify any bot-reported regressions before merge.",
+        "source_path": null,
+        "scope": [
+          "bot reports",
+          "regression ledger",
+          "large PRs"
+        ],
+        "evidence_refs": [
+          "text_corpus: bot report lists 4 regressions in unmatched items",
+          "decomp_standards: verification-and-regression-ledger"
+        ],
+        "reason": "The current standards already mention regression ledgers; this PR is supporting evidence for possibly strengthening large-PR guidance."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote all PR 2561 functions as matched; the bot report distinguishes 10 new matches from many partial improvements.",
+      "Do not infer reviewer intent or human approval rationale; no human review comments are loaded.",
+      "Do not create path facts for every touched file from this slice alone; many files lack detailed diff excerpts.",
+      "Do not treat PAD_STACK/UNUSED locals as endorsed permanent style; evidence shows use but not justification."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

@@ -1,6 +1,16 @@
 # Resource Graph
 
-Shared graph state for source slices and external tool outputs.
+Shared graph state for project-derived code context, active knowledge-source
+indexes, and graph-owned enrichments.
+
+The resource graph is the layer for evidence that changes or needs linking:
+current code graph records, path/file cards, past-PR edges, resource hits, rank
+features, imported durable lessons, and curator-produced
+updates. Durable mismatch-pattern knowledge also lives here as graph-owned
+entities linked to files, functions, PRs, and evidence records. The graph is not
+the home for every source corpus; source corpora stay under
+`knowledge/sources/<section>/<source_id>/data`, and raw objdiff/checkdiff output
+stays with the tool run that produced it.
 
 Generated files:
 
@@ -18,6 +28,11 @@ Graph-owned enrichment artifacts:
 - `enrichments/knowledge_curator_updates.jsonl` - generated worker/PR lessons
   and proposal-only source updates produced by `kg-curate` or `kg-maintain`.
   This is ingestion output, not a registered knowledge source.
+- `mismatch_patterns` - graph-owned derived source built from accepted curator
+  records and imported historical lessons. It normalizes recurring stack,
+  register-allocation, inline-boundary, control-flow, data-layout, type, split,
+  loop, struct-layout, and negative-evidence lessons into linked pattern
+  entities.
 
 CLI entry points are exposed through `bun run kg:*` package scripts.
 
@@ -30,9 +45,11 @@ Useful commands:
 - `bun run kg:rebuild -- --repo-root <repo_root>`
 - `bun run kg:smoke -- --strict`
 - `bun run kg:search -- --source agent_shared_state --query <query>`
+- `bun run kg:search -- --source mismatch_patterns --query <query>`
 
-Current v1 graph ingestion builds source versions and search chunks for all
-registered sources: `code_graph`, `past_prs`, `discord_knowledge`,
-`ssbm_data_sheet`, `powerpc_docs`, `external_mirrors`, `resource_guides`,
-`reference_docs`, and `tool_outputs`. `agent_shared_state` and
-`curator_enrichment` are graph-owned enrichments, not registered source slices.
+Current v1 default graph ingestion builds source versions and search chunks for
+active sources: `code_graph`, `past_prs`, `discord_knowledge`,
+`ssbm_data_sheet`, `powerpc_docs`, `external_mirrors`, `decomp_standards`, and
+`path_facts`. `agent_shared_state` and
+`curator_enrichment` are graph-owned enrichment inputs, and
+`mismatch_patterns` is a graph-owned derived source built from those inputs.

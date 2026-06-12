@@ -2,6 +2,7 @@ import { buildAgentSharedStateGraphRecords } from "./agent-shared-state.js";
 import { buildCodeGraphRecords } from "./code-graph.js";
 import { insertGraphRecords, openKnowledgeGraph, resetKnowledgeGraph, upsertSourceDescriptor, upsertToolDescriptor, graphStats } from "./db.js";
 import { buildKnowledgeCuratorGraphRecords } from "./knowledge-curator.js";
+import { buildMismatchPatternGraphRecords } from "./mismatch-patterns.js";
 import { buildPastPrsGraphRecords } from "./past-prs.js";
 import {
   buildDiscordKnowledgeGraphRecords,
@@ -9,10 +10,7 @@ import {
   buildExternalMirrorsGraphRecords,
   buildPathFactsGraphRecords,
   buildPowerpcDocsGraphRecords,
-  buildReferenceDocsGraphRecords,
-  buildResourceGuidesGraphRecords,
   buildSsbmDataSheetGraphRecords,
-  buildToolOutputsGraphRecords,
 } from "./source-slices.js";
 import { readSourceRegistry, readToolRegistry } from "./sources.js";
 
@@ -31,7 +29,8 @@ export function rebuildKnowledgeGraph(options: RebuildKnowledgeGraphOptions): Re
   const skippedSources: string[] = [];
   try {
     resetKnowledgeGraph(store);
-    for (const source of readSourceRegistry()) upsertSourceDescriptor(store, source);
+    const sourceDescriptors = readSourceRegistry();
+    for (const source of sourceDescriptors) upsertSourceDescriptor(store, source);
     for (const tool of readToolRegistry()) upsertToolDescriptor(store, tool);
 
     if (selected.has("code_graph")) {
@@ -47,9 +46,6 @@ export function rebuildKnowledgeGraph(options: RebuildKnowledgeGraphOptions): Re
       ["ssbm_data_sheet", buildSsbmDataSheetGraphRecords],
       ["powerpc_docs", buildPowerpcDocsGraphRecords],
       ["external_mirrors", buildExternalMirrorsGraphRecords],
-      ["resource_guides", buildResourceGuidesGraphRecords],
-      ["reference_docs", buildReferenceDocsGraphRecords],
-      ["tool_outputs", buildToolOutputsGraphRecords],
       ["decomp_standards", buildDecompStandardsGraphRecords],
       ["path_facts", buildPathFactsGraphRecords],
     ] as const;
@@ -81,6 +77,18 @@ export function rebuildKnowledgeGraph(options: RebuildKnowledgeGraphOptions): Re
         skippedSources.push("curator_enrichment");
       }
     }
+    if (selected.has("mismatch_patterns")) {
+      const records = buildMismatchPatternGraphRecords(options.repoRoot, {
+        agentStateEnrichmentPath: options.agentStateEnrichmentPath,
+        knowledgeCuratorEnrichmentPath: options.knowledgeCuratorEnrichmentPath,
+      });
+      if (records) {
+        insertGraphRecords(store, records);
+        indexedSources.push("mismatch_patterns");
+      } else {
+        skippedSources.push("mismatch_patterns");
+      }
+    }
 
     return {
       graph_db: store.path,
@@ -101,12 +109,10 @@ export function defaultGraphSources(): string[] {
     "ssbm_data_sheet",
     "powerpc_docs",
     "external_mirrors",
-    "resource_guides",
-    "reference_docs",
-    "tool_outputs",
     "decomp_standards",
     "path_facts",
     "agent_shared_state",
     "curator_enrichment",
+    "mismatch_patterns",
   ];
 }

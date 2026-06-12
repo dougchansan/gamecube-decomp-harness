@@ -1,0 +1,17 @@
+{
+  "number": 1678,
+  "title": "gm struct cleanup + supporting matches",
+  "state": "MERGED",
+  "createdAt": "2025-07-11T02:46:00Z",
+  "updatedAt": "2025-07-11T02:53:47Z",
+  "mergedAt": "2025-07-11T02:53:45Z",
+  "closedAt": "2025-07-11T02:53:45Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1678",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 42296
+  }
+}

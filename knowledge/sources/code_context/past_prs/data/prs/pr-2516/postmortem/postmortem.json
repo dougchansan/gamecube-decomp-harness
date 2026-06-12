@@ -1,0 +1,593 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2516",
+  "pr": {
+    "number": 2516,
+    "title": "Incremental item progress",
+    "url": "https://github.com/doldecomp/melee/pull/2516",
+    "state": "MERGED",
+    "author": "lukechampine",
+    "created_at": "2026-05-19T20:17:55Z",
+    "merged_at": "2026-05-19T21:37:19Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Incremental item decomp/matching PR touching 30 files, mostly item TUs, plus symbols/splits/config metadata and small stage callsite cleanups. Bot report records broad text/data progress: +0.40% matched code, 31 new matches, 59 unmatched-item improvements, one broken match in itmewtwoshadowball .sdata2, and three unmatched-item regressions. The author explicitly describes the code as getting gross/hideous while pushing toward matching all item TUs.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "metadata",
+      "config",
+      "data-symbol-scope"
+    ],
+    "systems": [
+      "item",
+      "stage",
+      "config",
+      "library-types"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/it/it_2725.c",
+      "role": "large item TU matching progress; bot reports .sdata matched and multiple functions reaching 100%",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "text_corpus:decomp-dev bot report"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itsamusgrapple.c",
+      "role": "large item TU matching progress; several functions improved or newly matched",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "text_corpus:decomp-dev bot report"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itlinkhookshot.c",
+      "role": "large item TU matching progress with related header signature change",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itdosei.c",
+      "role": "large item TU progress; bot reports .data improvement and function/motion improvements with small regressions",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "text_corpus:decomp-dev bot report"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/it_2E5A.c",
+      "role": "stage-related item TU promoted to Matching in configure.py",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "diff:configure.py"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itbombhei.c",
+      "role": "item TU matching progress for motion anim/coll functions",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "text_corpus:decomp-dev bot report"
+      ]
+    },
+    {
+      "path": "src/melee/it/it_266F.c",
+      "role": "item common/random-spawn matching work using stack padding, local struct view, pointer casts, and union-var access macro",
+      "evidence_refs": [
+        "diff:src/melee/it/it_266F.c",
+        "text_corpus:decomp-dev bot report"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itlinkboomerang.c",
+      "role": "item TU matching progress with bot-reported .sdata2 regression",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "text_corpus:decomp-dev bot report"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "symbol metadata updates, especially global-to-local data/string/float/double labels",
+      "evidence_refs": [
+        "diff:config/GALE01/symbols.txt"
+      ]
+    },
+    {
+      "path": "config/GALE01/splits.txt",
+      "role": "split metadata adjustment for itmewtwoshadowball .sdata end address",
+      "evidence_refs": [
+        "diff:config/GALE01/splits.txt"
+      ]
+    },
+    {
+      "path": "configure.py",
+      "role": "promoted itsscope.c and it_2E5A.c from NonMatching to Matching",
+      "evidence_refs": [
+        "diff:configure.py"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grcorneria.c",
+      "role": "stage callsites updated to pass gobj directly to it_802E7654 instead of casting to s32",
+      "evidence_refs": [
+        "diff:src/melee/gr/grcorneria.c"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grvenom.c",
+      "role": "stage callsites updated to pass gobj directly to it_802E7654 instead of casting to s32",
+      "evidence_refs": [
+        "diff:src/melee/gr/grvenom.c"
+      ]
+    },
+    {
+      "path": "src/melee/it/itcoll.c",
+      "role": "item collision TU progress",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "text_corpus:decomp-dev bot report"
+      ]
+    },
+    {
+      "path": "src/melee/lb/types.h",
+      "role": "library type/header additions supporting item changes",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/it/types.h",
+      "role": "item type/header adjustments supporting changed item code",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itarwinglaser.c",
+      "role": "item TU progress; bot reports it_802E70BC newly matched",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "text_corpus:decomp-dev bot report"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itmasterhandlaser.c",
+      "role": "item TU progress; bot reports it_802F063C newly matched",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "text_corpus:decomp-dev bot report"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itlinkbomb.c",
+      "role": "small item TU cleanup/matching; bot reports multiple motion anim matches and .data match",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "text_corpus:decomp-dev bot report"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itseakchain.c",
+      "role": "item TU progress",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "text_corpus:decomp-dev bot report"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itseakneedlethrown.c",
+      "role": "item TU progress",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "text_corpus:decomp-dev bot report"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itsscope.c",
+      "role": "item TU promoted to Matching in configure.py; bot reports it_80291DAC newly matched",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "diff:configure.py",
+        "text_corpus:decomp-dev bot report"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itmewtwoshadowball.c",
+      "role": "small item change near split/symbol metadata; bot reports .sdata2 broken match",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "diff:config/GALE01/splits.txt",
+        "text_corpus:decomp-dev bot report"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itbombhei.static.h",
+      "role": "static header adjustment for bombhei item work",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itsamusmissile.c",
+      "role": "small item TU progress",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "text_corpus:decomp-dev bot report"
+      ]
+    },
+    {
+      "path": "src/melee/it/it_266F.h",
+      "role": "header signature adjustment paired with it_266F.c",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itarwinglaser.h",
+      "role": "header signature adjustment paired with itarwinglaser.c",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itdosei.h",
+      "role": "header signature adjustment paired with itdosei.c",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itlinkboomerang.h",
+      "role": "header signature adjustment paired with itlinkboomerang.c",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itlinkhookshot.h",
+      "role": "header signature adjustment paired with itlinkhookshot.c",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Touched 30 files: 24 item C/header/static-header files, 2 stage C files, config splits/symbols, configure.py, and lb/types.h.",
+    "configure.py changed itsscope.c and it_2E5A.c from NonMatching to Matching.",
+    "symbols.txt changed multiple data/sdata/sdata2 entries from global names such as grHeal_804DBC98 or it_804DD790 to local labels such as @159 and @249, and added a local data label at 0x803E83B8.",
+    "splits.txt narrowed itmewtwoshadowball .sdata end from 0x804D5580 to 0x804D557D.",
+    "grcorneria.c and grvenom.c removed s32 casts at it_802E7654 callsites and pass the ground object pointer directly.",
+    "it_266F.c changed __shr2u declaration, adjusted binary-search/local variable shapes, expanded a helper-call expression into explicit condition logic, increased PAD_STACK from 4 to 16, introduced a local ItemSpawnTables typedef over it_804A0E30, changed cumulative from s16 to s32, and added it_8026EECC_VARS macro for accessing item vars through a pointer reinterpretation.",
+    "Bot report records 31 new matches, 59 improvements in unmatched items, 1 broken match, and 3 regressions in unmatched items."
+  ],
+  "smart_moves": [
+    {
+      "text": "Promotion to Matching was limited to named objects in configure.py, specifically itsscope.c and it_2E5A.c, rather than broadly marking all touched item files matching.",
+      "evidence_refs": [
+        "diff:configure.py"
+      ]
+    },
+    {
+      "text": "Metadata updates used symbols.txt/splits.txt for data ownership and split changes rather than compensating only with C source changes.",
+      "evidence_refs": [
+        "diff:config/GALE01/symbols.txt",
+        "diff:config/GALE01/splits.txt"
+      ]
+    },
+    {
+      "text": "Function signature cleanup appears to have propagated to callsites in stage files, removing casts to s32 when calling it_802E7654.",
+      "evidence_refs": [
+        "diff:src/melee/gr/grcorneria.c",
+        "diff:src/melee/gr/grvenom.c"
+      ]
+    },
+    {
+      "text": "The author made the state of the work explicit in the PR body, warning that some code was gross/hideous and tying the PR to the goal of matching all item TUs.",
+      "evidence_refs": [
+        "human_pr_text"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "Incremental item matching can combine C shape changes, header/signature changes, config Matching status, and symbol/split metadata changes in one PR; intake should track text progress and data/split side effects separately.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "diff:configure.py",
+        "diff:config/GALE01/symbols.txt",
+        "diff:config/GALE01/splits.txt",
+        "text_corpus:decomp-dev bot report"
+      ],
+      "confidence": "high"
+    },
+    {
+      "lesson": "When a call signature becomes more typed, adjacent stage callsites may need cleanup from integer casts to pointer arguments.",
+      "evidence_refs": [
+        "diff:src/melee/gr/grcorneria.c",
+        "diff:src/melee/gr/grvenom.c"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "lesson": "Local struct overlays can make large global item-spawn storage more readable, but this PR evidence shows it as a matching tactic, not a general accepted style.",
+      "evidence_refs": [
+        "diff:src/melee/it/it_266F.c"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "lesson": "Bot progress reports are useful for triage because this PR had many new matches while still introducing a broken match and small regressions.",
+      "evidence_refs": [
+        "text_corpus:decomp-dev bot report"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Unproven data symbols in metadata were converted from address-style global names to local labels like @155, @159, @249, and ...data.0 where the diff indicated local scope.",
+      "evidence_refs": [
+        "diff:config/GALE01/symbols.txt"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "convention": "Temporary/local variable names in the excerpt remain mostly mechanical or role-light, e.g. last, tables, cumulative, x4_loc, xC_loc, matching the author’s statement that code was still rough.",
+      "evidence_refs": [
+        "diff:src/melee/it/it_266F.c",
+        "human_pr_text"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "convention": "The added macro name it_8026EECC_VARS is function-address scoped rather than semantic, reflecting conservative naming when meaning is not fully recovered.",
+      "evidence_refs": [
+        "diff:src/melee/it/it_266F.c"
+      ],
+      "confidence": "medium"
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Use PAD_STACK adjustment to steer stack layout; in it_8026C75C the diff changes PAD_STACK(4) to PAD_STACK(16).",
+      "evidence_refs": [
+        "diff:src/melee/it/it_266F.c"
+      ],
+      "risk": "Requires verifier evidence; PR slice has bot score output but no narrow objdiff explanation for the padding."
+    },
+    {
+      "tactic": "Introduce a temporary local struct typedef over global storage to access RandomItemSpawner and ItemPickTable subobjects through fields.",
+      "evidence_refs": [
+        "diff:src/melee/it/it_266F.c"
+      ],
+      "risk": "Useful bridge for typed access, but should be reviewed for whether the struct belongs in a shared header or remains local matching scaffolding."
+    },
+    {
+      "tactic": "Use a macro with pointer reinterpretation to access it_266F item vars: it_8026EECC_VARS(ip).",
+      "evidence_refs": [
+        "diff:src/melee/it/it_266F.c"
+      ],
+      "risk": "This is bridge-like typed access and may hide a recoverable union/type issue."
+    },
+    {
+      "tactic": "Adjust symbol scope and local labels in symbols.txt to align data/sdata2 ownership with matching progress.",
+      "evidence_refs": [
+        "diff:config/GALE01/symbols.txt"
+      ],
+      "risk": "Data metadata edits can affect section matching; bot report shows both matched-data improvement and a broken itmewtwoshadowball .sdata2 match."
+    },
+    {
+      "tactic": "Promote only specific objects to Matching after progress: itsscope.c and it_2E5A.c.",
+      "evidence_refs": [
+        "diff:configure.py",
+        "text_corpus:decomp-dev bot report"
+      ],
+      "risk": "Promotion is supported by bot report for newly matched items, but no separate local build/objdiff logs are included in the PR slice."
+    },
+    {
+      "tactic": "Shape control-flow and local lifetimes using added locals, empty if branch, pointer arithmetic, and assignment-in-expression forms in it_266F.c.",
+      "evidence_refs": [
+        "diff:src/melee/it/it_266F.c"
+      ],
+      "risk": "These look matching-driven and should not be generalized without objdiff evidence and cleanup review."
+    }
+  ],
+  "review_feedback": [
+    {
+      "type": "author_note",
+      "text": "Author says code is getting gross and contains hideous stuff while closing in on matching all item TUs; this is explicit self-disclosure, not reviewer feedback.",
+      "evidence_refs": [
+        "human_pr_text"
+      ]
+    },
+    {
+      "type": "bot_report",
+      "text": "Bot report: matched code +0.40% (+15688 bytes), linked code +0.16%, matched data +0.03%, linked data +0.02%, 31 new matches, 59 improvements in unmatched items.",
+      "evidence_refs": [
+        "text_corpus:decomp-dev bot report"
+      ]
+    },
+    {
+      "type": "bot_regression",
+      "text": "Bot report flags 1 broken match: main/melee/it/items/itmewtwoshadowball .sdata2 from 100.00% to 85.94%. It also flags 3 regressions in unmatched items: itlinkboomerang .sdata2, itdosei itDosei_UnkMotion4_Anim, and itdosei it_3F14_Logic7_Spawned.",
+      "evidence_refs": [
+        "text_corpus:decomp-dev bot report"
+      ]
+    },
+    {
+      "type": "missing_review",
+      "text": "No human review comments or reviews are present in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata_json:counts.review_comments=0,reviews=0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2516",
+    "Incremental item progress",
+    "lukechampine",
+    "item TUs",
+    "it_2725",
+    "it_266F",
+    "itcoll",
+    "it_2E5A",
+    "itsscope",
+    "itdosei",
+    "itbombhei",
+    "itlinkhookshot",
+    "itsamusgrapple",
+    "itlinkboomerang",
+    "itarwinglaser",
+    "itmasterhandlaser",
+    "itseakchain",
+    "itseakneedlethrown",
+    "itmewtwoshadowball",
+    "it_8026CD50",
+    "it_8026EECC",
+    "it_802E7654",
+    "PAD_STACK(16)",
+    "ItemSpawnTables",
+    "it_8026EECC_VARS",
+    "symbols.txt local labels",
+    "splits.txt itmewtwoshadowball .sdata",
+    "configure.py Matching",
+    "broken match .sdata2"
+  ],
+  "follow_up_queries": [
+    "PR2516 it_266F PAD_STACK(16) it_8026C75C",
+    "PR2516 it_8026EECC_VARS itemVar it_266F pointer reinterpretation",
+    "PR2516 ItemSpawnTables it_804A0E30 it_8026CD50",
+    "PR2516 symbols.txt global to local @249 @250 @251 it_804DD790",
+    "PR2516 itmewtwoshadowball .sdata2 broken match",
+    "PR2516 configure.py itsscope it_2E5A Matching",
+    "PR2516 it_802E7654 gobj cast grcorneria grvenom",
+    "PR2516 item progress 31 new matches 59 improvements"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json",
+      "human_pr_text",
+      "changed_files.jsonl",
+      "raw_diff excerpt",
+      "text_corpus:decomp-dev bot report"
+    ],
+    "notes": [
+      "Changed-file list and PR metadata are complete in the loaded slice.",
+      "Diff is truncated, so detailed source-level claims are limited to visible excerpts and changed-file metadata.",
+      "Bot report provides quantitative match/improvement/regression evidence, but no narrow build logs, objdiff screenshots, or author explanation of each matching tactic are included.",
+      "No human review comments are available, so reviewer intent or acceptance rationale cannot be inferred.",
+      "The PR is merged per metadata, but merge alone is not treated as proof that every matching tactic is a reusable standard."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "kind": "postmortem_lesson_candidate",
+        "title": "Track data regressions separately from item text progress",
+        "text": "PR #2516 made broad item matching progress and promoted two objects to Matching, but the bot report still flagged a broken itmewtwoshadowball .sdata2 match and three smaller regressions. Future intake/curation should separate text-section wins from data/sdata/sdata2 side effects.",
+        "scope": [
+          "item",
+          "matching",
+          "data-metadata"
+        ],
+        "evidence_refs": [
+          "text_corpus:decomp-dev bot report",
+          "diff:configure.py",
+          "diff:config/GALE01/symbols.txt",
+          "diff:config/GALE01/splits.txt"
+        ]
+      },
+      {
+        "kind": "postmortem_lesson_candidate",
+        "title": "Signature cleanup can require cross-system callsite edits",
+        "text": "In PR #2516, stage files grcorneria.c and grvenom.c removed s32 casts when calling the item function it_802E7654, showing that item signature cleanup can propagate into stage callsites.",
+        "scope": [
+          "item",
+          "stage",
+          "headers"
+        ],
+        "evidence_refs": [
+          "diff:src/melee/gr/grcorneria.c",
+          "diff:src/melee/gr/grvenom.c"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Treat self-described rough matching scaffolding as review risk, not reusable style",
+        "text": "PR #2516 includes the author's note that item code was getting gross/hideous while pursuing item TU matching. Consider adding guidance that merged matching scaffolding can be useful historical evidence but should not be promoted into style guidance without verifier evidence and later cleanup review.",
+        "source_path": null,
+        "scope": [
+          "matching tactics",
+          "reviewability",
+          "item"
+        ],
+        "evidence_refs": [
+          "human_pr_text",
+          "diff:src/melee/it/it_266F.c"
+        ],
+        "reason": "The PR demonstrates rough matching tactics such as PAD_STACK growth, pointer reinterpretation macro, and local struct overlay, but evidence is insufficient to mark those as accepted global style."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "Item matching work may touch stage callsites through item function signatures",
+        "text": "PR #2516 changed grcorneria.c and grvenom.c callsites for it_802E7654 while doing item matching work. Consider recording a path-scoped note that src/melee/gr stage files can be affected by item function signature cleanup.",
+        "source_path": "src/melee/gr",
+        "scope": [
+          "src/melee/gr/grcorneria.c",
+          "src/melee/gr/grvenom.c",
+          "src/melee/it"
+        ],
+        "evidence_refs": [
+          "diff:src/melee/gr/grcorneria.c",
+          "diff:src/melee/gr/grvenom.c"
+        ],
+        "reason": "This is a plausible path fact but should be curated against current source/header ownership before promotion."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "Item progress PRs can require symbols/splits metadata changes",
+        "text": "PR #2516 changed config/GALE01/symbols.txt and config/GALE01/splits.txt alongside item C/header changes, including local data labels and a split end-address adjustment for itmewtwoshadowball .sdata.",
+        "source_path": "config/GALE01",
+        "scope": [
+          "config/GALE01/symbols.txt",
+          "config/GALE01/splits.txt",
+          "src/melee/it"
+        ],
+        "evidence_refs": [
+          "diff:config/GALE01/symbols.txt",
+          "diff:config/GALE01/splits.txt"
+        ],
+        "reason": "Useful for curators as a path-scoped reminder, but metadata ownership should be verified against current source and symbols."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote PAD_STACK(16), assignment-in-expression, empty branch blocks, or pointer reinterpretation macros from this PR as accepted style; the PR body calls the code rough and the slice lacks narrow objdiff rationale.",
+      "Do not infer that all changed item functions became matched; bot report lists specific new matches and improvements, plus regressions.",
+      "Do not infer reviewer approval rationale; no human review comments or reviews are loaded.",
+      "Do not treat local @ labels in symbols.txt as a universal naming rule; they are metadata changes in this PR and need source/symbol ownership verification."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 1935,
+  "title": "Fix split suggester",
+  "state": "MERGED",
+  "createdAt": "2025-09-24T01:04:35Z",
+  "updatedAt": "2025-09-24T01:11:42Z",
+  "mergedAt": "2025-09-24T01:11:35Z",
+  "closedAt": "2025-09-24T01:11:35Z",
+  "author": "BR-",
+  "url": "https://github.com/doldecomp/melee/pull/1935",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 8103
+  }
+}

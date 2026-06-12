@@ -1,0 +1,17 @@
+{
+  "number": 1226,
+  "title": "stop mpColl_80046904 from inlining its helpers",
+  "state": "MERGED",
+  "createdAt": "2024-02-15T00:48:38Z",
+  "updatedAt": "2024-05-22T08:42:03Z",
+  "mergedAt": "2024-02-15T00:51:03Z",
+  "closedAt": "2024-02-15T00:51:03Z",
+  "author": "BR-",
+  "url": "https://github.com/doldecomp/melee/pull/1226",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 649
+  }
+}

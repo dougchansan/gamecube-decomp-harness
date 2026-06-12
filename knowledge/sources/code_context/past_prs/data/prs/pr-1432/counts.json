@@ -1,0 +1,17 @@
+{
+  "number": 1432,
+  "title": "Match 71.50% of `ftdynamics` (8.15 KB)",
+  "state": "MERGED",
+  "createdAt": "2024-08-16T07:22:38Z",
+  "updatedAt": "2024-08-16T07:34:29Z",
+  "mergedAt": "2024-08-16T07:34:28Z",
+  "closedAt": "2024-08-16T07:34:28Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1432",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 443165
+  }
+}

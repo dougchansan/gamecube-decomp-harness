@@ -1,0 +1,17 @@
+{
+  "number": 2058,
+  "title": "gr: Match 4 functions + fix grheal context bugs",
+  "state": "CLOSED",
+  "createdAt": "2025-12-31T10:03:37Z",
+  "updatedAt": "2026-01-06T16:40:42Z",
+  "mergedAt": null,
+  "closedAt": "2026-01-06T16:40:41Z",
+  "author": "itsgrimetime",
+  "url": "https://github.com/doldecomp/melee/pull/2058",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 5999
+  }
+}

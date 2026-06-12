@@ -1,0 +1,17 @@
+{
+  "number": 1471,
+  "title": "Match all 12-byte functions",
+  "state": "MERGED",
+  "createdAt": "2024-09-26T06:06:53Z",
+  "updatedAt": "2024-09-26T06:15:08Z",
+  "mergedAt": "2024-09-26T06:15:07Z",
+  "closedAt": "2024-09-26T06:15:07Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1471",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 2197135
+  }
+}

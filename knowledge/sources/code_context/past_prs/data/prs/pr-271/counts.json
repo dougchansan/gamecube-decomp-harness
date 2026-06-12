@@ -1,0 +1,17 @@
+{
+  "number": 271,
+  "title": "Match a function for Fox and Ness thanks to altwo",
+  "state": "MERGED",
+  "createdAt": "2022-02-14T23:03:07Z",
+  "updatedAt": "2022-02-14T23:03:16Z",
+  "mergedAt": "2022-02-14T23:03:11Z",
+  "closedAt": "2022-02-14T23:03:11Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/271",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 4291
+  }
+}

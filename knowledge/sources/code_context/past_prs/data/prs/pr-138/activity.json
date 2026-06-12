@@ -1,0 +1,10 @@
+{
+  "pr": 138,
+  "title": "Correct some lb related data sections to be in the correct file, split lb further",
+  "url": "https://github.com/doldecomp/melee/pull/138",
+  "text_records_with_body": 0,
+  "review_comments": 0,
+  "changed_files": 6,
+  "added_lines": 808,
+  "deleted_lines": 809
+}

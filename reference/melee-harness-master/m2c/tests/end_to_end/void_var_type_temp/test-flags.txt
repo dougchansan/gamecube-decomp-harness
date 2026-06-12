@@ -1,1 +1,0 @@
---context ctx.h --void-var-type temp_t0:TestStruct

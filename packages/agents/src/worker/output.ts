@@ -92,6 +92,47 @@ function nonEmptyString(value: unknown): value is string {
   return typeof value === "string" && value.trim().length > 0;
 }
 
+function stringValuesFromRecord(value: Record<string, unknown>): string[] {
+  const values: string[] = [];
+  for (const item of Object.values(value)) {
+    if (typeof item === "string") values.push(item);
+    else if (item && typeof item === "object" && !Array.isArray(item)) values.push(...stringValuesFromRecord(item as Record<string, unknown>));
+    else if (Array.isArray(item)) {
+      for (const nested of item) {
+        if (typeof nested === "string") values.push(nested);
+        else if (nested && typeof nested === "object" && !Array.isArray(nested)) values.push(...stringValuesFromRecord(nested as Record<string, unknown>));
+      }
+    }
+  }
+  return values;
+}
+
+function artifactReferenceLooksPathLike(value: string): boolean {
+  const trimmed = value.trim();
+  return (
+    /^(?:\.{1,2}[\\/]|[\\/]|[A-Za-z]:[\\/])/.test(trimmed) ||
+    (/[\\/]/.test(trimmed) && !/\s/.test(trimmed)) ||
+    /\.(?:json|jsonl|txt|log|md|diff|patch|stdout|stderr|out|err|summary)(?:$|[?#])/i.test(trimmed)
+  );
+}
+
+function artifactReferenceError(params: {
+  label: "baseline_artifact" | "final_artifact";
+  value: unknown;
+  emptyMessage: string;
+  artifactExists?: (path: string) => boolean;
+}): string | null {
+  const stringValues = nonEmptyString(params.value)
+    ? [params.value]
+    : isRecord(params.value)
+      ? stringValuesFromRecord(params.value).filter((value) => value.trim().length > 0)
+      : [];
+  if (stringValues.length === 0) return params.emptyMessage;
+  if (!params.artifactExists) return null;
+  const missingPath = stringValues.find((value) => artifactReferenceLooksPathLike(value) && !params.artifactExists?.(value));
+  return missingPath ? `local_regression_check.${params.label} does not exist: ${missingPath}` : null;
+}
+
 function isProgressReportType(reportType: WorkerReportType): boolean {
   return reportType === "progress" || reportType === "score_candidate";
 }
@@ -292,16 +333,20 @@ export function evaluateWorkerReportAcceptance(params: {
       } else if (localRegressionCheck.neighbor_regressions.length > 0) {
         reasons.push("local_regression_check.neighbor_regressions must be empty");
       }
-      if (!nonEmptyString(baselineArtifact)) {
-        reasons.push("local_regression_check.baseline_artifact must reference a baseline artifact");
-      } else if (params.artifactExists && !params.artifactExists(baselineArtifact)) {
-        reasons.push(`local_regression_check.baseline_artifact does not exist: ${baselineArtifact}`);
-      }
-      if (!nonEmptyString(finalArtifact)) {
-        reasons.push("local_regression_check.final_artifact must reference a final validation artifact");
-      } else if (params.artifactExists && !params.artifactExists(finalArtifact)) {
-        reasons.push(`local_regression_check.final_artifact does not exist: ${finalArtifact}`);
-      }
+      const baselineArtifactError = artifactReferenceError({
+        label: "baseline_artifact",
+        value: baselineArtifact,
+        emptyMessage: "local_regression_check.baseline_artifact must reference a baseline artifact",
+        artifactExists: params.artifactExists,
+      });
+      if (baselineArtifactError) reasons.push(baselineArtifactError);
+      const finalArtifactError = artifactReferenceError({
+        label: "final_artifact",
+        value: finalArtifact,
+        emptyMessage: "local_regression_check.final_artifact must reference a final validation artifact",
+        artifactExists: params.artifactExists,
+      });
+      if (finalArtifactError) reasons.push(finalArtifactError);
     }
 
     const lease = report.lease;

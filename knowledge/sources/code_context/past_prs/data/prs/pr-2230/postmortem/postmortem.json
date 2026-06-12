@@ -1,0 +1,444 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2230",
+  "pr": {
+    "number": 2230,
+    "title": "itfoods match & link",
+    "url": "https://github.com/doldecomp/melee/pull/2230",
+    "state": "MERGED",
+    "author": "PsiLupan",
+    "created_at": "2026-03-07T01:45:17Z",
+    "merged_at": "2026-03-07T02:19:52Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2230 matched and linked the itfoods item unit. It changed itfoods.c source shape, moved itfoods.c from NonMatching to Matching in configure.py, adjusted related item helper prototypes and call sites, updated itFoods item-var signedness, and changed several itfoods-related symbol scopes/names in symbols.txt. The bot report records one new match for itFoods_Logic18_Spawned and one small unmatched-item score regression in it_802E6380.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "symbol-metadata",
+      "configuration"
+    ],
+    "systems": [
+      "item",
+      "itfoods",
+      "config",
+      "repo-root"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/it/items/itfoods.c",
+      "role": "Primary matching source for itfoods; renames ItemStateTable storage, changes getRandMax helper signature/body, removes PAD_STACK in favor of a temp local, includes it/inlines.h in the C file, and updates it_80273318 call shape.",
+      "evidence_refs": [
+        "raw_diff:src/melee/it/items/itfoods.c",
+        "bot_report:1 new match for main/melee/it/items/itfoods itFoods_Logic18_Spawned"
+      ]
+    },
+    {
+      "path": "configure.py",
+      "role": "Links the itfoods object by changing Object(NonMatching, \"melee/it/items/itfoods.c\") to Object(Matching, \"melee/it/items/itfoods.c\").",
+      "evidence_refs": [
+        "raw_diff:configure.py"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Updates symbol metadata for itfoods motion functions from local to global and converts several data/string/float symbols to local @ labels.",
+      "evidence_refs": [
+        "raw_diff:config/GALE01/symbols.txt"
+      ]
+    },
+    {
+      "path": "src/melee/it/itCommonItems.h",
+      "role": "Changes itFoods_ItemVars fields x0 and heal_amount from s32 to u32.",
+      "evidence_refs": [
+        "raw_diff:src/melee/it/itCommonItems.h"
+      ]
+    },
+    {
+      "path": "src/melee/it/it_2725.c",
+      "role": "Removes unused third parameter from it_80273318 implementation.",
+      "evidence_refs": [
+        "raw_diff:src/melee/it/it_2725.c"
+      ]
+    },
+    {
+      "path": "src/melee/it/it_2725.h",
+      "role": "Updates it_80273318 prototype to match the two-argument implementation.",
+      "evidence_refs": [
+        "raw_diff:src/melee/it/it_2725.h"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/it_2E5A.c",
+      "role": "Updates an it_80273318 call site after the helper signature changed; bot report also notes a small unmatched-item regression for it_802E6380.",
+      "evidence_refs": [
+        "raw_diff:src/melee/it/items/it_2E5A.c",
+        "bot_report:regression in main/melee/it/items/it_2E5A it_802E6380 58.27% to 58.23%"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itfoods.h",
+      "role": "Removes it/inlines.h include from the header after itfoods.c includes it directly.",
+      "evidence_refs": [
+        "raw_diff:src/melee/it/items/itfoods.h"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "itfoods.c was promoted from NonMatching to Matching in configure.py.",
+      "evidence_refs": [
+        "raw_diff:configure.py"
+      ]
+    },
+    {
+      "text": "The bot report records itFoods_Logic18_Spawned reaching 100.00%, adding one new match for main/melee/it/items/itfoods.",
+      "evidence_refs": [
+        "text_corpus:decomp-dev[bot] issue_comment 2026-03-07T01:49:12Z"
+      ]
+    },
+    {
+      "text": "itFoods_ItemVars.x0 and heal_amount were changed from signed 32-bit to unsigned 32-bit fields.",
+      "evidence_refs": [
+        "raw_diff:src/melee/it/itCommonItems.h"
+      ]
+    },
+    {
+      "text": "it_80273318 was simplified from three parameters to two parameters in its implementation, header prototype, and two observed call sites.",
+      "evidence_refs": [
+        "raw_diff:src/melee/it/it_2725.c",
+        "raw_diff:src/melee/it/it_2725.h",
+        "raw_diff:src/melee/it/items/it_2E5A.c",
+        "raw_diff:src/melee/it/items/itfoods.c"
+      ]
+    },
+    {
+      "text": "The itfoods item-state table symbol in source was renamed from it_803F83F0 to it_803F5DB0.",
+      "evidence_refs": [
+        "raw_diff:src/melee/it/items/itfoods.c"
+      ]
+    },
+    {
+      "text": "Several itFoods_UnkMotion* function symbols in symbols.txt changed scope from local to global, while several data/string/float symbols changed from global address-style names to local @ labels.",
+      "evidence_refs": [
+        "raw_diff:config/GALE01/symbols.txt"
+      ]
+    },
+    {
+      "text": "it/inlines.h include ownership moved from itfoods.h to itfoods.c.",
+      "evidence_refs": [
+        "raw_diff:src/melee/it/items/itfoods.h",
+        "raw_diff:src/melee/it/items/itfoods.c"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Updated the owning helper declaration and implementation together when removing the unused third parameter from it_80273318, then updated known call sites in both itfoods.c and it_2E5A.c.",
+      "evidence_refs": [
+        "raw_diff:src/melee/it/it_2725.c",
+        "raw_diff:src/melee/it/it_2725.h",
+        "raw_diff:src/melee/it/items/it_2E5A.c",
+        "raw_diff:src/melee/it/items/itfoods.c"
+      ]
+    },
+    {
+      "text": "Kept inline-helper include local to the C file that uses GET_ITEM instead of exporting it through itfoods.h.",
+      "evidence_refs": [
+        "raw_diff:src/melee/it/items/itfoods.h",
+        "raw_diff:src/melee/it/items/itfoods.c"
+      ]
+    },
+    {
+      "text": "Used symbol metadata updates alongside source changes before marking the object Matching.",
+      "evidence_refs": [
+        "raw_diff:config/GALE01/symbols.txt",
+        "raw_diff:configure.py"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a recovered helper body proves that an argument is unused, update the implementation, header prototype, and all visible call sites together before relying on the new signature for matching.",
+      "scope": [
+        "item helpers",
+        "it_80273318",
+        "prototype cleanup"
+      ],
+      "evidence_refs": [
+        "raw_diff:src/melee/it/it_2725.c",
+        "raw_diff:src/melee/it/it_2725.h",
+        "raw_diff:src/melee/it/items/it_2E5A.c",
+        "raw_diff:src/melee/it/items/itfoods.c"
+      ]
+    },
+    {
+      "lesson": "Object promotion to Matching may require coordinated source, configure.py, and symbols.txt metadata changes rather than only editing the primary C file.",
+      "scope": [
+        "matching object linkage",
+        "itfoods",
+        "symbol metadata"
+      ],
+      "evidence_refs": [
+        "raw_diff:src/melee/it/items/itfoods.c",
+        "raw_diff:configure.py",
+        "raw_diff:config/GALE01/symbols.txt",
+        "bot_report:1 new match"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "it_803F5DB0",
+      "kind": "data symbol",
+      "convention": "The item-state table in itfoods.c was renamed from an address-style symbol outside the shown symbols.txt location to the address-style symbol at 0x803F5DB0 visible in symbols.txt.",
+      "evidence_refs": [
+        "raw_diff:src/melee/it/items/itfoods.c",
+        "raw_diff:config/GALE01/symbols.txt"
+      ],
+      "confidence": 0.62
+    },
+    {
+      "name": "itFoods_UnkMotion{0,1,2,3}_{Anim,Phys,Coll}",
+      "kind": "function symbols",
+      "convention": "Motion callback names were preserved while their symbol scopes changed from local to global in symbols.txt.",
+      "evidence_refs": [
+        "raw_diff:config/GALE01/symbols.txt"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "name": "@163, @164, @165, @175, @176",
+      "kind": "local data labels",
+      "convention": "Several data/string/float entries were represented as local @ labels rather than global it_ address-style symbols.",
+      "evidence_refs": [
+        "raw_diff:config/GALE01/symbols.txt"
+      ],
+      "confidence": 0.72
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Replaced PAD_STACK(8) in itFoods_Logic18_Spawned with a normal local s32 temp used to index attr[temp].x4 for the it_80273318 call.",
+      "evidence_refs": [
+        "raw_diff:src/melee/it/items/itfoods.c"
+      ],
+      "notes": "The bot report supports the resulting function match, but the PR evidence does not include objdiff output explaining why this local shape was required."
+    },
+    {
+      "tactic": "Changed getRandMax from static s32 getRandMax(Item* ip) to inline u32 getRandMax(Article* article), accessing article->x4_specialAttributes directly.",
+      "evidence_refs": [
+        "raw_diff:src/melee/it/items/itfoods.c"
+      ],
+      "notes": "Grounded as an observed source-shape change; intent and necessity are not directly documented."
+    },
+    {
+      "tactic": "Changed related food item variables and helper return type to unsigned widths around random index/heal amount handling.",
+      "evidence_refs": [
+        "raw_diff:src/melee/it/itCommonItems.h",
+        "raw_diff:src/melee/it/items/itfoods.c"
+      ],
+      "notes": "The PR evidence shows the type changes and match result but does not include rationale."
+    }
+  ],
+  "review_feedback": [
+    {
+      "source": "decomp-dev[bot]",
+      "feedback": "Report for GALE01 shows matched code +120 bytes, linked code +1208 bytes, linked data +104 bytes, with one new match: main/melee/it/items/itfoods itFoods_Logic18_Spawned from 93.33% to 100.00%.",
+      "evidence_refs": [
+        "text_corpus:issue_comment by decomp-dev[bot] 2026-03-07T01:49:12Z"
+      ]
+    },
+    {
+      "source": "decomp-dev[bot]",
+      "feedback": "Report also shows one regression in an unmatched item: main/melee/it/items/it_2E5A it_802E6380 from 58.27% to 58.23%, 0 bytes.",
+      "evidence_refs": [
+        "text_corpus:issue_comment by decomp-dev[bot] 2026-03-07T01:49:12Z"
+      ]
+    },
+    {
+      "source": "pr_context",
+      "feedback": "No human review comments or reviews were included in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata_json:counts.review_comments=0",
+        "metadata_json:counts.reviews=0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2230",
+    "itfoods match & link",
+    "PsiLupan",
+    "itFoods_Logic18_Spawned",
+    "itFoods_UnkMotion0_Anim",
+    "itFoods_UnkMotion0_Phys",
+    "itFoods_UnkMotion0_Coll",
+    "itFoods_UnkMotion1_Anim",
+    "itFoods_UnkMotion1_Phys",
+    "itFoods_UnkMotion1_Coll",
+    "itFoods_UnkMotion2_Anim",
+    "itFoods_UnkMotion2_Phys",
+    "itFoods_UnkMotion3_Anim",
+    "itFoods_UnkMotion3_Phys",
+    "itFoods_UnkMotion3_Coll",
+    "it_80273318",
+    "it_802E6380",
+    "itFoods_ItemVars",
+    "heal_amount",
+    "getRandMax",
+    "PAD_STACK",
+    "ItemStateTable",
+    "it_803F5DB0",
+    "configure.py Matching",
+    "symbols.txt scope global local",
+    "it/inlines.h"
+  ],
+  "follow_up_queries": [
+    "itFoods_Logic18_Spawned PAD_STACK temp local attr[temp].x4",
+    "it_80273318 removed third parameter call sites",
+    "itFoods_ItemVars u32 heal_amount x0",
+    "itfoods.c Object(Matching) configure.py",
+    "itfoods symbols.txt UnkMotion scope global",
+    "it_802E6380 regression after it_80273318 signature change",
+    "itfoods local @ labels sdata sdata2 data strings floats"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json",
+      "raw_diff",
+      "changed_files.jsonl",
+      "text_corpus:decomp-dev[bot] issue_comment"
+    ],
+    "notes": [
+      "The diff and changed-file metadata are complete enough to identify files and source/symbol/config edits.",
+      "The PR body is empty and there are no human review comments in the loaded slice, so reviewer intent and author rationale are unavailable.",
+      "The bot report provides a match result and one regression, but no detailed objdiff, build log, or explanation for specific source-shape tactics.",
+      "Symbol metadata changes are observable, but the slice does not prove why each scope/local-label change was necessary."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson",
+        "title": "Prototype cleanup should propagate through implementation, header, and call sites",
+        "text": "PR 2230 removed an unused third parameter from it_80273318 in both the implementation and header, then updated visible call sites in itfoods.c and it_2E5A.c. This is a grounded example of keeping helper signatures truthful while matching item code.",
+        "scope": [
+          "item",
+          "headers",
+          "prototype cleanup"
+        ],
+        "evidence_refs": [
+          "raw_diff:src/melee/it/it_2725.c",
+          "raw_diff:src/melee/it/it_2725.h",
+          "raw_diff:src/melee/it/items/it_2E5A.c",
+          "raw_diff:src/melee/it/items/itfoods.c"
+        ],
+        "confidence": 0.84
+      },
+      {
+        "record_type": "matching_tactic",
+        "title": "A narrow local temporary can replace PAD_STACK when supported by matching evidence",
+        "text": "In itFoods_Logic18_Spawned, the PR removed PAD_STACK(8), introduced s32 temp, assigned temp = rand, and used attr[temp].x4 for the joint helper call. The bot report shows the function became a new 100% match. The exact codegen reason is not documented.",
+        "scope": [
+          "itfoods",
+          "stack shaping",
+          "local lifetime"
+        ],
+        "evidence_refs": [
+          "raw_diff:src/melee/it/items/itfoods.c",
+          "text_corpus:decomp-dev[bot] issue_comment"
+        ],
+        "confidence": 0.7
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "itfoods.c became a Matching object in PR 2230",
+        "text": "PR 2230 changed configure.py so melee/it/items/itfoods.c is built as Object(Matching, ...) instead of Object(NonMatching, ...), with the bot report recording a new match for itFoods_Logic18_Spawned.",
+        "source_path": "configure.py",
+        "scope": [
+          "src/melee/it/items/itfoods.c",
+          "configure.py",
+          "itfoods"
+        ],
+        "evidence_refs": [
+          "raw_diff:configure.py",
+          "text_corpus:decomp-dev[bot] issue_comment"
+        ],
+        "reason": "Potential path fact about matching status should be curated against current source before promotion."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "it_80273318 signature narrowed to two parameters",
+        "text": "PR 2230 changed it_80273318 from void it_80273318(Item_GObj*, HSD_Joint*, s32) to void it_80273318(Item_GObj*, HSD_Joint*) in it_2725.c and it_2725.h, with call-site updates in itfoods.c and it_2E5A.c.",
+        "source_path": "src/melee/it/it_2725.h",
+        "scope": [
+          "src/melee/it/it_2725.c",
+          "src/melee/it/it_2725.h",
+          "src/melee/it/items/itfoods.c",
+          "src/melee/it/items/it_2E5A.c"
+        ],
+        "evidence_refs": [
+          "raw_diff:src/melee/it/it_2725.c",
+          "raw_diff:src/melee/it/it_2725.h",
+          "raw_diff:src/melee/it/items/itfoods.c",
+          "raw_diff:src/melee/it/items/it_2E5A.c"
+        ],
+        "reason": "Candidate signature/path fact; should be checked against current headers and call graph before source-corpus update."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "itFoods_ItemVars fields are unsigned in PR 2230",
+        "text": "PR 2230 changed itFoods_ItemVars.x0 and itFoods_ItemVars.heal_amount from s32 to u32.",
+        "source_path": "src/melee/it/itCommonItems.h",
+        "scope": [
+          "src/melee/it/itCommonItems.h",
+          "itFoods_ItemVars"
+        ],
+        "evidence_refs": [
+          "raw_diff:src/melee/it/itCommonItems.h"
+        ],
+        "reason": "Candidate type fact; current source should be checked before promotion."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "itfoods symbol metadata scope changes",
+        "text": "PR 2230 changed itFoods_UnkMotion callback symbols at 0x8028FC84 through 0x8028FE44 from local to global in config/GALE01/symbols.txt, and changed several data/string/float address-style globals to local @ labels.",
+        "source_path": "config/GALE01/symbols.txt",
+        "scope": [
+          "config/GALE01/symbols.txt",
+          "itfoods symbol metadata"
+        ],
+        "evidence_refs": [
+          "raw_diff:config/GALE01/symbols.txt"
+        ],
+        "reason": "Symbol metadata is source-owned; curator should verify against current symbols before recording path facts."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer a general rule that PAD_STACK should be replaced by temp locals; this PR only shows one supported itfoods case and lacks detailed objdiff rationale.",
+      "Do not infer reviewer approval rationale; the loaded slice contains no human review comments.",
+      "Do not promote the observed data symbol local-label changes into a broad naming standard without section-ownership evidence beyond the diff.",
+      "Do not claim the it_2E5A regression was accepted intentionally for a particular reason; only the bot report's regression row is available."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

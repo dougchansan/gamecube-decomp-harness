@@ -1,92 +1,135 @@
 # Decomp Orchestrator Knowledge
 
-This directory is the runtime evidence surface for the orchestrator. It owns
-source corpora, normalized tool-output evidence, and the shared resource graph.
-Callable tool suites live in the top-level `tools/` tree.
+This directory is the runtime evidence surface for the orchestrator. Source
+folders live under section folders such as
+`knowledge/sources/code_context/past_prs`, and `knowledge/sources/registry.json`
+maps stable source IDs to those paths.
 
-Agent role behavior and prompt context live beside the agents under
-`src/agents/*/context/`. Historical role/workflow docs live under
-`docs/archive/`, not here.
+## Access Sections
 
-Reusable corpora:
+| Section | Sources | Access model |
+| --- | --- | --- |
+| Injected context | `decomp_standards`, `path_facts` | Compact context selected for worker boot. Standards are global; path facts resolve only for the target path or directory. |
+| Searchable knowledge bases | `discord_knowledge`, `powerpc_docs` | Standalone RAG-style lookup through source-local APIs and graph search. |
+| Code-connected evidence | `code_graph`, `past_prs`, `ssbm_data_sheet`, `external_mirrors` | Evidence that links to source paths, symbols, file cards, PR history, data rows, or mirrored names. |
 
-- `sources/` - shallow vertical slices for knowledge sources such as the code
-  graph, past PRs, Discord knowledge, data sheets, PowerPC docs, external
-  mirrors, and normalized tool outputs. Each slice has `data/`
-  so the actual corpus path is visible from the slice.
-- `resource_graph/` - generated SQLite graph state, graph schemas/placeholders,
-  graph command notes, generated graph-level indexes, and graph-owned
-  enrichment artifacts.
+Graph-owned mutable state is separate from source slices:
 
-Where the actual corpora live:
+- `knowledge/resource_graph/enrichments/agent_shared_state_lessons.jsonl`
+  contains durable lessons imported from the legacy shared agent-state DB.
+- `knowledge/resource_graph/enrichments/knowledge_curator_updates.jsonl`
+  contains generated worker/PR lessons plus proposal-only source updates.
+- `mismatch_patterns` is a graph-owned derived source built during graph
+  rebuild. It turns accepted curator records and imported historical lessons
+  into linked pattern entities for recurring stack, register, inline,
+  control-flow, literal/data-layout, type, split, loop, struct-layout, and
+  negative-evidence mismatch knowledge.
 
-- PRs: `knowledge/sources/past_prs/data/current` for fetched PR data and
-  `knowledge/sources/past_prs/data/prs` for processed postmortems/indexes.
-- Discord knowledge: `knowledge/sources/discord_knowledge/data/docs`.
-- Data sheet: `knowledge/sources/ssbm_data_sheet/data`.
-- PowerPC PDFs: `knowledge/sources/powerpc_docs/data`.
-- External mirrors: `knowledge/sources/external_mirrors/data`.
-- Resource guides/manifests: `knowledge/sources/resource_guides/data`.
-- Imported reference docs/legacy skills: `knowledge/sources/reference_docs/data`.
-- Tool integrations: `tools/<category>/<tool_id>`, with generated caches under
-  each tool's `cache/` folder.
-- Legacy shared agent-state lessons:
-  `knowledge/resource_graph/enrichments/agent_shared_state_lessons.jsonl`.
-  This is an internal graph enrichment, not a source slice; it is generated from
-  a legacy SQLite DB and keeps only durable tool/function lessons.
-- Knowledge curator updates:
-  `knowledge/resource_graph/enrichments/knowledge_curator_updates.jsonl`.
-  This generated enrichment is reduced from worker reports and PR postmortems.
-  It can contain accepted worker/PR lessons plus proposal-only updates for
-  source slices such as the data sheet or tool-output indexes. It is ingestion
-  output, not a registered source that workers query directly.
+These enrichment files are ingestion artifacts for the resource graph. Workers
+do not search them as ordinary source corpora; they use `kg:file-card` and
+`kg:search -- --source mismatch_patterns` for graph-connected mismatch
+knowledge.
 
-Package command surface:
+## Worker Flow
 
-- `bun run kg:sources` lists registered source slices and external tools.
-- `bun run kg:import-agent-state -- --input agent_state-shared.db` imports a
-  legacy shared agent-state DB into the graph-owned enrichment JSONL.
-- `bun run kg:curate -- --state-dir <state_dir>` rewrites curator enrichment
-  records from worker reports and PR postmortems.
-- `bun run kg:maintain -- --state-dir <state_dir> --repo-root <repo_root>` runs
-  pending PR postmortem indexing, tool index generation, curator reduction, and
-  graph rebuild.
-- `bun run kg:rebuild -- --repo-root <repo_root>` rebuilds the v1 graph from
-  all registered source slices, normalized tool outputs, and any available
-  graph enrichments.
-- `bun run kg:tool-indexes -- --repo-root <repo_root>` generates local JSONL
-  indexes for the callable tool APIs.
-- `bun run kg:smoke -- --strict` verifies every registered source has a graph
-  version/search chunks and every registered tool API reports ready.
+At worker start, the orchestrator can attach compact context: global decomp
+standards, path facts for the target path, and graph/file-card evidence such as
+editability, PR history, resource hits, and ranking signals. During research,
+the worker should use source-specific tools for concrete questions:
+
+- `code_graph_file_card` or `kg:file-card` for source-path context.
+- `past_prs_search` for historical PR tactics, review risks, and file edges.
+- `discord_knowledge_search` for community/compiler discussion.
+- `powerpc_docs_search` or `powerpc_instruction_lookup` for ABI and instruction
+  documentation.
+- `ssbm_data_sheet_*` and `external_mirrors_*` for code-connected resource
+  facts.
+- `kg:search -- --source mismatch_patterns` for durable mismatch-pattern
+  lessons linked into the graph.
+- First-class tool APIs such as `ghidra_lookup`, `opseq_similar_functions`,
+  `mismatch_db_search`, and `mwcc_debug_lookup` for tool-local cache or runner
+  evidence.
+
+Current source, headers, symbols, splits, assembly, objdiff/checkdiff, and
+regression output outrank all historical or external knowledge.
+
+## Physical Layout
+
+```text
+knowledge/
++-- README.md
++-- sources/
+|   +-- registry.json       # active sections, source paths, access modes
+|   +-- injectable/
+|   |   +-- <source_id>/
+|   +-- rag_search/
+|   |   +-- <source_id>/
+|   +-- code_context/
+|       +-- <source_id>/
+|           +-- source.json
+|           +-- README.md
+|           +-- data/
+|           +-- indexes/
+|           +-- api/
+|           +-- commands/
+|           +-- tests/
++-- resource_graph/
+    +-- README.md
+    +-- graph.sqlite        # compatibility/default DB when no project is selected
+    +-- commands/
+    +-- enrichments/
+    +-- indexes/
+    +-- schemas/
+```
+
+Callable tool suites live in the top-level `tools/` tree. Agent role behavior
+and prompt context live beside the agents under `packages/agents/src/*/context/`.
+Historical role/workflow docs live under `docs/archive/`, not here.
+
+## Corpus Locations
+
+| Source | Primary data |
+| --- | --- |
+| `decomp_standards` | `knowledge/sources/injectable/decomp_standards/data` |
+| `path_facts` | `knowledge/sources/injectable/path_facts/data` |
+| `past_prs` | `knowledge/sources/code_context/past_prs/data/current`, `knowledge/sources/code_context/past_prs/data/prs` |
+| `discord_knowledge` | `knowledge/sources/rag_search/discord_knowledge/data/docs` |
+| `ssbm_data_sheet` | `knowledge/sources/code_context/ssbm_data_sheet/data` |
+| `powerpc_docs` | `knowledge/sources/rag_search/powerpc_docs/data` |
+| `external_mirrors` | `knowledge/sources/code_context/external_mirrors/data` |
+
+Generated tool caches and indexes live with the callable tool suites under
+`tools/<category>/<tool_id>/{cache,indexes}`. They are not registered knowledge
+sources. `tools/research/mismatch_db` stores tool-local objdiff/checkdiff
+summaries and compatibility lookup rows; durable generalized mismatch patterns
+are graph records under the `mismatch_patterns` source id.
+
+## Command Surface
+
+- `bun run kg:sources` lists active source sections and registered tools.
+- `bun run kg:rebuild -- --repo-root <repo_root>` rebuilds the graph from active
+  default sources and graph-owned enrichments.
+- `bun run kg:smoke -- --strict` verifies active registered sources and tool APIs.
 - `bun run kg:file-card -- --repo-root <repo_root> --source <source_path>`
-  returns file graph context, editability, PR history, and rank signals.
+  returns graph-connected context for a source file.
 - `bun run kg:search -- --repo-root <repo_root> --source past_prs --query <term>`
-  searches indexed graph chunks.
-- `bun run kg:rank-features -- --repo-root <repo_root>` shows graph-derived
-  ranking features for board candidates.
-- `python3 knowledge/sources/<source_id>/api/status.py --json` checks
-  source-local index readiness for any registered source.
-- `python3 knowledge/sources/<source_id>/api/search.py --query <term> --json`
-  searches that source's generated JSONL indexes without going through a graph
-  rebuild.
-- `python3 tools/<category>/<tool_id>/api/status.py --json` and each tool's
-  lookup/search API provide direct CLI access to generated tool evidence.
-- `bun run pr:refresh:dry` previews recent PR discovery.
-- `bun run pr:refresh` refreshes missing PR slices and rebuilds deterministic
-  searchable records.
-- `bun run pr:refresh:all` refreshes the full PR corpus with 32 fetch workers
-  and 32 PR-review workers.
-- `bun run pr:postmortems -- --dump-root knowledge/sources/past_prs/data/current --run-agent`
-  reruns model-reviewed PR records.
-- `bun run pr:sync` syncs the local branch and PR library together.
-- `bun run pr:sync:all` syncs the branch and then refreshes the full PR corpus
-  with 32-way fetch/postmortem processing.
+  searches graph chunks for one active source.
+- `bun run kg:search -- --repo-root <repo_root> --source mismatch_patterns
+  --query <term>` searches durable graph-owned mismatch-pattern knowledge.
+- `python3 knowledge/sources/<section>/<source_id>/api/status.py --json`
+  checks source-local readiness.
+- `python3 knowledge/sources/<section>/<source_id>/api/search.py --query <term> --json`
+  searches a source-local generated JSONL index when that source exposes search.
+- `python3 knowledge/sources/rag_search/<source_id>/commands/vectorize.py --json`
+  embeds a RAG source's generated chunks into `indexes/vector.sqlite`.
+- `python3 knowledge/sources/rag_search/<source_id>/api/semantic_search.py --query <question> --json`
+  performs hybrid semantic lookup over a vectorized RAG source.
+- `python3 tools/<category>/<tool_id>/api/status.py --repo-root <repo_root>
+  --json` and each tool's lookup/search API provide direct access to generated
+  tool evidence with cache freshness checks when the tool supports them.
 
-Bootstrap status, 2026-06-06:
+Full PR-corpus maintenance remains:
 
-- Full PR corpus fetched and model-reviewed: `2501 / 2501` PR postmortems are
-  `agent_completed`.
-- Registered source APIs and registered tool APIs have passing status/search
-  smoke checks.
-- `bun run kg:tool-indexes`, `bun run kg:rebuild -- --sources all`, and
-  `bun run kg:smoke -- --strict` pass against the current graph.
+- `bun run pr:refresh:all`
+- `bun run pr:postmortems -- --dump-root knowledge/sources/code_context/past_prs/data/current --run-agent`
+- `bun run pr:sync:all`

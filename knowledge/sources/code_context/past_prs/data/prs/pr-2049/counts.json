@@ -1,0 +1,17 @@
+{
+  "number": 2049,
+  "title": "ft: Match ftKb_Init_UnkCallbackPairs0_1",
+  "state": "MERGED",
+  "createdAt": "2025-12-30T17:23:46Z",
+  "updatedAt": "2026-01-06T16:43:42Z",
+  "mergedAt": "2026-01-06T01:03:49Z",
+  "closedAt": "2026-01-06T01:03:49Z",
+  "author": "itsgrimetime",
+  "url": "https://github.com/doldecomp/melee/pull/2049",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 1570
+  }
+}

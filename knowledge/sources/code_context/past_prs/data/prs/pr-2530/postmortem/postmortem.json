@@ -1,0 +1,399 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2530",
+  "pr": {
+    "number": 2530,
+    "title": "Jj/granime 2",
+    "url": "https://github.com/doldecomp/melee/pull/2530",
+    "state": "MERGED",
+    "author": "jurrejelle",
+    "created_at": "2026-05-24T09:11:59Z",
+    "merged_at": "2026-05-27T23:00:55Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2530 advanced decompilation of src/melee/gr/granime.c, adding bodies or partial improvements for several grAnime functions, tightening granime prototypes, adding typed fields for stage animation archive entries, replacing several raw __assert blocks with HSD_ASSERT/HSD_ASSERTREPORT, and introducing narrow inline/noinline wrapper helpers used for matching-sensitive calls. The bot report records 3 new matches and 3 unmatched-item improvements, plus a .sdata regression.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "type-recovery",
+      "assert-cleanup",
+      "matching-tactics"
+    ],
+    "systems": [
+      "stage",
+      "ground-animation",
+      "granime"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gr/granime.c",
+      "role": "Main decomp/matching work: added or improved grAnime function bodies, assert macro cleanup, typed archive field use, varargs handling, recursive traversal, and matching wrapper helpers.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gr/granime.c added 294 deleted 59 hunks 20",
+        "raw_diff: src/melee/gr/granime.c additions for grAnime_801C752C, grAnime_801C7C1C, grAnime_801C8578, grAnime_801C86D4 changes",
+        "text_corpus issue_comment: bot reports new matches for grAnime_801C752C, grAnime_801C8578, grAnime_801C86D4 and improvements for grAnime_801C7C1C, grAnime_801C6A54, grAnime_801C7228"
+      ]
+    },
+    {
+      "path": "src/melee/gr/granime.h",
+      "role": "Header prototype updates for recovered signatures.",
+      "evidence_refs": [
+        "raw_diff: grAnime_801C752C prototype changed from HSD_JObj*, ... to HSD_JObj*, s32, s32, void*, u32, ...",
+        "raw_diff: grAnime_801C8578 prototype changed from void*, void* to HSD_Joint*, s32*"
+      ]
+    },
+    {
+      "path": "src/melee/gr/types.h",
+      "role": "Recovered typed fields in UnkStageDat_x8_t used by granime archive animation lookup.",
+      "evidence_refs": [
+        "raw_diff: UnkStageDat_x8_t replaces u8 _4[0x10 - 0x4] with HSD_AnimJoint** unk4, HSD_MatAnimJoint** unk8, HSD_ShapeAnimJoint** unkC",
+        "raw_diff: grAnime_801C8138 replaces pointer casts at +0x4/+0x8/+0xC with archive->unk4->unk8[arg1].unk4/unk8/unkC"
+      ]
+    },
+    {
+      "path": "target_funcs.txt",
+      "role": "Target function checklist for granime work in this PR.",
+      "evidence_refs": [
+        "raw_diff: new target_funcs.txt lists grAnime_801C86D4, grAnime_801C84A4, grAnime_801C8578, grAnime_801C6A54, grAnime_801C752C, grAnime_801C6C0C, grAnime_801C7228, grAnime_801C7C1C"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Added includes needed for the new code paths: baselib/debug.h, stdarg.h, and dolphin/os.h.",
+    "Added full source bodies for grAnime_801C752C and grAnime_801C8578 where the diff previously had decomp placeholders.",
+    "Added a large partial body for grAnime_801C7C1C, including animation archive lookups, all/partial animation application paths, rate and flag callback setup, and typed archive field access.",
+    "Improved grAnime_801C86D4 by using HSD_ASSERT, retrieving the root joint from archive->unk4->unk8[arg0].unk0, calling grAnime_801C8578_noinline, and passing the result to HSD_JObjResetRST.",
+    "Replaced raw __assert blocks in several places with HSD_ASSERT or HSD_ASSERTREPORT.",
+    "Updated granime.h prototypes for grAnime_801C752C and grAnime_801C8578 to reflect recovered parameter types.",
+    "Recovered UnkStageDat_x8_t fields at offsets +4, +8, and +C as animation-joint pointer arrays instead of an opaque byte pad.",
+    "Introduced multiple static inline *_inner and *_noinline wrapper helpers around grAnime calls, apparently to steer matching-sensitive inlining/call behavior.",
+    "Removed a PAD_STACK(16) from grAnime_801C6A54 and replaced a pragma dont_inline block around grAnime_801C67A8 with wrapper-based calls.",
+    "Bot report shows matched-code progress: +1080 bytes overall, 3 new matches, 3 unmatched-item improvements, and one .sdata regression."
+  ],
+  "smart_moves": [
+    {
+      "text": "Recovered typed fields in UnkStageDat_x8_t and then used those fields in granime.c instead of repeated raw pointer arithmetic against archive entries.",
+      "evidence_refs": [
+        "raw_diff: types.h adds unk4/unk8/unkC fields",
+        "raw_diff: grAnime_801C8138 uses archive->unk4->unk8[arg1].unkC/unk4/unk8"
+      ]
+    },
+    {
+      "text": "Updated owning header prototypes after recovering function signatures for grAnime_801C752C and grAnime_801C8578.",
+      "evidence_refs": [
+        "raw_diff: granime.h prototype updates"
+      ]
+    },
+    {
+      "text": "Factored a repeated JObj-aobj/flags/assert sequence into grAnime_801C6F50_wrapped and reused it in grAnime_801C7228 and grAnime_801C752C.",
+      "evidence_refs": [
+        "raw_diff: added grAnime_801C6F50_wrapped",
+        "raw_diff: grAnime_801C7228 calls grAnime_801C6F50_wrapped for obj and phi_r24",
+        "raw_diff: grAnime_801C752C calls grAnime_801C6F50_wrapped"
+      ]
+    },
+    {
+      "text": "Used HSD_ASSERT/HSD_ASSERTREPORT forms for plain assert/report cases instead of leaving expanded __assert blocks.",
+      "evidence_refs": [
+        "raw_diff: __assert at lines 0x33A, 0x556, 0x148, 0x602, 0x617 replaced with HSD_ASSERT forms",
+        "raw_diff: grAnime_801C752C default case uses HSD_ASSERTREPORT(0x36F, NULL, \"not match arg_type\\n\")"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a recovered function body proves a public signature, update the owning header in the same PR rather than leaving broad void*/variadic placeholders.",
+      "scope": [
+        "granime",
+        "headers",
+        "function-signature-recovery"
+      ],
+      "evidence_refs": [
+        "raw_diff: grAnime_801C752C body uses HSD_JObj*, s32, s32, void*, u32, ... and granime.h is updated accordingly",
+        "raw_diff: grAnime_801C8578 body uses HSD_Joint* and s32* and granime.h is updated accordingly"
+      ]
+    },
+    {
+      "lesson": "Archive entry struct recovery can unblock cleaner C in callers: once offsets +4/+8/+C were typed as animation pointer arrays, granime code could use fields instead of byte-offset loads.",
+      "scope": [
+        "granime",
+        "stage archive types",
+        "typed-fields-over-pointer-math"
+      ],
+      "evidence_refs": [
+        "raw_diff: types.h adds HSD_AnimJoint** unk4, HSD_MatAnimJoint** unk8, HSD_ShapeAnimJoint** unkC",
+        "raw_diff: grAnime_801C8138 removes casts from &archive->unk4->unk8[arg1] + offsets"
+      ]
+    },
+    {
+      "lesson": "Assert cleanup should preserve line numbers and messages while mapping expanded __assert patterns to HSD_ASSERT/HSD_ASSERTREPORT macros.",
+      "scope": [
+        "granime",
+        "assert macros"
+      ],
+      "evidence_refs": [
+        "raw_diff: HSD_ASSERT(0x556, archive), HSD_ASSERT(0x148, archive), HSD_ASSERT(0x602, archive), HSD_ASSERT(0x617, archive)",
+        "raw_diff: HSD_ASSERTREPORT(0x36F, NULL, \"not match arg_type\\n\")"
+      ]
+    },
+    {
+      "lesson": "Recursive tree traversal may be the natural source form for child/next joint walks when the function carries a decrementing counter through recursive calls.",
+      "scope": [
+        "granime",
+        "joint traversal",
+        "control flow"
+      ],
+      "evidence_refs": [
+        "raw_diff: grAnime_801C8578 recursively descends joint->child then joint->next while decrementing *counter"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Address-style grAnime function names were retained for still-unnamed global functions, while local names such as archive, child, root, joint, robj, flags2, and callbackArg arg describe immediate roles.",
+      "evidence_refs": [
+        "raw_diff: grAnime_801C752C locals obj_tmp, robj, flags2, child, callbackArg arg",
+        "raw_diff: grAnime_801C7C1C locals archive, ajp, mjp, sjp, child, eflags",
+        "raw_diff: grAnime_801C86D4 local root inside scoped block"
+      ]
+    },
+    {
+      "convention": "Recovered struct fields remain offset-style unk names (unk4, unk8, unkC) where semantic names are not proven, but now carry precise pointer types.",
+      "evidence_refs": [
+        "raw_diff: UnkStageDat_x8_t fields named unk4, unk8, unkC with animation pointer-array types"
+      ]
+    },
+    {
+      "convention": "Matching-control helper names use an address plus suffix pattern, e.g. grAnime_801C67A8_inner and grAnime_801C67A8_noinline.",
+      "evidence_refs": [
+        "raw_diff: added *_inner and *_noinline wrappers for grAnime_801C67A8, 801C683C, 801C6960, 801C69FC, 801C6A54, 801C706C, 801C8578"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Used static inline indirection wrappers named *_inner and *_noinline to influence whether call sites inline or remain calls.",
+      "evidence_refs": [
+        "raw_diff: grAnime_801C67A8_noinline calls grAnime_801C67A8_inner",
+        "raw_diff: grAnime_801C7C1C calls grAnime_801C6A54_noinline, grAnime_801C69FC_noinline, grAnime_801C6960_noinline, grAnime_801C683C_noinline",
+        "raw_diff: grAnime_801C86D4 calls grAnime_801C8578_noinline"
+      ],
+      "notes": "This is a matching tactic with evidence in the diff, but the PR contains no author explanation or objdiff details for why each wrapper was necessary."
+    },
+    {
+      "tactic": "Replaced a local #pragma dont_inline block with wrapper-based noinline-style call indirection.",
+      "evidence_refs": [
+        "raw_diff: removed #pragma push/#pragma dont_inline on/#pragma pop around grAnime_801C67A8 call",
+        "raw_diff: call changed to grAnime_801C67A8_noinline(dobj->mobj, matanim)"
+      ],
+      "notes": "Consistent with avoiding broad pragma steering, but the exact codegen reason is not documented in PR text."
+    },
+    {
+      "tactic": "Removed PAD_STACK(16) from grAnime_801C6A54 while the bot report shows grAnime_801C6A54 improved from 59.00% to 99.23%.",
+      "evidence_refs": [
+        "raw_diff: PAD_STACK(16) removed from grAnime_801C6A54",
+        "text_corpus issue_comment: grAnime_801C6A54 improved +177 bytes, 59.00% to 99.23%"
+      ],
+      "notes": "The bot report supports improvement, but the PR slice does not isolate PAD_STACK removal as the cause."
+    },
+    {
+      "tactic": "Used a union-like callbackArg local and va_arg dispatch in grAnime_801C752C to model callback argument variants by AOBJ_ARG_* type.",
+      "evidence_refs": [
+        "raw_diff: grAnime_801C752C declares va_list ap and callbackArg arg",
+        "raw_diff: switch over AOBJ_ARG_A, AOBJ_ARG_AF, AOBJ_ARG_AV, AOBJ_ARG_AU families with f64/void*/u32 va_arg reads"
+      ]
+    },
+    {
+      "tactic": "Introduced scoped dummy-looking stack locals in grAnime_801C86D4 while replacing a temporary struct, likely for stack/register shape.",
+      "evidence_refs": [
+        "raw_diff: struct sp removed and locals s32 sp2, sp3, sp, sp4 added; only sp is used in shown diff"
+      ],
+      "notes": "The unused-looking locals are tactic-like and should require verifier evidence before treating as normal style."
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "author": "decomp-dev[bot]",
+      "text": "GALE01 report: matched code 68.88% (+0.03%, +1080 bytes); 3 new matches: grAnime_801C752C, grAnime_801C8578, grAnime_801C86D4; 3 improvements: grAnime_801C7C1C, grAnime_801C6A54, grAnime_801C7228; 1 .sdata regression.",
+      "evidence_refs": [
+        "text_corpus issue_comment created_at 2026-05-24T09:16:56Z"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2530",
+    "Jj/granime 2",
+    "jurrejelle",
+    "granime",
+    "src/melee/gr/granime.c",
+    "src/melee/gr/granime.h",
+    "src/melee/gr/types.h",
+    "target_funcs.txt",
+    "grAnime_801C752C",
+    "grAnime_801C7C1C",
+    "grAnime_801C8578",
+    "grAnime_801C86D4",
+    "grAnime_801C7228",
+    "grAnime_801C6A54",
+    "grAnime_801C6F50_wrapped",
+    "grAnime_801C683C_noinline",
+    "grAnime_801C6960_noinline",
+    "grAnime_801C69FC_noinline",
+    "grAnime_801C706C_noinline",
+    "UnkStageDat_x8_t",
+    "HSD_AnimJoint",
+    "HSD_MatAnimJoint",
+    "HSD_ShapeAnimJoint",
+    "HSD_ASSERT",
+    "HSD_ASSERTREPORT",
+    "callbackArg",
+    "AOBJ_ARG_AF",
+    "AOBJ_ARG_AV",
+    "AOBJ_ARG_AU",
+    "PAD_STACK",
+    "dont_inline",
+    ".sdata regression"
+  ],
+  "follow_up_queries": [
+    "Find later PRs touching grAnime_801C7C1C to see whether the 83.11% partial improvement was completed.",
+    "Search for grAnime_801C6F50_wrapped to see whether the wrapper remained or was later simplified.",
+    "Search for UnkStageDat_x8_t unk4 unk8 unkC to determine whether semantic field names were later recovered.",
+    "Search for *_noinline wrappers in src/melee/gr/granime.c to identify whether wrapper-based noinline tactics became common or were cleanup targets.",
+    "Search PRs with .sdata regressions in granime to see whether the regression from this PR was later resolved.",
+    "Search grAnime_801C86D4 unused locals sp2 sp3 sp4 for later cleanup or matching comments."
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR 2530 merged, changed files, added/deleted counts",
+      "raw_diff: full diff available, not truncated",
+      "changed_files.jsonl: four changed files",
+      "text_corpus.jsonl: empty PR body and one bot issue comment",
+      "metadata_json: review_comments 0, reviews 0"
+    ],
+    "notes": [
+      "The diff and bot report strongly support changed files and match-progress claims.",
+      "There is no PR body explanation and no human review feedback in the loaded slice.",
+      "The bot report validates three new matches and three improvements, but target_funcs.txt lists eight checked functions; target_funcs.txt should not be read as proof that all listed functions newly matched.",
+      "Wrapper/noinline and stack-local tactics are visible in source, but the PR slice lacks narrow objdiff rationale for each tactic.",
+      "The .sdata regression is reported by the bot, but the slice does not explain its cause or whether it was accepted intentionally."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "type": "lesson_candidate",
+        "title": "Header prototypes should be tightened when recovered bodies prove signatures",
+        "text": "PR 2530 recovered concrete signatures for grAnime_801C752C and grAnime_801C8578 and updated src/melee/gr/granime.h in the same diff, replacing broad placeholders.",
+        "scope": [
+          "headers",
+          "signature recovery",
+          "granime"
+        ],
+        "evidence_refs": [
+          "raw_diff: grAnime_801C752C prototype update",
+          "raw_diff: grAnime_801C8578 prototype update"
+        ]
+      },
+      {
+        "type": "lesson_candidate",
+        "title": "Prefer typed archive fields over raw offset loads when struct layout evidence exists",
+        "text": "PR 2530 added typed fields at offsets +4/+8/+C in UnkStageDat_x8_t and used them in granime.c, replacing explicit pointer arithmetic for animation arrays.",
+        "scope": [
+          "typed-fields-over-pointer-math",
+          "stage archive",
+          "granime"
+        ],
+        "evidence_refs": [
+          "raw_diff: types.h field additions",
+          "raw_diff: grAnime_801C8138 pointer-cast replacements"
+        ]
+      },
+      {
+        "type": "lesson_candidate",
+        "title": "Assert macro cleanup should preserve line and message evidence",
+        "text": "PR 2530 replaced several expanded __assert patterns with HSD_ASSERT/HSD_ASSERTREPORT while preserving line constants and, where applicable, report text.",
+        "scope": [
+          "assert-report-macros",
+          "granime"
+        ],
+        "evidence_refs": [
+          "raw_diff: HSD_ASSERT line constants 0x33A, 0x556, 0x148, 0x602, 0x617",
+          "raw_diff: HSD_ASSERTREPORT at 0x36F with not match arg_type message"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "src/melee/gr/types.h UnkStageDat_x8_t animation pointer fields",
+        "text": "In this PR, UnkStageDat_x8_t offset +4 was typed as HSD_AnimJoint** unk4, +8 as HSD_MatAnimJoint** unk8, and +C as HSD_ShapeAnimJoint** unkC; granime.c uses these fields for stage animation archive lookups.",
+        "source_path": "src/melee/gr/types.h",
+        "scope": [
+          "UnkStageDat_x8_t",
+          "stage archive",
+          "granime"
+        ],
+        "evidence_refs": [
+          "raw_diff: types.h UnkStageDat_x8_t field changes",
+          "raw_diff: grAnime_801C7C1C and grAnime_801C8138 use archive->unk4->unk8[...].unk4/unk8/unkC"
+        ],
+        "reason": "Potential reusable path fact for future stage archive decomp work; requires curator validation against current source and later renames."
+      },
+      {
+        "target_source_id": "other",
+        "update_kind": "source_update",
+        "title": "Track granime noinline wrapper tactic as a review-risk pattern",
+        "text": "This PR introduced multiple *_inner and *_noinline wrappers to steer matching-sensitive calls and removed one pragma dont_inline block. These wrappers may be useful search anchors for later cleanup or matching rationale audits.",
+        "source_path": "src/melee/gr/granime.c",
+        "scope": [
+          "matching tactics",
+          "noinline wrappers",
+          "granime"
+        ],
+        "evidence_refs": [
+          "raw_diff: added grAnime_801C67A8_noinline, grAnime_801C683C_noinline, grAnime_801C6960_noinline, grAnime_801C69FC_noinline, grAnime_801C6A54_noinline, grAnime_801C706C_noinline, grAnime_801C8578_noinline",
+          "raw_diff: removed #pragma dont_inline block"
+        ],
+        "reason": "The tactic is visible but not explained by human review or objdiff notes in this slice; curator may want a cautionary source note or search index entry rather than a global standard."
+      },
+      {
+        "target_source_id": "other",
+        "update_kind": "source_update",
+        "title": "Record bot-reported .sdata regression for PR 2530 granime",
+        "text": "The bot report for PR 2530 shows one unmatched-item regression in main/melee/gr/granime .sdata from 71.43% to 47.06%. The slice does not explain the cause.",
+        "source_path": "src/melee/gr/granime.c",
+        "scope": [
+          ".sdata",
+          "regression",
+          "granime"
+        ],
+        "evidence_refs": [
+          "text_corpus issue_comment: .sdata regression -4, 71.43% to 47.06%"
+        ],
+        "reason": "Potential follow-up audit target; do not treat as accepted or intentional without later evidence."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that all eight target_funcs.txt entries were newly matched; the bot report only lists three new matches and three improvements.",
+      "Do not promote wrapper-based *_noinline helpers as a generally accepted tactic from this PR alone; the diff shows use, but no human rationale or per-call objdiff evidence is present.",
+      "Do not infer semantic names for UnkStageDat_x8_t fields beyond the typed unk4/unk8/unkC names shown in this PR.",
+      "Do not claim the .sdata regression was acceptable or harmless; the bot report only records the regression."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

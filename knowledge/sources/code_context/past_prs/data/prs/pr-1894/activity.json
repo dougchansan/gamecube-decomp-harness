@@ -1,0 +1,10 @@
+{
+  "pr": 1894,
+  "title": "Fix return type of gm_8017E48C",
+  "url": "https://github.com/doldecomp/melee/pull/1894",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 4,
+  "added_lines": 30,
+  "deleted_lines": 23
+}

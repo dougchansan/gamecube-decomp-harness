@@ -1,0 +1,17 @@
+{
+  "number": 900,
+  "title": "Partially match `ftCo_CargoThrow`",
+  "state": "MERGED",
+  "createdAt": "2023-05-29T17:40:13Z",
+  "updatedAt": "2023-05-29T17:48:08Z",
+  "mergedAt": "2023-05-29T17:48:07Z",
+  "closedAt": "2023-05-29T17:48:07Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/900",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 43304
+  }
+}

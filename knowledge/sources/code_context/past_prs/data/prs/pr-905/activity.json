@@ -1,0 +1,10 @@
+{
+  "pr": 905,
+  "title": "Partially match `ftCo_BarrelWait`",
+  "url": "https://github.com/doldecomp/melee/pull/905",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 21,
+  "added_lines": 3257,
+  "deleted_lines": 2976
+}

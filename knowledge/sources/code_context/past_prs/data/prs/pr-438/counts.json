@@ -1,0 +1,17 @@
+{
+  "number": 438,
+  "title": "Fill out `lbrefract.h`",
+  "state": "CLOSED",
+  "createdAt": "2022-08-06T08:04:34Z",
+  "updatedAt": "2022-08-08T11:51:04Z",
+  "mergedAt": null,
+  "closedAt": "2022-08-08T11:50:58Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/438",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 46113
+  }
+}

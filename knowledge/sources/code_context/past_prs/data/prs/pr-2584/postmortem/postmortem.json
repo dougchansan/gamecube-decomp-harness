@@ -1,0 +1,322 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2584",
+  "pr": {
+    "number": 2584,
+    "title": "Group the wiki TU list into progress sections",
+    "url": "https://github.com/doldecomp/melee/pull/2584",
+    "state": "MERGED",
+    "author": "itsgrimetime",
+    "created_at": "2026-06-06T01:14:12Z",
+    "merged_at": "2026-06-06T10:02:10Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Updated tools/wiki_tu.py so generated Translation Units wiki output is grouped by progress state instead of one flat table. The script now buckets TUs into `.text in progress`, `.text matched - data / linking left`, and `Fully linked`, displays separate `.text %` and `data %` signals, removes the combined percent/checkmark completion column, and applies reviewer-requested formatting fixes for stable anchors, non-wrapping size units, and exactly one leading @ on Discord handles.",
+  "change_classification": {
+    "primary_type": "tooling_documentation_cleanup",
+    "categories": [
+      "tooling",
+      "documentation",
+      "cleanup",
+      "progress-reporting"
+    ],
+    "systems": [
+      "tools/wiki_tu.py",
+      "wiki translation-unit progress page"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "tools/wiki_tu.py",
+      "role": "Only changed file; rewrites the wiki TU writer output layout, row helpers, bucketing logic, percent formatting, size formatting, and assignee cell formatting.",
+      "evidence_refs": [
+        "changed_files.jsonl: tools/wiki_tu.py added 98 deleted 30 hunks 1",
+        "raw_diff: diff --git a/tools/wiki_tu.py b/tools/wiki_tu.py",
+        "pr_body: `wiki_tu.py write` emitted every translation unit into one flat table"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "The flat Translation Units wiki table was replaced with three generated sections: `.text in progress`, `.text matched - data / linking left`, and `Fully linked`.",
+      "evidence_refs": [
+        "pr_body: This groups the generated page into three sections",
+        "raw_diff: in_progress = []; data_left = []; linked = []",
+        "raw_diff: print(\"\\n## .text in progress\\n\") / print(\"\\n## .text matched - data / linking left\\n\") / print(\"\\n## Fully linked\\n\")"
+      ]
+    },
+    {
+      "text": "Section assignment is based on `metadata.complete` first, otherwise `matched_code_percent >= 100` for data/linking-left rows, otherwise in-progress.",
+      "evidence_refs": [
+        "pr_body table: `.text in progress` criterion `matched_code_percent` < 100; `.text matched - data / linking left` criterion `.text` at 100% but not `complete`; `Fully linked` criterion `metadata.complete`",
+        "raw_diff: if unit[\"metadata\"].get(\"complete\"): linked.append(unit) ... elif float(unit[\"measures\"].get(\"matched_code_percent\") or 0) >= 100: data_left.append(unit)"
+      ]
+    },
+    {
+      "text": "Active tables now show separate `.text %` and `data %` columns, while fully linked rows use a slim file/text/data table.",
+      "evidence_refs": [
+        "pr_body: Active rows gain separate **`.text %`** and **`data %`** columns",
+        "raw_diff: full_header = \"File|Matched|Total|.text %|data %|Assignee<br>Discord|Assignee<br>GitHub\"",
+        "raw_diff: slim_header = \"File|.text %|data %\""
+      ]
+    },
+    {
+      "text": "The old combined percent plus checkmark completion column was removed; completion is represented by section membership.",
+      "evidence_refs": [
+        "pr_body: The combined `%` + checkmark column is removed — section membership now encodes completion",
+        "raw_diff removed: percent = ...; linked = \":heavy_check_mark:\" if unit[\"metadata\"].get(\"complete\") else \":x:\"",
+        "raw_diff removed: File|Matched|Total|%|:grey_question:|Assignee..."
+      ]
+    },
+    {
+      "text": "Section counts are printed on their own line below each header to keep header anchor URLs stable.",
+      "evidence_refs": [
+        "pr_body: Each section's count is printed on the line below its header so the header anchors stay stable as counts change",
+        "raw_diff comment: The count goes on its own line below each header so the header text -- and therefore the section's anchor URL -- stays stable as counts change"
+      ]
+    },
+    {
+      "text": "Formatting cleanup changed size strings to use `&nbsp;` after humanfriendly formatting and normalized Discord handles to exactly one leading `@`.",
+      "evidence_refs": [
+        "pr_body: size units joined with `&nbsp;` so they don't wrap, and Discord handles normalized to exactly one leading `@`",
+        "review CHANGES_REQUESTED: The sizes should replace spaces in the strings with `&nbsp;` after being run through `humanfriendly`; Discord usernames should start with exactly one `@` symbol",
+        "raw_diff: return size.replace(\" \", \"&nbsp;\")",
+        "raw_diff: discord = f\"`@{assignee['discord'].lstrip('@')}`\""
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Factored repeated row-generation details into local helpers (`friendly_size`, `percent_cell`, `file_of`, `assignee_cells`, `percent_cells`, `row_full`, `row_slim`) before printing section tables.",
+      "evidence_refs": [
+        "raw_diff: def friendly_size(value: int) -> str",
+        "raw_diff: def percent_cell(matched: int, total: int, reported: Optional[float]) -> str",
+        "raw_diff: def row_full(unit) -> str / def row_slim(unit) -> str"
+      ]
+    },
+    {
+      "text": "Kept active-table assignee columns at the same indices so existing `read_wiki` round-tripping could continue according to the PR body.",
+      "evidence_refs": [
+        "pr_body: Assignee columns stay at the same indices in the active tables, so `read_wiki` round-trips them as before",
+        "raw_diff: full_header keeps Assignee<br>Discord and Assignee<br>GitHub after File, Matched, Total, .text %, data %"
+      ]
+    },
+    {
+      "text": "Used `metadata.complete` as the winning bucket condition for fully linked TUs, matching the PR's stated canonical completion signal.",
+      "evidence_refs": [
+        "raw_diff comment: \"complete\" (fully linked) is the canonical done flag -- it drives the official completed-unit count -- so it wins",
+        "pr_body: `Fully linked` | `metadata.complete`"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "text": "For decomp progress reporting, separate code/text completion from data/linking completion; a TU with 100% `.text` but incomplete data/linking should not be displayed as finished.",
+      "scope": [
+        "wiki_tu.py",
+        "translation-unit progress reporting",
+        "documentation tooling"
+      ],
+      "evidence_refs": [
+        "pr_body: Active rows gain separate **`.text %`** and **`data %`** columns, so a TU that's 100% code but a few percent data is no longer indistinguishable from a finished one",
+        "pr_body: `.text matched - data / linking left` | `.text` at 100% but not `complete`",
+        "raw_diff: elif float(unit[\"measures\"].get(\"matched_code_percent\") or 0) >= 100: data_left.append(unit)"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "Generated wiki section names used by this PR: `.text in progress`, `.text matched - data / linking left`, and `Fully linked`.",
+      "evidence_refs": [
+        "pr_body section table",
+        "raw_diff: print(\"\\n## .text in progress\\n\")",
+        "raw_diff: print(\"\\n## .text matched - data / linking left\\n\")",
+        "raw_diff: print(\"\\n## Fully linked\\n\")"
+      ]
+    },
+    {
+      "text": "The generated progress columns are labeled `.text %` and `data %`.",
+      "evidence_refs": [
+        "pr_body: separate **`.text %`** and **`data %`** columns",
+        "raw_diff: full_header = \"File|Matched|Total|.text %|data %|...\"",
+        "raw_diff: slim_header = \"File|.text %|data %\""
+      ]
+    },
+    {
+      "text": "Discord assignee handles emitted by the wiki tool should have exactly one leading `@`.",
+      "evidence_refs": [
+        "pr_body: Discord handles normalized to exactly one leading `@`",
+        "review CHANGES_REQUESTED: Discord usernames should start with exactly one `@` symbol",
+        "raw_diff: discord = f\"`@{assignee['discord'].lstrip('@')}`\""
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [],
+  "review_feedback": [
+    {
+      "author": "ribbanya",
+      "state": "CHANGES_REQUESTED",
+      "text": "Requested removing emoji from section headers because they do not render in the table of contents.",
+      "evidence_refs": [
+        "text_corpus review 2026-06-06T07:37:38Z: Remove the emoji from the headers (they don't render in the ToC)"
+      ]
+    },
+    {
+      "author": "ribbanya",
+      "state": "CHANGES_REQUESTED",
+      "text": "Requested placing counts below headers so section hyperlink URLs remain consistent.",
+      "evidence_refs": [
+        "text_corpus review 2026-06-06T07:37:38Z: Place the count for each header below the header, so the section hyperlink URLs remain consistent",
+        "raw_diff comment: count goes on its own line below each header"
+      ]
+    },
+    {
+      "author": "ribbanya",
+      "state": "CHANGES_REQUESTED",
+      "text": "Suggested the `details` tag was unnecessary because the linked TUs are at the bottom of the page and browsers should handle rendering the tables.",
+      "evidence_refs": [
+        "text_corpus review 2026-06-06T07:37:38Z: I don't personally think the `details` tag is necessary here..."
+      ]
+    },
+    {
+      "author": "ribbanya",
+      "state": "CHANGES_REQUESTED",
+      "text": "Requested size strings replace spaces with `&nbsp;` after `humanfriendly` formatting.",
+      "evidence_refs": [
+        "text_corpus review 2026-06-06T07:37:38Z: The sizes should replace spaces in the strings with `&nbsp;` after being run through `humanfriendly`",
+        "raw_diff: return size.replace(\" \", \"&nbsp;\")"
+      ]
+    },
+    {
+      "author": "ribbanya",
+      "state": "CHANGES_REQUESTED",
+      "text": "Requested Discord usernames start with exactly one `@`, whether or not the parsed version already had one.",
+      "evidence_refs": [
+        "text_corpus review 2026-06-06T07:37:38Z: Discord usernames should start with exactly one `@` symbol",
+        "raw_diff: `@{assignee['discord'].lstrip('@')}`"
+      ]
+    },
+    {
+      "author": "ribbanya",
+      "state": "APPROVED",
+      "text": "A later review approved the PR; no body text was included in the approval record.",
+      "evidence_refs": [
+        "text_corpus review 2026-06-06T10:01:56Z state APPROVED body empty"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2584",
+    "wiki_tu.py",
+    "Translation Units wiki",
+    "TU progress sections",
+    ".text in progress",
+    ".text matched - data / linking left",
+    "Fully linked",
+    "matched_code_percent",
+    "matched_data_percent",
+    "metadata.complete",
+    "data / linking left",
+    "humanfriendly.format_size",
+    "&nbsp;",
+    "Discord handles",
+    "exactly one @",
+    "read_wiki round-trip",
+    "stable header anchors",
+    "ribbanya",
+    "itsgrimetime"
+  ],
+  "follow_up_queries": [
+    "tools/wiki_tu.py matched_code_percent metadata.complete",
+    "wiki_tu.py data % .text %",
+    "Translation Units wiki Fully linked metadata.complete",
+    "read_wiki assignee Discord @ lstrip",
+    "humanfriendly format_size &nbsp wiki_tu.py",
+    "PR 2584 wiki TU progress sections"
+  ],
+  "evidence_quality": {
+    "status": "strong",
+    "evidence_refs": [
+      "metadata_json: PR number/title/state/author/dates/changed_files",
+      "human_pr_text.md: PR body and issue comment",
+      "raw_diff: complete one-file diff excerpt",
+      "text_corpus.jsonl: PR body, changes-requested review, author follow-up comment, approval review",
+      "changed_files.jsonl: tools/wiki_tu.py added 98 deleted 30"
+    ],
+    "notes": [
+      "Evidence is strong for what changed in tools/wiki_tu.py and for review feedback because the PR body, full diff, changed-file metadata, and review text are loaded.",
+      "No inline review comments were present; review feedback comes from top-level review records and the author's follow-up comment.",
+      "This PR is tooling/documentation-oriented, not a code matching PR; assembly or objdiff tactics are not evidenced.",
+      "No build output, test output, or generated wiki artifact diff is loaded, so no validation result is claimed beyond the author's statement that the page was live."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "kind": "tooling_progress_reporting_lesson",
+        "title": "Distinguish text completion from data/linking completion in TU progress views",
+        "text": "When presenting translation-unit decomp progress, keep `.text` progress and data/linking completion as separate signals. A TU at 100% code but not `metadata.complete` should be visibly separated from fully linked units.",
+        "scope": [
+          "tools/wiki_tu.py",
+          "wiki translation-unit progress reporting"
+        ],
+        "evidence_refs": [
+          "pr_body: Active rows gain separate **`.text %`** and **`data %`** columns",
+          "pr_body: `.text matched - data / linking left` criterion `.text` at 100% but not `complete`",
+          "raw_diff: in_progress/data_left/linked buckets"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "other",
+        "update_kind": "source_update",
+        "title": "Document wiki_tu.py progress-section semantics",
+        "text": "Consider documenting that the generated Translation Units wiki groups rows into `.text in progress`, `.text matched - data / linking left`, and `Fully linked`, with `metadata.complete` taking precedence over percent values and section counts printed below headers to keep anchors stable.",
+        "source_path": "tools/wiki_tu.py",
+        "scope": [
+          "tooling documentation",
+          "Translation Units wiki generation"
+        ],
+        "evidence_refs": [
+          "pr_body section criteria table",
+          "raw_diff comment: complete is the canonical done flag",
+          "raw_diff comment: count goes on its own line below each header"
+        ],
+        "reason": "This is a tooling convention surfaced by the PR, but it should be curated into documentation or source comments only after maintainer review."
+      },
+      {
+        "target_source_id": "other",
+        "update_kind": "source_update",
+        "title": "Document assignee formatting rules for wiki round-tripping",
+        "text": "Consider documenting that active TU wiki tables keep assignee columns at stable indices for `read_wiki` round-tripping and emit Discord handles with exactly one leading `@`.",
+        "source_path": "tools/wiki_tu.py",
+        "scope": [
+          "wiki_tu.py",
+          "read_wiki/write wiki assignee handling"
+        ],
+        "evidence_refs": [
+          "pr_body: Assignee columns stay at the same indices in the active tables, so `read_wiki` round-trips them as before",
+          "review: Discord usernames should start with exactly one `@` symbol",
+          "raw_diff: assignee_cells(file)"
+        ],
+        "reason": "The PR supports this as a local tooling behavior; curator review is needed before treating it as a broader project standard."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer any decompilation match, objdiff validation, or build/test pass from this PR slice; none is loaded.",
+      "Do not promote the three wiki section names as global decomp status taxonomy outside the wiki_tu.py reporting context without additional evidence.",
+      "Do not infer that reviewer approval specifically endorsed every implementation detail; only the approval state and earlier review requests are evidenced."
+    ]
+  },
+  "confidence": 0.91,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

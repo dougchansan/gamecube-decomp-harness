@@ -1,0 +1,17 @@
+{
+  "number": 466,
+  "title": "Create global context generation script",
+  "state": "CLOSED",
+  "createdAt": "2022-08-20T07:14:24Z",
+  "updatedAt": "2022-08-20T14:51:25Z",
+  "mergedAt": null,
+  "closedAt": "2022-08-20T14:51:20Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/466",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 0
+  }
+}

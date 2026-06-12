@@ -1,0 +1,17 @@
+{
+  "number": 2165,
+  "title": "HSD_TExpDag matches",
+  "state": "MERGED",
+  "createdAt": "2026-02-10T19:58:28Z",
+  "updatedAt": "2026-02-10T21:06:56Z",
+  "mergedAt": "2026-02-10T20:34:56Z",
+  "closedAt": "2026-02-10T20:34:56Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/2165",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 1,
+    "diff_bytes": 16627
+  }
+}

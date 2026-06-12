@@ -1,0 +1,297 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2270",
+  "pr": {
+    "number": 2270,
+    "title": "stages: match 2 functions",
+    "url": "https://github.com/doldecomp/melee/pull/2270",
+    "state": "MERGED",
+    "author": "johnwinston",
+    "created_at": "2026-03-11T03:55:55Z",
+    "merged_at": "2026-03-11T04:27:53Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Matched two stage functions: grOldPupupu_80211110 in groldpupupu.c and grRCruise_80201B60 in grrcruise.c. The PR also added required includes and updated the grRCruise_80201B60 header prototype from UNK_RET/UNK_PARAMS to void grRCruise_80201B60(HSD_JObj*, s32). Bot report confirms both functions reached 100.00% and contributed +252 matched bytes.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "typed-access",
+      "stage"
+    ],
+    "systems": [
+      "stage",
+      "ground",
+      "baselib-dobj",
+      "material"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gr/groldpupupu.c",
+      "role": "Replaced stub marker for grOldPupupu_80211110 with a matched implementation and added gr/grmaterial.h include.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gr/groldpupupu.c added 11 deleted 1",
+        "raw_diff: groldpupupu.c include gr/grmaterial.h and grOldPupupu_80211110 implementation",
+        "text_corpus: bot report lists grOldPupupu_80211110 0.00% -> 100.00%, +124 bytes"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grrcruise.c",
+      "role": "Replaced stub marker for grRCruise_80201B60 with a matched implementation that iterates DObj siblings and toggles flag 1; added baselib dobj include.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gr/grrcruise.c added 22 deleted 1",
+        "raw_diff: grrcruise.c include sysdolphin/baselib/dobj.h and grRCruise_80201B60 implementation",
+        "text_corpus: bot report lists grRCruise_80201B60 0.00% -> 100.00%, +128 bytes"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grrcruise.h",
+      "role": "Updated grRCruise_80201B60 declaration from unknown return/params to recovered signature.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gr/grrcruise.h added 1 deleted 1",
+        "raw_diff: grRCruise_80201B60 prototype changed to void grRCruise_80201B60(HSD_JObj*, s32)"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Implemented grOldPupupu_80211110(Ground_GObj* gobj), using Ground and HSD_JObj typed locals, calling grAnime_801C8138 with gp->map_id, clearing x10_flags.b2, applying grMaterial_801C8858(jobj, 0x28000000U), and setting gp->x11_flags.b012 to 2.",
+      "evidence_refs": [
+        "raw_diff: grOldPupupu_80211110 body",
+        "human_pr_text: Summary names grOldPupupu_80211110"
+      ]
+    },
+    {
+      "text": "Implemented grRCruise_80201B60(HSD_JObj* jobj, s32 arg1), retrieving the first DObj with HSD_JObjGetDObj, walking dobj->next, and clearing or setting flag 1 depending on arg1.",
+      "evidence_refs": [
+        "raw_diff: grRCruise_80201B60 body",
+        "human_pr_text: Summary names grRCruise_80201B60"
+      ]
+    },
+    {
+      "text": "Added includes for gr/grmaterial.h and sysdolphin/baselib/dobj.h to support the new typed calls and DObj access.",
+      "evidence_refs": [
+        "raw_diff: include additions in groldpupupu.c and grrcruise.c"
+      ]
+    },
+    {
+      "text": "Updated the public grrcruise.h prototype for grRCruise_80201B60 from UNK_RET/UNK_PARAMS to the recovered void(HSD_JObj*, s32) signature.",
+      "evidence_refs": [
+        "raw_diff: grrcruise.h prototype hunk"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "The PR paired a recovered function body with a header prototype update, avoiding a stale UNK_RET/UNK_PARAMS declaration for grRCruise_80201B60.",
+      "evidence_refs": [
+        "raw_diff: grrcruise.c function signature",
+        "raw_diff: grrcruise.h declaration update",
+        "decomp_standards: truthful-headers-and-includes"
+      ]
+    },
+    {
+      "text": "The matched implementations use existing typed APIs and fields such as HSD_JObjGetDObj, HSD_DObjClearFlags, HSD_DObjSetFlags, Ground->map_id, and Ground flag bitfields rather than raw pointer arithmetic.",
+      "evidence_refs": [
+        "raw_diff: grRCruise_80201B60 body",
+        "raw_diff: grOldPupupu_80211110 body",
+        "decomp_standards: typed-fields-over-pointer-math"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For recovered functions with newly known signatures, update the owning header alongside the body when the declaration previously used UNK_RET/UNK_PARAMS.",
+      "scope": [
+        "headers",
+        "stage functions",
+        "grrcruise"
+      ],
+      "evidence_refs": [
+        "raw_diff: grrcruise.h changes grRCruise_80201B60 to void grRCruise_80201B60(HSD_JObj*, s32)",
+        "raw_diff: grrcruise.c defines matching signature",
+        "decomp_standards: truthful-headers-and-includes"
+      ]
+    },
+    {
+      "lesson": "Existing baselib helpers can express DObj list traversal and flag changes cleanly in stage code: start with HSD_JObjGetDObj(jobj), walk dobj->next, and use HSD_DObjClearFlags/HSD_DObjSetFlags for flag mutations.",
+      "scope": [
+        "stage",
+        "grrcruise",
+        "HSD_DObj"
+      ],
+      "evidence_refs": [
+        "raw_diff: grRCruise_80201B60 implementation",
+        "text_corpus: bot report confirms grRCruise_80201B60 100.00%"
+      ]
+    },
+    {
+      "lesson": "Stage object setup code can often be made reviewable by naming clear local roles such as gp for Ground* and jobj for HSD_JObj* while using typed Ground flag fields.",
+      "scope": [
+        "stage",
+        "ground objects",
+        "groldpupupu"
+      ],
+      "evidence_refs": [
+        "raw_diff: grOldPupupu_80211110 uses Ground* gp, HSD_JObj* jobj, gp->map_id, x10_flags.b2, x11_flags.b012",
+        "decomp_standards: conservative-naming",
+        "decomp_standards: typed-fields-over-pointer-math"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "gp",
+      "meaning": "Local Ground* extracted from gobj->user_data.",
+      "scope": "grOldPupupu_80211110",
+      "evidence_refs": [
+        "raw_diff: Ground* gp = gobj->user_data"
+      ]
+    },
+    {
+      "name": "jobj",
+      "meaning": "Local or parameter HSD_JObj* used for joint/DObj operations.",
+      "scope": "grOldPupupu_80211110 and grRCruise_80201B60",
+      "evidence_refs": [
+        "raw_diff: HSD_JObj* jobj = gobj->hsd_obj",
+        "raw_diff: void grRCruise_80201B60(HSD_JObj* jobj, s32 arg1)"
+      ]
+    },
+    {
+      "name": "dobj, next",
+      "meaning": "DObj traversal locals for walking a linked DObj list.",
+      "scope": "grRCruise_80201B60",
+      "evidence_refs": [
+        "raw_diff: HSD_DObj* dobj; HSD_DObj* next; next = dobj->next"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Used PAD_STACK(16) in grOldPupupu_80211110 and PAD_STACK(8) in grRCruise_80201B60.",
+      "evidence_refs": [
+        "raw_diff: PAD_STACK(16) in grOldPupupu_80211110",
+        "raw_diff: PAD_STACK(8) in grRCruise_80201B60",
+        "text_corpus: bot report confirms both functions at 100.00%"
+      ],
+      "caution": "PAD_STACK is an explicit matching tactic; retain only with verifier evidence and keep scoped narrowly."
+    },
+    {
+      "tactic": "Used a natural while loop over the DObj linked list in grRCruise_80201B60.",
+      "evidence_refs": [
+        "raw_diff: while (dobj != NULL) loop",
+        "decomp_standards: natural-loops"
+      ],
+      "caution": "The loop includes a redundant null check inside a loop already guarded by dobj != NULL; evidence shows this shape was part of the matched PR, but the slice does not explain whether alternate cleaner shapes were tried."
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "text": "GALE01 report: matched code increased by +0.01%, +252 bytes, with 2 new matches. grRCruise_80201B60 reached 100.00% (+128 bytes) and grOldPupupu_80211110 reached 100.00% (+124 bytes).",
+      "author": "decomp-dev[bot]",
+      "evidence_refs": [
+        "text_corpus: issue_comment by decomp-dev[bot] created_at 2026-03-11T03:58:37Z"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2270",
+    "stages: match 2 functions",
+    "johnwinston",
+    "grOldPupupu_80211110",
+    "grRCruise_80201B60",
+    "groldpupupu.c",
+    "grrcruise.c",
+    "grrcruise.h",
+    "Ground_GObj",
+    "Ground",
+    "HSD_JObj",
+    "HSD_DObj",
+    "HSD_JObjGetDObj",
+    "HSD_DObjClearFlags",
+    "HSD_DObjSetFlags",
+    "grAnime_801C8138",
+    "grMaterial_801C8858",
+    "PAD_STACK",
+    "UNK_RET",
+    "UNK_PARAMS",
+    "x10_flags.b2",
+    "x11_flags.b012",
+    "map_id"
+  ],
+  "follow_up_queries": [
+    "grRCruise_80201B60 HSD_DObjClearFlags HSD_DObjSetFlags PAD_STACK",
+    "grOldPupupu_80211110 grMaterial_801C8858 x10_flags b2 x11_flags b012",
+    "stage functions header prototype UNK_RET UNK_PARAMS HSD_JObj s32",
+    "PAD_STACK stage 100.00% matched grrcruise groldpupupu"
+  ],
+  "evidence_quality": {
+    "status": "strong",
+    "evidence_refs": [
+      "metadata_json: PR number, title, author, state, dates, changed files",
+      "human_pr_text: author summary and all 100% matched claim",
+      "raw_diff: complete 2426-byte diff for three changed files",
+      "changed_files.jsonl: file-level added/deleted counts",
+      "text_corpus: decomp-dev[bot] match report"
+    ],
+    "notes": [
+      "No human review comments were present in the loaded slice.",
+      "The bot report provides verification-like evidence for 100.00% function matches, but the slice does not include raw objdiff logs or local build commands.",
+      "The PR body says all 100% matched and the bot report independently lists both functions as 100.00%; this supports match status for the two functions in this PR slice.",
+      "The slice does not explain why PAD_STACK was necessary or whether cleaner stack-neutral alternatives were tried."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson",
+        "title": "Recover header prototypes with matched function bodies",
+        "text": "When a matched function body proves a signature, update the owning header declaration in the same change rather than leaving UNK_RET/UNK_PARAMS. PR #2270 demonstrates this for grRCruise_80201B60, with the C definition and grrcruise.h prototype both using void grRCruise_80201B60(HSD_JObj*, s32).",
+        "scope": [
+          "headers",
+          "stage",
+          "function signatures"
+        ],
+        "evidence_refs": [
+          "raw_diff: grrcruise.c definition of grRCruise_80201B60",
+          "raw_diff: grrcruise.h prototype update",
+          "decomp_standards: truthful-headers-and-includes"
+        ]
+      },
+      {
+        "record_type": "matching_tactic",
+        "title": "Scoped PAD_STACK in small matched stage functions",
+        "text": "PR #2270 used narrow PAD_STACK calls in two newly matched stage functions, with the bot report showing both reached 100.00%. Treat this as a matching tactic with evidence, not a general style preference.",
+        "scope": [
+          "stage",
+          "PAD_STACK",
+          "matching tactics"
+        ],
+        "evidence_refs": [
+          "raw_diff: PAD_STACK(16) and PAD_STACK(8)",
+          "text_corpus: bot report lists both functions at 100.00%",
+          "decomp_standards: matching-tactics-need-evidence"
+        ]
+      }
+    ],
+    "source_update_candidates": [],
+    "rejection_notes": [
+      "Do not infer a broad standard that redundant null checks inside loops should be preserved; the PR shows this matched one function but gives no rationale or alternate-shape evidence.",
+      "Do not promote PAD_STACK as normal decomp style; the loaded standards require explicit evidence and narrow scope.",
+      "Do not claim reviewer approval rationale; there were no loaded human reviews or review comments."
+    ]
+  },
+  "confidence": 0.88,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

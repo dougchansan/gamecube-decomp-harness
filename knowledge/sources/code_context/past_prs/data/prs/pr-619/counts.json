@@ -1,0 +1,17 @@
+{
+  "number": 619,
+  "title": "Match `grtkoopa.c`",
+  "state": "MERGED",
+  "createdAt": "2022-12-21T06:32:00Z",
+  "updatedAt": "2022-12-21T06:43:10Z",
+  "mergedAt": "2022-12-21T06:43:10Z",
+  "closedAt": "2022-12-21T06:43:10Z",
+  "author": "ndhaba",
+  "url": "https://github.com/doldecomp/melee/pull/619",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 1,
+    "diff_bytes": 16962
+  }
+}

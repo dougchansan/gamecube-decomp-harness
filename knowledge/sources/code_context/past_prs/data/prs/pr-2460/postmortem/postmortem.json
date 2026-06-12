@@ -1,0 +1,453 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2460",
+  "pr": {
+    "number": 2460,
+    "title": "various item work",
+    "url": "https://github.com/doldecomp/melee/pull/2460",
+    "state": "MERGED",
+    "author": "lukechampine",
+    "created_at": "2026-05-05T05:21:14Z",
+    "merged_at": "2026-05-06T19:49:28Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Broad item-system matching and cleanup PR touching 38 files, primarily item TUs and headers, with small ground type/prototype updates. The bot report records +2920 matched-code bytes, 8 new matches, 45 unmatched-item improvements, and one .sdata2 regression in it_266F. Review feedback focused on replacing placeholder/permuter-style local names such as new_var with meaningful names.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "cleanup",
+      "decomp-matching",
+      "headers",
+      "naming",
+      "typing"
+    ],
+    "systems": [
+      "item",
+      "stage"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/it/it_266F.c",
+      "role": "major item matching/cleanup changes around item pick tables, random item spawning, local typing, loop cleanup, and matching tactics",
+      "evidence_refs": [
+        "changed_files: src/melee/it/it_266F.c +123/-115, 16 hunks",
+        "raw_diff: it_266F.c excerpts for ItemPickTable, RandomItemSpawner, it_8026CB9C, it_8026CF04, it_8026D018, it_8026F3D4",
+        "text_corpus: bot report improvements in main/melee/it/it_266F"
+      ]
+    },
+    {
+      "path": "src/melee/it/it_2725.c",
+      "role": "major item TU matching/cleanup, data/type declarations, and local ordering/stack-shape edits",
+      "evidence_refs": [
+        "changed_files: src/melee/it/it_2725.c +115/-125, 31 hunks",
+        "raw_diff: it_2725.c excerpts for it_804A0E30/50/60 type updates and it_8027649C",
+        "text_corpus: bot report new matches in main/melee/it/it_2725"
+      ]
+    },
+    {
+      "path": "src/melee/it/types.h",
+      "role": "item type definitions changed",
+      "evidence_refs": [
+        "changed_files: src/melee/it/types.h +35/-20, 3 hunks"
+      ]
+    },
+    {
+      "path": "src/melee/it/forward.h",
+      "role": "forward declarations renamed from unknown HSD_ObjAllocUnk types to RandomItemSpawner and ItemPickTable",
+      "evidence_refs": [
+        "raw_diff: forward.h HSD_ObjAllocUnk4 -> RandomItemSpawner and HSD_ObjAllocUnk6 -> ItemPickTable",
+        "changed_files: src/melee/it/forward.h +2/-2, 1 hunk"
+      ]
+    },
+    {
+      "path": "src/melee/it/it_266F.h",
+      "role": "function prototypes updated to use ItemPickTable",
+      "evidence_refs": [
+        "raw_diff: it_266F.h prototypes for it_8026C530, it_8026C65C, it_8026C75C, it_8026CA4C changed from HSD_ObjAllocUnk6* to ItemPickTable*",
+        "changed_files: src/melee/it/it_266F.h +4/-4, 1 hunk"
+      ]
+    },
+    {
+      "path": "src/melee/gr/types.h",
+      "role": "StageInfo field xA0 retyped from byte array to s32",
+      "evidence_refs": [
+        "raw_diff: gr/types.h StageInfo xA0 u8[4] -> s32",
+        "changed_files: src/melee/gr/types.h +1/-1, 1 hunk"
+      ]
+    },
+    {
+      "path": "src/melee/gr/ground.c",
+      "role": "Ground_801C2AD8 return type and xA0 address use updated to match StageInfo xA0 typing",
+      "evidence_refs": [
+        "raw_diff: Ground_801C0754 passes &stage_info.xA0; Ground_801C2AD8 returns s32*",
+        "changed_files: src/melee/gr/ground.c +3/-3, 2 hunks"
+      ]
+    },
+    {
+      "path": "src/melee/gr/ground.h",
+      "role": "Ground_801C2AD8 prototype updated from u8* to s32*",
+      "evidence_refs": [
+        "raw_diff: ground.h Ground_801C2AD8 u8* -> s32*",
+        "changed_files: src/melee/gr/ground.h +1/-1, 1 hunk"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itsamusgrapple.c",
+      "role": "item matching changes and review-discussed naming issue around new_var",
+      "evidence_refs": [
+        "changed_files: src/melee/it/items/itsamusgrapple.c +22/-20, 12 hunks",
+        "review_comments: PsiLupan requested meaningful names instead of new_var",
+        "text_corpus: bot report improvements in itsamusgrapple functions"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itlinkhookshot.c",
+      "role": "item matching changes",
+      "evidence_refs": [
+        "changed_files: src/melee/it/items/itlinkhookshot.c +76/-81, 28 hunks",
+        "text_corpus: bot report new match it_802A3500 and improvements in itlinkhookshot"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itlinkboomerang.c",
+      "role": "item matching changes",
+      "evidence_refs": [
+        "changed_files: src/melee/it/items/itlinkboomerang.c +27/-36, 8 hunks",
+        "text_corpus: bot report new match it_802A0930 and improvement in itLinkboomerang_UnkMotion3_Phys"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itseakneedlethrown.c",
+      "role": "item matching changes",
+      "evidence_refs": [
+        "changed_files: src/melee/it/items/itseakneedlethrown.c +22/-17, 3 hunks",
+        "text_corpus: bot report new matches it_802AFF08 and it_802AFD8C"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itseakchain.c",
+      "role": "item matching changes",
+      "evidence_refs": [
+        "changed_files: src/melee/it/items/itseakchain.c +15/-14, 3 hunks",
+        "text_corpus: bot report new match it_802BC94C"
+      ]
+    },
+    {
+      "path": "src/melee/it/itcoll.c",
+      "role": "item collision matching improvements",
+      "evidence_refs": [
+        "changed_files: src/melee/it/itcoll.c +13/-12, 7 hunks",
+        "text_corpus: bot report improvements in it_8027163C, it_80270E30, it_80271B60"
+      ]
+    },
+    {
+      "path": "src/melee/it/itCharItems.h",
+      "role": "character item attribute layout adjusted",
+      "evidence_refs": [
+        "raw_diff: itCharItems.h xDDC and xDE0 replaced with xDDC[2]",
+        "changed_files: src/melee/it/itCharItems.h +1/-2, 1 hunk"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Changed 38 files: src/melee/gr/ground.c, src/melee/gr/ground.h, src/melee/gr/types.h, src/melee/it/forward.h, src/melee/it/itCharItems.h, src/melee/it/it_266F.c, src/melee/it/it_266F.dox, src/melee/it/it_266F.h, src/melee/it/it_2725.c, src/melee/it/it_2725.h, src/melee/it/itcoll.c, src/melee/it/items/it_2E5A.c, src/melee/it/items/itdosei.c, src/melee/it/items/itkyasarin.c, src/melee/it/items/itleadead.c, src/melee/it/items/itleadead.h, src/melee/it/items/itlikelike.c, src/melee/it/items/itlikelike.h, src/melee/it/items/itlinkarrow.c, src/melee/it/items/itlinkboomerang.c, src/melee/it/items/itlinkhookshot.c, src/melee/it/items/itmasterhandlaser.c, src/melee/it/items/itmewtwoshadowball.c, src/melee/it/items/itnessyoyo.c, src/melee/it/items/itoctarock.c, src/melee/it/items/itoctarock.h, src/melee/it/items/itoldkuri.c, src/melee/it/items/itoldkuri.h, src/melee/it/items/itoldottosea.c, src/melee/it/items/itpikachuthunder.c, src/melee/it/items/itsamusgrapple.c, src/melee/it/items/itsamusmissile.c, src/melee/it/items/itseakchain.c, src/melee/it/items/itseakneedlethrown.c, src/melee/it/items/itwhispyapple.c, src/melee/it/items/itwhitebea.c, src/melee/it/items/itwhitebea.h, src/melee/it/types.h.",
+    "Renamed or retyped unknown item allocation/table structs in forward declarations and declarations: HSD_ObjAllocUnk4 became RandomItemSpawner and HSD_ObjAllocUnk6 became ItemPickTable in visible diff excerpts.",
+    "Updated it_266F function signatures and call sites to use ItemPickTable* and RandomItemSpawner* instead of less-specific unknown allocation types.",
+    "Retyped StageInfo.xA0 from u8[4] to s32 and updated Ground_801C2AD8 to return s32* plus corresponding header and call-site changes.",
+    "Reworked item spawn/pick-table loops in it_8026CB9C, it_8026CF04, and it_8026D018 using named locals such as counts, mask, weight, spawner, tables, common, monster, cumulative, and idx.",
+    "Introduced some explicit matching tactics in visible excerpts, including #pragma dont_inline wrappers, stack padding arrays, volatile local cnt2, local declaration/order changes, and temporary ret/new_var locals.",
+    "Bot report recorded +0.08% matched code, +2920 bytes, 8 new matches, 45 improvements in unmatched items, and one unmatched-item .sdata2 regression for main/melee/it/it_266F."
+  ],
+  "smart_moves": [
+    "Where supported by visible diff, unknown struct names were replaced by narrower domain names such as RandomItemSpawner and ItemPickTable, improving readability and reducing raw pointer-style access.",
+    "StageInfo.xA0 and Ground_801C2AD8 were updated together across source, header, and type definition, keeping the prototype aligned with the recovered field type.",
+    "Several generated-looking variable names in it_266F were replaced with role-oriented names such as counts, mask, weight, spawner, tables, common, monster, cumulative, and idx.",
+    "The PR body explicitly scoped remaining work pressure in item TUs, and the bot report quantified both matches and regressions, making progress and risk searchable."
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a recovered body proves that an unknown helper/data struct has a narrower domain role, update the forward declaration, global declarations, prototypes, and call sites together rather than leaving HSD_ObjAllocUnk-style names in the interface.",
+      "scope": [
+        "item",
+        "headers",
+        "typing"
+      ],
+      "evidence_refs": [
+        "raw_diff: forward.h HSD_ObjAllocUnk4/HSD_ObjAllocUnk6 renamed to RandomItemSpawner/ItemPickTable",
+        "raw_diff: it_266F.h prototypes changed to ItemPickTable*",
+        "raw_diff: it_2725.c globals it_804A0E30/50/60 retyped"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "If a field is recovered from a byte array to a scalar, update both address-taking call sites and getter return types so consumers no longer need casts or byte-array assumptions.",
+      "scope": [
+        "stage",
+        "typing",
+        "headers"
+      ],
+      "evidence_refs": [
+        "raw_diff: gr/types.h StageInfo.xA0 u8[4] -> s32",
+        "raw_diff: ground.c Ground_801C0754 passes &stage_info.xA0 and Ground_801C2AD8 returns &stage_info.xA0",
+        "raw_diff: ground.h Ground_801C2AD8 u8* -> s32*"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "lesson": "Reviewer-visible placeholder names such as new_var are treated as cleanup debt even if they help a match; prefer a minimal role name such as pos_copy when the role is known.",
+      "scope": [
+        "naming",
+        "reviewability",
+        "item"
+      ],
+      "evidence_refs": [
+        "review_comments: PsiLupan requested meaningful names instead of new_var and suggested pos_copy",
+        "review_comments: author replied that a lot of this is permuterslop and would get cleanup"
+      ],
+      "confidence": 0.9
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Use domain names for recovered item table/spawner structs when evidence supports them, e.g. RandomItemSpawner and ItemPickTable rather than HSD_ObjAllocUnk4/HSD_ObjAllocUnk6.",
+      "evidence_refs": [
+        "raw_diff: forward.h typedef changes",
+        "raw_diff: it_266F.c and it_2725.c type changes"
+      ],
+      "confidence": 0.76
+    },
+    {
+      "convention": "Avoid placeholder locals like new_var in reviewable decomp code; even simple role names such as pos_copy are preferred when the role is clear.",
+      "evidence_refs": [
+        "review_comments: PsiLupan on itsamusgrapple.c"
+      ],
+      "confidence": 0.95
+    },
+    {
+      "convention": "Visible cleanup moved several generated arg/temp names toward role names such as counts, mask, weight, spawner, tables, common, monster, cumulative, and idx.",
+      "evidence_refs": [
+        "raw_diff: it_8026CB9C and it_8026CF04 excerpts"
+      ],
+      "confidence": 0.72
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Used narrow #pragma dont_inline blocks around it_8026CA4C and an added it_8026C704_outline wrapper in the visible diff.",
+      "evidence_refs": [
+        "raw_diff: it_266F.c #pragma push / #pragma dont_inline on around it_8026CA4C",
+        "raw_diff: it_266F.c static bool it_8026C704_outline under #pragma dont_inline"
+      ],
+      "risk_or_note": "Loaded evidence shows tactic use but does not include author explanation or adjacent-function verification beyond bot report progress."
+    },
+    {
+      "tactic": "Used stack-shape/local-lifetime steering in visible snippets, including u8 _padA[136], u8 _padA[8], volatile s32 cnt2, explicit temporary randf, and ret assignment on return.",
+      "evidence_refs": [
+        "raw_diff: it_266F.c it_8026D018 and it_8026F3D4 excerpts",
+        "raw_diff: it_2725.c it_8027649C excerpt"
+      ],
+      "risk_or_note": "These are matching tactics requiring verification; bot report shows overall progress but not line-level justification for each tactic."
+    },
+    {
+      "tactic": "Converted repeated generated-looking item table logic into explicit loops over counts/masks while preserving mask backup and cumulative weighting variables.",
+      "evidence_refs": [
+        "raw_diff: it_8026CB9C rewrite from nested generated-looking blocks to loops with counts/mask/weight"
+      ],
+      "risk_or_note": "Consistent with natural-loop cleanup, but loaded slice does not provide objdiff details for the specific loop shape."
+    },
+    {
+      "tactic": "Changed some array indexing/cumulative-index increments from byte-shift or +2 style to direct element indexing/increment in visible excerpts.",
+      "evidence_refs": [
+        "raw_diff: it_8026CD50 idx += 2 -> idx++",
+        "raw_diff: it_8026F3D4 sp30.x0[(s8) cnt2 << 2] -> sp30.x0[cnt2]"
+      ],
+      "risk_or_note": "Likely tied to recovered array typing, but exact struct definitions and verifier output are not fully loaded."
+    }
+  ],
+  "review_feedback": [
+    {
+      "path": "src/melee/it/items/itsamusgrapple.c",
+      "author": "PsiLupan",
+      "feedback": "Requested meaningful names instead of placeholders like new_var; said this was the main complaint about most of the PR and suggested pos_copy as better than new_var.",
+      "evidence_refs": [
+        "review_comments: discussion_r3191396695"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itsamusgrapple.c",
+      "author": "lukechampine",
+      "feedback": "Acknowledged the issue, calling much of it permuterslop, and said they would give it a cleanup pass.",
+      "evidence_refs": [
+        "review_comments: discussion_r3191433462"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2460",
+    "various item work",
+    "lukechampine",
+    "item matching",
+    "permuterslop",
+    "new_var",
+    "pos_copy",
+    "RandomItemSpawner",
+    "ItemPickTable",
+    "HSD_ObjAllocUnk4",
+    "HSD_ObjAllocUnk6",
+    "Ground_801C2AD8",
+    "StageInfo.xA0",
+    "it_8026CB9C",
+    "it_8026CF04",
+    "it_8026D018",
+    "it_8026F3D4",
+    "it_8027649C",
+    "it_8027870C",
+    "it_80278F2C",
+    "it_802A0930",
+    "it_802A3500",
+    "it_802AFF08",
+    "it_802AFD8C",
+    "it_802BC94C",
+    "PAD_STACK",
+    "dont_inline",
+    "volatile cnt2",
+    "sdata2 regression"
+  ],
+  "follow_up_queries": [
+    "PR2460 new_var permuterslop naming review",
+    "RandomItemSpawner ItemPickTable HSD_ObjAllocUnk6",
+    "Ground_801C2AD8 StageInfo xA0 s32",
+    "it_8026F3D4 volatile cnt2 _padA dont_inline",
+    "it_8026CB9C counts mask weight cumulative",
+    "it_266F .sdata2 regression PR2460",
+    "item TUs one tricky match away remaining item functions 142"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR identity, state, author, changed-file list, counts",
+      "human_pr_text: PR body with remaining item TUs/functions",
+      "text_corpus: decomp-dev bot report with match/improvement/regression metrics",
+      "review_comments: naming/permuterslop discussion",
+      "raw_diff: visible excerpts for ground, it_266F, it_2725, and headers",
+      "changed_files: complete changed-file list"
+    ],
+    "notes": [
+      "Changed-file list and review feedback are complete in loaded evidence.",
+      "Diff is truncated, so file-specific details outside the visible excerpts are not summarized beyond changed-file metadata and bot report entries.",
+      "Bot report provides progress metrics but not full build, objdiff, or adjacent-function verification for each individual tactic.",
+      "The PR was merged per metadata, but this intake does not infer that every tactic or naming choice is a global accepted standard.",
+      "The author's comment confirms cleanup intent for permuter-style names, but the loaded slice does not show the final cleanup pass wording or all resulting local names."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "review_lesson",
+        "title": "Avoid placeholder permuter locals in reviewable decomp PRs",
+        "text": "In PR #2460, review feedback called out placeholder names like new_var and requested meaningful names, with pos_copy given as an example of an acceptable simple role name. The author acknowledged that much of the PR was permuterslop and planned cleanup.",
+        "scope": [
+          "naming",
+          "reviewability",
+          "decomp-matching"
+        ],
+        "evidence_refs": [
+          "review_comments: discussion_r3191396695",
+          "review_comments: discussion_r3191433462"
+        ],
+        "confidence": 0.93
+      },
+      {
+        "record_type": "typing_lesson",
+        "title": "Propagate recovered struct roles through headers and declarations",
+        "text": "The visible diff replaces HSD_ObjAllocUnk4/HSD_ObjAllocUnk6 with RandomItemSpawner/ItemPickTable in forward declarations, globals, and it_266F prototypes/call sites, illustrating that recovered domain types should be propagated across interface surfaces when supported.",
+        "scope": [
+          "item",
+          "headers",
+          "typing"
+        ],
+        "evidence_refs": [
+          "raw_diff: forward.h typedef changes",
+          "raw_diff: it_266F.h prototype changes",
+          "raw_diff: it_2725.c global declaration changes"
+        ],
+        "confidence": 0.78
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Strengthen naming guidance against placeholder permuter locals",
+        "text": "Consider adding PR #2460 as historical evidence under conservative-naming or matching-tactics: reviewer feedback explicitly objected to placeholder names such as new_var in matched/permuter-shaped code and preferred even a simple role name like pos_copy.",
+        "source_path": null,
+        "scope": [
+          "naming",
+          "reviewability",
+          "matching tactics"
+        ],
+        "evidence_refs": [
+          "review_comments: PsiLupan requested meaningful names instead of new_var",
+          "review_comments: lukechampine called much of it permuterslop"
+        ],
+        "reason": "The existing conservative-naming standard already covers meaningful local names; this PR provides a concrete review example that placeholder permuter locals create cleanup debt."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "Item random spawning code uses RandomItemSpawner and ItemPickTable names in it_266F/it_2725",
+        "text": "Visible PR #2460 diff retyped item spawning globals/prototypes from HSD_ObjAllocUnk4/HSD_ObjAllocUnk6 to RandomItemSpawner/ItemPickTable across src/melee/it/forward.h, src/melee/it/it_266F.h, src/melee/it/it_266F.c, src/melee/it/it_266F.dox, and src/melee/it/it_2725.c.",
+        "source_path": "src/melee/it",
+        "scope": [
+          "src/melee/it/forward.h",
+          "src/melee/it/it_266F.h",
+          "src/melee/it/it_266F.c",
+          "src/melee/it/it_266F.dox",
+          "src/melee/it/it_2725.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: forward.h",
+          "raw_diff: it_266F.h",
+          "raw_diff: it_266F.c",
+          "raw_diff: it_266F.dox",
+          "raw_diff: it_2725.c"
+        ],
+        "reason": "Could help future path-scoped lookup for item spawn table naming, but should be verified against current source before promotion."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "StageInfo.xA0 and Ground_801C2AD8 typing changed to s32/s32*",
+        "text": "Visible PR #2460 diff changes StageInfo.xA0 from u8[4] to s32 and Ground_801C2AD8 from u8* to s32*, including call-site address-taking in Ground_801C0754.",
+        "source_path": "src/melee/gr",
+        "scope": [
+          "src/melee/gr/types.h",
+          "src/melee/gr/ground.c",
+          "src/melee/gr/ground.h"
+        ],
+        "evidence_refs": [
+          "raw_diff: gr/types.h",
+          "raw_diff: ground.c",
+          "raw_diff: ground.h"
+        ],
+        "reason": "Potential path fact for future stage/item interaction searches; should be checked against current source before adding."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote #pragma dont_inline, volatile locals, _padA arrays, or ret/new_var temporaries as accepted tactics from this PR alone; the loaded evidence shows their use but not per-tactic verifier justification.",
+      "Do not infer that the .sdata2 regression was accepted as desirable; the bot report only records one regression.",
+      "Do not infer detailed semantics for every changed item file because the raw diff excerpt is truncated and many changed files only have metadata."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

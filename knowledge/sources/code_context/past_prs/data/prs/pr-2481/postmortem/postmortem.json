@@ -1,0 +1,562 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2481",
+  "pr": {
+    "number": 2481,
+    "title": "fixup misc lb data",
+    "url": "https://github.com/doldecomp/melee/pull/2481",
+    "state": "MERGED",
+    "author": "r-burns",
+    "created_at": "2026-05-11T00:14:50Z",
+    "merged_at": "2026-05-11T00:26:51Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2481 split the tail of melee/lb/lbmthp.c into a new matching object melee/lb/lb_01F8.c, adjusted GALE01 splits and symbol metadata for lb data/string ownership, moved shared lbmthp struct declarations into the public header, and made small matching/data fixes in lb_00F9, lbmthp, lbsnap, lbrefract, and lbshadow. The bot report recorded 13 new matches, including lb_01F8 text, bss, and sdata2, plus matched data gains in nearby lb units.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "matching",
+      "data-metadata",
+      "tu-split",
+      "headers",
+      "fix"
+    ],
+    "systems": [
+      "melee/lb",
+      "GALE01 config",
+      "build configuration"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/lb/lb_01F8.c",
+      "role": "New matching translation unit containing lbMthp8001F890, lbMthp8001F928, lbMthp8001FAA0 and local bss struct lbl_804335B8_t.",
+      "evidence_refs": [
+        "diff:new file src/melee/lb/lb_01F8.c",
+        "bot_report:lb_01F8 functions, .bss, and .sdata2 new matches"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lbmthp.c",
+      "role": "Original lbmthp unit shortened at 0x8001F890; tail functions removed and minor matching fixes applied to assertions and THPVideoDecode calls.",
+      "evidence_refs": [
+        "diff:lbmthp.c removes lbMthp8001F890/lbMthp8001F928/lbMthp8001FAA0",
+        "diff:lbmthp.c changes streamPlayer copy to pointer and THPVideoDecode third argument cast",
+        "bot_report:fn_8001F13C reached 100%; fn_8001E910 improved"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lbmthp.h",
+      "role": "Header gains GXStruct include, THPVideoDecode prototype correction, and struct lbl_804333E0_t definition shared by lbmthp.c and lb_01F8.c.",
+      "evidence_refs": [
+        "diff:lbmthp.h adds <dolphin/gx/GXStruct.h>",
+        "diff:THPVideoDecode third parameter changed from s32 to void*",
+        "diff:struct lbl_804333E0_t moved into header"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lbmthp.static.h",
+      "role": "Static header no longer owns lbl_804333E0_t definition after it moved to lbmthp.h.",
+      "evidence_refs": [
+        "diff:lbmthp.static.h removes GXStruct include and struct lbl_804333E0_t block"
+      ]
+    },
+    {
+      "path": "config/GALE01/splits.txt",
+      "role": "Updates lbmthp ranges and introduces new split entry for melee/lb/lb_01F8.c.",
+      "evidence_refs": [
+        "diff:splits.txt lbmthp text end changes 0x8001FC08 to 0x8001F890",
+        "diff:splits.txt lb_01F8 text 0x8001F890-0x8001FC08, bss 0x804335B8-0x80433658, sdata2 0x804D7CE0-0x804D7CE8"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Refines lb/lbshadow/lbsnap/lbmthp data symbol boundaries, string labels, sizes, scopes, and data encodings.",
+      "evidence_refs": [
+        "diff:symbols.txt splits lbShadow_803BA0FC and adds lbl_803BA12C",
+        "diff:symbols.txt replaces lbSnap_803BAD00 aggregate with individual string/sjis labels",
+        "diff:symbols.txt replaces str_arr_803BADB0 and str_arr_803BAE3C aggregates with individual labels"
+      ]
+    },
+    {
+      "path": "configure.py",
+      "role": "Adds melee/lb/lb_01F8.c as a Matching object.",
+      "evidence_refs": [
+        "diff:configure.py adds Object(Matching, \"melee/lb/lb_01F8.c\")"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lb_00F9.c",
+      "role": "Small matching/data cleanup: assert filename override, const Vec3 data, and local float initialization order/value changes.",
+      "evidence_refs": [
+        "diff:lb_00F9.c defines __FILE__ as \"lbspdisplay.c\"",
+        "diff:lb_00F9.c makes lb_803B72A8/lb_803B72B4 static const",
+        "bot_report:lb_00F9 .rodata reached 100%"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lbsnap.static.h",
+      "role": "Changed file in lb data cleanup; exact hunk content not fully loaded in excerpt.",
+      "evidence_refs": [
+        "changed_files:lbsnap.static.h added 4 deleted 2",
+        "bot_report:lbsnap .data reached 100%"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lbrefract.c",
+      "role": "Changed file in lb data cleanup; exact hunk content not loaded in excerpt.",
+      "evidence_refs": [
+        "changed_files:lbrefract.c added 1 deleted 1",
+        "bot_report:lbrefract .sdata reached 100%"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lbshadow.c",
+      "role": "Changed file in lb data cleanup; exact hunk content not loaded in excerpt.",
+      "evidence_refs": [
+        "changed_files:lbshadow.c added 1 deleted 1",
+        "bot_report:lbshadow .data and .sdata reached 100%"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Created src/melee/lb/lb_01F8.c and moved three lbMthp tail functions from lbmthp.c into it: lbMthp8001F890, lbMthp8001F928, and lbMthp8001FAA0.",
+    "Updated GALE01 splits so lbmthp.c text ends at 0x8001F890 and new lb_01F8.c owns text 0x8001F890-0x8001FC08, bss 0x804335B8-0x80433658, and sdata2 0x804D7CE0-0x804D7CE8.",
+    "Added lb_01F8.c to configure.py as Object(Matching, \"melee/lb/lb_01F8.c\").",
+    "Changed THPVideoDecode prototype third argument from s32 to void* and updated call sites to pass/cast pointer values accordingly.",
+    "Moved struct lbl_804333E0_t from lbmthp.static.h into lbmthp.h so lb_01F8.c can extern Movieplayer with the shared type.",
+    "Replaced generated-looking float symbol use lbl_804D7CE0 in moved lb_01F8 code with inline 0.0F literals.",
+    "Adjusted lbmthp assertion code to use a pointer to Movieplayer instead of copying the whole struct before HSD_ASSERTREPORT.",
+    "Fixed an HSD_ASSERTREPORT format string in fn_8001F13C by removing an embedded newline from the literal.",
+    "Refined symbols.txt data metadata by splitting aggregate symbols into smaller string/sjis labels and adjusting lbShadow_803BA0FC size.",
+    "In lb_00F9.c, added a local __FILE__ override to \"lbspdisplay.c\", made two Vec3 objects const, and swapped local float initializers for far and ortho_bot."
+  ],
+  "smart_moves": [
+    {
+      "text": "The PR used a real split entry plus configure.py object addition instead of leaving tail functions in the old lbmthp unit, which made lb_01F8 text, bss, and sdata2 independently match.",
+      "evidence_refs": [
+        "diff:splits.txt new melee/lb/lb_01F8.c ranges",
+        "diff:configure.py Object(Matching, \"melee/lb/lb_01F8.c\")",
+        "bot_report:lb_01F8 new matches"
+      ]
+    },
+    {
+      "text": "The shared Movieplayer struct was moved from a static header into lbmthp.h when the new translation unit needed the same type, avoiding duplicate local struct definitions in the diff.",
+      "evidence_refs": [
+        "diff:lbmthp.h adds struct lbl_804333E0_t",
+        "diff:lbmthp.static.h removes struct lbl_804333E0_t",
+        "diff:lb_01F8.c extern struct lbl_804333E0_t Movieplayer"
+      ]
+    },
+    {
+      "text": "The PR corrected a function prototype to represent a pointer parameter directly and then adjusted call sites, rather than continuing to pass pointer-like values through an s32 prototype.",
+      "evidence_refs": [
+        "diff:THPVideoDecode prototype changes third parameter to void*",
+        "diff:lbmthp.c casts data->unk_98 to void*",
+        "diff:lb_01F8.c passes decode_buf to THPVideoDecode"
+      ]
+    },
+    {
+      "text": "Data progress was achieved through symbol/split metadata and const/literal adjustments, not by adding broad dummy storage in the loaded excerpt.",
+      "evidence_refs": [
+        "diff:symbols.txt string/sjis label splits",
+        "diff:lb_00F9.c static const Vec3 changes",
+        "diff:lb_01F8.c inline 0.0F literals"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a contiguous tail range of a nonmatching translation unit has distinct bss/sdata2 ownership and can be matched as its own unit, consider a split update plus a new Matching object rather than forcing the whole old unit to carry the code.",
+      "scope": [
+        "GALE01 splits",
+        "configure.py",
+        "melee/lb"
+      ],
+      "evidence_refs": [
+        "diff:splits.txt lbmthp range shortened and lb_01F8 ranges added",
+        "diff:configure.py adds lb_01F8.c as Matching",
+        "bot_report:lb_01F8 functions and sections reach 100%"
+      ]
+    },
+    {
+      "lesson": "If a split exposes a type needed by multiple translation units, move the recovered struct to the shared header instead of keeping it in a static header tied to one source file.",
+      "scope": [
+        "headers",
+        "melee/lb/lbmthp"
+      ],
+      "evidence_refs": [
+        "diff:lbmthp.h gains struct lbl_804333E0_t",
+        "diff:lbmthp.static.h removes same struct",
+        "diff:lb_01F8.c uses extern struct lbl_804333E0_t Movieplayer"
+      ]
+    },
+    {
+      "lesson": "Prototype truth can be part of matching cleanup: once call sites show an argument is a pointer buffer, changing the prototype from integer to void* may remove casts at the better-owned call site and make remaining casts explicit.",
+      "scope": [
+        "THPVideoDecode",
+        "lbmthp"
+      ],
+      "evidence_refs": [
+        "diff:lbmthp.h THPVideoDecode third parameter s32 to void*",
+        "diff:lb_01F8.c THPVideoDecode passes decode_buf",
+        "diff:lbmthp.c THPVideoDecode casts data->unk_98 to void*"
+      ]
+    },
+    {
+      "lesson": "For data-section cleanup, split aggregate string-array symbols into address-sized string/sjis labels when the metadata supports smaller labels; this can improve data matching without changing C control flow.",
+      "scope": [
+        "config/GALE01/symbols.txt",
+        "melee/lb data"
+      ],
+      "evidence_refs": [
+        "diff:symbols.txt lbSnap_803BAD00 replaced by lbl_803BAD00/lbl_803BAD1C/lbl_803BAD48/lbl_803BAD74",
+        "diff:symbols.txt str_arr_803BADB0 and str_arr_803BAE3C replaced by individual labels",
+        "bot_report:matched data +480 bytes"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "lb_01F8.c",
+      "convention": "The new file name follows the address-style lb split naming convention for a range beginning at 0x8001F890 rather than inventing a semantic module name.",
+      "evidence_refs": [
+        "diff:splits.txt melee/lb/lb_01F8.c text start 0x8001F890",
+        "diff:new file src/melee/lb/lb_01F8.c"
+      ]
+    },
+    {
+      "name": "lbl_804335B8_t / lbl_804335B8",
+      "convention": "The PR keeps address-style names for the new local bss struct and object where semantics are only partly known, while adding field comments for obvious texture/image/width/height roles.",
+      "evidence_refs": [
+        "diff:lb_01F8.c struct lbl_804335B8_t",
+        "diff:lb_01F8.c comments image ptr for tex0/tex1/tex2, width, height"
+      ]
+    },
+    {
+      "name": "lbl_803BAD00-style data labels",
+      "convention": "The symbols metadata uses address-style lbl_ names for newly split data/string labels rather than speculative semantic names.",
+      "evidence_refs": [
+        "diff:symbols.txt added lbl_803BAD00, lbl_803BAD1C, lbl_803BAD48, lbl_803BAD74",
+        "diff:symbols.txt added lbl_803BAE3C through lbl_803BAFCC labels"
+      ]
+    },
+    {
+      "name": "pWidth / pHeight",
+      "convention": "Local pointer variables in lbMthp8001F928 use role names for width and height where the field purpose is clear.",
+      "evidence_refs": [
+        "diff:lb_01F8.c u16* pWidth = &lbl_804335B8.x6C",
+        "diff:lb_01F8.c u16* pHeight = &lbl_804335B8.x6E"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Translation-unit split with section ownership updates",
+      "details": "The tail text, bss, and sdata2 ranges were separated from lbmthp.c into lb_01F8.c and then configured as a Matching object.",
+      "evidence_refs": [
+        "diff:splits.txt",
+        "diff:configure.py",
+        "bot_report:lb_01F8 100% items"
+      ]
+    },
+    {
+      "tactic": "Inline literal restoration for small float constants",
+      "details": "Moved code in lb_01F8.c uses 0.0F directly where the old lbmthp.c version referenced lbl_804D7CE0.",
+      "evidence_refs": [
+        "diff:lbmthp.c removed lbl_804D7CE0 uses in deleted tail code",
+        "diff:lb_01F8.c uses 0.0F in x80/x84 and GXInitTexObjLOD calls",
+        "bot_report:lb_01F8 .sdata2 reached 100%"
+      ]
+    },
+    {
+      "tactic": "Prototype correction for pointer argument matching",
+      "details": "THPVideoDecode's third parameter became void*, with call sites updated to pass a buffer pointer or cast pointer-like storage.",
+      "evidence_refs": [
+        "diff:lbmthp.h",
+        "diff:lbmthp.c",
+        "diff:lb_01F8.c"
+      ]
+    },
+    {
+      "tactic": "Struct copy avoidance",
+      "details": "fn_8001E910 now takes a pointer to Movieplayer for the assertion check instead of copying the full struct to a local variable.",
+      "evidence_refs": [
+        "diff:lbmthp.c streamPlayer changes from struct value to pointer",
+        "bot_report:fn_8001E910 improved from 81.22% to 87.12%"
+      ]
+    },
+    {
+      "tactic": "Assert filename override",
+      "details": "lb_00F9.c undefines and redefines __FILE__ as \"lbspdisplay.c\", apparently to match assert/report file-string ownership in that source range.",
+      "evidence_refs": [
+        "diff:lb_00F9.c __FILE__ override",
+        "bot_report:lb_00F9 .rodata reached 100%"
+      ]
+    },
+    {
+      "tactic": "Symbol metadata refinement",
+      "details": "symbols.txt changed aggregate data entries into individual string/sjis labels and adjusted object sizes to improve data matching.",
+      "evidence_refs": [
+        "diff:symbols.txt",
+        "bot_report:matched data +0.04%, +480 bytes"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "author": "decomp-dev[bot]",
+      "created_at": "2026-05-11T00:18:32Z",
+      "text": "Report recorded matched code 66.55% (+0.03%, +1232 bytes), linked code 38.85% (+0.02%, +888 bytes), matched data 38.85% (+0.04%, +480 bytes), and linked data 33.15% (+0.01%, +168 bytes).",
+      "evidence_refs": [
+        "text_corpus:issue_comment decomp-dev[bot]"
+      ]
+    },
+    {
+      "kind": "bot_report",
+      "author": "decomp-dev[bot]",
+      "created_at": "2026-05-11T00:18:32Z",
+      "text": "The bot listed 13 new matches, including lbMthp8001F928, lbMthp8001FAA0, lbMthp8001F890, lb_01F8 .bss, lb_01F8 .sdata2, lb_00F9 .rodata, lbshadow data/sdata, lbsnap data, lbrefract sdata, lbmthp fn_8001F13C, lbmthp .sdata2, and lbmthp .bss.",
+      "evidence_refs": [
+        "text_corpus:issue_comment decomp-dev[bot] new matches table"
+      ]
+    },
+    {
+      "kind": "bot_report",
+      "author": "decomp-dev[bot]",
+      "created_at": "2026-05-11T00:18:32Z",
+      "text": "The bot also listed apparent regressions for lbMthp8001F928, lbMthp8001FAA0, and lbMthp8001F890 under the old lbmthp unit; these correspond to functions removed from lbmthp.c and reintroduced as new 100% matches in lb_01F8.",
+      "evidence_refs": [
+        "text_corpus:issue_comment decomp-dev[bot] regressions table",
+        "diff:lbmthp.c deleted tail functions",
+        "diff:lb_01F8.c added same functions"
+      ]
+    },
+    {
+      "kind": "absence",
+      "author": null,
+      "created_at": null,
+      "text": "No human review comments were included in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata_json:review_comments 0",
+        "metadata_json:reviews 0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2481",
+    "fixup misc lb data",
+    "r-burns",
+    "lb_01F8.c",
+    "lbmthp.c",
+    "lbmthp.h",
+    "lbmthp.static.h",
+    "lb_00F9.c",
+    "lbsnap.static.h",
+    "lbrefract.c",
+    "lbshadow.c",
+    "GALE01 splits",
+    "GALE01 symbols",
+    "Object(Matching, melee/lb/lb_01F8.c)",
+    "lbMthp8001F890",
+    "lbMthp8001F928",
+    "lbMthp8001FAA0",
+    "THPVideoDecode",
+    "THPDec_80331340",
+    "THPDec_803313D0",
+    "HSD_SObjLib_803A477C",
+    "HSD_ASSERTREPORT",
+    "Movieplayer",
+    "lbl_804333E0_t",
+    "lbl_804335B8_t",
+    "lbl_804335B8",
+    "lbl_804D7CE0",
+    "lbspdisplay.c",
+    "str_Warning_frame_offsets_not_supported",
+    "lbShadow_803BA0FC",
+    "lbSnap_803BAD00",
+    "str_arr_803BADB0",
+    "str_arr_803BAE3C"
+  ],
+  "follow_up_queries": [
+    "PR 2481 lb_01F8 split lbmthp 0x8001F890",
+    "lbMthp8001F890 lbMthp8001F928 lbMthp8001FAA0 split history",
+    "THPVideoDecode void* third parameter lbmthp",
+    "Movieplayer lbl_804333E0_t header move",
+    "lbmthp symbols.txt str_arr_803BAE3C labels",
+    "lb_00F9 __FILE__ lbspdisplay.c rodata match",
+    "lbShadow_803BA0FC lbl_803BA12C symbol size",
+    "lbsnap lbl_803BAD00 lbl_803BAD1C sjis"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json:PR identity, changed file list, merge state",
+      "raw_diff/diff_excerpt:main loaded code/config changes",
+      "changed_files.jsonl:all changed paths and hunk counts",
+      "text_corpus.jsonl:bot report and empty PR body"
+    ],
+    "notes": [
+      "The PR body is empty and no human review comments are present, so intent beyond the diff and bot report is not supported.",
+      "The loaded raw diff is truncated; exact hunks for lbsnap.static.h, lbrefract.c, and lbshadow.c are not available in the excerpt, so their file-specific details are limited to changed-file metadata and bot report outcomes.",
+      "The bot report provides matching/regression metrics, but no local build command, objdiff command, or reviewer acceptance rationale is included.",
+      "The apparent regressions for lbMthp8001F890/lbMthp8001F928/lbMthp8001FAA0 are interpreted only as old-unit report movement because the diff shows those functions removed from lbmthp.c and added to lb_01F8.c; no broader regression conclusion is claimed."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "type": "decomp_lesson_candidate",
+        "title": "Use a real TU split when a tail range becomes independently matchable",
+        "text": "PR 2481 supports a candidate lesson that a tail range should be split with GALE01 splits and configure.py updates when the new unit owns distinct text/bss/sdata2 ranges and reaches matching status. Evidence: lbmthp.c shortened at 0x8001F890, lb_01F8.c added for 0x8001F890-0x8001FC08, and bot report shows lb_01F8 functions/sections at 100%.",
+        "scope": [
+          "melee/lb",
+          "translation-unit splits",
+          "matching configuration"
+        ],
+        "evidence_refs": [
+          "diff:splits.txt",
+          "diff:configure.py",
+          "bot_report:lb_01F8 new matches"
+        ]
+      },
+      {
+        "type": "decomp_lesson_candidate",
+        "title": "Move proven shared structs out of static headers when a new TU needs them",
+        "text": "PR 2481 supports a candidate lesson that splitting code may require moving a recovered struct from a static header to the public owning header so another source file can use the same type without duplication.",
+        "scope": [
+          "headers",
+          "shared structs",
+          "melee/lb/lbmthp"
+        ],
+        "evidence_refs": [
+          "diff:lbmthp.h adds struct lbl_804333E0_t",
+          "diff:lbmthp.static.h removes struct lbl_804333E0_t",
+          "diff:lb_01F8.c extern Movieplayer"
+        ]
+      },
+      {
+        "type": "decomp_lesson_candidate",
+        "title": "Prefer truthful pointer prototypes over integer placeholders",
+        "text": "PR 2481 supports a candidate lesson that a function prototype should use a pointer type when call sites pass a buffer pointer; THPVideoDecode changed from s32 to void* for its third parameter and call sites were updated.",
+        "scope": [
+          "headers",
+          "function prototypes",
+          "THP decode"
+        ],
+        "evidence_refs": [
+          "diff:lbmthp.h THPVideoDecode signature",
+          "diff:lbmthp.c THPVideoDecode call",
+          "diff:lb_01F8.c THPVideoDecode call"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "PR 2481 introduced matching split melee/lb/lb_01F8.c",
+        "text": "In PR 2481, GALE01 splits gained melee/lb/lb_01F8.c with text 0x8001F890-0x8001FC08, bss 0x804335B8-0x80433658, and sdata2 0x804D7CE0-0x804D7CE8; configure.py added it as Object(Matching, \"melee/lb/lb_01F8.c\").",
+        "source_path": "src/melee/lb/lb_01F8.c",
+        "scope": [
+          "GALE01",
+          "melee/lb",
+          "splits",
+          "configure"
+        ],
+        "evidence_refs": [
+          "diff:splits.txt",
+          "diff:configure.py",
+          "bot_report:lb_01F8 new matches"
+        ],
+        "reason": "This is a path/split ownership fact supported by the PR diff and may be useful for future lookup."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "PR 2481 shortened lbmthp.c split after moving tail functions",
+        "text": "In PR 2481, melee/lb/lbmthp.c text range changed from ending at 0x8001FC08 to ending at 0x8001F890; its bss end changed from 0x80433658 to 0x804335B8 and sdata2 end from 0x804D7CE8 to 0x804D7CE0.",
+        "source_path": "src/melee/lb/lbmthp.c",
+        "scope": [
+          "GALE01",
+          "melee/lb/lbmthp.c",
+          "splits"
+        ],
+        "evidence_refs": [
+          "diff:splits.txt"
+        ],
+        "reason": "This is a concrete split-boundary update, but should be curated as path metadata rather than inferred as a general standard."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "PR 2481 made lbmthp.h own struct lbl_804333E0_t",
+        "text": "PR 2481 moved struct lbl_804333E0_t from src/melee/lb/lbmthp.static.h into src/melee/lb/lbmthp.h and added GXStruct.h include support there.",
+        "source_path": "src/melee/lb/lbmthp.h",
+        "scope": [
+          "headers",
+          "melee/lb/lbmthp"
+        ],
+        "evidence_refs": [
+          "diff:lbmthp.h",
+          "diff:lbmthp.static.h"
+        ],
+        "reason": "This records header ownership observed in the PR without promoting a broader rule."
+      },
+      {
+        "target_source_id": "ssbm_data_sheet",
+        "update_kind": "source_update",
+        "title": "PR 2481 refined lb data symbols around 0x803BA0FC and 0x803BAD00-0x803BAFCC",
+        "text": "PR 2481 changed symbols.txt data metadata by resizing lbShadow_803BA0FC, adding lbl_803BA12C, replacing lbSnap_803BAD00 with individual string/sjis labels, and replacing str_arr_803BADB0/str_arr_803BAE3C aggregates with individual lbl_ address labels.",
+        "source_path": "config/GALE01/symbols.txt",
+        "scope": [
+          "GALE01 symbols",
+          "melee/lb data",
+          "lbshadow",
+          "lbsnap",
+          "lbmthp"
+        ],
+        "evidence_refs": [
+          "diff:symbols.txt"
+        ],
+        "reason": "This may belong in a data-symbol ownership sheet, but should be reviewed against current symbols and map metadata before acceptance."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Consider documenting split-plus-config matching workflow",
+        "text": "PR 2481 is evidence that a matching change may require coordinated source movement, splits.txt ranges, symbols.txt metadata, and configure.py Object(Matching) updates. Existing standards cover data sections and truthful headers; curator may decide whether a more explicit split workflow note is useful.",
+        "source_path": null,
+        "scope": [
+          "translation-unit splits",
+          "matching workflow",
+          "configuration"
+        ],
+        "evidence_refs": [
+          "diff:splits.txt",
+          "diff:configure.py",
+          "diff:lb_01F8.c",
+          "bot_report:lb_01F8 new matches"
+        ],
+        "reason": "Candidate standard only; the PR is a single example and does not by itself establish global policy."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that __FILE__ overrides are generally acceptable from this PR alone; the diff shows one override in lb_00F9.c, but no reviewer explanation or objdiff command is included.",
+      "Do not treat address-style lbl_ names as semantically meaningful; the PR mostly preserves conservative address-based naming for data labels and unknown structs.",
+      "Do not claim all lbsnap/lbrefract/lbshadow source changes from this PR because their exact hunks are not fully present in the loaded excerpt.",
+      "Do not promote the bot report's old-lbmthp regressions as true functional regressions; the loaded diff supports that the listed functions moved to lb_01F8 and matched there."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 695,
+  "title": "Support `-requireprotos`, pass 1",
+  "state": "MERGED",
+  "createdAt": "2023-01-16T22:50:15Z",
+  "updatedAt": "2023-01-16T23:15:12Z",
+  "mergedAt": "2023-01-16T23:15:11Z",
+  "closedAt": "2023-01-16T23:15:11Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/695",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 1,
+    "diff_bytes": 17192
+  }
+}

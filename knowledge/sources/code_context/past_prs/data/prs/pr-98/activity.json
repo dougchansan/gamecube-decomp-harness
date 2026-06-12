@@ -1,0 +1,10 @@
+{
+  "pr": 98,
+  "title": "Clean some ascii and pointers in .data",
+  "url": "https://github.com/doldecomp/melee/pull/98",
+  "text_records_with_body": 0,
+  "review_comments": 0,
+  "changed_files": 1,
+  "added_lines": 48,
+  "deleted_lines": 93
+}

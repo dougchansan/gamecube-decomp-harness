@@ -1,0 +1,17 @@
+{
+  "number": 1363,
+  "title": "Mark scratches with 100% fuzzy score as OK",
+  "state": "MERGED",
+  "createdAt": "2024-02-29T20:29:30Z",
+  "updatedAt": "2024-02-29T20:31:53Z",
+  "mergedAt": "2024-02-29T20:31:52Z",
+  "closedAt": "2024-02-29T20:31:52Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1363",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 579098
+  }
+}

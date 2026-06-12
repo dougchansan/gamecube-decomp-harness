@@ -1,0 +1,17 @@
+{
+  "number": 975,
+  "title": "Match the rest of HSD's pobj.c",
+  "state": "MERGED",
+  "createdAt": "2023-09-27T01:14:56Z",
+  "updatedAt": "2023-09-27T01:30:08Z",
+  "mergedAt": "2023-09-27T01:30:04Z",
+  "closedAt": "2023-09-27T01:30:05Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/975",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 244664
+  }
+}

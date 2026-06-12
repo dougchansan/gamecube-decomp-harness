@@ -1,0 +1,17 @@
+{
+  "number": 387,
+  "title": "Match ftcamera",
+  "state": "MERGED",
+  "createdAt": "2022-05-24T19:29:06Z",
+  "updatedAt": "2022-05-25T17:27:24Z",
+  "mergedAt": "2022-05-25T01:42:10Z",
+  "closedAt": "2022-05-25T01:42:10Z",
+  "author": "BR-",
+  "url": "https://github.com/doldecomp/melee/pull/387",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 19854
+  }
+}

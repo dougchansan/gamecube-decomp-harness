@@ -1,0 +1,405 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2268",
+  "pr": {
+    "number": 2268,
+    "title": "Almost finish mngallery.c + misc matches",
+    "url": "https://github.com/doldecomp/melee/pull/2268",
+    "state": "MERGED",
+    "author": "dwilliams27",
+    "created_at": "2026-03-11T02:05:47Z",
+    "merged_at": "2026-03-11T05:13:00Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2268 decompiled and matched a large slice of mngallery.c plus smaller matches in gm_1601.c, grcorneria.c, and lbaudio_ax.c, with associated header signature updates. The bot report records 19 new matches, including 9 mngallery functions listed by the author, 4 gm_1601 functions, grCorneria_801DEC94, and 3 lbaudio_ax functions, plus a 99.19% fuzzy improvement for fn_802590C4. Evidence also shows narrow matching tactics such as PAD_STACK and scoped pragmas in mngallery/lbaudio_ax, but no review comments were present.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "cleanup",
+      "matching-tactics"
+    ],
+    "systems": [
+      "menu-gallery",
+      "game-mode",
+      "ground-corneria",
+      "audio-library"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/mn/mngallery.c",
+      "role": "Primary decompilation target; added gallery camera/rendering, movie playback/menu handling, animation/update routines, includes, local static storage, scoped pragmas, temporary local structs, and PAD_STACK uses.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mngallery.c added 585 deleted 2",
+        "human_pr_text.md: author lists 9 new mngallery.c matches and fn_802590C4 at about 95% fuzzy",
+        "text_corpus.jsonl: bot report lists mngallery new matches and fn_802590C4 99.19% improvement",
+        "raw_diff: mngallery.c adds includes, mnGallery_804D6C88, mnGallery_8025896C, mnGallery_80258A08, mnGallery_80258BC4, mnGallery_80258DBC, fn_80258ED0, fn_802590C4 excerpt"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mngallery.h",
+      "role": "Header surface changed for mngallery; exact signature edits are not visible in loaded diff excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mngallery.h added 11 deleted 10"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1601.c",
+      "role": "Added matched implementations for time/stat formatting and stage unlock check helpers.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gm/gm_1601.c added 100 deleted 3",
+        "human_pr_text.md: author lists gm_801636D8, gm_80163838, gm_80163A3C, gm_80164430",
+        "raw_diff: implementations for gm_801636D8, gm_80163838, gm_80163A3C, gm_80164430"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1601.h",
+      "role": "Updated prototypes from generic int/void* forms to typed u8/u8* and bool forms for recovered functions.",
+      "evidence_refs": [
+        "raw_diff: gm_801636D8, gm_80163838, gm_80163A3C prototype changes",
+        "changed_files.jsonl: src/melee/gm/gm_1601.h added 3 deleted 3"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grcorneria.c",
+      "role": "Added grCorneria_801DEC94, a Vec3 position test against blast zone offsets.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gr/grcorneria.c added 18 deleted 1",
+        "human_pr_text.md: author lists grCorneria_801DEC94",
+        "raw_diff: grCorneria_801DEC94 implementation uses pos->x/y/z and Stage_GetBlastZone*Offset"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grcorneria.h",
+      "role": "Replaced unknown grCorneria_801DEC94 declaration with s32 grCorneria_801DEC94(Vec3*).",
+      "evidence_refs": [
+        "raw_diff: grCorneria_801DEC94 prototype changed from UNK_RET/UNK_PARAMS to s32(Vec3*)",
+        "changed_files.jsonl: src/melee/gr/grcorneria.h added 1 deleted 1"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lbaudio_ax.c",
+      "role": "Cleaned and completed several audio helper matches, including structured control flow in lbAudioAx_800263E8, PAD_STACK in lbAudioAx_80026510, and array indexing/void return in lbAudioAx_80026F2C.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/lb/lbaudio_ax.c added 35 deleted 47",
+        "human_pr_text.md: author lists lbAudioAx_800263E8, lbAudioAx_80026510, lbAudioAx_80026F2C",
+        "raw_diff: lbAudioAx_800263E8 removes goto labels, lbAudioAx_80026510 adds PAD_STACK(8), lbAudioAx_80026F2C changes return and array access"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lbaudio_ax.h",
+      "role": "Updated lbAudioAx_80026F2C prototype from u64 return to void.",
+      "evidence_refs": [
+        "raw_diff: lbAudioAx_80026F2C prototype changed from u64 to void",
+        "changed_files.jsonl: src/melee/lb/lbaudio_ax.h added 1 deleted 1"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Added implementations replacing placeholder comments for gm_801636D8, gm_80163838, gm_80163A3C, gm_80164430, grCorneria_801DEC94, and multiple mngallery routines visible in the diff.",
+    "Updated header prototypes when recovered bodies established more specific signatures, including gm_1601.h u8/u8*/bool prototypes, grcorneria.h Vec3* signature, and lbaudio_ax.h void return for lbAudioAx_80026F2C.",
+    "Refactored lbAudioAx_800263E8 from goto-labelled generated-looking flow into nested checks with direct NULL return handling.",
+    "Changed lbAudioAx_80026F2C from returning a mask and using a moving pointer to void and direct lbl_804337C4[i] assignment.",
+    "Bot report records matched code improvement of +6052 bytes and 19 new matches, with mngallery .sdata/.sbss also newly matched and grcorneria .sdata2 showing a small unmatched data regression.",
+    "fn_802590C4 was included as an in-progress mngallery improvement rather than a claimed full match; author described it as difficult and bot report shows 99.19%, not 100%."
+  ],
+  "smart_moves": [
+    {
+      "text": "The PR paired recovered function bodies with header prototype updates instead of leaving UNK_RET/UNK_PARAMS or generic void* declarations where the body established argument and return types.",
+      "evidence_refs": [
+        "raw_diff: gm_1601.h, grcorneria.h, lbaudio_ax.h prototype changes"
+      ]
+    },
+    {
+      "text": "For repeated time formatting in gm_801636D8/gm_80163A3C and aggregate time formatting in gm_80163838, the implementation uses typed u8 outputs with NULL-guarded stores and a natural for-loop for the 0x19 entry aggregation.",
+      "evidence_refs": [
+        "raw_diff: gm_801636D8, gm_80163838, gm_80163A3C"
+      ]
+    },
+    {
+      "text": "The lbaudio_ax cleanup removed explicit goto labels from lbAudioAx_800263E8 and expressed success/failure with nested checks and direct returns.",
+      "evidence_refs": [
+        "raw_diff: lbAudioAx_800263E8 before/after"
+      ]
+    },
+    {
+      "text": "The author explicitly called out fn_802590C4 as incomplete/fuzzy rather than presenting it as fully matched, which aligns with the bot report showing an unmatched-item improvement rather than a new match.",
+      "evidence_refs": [
+        "human_pr_text.md: fn_802590C4 at like 95% fuzzy match",
+        "text_corpus.jsonl: bot report fn_802590C4 99.19%"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a recovered function body proves the signature, update the owning header in the same PR rather than leaving generic declarations.",
+      "scope": [
+        "headers",
+        "decomp-matching"
+      ],
+      "evidence_refs": [
+        "raw_diff: gm_1601.h typed prototypes",
+        "raw_diff: grcorneria.h UNK_RET/UNK_PARAMS replaced",
+        "raw_diff: lbaudio_ax.h lbAudioAx_80026F2C return type changed"
+      ],
+      "confidence": 0.86
+    },
+    {
+      "lesson": "Generated-looking goto exits can sometimes be replaced by structured conditional control flow while preserving a match, as shown by lbAudioAx_800263E8 reaching 100% after replacing return_null/return_gobj labels with nested checks and direct returns.",
+      "scope": [
+        "src/melee/lb/lbaudio_ax.c",
+        "control-flow cleanup"
+      ],
+      "evidence_refs": [
+        "raw_diff: lbAudioAx_800263E8 removes goto labels",
+        "text_corpus.jsonl: bot report lbAudioAx_800263E8 99.92% to 100.00%"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "Keep incomplete fuzzy matches clearly labeled as such; a near-match can still be useful PR evidence without being treated as a completed symbol.",
+      "scope": [
+        "mngallery",
+        "matching progress reporting"
+      ],
+      "evidence_refs": [
+        "human_pr_text.md: fn_802590C4 described as about 95% fuzzy and difficult",
+        "text_corpus.jsonl: bot report lists fn_802590C4 under improvements in unmatched items"
+      ],
+      "confidence": 0.9
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "Address-style function names were retained for unrecovered semantics, e.g. gm_801636D8, fn_80258ED0, fn_802590C4, lbAudioAx_80026F2C, while clearer local names such as total_frames, frames, stage_idx, unlock_bit, cobj, viewport, scissor, eye, and interest were used where roles were locally evident.",
+      "evidence_refs": [
+        "raw_diff: gm_80163838 locals total_frames/frames",
+        "raw_diff: gm_80164430 locals stage_idx/unlock_bit",
+        "raw_diff: mnGallery_80258A08 locals cobj/viewport/scissor/eye/interest"
+      ]
+    },
+    {
+      "text": "Temporary register-style names remained in some spots such as temp_r0 and temp_r31 where the PR evidence does not show a semantic rename.",
+      "evidence_refs": [
+        "raw_diff: gm_801636D8 temp_r0",
+        "raw_diff: gm_80164430 temp_r31"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Scoped MWCC pragmas were used around difficult mngallery functions, including opt_propagation off for mnGallery_80258A08 and optimization/strength-reduction/propagation settings for fn_802590C4.",
+      "evidence_refs": [
+        "raw_diff: #pragma push/#pragma opt_propagation off around mnGallery_80258A08",
+        "raw_diff: #pragma optimization_level 2, opt_strength_reduction on, opt_propagation off around fn_802590C4"
+      ],
+      "risk_note": "Loaded evidence shows these pragmas but does not include adjacent-function validation beyond the bot progress report."
+    },
+    {
+      "tactic": "PAD_STACK was used narrowly in mnGallery_8025896C, mnGallery_80258DBC, mnGallery_802591BC, and lbAudioAx_80026510 to affect stack layout for matching.",
+      "evidence_refs": [
+        "raw_diff: PAD_STACK(0x10) in mnGallery_8025896C",
+        "raw_diff: PAD_STACK(0x10) in mnGallery_80258DBC",
+        "raw_diff: PAD_STACK(24) in mnGallery_802591BC",
+        "raw_diff: PAD_STACK(8) in lbAudioAx_80026510"
+      ],
+      "risk_note": "The bot report supports match outcomes for listed symbols, but the loaded slice does not show a rationale for each PAD_STACK or a cleanup plan."
+    },
+    {
+      "tactic": "A volatile local field was used in fn_80258ED0's temporary inner struct for gobj8, likely as a codegen steering detail; the loaded evidence only proves its presence, not the author’s exact intent.",
+      "evidence_refs": [
+        "raw_diff: HSD_GObj* volatile gobj8 in fn_80258ED0_inner"
+      ],
+      "risk_note": "Do not generalize this as a standard tactic without objdiff rationale from a fuller review."
+    },
+    {
+      "tactic": "Direct array indexing replaced pointer-walk writes in lbAudioAx_80026F2C while preserving/improving the match to 100%.",
+      "evidence_refs": [
+        "raw_diff: lbl_804337C4[i] = -1 replaces *arr = -1 and arr++",
+        "text_corpus.jsonl: bot report lbAudioAx_80026F2C 95.58% to 100.00%"
+      ],
+      "risk_note": "This is a local cleanup observation, not proof that indexed form is always better for similar loops."
+    }
+  ],
+  "review_feedback": [
+    {
+      "type": "issue_comment",
+      "author": "ribbanya",
+      "text": "Pointed to a fully matched version of a nearby MWCC version as potentially helpful for fn_802590C4/MWCC investigation, while noting it is not Melee's exact MWCC.",
+      "evidence_refs": [
+        "human_pr_text.md: ribbanya issue comment",
+        "text_corpus.jsonl: issue_comment by ribbanya at 2026-03-11T05:08:41Z"
+      ]
+    },
+    {
+      "type": "missing_review_comments",
+      "author": null,
+      "text": "No review comments were present in the loaded PR slice; only issue comments and the bot report are available.",
+      "evidence_refs": [
+        "metadata_json: counts.review_comments 0, reviews 0",
+        "metadata_json: counts.issue_comments 2"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2268",
+    "mngallery.c",
+    "mnGallery_8025896C",
+    "mnGallery_80258A08",
+    "mnGallery_80258BC4",
+    "mnGallery_80258DBC",
+    "fn_80258ED0",
+    "fn_802590C4",
+    "mnGallery_802591BC",
+    "mnGallery_80259604",
+    "mnGallery_8025963C",
+    "mnGallery_80259868",
+    "gm_801636D8",
+    "gm_80163838",
+    "gm_80163A3C",
+    "gm_80164430",
+    "grCorneria_801DEC94",
+    "lbAudioAx_800263E8",
+    "lbAudioAx_80026510",
+    "lbAudioAx_80026F2C",
+    "PAD_STACK",
+    "opt_propagation off",
+    "opt_strength_reduction",
+    "mwcc coloring",
+    "HSD_CObjSetOrtho",
+    "lbMthp_8001F410",
+    "Stage_GetBlastZoneRightOffset",
+    "NUM_UNLOCKABLE_STAGES",
+    "lbl_804337C4"
+  ],
+  "follow_up_queries": [
+    "fn_802590C4 mngallery 99.19 fuzzy MWCC coloring",
+    "mnGallery_802590C4 opt_propagation opt_strength_reduction",
+    "mngallery PAD_STACK pragma follow-up cleanup",
+    "lbAudioAx_800263E8 goto return_null structured control flow",
+    "lbAudioAx_80026F2C void return lbl_804337C4 indexed loop",
+    "grCorneria_801DEC94 sdata2 regression",
+    "PR 2268 mngallery.h signature changes exact diff"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR metadata, changed files, counts",
+      "human_pr_text.md: author function list and fn_802590C4 caveat",
+      "text_corpus.jsonl: bot report with 19 new matches, improvements, and one unmatched data regression",
+      "raw_diff: visible excerpts for gm_1601, grcorneria, lbaudio_ax, and partial mngallery",
+      "changed_files.jsonl: complete changed-file list"
+    ],
+    "notes": [
+      "Evidence is strong for changed files, PR identity, author-stated scope, bot-reported match outcomes, and visible diff excerpts.",
+      "The raw diff and raw PR JSON loaded files are truncated; mngallery.c and mngallery.h details after the visible excerpt are incomplete.",
+      "No inline review comments are available, so reviewer intent cannot be inferred beyond ribbanya's issue comment.",
+      "The bot report provides match percentages but the loaded slice does not include build logs, objdiff details, or adjacent regression inspection.",
+      "The diff shows small grcorneria .sdata2 regression in the bot report, but the slice does not explain whether it was accepted knowingly or incidental."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "lesson",
+        "title": "Header prototypes should follow recovered function bodies",
+        "text": "PR #2268 shows recovered bodies accompanied by header updates from generic or unknown declarations to typed signatures, e.g. gm_1601.h, grcorneria.h, and lbaudio_ax.h.",
+        "scope": [
+          "headers",
+          "decomp-matching"
+        ],
+        "evidence_refs": [
+          "raw_diff: gm_1601.h prototype updates",
+          "raw_diff: grcorneria.h UNK_RET/UNK_PARAMS to s32(Vec3*)",
+          "raw_diff: lbaudio_ax.h lbAudioAx_80026F2C u64 to void"
+        ]
+      },
+      {
+        "record_type": "lesson",
+        "title": "Treat fuzzy near-matches as incomplete even when useful",
+        "text": "fn_802590C4 was explicitly called out by the author as a difficult fuzzy match and the bot report lists it as an unmatched-item improvement, not a completed match.",
+        "scope": [
+          "matching-progress-reporting",
+          "mngallery"
+        ],
+        "evidence_refs": [
+          "human_pr_text.md: fn_802590C4 at like 95% fuzzy",
+          "text_corpus.jsonl: fn_802590C4 99.19% under improvements in unmatched items"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Record narrow use of scoped pragmas/PAD_STACK as PR-local tactics requiring verifier context",
+        "text": "PR #2268 contains scoped pragmas and PAD_STACK uses around mngallery and lbaudio_ax matching work. The bot report supports match progress, but the loaded slice does not document a per-tactic rationale or adjacent-function validation. This may be useful as an example under existing matching-tactics/pragma standards, not as a new blanket permission.",
+        "source_path": null,
+        "scope": [
+          "src/melee/mn/mngallery.c",
+          "src/melee/lb/lbaudio_ax.c",
+          "matching tactics"
+        ],
+        "evidence_refs": [
+          "raw_diff: PAD_STACK in mngallery and lbAudioAx_80026510",
+          "raw_diff: #pragma opt_propagation off and optimization pragmas in mngallery",
+          "text_corpus.jsonl: bot report new matches and fn_802590C4 improvement"
+        ],
+        "reason": "Curator may want this PR indexed as a cautionary example for existing standards matching-tactics-need-evidence and avoid-pragmas-register-asm."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "mngallery.c had many gallery menu/movie playback matches in PR #2268",
+        "text": "PR #2268's main target was src/melee/mn/mngallery.c, with author-listed new functions mnGallery_8025896C, mnGallery_80258A08, mnGallery_80258BC4, mnGallery_80258DBC, fn_80258ED0, mnGallery_802591BC, mnGallery_80259604, mnGallery_8025963C, and mnGallery_80259868, plus fn_802590C4 as an incomplete fuzzy near-match.",
+        "source_path": "src/melee/mn/mngallery.c",
+        "scope": [
+          "menu-gallery",
+          "movie playback",
+          "mngallery"
+        ],
+        "evidence_refs": [
+          "human_pr_text.md: mngallery function list",
+          "text_corpus.jsonl: bot report mngallery new matches and fn_802590C4 improvement",
+          "changed_files.jsonl: mngallery.c added 585 deleted 2"
+        ],
+        "reason": "Useful path-level historical context, but should be curated as a source/path fact rather than inferred broadly from partial diff."
+      },
+      {
+        "target_source_id": "ssbm_data_sheet",
+        "update_kind": "source_update",
+        "title": "Potential note: grcorneria .sdata2 regression occurred alongside grCorneria_801DEC94 match",
+        "text": "The bot report records grCorneria_801DEC94 as a new 100% text match and also reports a small unmatched grcorneria .sdata2 regression from 20.48% to 20.00%. The loaded slice does not explain the data movement.",
+        "source_path": "src/melee/gr/grcorneria.c",
+        "scope": [
+          "grcorneria",
+          ".sdata2",
+          "data regression"
+        ],
+        "evidence_refs": [
+          "text_corpus.jsonl: bot report new grCorneria_801DEC94 match and grcorneria .sdata2 regression",
+          "raw_diff: grCorneria_801DEC94 implementation"
+        ],
+        "reason": "Potential data-section follow-up if the curator tracks data regressions from matching PRs."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote ribbanya's MWCC link as evidence about Melee's exact compiler; the comment explicitly says it is not Melee's version but close.",
+      "Do not treat fn_802590C4 as a completed match; both author text and bot report identify it as incomplete/fuzzy.",
+      "Do not infer reviewer approval of PAD_STACK, volatile locals, or pragmas from merge status alone; no review comments are present in the loaded slice.",
+      "Do not claim exact mngallery.h signature changes from loaded evidence; only changed-file metadata is visible for that header."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

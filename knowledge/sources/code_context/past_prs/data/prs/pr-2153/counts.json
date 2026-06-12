@@ -1,0 +1,17 @@
+{
+  "number": 2153,
+  "title": "Decompile item functions with Codex",
+  "state": "MERGED",
+  "createdAt": "2026-02-03T03:32:49Z",
+  "updatedAt": "2026-02-03T17:11:29Z",
+  "mergedAt": "2026-02-03T16:41:52Z",
+  "closedAt": "2026-02-03T16:41:52Z",
+  "author": "lukechampine",
+  "url": "https://github.com/doldecomp/melee/pull/2153",
+  "counts": {
+    "issue_comments": 3,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 28757
+  }
+}

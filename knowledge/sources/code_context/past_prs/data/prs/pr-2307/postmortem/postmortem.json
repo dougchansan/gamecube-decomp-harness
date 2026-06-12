@@ -1,0 +1,378 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2307",
+  "pr": {
+    "number": 2307,
+    "title": "ftYs_Special work",
+    "url": "https://github.com/doldecomp/melee/pull/2307",
+    "state": "MERGED",
+    "author": "lukechampine",
+    "created_at": "2026-03-16T16:33:21Z",
+    "merged_at": "2026-03-16T17:52:11Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Decomp/matching work for Yoshi special-move code, primarily ftYs_SpecialS.c with smaller ftYs_SpecialHi.c and header/type updates. The loaded diff shows multiple previously stubbed Yoshi Side-B/SpecialS routines implemented, one SpecialHi helper partially improved, prototypes corrected, and support includes/types added. The bot report records 9 new 100% matches and 11 additional unmatched-item improvements.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "fighter-special-move-code",
+      "typed-struct-cleanup"
+    ],
+    "systems": [
+      "fighter",
+      "ftYoshi",
+      "item",
+      "effects",
+      "collision"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/ft/chara/ftYoshi/ftYs_SpecialS.c",
+      "role": "Primary implementation file; adds most Yoshi SpecialS/Side-B routine bodies and helper inlines, including animation/physics/collision-adjacent helpers, effect spawning, rotation/scale updates, and callback setup.",
+      "evidence_refs": [
+        "changed_files.jsonl: ftYs_SpecialS.c +918/-27 across 13 hunks",
+        "raw_diff: replaces stubs for ftYs_SpecialS_8012EB48, ftYs_SpecialS_8012F0DC, ftYs_SpecialS_8012F35C, ftYs_SpecialAirSLoop_* and ftYs_SpecialAirSEnd_Anim excerpts",
+        "text_corpus: bot report lists 9 new matches and 10 ftYs_SpecialS unmatched-item improvements"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftYoshi/ftYs_SpecialHi.c",
+      "role": "Secondary implementation file; adds fn_8012E110 body, moves setDamageCallbacks earlier, uses MAX macro, adds lb_00B0 include and placeholder include.",
+      "evidence_refs": [
+        "changed_files.jsonl: ftYs_SpecialHi.c +59/-16 across 6 hunks",
+        "raw_diff: fn_8012E110 implemented and ftYs_SpecialS_8012DF8C changes max() to MAX()",
+        "text_corpus: bot report lists fn_8012E110 improvement 0.00% to 94.02% and ftYs_SpecialS_8012DF8C 96.03% to 97.06%"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftYoshi/types.h",
+      "role": "Yoshi type/field support changed to back the recovered SpecialS/SpecialHi code.",
+      "evidence_refs": [
+        "changed_files.jsonl: types.h +40/-10 across 4 hunks",
+        "metadata_json.changed_files"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/ityoshieggthrow.h",
+      "role": "Item header signature/interface updates for Yoshi egg throw calls used by SpecialHi code.",
+      "evidence_refs": [
+        "changed_files.jsonl: ityoshieggthrow.h +2/-2 across 1 hunk",
+        "raw_diff: ftYs_SpecialHi.c calls it_802B2A10 and it_802B28C8"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftYoshi/ftYs_SpecialHi.h",
+      "role": "Header prototype cleanup for ftYs_SpecialS_8012EB48.",
+      "evidence_refs": [
+        "raw_diff: changes UNK_RET ftYs_SpecialS_8012EB48(UNK_PARAMS) to void ftYs_SpecialS_8012EB48(Fighter_GObj* gobj)",
+        "changed_files.jsonl: ftYs_SpecialHi.h +1/-1"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftYoshi/ftYs_SpecialS.h",
+      "role": "Header changed, but exact contents are not present in the loaded diff excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl: ftYs_SpecialS.h +1/-1"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Implemented several Yoshi SpecialS functions that were previously represented by decomp stubs, including ftYs_SpecialS_8012EB48, ftYs_SpecialS_8012F0DC, ftYs_SpecialS_8012F35C, ftYs_SpecialAirSLoop_0_Anim, ftYs_SpecialAirSLoop_1_Anim, ftYs_SpecialAirSLoop_2_Anim, ftYs_SpecialAirSLoop_3_Anim, and ftYs_SpecialAirSEnd_Anim in the loaded diff/report evidence.",
+    "Added static inline helpers in ftYs_SpecialS.c for repeated SpecialS behavior: callback setup, wall-bounce effect spawning, scale update, rotation wrapping, and button-pressure checking.",
+    "Changed ftYs_SpecialS_8012EB48 call sites from no-argument calls to gobj-passing calls and updated a header prototype from UNK_RET/UNK_PARAMS to void ftYs_SpecialS_8012EB48(Fighter_GObj* gobj).",
+    "In ftYs_SpecialHi.c, implemented fn_8012E110 with egg item spawning/throwing logic, damage callback assignment/clearing, and a small outline wrapper around ftYs_SpecialS_8012DF8C.",
+    "Replaced a local max helper in ftYs_SpecialHi.c with the project MAX macro while continuing to use ABS in the nearby math.",
+    "Changed ftYs_Unk3_803CEDA4 representation in ftYs_SpecialS.c from a Vec3 array initializer shape to a single ftCollisionBox initializer.",
+    "Added includes for camera, common fighter fall/fallspecial headers, ftcoll, lb forward, mplib, trigf, ftYs_Init, and related dependencies needed by the recovered code.",
+    "Bot report recorded matched-code progress: overall +5484 bytes, +0.14%, 9 new matches, and 11 unmatched-item improvements."
+  ],
+  "smart_moves": [
+    "Updated recovered function signatures in headers instead of leaving UNK_RET/UNK_PARAMS after the body shape was known.",
+    "Used existing project macros MAX and ABS rather than retaining a one-off local max helper.",
+    "Kept address-style names such as fn_8012EC7C and ftYs_Unk3_* where the loaded PR evidence does not prove semantic names.",
+    "Introduced narrowly scoped static inline helpers for repeated or call-shape-sensitive logic rather than duplicating callback, scale, rotation, and effect code throughout the file.",
+    "Used typed field/member access such as fp->mv.ys.specials.*, fp->fv.ys.*, fp->parts[index].joint, and ftCollisionBox rather than raw pointer arithmetic in the shown recovered code."
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a recovered body proves a function signature, update the owning header and call sites together; this PR changed ftYs_SpecialS_8012EB48 from UNK_RET/UNK_PARAMS to void with Fighter_GObj* and updated callers to pass gobj.",
+      "evidence_refs": [
+        "raw_diff: ftYs_SpecialHi.h prototype update",
+        "raw_diff: ftYs_SpecialAirSStart_* call sites changed to ftYs_SpecialS_8012EB48(gobj)"
+      ]
+    },
+    {
+      "lesson": "Prefer existing project expression macros for common math operations when they express the recovered code; this PR removed a local max helper and used MAX alongside ABS.",
+      "evidence_refs": [
+        "raw_diff: static inline float max removed",
+        "raw_diff: max(temp, 1.0f) changed to MAX(temp, 1.0f)"
+      ]
+    },
+    {
+      "lesson": "Small static inline helpers can make repeated decomp logic reviewable while preserving recurring state operations such as scale update, angle wrapping, effect spawning, and callback setup.",
+      "evidence_refs": [
+        "raw_diff: ftYs_SpecialS_UpdateScale",
+        "raw_diff: ftYs_SpecialS_WrapAndSetRotX",
+        "raw_diff: ftYs_SpecialS_SpawnWallBounceEffect",
+        "raw_diff: ftYoshi_SpecialS_SetCall"
+      ]
+    },
+    {
+      "lesson": "Use existing typed structures when the data shape is clear; the diff changes a six-value collision-box initializer from a Vec3-array shape to ftCollisionBox.",
+      "evidence_refs": [
+        "raw_diff: ftYs_Unk3_803CEDA4 changed from static Vec3[] to static ftCollisionBox"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Use short local role names for common decomp objects when roles are clear: fp for Fighter*, gobj for Fighter_GObj/HSD_GObj, jobj for HSD_JObj, attrs/attributes for ftYoshiAttributes, cd for CollData.",
+      "evidence_refs": [
+        "raw_diff: ftYs_SpecialS.c helper and function bodies",
+        "raw_diff: ftYs_SpecialHi.c fn_8012E110"
+      ]
+    },
+    {
+      "convention": "Retain address-style function/data names when semantics are not proven by the PR slice, e.g. fn_8012E110, fn_8012EC7C, fn_8013295C, ftYs_Unk3_803CED48.",
+      "evidence_refs": [
+        "raw_diff: function and data names remain address-style in recovered code"
+      ]
+    },
+    {
+      "convention": "Use semantic helper names for locally obvious operations, such as setDamageCallbacks, ftYs_SpecialS_UpdateScale, ftYs_SpecialS_WrapAndSetRotX, and ftYs_SpecialS_SpawnWallBounceEffect.",
+      "evidence_refs": [
+        "raw_diff: static helper declarations in ftYs_SpecialHi.c and ftYs_SpecialS.c"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "PAD_STACK was inserted in several recovered functions, indicating stack-shape steering for matching; the bot report supports resulting matches/improvements, but the loaded evidence does not isolate each PAD_STACK's individual necessity.",
+      "evidence_refs": [
+        "raw_diff: PAD_STACK in fn_8012E110, ftYs_SpecialS_8012F0DC, ftYs_SpecialS_8012F35C, ftYs_SpecialAirSLoop_* excerpts",
+        "text_corpus: bot report lists 9 new matches and 11 improvements"
+      ]
+    },
+    {
+      "tactic": "A tiny outline wrapper ftYs_SpecialS_8012DF8C_outline calls ftYs_SpecialS_8012DF8C before use in fn_8012E110, likely serving call/inline code-shape control, but the slice does not include author explanation.",
+      "evidence_refs": [
+        "raw_diff: static inline ftYs_SpecialS_8012DF8C_outline added and called from fn_8012E110"
+      ]
+    },
+    {
+      "tactic": "Angle normalization uses repeated while loops adding/subtracting 2*M_PI before ftPartSetRotX/RotY, a natural loop form visible in multiple recovered routines.",
+      "evidence_refs": [
+        "raw_diff: ftYs_SpecialS_WrapAndSetRotX",
+        "raw_diff: ftYs_SpecialAirSLoop_1_Anim angle normalization"
+      ]
+    },
+    {
+      "tactic": "Switch over fp->cmd_vars[0] replaced/generated command dispatch in ftYs_SpecialS_8012EB48, matching normal C control flow for discrete command values.",
+      "evidence_refs": [
+        "raw_diff: ftYs_SpecialS_8012EB48 switch cases 1 and 2"
+      ]
+    },
+    {
+      "tactic": "The bot report is the only loaded verifier evidence: 9 named functions reached 100%, while several other functions improved but remained below 100%.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev[bot] report for GALE01"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "author": "decomp-dev[bot]",
+      "summary": "Matched code increased to 58.47%, +0.14%, +5484 bytes. The report lists 9 new 100% matches and 11 improvements in unmatched items.",
+      "evidence_refs": [
+        "text_corpus: issue_comment by decomp-dev[bot] at 2026-03-16T16:38:16Z"
+      ]
+    },
+    {
+      "kind": "new_matches",
+      "author": "decomp-dev[bot]",
+      "summary": "New 100% matches listed for ftYs_SpecialAirSLoop_3_Anim, ftYs_SpecialAirSLoop_0_Anim, ftYs_SpecialAirSLoop_1_Phys, ftYs_SpecialS_8012F0DC, ftYs_SpecialAirSLoop_2_Anim, ftYs_SpecialAirSLoop_0_Phys, ftYs_SpecialAirSLoop_0_IASA, ftYs_SpecialS_8012F35C, and ftYs_SpecialS_8012EB48.",
+      "evidence_refs": [
+        "text_corpus: bot report new matches table"
+      ]
+    },
+    {
+      "kind": "missing_human_review",
+      "author": null,
+      "summary": "No human review comments or review records are present in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata_json.counts: review_comments 0, reviews 0",
+        "text_corpus: only PR body and bot issue comment loaded"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2307",
+    "ftYs_Special work",
+    "lukechampine",
+    "ftYs_SpecialS.c",
+    "ftYs_SpecialHi.c",
+    "Yoshi SpecialS",
+    "Yoshi Side-B",
+    "ftYs_SpecialS_8012EB48",
+    "ftYs_SpecialS_8012F0DC",
+    "ftYs_SpecialS_8012F35C",
+    "ftYs_SpecialAirSLoop_0_Anim",
+    "ftYs_SpecialAirSLoop_1_Anim",
+    "ftYs_SpecialAirSLoop_2_Anim",
+    "ftYs_SpecialAirSLoop_3_Anim",
+    "ftYs_SpecialAirSEnd_Anim",
+    "fn_8012E110",
+    "setDamageCallbacks",
+    "ftYs_SpecialS_UpdateScale",
+    "ftYs_SpecialS_WrapAndSetRotX",
+    "ftYs_SpecialS_SpawnWallBounceEffect",
+    "ftCollisionBox",
+    "ftYs_Unk3_803CEDA4",
+    "PAD_STACK",
+    "MAX macro",
+    "UNK_RET",
+    "UNK_PARAMS",
+    "it_802B2A10",
+    "it_802B28C8",
+    "decomp-dev bot"
+  ],
+  "follow_up_queries": [
+    "Search later PRs for cleanup or semantic renames of fn_8012E110, fn_8012EC7C, fn_8012EDE8, fn_8012EF C0, and ftYs_Unk3_* in ftYoshi SpecialS code.",
+    "Search for later removal or justification of PAD_STACK in ftYs_SpecialS.c and ftYs_SpecialHi.c.",
+    "Search ftYoshi types.h history around mv.ys.specials and fv.ys fields introduced or changed by PR 2307.",
+    "Search for subsequent matches of ftYs_SpecialAirSLoop_1_Anim, ftYs_SpecialAirSEnd_Anim, and SpecialS collision routines that were only improved, not fully matched, in this bot report.",
+    "Search item header history for ityoshieggthrow.h signatures it_802B2A10 and it_802B28C8 after this PR."
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR identity, state, author, counts, changed files",
+      "changed_files.jsonl: complete changed-file list",
+      "raw_diff: truncated but includes major SpecialHi and SpecialS excerpts",
+      "text_corpus: empty PR body and one bot report"
+    ],
+    "notes": [
+      "The raw diff is truncated in the loaded slice, so exact contents of later ftYs_SpecialS.c hunks, ftYs_SpecialS.h, types.h, and ityoshieggthrow.h are not fully visible.",
+      "The PR body is empty and there are no human review comments, so author intent and reviewer rationale cannot be inferred beyond the diff and bot report.",
+      "The bot report supports match/progress claims, but it does not prove the necessity of each individual tactic such as PAD_STACK or the outline wrapper."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson",
+        "title": "Header prototypes should be updated when recovered bodies prove signatures",
+        "text": "PR 2307 changed ftYs_SpecialS_8012EB48 from UNK_RET/UNK_PARAMS to void ftYs_SpecialS_8012EB48(Fighter_GObj* gobj) and updated call sites to pass gobj while implementing the function.",
+        "scope": [
+          "headers",
+          "fighter",
+          "ftYoshi"
+        ],
+        "evidence_refs": [
+          "raw_diff: ftYs_SpecialHi.h prototype update",
+          "raw_diff: ftYs_SpecialS_8012EB48 implementation and call-site updates"
+        ]
+      },
+      {
+        "record_type": "matching_tactic",
+        "title": "Use project macros for common math when source form fits",
+        "text": "PR 2307 removed a local max helper and used MAX(temp, 1.0f), consistent with using established ABS/MAX-style macros for common expressions.",
+        "scope": [
+          "C cleanup",
+          "macro cleanup",
+          "matching"
+        ],
+        "evidence_refs": [
+          "raw_diff: local max removed and MAX used in ftYs_SpecialS_8012DF8C"
+        ]
+      },
+      {
+        "record_type": "naming_observation",
+        "title": "Keep address-style names when semantics are not proven",
+        "text": "PR 2307 recovered bodies while retaining names such as fn_8012E110 and ftYs_Unk3_803CED48, but used semantic names for local helpers whose behavior was clear.",
+        "scope": [
+          "naming",
+          "ftYoshi"
+        ],
+        "evidence_refs": [
+          "raw_diff: address-style functions/data retained; semantic static helper names added"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "ftYs_SpecialS.c owns much of Yoshi SpecialS/Side-B behavior",
+        "text": "PR 2307 evidence shows src/melee/ft/chara/ftYoshi/ftYs_SpecialS.c implementing Yoshi SpecialS/Side-B animation, physics/collision-adjacent state transitions, scale/rotation updates, hit capsule timing, wall/floor effects, and callback setup.",
+        "source_path": "src/melee/ft/chara/ftYoshi/ftYs_SpecialS.c",
+        "scope": [
+          "fighter",
+          "ftYoshi",
+          "SpecialS"
+        ],
+        "evidence_refs": [
+          "raw_diff: ftYs_SpecialS.c helper/function implementations",
+          "text_corpus: bot report ftYs_SpecialS matches and improvements"
+        ],
+        "reason": "Useful path-level ownership fact, but should be curated against current source before promotion."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "ftYs_SpecialHi.c interacts with Yoshi egg throw item helpers",
+        "text": "PR 2307 evidence shows fn_8012E110 in ftYs_SpecialHi.c spawning/storing an item with it_802B2A10 and throwing/updating it with it_802B28C8, while setting and clearing Yoshi damage callbacks around fp->fv.ys.x2238.",
+        "source_path": "src/melee/ft/chara/ftYoshi/ftYs_SpecialHi.c",
+        "scope": [
+          "fighter",
+          "ftYoshi",
+          "SpecialHi",
+          "item"
+        ],
+        "evidence_refs": [
+          "raw_diff: fn_8012E110 implementation",
+          "changed_files.jsonl: ityoshieggthrow.h changed"
+        ],
+        "reason": "Potential path fact about fighter-item interaction; should be checked against current source and item header ownership."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "PAD_STACK and outline wrappers need per-function evidence",
+        "text": "PR 2307 uses PAD_STACK and a tiny outline wrapper in recovered code while the bot report shows aggregate matches/improvements. Curator may want examples under the existing matching-tactics standard, emphasizing that these tactics should remain narrow and tied to verifier evidence.",
+        "source_path": null,
+        "scope": [
+          "matching tactics",
+          "PAD_STACK",
+          "inline wrappers"
+        ],
+        "evidence_refs": [
+          "raw_diff: PAD_STACK occurrences",
+          "raw_diff: ftYs_SpecialS_8012DF8C_outline",
+          "text_corpus: bot report"
+        ],
+        "reason": "Potential illustrative example for an existing standard, not a new accepted rule from this PR alone."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that all PAD_STACK uses in this PR were independently necessary; the loaded evidence only provides aggregate bot match/progress output.",
+      "Do not infer semantic meanings for address-style symbols such as fn_8012E110 or ftYs_Unk3_803CED48 beyond their local usage in the diff.",
+      "Do not treat the .sdata2 improvement as proof of intentional data-section cleanup; the PR title/body do not scope data work and the diff excerpt is incomplete.",
+      "Do not infer human reviewer approval rationale; no human review comments are present in the loaded slice."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

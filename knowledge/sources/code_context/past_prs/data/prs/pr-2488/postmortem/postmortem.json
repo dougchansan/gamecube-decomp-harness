@@ -1,0 +1,339 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2488",
+  "pr": {
+    "number": 2488,
+    "title": "sysdolphin: split hsd_3B34 JPEG routines",
+    "url": "https://github.com/doldecomp/melee/pull/2488",
+    "state": "MERGED",
+    "author": "itsgrimetime",
+    "created_at": "2026-05-13T23:03:36Z",
+    "merged_at": "2026-05-14T08:42:25Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2488 split the previous sysdolphin/baselib/hsd_3B34 range into hsd_3B34 and new hsd_3B5C translation units, added large nonmatching C bodies for JPEG encode/decode routines, updated split metadata and configure.py, and reported fuzzy progress plus data/rodata matches. The PR body explicitly justifies the TU split at hsd_803B5C4C using adjacent extab/extabindex cut points, separated data clusters, hsd_803B5C2C matching at 100%, and a rebuilt sections/link check.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "translation-unit-split",
+      "headers",
+      "build-config",
+      "data-section-matching"
+    ],
+    "systems": [
+      "sysdolphin",
+      "baselib",
+      "JPEG routines",
+      "config/GALE01 splits",
+      "configure.py"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "config/GALE01/splits.txt",
+      "role": "Split metadata changed: hsd_3B34 text/extab/extabindex/data/sdata2 ranges were shortened and a new hsd_3B5C TU range was added starting at text 0x803B5C4C.",
+      "evidence_refs": [
+        "changed_files.jsonl: config/GALE01/splits.txt added 12 deleted 5",
+        "raw_diff: config/GALE01/splits.txt hsd_3B34 range changed and hsd_3B5C.c split added",
+        "pr_body: TU split rationale"
+      ]
+    },
+    {
+      "path": "configure.py",
+      "role": "Build configuration added hsd_3B5C.c as a NonMatching object.",
+      "evidence_refs": [
+        "changed_files.jsonl: configure.py added 1",
+        "raw_diff: Object(NonMatching, \"sysdolphin/baselib/hsd_3B5C.c\") added"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/hsd_3B34.c",
+      "role": "Expanded first TU with nonmatching JPEG encode-side routines, JPEG tables/data, externs, includes, M2C_FIELD-heavy generated-looking code, and retained hsd_803B5C2C in the first cluster per PR body.",
+      "evidence_refs": [
+        "changed_files.jsonl: hsd_3B34.c added 1798 deleted 5",
+        "raw_diff: hsd_3B34.c adds hsd_803B3408 and static JPEG table clusters",
+        "pr_body: hsd_3B34 fuzzy 84.855255%; hsd_803B5C2C matching at 100%"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/hsd_3B34.h",
+      "role": "Header changed to support the split/new routines; exact declarations are not visible in loaded diff excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl: hsd_3B34.h added 13 deleted 3",
+        "pr_body verification lists hsd_3B34.h in pre-commit files"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/hsd_3B5C.c",
+      "role": "New nonmatching TU for the second JPEG/decode-side helper cluster beginning at hsd_803B5C4C.",
+      "evidence_refs": [
+        "changed_files.jsonl: hsd_3B5C.c added 1058",
+        "raw_diff: new split entry hsd_3B5C.c text 0x803B5C4C-0x803B7230, data 0x80431090-0x804316C0, sdata2 0x804DEB90-0x804DEC00",
+        "pr_body: hsd_3B5C fuzzy 84.95146%"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Split sysdolphin/baselib/hsd_3B34.c into two TUs: hsd_3B34.c now ends at text 0x803B5C4C and new hsd_3B5C.c covers text 0x803B5C4C-0x803B7230.",
+    "Adjusted extab/extabindex boundaries at 0x80005690 and 0x800058E8, and data/sdata2 boundaries at 0x80431090 and 0x804DEB90, respectively.",
+    "Added hsd_3B5C.c to configure.py as Object(NonMatching, \"sysdolphin/baselib/hsd_3B5C.c\").",
+    "Added nonmatching C for JPEG encode/decode-related routines in both TUs, with many address-style symbols, static table blobs, extern globals, and generated-style temporaries.",
+    "PR body claims hsd_803B5C2C stayed matching at 100%, hsd_3B34 reached 84.855255% fuzzy, and hsd_3B5C reached 84.95146% fuzzy.",
+    "Bot report showed three new data/rodata matches and 15 fuzzy improvements, including .data for both hsd_3B34 and hsd_3B5C at 100% and .rodata for hsd_3B34 at 100%."
+  ],
+  "smart_moves": [
+    "The TU split was justified with multiple independent section-boundary signals rather than only a text function boundary: adjacent extab/extabindex cut points, clean data-section separation, and separate .sdata2 constants.",
+    "Keeping hsd_803B5C2C at the end of the first cluster because it matched 100% immediately before hsd_803B5C4C gave a concrete anchor for the proposed boundary.",
+    "The PR separated the new hsd_3B5C object in configure.py and splits.txt instead of only adding code to the existing hsd_3B34 file.",
+    "Verification listed both source-format/pre-commit and full configure+ninja rebuild steps."
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When splitting a TU, use aligned evidence from text, extab/extabindex, data, and sdata2 ranges before treating a function address as a boundary.",
+      "evidence_refs": [
+        "pr_body: split at hsd_803B5C4C looked like natural TU boundary; clean adjacent extab/extabindex cut points; data sections separated cleanly",
+        "raw_diff: splits.txt moves extab/extabindex/data/sdata2 endpoints and creates hsd_3B5C.c ranges"
+      ],
+      "confidence": 0.88
+    },
+    {
+      "lesson": "A fully matching small routine at the end of a data/function cluster can be useful boundary evidence when the next routine begins a different helper cluster, but should be combined with section metadata.",
+      "evidence_refs": [
+        "pr_body: hsd_803B5C2C behaved like a small end-of-first-cluster routine and matched 100% before hsd_803B5C4C starts decode-side helper cluster"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "For large nonmatching JPEG-style code intake, landing address-style symbols and generated temporaries can be acceptable as an initial nonmatching/fuzzy progress step, but should not be treated as final authored style without later cleanup.",
+      "evidence_refs": [
+        "raw_diff: many fn_/lbl_/hsd_ address-style symbols, temp_rXX/var_rXX locals, M2C_FIELD uses",
+        "pr_body: add nonmatching C; fuzzy scores below 100%"
+      ],
+      "confidence": 0.7
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Unproven static/local routines and data remained address-style, e.g. fn_803B376C, lbl_803B9670, lbl_80430C40, and hsd_803B3408.",
+      "evidence_refs": [
+        "raw_diff: hsd_3B34.c function/data declarations use fn_/lbl_/address names"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "convention": "Generated temporaries such as temp_r22, var_r10, and unused_arg4 appear in the nonmatching code and should be considered bridge names, not a semantic naming standard.",
+      "evidence_refs": [
+        "raw_diff: hsd_803B3408 locals include temp_r22, var_r10, unused_arg4",
+        "decomp_standards: conservative-naming says clean temp_rXX names once a local role is clear"
+      ],
+      "confidence": 0.74
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "TU boundary selection used section metadata: extab/extabindex endpoints, text range split, data start/end, and .sdata2 constants.",
+      "evidence_refs": [
+        "pr_body: clean adjacent extab/extabindex cut points and separated data sections",
+        "raw_diff: splits.txt exact range changes"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "tactic": "Added large static table blobs with exact address-style labels to match JPEG data/rodata clusters before full semantic recovery.",
+      "evidence_refs": [
+        "raw_diff: hsd_3B34.c adds static const u8 lbl_803B9670[0x1B6], static u8 lbl_80430C40[0x40], static u8 lbl_80430C80[0x410]",
+        "bot report: .data and .rodata new matches"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "tactic": "Used nonmatching object status for the new TU while reporting fuzzy scores rather than claiming full text matches.",
+      "evidence_refs": [
+        "raw_diff: configure.py adds Object(NonMatching, \"sysdolphin/baselib/hsd_3B5C.c\")",
+        "pr_body: hsd_3B34 and hsd_3B5C fuzzy percentages"
+      ],
+      "confidence": 0.86
+    },
+    {
+      "tactic": "Bridge code includes M2C_FIELD and raw buffer-offset access through HSD_804D2648_BUF for unrecovered structures/state.",
+      "evidence_refs": [
+        "raw_diff: #define HSD_804D2648_BUF ((u8*) &hsd_804D2648); M2C_FIELD uses in hsd_803B3408",
+        "decomp_standards: typed-fields-over-pointer-math treats M2C_FIELD as bridge code"
+      ],
+      "confidence": 0.76
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "feedback": "decomp-dev bot reported matched data increased to 39.28% (+0.26%, +3126 bytes), with three new matches and 15 improvements in unmatched items.",
+      "evidence_refs": [
+        "text_corpus.jsonl: issue_comment by decomp-dev[bot] at 2026-05-13T23:30:17Z"
+      ],
+      "confidence": 0.95
+    },
+    {
+      "kind": "human_review",
+      "feedback": "No human review comments are present in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata_json: review_comments 0, reviews 0",
+        "counts: issue_comments 1"
+      ],
+      "confidence": 0.96
+    }
+  ],
+  "searchable_terms": [
+    "pr-2488",
+    "sysdolphin",
+    "baselib",
+    "hsd_3B34",
+    "hsd_3B5C",
+    "JPEG",
+    "hsd_803B5C4C",
+    "hsd_803B5C2C",
+    "extab",
+    "extabindex",
+    "TU split",
+    "translation unit boundary",
+    "splits.txt",
+    "NonMatching",
+    "M2C_FIELD",
+    "HSD_804D2648_BUF",
+    "lbl_80430C40",
+    "lbl_80431090",
+    "sdata2 804DEB90",
+    "hsd_803B3408",
+    "fn_803B376C",
+    "hsd_803B3CD8",
+    "hsd_803B51C8",
+    "fn_803B61B4",
+    "hsd_803B6BE4"
+  ],
+  "follow_up_queries": [
+    "hsd_803B5C4C TU boundary extab extabindex data sdata2",
+    "hsd_3B34 hsd_3B5C JPEG nonmatching M2C_FIELD cleanup",
+    "HSD_804D2648_BUF jmp_buf JPEG state structure",
+    "lbl_80430C40 lbl_80431090 JPEG table ownership",
+    "hsd_803B5C2C matching end of first cluster",
+    "src/sysdolphin/baselib/hsd_3B34.c temp_r var_r cleanup",
+    "src/sysdolphin/baselib/hsd_3B5C.c decode helper cluster"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "human_pr_text.md: full PR body loaded",
+      "changed_files.jsonl: all five changed files and line counts loaded",
+      "raw_diff: diff excerpt includes split/configure and beginning of hsd_3B34.c but is truncated",
+      "text_corpus.jsonl: PR body and bot report loaded",
+      "metadata_json: PR state, timestamps, changed file counts, no review comments"
+    ],
+    "notes": [
+      "Evidence is strong for PR identity, changed files, split rationale, configure.py change, split ranges, verification commands, and reported fuzzy/data progress.",
+      "Evidence is incomplete for exact hsd_3B34.h contents and most of hsd_3B5C.c because the raw diff is truncated and only changed-file metadata is loaded for those details.",
+      "The PR body claims a rebuilt sections/link check and hsd_803B5C2C 100% match; intake records these as PR-author claims, not independently rerun validation.",
+      "No reviewer intent can be inferred because there are no loaded human review comments.",
+      "Large added code uses generated-style locals and M2C_FIELD; this supports cleanup/search handoff but not acceptance of those forms as final style."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "type": "decomp_lesson",
+        "title": "Use section metadata to justify TU splits",
+        "text": "PR 2488 supports a reusable lesson that TU splits should be justified with aligned text, extab/extabindex, data, and sdata2 boundary evidence, not only a chosen function address. Here the split at hsd_803B5C4C was justified by adjacent extab/extabindex cut points, separated data clusters, and separate .sdata2 constants.",
+        "scope": [
+          "translation-unit-splits",
+          "config/GALE01/splits.txt",
+          "sysdolphin/baselib"
+        ],
+        "evidence_refs": [
+          "pr_body: TU split rationale",
+          "raw_diff: splits.txt range changes"
+        ],
+        "confidence": 0.88
+      },
+      {
+        "type": "matching_tactic",
+        "title": "Use matched end-of-cluster routine as boundary anchor with corroborating metadata",
+        "text": "A small fully matching routine at the end of one cluster can help anchor a TU boundary when the next address starts a different helper cluster, but this PR's evidence is strongest because that observation was combined with section metadata.",
+        "scope": [
+          "translation-unit-splits",
+          "function-boundary-analysis"
+        ],
+        "evidence_refs": [
+          "pr_body: hsd_803B5C2C matched 100% before hsd_803B5C4C decode-side helper cluster"
+        ],
+        "confidence": 0.78
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "sysdolphin/baselib hsd_3B34 to hsd_3B5C split boundary",
+        "text": "In PR 2488, hsd_3B34.c was split so hsd_3B34 covers text 0x803B3408-0x803B5C4C and hsd_3B5C covers text 0x803B5C4C-0x803B7230. Related section boundaries in the diff are extab 0x80005690, extabindex 0x800058E8, data 0x80431090, and sdata2 0x804DEB90.",
+        "source_path": "config/GALE01/splits.txt",
+        "scope": [
+          "sysdolphin/baselib/hsd_3B34.c",
+          "sysdolphin/baselib/hsd_3B5C.c",
+          "GALE01 splits"
+        ],
+        "evidence_refs": [
+          "raw_diff: config/GALE01/splits.txt hsd_3B34 and hsd_3B5C ranges",
+          "pr_body: TU split rationale"
+        ],
+        "reason": "Useful as a source-owned path fact candidate for future searches around this TU boundary; curator should verify against current splits before promoting."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "TU split evidence should combine exception and data section boundaries",
+        "text": "Consider adding a standard note that TU-split PRs should document section-boundary evidence such as extab/extabindex, .data, .rodata, and .sdata2 ownership, especially when creating a new object for a partially nonmatching range.",
+        "source_path": null,
+        "scope": [
+          "translation-unit-splits",
+          "section metadata",
+          "matching verification"
+        ],
+        "evidence_refs": [
+          "pr_body: clean adjacent extab/extabindex cut points and separated data sections; rebuilt sections/link check corroborated split",
+          "raw_diff: splits.txt exact split ranges"
+        ],
+        "reason": "This PR provides a concrete example aligned with existing data-sections-and-tu-splits and verification standards; curator should decide whether to fold it into an existing standard rather than create a new one."
+      },
+      {
+        "target_source_id": "other",
+        "update_kind": "source_update",
+        "title": "JPEG state structure cleanup candidate for hsd_804D2648 buffer accesses",
+        "text": "The added nonmatching code accesses hsd_804D2648 through HSD_804D2648_BUF and M2C_FIELD offsets such as 0x518 and 0x618. Future decomp work may need a recovered state/buffer type for these offsets.",
+        "source_path": "src/sysdolphin/baselib/hsd_3B34.c",
+        "scope": [
+          "hsd_803B3408",
+          "JPEG encode/decode state",
+          "M2C_FIELD cleanup"
+        ],
+        "evidence_refs": [
+          "raw_diff: HSD_804D2648_BUF definition and M2C_FIELD uses"
+        ],
+        "reason": "This is a cleanup/search candidate only; the PR does not prove field names or structure layout."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote the exact fuzzy percentages as current validation facts without checking current objdiff/build output; they are historical PR/body and bot-report evidence.",
+      "Do not treat temp_rXX/var_rXX names, M2C_FIELD offsets, or raw table labels as accepted naming/style standards; they appear in nonmatching bridge code.",
+      "Do not infer semantic JPEG table names or state-field names from the raw byte arrays alone; the PR keeps address-style labels and provides no naming proof.",
+      "Do not infer human reviewer approval details beyond the PR being merged; no human review comments are loaded."
+    ]
+  },
+  "confidence": 0.84,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 1109,
+  "title": "Run IWYU and deprecate `WIP`",
+  "state": "MERGED",
+  "createdAt": "2024-01-25T12:12:53Z",
+  "updatedAt": "2024-01-25T12:14:18Z",
+  "mergedAt": "2024-01-25T12:14:17Z",
+  "closedAt": "2024-01-25T12:14:17Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1109",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 0
+  }
+}

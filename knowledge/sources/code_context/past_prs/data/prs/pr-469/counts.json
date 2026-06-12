@@ -1,0 +1,17 @@
+{
+  "number": 469,
+  "title": "Create `build.sh`",
+  "state": "MERGED",
+  "createdAt": "2022-08-20T20:01:53Z",
+  "updatedAt": "2022-08-22T10:37:20Z",
+  "mergedAt": "2022-08-22T10:37:17Z",
+  "closedAt": "2022-08-22T10:37:17Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/469",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 2816
+  }
+}

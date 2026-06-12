@@ -1,0 +1,375 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2412",
+  "pr": {
+    "number": 2412,
+    "title": "Link kirbycutterbeam",
+    "url": "https://github.com/doldecomp/melee/pull/2412",
+    "state": "MERGED",
+    "author": "lukechampine",
+    "created_at": "2026-04-13T17:21:59Z",
+    "merged_at": "2026-04-14T16:58:02Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2412 linked itkirbycutterbeam as Matching and also added or improved item decomp work in Ness yoyo and Ice Climbers string/link-style item files. The bot report records 8 new matches, including itkirbycutterbeam .data, several yoyo/string physics callbacks, and several near-matches in unmatched yoyo/string functions.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "data-table",
+      "item-code"
+    ],
+    "systems": [
+      "item",
+      "fighter-related-items",
+      "kirbycutterbeam",
+      "nessyoyo",
+      "climbersstring",
+      "repo-config"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "configure.py",
+      "role": "Changed itkirbycutterbeam.c from NonMatching to Matching in MatchingFor.",
+      "evidence_refs": [
+        "diff_excerpt: configure.py NonMatching->Matching for melee/it/items/itkirbycutterbeam.c"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itkirbycutterbeam.c",
+      "role": "Cleaned includes and added ItemStateTable it_803F6798, corresponding to bot-reported .data match.",
+      "evidence_refs": [
+        "diff_excerpt: itkirbycutterbeam.c include cleanup and ItemStateTable it_803F6798[]",
+        "text_corpus: decomp-dev bot reports itkirbycutterbeam .data +56 bytes 0.00%->100.00%"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itnessyoyo.c",
+      "role": "Implemented multiple Ness yoyo functions and matching support code around ItemLink chains, matrices, cleanup, collision, and scale/position updates.",
+      "evidence_refs": [
+        "changed_files: itnessyoyo.c +269/-15 across 5 hunks",
+        "diff_excerpt: itNessyoyo_UnkMotion1_Phys, itNessyoyo_UnkMotion2_Phys, itNessyoyo_UnkMotion3_Anim, it_802BF030, it_802BF180, it_802BF800, it_802BF900, it_802BFEC4, it_802C0010",
+        "text_corpus: bot reports yoyo new matches and improvements"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itnessyoyo.h",
+      "role": "Header declarations adjusted for Ness yoyo work.",
+      "evidence_refs": [
+        "changed_files: itnessyoyo.h +5/-5"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itclimbersstring.c",
+      "role": "Implemented multiple Ice Climbers string functions using ItemLink traversal, matrix-derived positions, cleanup, and action-range checks.",
+      "evidence_refs": [
+        "changed_files: itclimbersstring.c +197/-6 across 2 hunks",
+        "diff_excerpt: fn_802C28DC, fn_802C29E8, fn_802C2AF4, it_802C2CA8, it_802C2DB0, it_802C32D4, itClimbersstring_UnkMotion3_Anim",
+        "text_corpus: bot reports climbersstring new matches and improvements"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itclimbersstring.h",
+      "role": "Added prototypes and itCharItems.h include for climbers string functions and types.",
+      "evidence_refs": [
+        "diff_excerpt: itclimbersstring.h adds itCharItems.h include and prototypes",
+        "changed_files: itclimbersstring.h +19/-1"
+      ]
+    },
+    {
+      "path": "src/melee/it/itCharItems.h",
+      "role": "Refined itClimbersStringAttributes layout by splitting padding and naming float fields x8 and x14.",
+      "evidence_refs": [
+        "diff_excerpt: itClimbersStringAttributes pad_00[0x18] split into pad_00[0x8], f32 x8, pad_0C[0x8], f32 x14"
+      ]
+    }
+  ],
+  "what_changed": [
+    "configure.py now treats melee/it/items/itkirbycutterbeam.c as Matching instead of NonMatching.",
+    "itkirbycutterbeam.c gained ItemStateTable it_803F6798 with anim/phys/coll callbacks and removed several unused includes.",
+    "itclimbersstring.c added matrix-position helper callbacks, ItemLink chain adjustment functions, pickup/cleanup logic, and owner action-range cleanup checks.",
+    "itclimbersstring.h added declarations for newly implemented climbers string functions and included it/itCharItems.h for itClimbersStringAttributes.",
+    "itCharItems.h exposed two float fields in itClimbersStringAttributes at offsets +0x08 and +0x14.",
+    "itnessyoyo.c added several yoyo physics/animation/collision functions and matrix/ItemLink manipulation routines, while adding ftlib, itlinkhookshot, mpcoll, and math_ppc includes.",
+    "itnessyoyo.h was changed, but the loaded diff is truncated before the exact header edits."
+  ],
+  "smart_moves": [
+    {
+      "text": "The PR did not only flip configure.py; it also added the itkirbycutterbeam state table/data needed for the bot-reported .data match.",
+      "evidence_refs": [
+        "diff_excerpt: configure.py Matching change",
+        "diff_excerpt: ItemStateTable it_803F6798[]",
+        "text_corpus: bot report .data 0.00%->100.00%"
+      ]
+    },
+    {
+      "text": "Repeated rope/chain logic was expressed as natural while loops over ItemLink prev/next links rather than as copied blocks.",
+      "evidence_refs": [
+        "diff_excerpt: it_802C2CA8 and it_802C2DB0 while(prev != NULL)",
+        "diff_excerpt: itNessyoyo_UnkMotion3_Anim_Cleanup while(link != NULL)",
+        "diff_excerpt: it_802BF180 while(prev != NULL)"
+      ]
+    },
+    {
+      "text": "Several functions recover world or local positions through PSMTXIdentity, HSD_JObjSetupMatrix, PSMTXConcat, then Vec3 extraction, a repeated pattern across yoyo and climbers string callbacks.",
+      "evidence_refs": [
+        "diff_excerpt: fn_802C28DC/fn_802C29E8/fn_802C2AF4",
+        "diff_excerpt: itNessyoyo_UnkMotion1_Phys/UnkMotion2_Phys/it_802BFEC4/it_802C0010"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For chained item effects such as yoyo or climbers string, natural linked-list loops over ItemLink prev/next can express repeated segment propagation and cleanup clearly while still supporting matching progress.",
+      "evidence_refs": [
+        "diff_excerpt: it_802C2CA8, it_802C2DB0, it_802BF180, cleanup loops",
+        "decomp_standards:natural-loops"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "lesson": "When a function body reveals attribute offsets, refining the owning attributes struct can remove opaque padding and allow direct field use in matched item code.",
+      "evidence_refs": [
+        "diff_excerpt: itClimbersStringAttributes adds f32 x8 and x14",
+        "diff_excerpt: climbers string functions use attrs->x8 and attrs->x14",
+        "decomp_standards:typed-fields-over-pointer-math"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "A code-linking PR may include small data-table recovery when that table is tied to the linked object and is reported as matching, but broader data ownership conclusions should not be inferred from this slice alone.",
+      "evidence_refs": [
+        "diff_excerpt: ItemStateTable it_803F6798[] in itkirbycutterbeam.c",
+        "text_corpus: bot report itkirbycutterbeam .data match"
+      ],
+      "confidence": 0.74
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "address-style functions",
+      "description": "Unproven functions retain names such as it_802C2CA8, it_802BF800, fn_802C28DC rather than speculative semantic names.",
+      "evidence_refs": [
+        "diff_excerpt: newly implemented climbersstring and yoyo functions retain address-style names",
+        "decomp_standards:conservative-naming"
+      ]
+    },
+    {
+      "name": "short local role names",
+      "description": "Clear local roles use short names such as ip, fp, attrs, link, link1, link2, cur, prev, pos, dir, owner, and jobj.",
+      "evidence_refs": [
+        "diff_excerpt: itclimbersstring.c and itnessyoyo.c local variable declarations"
+      ]
+    },
+    {
+      "name": "offset-based struct fields",
+      "description": "Recovered but not semantically named attributes remain offset-style x8 and x14, avoiding unsupported semantic naming.",
+      "evidence_refs": [
+        "diff_excerpt: itClimbersStringAttributes f32 x8 and f32 x14"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "PAD_STACK retained in itClimbersstring_UnkMotion3_Anim after the return.",
+      "evidence_refs": [
+        "diff_excerpt: return false; PAD_STACK(8);"
+      ],
+      "risk_note": "Loaded evidence does not include author explanation or objdiff detail for this stack tactic beyond bot score improvements."
+    },
+    {
+      "tactic": "Explicit pad locals are used near matrix and vector temporaries, e.g. f32 pad[1], pad_top, pad_mid, pad_bottom.",
+      "evidence_refs": [
+        "diff_excerpt: fn_802C28DC/fn_802C29E8, it_802BF180, it_802BFEC4, it_802C0010"
+      ],
+      "risk_note": "Global standards require verifier evidence for stack-shape tactics; the bot report supplies matching percentages but not local rationale for each pad."
+    },
+    {
+      "tactic": "State table recovery in itkirbycutterbeam.c was paired with configure.py marking the object Matching.",
+      "evidence_refs": [
+        "diff_excerpt: ItemStateTable it_803F6798[]",
+        "diff_excerpt: configure.py NonMatching->Matching",
+        "text_corpus: bot report itkirbycutterbeam .data 100%"
+      ],
+      "risk_note": "The slice supports the data table change, but not broader data-section policy."
+    },
+    {
+      "tactic": "Uses HSD_JObjGetChild/GetRotationX/SetRotationX and HSD_JObjSetupMatrix/CopyMtx/SetMtxDirty instead of raw expanded jobj access in the visible yoyo code.",
+      "evidence_refs": [
+        "diff_excerpt: itNessyoyo_UnkMotion3_Anim and it_802BF900",
+        "decomp_standards:header-inlines"
+      ],
+      "risk_note": "No review comment confirms this was intentional cleanup; evidence is from the diff shape."
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "author": "decomp-dev[bot]",
+      "text": "Reported +0.05% matched code, +0.07% linked code, +56 bytes matched data, 8 new matches, and 10 improvements in unmatched items.",
+      "evidence_refs": [
+        "text_corpus: issue_comment by decomp-dev[bot] at 2026-04-13T17:27:21Z"
+      ]
+    },
+    {
+      "kind": "human_review",
+      "author": null,
+      "text": "No human review comments or review records are present in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata_json: review_comments 0, reviews 0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2412",
+    "Link kirbycutterbeam",
+    "itkirbycutterbeam",
+    "it_803F6798",
+    "ItemStateTable",
+    "itclimbersstring",
+    "itClimbersStringAttributes",
+    "it_802C2CA8",
+    "it_802C2DB0",
+    "it_802C32D4",
+    "itClimbersstring_UnkMotion3_Anim",
+    "itnessyoyo",
+    "itNessyoyo_UnkMotion1_Phys",
+    "itNessyoyo_UnkMotion2_Phys",
+    "itNessyoyo_UnkMotion3_Anim",
+    "it_802BF030",
+    "it_802BF180",
+    "it_802BF800",
+    "it_802BF900",
+    "it_802BFEC4",
+    "it_802C0010",
+    "ItemLink",
+    "PSMTXConcat",
+    "HSD_JObjSetupMatrix",
+    "PAD_STACK",
+    "ftLib_80086C0C",
+    "mpColl_800471F8"
+  ],
+  "follow_up_queries": [
+    "Find later PRs that finish or adjust itnessyoyo functions it_802BF28C, it_802BF4A0, or it_802BFAFC.",
+    "Search for later changes to itClimbersStringAttributes x8 or x14 to see whether semantic names were recovered.",
+    "Search for later review or cleanup around PAD_STACK(8) in itClimbersstring_UnkMotion3_Anim.",
+    "Search for other ItemLink chain implementations that share yoyo/climbersstring patterns.",
+    "Check whether itkirbycutterbeam remained Matching after subsequent data/table changes."
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR metadata, changed file counts, merged_at",
+      "human_pr_text: short PR body",
+      "raw_diff/diff_excerpt: visible changed code, truncated before full itnessyoyo.h details",
+      "text_corpus: decomp-dev bot report with match percentages"
+    ],
+    "notes": [
+      "Diff evidence is truncated, so exact itnessyoyo.h edits and any later hunks not in the excerpt are not fully visible.",
+      "No human review comments are available; reviewer intent and acceptance rationale cannot be inferred.",
+      "The bot report gives score/match outcomes, but does not provide per-tactic objdiff rationale for PAD_STACK or padding locals.",
+      "The PR body is very brief and only states that additional it files were matched from a missed prior PR."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson_candidate",
+        "title": "ItemLink chain item code can often be represented as natural prev/next loops",
+        "text": "In PR 2412, climbers string and Ness yoyo functions implement segment propagation and cleanup as while/for loops over ItemLink prev/next pointers, aligning with the natural-loops standard and producing reported matches or near-matches.",
+        "scope": [
+          "src/melee/it/items/itclimbersstring.c",
+          "src/melee/it/items/itnessyoyo.c",
+          "ItemLink chain items"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: it_802C2CA8, it_802C2DB0, it_802BF180, cleanup loops",
+          "text_corpus: bot reports matches/improvements in these units"
+        ]
+      },
+      {
+        "record_type": "matching_tactic_candidate",
+        "title": "Matrix-derived ItemLink anchor positions recur in yoyo/string item callbacks",
+        "text": "Several callbacks initialize a matrix, setup a JObj matrix, concatenate, then copy translation components into Vec3 before calling chain update helpers. This pattern appears in both climbers string and Ness yoyo code in the PR.",
+        "scope": [
+          "src/melee/it/items/itclimbersstring.c",
+          "src/melee/it/items/itnessyoyo.c"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: fn_802C28DC, fn_802C29E8, fn_802C2AF4",
+          "diff_excerpt: itNessyoyo_UnkMotion1_Phys, itNessyoyo_UnkMotion2_Phys, it_802BFEC4, it_802C0010"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "itkirbycutterbeam became Matching in PR 2412",
+        "text": "PR 2412 changed configure.py so melee/it/items/itkirbycutterbeam.c is Object(Matching) instead of Object(NonMatching), with bot-reported itkirbycutterbeam .data at 100%.",
+        "source_path": "src/melee/it/items/itkirbycutterbeam.c",
+        "scope": [
+          "configure.py",
+          "src/melee/it/items/itkirbycutterbeam.c"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: configure.py NonMatching->Matching",
+          "text_corpus: bot report itkirbycutterbeam .data 0.00%->100.00%"
+        ],
+        "reason": "Potential path fact for object matching status; curator should verify against current source/history before promoting."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "itClimbersStringAttributes has float fields at +0x08 and +0x14 in PR 2412",
+        "text": "The PR split padding in itClimbersStringAttributes to expose f32 x8 and f32 x14, which are used by climbers string chain update functions.",
+        "source_path": "src/melee/it/itCharItems.h",
+        "scope": [
+          "itClimbersStringAttributes",
+          "src/melee/it/items/itclimbersstring.c"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: itCharItems.h field layout change",
+          "diff_excerpt: attrs->x8 and attrs->x14 uses"
+        ],
+        "reason": "Possible struct layout path fact; field semantics remain unnamed in the PR and should not be over-interpreted."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Do not treat PAD_STACK or pad locals as self-justifying from a bot score alone",
+        "text": "PR 2412 contains PAD_STACK and several pad locals while the bot report shows matches/improvements, but the slice lacks per-tactic justification. This supports retaining the existing standard that stack tactics need narrow verifier evidence rather than creating a new exception.",
+        "source_path": null,
+        "scope": [
+          "matching tactics",
+          "PAD_STACK",
+          "stack padding locals"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: PAD_STACK(8) in itClimbersstring_UnkMotion3_Anim",
+          "diff_excerpt: f32 pad locals in yoyo/climbersstring functions",
+          "decomp_standards:matching-tactics-need-evidence"
+        ],
+        "reason": "Curator may use this as supporting example for an existing standard, not as a new accepted exception."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that all yoyo/climbersstring score improvements were accepted as final matches; the bot lists several as improvements under unmatched items.",
+      "Do not infer semantic meanings for itClimbersStringAttributes x8/x14 or address-style functions from this PR alone.",
+      "Do not promote the PAD_STACK or pad locals as generally accepted style; the slice lacks explicit objdiff rationale for those tactics.",
+      "Do not claim human reviewer approval details; no human review comments are loaded."
+    ]
+  },
+  "confidence": 0.84,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

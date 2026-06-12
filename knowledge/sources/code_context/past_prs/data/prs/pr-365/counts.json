@@ -1,0 +1,17 @@
+{
+  "number": 365,
+  "title": "matched the final function in fighter.c that was temp moved to ftanim.s",
+  "state": "MERGED",
+  "createdAt": "2022-05-03T06:25:41Z",
+  "updatedAt": "2022-05-03T13:01:19Z",
+  "mergedAt": "2022-05-03T13:01:19Z",
+  "closedAt": "2022-05-03T13:01:19Z",
+  "author": "snuffysasa",
+  "url": "https://github.com/doldecomp/melee/pull/365",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 11553
+  }
+}

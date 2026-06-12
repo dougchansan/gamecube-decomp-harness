@@ -1,0 +1,17 @@
+{
+  "number": 435,
+  "title": "Rename `func_someCalcAngle_80022C30` to `atan2f`",
+  "state": "MERGED",
+  "createdAt": "2022-08-05T15:27:41Z",
+  "updatedAt": "2022-08-11T12:46:00Z",
+  "mergedAt": "2022-08-05T15:51:20Z",
+  "closedAt": "2022-08-05T15:51:20Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/435",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 129745
+  }
+}

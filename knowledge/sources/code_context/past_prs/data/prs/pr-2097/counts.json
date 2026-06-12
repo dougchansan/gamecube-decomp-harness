@@ -1,0 +1,17 @@
+{
+  "number": 2097,
+  "title": "Update for itlugia.c",
+  "state": "MERGED",
+  "createdAt": "2026-01-16T15:39:06Z",
+  "updatedAt": "2026-01-16T16:01:03Z",
+  "mergedAt": "2026-01-16T16:01:02Z",
+  "closedAt": "2026-01-16T16:01:03Z",
+  "author": "Duglas560",
+  "url": "https://github.com/doldecomp/melee/pull/2097",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 3996
+  }
+}

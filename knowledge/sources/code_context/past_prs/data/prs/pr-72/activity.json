@@ -1,0 +1,10 @@
+{
+  "pr": 72,
+  "title": "Fix incorrectly named file from gmsinglebutton to gmcamera",
+  "url": "https://github.com/doldecomp/melee/pull/72",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 1,
+  "added_lines": 1,
+  "deleted_lines": 1
+}

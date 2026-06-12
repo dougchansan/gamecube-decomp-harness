@@ -1,0 +1,432 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2232",
+  "pr": {
+    "number": 2232,
+    "title": "grzebes",
+    "url": "https://github.com/doldecomp/melee/pull/2232",
+    "state": "MERGED",
+    "author": "jurrejelle",
+    "created_at": "2026-03-07T11:11:15Z",
+    "merged_at": "2026-03-10T17:40:17Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Large stage decomp/matching PR for src/melee/gr/grzebes.c, with supporting GroundVars, headers, exported helper prototypes, and symbol metadata changes. Evidence shows many newly matched grZebes functions and partial improvements, while review focused on avoiding premature static/data ordering, using OSReport strings in-place, and relying on local const Vec3 initialization instead of separate static storage.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "stage",
+      "decomp-matching",
+      "headers",
+      "types",
+      "symbols",
+      "cleanup",
+      "naming"
+    ],
+    "systems": [
+      "stage",
+      "ground",
+      "config",
+      "symbols"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gr/grzebes.c",
+      "role": "Primary decomp target; replaces many placeholders with grZebes functions, local structs, stage callback data, acid/bubble state code, OSReport use, material and zako-generator calls.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gr/grzebes.c added 2088 deleted 38 hunks 8",
+        "raw_diff: grZebes_801D8558, grZebes_801D8644, grZebes_801D881C excerpts",
+        "text_corpus: decomp-dev bot report lists 15 new matches and 17 improvements in main/melee/gr/grzebes",
+        "review_comments: PsiLupan comments on OSReport in-place use and statics"
+      ]
+    },
+    {
+      "path": "src/melee/gr/types.h",
+      "role": "Adds/refines grZebes GroundVars union arms, including zebes3, zebes4, and zebes5 structs with offset-commented fields.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gr/types.h added 50 deleted 2 hunks 2",
+        "raw_diff: struct grZebes_GroundVars and Ground.gv union additions"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grzebes.h",
+      "role": "Adds or corrects public grZebes prototypes with recovered parameter and return types.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gr/grzebes.h added 11 deleted 2 hunks 1",
+        "raw_diff: grZebes_801D8644, grZebes_801D881C, grZebes_801DA3F4(Vec3*), grZebes_801DCBFC(Ground_GObj*, HSD_GObj*, void*)"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grmaterial.c",
+      "role": "Makes grMaterial_801C8D44 non-static so grzebes can call it.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gr/grmaterial.c added 1 deleted 1",
+        "raw_diff: static Item_GObj* changed to Item_GObj* for grMaterial_801C8D44"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grmaterial.h",
+      "role": "Adds exported declaration for grMaterial_801C8D44 with callback types.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gr/grmaterial.h added 5 deleted 0",
+        "raw_diff: grMaterial_801C8D44 prototype added"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grzakogenerator.h",
+      "role": "Refines grZakoGenerator_801CA43C prototype from unknown signature to typed parameters and s32 return.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gr/grzakogenerator.h added 1 deleted 1",
+        "raw_diff: UNK_RET/UNK_PARAMS replaced with s32 grZakoGenerator_801CA43C(void*, HSD_JObj*, f32)"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Adjusts grZe .data/.sdata2 symbol names, sizes, scopes, and local labels; renames grZe_803E1A30 to grZe_callbacks.",
+      "evidence_refs": [
+        "changed_files.jsonl: config/GALE01/symbols.txt added 23 deleted 20 hunks 2",
+        "raw_diff: grZe_callbacks, @303, @186-@625 local labels, grZe_803E1B60 split"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Expanded grzebes.c from mostly placeholders into a large partial decomp with local structs such as grZe_ColorEntry, grZe_AcidLevelEntry, grZe_YakumonoParam, grZe_BubbleEntry, grZe_BubbleConfig, and grZe_AcidState.",
+    "Recovered or partially recovered numerous grZebes routines, including grZebes_801D8558, grZebes_801D8644, grZebes_801D881C, grZebes_801DA528, grZebes_801DAA08, fn_801DAC90, grZebes_801DB3CC, grZebes_801DBB60, grZebes_801DC260, grZebes_801DC408, grZebes_801DC744, grZebes_801DC9DC, and grZebes_801DCBFC.",
+    "Added includes needed by the recovered code, including dolphin OS, stage anime/display/datfiles/material, lb, mp, baselib jobj/lobj/gobjproc/gobjgxlink/random, and MSL math_ppc headers.",
+    "Added typed GroundVars for multiple grZebes variants in types.h and updated grzebes.h prototypes to match recovered bodies.",
+    "Exported grMaterial_801C8D44 through grmaterial.c and grmaterial.h for use by grzebes.c.",
+    "Refined grZakoGenerator_801CA43C header signature to s32 grZakoGenerator_801CA43C(void*, HSD_JObj*, f32).",
+    "Updated symbols.txt metadata around grZe data, including callback table naming, data string splits, and conversion of several sdata2 globals to local labels.",
+    "Bot report claims +5868 matched code bytes, +800 matched data bytes, 15 new matches, and multiple improved grzebes items; this is treated as report evidence, not independently revalidated here."
+  ],
+  "smart_moves": [
+    {
+      "text": "Header surfaces were updated where recovered bodies needed cross-file calls or better signatures, rather than hiding calls behind source-local unknown declarations.",
+      "evidence_refs": [
+        "raw_diff: grmaterial.h adds grMaterial_801C8D44 declaration",
+        "raw_diff: grzakogenerator.h replaces UNK_RET/UNK_PARAMS for grZakoGenerator_801CA43C",
+        "raw_diff: grzebes.h prototype updates"
+      ]
+    },
+    {
+      "text": "GroundVars were moved toward typed offset-commented fields for grZebes-specific state instead of leaving all access as unknown storage.",
+      "evidence_refs": [
+        "raw_diff: types.h grZebes_GroundVars3/4/5 additions",
+        "raw_diff: grzebes.c uses gp->gv.zebes4 and gp->gv.zebes5 fields"
+      ]
+    },
+    {
+      "text": "Some generated/global-looking symbol metadata was narrowed to local labels in symbols.txt, consistent with not over-naming every float or string as a global.",
+      "evidence_refs": [
+        "raw_diff: grZe_804DB088 and related sdata2 globals changed to @186, @187, @188, etc.",
+        "raw_diff: grZe_803E1B84 changed to @303 local string"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For incomplete large stage files, avoid declaring many statics solely to preserve apparent data order; reviewers may prefer removing unproven statics until the file is correctly matched because later asserts or local evidence can reveal the real temporary names and ownership.",
+      "evidence_refs": [
+        "review_comments: PsiLupan says remaining statics should probably be removed until correctly matched and warns about false impression of ordering",
+        "decomp_standards: text-before-data-matching",
+        "decomp_standards: literals-and-data-ownership"
+      ]
+    },
+    {
+      "lesson": "For OSReport-style error strings, compare local matched examples and try using the report call/string in place rather than introducing separate static storage for the format string.",
+      "evidence_refs": [
+        "review_comments: PsiLupan asks whether these can be fixed to be used in-place and links grlast.c OSReport example",
+        "raw_diff: grZebes_801D8558 uses OSReport(\"%s:%d: couldn t get gobj(id=%d)\\n\", \"grzebes.c\", 256, id)"
+      ]
+    },
+    {
+      "lesson": "When a recovered function body proves a helper signature, update the owning header and linkage so callers can use the typed function directly.",
+      "evidence_refs": [
+        "raw_diff: grMaterial_801C8D44 changed from static to exported and declared in grmaterial.h",
+        "raw_diff: grZakoGenerator_801CA43C typed in grzakogenerator.h",
+        "decomp_standards: truthful-headers-and-includes"
+      ]
+    },
+    {
+      "lesson": "Small local Vec3 constants may be expressible as direct aggregate assignments to local variables; review evidence says this can avoid extra const/static declarations in at least this grzebes context.",
+      "evidence_refs": [
+        "text_corpus review_comment r2913021669: PsiLupan suggests pos1 = { 24.1f, -4.6f, 0.0f }; and pos2 = { 24.05f, 2.2f, 0.0f }; because they will be treated as const"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name_or_pattern": "grZe_callbacks",
+      "convention": "Use a semantic name for a StageCallbacks table when the type/role is supported by usage and symbol metadata.",
+      "evidence_refs": [
+        "raw_diff: grZe_803E1A30 renamed to grZe_callbacks in symbols.txt",
+        "raw_diff: StageCallbacks grZe_callbacks[] and grZebes_801D8558 indexes callbacks by id"
+      ]
+    },
+    {
+      "name_or_pattern": "grZe_BubbleEntry, grZe_BubbleConfig, grZe_AcidState, grZe_YakumonoParam",
+      "convention": "For file-local recovered stage structs, prefix with the stage abbreviation grZe_ and retain offset-style field names where semantics are not fully proven.",
+      "evidence_refs": [
+        "raw_diff: typedef struct grZe_BubbleEntry with x00_active/x20_gobj",
+        "raw_diff: typedef struct grZe_AcidState with offset-commented fields"
+      ]
+    },
+    {
+      "name_or_pattern": "zebes3, zebes4, zebes5",
+      "convention": "GroundVars union arms may be split into numbered stage-specific variants when multiple object layouts are recovered but semantic names are not established.",
+      "evidence_refs": [
+        "raw_diff: types.h adds struct grZebes_GroundVars3/4/5 and union arms zebes3/zebes4/zebes5"
+      ]
+    },
+    {
+      "name_or_pattern": "@NNN local labels",
+      "convention": "Use local label names for unproven local floats/doubles/strings instead of retaining global grZe address names.",
+      "evidence_refs": [
+        "raw_diff: sdata2 entries changed to @186, @187, @188, @189, @192, @296, @297, @298, @309, @316, @573, @604, @605, @625, @814"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Used typed temporary structs and offset-commented GroundVars to make large stateful stage code expressible in C while retaining exact layout evidence.",
+      "evidence_refs": [
+        "raw_diff: grZe_YakumonoParam, grZe_BubbleEntry, grZe_AcidState definitions",
+        "raw_diff: types.h grZebes_GroundVars4/5 offset comments"
+      ]
+    },
+    {
+      "tactic": "Used PAD_STACK and UNUSED padding in several recovered functions, which should remain narrow and evidence-backed because such stack-shaping is a matching tactic.",
+      "evidence_refs": [
+        "raw_diff grep: PAD_STACK(0x10), PAD_STACK(12), PAD_STACK(8), PAD_STACK(0x30), UNUSED u8 _[4]",
+        "decomp_standards: matching-tactics-need-evidence"
+      ]
+    },
+    {
+      "tactic": "Adjusted symbols.txt section metadata and local/global scope around grZe data to support data and sdata2 matching.",
+      "evidence_refs": [
+        "raw_diff: .data grZe sizes/splits and .sdata2 local-label conversions",
+        "text_corpus: bot report shows .data, .sdata2, .rodata, .bss, .sdata improvements"
+      ]
+    },
+    {
+      "tactic": "Used local matched-source comparison for report formatting; reviewer pointed to grlast.c as an OSReport example for the same kind of cleanup.",
+      "evidence_refs": [
+        "review_comments: PsiLupan links grlast.c#L217 as an example for the OSReport"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "author": "PsiLupan",
+      "path": "src/melee/gr/grzebes.c",
+      "feedback": "Asked whether OSReport-related statics/strings could be fixed to be used in-place, citing a grlast.c OSReport example.",
+      "evidence_refs": [
+        "review_comment https://github.com/doldecomp/melee/pull/2232#discussion_r2912400349"
+      ]
+    },
+    {
+      "author": "PsiLupan",
+      "path": "src/melee/gr/grzebes.c",
+      "feedback": "Recommended removing the rest of the statics until the file is correctly matched, to avoid a false impression of ordering; noted an HSD_ASSERT may reveal the actual temp name for something like map_a_gobj.",
+      "evidence_refs": [
+        "review_comment https://github.com/doldecomp/melee/pull/2232#discussion_r2912411154"
+      ]
+    },
+    {
+      "author": "jellejurre",
+      "path": "src/melee/gr/grzebes.c",
+      "feedback": "Author asked whether the revised handling of statics was acceptable.",
+      "evidence_refs": [
+        "review_comment https://github.com/doldecomp/melee/pull/2232#discussion_r2912984661"
+      ]
+    },
+    {
+      "author": "PsiLupan",
+      "path": "src/melee/gr/grzebes.c",
+      "feedback": "Responded that the revised static handling looked a lot better.",
+      "evidence_refs": [
+        "review_comment https://github.com/doldecomp/melee/pull/2232#discussion_r2913014666"
+      ]
+    },
+    {
+      "author": "PsiLupan",
+      "path": "src/melee/gr/grzebes.c",
+      "feedback": "Suggested direct aggregate assignments for pos1 and pos2 Vec3 values so they are treated as const and do not need separate declarations.",
+      "evidence_refs": [
+        "review_comment https://github.com/doldecomp/melee/pull/2232#discussion_r2913021669"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2232",
+    "grzebes",
+    "jurrejelle",
+    "grZe_callbacks",
+    "grZebes_801D8558",
+    "grZebes_801D8644",
+    "grZebes_801D881C",
+    "grZebes_801DA528",
+    "grZebes_801DAA08",
+    "fn_801DAC90",
+    "grZebes_801DB3CC",
+    "grZebes_801DBB60",
+    "grZebes_801DC260",
+    "grZebes_801DC408",
+    "grZebes_801DC744",
+    "grZebes_801DC9DC",
+    "grZebes_801DCBFC",
+    "grMaterial_801C8D44",
+    "grZakoGenerator_801CA43C",
+    "grZe_BubbleEntry",
+    "grZe_BubbleConfig",
+    "grZe_AcidState",
+    "grZe_YakumonoParam",
+    "GroundVars zebes5",
+    "OSReport in-place",
+    "statics false impression of ordering",
+    "PAD_STACK",
+    "Vec3 aggregate assignment",
+    "symbols.txt local sdata2 labels"
+  ],
+  "follow_up_queries": [
+    "grzebes statics false impression ordering HSD_ASSERT map_a_gobj",
+    "OSReport in-place grlast.c grzebes.c",
+    "grZe_callbacks StageCallbacks grZebes_801D8558",
+    "grZe_BubbleEntry grZe_AcidState GroundVars zebes5",
+    "grMaterial_801C8D44 export header grzebes",
+    "grZakoGenerator_801CA43C void HSD_JObj f32",
+    "PAD_STACK grzebes matching tactic",
+    "Vec3 aggregate assignment treated as const pos1 pos2"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR identity, merge state, file counts, changed files",
+      "loaded_files: human_pr_text.md",
+      "loaded_files: raw_diff.diff truncated but contains primary hunks",
+      "loaded_files: text_corpus.jsonl includes bot report and review comments",
+      "review_comments.md truncated but key review examples are present"
+    ],
+    "notes": [
+      "The raw diff and review comments are truncated in loaded context, so this intake only summarizes visible evidence and metadata-provided file list/counts.",
+      "The bot report provides matching percentages and new-match claims, but no independent build/objdiff was run during intake.",
+      "The PR body says the PR was mostly done with AI and cleanup was planned; this is author self-report and not used to infer code quality beyond evidence quality/context.",
+      "Some changed files, especially grzebes.c, have much more content than the excerpt; this record avoids enumerating all recovered functions unless visible in diff/report evidence."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson",
+        "title": "Do not keep unproven statics just to imply data order in incomplete files",
+        "text": "PR #2232 review explicitly warned that statics in an incomplete grzebes.c file should probably be removed until the file is correctly matched because they create a false impression of ordering and later HSD_ASSERT/local evidence can reveal actual temporary names.",
+        "scope": [
+          "stage decomp",
+          "incomplete translation units",
+          "data ownership",
+          "static data cleanup"
+        ],
+        "evidence_refs": [
+          "review_comment r2912411154",
+          "raw_diff: grzebes.c added static data and symbols.txt data changes"
+        ]
+      },
+      {
+        "record_type": "decomp_lesson",
+        "title": "Prefer in-place OSReport form when local examples identify it",
+        "text": "For grzebes OSReport cleanup, review requested using the OSReport string/call in-place and pointed to grlast.c as a local example, rather than preserving separate static report string storage.",
+        "scope": [
+          "stage decomp",
+          "OSReport",
+          "assert/report cleanup"
+        ],
+        "evidence_refs": [
+          "review_comment r2912400349",
+          "raw_diff: grZebes_801D8558 OSReport call"
+        ]
+      },
+      {
+        "record_type": "decomp_lesson",
+        "title": "Direct Vec3 aggregate assignments can replace separate local const storage in matching attempts",
+        "text": "Reviewer suggested assigning pos1 and pos2 with aggregate literals directly; in this context they would be treated as const and separate declarations were unnecessary.",
+        "scope": [
+          "stage decomp",
+          "Vec3 locals",
+          "literal handling"
+        ],
+        "evidence_refs": [
+          "review_comment r2913021669"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Warn against premature static-data ordering in partially matched files",
+        "text": "Consider adding a note to data/literal standards: in incomplete translation units, avoid keeping static arrays/strings/floats solely to imply data order; remove or narrow them until code, asserts, symbols, or local matched evidence prove ownership and names.",
+        "source_path": null,
+        "scope": [
+          "literals-and-data-ownership",
+          "text-before-data-matching",
+          "data-sections-and-tu-splits"
+        ],
+        "evidence_refs": [
+          "review_comment r2912411154",
+          "PR #2232 symbols.txt data churn"
+        ],
+        "reason": "This review gives concrete historical evidence for a recurring risk already covered by standards: false confidence from premature static ordering."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "OSReport cleanup can use in-place string/call form when local examples match",
+        "text": "Consider mentioning OSReport specifically under assert/report cleanup: when local matched files show the same report pattern, prefer the in-place OSReport string/call form rather than naming report strings as separate statics without ownership evidence.",
+        "source_path": null,
+        "scope": [
+          "assert-report-macros",
+          "literals-and-data-ownership",
+          "stage decomp"
+        ],
+        "evidence_refs": [
+          "review_comment r2912400349",
+          "raw_diff grZebes_801D8558 OSReport"
+        ],
+        "reason": "Reviewer provided a concrete OSReport example and requested in-place cleanup."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "grzebes stage code uses grZe-prefixed local structs and GroundVars variants",
+        "text": "Candidate path fact: src/melee/gr/grzebes.c and src/melee/gr/types.h in PR #2232 introduced grZe_BubbleEntry, grZe_BubbleConfig, grZe_AcidState, grZe_YakumonoParam, and grZebes_GroundVars3/4/5 as local layout scaffolding for Zebes stage decomp.",
+        "source_path": "src/melee/gr/grzebes.c",
+        "scope": [
+          "src/melee/gr/grzebes.c",
+          "src/melee/gr/types.h",
+          "stage grzebes"
+        ],
+        "evidence_refs": [
+          "raw_diff: local typedef additions in grzebes.c",
+          "raw_diff: types.h GroundVars additions"
+        ],
+        "reason": "Could help future searches in this path, but should be curated against current source before accepting."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote all symbol.txt local-label changes from this PR as a general rule; the excerpt does not show enough ownership proof for each label.",
+      "Do not infer that AI-generated decomp is acceptable or unacceptable from the PR body alone; only review comments and diff evidence are used for lessons.",
+      "Do not treat PAD_STACK and UNUSED padding in this PR as style; standards require explicit verifier evidence and cleanup reasoning for such tactics."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

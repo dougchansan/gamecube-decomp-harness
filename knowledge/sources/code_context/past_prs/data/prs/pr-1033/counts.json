@@ -1,0 +1,17 @@
+{
+  "number": 1033,
+  "title": "Match `ftCo_HammerLanding` (320 bytes)",
+  "state": "MERGED",
+  "createdAt": "2023-11-21T19:14:53Z",
+  "updatedAt": "2023-11-21T19:30:07Z",
+  "mergedAt": "2023-11-21T19:30:06Z",
+  "closedAt": "2023-11-21T19:30:06Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1033",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 9941
+  }
+}

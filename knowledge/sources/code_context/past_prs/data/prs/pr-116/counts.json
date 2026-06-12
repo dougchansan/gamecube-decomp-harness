@@ -1,0 +1,17 @@
+{
+  "number": 116,
+  "title": "Fix two hardcoded pointers",
+  "state": "MERGED",
+  "createdAt": "2021-11-21T03:07:08Z",
+  "updatedAt": "2021-11-21T03:07:19Z",
+  "mergedAt": "2021-11-21T03:07:14Z",
+  "closedAt": "2021-11-21T03:07:14Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/116",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 2074
+  }
+}

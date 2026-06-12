@@ -1,0 +1,17 @@
+{
+  "number": 555,
+  "title": "Match HSD perf",
+  "state": "MERGED",
+  "createdAt": "2022-09-07T04:58:50Z",
+  "updatedAt": "2022-09-07T10:01:11Z",
+  "mergedAt": "2022-09-07T09:41:53Z",
+  "closedAt": "2022-09-07T09:41:53Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/555",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 1,
+    "diff_bytes": 13483
+  }
+}

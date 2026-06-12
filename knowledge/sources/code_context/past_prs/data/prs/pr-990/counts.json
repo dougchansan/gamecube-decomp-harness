@@ -1,0 +1,17 @@
+{
+  "number": 990,
+  "title": "Match `ft_0BEF`",
+  "state": "MERGED",
+  "createdAt": "2023-10-13T13:09:43Z",
+  "updatedAt": "2023-10-13T13:18:11Z",
+  "mergedAt": "2023-10-13T13:18:09Z",
+  "closedAt": "2023-10-13T13:18:09Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/990",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 3959
+  }
+}

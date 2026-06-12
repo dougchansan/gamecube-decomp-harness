@@ -1,0 +1,17 @@
+{
+  "number": 1206,
+  "title": "Match `itscball` (752 bytes)",
+  "state": "MERGED",
+  "createdAt": "2024-02-12T21:46:27Z",
+  "updatedAt": "2024-03-05T19:39:48Z",
+  "mergedAt": "2024-02-12T21:57:12Z",
+  "closedAt": "2024-02-12T21:57:12Z",
+  "author": "wyatt-avilla",
+  "url": "https://github.com/doldecomp/melee/pull/1206",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 20209
+  }
+}

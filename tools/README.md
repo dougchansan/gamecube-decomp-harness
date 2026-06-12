@@ -2,8 +2,8 @@
 
 This directory owns callable tool capabilities for agents. The tools are kept
 outside `knowledge/` because they are process automation and lookup surfaces;
-the knowledge graph may index their cached outputs through `tool_outputs`, but
-the tools themselves are reusable extensions.
+their caches and generated indexes stay with the owning tool suite so each API
+can make its own freshness decision.
 
 `tools/registry.json` is the source of truth for stable tool ids, physical
 paths, categories, and lightweight usage metadata. Agent prompts should present
@@ -20,6 +20,7 @@ tools/
 +-- source_editing/
 +-- data_conversion/
 +-- operations/
++-- _impl/
 +-- _shared/
 ```
 
@@ -35,6 +36,11 @@ Each registered suite keeps the same shape:
 +-- indexes/
 +-- tests/
 ```
+
+Shared implementations that support multiple public tool suites live under
+`tools/_impl/`. For Melee-specific helpers, `tools/_impl/melee/tools/` contains
+the callable implementation scripts and `tools/_impl/melee/m2c/` contains the
+vendored m2c package used by `m2c_decomp`.
 
 ## Capability Roles
 

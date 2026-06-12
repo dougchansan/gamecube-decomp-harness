@@ -1,0 +1,17 @@
+{
+  "number": 897,
+  "title": "Match `ftCo_CargoJump`",
+  "state": "MERGED",
+  "createdAt": "2023-05-29T11:16:54Z",
+  "updatedAt": "2023-05-29T11:23:40Z",
+  "mergedAt": "2023-05-29T11:23:39Z",
+  "closedAt": "2023-05-29T11:23:39Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/897",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 138650
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 1276,
+  "title": "RObj work",
+  "state": "MERGED",
+  "createdAt": "2024-02-20T16:54:58Z",
+  "updatedAt": "2024-02-20T17:02:23Z",
+  "mergedAt": "2024-02-20T17:02:20Z",
+  "closedAt": "2024-02-20T17:02:20Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/1276",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 2445
+  }
+}

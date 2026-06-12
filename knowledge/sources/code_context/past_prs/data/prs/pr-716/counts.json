@@ -1,0 +1,17 @@
+{
+  "number": 716,
+  "title": "Match `func_8015DB2C`",
+  "state": "MERGED",
+  "createdAt": "2023-01-21T01:32:35Z",
+  "updatedAt": "2023-01-25T02:58:46Z",
+  "mergedAt": "2023-01-25T02:58:45Z",
+  "closedAt": "2023-01-25T02:58:45Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/716",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 1,
+    "diff_bytes": 1660
+  }
+}

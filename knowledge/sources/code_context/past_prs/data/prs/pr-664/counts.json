@@ -1,0 +1,17 @@
+{
+  "number": 664,
+  "title": "Fix `implicit-function-declaration` warnings, pass 8",
+  "state": "MERGED",
+  "createdAt": "2023-01-11T09:59:12Z",
+  "updatedAt": "2023-01-11T10:40:07Z",
+  "mergedAt": "2023-01-11T10:40:05Z",
+  "closedAt": "2023-01-11T10:40:06Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/664",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 4,
+    "reviews": 5,
+    "diff_bytes": 149657
+  }
+}

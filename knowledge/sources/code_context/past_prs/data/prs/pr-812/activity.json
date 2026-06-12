@@ -1,0 +1,10 @@
+{
+  "pr": 812,
+  "title": "Clean up `ftMasterHand` and `ftCrazyHand` motion definitions",
+  "url": "https://github.com/doldecomp/melee/pull/812",
+  "text_records_with_body": 0,
+  "review_comments": 0,
+  "changed_files": 2,
+  "added_lines": 198,
+  "deleted_lines": 198
+}

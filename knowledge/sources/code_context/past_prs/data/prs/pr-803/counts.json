@@ -1,0 +1,17 @@
+{
+  "number": 803,
+  "title": "Clean up `ftSandbag` motion definitions",
+  "state": "MERGED",
+  "createdAt": "2023-04-22T22:47:18Z",
+  "updatedAt": "2023-04-22T22:56:06Z",
+  "mergedAt": "2023-04-22T22:56:05Z",
+  "closedAt": "2023-04-22T22:56:05Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/803",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 2322
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "pr": 1176,
+  "title": "Re-enable linking of gobjgxlink, remove .s",
+  "url": "https://github.com/doldecomp/melee/pull/1176",
+  "text_records_with_body": 0,
+  "review_comments": 0,
+  "changed_files": 3,
+  "added_lines": 2,
+  "deleted_lines": 365
+}

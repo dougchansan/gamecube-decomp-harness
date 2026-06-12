@@ -1,0 +1,17 @@
+{
+  "number": 1425,
+  "title": "Update `dtk-template`",
+  "state": "MERGED",
+  "createdAt": "2024-08-11T23:58:16Z",
+  "updatedAt": "2024-08-12T00:28:39Z",
+  "mergedAt": "2024-08-12T00:28:38Z",
+  "closedAt": "2024-08-12T00:28:38Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1425",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 14277
+  }
+}

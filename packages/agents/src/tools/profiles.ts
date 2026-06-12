@@ -6,63 +6,18 @@
  * templates. This keeps agent/tool composition explicit and testable.
  */
 import type { RuntimeAgentRole } from "@decomp-orchestrator/core/types";
+import { defaultKnowledgeCuratorToolProfile, defaultPrReviewToolProfile, defaultReconcileToolProfile, defaultWorkerToolProfile, workerToolPromptInfo } from "./profile-data.js";
 import { agentToolSummary, createAgentTools } from "./registry.js";
 import type { AgentToolProfileInput, AgentToolRuntimeContext, PiToolDefinition } from "./types.js";
 
-/** Default worker Pi tools: one compact context tool plus source/tool-specific knowledge affordances. */
-export const defaultWorkerToolProfile = [
-  "worker_context_get",
-  "code_graph_file_card",
-  "code_graph_search",
-  "past_prs_search",
-  "discord_knowledge_search",
-  "discord_knowledge_topics_for_terms",
-  "ssbm_data_sheet_search",
-  "ssbm_data_sheet_lookup_address",
-  "ssbm_data_sheet_lookup_offset",
-  "powerpc_docs_search",
-  "powerpc_instruction_lookup",
-  "external_mirrors_search",
-  "external_symbol_lookup",
-  "resource_guides_search",
-  "reference_docs_search",
-  "tool_outputs_search",
-  "tool_outputs_similar_functions",
-  "tool_outputs_mismatch_patterns",
-  "tool_outputs_tool_lookup",
-  "decomp_standards_search",
-  "decomp_standards_context",
-  "path_facts_resolve",
-  "path_facts_search",
-  "ghidra_lookup",
-  "opseq_similar_functions",
-  "mismatch_db_search",
-  "mwcc_debug_lookup",
-  "checkdiff_run",
-  "checkdiff_summary",
-  "direct_compile_tu",
-  "objdiff_score_candidate",
-  "mwcc_debug_dump_function",
-  "mwcc_debug_diagnose_stack",
-  "mwcc_debug_diagnose_regflow",
-  "mwcc_debug_diagnose_inlines",
-  "mwcc_debug_raw_dump",
-  "source_permuter_run",
-  "source_permuter_replay",
-  "source_mutation_preview",
-  "type_oracle_lookup",
-  "struct_infer_from_asm",
-  "m2c_decompile",
-  "include_fixer_preview",
-  "item_state_table_preview",
-  "review_lint_scan",
-] as const;
+export { defaultKnowledgeCuratorToolProfile, defaultPrReviewToolProfile, defaultReconcileToolProfile, defaultWorkerToolProfile } from "./profile-data.js";
 
 export const defaultAgentToolProfiles: Record<RuntimeAgentRole, string[]> = {
   director: [],
   worker: [...defaultWorkerToolProfile],
-  "pr-review": [],
-  "knowledge-curator": [],
+  "pr-review": [...defaultPrReviewToolProfile],
+  "knowledge-curator": [...defaultKnowledgeCuratorToolProfile],
+  reconcile: [...defaultReconcileToolProfile],
 };
 
 /** Resolve built-in defaults plus optional replace/enable/disable overrides. */
@@ -76,6 +31,57 @@ export function resolveAgentToolIds(role: RuntimeAgentRole, profile?: AgentToolP
 /** Build concrete Pi custom tools for the role and runtime context. */
 export function buildAgentTools(context: AgentToolRuntimeContext, profile?: AgentToolProfileInput): PiToolDefinition[] {
   return createAgentTools(resolveAgentToolIds(context.role, profile), context);
+}
+
+function xmlAttribute(value: unknown): string {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+interface AvailableToolRow {
+  name: string;
+  label: string;
+  provider: string;
+  type: string;
+  useWhen: string;
+}
+
+function availableToolRows(context: AgentToolRuntimeContext, profile?: AgentToolProfileInput): AvailableToolRow[] {
+  return buildAgentTools(context, profile).map((tool) => {
+    const promptInfo = workerToolPromptInfo[tool.name];
+    return {
+      name: tool.name,
+      label: tool.label,
+      provider: promptInfo?.provider ?? "custom",
+      type: promptInfo?.type ?? "other",
+      useWhen: promptInfo?.useWhen ?? tool.description,
+    };
+  });
+}
+
+/** Render the resolved agent tool profile as a compact prompt block. */
+export function availableToolsPromptXml(context: AgentToolRuntimeContext, profile?: AgentToolProfileInput): string {
+  const groups = new Map<string, { provider: string; type: string; tools: AvailableToolRow[] }>();
+  for (const row of availableToolRows(context, profile)) {
+    const groupKey = `${row.provider}\0${row.type}`;
+    const group = groups.get(groupKey) ?? { provider: row.provider, type: row.type, tools: [] };
+    group.tools.push(row);
+    groups.set(groupKey, group);
+  }
+
+  const lines = ["    <available_tools>"];
+  for (const group of groups.values()) {
+    lines.push(`        <tool_group provider="${xmlAttribute(group.provider)}" type="${xmlAttribute(group.type)}">`);
+    for (const tool of group.tools) {
+      lines.push(`            <tool name="${xmlAttribute(tool.name)}" label="${xmlAttribute(tool.label)}" use_when="${xmlAttribute(tool.useWhen)}" />`);
+    }
+    lines.push("        </tool_group>");
+  }
+  lines.push("    </available_tools>");
+  return lines.join("\n");
 }
 
 /** Return a compact, prompt-safe summary of tools available to an agent role. */

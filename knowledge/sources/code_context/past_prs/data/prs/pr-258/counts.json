@@ -1,0 +1,17 @@
+{
+  "number": 258,
+  "title": "update function names in stage to match conventions",
+  "state": "MERGED",
+  "createdAt": "2022-02-07T23:08:47Z",
+  "updatedAt": "2022-02-08T02:16:27Z",
+  "mergedAt": "2022-02-08T02:16:27Z",
+  "closedAt": "2022-02-08T02:16:27Z",
+  "author": "snuffysasa",
+  "url": "https://github.com/doldecomp/melee/pull/258",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 300032
+  }
+}

@@ -1,0 +1,229 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2623",
+  "pr": {
+    "number": 2623,
+    "title": "Improvements to split up: IF",
+    "url": "https://github.com/doldecomp/melee/pull/2623",
+    "state": "MERGED",
+    "author": "fjooord",
+    "created_at": "2026-06-08T14:30:36Z",
+    "merged_at": "2026-06-08T15:46:36Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Small IF subsystem matching slice. The final loaded diff changes `src/melee/if/soundtest.c` by explicitly zero-initializing `un_803FA258`. The PR body says the slice was split from #2617 for easier review, scoped to `src/melee/if`, and local `git diff --check` passed. decomp-dev reported one new soundtest match and several soundtest item improvements. Review comments on `src/melee/if/textlib.c` objected to renaming variables and using defines in their place, but the final changed-file metadata only lists `soundtest.c`.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "small-data-initialization",
+      "review-feedback"
+    ],
+    "systems": [
+      "melee-core",
+      "if",
+      "soundtest"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/if/soundtest.c",
+      "role": "Final changed file; zero-initializes `un_803FA258`, with decomp-dev reporting one new match and several soundtest improvements.",
+      "evidence_refs": [
+        "changed_files.jsonl: `src/melee/if/soundtest.c`, added 1, deleted 1, hunks 1",
+        "raw_diff: `} un_803FA258;` changed to `} un_803FA258 = { 0 };`",
+        "text_corpus issue_comment: decomp-dev report for GALE01 lists `main/melee/if/soundtest` new match `un_80301BA8` and improvements in `un_802FFF2C`, `.data`, `un_80300AF4`, `un_80300B58`"
+      ]
+    },
+    {
+      "path": "src/melee/if/textlib.c",
+      "role": "PR body listed file and review comments discuss naming/define concerns, but final loaded changed-file metadata does not list it.",
+      "evidence_refs": [
+        "human_pr_text: Files lists `src/melee/if/textlib.c`",
+        "review_comments.md: two PsiLupan comments on `src/melee/if/textlib.c`",
+        "changed_files.jsonl: only final changed file listed is `src/melee/if/soundtest.c`"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "path": "src/melee/if/soundtest.c",
+      "change": "Added explicit aggregate zero initializer to `un_803FA258`.",
+      "evidence_refs": [
+        "raw_diff: `} un_803FA258;` -> `} un_803FA258 = { 0 };`"
+      ]
+    },
+    {
+      "path": "src/melee/if/soundtest.c",
+      "change": "decomp-dev reported the PR slice produced one new match for `main/melee/if/soundtest` item `un_80301BA8` and improvements in four soundtest items.",
+      "evidence_refs": [
+        "text_corpus issue_comment: Matched code +188 bytes; new match `un_80301BA8`; improvements `un_802FFF2C`, `.data`, `un_80300AF4`, `un_80300B58`"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "lesson": "Splitting a larger matching branch by directory/subsystem can make matching improvements easier to review.",
+      "evidence_refs": [
+        "human_pr_text: `Split from #2617 by directory/subsystem so the matching improvements are easier to review.`",
+        "human_pr_text: Scope `src/melee/if`"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "A minimal initializer-only source change can affect soundtest matching outcomes, including text and data-related item scores.",
+      "evidence_refs": [
+        "raw_diff: `un_803FA258 = { 0 }`",
+        "text_corpus issue_comment: decomp-dev report lists one new match and soundtest improvements"
+      ],
+      "confidence": 0.72
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For data/global cleanup in matching PRs, avoid replacing existing semantic variable names with address-style names plus defines unless there is explicit evidence supporting the rename.",
+      "evidence_refs": [
+        "review_comments.md: PsiLupan comment `Avoid renaming variables and using defines in their place.`",
+        "review_comments.md: hunk shows `devtext_drawlist`/`devtext_poolhead` being changed toward `un_804D6E18`",
+        "decomp_standards:no-define-alias-global-renames",
+        "decomp_standards:conservative-naming"
+      ],
+      "confidence": 0.9
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Do not rename established semantic globals such as `devtext_drawlist`, `devtext_poolhead`, or color globals to address-style names as a convenience layer with defines.",
+      "evidence_refs": [
+        "review_comments.md: first textlib hunk shows semantic DevText globals removed in favor of `un_804D6E18`",
+        "review_comments.md: second textlib hunk shows color globals removed in favor of `un_804DDC88`",
+        "review_comments.md: reviewer says to avoid renaming variables and using defines in their place"
+      ],
+      "confidence": 0.86
+    },
+    {
+      "convention": "Keep one canonical evidence-backed global/data name rather than using identifier-to-identifier defines to mask a rename.",
+      "evidence_refs": [
+        "review_comments.md: two reviewer comments against renaming variables and using defines",
+        "decomp_standards:no-define-alias-global-renames"
+      ],
+      "confidence": 0.88
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Explicitly zero-initialize a global aggregate when it matches the target object layout/codegen for the soundtest unit.",
+      "evidence_refs": [
+        "raw_diff: `un_803FA258 = { 0 }`",
+        "text_corpus issue_comment: decomp-dev report shows `main/melee/if/soundtest` match/improvement results"
+      ],
+      "caveat": "The slice does not include author explanation proving why this initializer was required; treat as PR-specific evidence, not a global rule.",
+      "confidence": 0.68
+    }
+  ],
+  "review_feedback": [
+    {
+      "reviewer": "PsiLupan",
+      "path": "src/melee/if/textlib.c",
+      "feedback": "Avoid renaming variables and using defines in their place.",
+      "evidence_refs": [
+        "review_comments.md: discussion_r3374175164",
+        "review_comments.md: hunk around DevText globals"
+      ]
+    },
+    {
+      "reviewer": "PsiLupan",
+      "path": "src/melee/if/textlib.c",
+      "feedback": "Same concern applied to color globals: avoid renaming variables and using defines in their place.",
+      "evidence_refs": [
+        "review_comments.md: discussion_r3374176537",
+        "review_comments.md: hunk around `GXColor white/red/green/blue` changed to `un_804DDC88`"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR 2623",
+    "Improvements to split up: IF",
+    "src/melee/if",
+    "src/melee/if/soundtest.c",
+    "src/melee/if/textlib.c",
+    "soundtest",
+    "textlib",
+    "un_803FA258",
+    "un_803FA348",
+    "un_803FA34C",
+    "un_803FA32C",
+    "un_80301BA8",
+    "un_802FFF2C",
+    "un_80300AF4",
+    "un_80300B58",
+    "devtext_drawlist",
+    "devtext_poolhead",
+    "un_804D6E18",
+    "un_804DDC88",
+    "GXColor",
+    "avoid renaming variables",
+    "using defines in their place",
+    "no define alias global renames"
+  ],
+  "follow_up_queries": [
+    "PR 2623 textlib defines renaming variables",
+    "un_803FA258 zero initializer soundtest match",
+    "soundtest un_80301BA8 new match PR 2623",
+    "devtext_drawlist devtext_poolhead rename review",
+    "GXColor white red green blue un_804DDC88 review"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR metadata, final changed_files count 1",
+      "human_pr_text.md: PR body scope, preliminary report, local checks, listed files",
+      "raw_diff.diff: complete final diff excerpt for soundtest.c",
+      "text_corpus.jsonl: decomp-dev report and review comments",
+      "review_comments.md: reviewer feedback on textlib.c"
+    ],
+    "notes": [
+      "Final changed-file metadata and raw diff only show `src/melee/if/soundtest.c`; however, PR body and review comments reference `src/melee/if/textlib.c`, likely from an earlier revision or split context.",
+      "The PR body includes preliminary full-branch metrics, but it says per-PR CI/decomp-dev reporting is authoritative once complete; the decomp-dev issue comment provides narrower PR-slice results.",
+      "No author explanation is loaded for why `un_803FA258 = { 0 }` was chosen, so the initializer tactic is PR-specific and should not be generalized without more evidence.",
+      "Review feedback is strong for the naming/define lesson, but the loaded final diff does not show the corresponding textlib changes as merged."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "review_lesson",
+        "title": "Avoid define aliases for speculative global renames",
+        "text": "Reviewer feedback in PR #2623 says to avoid renaming variables and using defines in their place. In the cited textlib hunks, existing names like `devtext_drawlist`, `devtext_poolhead`, and color globals were being replaced by address-style names, and the reviewer objected.",
+        "scope": [
+          "src/melee/if/textlib.c",
+          "global/data symbol naming",
+          "decomp review"
+        ],
+        "evidence_refs": [
+          "review_comments.md: discussion_r3374175164",
+          "review_comments.md: discussion_r3374176537",
+          "decomp_standards:no-define-alias-global-renames",
+          "decomp_standards:conservative-naming"
+        ],
+        "confidence": 0.9
+      }
+    ],
+    "source_update_candidates": [],
+    "rejection_notes": [
+      "Do not promote `un_803FA258 = { 0 }` into a global standard; the PR proves only that this exact soundtest initializer was part of a matching slice.",
+      "Do not claim textlib.c was a final changed file from this slice based solely on review comments; final changed-file metadata lists only soundtest.c.",
+      "Do not treat the preliminary full-branch metrics from the PR body as final PR-slice validation; the PR body explicitly defers to per-PR reporting."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

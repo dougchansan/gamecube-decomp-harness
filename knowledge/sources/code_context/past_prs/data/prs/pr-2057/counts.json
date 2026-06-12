@@ -1,0 +1,17 @@
+{
+  "number": 2057,
+  "title": "Match 7 functions",
+  "state": "CLOSED",
+  "createdAt": "2025-12-31T09:26:28Z",
+  "updatedAt": "2026-01-06T16:40:41Z",
+  "mergedAt": null,
+  "closedAt": "2025-12-31T17:59:47Z",
+  "author": "itsgrimetime",
+  "url": "https://github.com/doldecomp/melee/pull/2057",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 42489
+  }
+}

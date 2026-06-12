@@ -1,0 +1,17 @@
+{
+  "number": 1573,
+  "title": "Fix extern/dolphin headers for decomp.py",
+  "state": "MERGED",
+  "createdAt": "2025-06-06T01:14:35Z",
+  "updatedAt": "2025-06-06T01:20:52Z",
+  "mergedAt": "2025-06-06T01:20:50Z",
+  "closedAt": "2025-06-06T01:20:50Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1573",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 1871
+  }
+}

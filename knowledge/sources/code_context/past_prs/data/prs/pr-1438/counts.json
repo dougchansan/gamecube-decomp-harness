@@ -1,0 +1,17 @@
+{
+  "number": 1438,
+  "title": "Foxblaster demystification and Lgun decomp",
+  "state": "MERGED",
+  "createdAt": "2024-08-23T17:49:17Z",
+  "updatedAt": "2024-08-23T20:54:57Z",
+  "mergedAt": "2024-08-23T20:54:13Z",
+  "closedAt": "2024-08-23T20:54:13Z",
+  "author": "AaronB-Hub",
+  "url": "https://github.com/doldecomp/melee/pull/1438",
+  "counts": {
+    "issue_comments": 5,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 51014
+  }
+}

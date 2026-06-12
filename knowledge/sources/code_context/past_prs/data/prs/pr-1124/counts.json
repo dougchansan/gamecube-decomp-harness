@@ -1,0 +1,17 @@
+{
+  "number": 1124,
+  "title": "Itspycloak",
+  "state": "MERGED",
+  "createdAt": "2024-01-26T01:09:37Z",
+  "updatedAt": "2024-01-26T05:11:46Z",
+  "mergedAt": "2024-01-26T05:11:46Z",
+  "closedAt": "2024-01-26T05:11:46Z",
+  "author": "wyatt-avilla",
+  "url": "https://github.com/doldecomp/melee/pull/1124",
+  "counts": {
+    "issue_comments": 2,
+    "review_comments": 2,
+    "reviews": 2,
+    "diff_bytes": 19458
+  }
+}

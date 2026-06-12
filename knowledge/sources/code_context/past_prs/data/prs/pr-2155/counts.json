@@ -1,0 +1,17 @@
+{
+  "number": 2155,
+  "title": "[WIP] gmClassic",
+  "state": "MERGED",
+  "createdAt": "2026-02-05T06:36:18Z",
+  "updatedAt": "2026-02-06T22:00:09Z",
+  "mergedAt": "2026-02-06T22:00:09Z",
+  "closedAt": "2026-02-06T22:00:09Z",
+  "author": "Duglas560",
+  "url": "https://github.com/doldecomp/melee/pull/2155",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 1,
+    "reviews": 2,
+    "diff_bytes": 34973
+  }
+}

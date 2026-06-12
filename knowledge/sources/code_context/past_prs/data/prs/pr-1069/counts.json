@@ -1,0 +1,17 @@
+{
+  "number": 1069,
+  "title": "Create initial decomp-toolkit skeleton",
+  "state": "MERGED",
+  "createdAt": "2024-01-17T02:52:52Z",
+  "updatedAt": "2024-01-17T09:29:10Z",
+  "mergedAt": "2024-01-17T03:49:37Z",
+  "closedAt": "2024-01-17T03:49:37Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1069",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 2137754
+  }
+}

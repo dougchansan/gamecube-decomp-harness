@@ -1,0 +1,17 @@
+{
+  "number": 2112,
+  "title": "GrZebes and GrOnett matches, match & link GrGarden",
+  "state": "MERGED",
+  "createdAt": "2026-01-20T18:10:32Z",
+  "updatedAt": "2026-01-20T18:38:49Z",
+  "mergedAt": "2026-01-20T18:38:45Z",
+  "closedAt": "2026-01-20T18:38:45Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/2112",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 23451
+  }
+}

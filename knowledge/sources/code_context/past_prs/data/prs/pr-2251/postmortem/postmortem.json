@@ -1,0 +1,249 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2251",
+  "pr": {
+    "number": 2251,
+    "title": "grpushon: match 2 functions",
+    "url": "https://github.com/doldecomp/melee/pull/2251",
+    "state": "MERGED",
+    "author": "johnwinston",
+    "created_at": "2026-03-10T13:26:42Z",
+    "merged_at": "2026-03-10T15:30:02Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2251 decompiled two grpushon functions, grPushOn_802182C8 and fn_80218678, replacing nonmatching placeholders with C implementations and updating fn_80218678's header prototype. The PR body claims a clean ninja build and 100.0 fuzzy_match_percent for all functions.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "include-update"
+    ],
+    "systems": [
+      "stage",
+      "ground",
+      "grpushon"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gr/grpushon.c",
+      "role": "Implemented grPushOn_802182C8 and fn_80218678; added mp/mplib.h include for mpLib_80057BC0.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gr/grpushon.c added 23 deleted 2 hunks 3",
+        "raw_diff: added #include \"mp/mplib.h\"",
+        "raw_diff: replaced /// #grPushOn_802182C8 with function body",
+        "raw_diff: replaced /// #fn_80218678 with function body"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grpushon.h",
+      "role": "Updated fn_80218678 prototype from unknown return/params to bool fn_80218678(void).",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gr/grpushon.h added 1 deleted 1 hunks 1",
+        "raw_diff: UNK_RET fn_80218678(UNK_PARAMS) changed to bool fn_80218678(void)"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "grPushOn_802182C8 now initializes grPushOn_804D6AB8 from Ground_801C49F8, sets stage_info.unk8C.b4 false and b5 true, calls grPushOn_802183E4 for indices 0 and 1, then calls mpLib_80057BC0(0).",
+      "evidence_refs": [
+        "raw_diff: grPushOn_802182C8 body"
+      ]
+    },
+    {
+      "text": "fn_80218678 now fetches Ground_801C2BA4(1), null-checks the returned HSD_GObj and its Ground user_data, and returns true only when gp->u.map.xC4_b0 is set; otherwise it returns false.",
+      "evidence_refs": [
+        "raw_diff: fn_80218678 body"
+      ]
+    },
+    {
+      "text": "The header prototype for fn_80218678 was made truthful to the recovered implementation: bool return and void parameters.",
+      "evidence_refs": [
+        "raw_diff: grpushon.h prototype change"
+      ]
+    },
+    {
+      "text": "The C file added mp/mplib.h to support the recovered mpLib_80057BC0 call.",
+      "evidence_refs": [
+        "raw_diff: include addition"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "The PR updated the owning header prototype at the same time as recovering fn_80218678, avoiding a stale UNK_RET/UNK_PARAMS declaration.",
+      "evidence_refs": [
+        "raw_diff: grpushon.h prototype change",
+        "decomp_standards: truthful-headers-and-includes"
+      ]
+    },
+    {
+      "text": "The implementation uses typed access through HSD_GObj user_data and Ground's map union arm instead of raw offset or M2C_FIELD-style access.",
+      "evidence_refs": [
+        "raw_diff: HSD_GObj* gobj, Ground* gp, gp->u.map.xC4_b0",
+        "decomp_standards: typed-fields-over-pointer-math"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a recovered function body establishes a concrete signature, update the corresponding header declaration rather than leaving UNK_RET/UNK_PARAMS behind.",
+      "scope": [
+        "headers",
+        "decompiled function prototypes"
+      ],
+      "evidence_refs": [
+        "raw_diff: fn_80218678 implementation returns bool and takes void",
+        "raw_diff: grpushon.h changed to bool fn_80218678(void)",
+        "decomp_standards: truthful-headers-and-includes"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "lesson": "Small stage helper matches may depend on direct initialization calls plus flag writes; preserve the observed call order and add the needed subsystem include for newly referenced helpers.",
+      "scope": [
+        "stage/grpushon",
+        "include hygiene"
+      ],
+      "evidence_refs": [
+        "raw_diff: grPushOn_802182C8 call sequence",
+        "raw_diff: added mp/mplib.h"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "lesson": "Use typed Ground/HSD_GObj access and explicit null guards when recovering ground-state query helpers if the known structures expose the field being checked.",
+      "scope": [
+        "ground queries",
+        "typed field access"
+      ],
+      "evidence_refs": [
+        "raw_diff: fn_80218678 nested null checks and gp->u.map.xC4_b0",
+        "decomp_standards: typed-fields-over-pointer-math"
+      ],
+      "confidence": 0.8
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "The PR kept address-style names for functions without recovered semantic names, such as fn_80218678 and grPushOn_802182C8.",
+      "evidence_refs": [
+        "raw_diff: function names retained",
+        "decomp_standards: conservative-naming"
+      ]
+    },
+    {
+      "text": "Clear local role names were used for object pointers: gobj for HSD_GObj* and gp for Ground*.",
+      "evidence_refs": [
+        "raw_diff: HSD_GObj* gobj; Ground* gp"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "text": "No special pragmas, register steering, inline assembly, PAD_STACK, or dummy locals appear in the loaded diff. The matching approach shown is straightforward C with typed fields, ordered calls, and header/include cleanup.",
+      "evidence_refs": [
+        "raw_diff: full diff excerpt"
+      ]
+    },
+    {
+      "text": "The PR body reports verification via clean ninja build and fuzzy_match_percent 100.0 for all functions; no objdiff excerpt or command output is included in the slice.",
+      "evidence_refs": [
+        "human_pr_text: Verification section"
+      ]
+    }
+  ],
+  "review_feedback": [],
+  "searchable_terms": [
+    "pr-2251",
+    "grpushon",
+    "grPushOn_802182C8",
+    "fn_80218678",
+    "src/melee/gr/grpushon.c",
+    "src/melee/gr/grpushon.h",
+    "Ground_801C49F8",
+    "stage_info.unk8C.b4",
+    "stage_info.unk8C.b5",
+    "grPushOn_802183E4",
+    "mpLib_80057BC0",
+    "Ground_801C2BA4",
+    "HSD_GObj",
+    "Ground",
+    "user_data",
+    "gp->u.map.xC4_b0",
+    "UNK_RET",
+    "UNK_PARAMS",
+    "bool fn_80218678(void)",
+    "mp/mplib.h",
+    "fuzzy_match_percent 100.0",
+    "ninja builds clean"
+  ],
+  "follow_up_queries": [
+    "grpushon fn_80218678 gp->u.map.xC4_b0",
+    "grPushOn_802182C8 mpLib_80057BC0 stage_info.unk8C",
+    "src/melee/gr/grpushon.h UNK_RET fn_80218678",
+    "Ground_801C2BA4 user_data xC4_b0"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR #2251 metadata, merged state, changed file counts",
+      "human_pr_text: summary and verification claims",
+      "raw_diff: complete diff for changed files",
+      "changed_files.jsonl: changed file list"
+    ],
+    "notes": [
+      "The changed files and exact code edits are strongly supported by the loaded raw diff.",
+      "The PR body claims clean ninja build and 100.0 fuzzy_match_percent, but the slice does not include independent build logs, objdiff output, or CI details.",
+      "There are no review comments, issue comments, or reviews in the loaded metadata, so no reviewer intent or feedback is inferred.",
+      "The PR body says generated with Claude Code; this is recorded as context only and not treated as evidence about source correctness beyond the submitted diff and verification claims."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "lesson",
+        "title": "Recovered bodies should update owning header prototypes",
+        "text": "PR #2251 recovered fn_80218678 as bool fn_80218678(void) and updated src/melee/gr/grpushon.h from UNK_RET/UNK_PARAMS to the concrete prototype in the same change.",
+        "scope": [
+          "headers",
+          "decompiled function signatures"
+        ],
+        "evidence_refs": [
+          "raw_diff: fn_80218678 implementation",
+          "raw_diff: grpushon.h prototype change"
+        ]
+      },
+      {
+        "record_type": "lesson",
+        "title": "Prefer typed Ground fields for simple state queries",
+        "text": "PR #2251 implemented fn_80218678 using HSD_GObj*, Ground* user_data, and gp->u.map.xC4_b0, with null checks, rather than raw offset access.",
+        "scope": [
+          "ground",
+          "typed field access"
+        ],
+        "evidence_refs": [
+          "raw_diff: fn_80218678 body"
+        ]
+      }
+    ],
+    "source_update_candidates": [],
+    "rejection_notes": [
+      "Do not generalize the two grPushOn_802183E4 calls in grPushOn_802182C8 into a natural-loop lesson; the PR evidence shows two explicit calls and no discussion of loop attempts.",
+      "Do not claim reviewer approval rationale or requested changes; the slice has zero review comments and zero reviews.",
+      "Do not treat the PR body's fuzzy_match_percent and ninja claims as independently verified logs; no build or objdiff artifacts are loaded."
+    ]
+  },
+  "confidence": 0.86,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 1421,
+  "title": "Match 34% of `sislib`",
+  "state": "MERGED",
+  "createdAt": "2024-08-11T00:13:54Z",
+  "updatedAt": "2024-08-11T16:22:41Z",
+  "mergedAt": "2024-08-11T16:22:41Z",
+  "closedAt": "2024-08-11T16:22:41Z",
+  "author": "thefoxcam",
+  "url": "https://github.com/doldecomp/melee/pull/1421",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 78134
+  }
+}

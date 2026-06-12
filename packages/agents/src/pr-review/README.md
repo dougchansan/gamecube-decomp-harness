@@ -1,7 +1,7 @@
-# PR Review Agent
+# PR Intake Agent
 
-Shared Pi-agent instructions for turning one raw PR slice into a searchable JSON record.
-Per-PR folders do not duplicate these prompts; the builder renders the current PR context in memory.
+Shared Pi-agent instructions for turning one raw PR slice into a searchable postmortem record for knowledge-curator handoff.
+The stable runtime id remains `pr-review` for compatibility.
 
 Files:
 
@@ -9,7 +9,7 @@ Files:
 - `templates/initial_user.md`: template for the per-PR context payload.
 - `schema.json`: required JSON response shape.
 
-Default Pi review config:
+Default Pi intake config:
 
 - Provider: `codex-lb`
 - Model: `gpt-5.5`

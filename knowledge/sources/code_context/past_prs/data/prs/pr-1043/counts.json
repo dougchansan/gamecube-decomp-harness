@@ -1,0 +1,17 @@
+{
+  "number": 1043,
+  "title": "Use some existing ftmaterial matches",
+  "state": "MERGED",
+  "createdAt": "2023-12-29T09:21:24Z",
+  "updatedAt": "2023-12-29T19:51:28Z",
+  "mergedAt": "2023-12-29T19:51:25Z",
+  "closedAt": "2023-12-29T19:51:25Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1043",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 1,
+    "diff_bytes": 13966
+  }
+}

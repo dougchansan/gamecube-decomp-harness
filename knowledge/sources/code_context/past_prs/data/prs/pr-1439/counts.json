@@ -1,0 +1,17 @@
+{
+  "number": 1439,
+  "title": "Finish match of sysdolphin's tev",
+  "state": "MERGED",
+  "createdAt": "2024-08-30T20:37:57Z",
+  "updatedAt": "2024-08-30T20:42:41Z",
+  "mergedAt": "2024-08-30T20:42:38Z",
+  "closedAt": "2024-08-30T20:42:38Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/1439",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 61439
+  }
+}

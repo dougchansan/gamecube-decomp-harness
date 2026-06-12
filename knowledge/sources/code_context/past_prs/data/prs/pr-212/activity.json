@@ -1,0 +1,10 @@
+{
+  "pr": 212,
+  "title": "Label some previously unknown AObj functions and add structs",
+  "url": "https://github.com/doldecomp/melee/pull/212",
+  "text_records_with_body": 0,
+  "review_comments": 0,
+  "changed_files": 16,
+  "added_lines": 327,
+  "deleted_lines": 291
+}

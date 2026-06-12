@@ -1,0 +1,379 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2615",
+  "pr": {
+    "number": 2615,
+    "title": "Attempt to link `gmopening`",
+    "url": "https://github.com/doldecomp/melee/pull/2615",
+    "state": "MERGED",
+    "author": "ribbanya",
+    "created_at": "2026-06-08T11:39:31Z",
+    "merged_at": "2026-06-08T11:51:49Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2615 attempted to link `src/melee/gm/gmopening.c` by adjusting GALE01 split/symbol metadata and reshaping gmopening data declarations. The author stated that all code matched in objdiff, but marking the file as `Matching` still caused a data mismatch.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "split-metadata",
+      "symbol-metadata",
+      "data-layout"
+    ],
+    "systems": [
+      "game-mode",
+      "config",
+      "gmopening"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gm/gmopening.c",
+      "role": "Main source file being linked; data declarations were reordered/split, inline format strings replaced pointer-offset uses, force-active float storage and sdata2 ordering helper were added.",
+      "evidence_refs": [
+        "changed_files: src/melee/gm/gmopening.c added 31 deleted 31 hunks 4",
+        "raw_diff: gmopening.c removes static struct gm_803DBF78 containing floats and strings",
+        "raw_diff: gmopening.c adds address-commented Vec3, BSS, SBSS, and data declarations near file top",
+        "raw_diff: gmopening.c adds sdata2_order and force_active unused_floats",
+        "raw_diff: fn_801A9FCC now uses inline sprintf format strings"
+      ]
+    },
+    {
+      "path": "config/GALE01/splits.txt",
+      "role": "Split metadata changed to move BSS range ownership from gm_1A4C into gmopening.",
+      "evidence_refs": [
+        "raw_diff: gm_1A4C .bss end changes 0x80480D58 to 0x80480B38",
+        "raw_diff: gmopening gains .bss start:0x80480B38 end:0x80480D58"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Symbol metadata changed around gmopening data at 0x803DBF78.",
+      "evidence_refs": [
+        "raw_diff: gm_803DBF78 size changes from 0x3C global to 0x24 local data:float",
+        "raw_diff: adds lbl_803DBF9C and lbl_803DBFA8 as 0xC string data labels"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Changed `gm_803DBF78` from one local C struct bundling nine floats plus two strings into separate metadata: a local 0x24 float object and two string labels in symbols.txt.",
+      "evidence_refs": [
+        "raw_diff: symbols.txt gm_803DBF78 size/scope/type update",
+        "raw_diff: symbols.txt lbl_803DBF9C and lbl_803DBFA8 additions",
+        "raw_diff: gmopening.c removes struct containing f32 data[9], x24 string, x30 string"
+      ]
+    },
+    {
+      "text": "Replaced pointer arithmetic into the former `gm_803DBF78` struct with inline `sprintf` format string literals in `fn_801A9FCC`.",
+      "evidence_refs": [
+        "raw_diff: removes `u8* data = (u8*) &gm_803DBF78`",
+        "raw_diff: replaces `(char*) (data + 0x24)` with `\"\\cffff00%2d\"`",
+        "raw_diff: replaces `(char*) (data + 0x30)` with `\"\\cffff00%3d\"`"
+      ]
+    },
+    {
+      "text": "Moved and annotated static data declarations, including Vec3 constants, BSS/SBSS variables, and `gm_803DBFB4`, using address comments.",
+      "evidence_refs": [
+        "raw_diff: adds `/* 3B7D68 */ static const Vec3 gm_803B7D68`",
+        "raw_diff: adds `/* 480B38 */ static PerfLabelLine gm_80480B38[4]`",
+        "raw_diff: moves gm_804D67D0 through gm_804D67F4 declarations near file top",
+        "raw_diff: changes `static int gm_803DBFB4[]` to `/* 3DBFB4 */ static int gm_803DBFB4[]`"
+      ]
+    },
+    {
+      "text": "Added a `sdata2_order` helper referencing `82.0f` and `290.0f`, apparently to affect float ordering.",
+      "evidence_refs": [
+        "raw_diff: adds `static void sdata2_order(void)` with `(void) 82.0f` and `(void) 290.0f`"
+      ]
+    },
+    {
+      "text": "Added `#pragma force_active on` around `unused_floats` containing nine float values formerly held inside `gm_803DBF78`.",
+      "evidence_refs": [
+        "raw_diff: adds `#pragma push`, `#pragma force_active on`, `static float unused_floats[]`, `#pragma pop`",
+        "raw_diff: unused_floats values include 0.0f, 1600.0, 400.0f, 1330.0f, 130.0f, -3.0f"
+      ]
+    },
+    {
+      "text": "Updated splits so `gmopening.c` owns `.bss` range `0x80480B38..0x80480D58`, while `gm_1A4C.c` BSS ends at `0x80480B38`.",
+      "evidence_refs": [
+        "raw_diff: splits.txt gm_1A4C .bss end change",
+        "raw_diff: splits.txt gmopening .bss addition"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "The PR avoided using a fake aggregate struct as a source-level access path for format strings once the symbol metadata separated floats from strings.",
+      "evidence_refs": [
+        "raw_diff: removes combined struct gm_803DBF78",
+        "raw_diff: `fn_801A9FCC` uses inline format strings instead of offsets from `data`"
+      ]
+    },
+    {
+      "text": "Split metadata was adjusted together with source declarations, keeping BSS ownership visible in `splits.txt` rather than compensating only in C.",
+      "evidence_refs": [
+        "raw_diff: gmopening gains .bss range in splits.txt",
+        "raw_diff: gm_80480B38 BSS declaration appears in gmopening.c"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a code object appears to bundle floats and strings only because generated output exposed adjacent data, split the symbol metadata and keep ordinary string literals inline if the source code uses them directly.",
+      "scope": [
+        "gmopening",
+        "data-layout",
+        "string-literals"
+      ],
+      "evidence_refs": [
+        "raw_diff: combined `gm_803DBF78` struct removed",
+        "raw_diff: symbols split 0x803DBF78 float data from lbl_803DBF9C/lbl_803DBFA8 strings",
+        "raw_diff: `sprintf` calls use inline format strings"
+      ],
+      "standard_refs": [
+        "literals-and-data-ownership",
+        "no-string-literal-symbol-regression",
+        "text-before-data-matching"
+      ]
+    },
+    {
+      "lesson": "Linking a TU can require split/symbol metadata changes in addition to source changes; here BSS ownership and data symbol sizes/scopes were part of the attempt.",
+      "scope": [
+        "gmopening",
+        "splits.txt",
+        "symbols.txt"
+      ],
+      "evidence_refs": [
+        "raw_diff: splits.txt BSS ownership change",
+        "raw_diff: symbols.txt gm_803DBF78 size/scope/type update"
+      ],
+      "standard_refs": [
+        "data-sections-and-tu-splits"
+      ]
+    },
+    {
+      "lesson": "Author-reported objdiff text matching is not enough to mark a file Matching when data mismatch remains unresolved.",
+      "scope": [
+        "matching-status",
+        "gmopening"
+      ],
+      "evidence_refs": [
+        "human_pr_text: Everything matches in objdiff, but something causes a data mismatch if the file is marked as `Matching`."
+      ],
+      "standard_refs": [
+        "verification-and-regression-ledger",
+        "text-before-data-matching"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "Address-style names such as `gm_803DBF78`, `lbl_803DBF9C`, `gm_80480B38`, and `gm_804D67D0` were preserved rather than replaced with speculative semantic names.",
+      "evidence_refs": [
+        "raw_diff: symbols.txt uses gm_/lbl_ address-style names",
+        "raw_diff: gmopening.c declarations use address-style gm_ names"
+      ],
+      "standard_refs": [
+        "conservative-naming"
+      ]
+    },
+    {
+      "text": "Address comments were added to several declarations to make section placement explicit without changing the canonical symbol names.",
+      "evidence_refs": [
+        "raw_diff: `/* 3B7D68 */ static const Vec3 gm_803B7D68`",
+        "raw_diff: `/* 480B38 */ static PerfLabelLine gm_80480B38[4]`",
+        "raw_diff: `/* 3DBFB4 */ static int gm_803DBFB4[]`"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Split one generated-looking struct into separate float storage and inline string literal uses, backed by symbols.txt labels.",
+      "evidence_refs": [
+        "raw_diff: gmopening.c removes struct gm_803DBF78",
+        "raw_diff: symbols.txt splits gm_803DBF78/lbl_803DBF9C/lbl_803DBFA8",
+        "raw_diff: sprintf calls use inline strings"
+      ],
+      "risk": "Touches data ownership and literal placement; PR body says data mismatch still occurs if file is marked Matching."
+    },
+    {
+      "tactic": "Use `#pragma force_active on` around `unused_floats` to retain otherwise unused float data.",
+      "evidence_refs": [
+        "raw_diff: force_active block around unused_floats"
+      ],
+      "risk": "Pragma-based retention is a narrow matching tactic that needs verifier and adjacent-regression evidence; the slice only includes the author's objdiff/data-mismatch note."
+    },
+    {
+      "tactic": "Add `sdata2_order` with unused float references to influence `.sdata2` ordering.",
+      "evidence_refs": [
+        "raw_diff: `sdata2_order` references 82.0f and 290.0f",
+        "metadata initial_classification includes `sdata2_order`"
+      ],
+      "risk": "Ordering helper appears data-order motivated; no build/checkdiff details beyond author body are present."
+    },
+    {
+      "tactic": "Change split ownership so gmopening owns the BSS range containing `gm_80480B38`.",
+      "evidence_refs": [
+        "raw_diff: splits.txt gmopening .bss start 0x80480B38 end 0x80480D58",
+        "raw_diff: gmopening.c declares `gm_80480B38[4]`"
+      ],
+      "risk": "Split boundary changes can affect neighboring TU data ownership; no review discussion is available in the slice."
+    }
+  ],
+  "review_feedback": [],
+  "searchable_terms": [
+    "pr-2615",
+    "Attempt to link gmopening",
+    "ribbanya",
+    "gmopening.c",
+    "gm_803DBF78",
+    "lbl_803DBF9C",
+    "lbl_803DBFA8",
+    "gm_80480B38",
+    "gm_804D67D0",
+    "gm_804D67F4",
+    "gm_803DBFB4",
+    "sdata2_order",
+    "unused_floats",
+    "force_active",
+    "sprintf",
+    "\\cffff00%2d",
+    "\\cffff00%3d",
+    "PerfLabelLine",
+    "lbMthp_8001F5F4",
+    "lbMthp_8001F5E4",
+    "lbMthp_8001F5D4",
+    "gm_1A4C",
+    "splits.txt",
+    "symbols.txt",
+    "data mismatch",
+    "Matching"
+  ],
+  "follow_up_queries": [
+    "gmopening data mismatch Matching",
+    "gm_803DBF78 lbl_803DBF9C lbl_803DBFA8",
+    "sdata2_order unused_floats force_active",
+    "gmopening .bss 0x80480B38 0x80480D58",
+    "fn_801A9FCC sprintf \\cffff00",
+    "PR 2615 gmopening objdiff data mismatch"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR number/title/author/state/merge timestamps",
+      "human_pr_text: author states objdiff matches but data mismatch blocks Matching marking",
+      "changed_files: 3 changed files with line counts",
+      "raw_diff: complete 5129-byte diff loaded",
+      "metadata_json: review_comments 0, issue_comments 0, reviews 0"
+    ],
+    "notes": [
+      "The diff evidence is complete and supports changed-file and tactic extraction.",
+      "The only validation statement is the author's PR body; no build log, objdiff output, checkdiff output, or reviewer confirmation is present.",
+      "No review comments are available, so reviewer intent or accepted rationale cannot be inferred.",
+      "The PR was merged per metadata, but the slice still records the author's unresolved data mismatch note."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "kind": "decomp_lesson",
+        "title": "Do not keep a fake aggregate when symbol metadata separates floats from string literals",
+        "text": "In PR #2615, `gm_803DBF78` changed from a source struct containing floats and strings into a 0x24 local float object plus separate string labels, and `fn_801A9FCC` used inline format strings instead of pointer offsets into the aggregate.",
+        "scope": [
+          "gmopening",
+          "data-layout",
+          "string-literals"
+        ],
+        "evidence_refs": [
+          "raw_diff: gmopening.c removes combined `gm_803DBF78` struct",
+          "raw_diff: symbols.txt splits `gm_803DBF78`, `lbl_803DBF9C`, `lbl_803DBFA8`",
+          "raw_diff: `sprintf` calls use inline strings"
+        ],
+        "confidence": 0.78
+      },
+      {
+        "kind": "matching_caution",
+        "title": "Objdiff text match can still leave data mismatch unresolved",
+        "text": "The PR body says everything matched in objdiff, but marking gmopening as Matching caused a data mismatch. Treat this as evidence that text closure and Matching status may need separate data-section verification.",
+        "scope": [
+          "gmopening",
+          "matching-status",
+          "data-verification"
+        ],
+        "evidence_refs": [
+          "human_pr_text: author validation/mismatch statement"
+        ],
+        "confidence": 0.74
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "gmopening split ownership includes BSS range after PR #2615",
+        "text": "PR #2615 changed `config/GALE01/splits.txt` so `melee/gm/gmopening.c` owns `.bss start:0x80480B38 end:0x80480D58`, and shortened `melee/gm/gm_1A4C.c` BSS to end at `0x80480B38`.",
+        "source_path": "config/GALE01/splits.txt",
+        "scope": [
+          "config/GALE01/splits.txt",
+          "melee/gm/gmopening.c",
+          "melee/gm/gm_1A4C.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: splits.txt BSS ownership changes"
+        ],
+        "reason": "Potential durable split-boundary/path fact; should be curator-checked against current source before promotion."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "gmopening data metadata around 0x803DBF78 was split into float and string labels",
+        "text": "PR #2615 changed `gm_803DBF78` at `.data:0x803DBF78` from size 0x3C global to size 0x24 local data:float and added string labels `lbl_803DBF9C` and `lbl_803DBFA8`, each size 0xC.",
+        "source_path": "config/GALE01/symbols.txt",
+        "scope": [
+          "config/GALE01/symbols.txt",
+          "src/melee/gm/gmopening.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: symbols.txt gm_803DBF78/lbl_803DBF9C/lbl_803DBFA8 changes"
+        ],
+        "reason": "Potential symbol metadata fact; current symbols should be checked before promotion."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Pragma/data-order helpers need explicit verification when used for linking",
+        "text": "PR #2615 used `#pragma force_active on` for `unused_floats` and a `sdata2_order` helper while the author still reported a data mismatch when marking the file Matching. This reinforces that pragma and data-order tactics should include narrow objdiff/checkdiff and data regression evidence.",
+        "source_path": "src/melee/gm/gmopening.c",
+        "scope": [
+          "force_active",
+          "sdata2_order",
+          "data-order",
+          "matching-verification"
+        ],
+        "evidence_refs": [
+          "raw_diff: force_active unused_floats block",
+          "raw_diff: sdata2_order helper",
+          "human_pr_text: objdiff matches but Matching causes data mismatch"
+        ],
+        "reason": "Mostly already covered by existing standards, but this PR is a concrete example curator may want to cite."
+      }
+    ],
+    "rejection_notes": [
+      "Do not record that gmopening was successfully marked `Matching`; the PR body explicitly says data mismatch occurred if marked Matching, and no status-file change is present in the slice.",
+      "Do not infer reviewer approval rationale; there were no review comments or reviews in the loaded PR slice.",
+      "Do not treat `sdata2_order` or `unused_floats` as preferred style; they are matching tactics with limited evidence in this slice.",
+      "Do not promote exact current path facts without checking current source, because this intake only proves the historical PR diff."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

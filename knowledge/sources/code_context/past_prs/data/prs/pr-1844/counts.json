@@ -1,0 +1,17 @@
+{
+  "number": 1844,
+  "title": "Match most of mnmain",
+  "state": "MERGED",
+  "createdAt": "2025-08-16T05:36:16Z",
+  "updatedAt": "2025-08-16T05:40:19Z",
+  "mergedAt": "2025-08-16T05:40:17Z",
+  "closedAt": "2025-08-16T05:40:17Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1844",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 61020
+  }
+}

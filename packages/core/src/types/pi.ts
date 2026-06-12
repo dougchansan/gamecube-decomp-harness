@@ -11,4 +11,8 @@ export interface PiRunResult {
   dryRun: boolean;
   failed?: boolean;
   error?: string;
+  // Set when the session's final assistant turn ended with a provider error
+  // (stopReason "error"), e.g. every retry timed out against the LLM endpoint.
+  // The session "completed" from the SDK's perspective but produced no usable turn.
+  providerError?: string;
 }

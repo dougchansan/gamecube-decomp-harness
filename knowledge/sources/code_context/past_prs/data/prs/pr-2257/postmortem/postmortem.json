@@ -1,0 +1,331 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2257",
+  "pr": {
+    "number": 2257,
+    "title": "tydisplay: match 3 functions",
+    "url": "https://github.com/doldecomp/melee/pull/2257",
+    "state": "MERGED",
+    "author": "johnwinston",
+    "created_at": "2026-03-10T13:27:18Z",
+    "merged_at": "2026-03-11T00:30:23Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Matched three functions in src/melee/ty/tydisplay.c: un_8031BB94, un_8031BBF4, and un_8031C354. The PR also updated tydisplay.h prototypes for two recovered functions. Evidence includes author-stated 100% fuzzy match, clean ninja build, and bot report of three new 100% matches.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "prototype-recovery"
+    ],
+    "systems": [
+      "melee-core",
+      "tydisplay",
+      "src/melee/ty"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/ty/tydisplay.c",
+      "role": "Implemented three previously undecompiled functions, added asset/string lookup tables, loop filtering logic, PAD_STACK(8), and an extern for un_804D5AC0.",
+      "evidence_refs": [
+        "changed_files: src/melee/ty/tydisplay.c added 129 deleted 3 hunks 3",
+        "raw_diff: implementations for un_8031BB94, un_8031BBF4, un_8031C354",
+        "pr_body: Decompile un_8031BB94, un_8031BBF4, un_8031C354 — 100% match",
+        "bot_report: 3 new matches in main/melee/ty/tydisplay"
+      ]
+    },
+    {
+      "path": "src/melee/ty/tydisplay.h",
+      "role": "Replaced UNK_RET/UNK_PARAMS declarations for un_8031BB94 and un_8031BBF4 with recovered signatures.",
+      "evidence_refs": [
+        "changed_files: src/melee/ty/tydisplay.h added 2 deleted 2 hunks 1",
+        "raw_diff: un_8031BB94 changed to char* un_8031BB94(s8); un_8031BBF4 changed to s32 un_8031BBF4(s8)"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "un_8031BB94 was implemented as a signed-byte-indexed table returning animation joint/resource name strings, with idx == -1 normalized to 0 and un_804D5AC0 used for several entries.",
+      "evidence_refs": [
+        "raw_diff: char* un_8031BB94(s8 idx)",
+        "raw_diff: table entries ToyDspMycharaCmA_Top_matanim_joint through ToyDspItemE_Top_matanim_joint and un_804D5AC0"
+      ]
+    },
+    {
+      "text": "un_8031BBF4 was implemented as a signed-byte-indexed table returning .dat asset filenames cast to s32, with arg0 == -1 normalized to 0.",
+      "evidence_refs": [
+        "raw_diff: s32 un_8031BBF4(s8 arg0)",
+        "raw_diff: table entries TyQuesD.dat, TyMycCmA.dat, TyMapA.dat, TyStandD.dat, etc."
+      ]
+    },
+    {
+      "text": "un_8031C354 was implemented as a loop over ids 0..0x124 that skips invalid/self/nonmatching entries, appends matching ids to a caller buffer, and stops when count reaches max.",
+      "evidence_refs": [
+        "raw_diff: s32 un_8031C354(s32 id, s32 (*buf)[], s32 max, s32 kind)",
+        "raw_diff: for (i = 0; i < 0x125; i++) with continue filters and break on count >= max"
+      ]
+    },
+    {
+      "text": "Header prototypes were recovered for un_8031BB94 and un_8031BBF4, replacing unknown return/parameter macros.",
+      "evidence_refs": [
+        "raw_diff: tydisplay.h UNK_RET declarations replaced"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "The final diff used early continue statements inside the un_8031C354 loop to express skip conditions clearly; this corresponds to reviewer feedback replacing a goto-style skip.",
+      "evidence_refs": [
+        "review_comment PsiLupan: `continue;` on hunk showing if (i == id) { goto next; }",
+        "raw_diff: final un_8031C354 uses continue for each skip condition"
+      ]
+    },
+    {
+      "text": "Recovered function signatures were reflected in the owning header instead of leaving UNK_RET/UNK_PARAMS after body recovery.",
+      "evidence_refs": [
+        "raw_diff: src/melee/ty/tydisplay.h prototype updates"
+      ]
+    },
+    {
+      "text": "The PR kept ordinary asset/resource strings inline in the lookup tables rather than promoting every string to new global data symbols; only existing un_804D5AC0 was referenced as an extern.",
+      "evidence_refs": [
+        "raw_diff: un_8031BB94 inline ToyDsp... strings plus un_804D5AC0",
+        "raw_diff: un_8031BBF4 inline Ty... .dat strings"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a recovered function body proves a signature, update the corresponding header prototype at the same time.",
+      "scope": [
+        "src/melee/ty/tydisplay.h",
+        "headers",
+        "prototype recovery"
+      ],
+      "evidence_refs": [
+        "raw_diff: un_8031BB94 and un_8031BBF4 declarations changed from UNK_RET/UNK_PARAMS to typed signatures"
+      ],
+      "standards": [
+        "truthful-headers-and-includes"
+      ]
+    },
+    {
+      "lesson": "For loop filters, prefer direct continue statements over generated-looking goto/label skip patterns when the control flow is equivalent and review feedback supports it.",
+      "scope": [
+        "src/melee/ty/tydisplay.c",
+        "un_8031C354",
+        "loop cleanup"
+      ],
+      "evidence_refs": [
+        "review_comment PsiLupan: `continue;`",
+        "raw_diff: un_8031C354 final loop uses continue for skip conditions"
+      ],
+      "standards": [
+        "canonical-control-flow-and-macros",
+        "natural-loops"
+      ]
+    },
+    {
+      "lesson": "Lookup-table functions may match using local stack arrays of inline string literals when the function is a simple index-to-asset-name mapper; avoid turning such literals into new globals without ownership evidence.",
+      "scope": [
+        "src/melee/ty/tydisplay.c",
+        "un_8031BB94",
+        "un_8031BBF4"
+      ],
+      "evidence_refs": [
+        "raw_diff: local char* table[] in un_8031BB94",
+        "raw_diff: local char* table[] in un_8031BBF4"
+      ],
+      "standards": [
+        "literals-and-data-ownership",
+        "no-string-literal-symbol-regression"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "Unresolved symbols kept address-style names: un_8031BB94, un_8031BBF4, un_8031C354, un_804D5AC0.",
+      "evidence_refs": [
+        "raw_diff: function and extern names remain address-style"
+      ],
+      "standards": [
+        "conservative-naming"
+      ]
+    },
+    {
+      "text": "Local variables in un_8031C354 use short role names such as id, buf, max, kind, data, other, count, and val rather than temp_rXX-style names.",
+      "evidence_refs": [
+        "raw_diff: un_8031C354 signature and local declarations"
+      ],
+      "standards": [
+        "conservative-naming"
+      ]
+    },
+    {
+      "text": "No semantic rename was introduced for un_804D5AC0; it was declared as extern char un_804D5AC0[].",
+      "evidence_refs": [
+        "raw_diff: extern char un_804D5AC0[];"
+      ],
+      "standards": [
+        "no-define-alias-global-renames",
+        "conservative-naming"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Used PAD_STACK(8) in un_8031C354.",
+      "evidence_refs": [
+        "raw_diff: PAD_STACK(8); in un_8031C354"
+      ],
+      "risk_or_note": "The PR body and bot report claim 100% match, but no narrow objdiff transcript for PAD_STACK specifically is included in the slice; treat as supported only by the PR's general verification evidence."
+    },
+    {
+      "tactic": "Used s8 parameters for index functions and normalized -1 to 0 before table lookup.",
+      "evidence_refs": [
+        "raw_diff: char* un_8031BB94(s8 idx) with if (idx == -1) idx = 0",
+        "raw_diff: s32 un_8031BBF4(s8 arg0) with if (arg0 == -1) arg0 = 0"
+      ],
+      "risk_or_note": "Signature choices are reinforced by matching claims and header updates, but the slice does not include disassembly or objdiff detail."
+    },
+    {
+      "tactic": "Advanced the output buffer in un_8031C354 by casting buf through u8* and adding 4 after writing (*buf)[0] = i.",
+      "evidence_refs": [
+        "raw_diff: (*buf)[0] = i; buf = (s32 (*)[]) ((u8*) buf + 4);"
+      ],
+      "risk_or_note": "This is a matching-oriented pointer-shape detail; no type cleanup evidence is present in this PR slice."
+    }
+  ],
+  "review_feedback": [
+    {
+      "author": "PsiLupan",
+      "path": "src/melee/ty/tydisplay.c",
+      "feedback": "`continue;`",
+      "interpreted_effect": "The final diff shows continue statements in un_8031C354 where the review hunk showed a goto next skip, indicating the loop skip shape was cleaned up.",
+      "evidence_refs": [
+        "review_comments: discussion_r2912545147",
+        "raw_diff: un_8031C354 uses continue statements"
+      ]
+    },
+    {
+      "author": "ribbanya",
+      "path": null,
+      "feedback": "If planning to do more contributions, consolidate into fewer PRs.",
+      "interpreted_effect": "Process feedback about PR batching, not a code requirement.",
+      "evidence_refs": [
+        "human_pr_text issue comment by ribbanya"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2257",
+    "tydisplay",
+    "src/melee/ty/tydisplay.c",
+    "src/melee/ty/tydisplay.h",
+    "un_8031BB94",
+    "un_8031BBF4",
+    "un_8031C354",
+    "un_804D5AC0",
+    "PAD_STACK(8)",
+    "ToyDspMycharaCmA_Top_matanim_joint",
+    "ToyDspMapA_Top_matanim_joint",
+    "ToyDspFgseriesA_Top_matanim_joint",
+    "ToyDspPokemonA_Top_matanim_joint",
+    "ToyDspItemA_Top_matanim_joint",
+    "TyQuesD.dat",
+    "TyMycCmA.dat",
+    "TyMapA.dat",
+    "TyStandD.dat",
+    "continue",
+    "goto next",
+    "fuzzy_match_percent 100.0"
+  ],
+  "follow_up_queries": [
+    "tydisplay un_8031C354 PAD_STACK",
+    "tydisplay continue goto next review",
+    "un_8031BB94 string table ToyDsp",
+    "un_8031BBF4 TyQuesD.dat table",
+    "src/melee/ty/tydisplay.h UNK_RET un_8031BB94",
+    "un_804D5AC0 tydisplay extern char"
+  ],
+  "evidence_quality": {
+    "status": "strong",
+    "evidence_refs": [
+      "pr_body: author claims decompile three functions with 100% match and ninja clean",
+      "bot_report: 3 new matches, each 100.00%",
+      "raw_diff: complete diff excerpt for both changed files",
+      "changed_files: two changed files with line counts",
+      "review_comments: one concrete code review comment"
+    ],
+    "notes": [
+      "The slice has strong evidence for changed files, implemented functions, header updates, review feedback, and reported match status.",
+      "The raw PR JSON is truncated, but non-truncated extracted text, diff, changed files, and review comments cover the relevant intake facts.",
+      "No build log, objdiff command output, or disassembly is included; verification is represented only from PR body and bot report.",
+      "The exact semantics of un_804D5AC0 and the byte at offset 4 in un_8031C354 are not established by this slice and should not be promoted."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "kind": "pr_lesson",
+        "title": "Use continue instead of goto skip labels in recovered filter loops when equivalent",
+        "text": "PR #2257 review feedback requested `continue;` for a skip branch in un_8031C354, and the final diff uses continue-based filters throughout the loop. This is a local example supporting canonical loop cleanup over generated goto/label flow.",
+        "scope": [
+          "src/melee/ty/tydisplay.c",
+          "un_8031C354",
+          "loop control flow"
+        ],
+        "evidence_refs": [
+          "review_comments: PsiLupan `continue;`",
+          "raw_diff: final un_8031C354 continue filters"
+        ]
+      },
+      {
+        "kind": "pr_lesson",
+        "title": "Recover header prototypes alongside matched function bodies",
+        "text": "PR #2257 matched un_8031BB94 and un_8031BBF4 and updated their declarations in src/melee/ty/tydisplay.h from UNK_RET/UNK_PARAMS to typed signatures.",
+        "scope": [
+          "src/melee/ty/tydisplay.h",
+          "prototype recovery"
+        ],
+        "evidence_refs": [
+          "raw_diff: tydisplay.h prototype changes"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "other",
+        "update_kind": "source_update",
+        "title": "Investigate typed replacement for un_8031C354 offset-4 byte access",
+        "text": "un_8031C354 compares ((u8*) other)[4] and ((u8*) data)[4]. This may indicate an unrecovered struct field, but this PR slice does not identify the type or field name.",
+        "source_path": "src/melee/ty/tydisplay.c",
+        "scope": [
+          "un_8031C354",
+          "typed field recovery"
+        ],
+        "evidence_refs": [
+          "raw_diff: if (((u8*) other)[4] != ((u8*) data)[4])"
+        ],
+        "reason": "Potential future cleanup under typed-fields-over-pointer-math, but current PR evidence is insufficient to name the field."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote un_804D5AC0 as a named semantic asset or empty string symbol from this slice; it is only shown as an address-style extern.",
+      "Do not claim the PAD_STACK(8) tactic is independently validated beyond the PR body and bot 100% match report; no narrow objdiff transcript is loaded.",
+      "Do not infer semantics for kind == 99 or un_803060BC(id, 6); the PR evidence only shows the control-flow and calls."
+    ]
+  },
+  "confidence": 0.88,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

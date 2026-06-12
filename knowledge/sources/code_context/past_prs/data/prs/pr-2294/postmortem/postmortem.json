@@ -1,0 +1,584 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2294",
+  "pr": {
+    "number": 2294,
+    "title": "Fix a bunch of near-matches",
+    "url": "https://github.com/doldecomp/melee/pull/2294",
+    "state": "MERGED",
+    "author": "lukechampine",
+    "created_at": "2026-03-15T15:43:52Z",
+    "merged_at": "2026-03-15T18:40:56Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2294 repaired many near-matches where text was close but reloc/data values were wrong, including wrong called functions, wrong float literals or float data references, wrong collision helper calls, and signature/header mismatches. The author explicitly tied the issue to functions that had only wrong `bl` instructions and suspected workflows that did not start from m2c or did not diff with `functionRelocDiffs=data_value`. The bot reported 6 new matches and 2 unmatched-item improvements, but the author noted that the report appeared to undercount fixes involving data values.",
+  "change_classification": {
+    "primary_type": "decomp-matching-fix",
+    "categories": [
+      "decomp-matching",
+      "near-match-fix",
+      "data-relocation-values",
+      "function-call-targets",
+      "float-literals",
+      "headers",
+      "signatures",
+      "naming",
+      "types-structs",
+      "review-feedback"
+    ],
+    "systems": [
+      "fighter",
+      "Kirby",
+      "ftcoll",
+      "game-mode",
+      "stage",
+      "item",
+      "toy",
+      "sysdolphin-baselib"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_Init.c",
+      "role": "Kirby near-match fixes: corrected ftAnim_80070458 declaration/call and changed Fighter_ChangeMotionState float arguments from inline literals to named float symbols.",
+      "evidence_refs": [
+        "changed_files.jsonl:ftKb_Init.c added=8 deleted=4 hunks=3",
+        "raw_diff:ftKb_Init.c ftAnim_80070458_proto -> ftAnim_80070458 with tobj_idx/frame; 0.0f/1.0f/0.0f -> ftKb_Init_804D9368/804D936C/804D9368"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_Init.h",
+      "role": "Header signature correction for ftKb_SpecialNYs_8010AC78 to include victim and gobj parameters.",
+      "evidence_refs": [
+        "changed_files.jsonl:ftKb_Init.h added=2 deleted=1 hunks=1",
+        "raw_diff:ftKb_SpecialNYs_8010AC78(Fighter_GObj* gobj) -> (Fighter_GObj* victim, Fighter_GObj* gobj)"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_SpecialN.c",
+      "role": "Kirby special-N call-target and data-value corrections, including item cleanup call, animation/helper call order, and ChangeMotionState float symbols.",
+      "evidence_refs": [
+        "changed_files.jsonl:ftKb_SpecialN.c added=9 deleted=5 hunks=6",
+        "raw_diff:it_802AEAB4 -> it_802ADC34; ftAnim_8006EBA4 -> ftKb_SpecialN_800F9070 in two functions; helper call order changed in ftKb_EatTurn_Anim; ChangeMotionState literals -> ftKb_Init_804D93E8/804D93EC"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_SpecialNNs.c",
+      "role": "Kirby copied-power collision helper corrections and float data substitutions, with minor formatting-only line-wrap changes.",
+      "evidence_refs": [
+        "changed_files.jsonl:ftKb_SpecialNNs.c added=15 deleted=14 hunks=9",
+        "raw_diff:ft_80082708 -> ft_800827A0 or ft_80081D0C; ftCommon_8007D5D4 -> ftCommon_8007D7FC; ChangeMotionState literals -> ftKb_Init_804D94F0/804D94F4"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_SpecialNPk.c",
+      "role": "Kirby copied-power collision helper corrections for air-state transitions.",
+      "evidence_refs": [
+        "changed_files.jsonl:ftKb_SpecialNPk.c added=4 deleted=4 hunks=2",
+        "raw_diff:ft_80082708 -> ft_80081D0C and ftCommon_8007D5D4 -> ftCommon_8007D7FC in SsSpecialAirN collision functions"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_SpecialNYs.c",
+      "role": "Largest Kirby update: removed fake-match locals/comment, completed two animation functions, corrected callback target, corrected ChangeMotionState literals, and updated call to ftKb_SpecialNYs_8010AC78 with two arguments.",
+      "evidence_refs": [
+        "changed_files.jsonl:ftKb_SpecialNYs.c added=49 deleted=19 hunks=7",
+        "raw_diff:removed `FAKE MATCH: comma operator required for regalloc`; NULL used directly; implemented ftKb_YsSpecialNCapture2_1_Anim and ftKb_YsSpecialAirN2_0_Anim; ftAnim_IsFramesRemaining -> ftKb_SpecialNPe_8010C1E8; ftKb_Init_804D9570 extern removed in favor of 0.0f/1.0f/0.0f literals"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_SpecialNZd.c",
+      "role": "Kirby collision helper and data-value corrections, including z vector value changed from literal to named float.",
+      "evidence_refs": [
+        "changed_files.jsonl:ftKb_SpecialNZd.c added=18 deleted=16 hunks=10",
+        "raw_diff:multiple ft_80082708 -> ft_80081D0C and ftCommon_8007D5D4 -> ftCommon_8007D7FC changes; ft_800827A0 -> ft_80082708 in PpSpecialN_Coll; vec->z 0.0f -> ftKb_Init_804D9558"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftkirbyspecialfox.c",
+      "role": "Kirby Fox-copy ChangeMotionState float argument correction.",
+      "evidence_refs": [
+        "changed_files.jsonl:ftkirbyspecialfox.c added=6 deleted=2 hunks=1",
+        "raw_diff:ftKb_SpecialNNs_800FED38 uses ftKb_Init_804D9478/804D9480 instead of 0/1/0"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftcoll.c",
+      "role": "ft collision near-match fix; bot reported ftColl_8007AB48 improved from 69.64% to 100%.",
+      "evidence_refs": [
+        "changed_files.jsonl:ftcoll.c added=6 deleted=13 hunks=3",
+        "text_corpus:decomp-dev bot reports ftColl_8007AB48 +17 bytes, 69.64% -> 100.00%"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_18A5.c",
+      "role": "Game-mode near-match/data-value fixes; exact hunks not visible in loaded diff excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl:gm_18A5.c added=6 deleted=6 hunks=6"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_18A5.static.h",
+      "role": "Game-mode static header changes; exact hunks not visible in loaded diff excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl:gm_18A5.static.h added=6 deleted=6 hunks=1"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmresult.c",
+      "role": "Game-result near-match/data-value fix; exact hunk not visible in loaded diff excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl:gmresult.c added=1 deleted=1 hunks=1"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmresult.static.h",
+      "role": "Game-result static header changes; exact hunk not visible in loaded diff excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl:gmresult.static.h added=2 deleted=2 hunks=1"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grbigblue.c",
+      "role": "Stage near-match/data improvements; bot reported grBigBlue_801EF7D8 matched and .sdata2/.rodata improvements.",
+      "evidence_refs": [
+        "changed_files.jsonl:grbigblue.c added=22 deleted=16 hunks=6",
+        "text_corpus:decomp-dev bot reports grBigBlue_801EF7D8 +5 bytes 96.30% -> 100.00%, .sdata2 +68 bytes 19.12% -> 45.00%, .rodata +4 bytes 35.19% -> 37.04%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grbigblueroute.c",
+      "role": "Stage route near-match/data-value fixes; exact hunks not visible in loaded diff excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl:grbigblueroute.c added=24 deleted=17 hunks=5"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grvenom.c",
+      "role": "Stage near-match/data-value fixes; exact hunks not visible in loaded diff excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl:grvenom.c added=3 deleted=1 hunks=2"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itbombhei.c",
+      "role": "Item near-match/data-value fix; exact hunk not visible in loaded diff excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl:itbombhei.c added=1 deleted=1 hunks=1"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itoldkuri.c",
+      "role": "Item near-match/data-value fixes; exact hunks not visible in loaded diff excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl:itoldkuri.c added=2 deleted=2 hunks=2"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itseakchain.c",
+      "role": "Item near-match/data-value fix; exact hunk not visible in loaded diff excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl:itseakchain.c added=1 deleted=1 hunks=1"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itseakchain.static.h",
+      "role": "Item static header rodata-related change; bot reported itseakchain .rodata became matched.",
+      "evidence_refs": [
+        "changed_files.jsonl:itseakchain.static.h added=2 deleted=2 hunks=1",
+        "text_corpus:decomp-dev bot reports main/melee/it/items/itseakchain .rodata +8 bytes 66.67% -> 100.00%"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itwhitebea.c",
+      "role": "Item near-match/data-value fix; exact hunk not visible in loaded diff excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl:itwhitebea.c added=1 deleted=1 hunks=1"
+      ]
+    },
+    {
+      "path": "src/melee/ty/toy.c",
+      "role": "Toy near-match/data-value fix; exact hunk not visible in loaded diff excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl:toy.c added=1 deleted=1 hunks=1"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/hsd_3AA7.c",
+      "role": "baselib near-match/data-value fixes; exact hunk not visible in loaded diff excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl:hsd_3AA7.c added=4 deleted=4 hunks=1"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/particle.c",
+      "role": "baselib particle near-match/data-value fixes; exact hunks not visible in loaded diff excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl:particle.c added=6 deleted=5 hunks=3"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Corrected near-matches across 24 files, mostly by replacing wrong call targets, wrong float literals, or wrong data-symbol references.",
+    "Repaired several Kirby copied-power collision transitions by changing helper calls such as ft_80082708/ft_800827A0/ft_80081D0C and ftCommon_8007D5D4/ftCommon_8007D7FC in context-specific ways.",
+    "Updated the ftAnim_80070458 local declaration/call in ftKb_Init.c from a proto wrapper with 3 arguments to the real function signature using a tobj index and frame argument.",
+    "Changed ftKb_SpecialNYs_8010AC78 declaration from one Fighter_GObj parameter to victim and gobj parameters, matching new call sites in implemented Yoshi-capture animation functions.",
+    "Implemented ftKb_YsSpecialNCapture2_1_Anim and ftKb_YsSpecialAirN2_0_Anim, which the bot reported as two new 100% matches.",
+    "Removed at least one explicit fake-match construct in ftKb_SpecialNYs.c: dummy locals and a comma-operator workaround for regalloc were replaced with direct NULL.",
+    "Bot report recorded 6 new matches: ftKb_YsSpecialNCapture2_1_Anim, ftKb_YsSpecialAirN2_0_Anim, ftColl_8007AB48, itseakchain .rodata, grBigBlue_801EF7D8, and fn_801098EC.",
+    "Bot report recorded unmatched-item improvements for grbigblue .sdata2 and .rodata.",
+    "Review approved the PR but objected to unnecessary extern use for named floats and warned that reverting static variables can create later manual checking work."
+  ],
+  "smart_moves": [
+    {
+      "lesson": "Search specifically for near-100% functions with wrong data values, not just low text similarity.",
+      "evidence_refs": [
+        "human_pr_text:author noticed recent matches nearly 100% but with wrong data values such as wrong function calls or wrong float literals"
+      ]
+    },
+    {
+      "lesson": "Use a script or targeted query to find functions whose only differences are wrong `bl` instructions; these are efficient near-match fixes.",
+      "evidence_refs": [
+        "human_pr_text:author wrote a script to find all functions that only have wrong `bl` instructions and fixed those"
+      ]
+    },
+    {
+      "lesson": "Diff settings that expose relocation/data-value mismatches are important for near-match cleanup.",
+      "evidence_refs": [
+        "human_pr_text:author suspected bad matches came from agents not using `functionRelocDiffs=data_value` when diffing"
+      ]
+    },
+    {
+      "lesson": "When a body proves a function's real signature, update its declaration/header rather than keeping a stale local proto.",
+      "evidence_refs": [
+        "raw_diff:ftAnim_80070458_proto declaration/call replaced by ftAnim_80070458 with u32 tobj_idx and float frame",
+        "raw_diff:ftKb_SpecialNYs_8010AC78 header signature updated to victim,gobj"
+      ]
+    },
+    {
+      "lesson": "Remove fake-match locals and comments once a direct source form works.",
+      "evidence_refs": [
+        "raw_diff:ftKb_SpecialNYs.c removed `FAKE MATCH: comma operator required for regalloc` workaround and passed NULL directly"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "A function can look nearly matched while still having semantically wrong relocation values, especially call targets and float arguments. Treat wrong `bl` instructions and wrong float literals/data references as real match failures, not cosmetic diff noise.",
+      "evidence_refs": [
+        "human_pr_text:wrong data values include calling the wrong function or passing the wrong float literal",
+        "raw_diff:multiple call-target swaps, including it_802AEAB4 -> it_802ADC34 and ftAnim_8006EBA4 -> ftKb_SpecialN_800F9070",
+        "raw_diff:multiple ChangeMotionState arguments changed between inline literals and ftKb_Init_* float symbols"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "lesson": "For near-match auditing, include data-value relocation checking such as `functionRelocDiffs=data_value`; otherwise wrong calls and constants may be missed by match reporting.",
+      "evidence_refs": [
+        "human_pr_text:author suspected errors came from not using `functionRelocDiffs=data_value` when diffing",
+        "issue_comment:author asks whether match reporting cares about data values because there are more fixes than the bot says"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "lesson": "Start from m2c or another relocation-faithful baseline when repairing near-matches; skipping it can leave plausible-looking but wrong call/data values.",
+      "evidence_refs": [
+        "human_pr_text:author guessed errors were produced by agents that either did not use `m2c` as a starting point or did not use data-value relocation diffing"
+      ],
+      "confidence": 0.67
+    },
+    {
+      "lesson": "A signature correction can be part of a matching fix: PR evidence updated both a local declaration/call and a header declaration when argument evidence changed.",
+      "evidence_refs": [
+        "raw_diff:ftAnim_80070458_proto -> ftAnim_80070458(Fighter*, CostumeTObjList*, u32, float)",
+        "raw_diff:ftKb_SpecialNYs_8010AC78 header changed to victim and gobj parameters"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "Avoid leaving artificial regalloc helpers when the direct expression matches; fake locals and comma-operator workarounds are review noise and should be removed if unnecessary.",
+      "evidence_refs": [
+        "raw_diff:removed dummy `new_var`, `new_var2`, and fake-match comma-operator comment from fn_801098EC"
+      ],
+      "confidence": 0.86
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Use meaningful argument names when a call relationship is clear: ftKb_SpecialNYs_8010AC78 parameters were named `victim` and `gobj` rather than two anonymous Fighter_GObj pointers.",
+      "evidence_refs": [
+        "raw_diff:ftKb_Init.h signature changed to `Fighter_GObj* victim, Fighter_GObj* gobj`",
+        "raw_diff:call site uses `ftKb_SpecialNYs_8010AC78(victim, gobj)`"
+      ]
+    },
+    {
+      "convention": "Do not infer that newly introduced ftKb_Init_804D9xxx float extern names are preferred style; reviewer said these named floats were unnecessary in this case.",
+      "evidence_refs": [
+        "review:ribbanya says try not to use extern at all except defining a data symbol in a header; named floats introduced here are not necessary"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Audit near-matches for wrong branch-and-link relocation targets by searching for functions whose only wrong instructions are `bl` instructions.",
+      "evidence_refs": [
+        "human_pr_text:author wrote a script to find all functions that only have wrong `bl` instructions"
+      ]
+    },
+    {
+      "tactic": "Use `functionRelocDiffs=data_value` when diffing near-matches so wrong call targets, float literals, and data references are surfaced.",
+      "evidence_refs": [
+        "human_pr_text:author explicitly names `functionRelocDiffs=data_value` as likely missing from bad workflows"
+      ]
+    },
+    {
+      "tactic": "Check call order as well as call identity in near-matches; ftKb_EatTurn_Anim changed the order of ftKb_SpecialN_800F9070 and ftAnim_8006EBA4.",
+      "evidence_refs": [
+        "raw_diff:ftKb_EatTurn_Anim moved ftKb_SpecialN_800F9070 before ftAnim_8006EBA4"
+      ]
+    },
+    {
+      "tactic": "Do not preserve dummy locals or comma-operator regalloc workarounds if direct NULL or literal assignment now matches.",
+      "evidence_refs": [
+        "raw_diff:fn_801098EC dummy locals and fake-match comma operator removed",
+        "raw_diff:ftKb_MsSpecialAirNLoop_Anim removed `new_var` and assigned `fp->cmd_vars[0] = 1` directly"
+      ]
+    },
+    {
+      "tactic": "Be cautious with introducing extern float symbols for matching; reviewer preferred leaving duplicate floats to later file-splitting/data ownership work when not necessary.",
+      "evidence_refs": [
+        "review:ribbanya says named floats are not necessary and duplicate floats can be deduced by whomever splits the file"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "reviewer": "ribbanya",
+      "state": "APPROVED",
+      "feedback": "Try not to use `extern` at all except for the specific case of defining a data symbol in a header; this PR introduced named floats that the reviewer considered unnecessary.",
+      "evidence_refs": [
+        "text_corpus:review by ribbanya at 2026-03-15T18:39:53Z"
+      ]
+    },
+    {
+      "reviewer": "ribbanya",
+      "state": "APPROVED",
+      "feedback": "Even if duplicate floats are used, that can be deduced later by whoever splits the file.",
+      "evidence_refs": [
+        "text_corpus:review body says duplicate floats can be deduced by whomever splits the file"
+      ]
+    },
+    {
+      "reviewer": "ribbanya",
+      "state": "APPROVED",
+      "feedback": "Static variables currently need to be checked manually, so reverting them when they are actually static can create more work later.",
+      "evidence_refs": [
+        "text_corpus:review body warns about static variables needing manual checks"
+      ]
+    },
+    {
+      "reviewer": "ribbanya",
+      "state": "APPROVED",
+      "feedback": "The extern/static concerns were not considered worth blocking the merge.",
+      "evidence_refs": [
+        "text_corpus:review body says neither issue was worth blocking a merge"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2294",
+    "near-matches",
+    "wrong data values",
+    "wrong bl instructions",
+    "functionRelocDiffs=data_value",
+    "m2c starting point",
+    "wrong function call",
+    "wrong float literal",
+    "extern floats",
+    "named floats",
+    "static variables manual check",
+    "ftAnim_80070458",
+    "ftAnim_80070458_proto",
+    "Fighter_ChangeMotionState",
+    "ftKb_Init_804D9368",
+    "ftKb_Init_804D936C",
+    "ftKb_Init_804D93E8",
+    "ftKb_Init_804D93EC",
+    "ftKb_Init_804D94F0",
+    "ftKb_Init_804D94F4",
+    "ftKb_Init_804D9558",
+    "ftKb_Init_804D9570",
+    "ftKb_SpecialNYs_8010AC78",
+    "ftKb_YsSpecialNCapture2_1_Anim",
+    "ftKb_YsSpecialAirN2_0_Anim",
+    "fn_801098EC",
+    "ftColl_8007AB48",
+    "grBigBlue_801EF7D8",
+    "itseakchain .rodata",
+    "FAKE MATCH comma operator",
+    "ft_80082708",
+    "ft_800827A0",
+    "ft_80081D0C",
+    "ftCommon_8007D5D4",
+    "ftCommon_8007D7FC",
+    "it_802AEAB4",
+    "it_802ADC34",
+    "ftKb_SpecialN_800F9070",
+    "ftAnim_8006EBA4"
+  ],
+  "follow_up_queries": [
+    "Search future near-match PRs for `functionRelocDiffs=data_value` usage or absence when wrong calls/float literals are later corrected.",
+    "Find other PRs with review feedback about unnecessary `extern` float symbols or data symbols introduced for code matching.",
+    "Search for `FAKE MATCH` comments removed in later PRs to identify patterns where artificial regalloc helpers were unnecessary.",
+    "Search for functions corrected only by `bl` target changes to build a corpus of relocation-value near-match failures.",
+    "Look for bot reports where matched-code improvements undercount data-value corrections mentioned by authors.",
+    "Search for Kirby copied-power collision helpers ft_80082708, ft_800827A0, ft_80081D0C, ftCommon_8007D5D4, and ftCommon_8007D7FC in near-match fixes."
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json:PR #2294 title/state/author/timestamps/changed files",
+      "human_pr_text:author explains near-100% wrong data values, Claude/codebase search, script for wrong `bl` instructions, and suspected missing m2c or data-value diffing",
+      "raw_diff:truncated but includes detailed hunks for Kirby files",
+      "changed_files.jsonl:complete list of 24 changed files with counts",
+      "text_corpus:bot report, author issue comment, and approving review"
+    ],
+    "notes": [
+      "PR-level motivation, changed-file list, bot report, and review feedback are strong.",
+      "The loaded raw diff is truncated, so exact hunk details are unavailable for later files such as gm_18A5, gmresult, grbigblue route, grvenom, item files, toy, hsd_3AA7, and particle beyond changed-file metadata and bot report summaries.",
+      "No inline review comments were present; review feedback comes from one approving review body.",
+      "No local build, objdiff, or checkdiff logs were loaded beyond the decomp-dev bot report. Claimed new matches are attributed to the bot report only.",
+      "The author's explanation includes a guess about how errors were introduced; this intake preserves it as author speculation rather than accepted causality."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson",
+        "title": "Near-100% matches still need relocation/data-value auditing",
+        "text": "PR #2294 shows that functions can be nearly or fully text-shaped while still using wrong data values, including wrong `bl` call targets and wrong float literals/data references. Near-match cleanup should explicitly check relocation/data values, not only instruction similarity.",
+        "scope": [
+          "decomp-matching",
+          "near-match-audit",
+          "relocation-values"
+        ],
+        "evidence_refs": [
+          "human_pr_text:wrong data values like calling wrong function or passing wrong float literal",
+          "raw_diff:call-target and float-argument corrections",
+          "text_corpus:author asks whether match reporting cares about data values"
+        ],
+        "confidence": 0.9
+      },
+      {
+        "record_type": "matching_tactic",
+        "title": "Use data-value relocation diffing for near-match repair",
+        "text": "When repairing near-matches, diff with settings that expose relocation/data-value mismatches such as `functionRelocDiffs=data_value`; PR #2294's author suspected absence of that setting contributed to wrong calls and constants.",
+        "scope": [
+          "objdiff",
+          "checkdiff",
+          "near-match-audit"
+        ],
+        "evidence_refs": [
+          "human_pr_text:author explicitly names `functionRelocDiffs=data_value`"
+        ],
+        "confidence": 0.82
+      },
+      {
+        "record_type": "matching_tactic",
+        "title": "Find wrong-call near-matches by searching for functions with only bad `bl` instructions",
+        "text": "A targeted script/query for functions whose only wrong instructions are `bl` instructions can identify efficient near-match fixes.",
+        "scope": [
+          "decomp-matching",
+          "call-targets",
+          "automation"
+        ],
+        "evidence_refs": [
+          "human_pr_text:author wrote a script to find functions with only wrong `bl` instructions"
+        ],
+        "confidence": 0.86
+      },
+      {
+        "record_type": "decomp_lesson",
+        "title": "Remove fake regalloc helpers when direct source forms match",
+        "text": "PR #2294 removed dummy locals and an explicit fake-match comma-operator workaround from fn_801098EC and used direct NULL, reinforcing that artificial regalloc scaffolding should not remain when clean source matches.",
+        "scope": [
+          "source-cleanup",
+          "matching-tactics",
+          "Kirby"
+        ],
+        "evidence_refs": [
+          "raw_diff:fn_801098EC removed dummy locals and fake-match comma-operator comment"
+        ],
+        "confidence": 0.86
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Explicitly require relocation/data-value checking for near-match claims",
+        "text": "Consider extending verification standards to say that near-match or match claims should check relocation/data values, especially `bl` targets and float/data references, using tooling such as `functionRelocDiffs=data_value` when applicable.",
+        "source_path": null,
+        "scope": [
+          "verification-and-regression-ledger",
+          "decomp-matching",
+          "objdiff/checkdiff"
+        ],
+        "evidence_refs": [
+          "human_pr_text:wrong data values and `functionRelocDiffs=data_value` discussion",
+          "text_corpus:author says bot appears to undercount data-value fixes"
+        ],
+        "reason": "Current loaded standards require verifier evidence generally, but PR #2294 provides concrete evidence that text similarity and bot reports may miss relocation/data-value mismatches."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Discourage unnecessary extern float/data declarations in code-matching PRs",
+        "text": "Consider a standard or note that code-matching PRs should avoid introducing `extern` float/data symbols solely to name duplicate literals unless data ownership/split evidence requires it; reviewers may prefer leaving duplicate floats for later file-splitting/data ownership work.",
+        "source_path": null,
+        "scope": [
+          "literals-and-data-ownership",
+          "text-before-data-matching",
+          "data-sections-and-tu-splits"
+        ],
+        "evidence_refs": [
+          "review:ribbanya says try not to use extern except defining a data symbol in a header; named floats in this PR are not necessary",
+          "review:ribbanya says duplicate floats can be deduced by whomever splits the file"
+        ],
+        "reason": "Reviewer feedback aligns with existing literal/data ownership standards but may warrant a more explicit note about extern float declarations."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Warn about reverting static variables during near-match cleanup",
+        "text": "Consider adding guidance that reverting or de-staticing variables during cleanup should be done cautiously because static variables may require manual checking later.",
+        "source_path": null,
+        "scope": [
+          "data-sections-and-tu-splits",
+          "text-before-data-matching"
+        ],
+        "evidence_refs": [
+          "review:ribbanya warns that static variables currently need manual checking and reverting them can create more work later"
+        ],
+        "reason": "PR review contains explicit process feedback, but the exact changed static variables are not visible in the loaded diff excerpt, so this should remain a curator-reviewed candidate."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote the author's speculation that agents caused the errors by not using m2c or data-value diffing as proven causality; preserve it as a suspected workflow issue.",
+      "Do not infer that ftKb_Init_804D9xxx extern float names are accepted style; reviewer explicitly said named floats introduced here were unnecessary.",
+      "Do not claim exact fixes for every one of the 24 files; the loaded diff excerpt is truncated and only changed-file metadata is available for several files.",
+      "Do not claim this PR validates Claude-generated searching as a standard workflow; PR body says Claude searched for easier fixes, but no review/validation evidence establishes an accepted AI workflow.",
+      "Do not promote bot report output as complete validation of all fixes; the author specifically questioned whether the report cared about data values."
+    ]
+  },
+  "confidence": 0.84,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

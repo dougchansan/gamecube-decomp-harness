@@ -1,0 +1,10 @@
+{
+  "pr": 1595,
+  "title": "Add partial match for HSD_GObj_80391304",
+  "url": "https://github.com/doldecomp/melee/pull/1595",
+  "text_records_with_body": 2,
+  "review_comments": 0,
+  "changed_files": 15,
+  "added_lines": 182,
+  "deleted_lines": 67
+}

@@ -1,0 +1,17 @@
+{
+  "number": 1743,
+  "title": "Dr Mario pill work",
+  "state": "MERGED",
+  "createdAt": "2025-07-26T02:33:41Z",
+  "updatedAt": "2025-07-26T03:14:05Z",
+  "mergedAt": "2025-07-26T02:44:53Z",
+  "closedAt": "2025-07-26T02:44:53Z",
+  "author": "lukechampine",
+  "url": "https://github.com/doldecomp/melee/pull/1743",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 1,
+    "diff_bytes": 9969
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 2128,
+  "title": "Match 15 game mode stage data accessor functions",
+  "state": "MERGED",
+  "createdAt": "2026-01-24T23:08:04Z",
+  "updatedAt": "2026-01-27T11:44:11Z",
+  "mergedAt": "2026-01-27T09:42:42Z",
+  "closedAt": "2026-01-27T09:42:42Z",
+  "author": "malvarezcastillo",
+  "url": "https://github.com/doldecomp/melee/pull/2128",
+  "counts": {
+    "issue_comments": 6,
+    "review_comments": 5,
+    "reviews": 6,
+    "diff_bytes": 9998
+  }
+}

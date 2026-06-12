@@ -1,0 +1,17 @@
+{
+  "number": 1548,
+  "title": "Split mnruleplus",
+  "state": "MERGED",
+  "createdAt": "2025-05-30T20:57:39Z",
+  "updatedAt": "2025-05-30T21:02:59Z",
+  "mergedAt": "2025-05-30T21:02:56Z",
+  "closedAt": "2025-05-30T21:02:56Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1548",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 4554
+  }
+}

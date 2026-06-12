@@ -1,0 +1,10 @@
+{
+  "pr": 1233,
+  "title": "ftcoll match, itparasol match, removal of math.h where it was problematic for itparasol and ftcommon matching",
+  "url": "https://github.com/doldecomp/melee/pull/1233",
+  "text_records_with_body": 0,
+  "review_comments": 0,
+  "changed_files": 6,
+  "added_lines": 31,
+  "deleted_lines": 18
+}

@@ -1,0 +1,17 @@
+{
+  "number": 373,
+  "title": "[WIP] melee/gm/gmmain_lib.s",
+  "state": "MERGED",
+  "createdAt": "2022-05-14T17:58:53Z",
+  "updatedAt": "2022-08-12T19:41:28Z",
+  "mergedAt": "2022-07-15T19:50:16Z",
+  "closedAt": "2022-07-15T19:50:16Z",
+  "author": "BR-",
+  "url": "https://github.com/doldecomp/melee/pull/373",
+  "counts": {
+    "issue_comments": 2,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 87978
+  }
+}

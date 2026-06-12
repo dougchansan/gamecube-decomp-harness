@@ -1,0 +1,10 @@
+{
+  "pr": 2102,
+  "title": "Match a bunch of \"duplicate\" functions with Claude",
+  "url": "https://github.com/doldecomp/melee/pull/2102",
+  "text_records_with_body": 11,
+  "review_comments": 9,
+  "changed_files": 131,
+  "added_lines": 2786,
+  "deleted_lines": 454
+}

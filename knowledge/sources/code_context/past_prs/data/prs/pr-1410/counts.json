@@ -1,0 +1,17 @@
+{
+  "number": 1410,
+  "title": "Ignore `extern` EditorConfig check",
+  "state": "MERGED",
+  "createdAt": "2024-08-04T10:35:26Z",
+  "updatedAt": "2024-08-04T10:38:19Z",
+  "mergedAt": "2024-08-04T10:38:19Z",
+  "closedAt": "2024-08-04T10:38:19Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1410",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 655
+  }
+}

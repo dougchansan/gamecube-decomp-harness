@@ -1,0 +1,17 @@
+{
+  "number": 1217,
+  "title": "match lbColl_CopyHitCapsule 100%",
+  "state": "MERGED",
+  "createdAt": "2024-02-14T06:02:36Z",
+  "updatedAt": "2024-02-14T06:42:20Z",
+  "mergedAt": "2024-02-14T06:42:20Z",
+  "closedAt": "2024-02-14T06:42:20Z",
+  "author": "rjeli",
+  "url": "https://github.com/doldecomp/melee/pull/1217",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 786
+  }
+}

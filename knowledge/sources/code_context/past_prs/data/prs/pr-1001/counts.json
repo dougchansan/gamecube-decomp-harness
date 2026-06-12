@@ -1,0 +1,17 @@
+{
+  "number": 1001,
+  "title": "Add `ctx.c` and `README.md` to dump branch",
+  "state": "MERGED",
+  "createdAt": "2023-11-11T20:32:13Z",
+  "updatedAt": "2023-11-11T20:43:11Z",
+  "mergedAt": "2023-11-11T20:43:10Z",
+  "closedAt": "2023-11-11T20:43:10Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1001",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 5349
+  }
+}

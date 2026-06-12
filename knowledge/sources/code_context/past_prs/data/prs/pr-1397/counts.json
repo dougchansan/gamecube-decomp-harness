@@ -1,0 +1,17 @@
+{
+  "number": 1397,
+  "title": "Match some `ftCommon` functions",
+  "state": "MERGED",
+  "createdAt": "2024-07-15T00:42:30Z",
+  "updatedAt": "2024-07-31T20:15:35Z",
+  "mergedAt": "2024-07-15T02:02:35Z",
+  "closedAt": "2024-07-15T02:02:35Z",
+  "author": "thefoxcam",
+  "url": "https://github.com/doldecomp/melee/pull/1397",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 1,
+    "reviews": 2,
+    "diff_bytes": 58829
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 994,
+  "title": "Match grIzumi",
+  "state": "MERGED",
+  "createdAt": "2023-10-14T19:04:37Z",
+  "updatedAt": "2023-10-14T19:47:09Z",
+  "mergedAt": "2023-10-14T19:42:38Z",
+  "closedAt": "2023-10-14T19:42:38Z",
+  "author": "BR-",
+  "url": "https://github.com/doldecomp/melee/pull/994",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 168792
+  }
+}

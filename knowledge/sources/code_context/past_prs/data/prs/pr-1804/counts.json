@@ -1,0 +1,17 @@
+{
+  "number": 1804,
+  "title": "Use Gm_PKind enum for all slot_type values",
+  "state": "MERGED",
+  "createdAt": "2025-08-07T03:41:35Z",
+  "updatedAt": "2025-08-07T03:49:35Z",
+  "mergedAt": "2025-08-07T03:49:32Z",
+  "closedAt": "2025-08-07T03:49:32Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1804",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 52305
+  }
+}

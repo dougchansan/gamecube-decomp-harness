@@ -1,0 +1,17 @@
+{
+  "number": 1100,
+  "title": "Configure `report_score.py` for dtk",
+  "state": "MERGED",
+  "createdAt": "2024-01-24T10:37:45Z",
+  "updatedAt": "2024-01-24T10:38:02Z",
+  "mergedAt": "2024-01-24T10:38:01Z",
+  "closedAt": "2024-01-24T10:38:01Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1100",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 2179
+  }
+}

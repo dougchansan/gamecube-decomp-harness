@@ -1,0 +1,450 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2535",
+  "pr": {
+    "number": 2535,
+    "title": "Jj/mndiagram",
+    "url": "https://github.com/doldecomp/melee/pull/2535",
+    "state": "MERGED",
+    "author": "jurrejelle",
+    "created_at": "2026-05-25T11:01:22Z",
+    "merged_at": "2026-05-31T11:10:33Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Large mndiagram matching PR touching the diagram menu source and static headers. The diff adds typed overlays for diagram data tables, expands menu input/navigation logic, converts several raw assert expansions to HSD_ASSERT/HSD_ASSERTREPORT-style forms, adjusts stack padding and casts for codegen, and introduces typed static-table declarations in mndiagram2 and mndiagram3. Bot output reports one new full match, many score improvements, and several regressions.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "typed-data-overlays",
+      "assert-cleanup",
+      "menu-navigation"
+    ],
+    "systems": [
+      "melee-core",
+      "menu",
+      "mn",
+      "mndiagram"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/mn/mndiagram.c",
+      "role": "Main diagram menu matching work: added mnDiagram_AnimTable overlay, rewrote/specialized input and cursor/navigation handling, adjusted stack padding/casts, used typed access to animation/layout data, and added HSD_ASSERTREPORT allocation checks.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mndiagram.c +852/-233",
+        "raw_diff.diff:1-1593",
+        "raw_diff.diff:17-29",
+        "raw_diff.diff:93-660",
+        "raw_diff.diff:665-682",
+        "raw_diff.diff:978",
+        "raw_diff.diff:1495-1496"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mndiagram2.c",
+      "role": "Secondary detail/stat view matching work: replaced raw asserts with HSD_ASSERT/HSD_ASSERTREPORT, used typed/static data references for animation settings and position offsets, and adjusted creation/update code.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mndiagram2.c +40/-50",
+        "raw_diff.diff:1594-1816",
+        "raw_diff.diff:1631-1641",
+        "raw_diff.diff:1681-1706",
+        "raw_diff.diff:1758-1762"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mndiagram2.static.h",
+      "role": "Static header update for mndiagram2 data typing: changed mnDiagram2_803EEB60 from one AnimLoopSettings object to an array and removed assert string externs used by raw assert expansions.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mndiagram2.static.h +1/-3",
+        "raw_diff.diff:1817-1834"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mndiagram3.c",
+      "role": "Diagram3 ranking/detail menu matching work: added debug include and lb/lbvector includes, typed table accesses, allocation asserts, helper setters with HSD_ASSERT, and a large fn_802461BC input handler.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mndiagram3.c +259/-88",
+        "raw_diff.diff:1835-2307",
+        "raw_diff.diff:1969-1974",
+        "raw_diff.diff:1988-2007",
+        "raw_diff.diff:2106-2307"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mndiagram3.static.h",
+      "role": "Static header update for mndiagram3 data typing: added mnDiagram3_PosTable and mnDiagram3_StatTable, changed u8 array externs to typed externs, and removed assert string externs.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mndiagram3.static.h +15/-4",
+        "raw_diff.diff:2308-2341"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Added mnDiagram_AnimTable as an overlay over mnDiagram_803EE728 to model trailing popup/cursor animation and text-layout data read at fixed offsets.",
+      "evidence_refs": [
+        "raw_diff.diff:17-29"
+      ]
+    },
+    {
+      "text": "Reworked mnDiagram_8023FA6C and mnDiagram_8023FC28 sorting-related code with explicit u8 casts, an assets pointer, and more explicit unlocked/non-null tie-break conditions.",
+      "evidence_refs": [
+        "raw_diff.diff:34-89"
+      ]
+    },
+    {
+      "text": "Expanded mnDiagram_InputProc substantially, including u32 input, sorted_fighters pointer reuse, name/fighter mode branching, popup selection calculation, scroll bounds clamping, and D-pad navigation with labeled control flow.",
+      "evidence_refs": [
+        "raw_diff.diff:93-660"
+      ]
+    },
+    {
+      "text": "Changed popup animation and popup/detail code to use mnDiagram_AnimTable fields and allocation assertions.",
+      "evidence_refs": [
+        "raw_diff.diff:661-993",
+        "raw_diff.diff:1470-1496"
+      ]
+    },
+    {
+      "text": "Converted several mndiagram2 and mndiagram3 raw __assert patterns to HSD_ASSERT or HSD_ASSERTREPORT and removed the now-unused assert filename/message externs from static headers.",
+      "evidence_refs": [
+        "raw_diff.diff:1622-1637",
+        "raw_diff.diff:1758-1762",
+        "raw_diff.diff:1870-1876",
+        "raw_diff.diff:1969-1974",
+        "raw_diff.diff:1988-2007",
+        "raw_diff.diff:1824-1831",
+        "raw_diff.diff:2337-2338"
+      ]
+    },
+    {
+      "text": "Typed mndiagram2 and mndiagram3 static data: mnDiagram2_803EEB60 became AnimLoopSettings[2], and mndiagram3 position/stat byte arrays became mnDiagram3_PosTable and mnDiagram3_StatTable.",
+      "evidence_refs": [
+        "raw_diff.diff:1824-1826",
+        "raw_diff.diff:2316-2334"
+      ]
+    },
+    {
+      "text": "Added fn_802461BC in mndiagram3.c as a large input handler for diagram3/detail view navigation, back/advance behavior, mode toggling, row label refresh, scrolling, and popup movement.",
+      "evidence_refs": [
+        "raw_diff.diff:2106-2307"
+      ]
+    },
+    {
+      "text": "Automation reported one new full match, mnDiagram_PopupAnimProc, and improvements in mnDiagram_InputProc, fn_802461BC, mndiagram data sections, and other functions, but also reported one broken match and six unmatched-item regressions.",
+      "evidence_refs": [
+        "text_corpus.jsonl: decomp-dev[bot] report"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Kept unknown or weakly understood symbols address-style, such as fn_802461BC and many mnDiagram_8024xxxx functions, while giving recovered local data roles names like assets, sorted, tbl, row, col, count, and user_data.",
+      "evidence_refs": [
+        "raw_diff.diff:65-67",
+        "raw_diff.diff:97-110",
+        "raw_diff.diff:947-958",
+        "raw_diff.diff:2106"
+      ]
+    },
+    {
+      "text": "Used typed overlays for recurring fixed-offset data instead of repeatedly casting base byte pointers, especially for mnDiagram_AnimTable and mndiagram3 position/stat tables.",
+      "evidence_refs": [
+        "raw_diff.diff:17-29",
+        "raw_diff.diff:1041-1042",
+        "raw_diff.diff:1478",
+        "raw_diff.diff:2316-2334"
+      ]
+    },
+    {
+      "text": "Changed raw assert expansions to project assert macros where the diff preserves line numbers and messages, reducing local assert string externs.",
+      "evidence_refs": [
+        "raw_diff.diff:1622-1637",
+        "raw_diff.diff:1758-1762",
+        "raw_diff.diff:1824-1831",
+        "raw_diff.diff:1969-1974",
+        "raw_diff.diff:2337-2338"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For fixed-offset menu data that is repeatedly indexed as a table, a narrow local overlay struct can make the source more reviewable than repeated char* base arithmetic, provided the offsets and field sizes are documented in the type.",
+      "scope": [
+        "src/melee/mn/mndiagram.c",
+        "src/melee/mn/mndiagram3.static.h"
+      ],
+      "evidence_refs": [
+        "raw_diff.diff:17-29",
+        "raw_diff.diff:2316-2334"
+      ]
+    },
+    {
+      "lesson": "When matching code around assert-expanded JObj operations or allocations, existing HSD_ASSERT/HSD_ASSERTREPORT forms can replace raw __assert blocks if the line and message behavior are preserved.",
+      "scope": [
+        "src/melee/mn/mndiagram2.c",
+        "src/melee/mn/mndiagram3.c"
+      ],
+      "evidence_refs": [
+        "raw_diff.diff:1622-1637",
+        "raw_diff.diff:1758-1762",
+        "raw_diff.diff:1969-1974",
+        "raw_diff.diff:1988-2007"
+      ]
+    },
+    {
+      "lesson": "Score-improving code changes can still carry regressions in nearby items; intake should record both new matches/improvements and broken/regressed items from automation rather than presenting the PR as uniformly positive.",
+      "scope": [
+        "main/melee/mn/mndiagram",
+        "main/melee/mn/mndiagram2",
+        "main/melee/mn/mndiagram3"
+      ],
+      "evidence_refs": [
+        "text_corpus.jsonl: decomp-dev[bot] report"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "New typed data overlays use subsystem-prefixed names: mnDiagram_AnimTable, mnDiagram3_PosTable, and mnDiagram3_StatTable.",
+      "evidence_refs": [
+        "raw_diff.diff:19-29",
+        "raw_diff.diff:2316-2327"
+      ]
+    },
+    {
+      "text": "Local variable names are mostly role-based for recovered roles, including assets, sorted, tbl, data, user_data, row, col, count, cur, found, and spacing.",
+      "evidence_refs": [
+        "raw_diff.diff:65-67",
+        "raw_diff.diff:97-110",
+        "raw_diff.diff:1478",
+        "raw_diff.diff:2178-2180"
+      ]
+    },
+    {
+      "text": "Unidentified functions remain address-style, e.g. fn_802461BC and mnDiagram_8024xxxx symbols, rather than being given speculative semantic names.",
+      "evidence_refs": [
+        "raw_diff.diff:2106",
+        "raw_diff.diff:805",
+        "raw_diff.diff:1299"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "text": "PAD_STACK values were adjusted in several functions, including mnDiagram_8023FA6C from 8 to 16, mnDiagram_PopupAnimProc from 24 to 0x18, and mnDiagram_CursorProc from 40 to 8.",
+      "evidence_refs": [
+        "raw_diff.diff:38-39",
+        "raw_diff.diff:681-682",
+        "raw_diff.diff:1436-1437"
+      ]
+    },
+    {
+      "text": "Explicit casts to u8 were added around fighter/name indices when indexing persistent fighter data or passing IDs.",
+      "evidence_refs": [
+        "raw_diff.diff:46-47",
+        "raw_diff.diff:898-899",
+        "raw_diff.diff:922-923"
+      ]
+    },
+    {
+      "text": "The diff uses labeled/goto-shaped control flow in mnDiagram_InputProc for navigation scanning across sorted fighters and names, likely as a code-shape tactic rather than a generalized style recommendation.",
+      "evidence_refs": [
+        "raw_diff.diff:132-148",
+        "raw_diff.diff:265-660"
+      ]
+    },
+    {
+      "text": "Small setter helpers named HSD_JObjSetTranslateX_Fake/Y_Fake/Z_Fake were added in mndiagram3.c with HSD_ASSERT checks, then used to alter JObj translation code shape.",
+      "evidence_refs": [
+        "raw_diff.diff:1988-2007",
+        "raw_diff.diff:2061-2063"
+      ]
+    },
+    {
+      "text": "Direct field references such as &mnDiagram3_803EEC28.x0/xC/x18 and mnDiagram3_803EEC4C.indices replaced raw byte-offset casts.",
+      "evidence_refs": [
+        "raw_diff.diff:1896",
+        "raw_diff.diff:1918",
+        "raw_diff.diff:2097-2102",
+        "raw_diff.diff:2180-2193"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "automation_report",
+      "author": "decomp-dev[bot]",
+      "text": "Bot reported matched code 69.13% (+0.00%, +184 bytes), one new match mnDiagram_PopupAnimProc, one broken match mnDiagram3_80247008, 15 improvements in unmatched items, and 6 regressions in unmatched items.",
+      "evidence_refs": [
+        "text_corpus.jsonl: decomp-dev[bot] issue_comment 2026-05-25T11:05:18Z"
+      ]
+    },
+    {
+      "kind": "human_review",
+      "author": null,
+      "text": "No loaded human review comments or review records were present in this PR slice.",
+      "evidence_refs": [
+        "metadata_json.counts.review_comments=0",
+        "metadata_json.counts.reviews=0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2535",
+    "Jj/mndiagram",
+    "jurrejelle",
+    "src/melee/mn/mndiagram.c",
+    "src/melee/mn/mndiagram2.c",
+    "src/melee/mn/mndiagram3.c",
+    "mndiagram2.static.h",
+    "mndiagram3.static.h",
+    "mnDiagram_AnimTable",
+    "mnDiagram3_PosTable",
+    "mnDiagram3_StatTable",
+    "mnDiagram_InputProc",
+    "mnDiagram_PopupAnimProc",
+    "mnDiagram_CursorProc",
+    "fn_802461BC",
+    "mnDiagram3_80247008",
+    "mnDiagram3_8024714C",
+    "mnDiagram2_CreateStatRow",
+    "mnDiagram2_UpdateScrollArrows",
+    "HSD_ASSERT",
+    "HSD_ASSERTREPORT",
+    "PAD_STACK",
+    "GetNameCount",
+    "mn_IsFighterUnlocked",
+    "GetPersistentFighterData",
+    "Menu_GetAllInputs",
+    "sorted_fighters",
+    "sorted_names",
+    "HSD_JObjSetTranslateY_Fake"
+  ],
+  "follow_up_queries": [
+    "PR 2535 mnDiagram_PopupAnimProc full match mnDiagram_AnimTable",
+    "mnDiagram3_803EEC28 mnDiagram3_PosTable x0 xC x18",
+    "mnDiagram3_803EEC4C mnDiagram3_StatTable indices",
+    "mndiagram HSD_ASSERTREPORT Can't get user_data",
+    "fn_802461BC Menu_GetAllInputs scroll_offset row_labels",
+    "mnDiagram_InputProc goto navigation sorted_fighters GetNameText",
+    "mnDiagram2_803EEB60 AnimLoopSettings[2]",
+    "mnDiagram3_80247008 broken match PR 2535",
+    "PAD_STACK mndiagram cursor input popup anim"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json",
+      "changed_files.jsonl",
+      "raw_diff.diff",
+      "text_corpus.jsonl"
+    ],
+    "notes": [
+      "PR body is empty and there are no loaded human review comments, so intent and reviewer rationale are not available.",
+      "The raw diff and raw PR JSON are truncated in loaded_files, but targeted local slice lookups covered missing mndiagram2/mndiagram3 and header regions needed for this intake.",
+      "Automation provides score and regression evidence, but no build log, objdiff details, or final post-review validation beyond the bot report is loaded.",
+      "The PR is marked merged in metadata, but the intake does not infer that every tactic in the diff is a general accepted style."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "type": "decomp_lesson_candidate",
+        "title": "Typed overlays can replace repeated fixed-offset data access in menu tables",
+        "text": "PR 2535 shows mndiagram fixed-offset tables being represented as local typed structs such as mnDiagram_AnimTable, mnDiagram3_PosTable, and mnDiagram3_StatTable, replacing repeated byte-offset casts in several callsites.",
+        "scope": [
+          "src/melee/mn/mndiagram.c",
+          "src/melee/mn/mndiagram3.static.h"
+        ],
+        "evidence_refs": [
+          "raw_diff.diff:17-29",
+          "raw_diff.diff:2316-2334"
+        ]
+      },
+      {
+        "type": "decomp_lesson_candidate",
+        "title": "Record regressions alongside match gains",
+        "text": "The PR bot report lists one new match and many improvements, but also one broken match and six regressions; future postmortems should capture both sides when a matching PR is noisy.",
+        "scope": [
+          "past PR automation reports"
+        ],
+        "evidence_refs": [
+          "text_corpus.jsonl: decomp-dev[bot] report"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Clarify typed static-data overlays for fixed-offset tables",
+        "text": "Consider adding guidance that local overlay structs are useful when a static byte array is repeatedly accessed at documented offsets, especially when the overlay replaces raw char*/u8* offset arithmetic and the field offsets are explicit.",
+        "source_path": null,
+        "scope": [
+          "typed-fields-over-pointer-math",
+          "data-sections-and-tu-splits"
+        ],
+        "evidence_refs": [
+          "raw_diff.diff:17-29",
+          "raw_diff.diff:2316-2334",
+          "raw_diff.diff:2097-2102"
+        ],
+        "reason": "The current standards already prefer typed fields over pointer math; this PR provides a concrete menu-data example that could help curators enrich that standard."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "mndiagram files contain menu diagram/stat/detail-view matching work",
+        "text": "src/melee/mn/mndiagram.c, mndiagram2.c, and mndiagram3.c participate in diagram menu, stat/detail view, cursor/popup, sorted fighter/name, and row-label navigation logic.",
+        "source_path": "src/melee/mn",
+        "scope": [
+          "src/melee/mn/mndiagram.c",
+          "src/melee/mn/mndiagram2.c",
+          "src/melee/mn/mndiagram3.c"
+        ],
+        "evidence_refs": [
+          "changed_files.jsonl",
+          "raw_diff.diff:93-660",
+          "raw_diff.diff:1607-1816",
+          "raw_diff.diff:2106-2307"
+        ],
+        "reason": "Potentially useful path-scope fact, but should be curated against current source rather than accepted from one historical PR slice alone."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Caution around fake helper/setter functions used for code shape",
+        "text": "PR 2535 adds HSD_JObjSetTranslateX_Fake/Y_Fake/Z_Fake helpers to influence JObj translation code shape. If this pattern appears elsewhere, standards may need explicit guidance that fake helpers require narrow objdiff evidence and should not become general style.",
+        "source_path": null,
+        "scope": [
+          "matching-tactics-need-evidence",
+          "header-inlines"
+        ],
+        "evidence_refs": [
+          "raw_diff.diff:1988-2007",
+          "raw_diff.diff:2061-2063"
+        ],
+        "reason": "The loaded evidence shows the tactic but not enough validation to bless it; curator review can decide whether existing matching-tactic standards already cover it."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote the large goto-shaped mnDiagram_InputProc navigation as preferred source style; the slice only supports that it was used in this PR for matching/code shape.",
+      "Do not infer that HSD_JObjSetTranslate*_Fake helpers are accepted global style from this PR alone.",
+      "Do not claim all touched functions matched; automation reported one new full match but also one broken match and several regressions.",
+      "Do not infer reviewer intent or human approval rationale; no human review comments are loaded."
+    ]
+  },
+  "confidence": 0.74,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

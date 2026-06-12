@@ -1,0 +1,10 @@
+{
+  "pr": 97,
+  "title": "Cleanup of some duplicated data pointers and convert some hex to ASCII",
+  "url": "https://github.com/doldecomp/melee/pull/97",
+  "text_records_with_body": 0,
+  "review_comments": 0,
+  "changed_files": 1,
+  "added_lines": 1551,
+  "deleted_lines": 1517
+}

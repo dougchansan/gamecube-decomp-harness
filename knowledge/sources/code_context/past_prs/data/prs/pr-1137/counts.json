@@ -1,0 +1,17 @@
+{
+  "number": 1137,
+  "title": "Migrate to `pip-tools` for Python dependencies",
+  "state": "MERGED",
+  "createdAt": "2024-01-27T18:27:45Z",
+  "updatedAt": "2024-01-27T18:28:52Z",
+  "mergedAt": "2024-01-27T18:28:51Z",
+  "closedAt": "2024-01-27T18:28:51Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1137",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 2115
+  }
+}

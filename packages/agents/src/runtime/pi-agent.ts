@@ -43,11 +43,18 @@ async function writeOutput(path: string, text: string): Promise<void> {
   await writeFile(path, text);
 }
 
+// The provider expects "xhigh"; "x-high"/"x_high" variants make it error and fall
+// back to a different model, so normalize here where every agent's config flows through.
+function normalizeThinkingLevel(level: string): string {
+  const normalized = level.trim().toLowerCase();
+  return normalized === "x-high" || normalized === "x_high" ? "xhigh" : normalized;
+}
+
 function piConfig(options: PiRunOptions): { provider: string; model: string; thinkingLevel: string } {
   return {
     provider: options.provider ?? DEFAULT_PI_PROVIDER,
     model: options.model ?? DEFAULT_PI_MODEL,
-    thinkingLevel: options.thinkingLevel ?? DEFAULT_PI_THINKING_LEVEL,
+    thinkingLevel: normalizeThinkingLevel(options.thinkingLevel ?? DEFAULT_PI_THINKING_LEVEL),
   };
 }
 
@@ -184,6 +191,8 @@ export async function runPiAgent(options: PiRunOptions): Promise<PiRunResult> {
     });
     session = created.session;
 
+    let lastAssistantStopReason: string | undefined;
+    let lastAssistantErrorMessage: string | undefined;
     unsubscribe = session.subscribe((event: any) => {
       if (event?.type === "message_update" && event.assistantMessageEvent?.type === "text_delta") {
         rawText += event.assistantMessageEvent.delta;
@@ -191,6 +200,11 @@ export async function runPiAgent(options: PiRunOptions): Promise<PiRunResult> {
       if (event?.type === "message_end" || event?.type === "turn_end") {
         const text = textFromMessage(event.message);
         if (text) finalAssistantText = text;
+        const record = event.message as Record<string, unknown> | undefined;
+        if (record?.role === "assistant") {
+          lastAssistantStopReason = typeof record.stopReason === "string" ? record.stopReason : undefined;
+          lastAssistantErrorMessage = typeof record.errorMessage === "string" ? record.errorMessage : undefined;
+        }
       }
     });
     await withTimeout(
@@ -200,6 +214,8 @@ export async function runPiAgent(options: PiRunOptions): Promise<PiRunResult> {
     );
     const outputText = finalAssistantText || rawText;
     await writeOutput(outputPath, outputText);
+    const providerError =
+      lastAssistantStopReason === "error" ? lastAssistantErrorMessage ?? "provider ended the session with an error and no message" : undefined;
     return {
       sessionId: String(session.sessionId ?? sessionId),
       sessionFile: typeof session.sessionFile === "string" ? session.sessionFile : undefined,
@@ -209,6 +225,7 @@ export async function runPiAgent(options: PiRunOptions): Promise<PiRunResult> {
       userPromptPath,
       rawText: outputText,
       dryRun: false,
+      providerError,
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

@@ -1,0 +1,373 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2608",
+  "pr": {
+    "number": 2608,
+    "title": "match and link math.c",
+    "url": "https://github.com/doldecomp/melee/pull/2608",
+    "state": "MERGED",
+    "author": "lukechampine",
+    "created_at": "2026-06-07T16:43:08Z",
+    "merged_at": "2026-06-07T17:13:53Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2608 matched and linked src/MSL/math.c by changing MSL/math.c from NonMatching to Matching in configure.py, moving/removing logf coefficient storage from math_data.c, adding .sdata2-local math constants in math.c, and reshaping logf codegen with tighter inlining and local expression changes. The bot report records 2 new matches: main/MSL/math .sdata2 to 100% and logf to 100%.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "MSL math",
+      "linking-status update",
+      "data-section placement"
+    ],
+    "systems": [
+      "MSL",
+      "configure.py",
+      "src/MSL/math.c",
+      "src/MSL/math_data.c"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "configure.py",
+      "role": "Changed MSL/math.c object classification from NonMatching to Matching.",
+      "evidence_refs": [
+        "metadata_json.changed_files",
+        "raw_diff: configure.py hunk changing Object(NonMatching, \"MSL/math.c\") to Object(Matching, \"MSL/math.c\")"
+      ]
+    },
+    {
+      "path": "src/MSL/math.c",
+      "role": "Primary matched function work for logf and associated .sdata2 constants.",
+      "evidence_refs": [
+        "metadata_json.changed_files",
+        "raw_diff: src/MSL/math.c hunks adding SECTION_SDATA2 constants and reshaping logf"
+      ]
+    },
+    {
+      "path": "src/MSL/math_data.c",
+      "role": "Removed logf Taylor coefficient bit-pattern globals from math_data.c.",
+      "evidence_refs": [
+        "metadata_json.changed_files",
+        "raw_diff: src/MSL/math_data.c hunk deleting __logf_C0_bits and __logf_C1_bits"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "configure.py now treats MSL/math.c as Matching instead of NonMatching.",
+      "evidence_refs": [
+        "raw_diff: configure.py"
+      ]
+    },
+    {
+      "text": "math.c adds SECTION_SDATA2, guarded for MWERKS and excluding M2CTX, then defines MSL_Math_804DE1B0, MSL_Math_804DE1B4, __float_nan, and __float_huge in .sdata2.",
+      "evidence_refs": [
+        "raw_diff: src/MSL/math.c SECTION_SDATA2 block"
+      ]
+    },
+    {
+      "text": "logf coefficient globals __logf_C0_bits and __logf_C1_bits were removed from math_data.c and replaced by MSL_Math_804DE1B0 and MSL_Math_804DE1B4 in math.c.",
+      "evidence_refs": [
+        "raw_diff: src/MSL/math.c coef assignments",
+        "raw_diff: src/MSL/math_data.c deleted coefficient definitions"
+      ]
+    },
+    {
+      "text": "logf was reshaped by switching directly on the masked exponent expression, moving raw_fm/raw_fM declarations outward, using register float locals for H and h2_poly, inlining the polynomial expression, and explicitly casting E to float in LN2 multiplications.",
+      "evidence_refs": [
+        "raw_diff: src/MSL/math.c logf hunk"
+      ]
+    },
+    {
+      "text": "NaN and infinity handling changed from float_nan/float_inf expression globals to __float_nan.f and __float_huge.f bit-pattern constants.",
+      "evidence_refs": [
+        "raw_diff: src/MSL/math.c float_nan/float_inf replacement"
+      ]
+    },
+    {
+      "text": "A stale block comment documenting a previous assembly mismatch for __one_over_F[m] was removed.",
+      "evidence_refs": [
+        "raw_diff: src/MSL/math.c deleted matching comment"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Kept MSL lookup tables in math_data.c while relocating only the logf coefficient and float special-value constants needed by this match, limiting the data change to math-related symbols visible in the diff.",
+      "evidence_refs": [
+        "raw_diff: src/MSL/math.c extern lookup tables retained",
+        "raw_diff: src/MSL/math_data.c only coefficient definitions deleted"
+      ]
+    },
+    {
+      "text": "Used address-style names for newly introduced MSL_Math_804DE1B0 and MSL_Math_804DE1B4 rather than inventing semantic coefficient names not shown by the PR evidence.",
+      "evidence_refs": [
+        "raw_diff: src/MSL/math.c MSL_Math_804DE1B0/MSL_Math_804DE1B4"
+      ]
+    },
+    {
+      "text": "The author identified that the last unmatched bit required inlining rather than further automated search.",
+      "evidence_refs": [
+        "human_pr_text: PR body"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For small remaining MSL math mismatches, expression-level inlining can be decisive: this PR collapsed temporary polynomial locals into one expression and the author described the final fix as 'a bit of inlining.'",
+      "scope": [
+        "src/MSL/math.c",
+        "logf",
+        "MSL math codegen"
+      ],
+      "evidence_refs": [
+        "human_pr_text: PR body",
+        "raw_diff: src/MSL/math.c h2_poly expression replacement"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "lesson": "When matching MSL math data, constants may need precise section placement and bit-pattern representation rather than computed floating expressions; here NaN/huge and coefficient constants were represented with u32/FloatU32 data in .sdata2.",
+      "scope": [
+        "src/MSL/math.c",
+        ".sdata2",
+        "logf constants"
+      ],
+      "evidence_refs": [
+        "raw_diff: src/MSL/math.c SECTION_SDATA2 constants",
+        "text_corpus: decomp-dev bot report showing main/MSL/math .sdata2 reached 100%"
+      ],
+      "confidence": 0.76
+    },
+    {
+      "lesson": "Local data ownership can matter for a text match: logf coefficient bit-pattern globals were removed from math_data.c and defined in math.c with address-style MSL_Math names before math.c was linked as Matching.",
+      "scope": [
+        "src/MSL/math.c",
+        "src/MSL/math_data.c",
+        "configure.py"
+      ],
+      "evidence_refs": [
+        "raw_diff: src/MSL/math.c coefficient definitions and uses",
+        "raw_diff: src/MSL/math_data.c coefficient deletions",
+        "raw_diff: configure.py Matching status change"
+      ],
+      "confidence": 0.7
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Address-style MSL_Math_804DE1B0/MSL_Math_804DE1B4 names were used for newly added raw coefficient constants when semantic names were not retained.",
+      "evidence_refs": [
+        "raw_diff: src/MSL/math.c"
+      ],
+      "confidence": 0.73
+    },
+    {
+      "convention": "__float_nan and __float_huge use double-underscore MSL-style special constant names and are accessed through the FloatU32 union field .f.",
+      "evidence_refs": [
+        "raw_diff: src/MSL/math.c"
+      ],
+      "confidence": 0.68
+    },
+    {
+      "convention": "Temporary raw bit variables in logf use raw_* names such as raw_x, raw_fm, and raw_fM.",
+      "evidence_refs": [
+        "raw_diff: src/MSL/math.c logf"
+      ],
+      "confidence": 0.64
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Changed object status to Matching only after the source/data edits; bot output reports logf and .sdata2 as new matches.",
+      "evidence_refs": [
+        "raw_diff: configure.py",
+        "text_corpus: decomp-dev bot report"
+      ]
+    },
+    {
+      "tactic": "Used MWERKS-only __declspec(section \".sdata2\") guarded away from M2CTX to place specific constants in .sdata2 without affecting non-MWERKS contexts.",
+      "evidence_refs": [
+        "raw_diff: src/MSL/math.c SECTION_SDATA2 macro"
+      ]
+    },
+    {
+      "tactic": "Used u32 bit patterns plus FloatU32 reinterpretation for special floating values and coefficients to control loads and representations.",
+      "evidence_refs": [
+        "raw_diff: src/MSL/math.c FloatU32 and constants"
+      ]
+    },
+    {
+      "tactic": "Introduced register float locals for H and h2_poly in the low-mantissa logf path.",
+      "evidence_refs": [
+        "raw_diff: src/MSL/math.c register float hunk"
+      ]
+    },
+    {
+      "tactic": "Removed intermediate locals C0, C1, new_var, and poly by inlining the polynomial calculation into h2_poly.",
+      "evidence_refs": [
+        "raw_diff: src/MSL/math.c polynomial expression hunk",
+        "human_pr_text: author says final bit required inlining"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "type": "bot_report",
+      "author": "decomp-dev[bot]",
+      "text": "Report for GALE01 recorded Matched code +364 bytes, Linked code +364 bytes, Matched data +32 bytes, Linked data +32 bytes, with 2 new matches: main/MSL/math .sdata2 from 66.67% to 100.00% and logf from 99.80% to 100.00%.",
+      "evidence_refs": [
+        "text_corpus: issue_comment by decomp-dev[bot] at 2026-06-07T16:46:47Z"
+      ]
+    },
+    {
+      "type": "absence",
+      "author": null,
+      "text": "No human review comments or reviews are present in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata_json.counts.review_comments=0",
+        "metadata_json.counts.reviews=0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2608",
+    "match and link math.c",
+    "lukechampine",
+    "MSL/math.c",
+    "MSL/math_data.c",
+    "configure.py",
+    "logf",
+    "SECTION_SDATA2",
+    "__declspec(section \".sdata2\")",
+    "MSL_Math_804DE1B0",
+    "MSL_Math_804DE1B4",
+    "__float_nan",
+    "__float_huge",
+    "FloatU32",
+    "__logf_C0_bits",
+    "__logf_C1_bits",
+    "__one_over_F",
+    "__ln_F",
+    "h2_poly",
+    "register float",
+    "M2CTX",
+    "MWERKS",
+    "GALE01",
+    "main/MSL/math .sdata2"
+  ],
+  "follow_up_queries": [
+    "MSL_Math_804DE1B0 MSL_Math_804DE1B4",
+    "SECTION_SDATA2 __declspec(section \".sdata2\") M2CTX",
+    "logf register float h2_poly",
+    "__float_nan __float_huge FloatU32",
+    "__logf_C0_bits __logf_C1_bits math_data.c",
+    "Object(Matching, \"MSL/math.c\")"
+  ],
+  "evidence_quality": {
+    "status": "strong",
+    "evidence_refs": [
+      "metadata_json",
+      "human_pr_text",
+      "raw_diff",
+      "changed_files",
+      "text_corpus"
+    ],
+    "notes": [
+      "The changed files and exact diffs are fully loaded and not truncated.",
+      "The PR body gives direct author evidence that inlining solved the final mismatch, but does not specify every individual source edit's intent.",
+      "The bot report supports match/link progress and names logf and .sdata2 as new matches.",
+      "There are no loaded human review comments, so no reviewer intent or requested changes can be inferred.",
+      "No independent build or objdiff logs beyond the decomp-dev bot report are included in the slice."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "type": "pr_lesson",
+        "title": "Inlining can close final MSL math expression mismatches",
+        "text": "In PR #2608, the author stated that Codex could not crack the last bit and that it 'just required a bit of inlining'; the diff inlined logf polynomial temporaries into the h2_poly expression and the bot reported logf reaching 100%.",
+        "scope": [
+          "src/MSL/math.c",
+          "logf",
+          "MSL"
+        ],
+        "evidence_refs": [
+          "human_pr_text",
+          "raw_diff: src/MSL/math.c h2_poly",
+          "text_corpus: bot report"
+        ]
+      },
+      {
+        "type": "pr_lesson",
+        "title": "MSL math constants may require local .sdata2 bit-pattern placement",
+        "text": "PR #2608 moved logf coefficient bit patterns out of math_data.c, added MWERKS .sdata2 constants in math.c, and the bot report showed main/MSL/math .sdata2 reaching 100%. Treat this as PR-specific evidence to check section ownership for MSL math constants rather than as a blanket rule to move constants.",
+        "scope": [
+          "src/MSL/math.c",
+          "src/MSL/math_data.c",
+          ".sdata2"
+        ],
+        "evidence_refs": [
+          "raw_diff: src/MSL/math.c SECTION_SDATA2 constants",
+          "raw_diff: src/MSL/math_data.c deleted coefficient globals",
+          "text_corpus: bot report"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "src/MSL/math.c matched and linked by PR #2608",
+        "text": "PR #2608 changed configure.py from Object(NonMatching, \"MSL/math.c\") to Object(Matching, \"MSL/math.c\"). The bot report recorded main/MSL/math logf reaching 100% and .sdata2 reaching 100%.",
+        "source_path": "src/MSL/math.c",
+        "scope": [
+          "MSL/math.c",
+          "logf",
+          ".sdata2"
+        ],
+        "evidence_refs": [
+          "raw_diff: configure.py",
+          "text_corpus: decomp-dev bot report"
+        ],
+        "reason": "Useful path-specific status fact for future MSL/math.c intake, but should be curated against current source before adding to path facts."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Register locals and section pragmas still need narrow match evidence",
+        "text": "PR #2608 used register float locals and a tightly guarded MWERKS .sdata2 section macro in a successful MSL math match. If curated, this should reinforce that such tactics are exceptions requiring bot/objdiff evidence and narrow scope, not general style.",
+        "source_path": null,
+        "scope": [
+          "matching tactics",
+          "register locals",
+          "section placement",
+          "MSL"
+        ],
+        "evidence_refs": [
+          "raw_diff: src/MSL/math.c register float H/h2_poly",
+          "raw_diff: src/MSL/math.c SECTION_SDATA2 macro",
+          "text_corpus: bot report"
+        ],
+        "reason": "This aligns with existing standards on matching tactics and pragmas; curator may decide whether the PR provides enough example evidence to add as an illustrative note."
+      }
+    ],
+    "rejection_notes": [
+      "Do not generalize this PR into a rule that constants should be moved from math_data.c into math.c; the evidence only covers logf coefficients and special values in this PR.",
+      "Do not infer human reviewer approval rationale; no human reviews or review comments are loaded.",
+      "Do not treat Codex failure as evidence about AI tools generally; the PR body only says Codex did not crack this specific final bit.",
+      "Do not promote register locals as normal style; the PR evidence only shows they were present in a successful narrow match."
+    ]
+  },
+  "confidence": 0.86,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

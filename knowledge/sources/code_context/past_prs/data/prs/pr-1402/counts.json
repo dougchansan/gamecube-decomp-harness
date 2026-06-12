@@ -1,0 +1,17 @@
+{
+  "number": 1402,
+  "title": "Partially match `grkongo`",
+  "state": "MERGED",
+  "createdAt": "2024-07-26T20:57:34Z",
+  "updatedAt": "2024-07-31T20:15:26Z",
+  "mergedAt": "2024-07-29T21:15:09Z",
+  "closedAt": "2024-07-29T21:15:09Z",
+  "author": "thefoxcam",
+  "url": "https://github.com/doldecomp/melee/pull/1402",
+  "counts": {
+    "issue_comments": 3,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 51653
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 115,
+  "title": "Fix up hardcoded pointers breaking shifts",
+  "state": "MERGED",
+  "createdAt": "2021-11-20T21:29:17Z",
+  "updatedAt": "2021-11-20T21:29:23Z",
+  "mergedAt": "2021-11-20T21:29:21Z",
+  "closedAt": "2021-11-20T21:29:21Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/115",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 17951
+  }
+}

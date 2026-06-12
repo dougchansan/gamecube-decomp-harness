@@ -1,0 +1,10 @@
+{
+  "pr": 386,
+  "title": "Decompile some of ftlink and add an inline function for grabbing Fighter object instances from HSD_GObj pointers.",
+  "url": "https://github.com/doldecomp/melee/pull/386",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 5,
+  "added_lines": 119,
+  "deleted_lines": 313
+}

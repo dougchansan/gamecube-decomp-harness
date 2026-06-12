@@ -1,0 +1,396 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2260",
+  "pr": {
+    "number": 2260,
+    "title": "Match and link ftlinkspecialn via hacky solution, cleanup inline names",
+    "url": "https://github.com/doldecomp/melee/pull/2260",
+    "state": "MERGED",
+    "author": "PsiLupan",
+    "created_at": "2026-03-10T19:44:46Z",
+    "merged_at": "2026-03-10T19:48:53Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2260 matched and linked `src/melee/ft/chara/ftLink/ftLk_SpecialN.c`, switched that object from NonMatching to Matching, and made supporting `symbols.txt` metadata changes across local/global scopes, labels, and data splits. The source diff includes helper cleanup and inline renames, but also explicitly hacky matching tactics such as stack padding and static zero Vec3 data for float/data order.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "cleanup",
+      "decomp-matching",
+      "naming",
+      "symbol-metadata",
+      "matching-tactic"
+    ],
+    "systems": [
+      "fighter",
+      "ftLink",
+      "config",
+      "repo-root",
+      "symbols"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/ft/chara/ftLink/ftLk_SpecialN.c",
+      "role": "Primary decomp source matched/linked; refactored inline helpers, renamed helpers, added static MotionFlags and Vec3 zero data, and used FORCE_PAD_STACK tactics.",
+      "evidence_refs": [
+        "changed_files.jsonl: ftLk_SpecialN.c +146/-156, 15 hunks",
+        "diff.diff: ftLk_SpecialN.c added `isDrawn`, `animate`, `animate_nopad`, `doEndColl`; renamed `unkCondition` to `isDrawback`",
+        "diff.diff: ftLk_SpecialN.c uses `FORCE_PAD_STACK_16`, `FORCE_PAD_STACK_8`, `FORCE_PAD_STACK_4`",
+        "text_corpus.jsonl bot report: `ftLk_SpecialNStart_Anim` and `ftLk_SpecialAirNStart_Anim` reached 100.00%"
+      ]
+    },
+    {
+      "path": "configure.py",
+      "role": "Build configuration changed `melee/ft/chara/ftLink/ftLk_SpecialN.c` from NonMatching to Matching.",
+      "evidence_refs": [
+        "diff.diff: `Object(NonMatching, \"melee/ft/chara/ftLink/ftLk_SpecialN.c\")` changed to `Object(Matching, ...)`"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Supporting symbol metadata updates for scope, labels, data names, and section sizes, including ftLink SpecialN floats and unrelated DevCom/ifStatus/ifTime metadata.",
+      "evidence_refs": [
+        "changed_files.jsonl: symbols.txt +49/-42, 11 hunks",
+        "diff.diff: ftLink rodata `@334/@335/@336` renamed to `zero/zero2/zero3`",
+        "diff.diff: ftLk_Init_804D9340/804D9344 changed to local float labels `@338/@339`",
+        "diff.diff: DevCom function/data scopes and BSS sizes adjusted"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "`ftLk_SpecialN.c` was promoted to Matching in `configure.py`.",
+      "evidence_refs": [
+        "diff.diff: configure.py MatchingFor object line"
+      ]
+    },
+    {
+      "text": "Inline helper names were cleaned up from generic names such as `inlineA0`, `inlineA1`, and `inlineA2` into role-oriented helpers such as `isDrawback`, `isDrawn`, `animate`, and `animate_nopad`.",
+      "evidence_refs": [
+        "diff.diff: `unkCondition` -> `isDrawback`; removed `inlineA0/inlineA1/inlineA2`; added `isDrawn`, `animate`, `animate_nopad`"
+      ]
+    },
+    {
+      "text": "Animation start functions now call `isDrawn(gobj)` before `animate(gobj)` and transition to loop states when no frames remain.",
+      "evidence_refs": [
+        "diff.diff: `ftLk_SpecialNStart_Anim` and `ftLk_SpecialAirNStart_Anim` hunks"
+      ]
+    },
+    {
+      "text": "Loop animation functions call `animate_nopad(gobj)` rather than the prior generic inline animation helper.",
+      "evidence_refs": [
+        "diff.diff: `ftLk_SpecialNLoop_Anim` and `ftLk_SpecialAirNLoop_Anim` hunks"
+      ]
+    },
+    {
+      "text": "Ground/air collision helper code was rearranged; `coll_mf` was moved earlier, `doEndColl` was introduced before `doColl`, and motion-change float arguments were made explicit as `1.0f` and `0.0f` in touched collision paths.",
+      "evidence_refs": [
+        "diff.diff: `coll_mf`, `doEndColl`, `doColl`, `ftLk_SpecialNEnd_Coll`, `ftLk_SpecialAirNEnd_Coll` hunks"
+      ]
+    },
+    {
+      "text": "Symbols metadata changed several functions/data from global to local scope, added local section labels, split `HSD_DevCom_804C6330` into a small global and local buffer symbol, and renamed ftLink-related float/vector labels.",
+      "evidence_refs": [
+        "diff.diff: config/GALE01/symbols.txt hunks for HSD_DevCom, ifTime, ftLink rodata/sdata2"
+      ]
+    },
+    {
+      "text": "The bot report recorded matched code +1616 bytes, linked code +6500 bytes, matched data +33024 bytes, and four new matches including two ftLk_SpecialN animation functions and DevCom data sections.",
+      "evidence_refs": [
+        "text_corpus.jsonl issue_comment by decomp-dev[bot]"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "The PR pairs the `configure.py` matching flip with a bot report showing specific ftLk_SpecialN functions reaching 100%, rather than only changing build classification.",
+      "evidence_refs": [
+        "diff.diff: configure.py object classification change",
+        "text_corpus.jsonl bot report: two ftLk_SpecialN functions at 100.00%"
+      ]
+    },
+    {
+      "text": "Generic inline helper names were replaced with more reviewable local-role names where the diff itself exposes clear behavior: drawing an arrow, drawback detection, and animation position updates.",
+      "evidence_refs": [
+        "diff.diff: `isDrawback`, `isDrawn`, `animate`, `animate_nopad` additions"
+      ]
+    },
+    {
+      "text": "The source separates padded and non-padded animation helpers, keeping the stack-shape tactic narrower than applying padding to all animation calls.",
+      "evidence_refs": [
+        "diff.diff: `animate` contains FORCE_PAD_STACK calls; `animate_nopad` omits them"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When matching a file with repeated inline helper bodies, extracting role-named static inline helpers can improve readability while preserving reusable source structure, but the helper boundaries still need match evidence.",
+      "scope": [
+        "ftLink",
+        "fighter special move animation helpers"
+      ],
+      "evidence_refs": [
+        "diff.diff: generic inline helpers removed; `isDrawn`, `animate`, `animate_nopad`, and `doEndColl` added",
+        "text_corpus.jsonl bot report: ftLk_SpecialNStart_Anim and ftLk_SpecialAirNStart_Anim reached 100.00%"
+      ]
+    },
+    {
+      "lesson": "Stack padding can be isolated to the helper/call path that needs it; in this PR the padded animation helper and no-padding variant are separate.",
+      "scope": [
+        "matching tactic",
+        "MWCC stack layout"
+      ],
+      "evidence_refs": [
+        "diff.diff: `animate` uses `FORCE_PAD_STACK_16` and two `FORCE_PAD_STACK_8`; `animate_nopad` has the same position-update body without padding"
+      ]
+    },
+    {
+      "lesson": "Data/symbol metadata may be part of a code-matching PR, but the PR evidence only supports that these metadata edits accompanied the match, not that the broad metadata pattern should be generalized without section ownership review.",
+      "scope": [
+        "symbols.txt",
+        "section metadata"
+      ],
+      "evidence_refs": [
+        "diff.diff: symbols.txt scope and label changes across .text, .data, .bss, .sdata, .sbss, .sdata2",
+        "text_corpus.jsonl bot report: matched data increased +33024 bytes"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "isDrawback",
+      "kind": "static inline helper",
+      "lesson": "Replaced the vague `unkCondition` name with a predicate-style name tied to Link bow drawback behavior.",
+      "evidence_refs": [
+        "diff.diff: `static inline bool unkCondition` changed to `static inline bool isDrawback`"
+      ]
+    },
+    {
+      "name": "isDrawn",
+      "kind": "static inline helper",
+      "lesson": "New predicate-style helper name wraps the arrow-spawn/drawn check path.",
+      "evidence_refs": [
+        "diff.diff: added `static inline bool isDrawn(Fighter_GObj* gobj)`"
+      ]
+    },
+    {
+      "name": "animate / animate_nopad",
+      "kind": "static inline helpers",
+      "lesson": "Helper names describe the shared animation coordinate update role, with suffix distinguishing the stack-padding variant.",
+      "evidence_refs": [
+        "diff.diff: added `animate` with FORCE_PAD_STACK calls and `animate_nopad` without them"
+      ]
+    },
+    {
+      "name": "zero / zero2 / zero3",
+      "kind": "static Vec3 data",
+      "lesson": "The PR used simple numbered names for three identical zero Vec3 constants; evidence suggests this was a matching/data-order tactic, not a general naming convention to promote.",
+      "evidence_refs": [
+        "diff.diff: added three `static const Vec3` zero constants",
+        "diff.diff: symbols.txt changed `@334/@335/@336` to `zero/zero2/zero3`"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Use `FORCE_PAD_STACK_*` in a narrow helper to steer stack layout.",
+      "evidence_refs": [
+        "diff.diff: `animate` uses `FORCE_PAD_STACK_16`, `FORCE_PAD_STACK_8`, `FORCE_PAD_STACK_8`",
+        "diff.diff: `doEndColl` uses `FORCE_PAD_STACK_8` and `FORCE_PAD_STACK_4`"
+      ],
+      "caution": "Loaded standards require explicit verifier evidence for stack-padding tactics; the PR has bot progress evidence but no inline objdiff transcript."
+    },
+    {
+      "tactic": "Introduce static const zero Vec3 objects to influence float/data order.",
+      "evidence_refs": [
+        "diff.diff: `static const Vec3 zero/zero2/zero3`",
+        "diff.diff: source comment `@todo Float order hack` remains near Enter setup",
+        "diff.diff: symbols.txt maps rodata labels to `zero/zero2/zero3`"
+      ],
+      "caution": "This is explicitly hack-like in the PR title/source and should not be generalized without data ownership evidence."
+    },
+    {
+      "tactic": "Move and share static MotionFlags constants (`mf`, `coll_mf`) so multiple motion-state transitions use named constants.",
+      "evidence_refs": [
+        "diff.diff: `mf` and `coll_mf` definitions moved near top of file",
+        "diff.diff: animation and collision state changes use `mf`/`coll_mf`"
+      ]
+    },
+    {
+      "tactic": "Update symbol scopes and local labels in `symbols.txt` to line up data/function ownership for matching reports.",
+      "evidence_refs": [
+        "diff.diff: HSD_DevCom callbacks changed global to local",
+        "diff.diff: local labels such as `...data.0`, `...bss.0`, and `...rodata.0` added",
+        "text_corpus.jsonl bot report: DevCom `.bss` and `.sbss` reached 100.00%"
+      ],
+      "caution": "The PR slice does not include rationale for every scope change, so these should be curated as source metadata candidates, not accepted global lessons."
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "none_loaded",
+      "text": "No human review comments or review records were present in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata_json: review_comments 0, reviews 0",
+        "text_corpus.jsonl: only PR body and decomp-dev[bot] issue comment loaded"
+      ]
+    },
+    {
+      "kind": "bot_report",
+      "text": "The bot reported progress: matched code +0.04%/+1616 bytes, linked code +0.17%/+6500 bytes, matched data +2.73%/+33024 bytes, and four new matches.",
+      "evidence_refs": [
+        "text_corpus.jsonl issue_comment by decomp-dev[bot]"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2260",
+    "PsiLupan",
+    "ftlinkspecialn",
+    "ftLk_SpecialN.c",
+    "ftLk_SpecialNStart_Anim",
+    "ftLk_SpecialAirNStart_Anim",
+    "ftLk_SpecialNLoop_Anim",
+    "ftLk_SpecialAirNLoop_Anim",
+    "isDrawback",
+    "isDrawn",
+    "animate_nopad",
+    "FORCE_PAD_STACK_16",
+    "FORCE_PAD_STACK_8",
+    "FORCE_PAD_STACK_4",
+    "zero zero2 zero3",
+    "Float order hack",
+    "MotionFlags mf coll_mf",
+    "HSD_DevCom_804C6330_bufs",
+    "devComRelayBufFlag",
+    "symbols.txt local scope"
+  ],
+  "follow_up_queries": [
+    "ftLk_SpecialN FORCE_PAD_STACK animate_nopad",
+    "ftLk_SpecialN Float order hack zero zero2 zero3",
+    "ftLk_SpecialNStart_Anim ftLk_SpecialAirNStart_Anim 100.00%",
+    "HSD_DevCom_804C6330_bufs symbols.txt PR 2260",
+    "devComRelayBufFlag scope local size 0x2",
+    "configure.py ftLk_SpecialN Matching NonMatching"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR identity, changed files, merged status, counts",
+      "diff.diff: full changed-file diff available locally but loaded excerpt was truncated",
+      "text_corpus.jsonl: bot report available; PR body empty; no human review comments"
+    ],
+    "notes": [
+      "Evidence is strong for changed files, build classification change, helper renames, stack padding usage, and bot-reported match progress.",
+      "Evidence is weaker for author intent behind each `symbols.txt` metadata change because the PR body is empty and there are no human review comments.",
+      "The title says `hacky solution`, and source has `@todo Float order hack`; these support caution around the matching tactics but not a broad claim that such tactics are accepted style.",
+      "No objdiff transcript or local build log is loaded beyond the decomp-dev bot report, so validation details should not be overclaimed."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "pr_lesson_candidate",
+        "title": "Separate padded and unpadded helper variants when stack shape differs",
+        "text": "PR 2260 separated `animate` with FORCE_PAD_STACK calls from `animate_nopad` without padding, allowing only the start animation paths to carry the stack-shape tactic while loop animation paths use the no-padding helper.",
+        "scope": [
+          "matching tactic",
+          "fighter animation helpers",
+          "ftLink SpecialN"
+        ],
+        "evidence_refs": [
+          "diff.diff: added `animate` with FORCE_PAD_STACK calls",
+          "diff.diff: added `animate_nopad`; loop anim functions call it"
+        ],
+        "confidence": 0.78
+      },
+      {
+        "record_type": "pr_lesson_candidate",
+        "title": "Role-named static inline helpers can replace generic inline placeholders during matching cleanup",
+        "text": "The PR replaced generic/vague helper names with local role names such as `isDrawback`, `isDrawn`, `animate`, and `doEndColl`, while the bot report showed the touched start animation functions reaching 100%.",
+        "scope": [
+          "naming",
+          "static inline helpers",
+          "ftLink SpecialN"
+        ],
+        "evidence_refs": [
+          "diff.diff: helper rename/additions",
+          "text_corpus.jsonl bot report"
+        ],
+        "confidence": 0.74
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "ftLk_SpecialN.c promoted to Matching in PR 2260",
+        "text": "`configure.py` changed `melee/ft/chara/ftLink/ftLk_SpecialN.c` from `Object(NonMatching, ...)` to `Object(Matching, ...)`; the bot report lists `ftLk_SpecialNStart_Anim` and `ftLk_SpecialAirNStart_Anim` as new 100% matches.",
+        "source_path": "src/melee/ft/chara/ftLink/ftLk_SpecialN.c",
+        "scope": [
+          "ftLink",
+          "SpecialN",
+          "configure.py"
+        ],
+        "evidence_refs": [
+          "diff.diff: configure.py hunk",
+          "text_corpus.jsonl bot report"
+        ],
+        "reason": "Useful path-level history, but should be curated against current source/path facts before promotion."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "PR 2260 adjusted symbols metadata for DevCom and ftLink-adjacent data while matching ftLk_SpecialN",
+        "text": "`config/GALE01/symbols.txt` changed scopes, labels, and sizes for several DevCom, ifTime/ifStatus, and ftLink-related data symbols, including `HSD_DevCom_804C6330_bufs` and ftLink zero vector labels.",
+        "source_path": "config/GALE01/symbols.txt",
+        "scope": [
+          "symbols",
+          "DevCom",
+          "ftLink",
+          "data metadata"
+        ],
+        "evidence_refs": [
+          "diff.diff: symbols.txt hunks",
+          "text_corpus.jsonl bot report: DevCom `.bss` and `.sbss` new matches"
+        ],
+        "reason": "Metadata changes are source-owned and require curator review; PR evidence does not justify generalizing every scope change."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Do not generalize PR 2260's zero Vec3/float-order hack without section ownership evidence",
+        "text": "PR 2260 used three static zero Vec3 constants and symbols `zero`, `zero2`, `zero3`, while retaining a `@todo Float order hack` comment and a title describing a hacky solution. This supports documenting the tactic as exceptional and evidence-bound, not normal style.",
+        "source_path": "src/melee/ft/chara/ftLink/ftLk_SpecialN.c",
+        "scope": [
+          "matching tactics",
+          "literals and data ownership",
+          "float order"
+        ],
+        "evidence_refs": [
+          "diff.diff: static `Vec3 zero/zero2/zero3` additions",
+          "diff.diff: `@todo Float order hack`",
+          "PR title: `via hacky solution`"
+        ],
+        "reason": "Potential standard reinforcement only; existing standards already caution against data/literal hacks, so curator should decide whether this PR adds useful historical evidence."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote `zero/zero2/zero3` as a preferred naming convention; the evidence suggests a local matching/data-order workaround.",
+      "Do not infer that all DevCom symbol scope changes were required for ftLk_SpecialN text matching; the loaded PR has no explanatory body or review.",
+      "Do not claim complete file-level or project-level validation beyond the bot report's listed progress and the configure.py Matching flip.",
+      "Do not treat FORCE_PAD_STACK usage here as accepted permanent style without the standards-required narrow objdiff/build evidence."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "pr": 1773,
+  "title": "Match lb_80011AC4 with new LightList type",
+  "url": "https://github.com/doldecomp/melee/pull/1773",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 10,
+  "added_lines": 55,
+  "deleted_lines": 29
+}

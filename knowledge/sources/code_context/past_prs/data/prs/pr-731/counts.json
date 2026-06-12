@@ -1,0 +1,17 @@
+{
+  "number": 731,
+  "title": "Fix `calcprogress` subtree",
+  "state": "MERGED",
+  "createdAt": "2023-01-29T13:33:40Z",
+  "updatedAt": "2023-01-29T21:14:59Z",
+  "mergedAt": "2023-01-29T21:14:58Z",
+  "closedAt": "2023-01-29T21:14:59Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/731",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 1,
+    "diff_bytes": 3817
+  }
+}

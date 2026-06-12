@@ -1,0 +1,431 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2657",
+  "pr": {
+    "number": 2657,
+    "title": "Melee decomp: GR",
+    "url": "https://github.com/doldecomp/melee/pull/2657",
+    "state": "OPEN",
+    "author": "fjooord",
+    "created_at": "2026-06-11T20:06:01Z",
+    "merged_at": null
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2657 is an open GR/stage decompilation slice touching five src/melee/gr files. The PR body claims exact-match decompilation of 5 files with 4 newly matched functions, and the bot report lists new matches for grCastle_801CD658, grKongo_801D7BBC, grIceMt_801F9ACC, and grVenom_80204284 plus 10 unmatched-item improvements.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "stage-source-cleanup",
+      "matching-tactics"
+    ],
+    "systems": [
+      "stage",
+      "ground",
+      "GR"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gr/grcastle.c",
+      "role": "Matched/improved Castle stage functions; changed loop initialization, platform state update access shape, declaration/lifetime shape, and compound assignment.",
+      "evidence_refs": [
+        "changed_files: grcastle.c +40/-46, 5 hunks",
+        "diff: grCastle_801CD658 initializes dynamics[0..11] with a single for loop and casts loop comparison to u32",
+        "diff: grCastle_801CDC44 rewrites platform access through gp->gv.castle8.plat[0] while advancing gp by platform stride",
+        "bot_report: grCastle_801CD658 new match; grCastle_801CDC44, grCastle_801CF868, grCastle_801CE3AC improved"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grgreatbay.c",
+      "role": "Small Great Bay matching improvement by splitting a direct hsd_obj assignment through a temporary.",
+      "evidence_refs": [
+        "changed_files: grgreatbay.c +2/-1, 1 hunk",
+        "diff: grGreatBay_801F5460 adds jobj_tmp before assigning jobj",
+        "bot_report: grGreatBay_801F5460 improved from 97.30% to 98.73%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/gricemt.c",
+      "role": "Ice Mountain matching work; declaration order, pointer/list filling, assert expansion, direct call shape, and a small inline getter were adjusted.",
+      "evidence_refs": [
+        "changed_files: gricemt.c +38/-17, 7 hunks",
+        "diff: grIceMt_801F8CDC reorders int i and archive declarations",
+        "diff: fn_801F8E58 replaces timer pointer with (&gp->gv.icemt.xDC)[chosen] and fills list through s32* p",
+        "diff: grIceMt_801F9ACC expands several HSD_ASSERT calls into explicit __assert checks and calls grIceMt_801F71E8 instead of grIceMt_801F71E8_noinline2",
+        "diff: grIceMt_801FA500 adds static inline grIceMt_801FA500_get_jobj",
+        "bot_report: grIceMt_801F9ACC new match; grIceMt_801FA500, fn_801F8E58, grIceMt_801F8CDC improved"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grkongo.c",
+      "role": "Kongo stage matching work; added extern float constants, adjusted assert string source, probability/control-flow arithmetic, declaration scope, and switch case local reuse.",
+      "evidence_refs": [
+        "changed_files: grkongo.c +50/-46, 6 hunks",
+        "diff: adds extern const f32 grKg_804DAFA0 and grKg_804DAFA4",
+        "diff: grKongo_801D828C changes assert message argument from literal to grKg_803E1A00",
+        "diff: grKongo_801D7BBC rewrites random/probability arithmetic using grKg_804DAFA0/grKg_804DAFA4 and shared HSD_GObj* obj",
+        "bot_report: grKongo_801D7BBC new match; .data and grKongo_801D7134 improved"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grvenom.c",
+      "role": "Venom stage matching work; adjusted stack padding, temporaries, ternary assignment, random range computation, and object assignment shape.",
+      "evidence_refs": [
+        "changed_files: grvenom.c +21/-24, 9 hunks",
+        "diff: grVenom_80203B18 adds pad8, zero, PAD_STACK(0xC), ternary flag assignment, diff temporaries, and assignment in condition for lobj",
+        "diff excerpt: grVenom_80204284 introduces tmp_gp before gp assignment",
+        "bot_report: grVenom_80204284 new match; grVenom_80203B18 improved"
+      ]
+    }
+  ],
+  "what_changed": [
+    "The PR touched five GR source files under src/melee/gr and reports 151 added and 134 deleted lines in the metadata.",
+    "Four functions are reported as newly matched by the bot: grCastle_801CD658, grKongo_801D7BBC, grIceMt_801F9ACC, and grVenom_80204284.",
+    "Ten additional items are reported as improved but not fully matched, including grVenom_80203B18, grCastle_801CDC44, grIceMt_801FA500, grCastle_801CF868, grGreatBay_801F5460, fn_801F8E58, and grIceMt_801F8CDC.",
+    "The diff uses a mix of source-shape changes: natural loop consolidation, declaration order changes, temporary variables, explicit assert expansions, small inline helper introduction, pointer/array access reshaping, ternary assignment, compound assignment, and stack padding."
+  ],
+  "smart_moves": [
+    {
+      "text": "Consolidated repeated NULL assignments in grCastle_801CD658 into a single loop over dynamics[0..11], matching the loaded natural-loops standard's preference for loop forms when repeated blocks differ only by index.",
+      "evidence_refs": [
+        "diff: grCastle_801CD658 replaces dynamics[0] through dynamics[7] manual assignments plus loop from 8 with for (i = 0; 12 > i; i++)"
+      ]
+    },
+    {
+      "text": "Kept several matching adjustments narrow and local to the affected functions, such as adding a temporary jobj variable in grGreatBay_801F5460 and tmp_gp in grVenom_80204284 rather than broad rewrites.",
+      "evidence_refs": [
+        "diff: grGreatBay_801F5460 adds jobj_tmp",
+        "diff excerpt: grVenom_80204284 adds tmp_gp",
+        "bot_report: both functions improved or newly matched"
+      ]
+    },
+    {
+      "text": "Used explicit float constant externs in grKongo_801D7BBC where the diff suggests exact literal/data shape mattered for matching, while keeping the change limited to grkongo.c.",
+      "evidence_refs": [
+        "diff: extern const f32 grKg_804DAFA0/grKg_804DAFA4 added",
+        "diff: grKongo_801D7BBC compares against grKg_804DAFA0 and uses grKg_804DAFA4 - grKg_804D6980->unk18"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When repeated field initialization is present, testing a loop that covers the full range can unlock an exact match and improve source readability.",
+      "scope": [
+        "stage GR source",
+        "indexed GroundVars arrays"
+      ],
+      "evidence_refs": [
+        "diff: grCastle_801CD658 loop over gp->gv.castle9.dynamics[i].data",
+        "bot_report: grCastle_801CD658 new match"
+      ],
+      "confidence": 0.86
+    },
+    {
+      "lesson": "For MWCC matching in GR functions, declaration order and local lifetime/temporary shape can matter even when semantics are unchanged.",
+      "scope": [
+        "stage GR source",
+        "local variable layout"
+      ],
+      "evidence_refs": [
+        "diff: grIceMt_801F8CDC reorders int i and UnkArchiveStruct* archive",
+        "diff: grCastle_801CE3AC moves HSD_JObj* jobj declaration and removes PAD_STACK(4)",
+        "diff: grGreatBay_801F5460 adds jobj_tmp",
+        "bot_report: these functions improved"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "A pointer-walk or base-plus-index expression may match better than a named pointer variable for adjacent struct fields, as shown by fn_801F8E58 changing timer[chosen] into (&gp->gv.icemt.xDC)[chosen].",
+      "scope": [
+        "GroundVars field arrays",
+        "stage state timers"
+      ],
+      "evidence_refs": [
+        "diff: fn_801F8E58 removes s16* timer and uses (&gp->gv.icemt.xDC)[chosen]",
+        "bot_report: fn_801F8E58 improved"
+      ],
+      "confidence": 0.72
+    },
+    {
+      "lesson": "Assert macro cleanup is not always the final matching form; this PR's Ice Mountain function expanded several HSD_ASSERT uses back into explicit __assert checks with file symbols and messages.",
+      "scope": [
+        "assert matching",
+        "stage GR source"
+      ],
+      "evidence_refs": [
+        "diff: grIceMt_801F9ACC replaces HSD_ASSERT(0xAB9, mgobj) with if (mgobj == NULL) __assert(grIm_803E46F8, 0xAB9, \"mgobj\")",
+        "diff: similar explicit __assert forms at 0xABA, 0xAF3, 0xAFE, 0xAFF, 0xB13, 0xB1E, 0xB1F",
+        "bot_report: grIceMt_801F9ACC new match"
+      ],
+      "confidence": 0.8
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Temporary names in this slice are mechanical and role-local rather than semantic: jobj_tmp, tmp_gp, zero, diff, delta, rand, p, obj.",
+      "evidence_refs": [
+        "diff: grGreatBay_801F5460 uses jobj_tmp",
+        "diff excerpt: grVenom_80204284 uses tmp_gp",
+        "diff: grVenom_80203B18 uses zero and diff",
+        "diff: grKongo_801D7BBC uses delta, rand, zero, obj",
+        "diff: fn_801F8E58 uses s32* p"
+      ],
+      "confidence": 0.74
+    },
+    {
+      "convention": "New helper grIceMt_801FA500_get_jobj follows the address-style function stem plus role suffix pattern, avoiding a broader semantic rename.",
+      "evidence_refs": [
+        "diff: static inline HSD_JObj* grIceMt_801FA500_get_jobj(HSD_GObj* gobj)"
+      ],
+      "confidence": 0.7
+    },
+    {
+      "convention": "New external float symbols retain address-style names grKg_804DAFA0 and grKg_804DAFA4 rather than guessed semantic names.",
+      "evidence_refs": [
+        "diff: extern const f32 grKg_804DAFA0",
+        "diff: extern const f32 grKg_804DAFA4"
+      ],
+      "confidence": 0.78
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Use exact loop comparison spelling and casts when MWCC loop shape matters, such as for (i = 0; 12 > i; i++) and (u32) i < 4U.",
+      "evidence_refs": [
+        "diff: grCastle_801CD658 loop comparison changes"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "tactic": "Reshape array/struct traversal by keeping index zero accesses and advancing the containing pointer by a struct stride when needed for codegen.",
+      "evidence_refs": [
+        "diff: grCastle_801CDC44 accesses gp->gv.castle8.plat[0] and advances gp = (Ground*) ((struct grCastle_Platform*) gp + 1)"
+      ],
+      "confidence": 0.76
+    },
+    {
+      "tactic": "Introduce or remove stack padding only in narrow functions where the report shows matching progress; this slice uses PAD_STACK in grCastle_801CDC44 and grVenom_80203B18 and removes PAD_STACK(4) from grCastle_801CE3AC.",
+      "evidence_refs": [
+        "diff: grCastle_801CDC44 retains PAD_STACK(8)",
+        "diff: grVenom_80203B18 adds PAD_STACK(0xC) and u8 pad8[8]",
+        "diff: grCastle_801CE3AC removes PAD_STACK(4)",
+        "bot_report: affected functions improved"
+      ],
+      "confidence": 0.7
+    },
+    {
+      "tactic": "Split direct expressions into named temporaries to influence evaluation order and register/stack lifetimes, as seen with rand, delta, diff, zero, jobj_tmp, and tmp_gp.",
+      "evidence_refs": [
+        "diff: grKongo_801D7BBC introduces rand and delta",
+        "diff: grVenom_80203B18 introduces diff and zero",
+        "diff: grGreatBay_801F5460 introduces jobj_tmp",
+        "diff excerpt: grVenom_80204284 introduces tmp_gp"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "tactic": "Explicit __assert blocks may be necessary when HSD_ASSERT macro form does not reproduce the original assert codegen or string/file reference shape.",
+      "evidence_refs": [
+        "diff: grIceMt_801F9ACC expands multiple HSD_ASSERT calls to explicit __assert",
+        "bot_report: grIceMt_801F9ACC new match"
+      ],
+      "confidence": 0.8
+    },
+    {
+      "tactic": "A tiny static inline accessor can affect matching even when it simply returns a struct field.",
+      "evidence_refs": [
+        "diff: grIceMt_801FA500_get_jobj returns gobj->hsd_obj",
+        "bot_report: grIceMt_801FA500 improved from 84.80% to 87.89%"
+      ],
+      "confidence": 0.66
+    }
+  ],
+  "review_feedback": [],
+  "searchable_terms": [
+    "pr-2657",
+    "Melee decomp: GR",
+    "fjooord",
+    "src/melee/gr/grcastle.c",
+    "src/melee/gr/grgreatbay.c",
+    "src/melee/gr/gricemt.c",
+    "src/melee/gr/grkongo.c",
+    "src/melee/gr/grvenom.c",
+    "grCastle_801CD658",
+    "grCastle_801CDC44",
+    "grCastle_801CE3AC",
+    "grCastle_801CF868",
+    "grGreatBay_801F5460",
+    "grIceMt_801F8CDC",
+    "fn_801F8E58",
+    "grIceMt_801F9ACC",
+    "grIceMt_801FA500",
+    "grIceMt_801FA500_get_jobj",
+    "grKongo_801D7BBC",
+    "grKongo_801D828C",
+    "grVenom_80203B18",
+    "grVenom_80204284",
+    "PAD_STACK",
+    "HSD_ASSERT",
+    "__assert",
+    "HSD_JObjSetTranslateY",
+    "HSD_JObjGetTranslationY",
+    "grKg_804DAFA0",
+    "grKg_804DAFA4",
+    "grIm_803E46F8",
+    "Ground_801C2BA4",
+    "Ground_801C4A08",
+    "Ground_801C2FE0",
+    "GET_GROUND",
+    "GET_JOBJ"
+  ],
+  "follow_up_queries": [
+    "Find later PRs that review or revert explicit __assert expansions in src/melee/gr/gricemt.c",
+    "Search for grCastle_801CDC44 platform pointer-stride patterns in later GR matching work",
+    "Search for grKg_804DAFA0 grKg_804DAFA4 data ownership or symbol metadata changes",
+    "Find subsequent changes to grIceMt_801FA500_get_jobj to see whether the inline helper was kept",
+    "Search for PRs touching grVenom_80204284 after PR #2657"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR number/title/state/author/timestamps/changed file counts",
+      "human_pr_text: exact-match summary and verification claims",
+      "text_corpus: decomp-dev[bot] report with 4 new matches and 10 improvements",
+      "raw_diff/diff_excerpt: concrete code changes in all five files"
+    ],
+    "notes": [
+      "No review comments or reviews are loaded; review_feedback is empty rather than inferred.",
+      "The raw diff is truncated in loaded_files and diff_excerpt, so grvenom.c later hunks are only partially visible.",
+      "Verification claims come from the PR body and bot report in the slice; no independent build or objdiff was run during intake.",
+      "PR state is OPEN and merged_at is null in the loaded metadata; no merge or acceptance status is inferred.",
+      "Some tactics, especially stack padding and explicit assert expansion, are supported as PR-local matching tactics but should not be promoted as general style without curator review."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "pr_postmortem_lesson",
+        "title": "Loop consolidation can be a matching move for repeated GR state initialization",
+        "text": "In PR #2657, grCastle_801CD658 replaced repeated dynamics[i].data = NULL assignments with a single loop over i = 0..11 and the bot reported the function as a new exact match.",
+        "scope": [
+          "src/melee/gr/grcastle.c",
+          "stage GR",
+          "natural loops"
+        ],
+        "evidence_refs": [
+          "diff: grCastle_801CD658 dynamics initialization loop",
+          "bot_report: grCastle_801CD658 new match"
+        ],
+        "confidence": 0.86
+      },
+      {
+        "record_type": "pr_postmortem_lesson",
+        "title": "Explicit assert expansion may be match-relevant in GR code",
+        "text": "In PR #2657, grIceMt_801F9ACC changed multiple HSD_ASSERT macro uses into explicit null checks calling __assert with grIm_803E46F8 and literal messages, and the bot reported grIceMt_801F9ACC as a new exact match. Treat this as PR-local evidence, not a blanket preference over assert macros.",
+        "scope": [
+          "src/melee/gr/gricemt.c",
+          "assert matching",
+          "stage GR"
+        ],
+        "evidence_refs": [
+          "diff: grIceMt_801F9ACC explicit __assert changes",
+          "bot_report: grIceMt_801F9ACC new match"
+        ],
+        "confidence": 0.8
+      },
+      {
+        "record_type": "pr_postmortem_tactic",
+        "title": "Temporary splitting influenced GR function improvements",
+        "text": "Several improved functions in PR #2657 split direct expressions through local temporaries, including jobj_tmp, tmp_gp, zero, diff, delta, rand, and p. This is evidence for trying narrow temporary/lifetime changes during MWCC matching, with verification required.",
+        "scope": [
+          "stage GR",
+          "MWCC local lifetime matching"
+        ],
+        "evidence_refs": [
+          "diff: grGreatBay_801F5460 jobj_tmp",
+          "diff: grVenom_80203B18 zero/diff",
+          "diff: grKongo_801D7BBC rand/delta/zero",
+          "diff: fn_801F8E58 p pointer",
+          "bot_report: affected functions improved or matched"
+        ],
+        "confidence": 0.78
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "PR #2657 touched five GR stage source files",
+        "text": "PR #2657 changed src/melee/gr/grcastle.c, grgreatbay.c, gricemt.c, grkongo.c, and grvenom.c for GR/stage decomp matching, with bot-reported new matches in Castle, Kongo, Ice Mountain, and Venom functions.",
+        "source_path": "src/melee/gr",
+        "scope": [
+          "src/melee/gr/grcastle.c",
+          "src/melee/gr/grgreatbay.c",
+          "src/melee/gr/gricemt.c",
+          "src/melee/gr/grkongo.c",
+          "src/melee/gr/grvenom.c"
+        ],
+        "evidence_refs": [
+          "changed_files.jsonl",
+          "text_corpus bot report"
+        ],
+        "reason": "Could help future path-scoped retrieval for GR/stage matching history; curator should decide whether PR-local history belongs in path facts."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Do not overgeneralize assert macro preference",
+        "text": "PR #2657 is a counterexample where explicit __assert blocks replaced HSD_ASSERT and the function matched. If standards mention preferring assert macros, they may need a caveat that explicit __assert can be match-required when file symbol/message/codegen shape proves it.",
+        "source_path": null,
+        "scope": [
+          "assert matching",
+          "HSD_ASSERT",
+          "__assert",
+          "stage GR"
+        ],
+        "evidence_refs": [
+          "diff: grIceMt_801F9ACC HSD_ASSERT to explicit __assert changes",
+          "bot_report: grIceMt_801F9ACC new match",
+          "loaded standard: assert-report-macros"
+        ],
+        "reason": "The loaded assert-report-macros standard generally prefers macros; this PR provides PR-local evidence for a narrow exception, but curator review is needed before modifying the global standard."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Stack padding and tiny helper tactics require verification and narrow scope",
+        "text": "PR #2657 uses PAD_STACK, an unused pad array, temporary split variables, and a trivial static inline getter in functions that improved. This supports the existing matching-tactics-need-evidence standard rather than requiring a new standard.",
+        "source_path": null,
+        "scope": [
+          "PAD_STACK",
+          "local lifetime matching",
+          "inline helper matching"
+        ],
+        "evidence_refs": [
+          "diff: grVenom_80203B18 adds u8 pad8[8] and PAD_STACK(0xC)",
+          "diff: grIceMt_801FA500 adds grIceMt_801FA500_get_jobj",
+          "bot_report: grVenom_80203B18 and grIceMt_801FA500 improved",
+          "loaded standard: matching-tactics-need-evidence"
+        ],
+        "reason": "Potential reinforcement/example for an existing standard; not enough to add a broad new rule."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer reviewer acceptance or reviewer intent; no reviews or review comments are loaded.",
+      "Do not promote explicit __assert as a general preferred style; the loaded standards prefer macros when they match, and this PR only supports a local matching exception.",
+      "Do not claim all five files are fully matched; the PR body says exact-match decompilation of 5 files but the bot specifically reports 4 new matches and 10 improvements, some still below 100%.",
+      "Do not infer semantic meanings for address-style globals grKg_804DAFA0/grKg_804DAFA4 or functions with address-style names."
+    ]
+  },
+  "confidence": 0.84,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

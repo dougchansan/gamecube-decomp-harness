@@ -1,0 +1,364 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2275",
+  "pr": {
+    "number": 2275,
+    "title": "grkraid matches",
+    "url": "https://github.com/doldecomp/melee/pull/2275",
+    "state": "MERGED",
+    "author": "PsiLupan",
+    "created_at": "2026-03-12T18:51:09Z",
+    "merged_at": "2026-03-12T18:58:43Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Focused grkraid stage matching PR. It changed grkraid C source, its header formatting, and ground variable signedness/formatting in types.h. Bot report records three newly matched grkraid functions and two additional grkraid improvements.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "types"
+    ],
+    "systems": [
+      "stage",
+      "ground",
+      "grkraid"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gr/grkraid.c",
+      "role": "Primary decomp source changes for grkraid matching; rewrites several functions, removes a const zero Vec, adds getMapRotation helper, adjusts expressions, casts, includes, formatting, and retains PAD_STACK in grKraid_801FEA00.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gr/grkraid.c added 168 deleted 154 hunks 9",
+        "raw_diff: src/melee/gr/grkraid.c hunks around grKraid_801FE440, grKraid_801FE6D8, grKraid_801FE818, grKraid_801FEA00, grKraid_801FEE54",
+        "text_corpus: decomp-dev bot report lists grkraid match/improvement results"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grkraid.h",
+      "role": "Header prototype formatting update for grKraid_801FE6D8.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gr/grkraid.h added 1 deleted 1 hunks 1",
+        "raw_diff: grKraid_801FE6D8 prototype changed from HSD_JObj*,float to HSD_JObj*, float"
+      ]
+    },
+    {
+      "path": "src/melee/gr/types.h",
+      "role": "Ground variable type refinements for grKraid structs plus nearby formatting-only changes in grOldYoshi structs.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gr/types.h added 6 deleted 6 hunks 4",
+        "raw_diff: grKraid_GroundVars.x0 changed u8 to s8; grKraid_GroundVars2.x3 changed u8 to s8",
+        "raw_diff: grOldYoshi_Cloud bitfield spacing and cloud array spacing changes"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "grKraid_801FE440 was rewritten to use a local zero-initialized Vec instead of const Vec grKr_803B8278, use cleaner switch formatting, use a ternary for absolute value of xC, and use an implicit float truth test for gp->gv.kraid.x4 with an inline remark that explicit != 0.0f changed ordering.",
+      "evidence_refs": [
+        "raw_diff: removed const Vec grKr_803B8278 and replaced Vec pos = grKr_803B8278 with Vec pos = { 0.0f, 0.0f, 0.0f }",
+        "raw_diff: grKraid_801FE440 case 0 condition changed to if (gp->gv.kraid.x4) with remark",
+        "text_corpus: bot report says grKraid_801FE440 improved 97.82% to 100.00%"
+      ]
+    },
+    {
+      "text": "grKraid_801FE6D8 gained static helper getMapRotation, removed an unused int local, introduced f32 rot, used a ternary absolute value for handpos.x without mutating handpos.x, and kept OSReport and camera calls.",
+      "evidence_refs": [
+        "raw_diff: getMapRotation added before grKraid_801FE6D8",
+        "raw_diff: int useless replaced by f32 rot",
+        "raw_diff: map->gv.kraid.x8 assigned rot * ((handpos.x < 0.0f) ? -handpos.x : handpos.x)",
+        "text_corpus: bot report says grKraid_801FE6D8 improved 88.93% to 99.60%"
+      ]
+    },
+    {
+      "text": "grKraid_801FE818 changed wait-time randomization expression to cast kraid_wait_time_add to s32 in the conditional.",
+      "evidence_refs": [
+        "raw_diff: grKraid_801FE818 wait time expression uses ((s32) grKr_804D6A08->kraid_wait_time_add != 0 ? HSD_Randi(...) : 0)",
+        "text_corpus: bot report says grKraid_801FE818 improved 90.70% to 91.20%"
+      ]
+    },
+    {
+      "text": "grKraid_801FEA00 was reformatted and adjusted but retained PAD_STACK(0x70); bot report records it as newly matched.",
+      "evidence_refs": [
+        "raw_diff: grKraid_801FEA00 contains PAD_STACK(0x70)",
+        "raw_diff: grKraid_801FEA00 switch cases reformatted and expressions adjusted",
+        "text_corpus: bot report says grKraid_801FEA00 improved 99.78% to 100.00%"
+      ]
+    },
+    {
+      "text": "grKraid_801FEE54 converted an if/else random choice into a ternary and reformatted JObj translate calls; bot report records it as newly matched.",
+      "evidence_refs": [
+        "raw_diff: iVar3 = HSD_Randi(2) != 0 ? gp->gv.kraid2.x3 : gp->gv.kraid2.x4",
+        "text_corpus: bot report says grKraid_801FEE54 improved 99.85% to 100.00%"
+      ]
+    },
+    {
+      "text": "Ground variable fields grKraid_GroundVars.x0 and grKraid_GroundVars2.x3 changed from unsigned to signed 8-bit types.",
+      "evidence_refs": [
+        "raw_diff: struct grKraid_GroundVars x0 u8 -> s8",
+        "raw_diff: struct grKraid_GroundVars2 x3 u8 -> s8"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Kept the zero vector local in grKraid_801FE440 rather than preserving a named const data object solely for the addressable literal.",
+      "evidence_refs": [
+        "raw_diff: const Vec grKr_803B8278 removed",
+        "raw_diff: Vec pos = { 0.0f, 0.0f, 0.0f } added",
+        "decomp_standards:literals-and-data-ownership"
+      ]
+    },
+    {
+      "text": "Introduced getMapRotation to isolate a repeated or codegen-sensitive arithmetic expression in grKraid_801FE6D8, making the main function easier to review.",
+      "evidence_refs": [
+        "raw_diff: static f32 getMapRotation added",
+        "raw_diff: grKraid_801FE6D8 uses rot = getMapRotation()"
+      ]
+    },
+    {
+      "text": "Used ternaries for select-like assignments and absolute-value-style expressions where the diff evidence shows they improved or matched code.",
+      "evidence_refs": [
+        "raw_diff: fVar2 ternary in grKraid_801FE440",
+        "raw_diff: handpos.x absolute-value ternary in grKraid_801FE6D8",
+        "raw_diff: iVar3 random choice ternary in grKraid_801FEE54",
+        "decomp_standards:canonical-control-flow-and-macros"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "text": "For grkraid matching, a float field truth test may produce different ordering than an explicit != 0.0f comparison; this PR used if (gp->gv.kraid.x4) and left a remark that the explicit comparison led to incorrect ordering.",
+      "scope": [
+        "src/melee/gr/grkraid.c",
+        "grKraid_801FE440"
+      ],
+      "evidence_refs": [
+        "raw_diff: if (gp->gv.kraid.x4) with remark 'Explicit != 0.0f comparison leads to incorrect ordering'",
+        "text_corpus: bot report says grKraid_801FE440 reached 100.00%"
+      ]
+    },
+    {
+      "text": "When matching code that passes a position vector later, computing an absolute value with a ternary can avoid mutating the original coordinate while still producing the needed arithmetic form.",
+      "scope": [
+        "src/melee/gr/grkraid.c",
+        "grKraid_801FE6D8"
+      ],
+      "evidence_refs": [
+        "raw_diff: removed mutation of handpos.x to positive value",
+        "raw_diff: map->gv.kraid.x8 = rot * ((handpos.x < 0.0f) ? -handpos.x : handpos.x)",
+        "raw_diff: Camera_80030E44(3, &handpos) remains after the calculation"
+      ]
+    },
+    {
+      "text": "Signedness of small state/index fields can matter for matching; this PR changed two grKraid ground-var u8 fields to s8 in types.h.",
+      "scope": [
+        "src/melee/gr/types.h",
+        "grKraid_GroundVars",
+        "grKraid_GroundVars2"
+      ],
+      "evidence_refs": [
+        "raw_diff: grKraid_GroundVars.x0 u8 -> s8",
+        "raw_diff: grKraid_GroundVars2.x3 u8 -> s8"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "New helper name getMapRotation uses descriptive camelCase local helper style but is static to grkraid.c; no evidence in the slice proves a broader naming convention.",
+      "evidence_refs": [
+        "raw_diff: static f32 getMapRotation() added"
+      ]
+    },
+    {
+      "text": "Existing address-style function names such as grKraid_801FE440, grKraid_801FE6D8, grKraid_801FEA00, and grKraid_801FEE54 were preserved.",
+      "evidence_refs": [
+        "raw_diff: function names retained in changed hunks",
+        "decomp_standards:conservative-naming"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "text": "PAD_STACK(0x70) was retained in grKraid_801FEA00; the bot report records the function as reaching 100%, but the PR slice does not explain why this stack padding is required.",
+      "evidence_refs": [
+        "raw_diff: grKraid_801FEA00 contains PAD_STACK(0x70)",
+        "text_corpus: bot report says grKraid_801FEA00 reached 100.00%",
+        "decomp_standards:matching-tactics-need-evidence"
+      ]
+    },
+    {
+      "text": "A cast to s32 on grKr_804D6A08->kraid_wait_time_add was used in wait-time conditional expressions in grKraid_801FE818 and grKraid_801FEA00.",
+      "evidence_refs": [
+        "raw_diff: grKraid_801FE818 wait time conditional casts kraid_wait_time_add to s32",
+        "raw_diff: grKraid_801FEA00 case 4 wait time conditional casts kraid_wait_time_add to s32"
+      ]
+    },
+    {
+      "text": "Switch-case formatting and ternary select forms were used in functions reported as matches or improvements.",
+      "evidence_refs": [
+        "raw_diff: grKraid_801FE440 switch and ternary expression changes",
+        "raw_diff: grKraid_801FEA00 switch case reformatting",
+        "raw_diff: grKraid_801FEE54 ternary random choice",
+        "text_corpus: bot report lists matches/improvements"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "text": "No human review comments were present in the loaded slice. Automated decomp-dev bot report recorded +2300 matched-code bytes, three new matches, and two improvements.",
+      "evidence_refs": [
+        "metadata_json: review_comments 0, reviews 0, issue_comments 1",
+        "text_corpus: decomp-dev bot report for GALE01"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2275",
+    "grkraid matches",
+    "PsiLupan",
+    "src/melee/gr/grkraid.c",
+    "src/melee/gr/grkraid.h",
+    "src/melee/gr/types.h",
+    "grKraid_801FE440",
+    "grKraid_801FE6D8",
+    "grKraid_801FE818",
+    "grKraid_801FEA00",
+    "grKraid_801FEE54",
+    "getMapRotation",
+    "PAD_STACK(0x70)",
+    "grKraid_GroundVars",
+    "grKraid_GroundVars2",
+    "kraid_wait_time_add",
+    "HSD_Randi",
+    "Camera_80030E44",
+    "HSD_JObjAddRotationZ",
+    "HSD_JObjSetTranslateX",
+    "OSReport",
+    "explicit != 0.0f comparison leads to incorrect ordering"
+  ],
+  "follow_up_queries": [
+    "grKraid_801FE440 explicit != 0.0f incorrect ordering",
+    "grKraid_801FEA00 PAD_STACK(0x70)",
+    "grKraid_GroundVars x0 s8",
+    "grKraid_GroundVars2 x3 s8",
+    "getMapRotation grKraid_801FE6D8",
+    "kraid_wait_time_add s32 cast HSD_Randi",
+    "grKr_803B8278 removed zero Vec"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR identity, merge state, changed-file counts",
+      "raw_diff: complete diff loaded, not truncated",
+      "text_corpus: PR body empty; one bot issue comment with match report",
+      "metadata_json: review_comments 0, reviews 0"
+    ],
+    "notes": [
+      "The diff and automated report provide strong evidence for changed files and reported match outcomes.",
+      "There is no PR body and no human review discussion, so author intent and reviewer rationale are mostly unavailable.",
+      "The bot report supports match/improvement claims but does not provide detailed objdiff/build logs or explain individual tactics such as PAD_STACK.",
+      "Some types.h changes outside grKraid appear formatting-only and should not be overinterpreted."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson_candidate",
+        "title": "Implicit float truth test can matter for MWCC ordering",
+        "text": "In grKraid_801FE440, the PR changed an explicit gp->gv.kraid.x4 != 0.0f comparison to if (gp->gv.kraid.x4) and left a remark that the explicit comparison led to incorrect ordering; bot report says the function reached 100%.",
+        "scope": [
+          "src/melee/gr/grkraid.c",
+          "grKraid_801FE440"
+        ],
+        "evidence_refs": [
+          "raw_diff: grKraid_801FE440 condition and remark",
+          "text_corpus: bot report grKraid_801FE440 100.00%"
+        ]
+      },
+      {
+        "record_type": "decomp_lesson_candidate",
+        "title": "Do not mutate coordinate input when later code still needs original vector",
+        "text": "In grKraid_801FE6D8, the PR replaced mutation of handpos.x for absolute value with a ternary expression feeding x8, while Camera_80030E44 still receives &handpos afterward.",
+        "scope": [
+          "src/melee/gr/grkraid.c",
+          "grKraid_801FE6D8"
+        ],
+        "evidence_refs": [
+          "raw_diff: removed handpos.x = -handpos.x block",
+          "raw_diff: x8 uses ternary absolute value",
+          "raw_diff: Camera_80030E44(3, &handpos)"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "grKraid ground-var signedness updates in PR 2275",
+        "text": "PR 2275 changed grKraid_GroundVars.x0 and grKraid_GroundVars2.x3 from u8 to s8 in src/melee/gr/types.h.",
+        "source_path": "src/melee/gr/types.h",
+        "scope": [
+          "struct grKraid_GroundVars",
+          "struct grKraid_GroundVars2"
+        ],
+        "evidence_refs": [
+          "raw_diff: grKraid_GroundVars.x0 u8 -> s8",
+          "raw_diff: grKraid_GroundVars2.x3 u8 -> s8"
+        ],
+        "reason": "Potential path fact for grkraid type recovery; needs curator validation against current source and symbols before promotion."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Float comparison spelling can affect ordering",
+        "text": "Consider noting that for MWCC matching, an implicit float truth test and an explicit != 0.0f comparison may produce different ordering; PR 2275 has an inline remark in grKraid_801FE440 that explicit != 0.0f led to incorrect ordering.",
+        "source_path": null,
+        "scope": [
+          "C expression matching",
+          "float comparisons",
+          "MWCC ordering"
+        ],
+        "evidence_refs": [
+          "raw_diff: grKraid_801FE440 condition changed to if (gp->gv.kraid.x4) with remark",
+          "text_corpus: bot report grKraid_801FE440 100.00%"
+        ],
+        "reason": "Possibly reusable matching tactic, but only one PR slice supports it; route to curator rather than accepting as a global standard."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Preserve original vector values when deriving absolute-value temporaries",
+        "text": "PR 2275 suggests using a ternary absolute-value expression instead of mutating a coordinate field when the vector is later passed by address.",
+        "source_path": null,
+        "scope": [
+          "matching tactics",
+          "Vec temporaries",
+          "absolute value expressions"
+        ],
+        "evidence_refs": [
+          "raw_diff: grKraid_801FE6D8 x8 expression uses ternary absolute handpos.x",
+          "raw_diff: Camera_80030E44(3, &handpos) follows"
+        ],
+        "reason": "Could refine existing control-flow/expression guidance, but broader applicability needs curator review."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that getMapRotation is a general project naming convention; the slice only shows one static helper.",
+      "Do not treat PAD_STACK(0x70) as generally acceptable style from this PR alone; the bot report supports a function match but no detailed tactic rationale is loaded.",
+      "Do not claim human reviewer approval or requested changes; no human reviews or review comments are present in the slice.",
+      "Do not promote grOldYoshi formatting changes as a grOldYoshi decomp lesson; the diff evidence shows only spacing changes in this PR."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

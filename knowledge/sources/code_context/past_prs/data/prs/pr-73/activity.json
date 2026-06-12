@@ -1,0 +1,10 @@
+{
+  "pr": 73,
+  "title": "Split out chunk of ef and remaining ft code from the text sections",
+  "url": "https://github.com/doldecomp/melee/pull/73",
+  "text_records_with_body": 0,
+  "review_comments": 0,
+  "changed_files": 8,
+  "added_lines": 560673,
+  "deleted_lines": 560654
+}

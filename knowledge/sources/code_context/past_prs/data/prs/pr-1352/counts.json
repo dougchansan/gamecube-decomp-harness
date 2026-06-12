@@ -1,0 +1,17 @@
+{
+  "number": 1352,
+  "title": "Tweak build CI slightly",
+  "state": "MERGED",
+  "createdAt": "2024-02-28T23:27:23Z",
+  "updatedAt": "2024-02-28T23:32:07Z",
+  "mergedAt": "2024-02-28T23:32:06Z",
+  "closedAt": "2024-02-28T23:32:06Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1352",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 726
+  }
+}

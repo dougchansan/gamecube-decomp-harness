@@ -1,0 +1,17 @@
+{
+  "number": 1149,
+  "title": "Re-link `gm`",
+  "state": "MERGED",
+  "createdAt": "2024-01-29T02:16:44Z",
+  "updatedAt": "2024-01-29T02:17:53Z",
+  "mergedAt": "2024-01-29T02:17:52Z",
+  "closedAt": "2024-01-29T02:17:52Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1149",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 4176996
+  }
+}

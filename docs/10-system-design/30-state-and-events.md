@@ -38,15 +38,26 @@ Wake events include:
 - `needs_fact`
 - `score_candidate`
 - `pool_below_target`
+- `epoch_regression_pause`
+- `epoch_cycle_error`
 
-The trigger actor first performs deterministic queue refill from the latest
-board snapshot. `pool_below_target` is produced when process-level queue shape
-still shows that the run should ask the director for more work. It covers low
-queued work, low schedulable distinct-file work, blocked queued work behind
-active file locks, long-tail worker drain, and optional periodic replans. The
-state reader prioritizes unhandled `pool_below_target` events ahead of ordinary
-worker-report backlog so capacity-preserving replans are not delayed behind
-many older completion events.
+In the default epoch cycle the queue is one batch that drains to zero before
+the epoch pipeline rebuilds the report and refills it, so a shrinking queue is
+intended shape rather than pressure. `pool_below_target` is then produced only
+when a post-rebuild refill finds no fresh board work. In legacy continuous
+mode (`--no-epoch-cycle`) the trigger tops the queue up on every pass and
+`pool_below_target` covers low queued work, low schedulable distinct-file
+work, blocked queued work behind active file locks, long-tail worker drain,
+and optional periodic replans. The state reader prioritizes unhandled
+`pool_below_target` events ahead of ordinary worker-report backlog so
+capacity-preserving replans are not delayed behind many older completion
+events.
+
+`epoch_regression_pause` records that one epoch regressed more report rows
+than the pause threshold, so the pipeline recorded its checkpoint but withheld
+the refill. `epoch_cycle_error` records a failed epoch commit or report build.
+Both carry enough payload for the director or an operator to decide whether to
+repair, revert, or resume.
 
 ## Leases And Locks
 

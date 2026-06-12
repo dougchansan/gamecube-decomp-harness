@@ -6,5 +6,15 @@
  * role-specific bundles, and future Pi extension packaging.
  */
 export { agentToolRegistry, agentToolSummary, createAgentTools, type AgentToolId } from "./registry.js";
-export { agentToolProfileSummary, buildAgentTools, defaultAgentToolProfiles, defaultWorkerToolProfile, resolveAgentToolIds } from "./profiles.js";
+export {
+  agentToolProfileSummary,
+  availableToolsPromptXml,
+  buildAgentTools,
+  defaultAgentToolProfiles,
+  defaultKnowledgeCuratorToolProfile,
+  defaultPrReviewToolProfile,
+  defaultReconcileToolProfile,
+  defaultWorkerToolProfile,
+  resolveAgentToolIds,
+} from "./profiles.js";
 export type { AgentToolProfileInput, AgentToolRegistration, AgentToolRuntimeContext, PiToolDefinition, PiToolResult } from "./types.js";

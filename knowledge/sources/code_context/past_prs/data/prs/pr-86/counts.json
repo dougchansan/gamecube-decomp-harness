@@ -1,0 +1,17 @@
+{
+  "number": 86,
+  "title": "Remove hardcoded _SDA(2)_BASE_ usage",
+  "state": "MERGED",
+  "createdAt": "2021-09-28T21:27:31Z",
+  "updatedAt": "2021-09-28T21:27:44Z",
+  "mergedAt": "2021-09-28T21:27:37Z",
+  "closedAt": "2021-09-28T21:27:37Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/86",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 16724856
+  }
+}

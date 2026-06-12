@@ -1,0 +1,17 @@
+{
+  "number": 1921,
+  "title": "match most of ftNn_Init. still needs splitting and some inline/floatmath work.",
+  "state": "MERGED",
+  "createdAt": "2025-09-18T06:58:23Z",
+  "updatedAt": "2025-09-18T07:05:31Z",
+  "mergedAt": "2025-09-18T07:05:26Z",
+  "closedAt": "2025-09-18T07:05:26Z",
+  "author": "BR-",
+  "url": "https://github.com/doldecomp/melee/pull/1921",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 24831
+  }
+}

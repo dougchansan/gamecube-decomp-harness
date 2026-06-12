@@ -1,0 +1,17 @@
+{
+  "number": 490,
+  "title": "Revert `.clang-format` change",
+  "state": "MERGED",
+  "createdAt": "2022-08-24T21:53:32Z",
+  "updatedAt": "2022-08-25T14:09:23Z",
+  "mergedAt": "2022-08-24T23:43:38Z",
+  "closedAt": "2022-08-24T23:43:38Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/490",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 1805
+  }
+}

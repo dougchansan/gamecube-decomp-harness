@@ -1,0 +1,10 @@
+{
+  "pr": 1256,
+  "title": "Remove `it/types.h` dependency on `ft/types.h`",
+  "url": "https://github.com/doldecomp/melee/pull/1256",
+  "text_records_with_body": 0,
+  "review_comments": 0,
+  "changed_files": 8,
+  "added_lines": 91,
+  "deleted_lines": 88
+}

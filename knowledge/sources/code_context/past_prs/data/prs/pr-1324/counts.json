@@ -1,0 +1,17 @@
+{
+  "number": 1324,
+  "title": "Match 14.32% of `ftKp_SpecialS` (10.78 KB)",
+  "state": "MERGED",
+  "createdAt": "2024-02-25T19:57:56Z",
+  "updatedAt": "2024-02-25T20:00:17Z",
+  "mergedAt": "2024-02-25T20:00:16Z",
+  "closedAt": "2024-02-25T20:00:16Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1324",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 204078
+  }
+}

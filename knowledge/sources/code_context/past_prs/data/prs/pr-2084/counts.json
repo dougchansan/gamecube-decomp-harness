@@ -1,0 +1,17 @@
+{
+  "number": 2084,
+  "title": "Match four items with Claude",
+  "state": "MERGED",
+  "createdAt": "2026-01-11T20:55:25Z",
+  "updatedAt": "2026-01-11T21:47:31Z",
+  "mergedAt": "2026-01-11T21:45:18Z",
+  "closedAt": "2026-01-11T21:45:18Z",
+  "author": "lukechampine",
+  "url": "https://github.com/doldecomp/melee/pull/2084",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 1,
+    "reviews": 1,
+    "diff_bytes": 47335
+  }
+}

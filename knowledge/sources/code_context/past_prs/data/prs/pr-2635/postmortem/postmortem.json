@@ -1,0 +1,220 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2635",
+  "pr": {
+    "number": 2635,
+    "title": "Bring CObjGetUpVector closer to a match",
+    "url": "https://github.com/doldecomp/melee/pull/2635",
+    "state": "MERGED",
+    "author": "PsiLupan",
+    "created_at": "2026-06-08T17:37:06Z",
+    "merged_at": "2026-06-08T17:42:26Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2635 made a focused decomp-matching cleanup in `src/sysdolphin/baselib/cobj.c`: inside `HSD_CObjGetLeftVector`, a duplicated inline reconstruction of up-vector selection and fallback initialization was replaced with a direct call to `HSD_CObjGetUpVector(cobj, &up)`. The bot report recorded `HSD_CObjGetLeftVector` improving from 33.92% to 98.65%, but the evidence does not show a full match.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "helper reuse",
+      "control-flow cleanup"
+    ],
+    "systems": [
+      "src",
+      "sysdolphin",
+      "baselib",
+      "cobj"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/sysdolphin/baselib/cobj.c",
+      "role": "Only changed source file; updates `HSD_CObjGetLeftVector` to call `HSD_CObjGetUpVector` instead of carrying duplicated local up-vector logic.",
+      "evidence_refs": [
+        "metadata.changed_files[0]",
+        "loaded_files.raw_diff",
+        "evidence_excerpts.diff_excerpt"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "`HSD_CObjGetLeftVector` now obtains `up` through `HSD_CObjGetUpVector(cobj, &up)`.",
+      "evidence_refs": [
+        "loaded_files.raw_diff"
+      ]
+    },
+    {
+      "text": "The removed code manually checked `cobj->flags & 1`, copied `cobj->u.up`, called `roll2upvec(cobj, &up, cobj->u.roll)`, and otherwise initialized `up` to `(0.0f, 1.0f, 0.0f)` with `res = -1`.",
+      "evidence_refs": [
+        "loaded_files.raw_diff"
+      ]
+    },
+    {
+      "text": "The change was one hunk in `src/sysdolphin/baselib/cobj.c` with 1 added line and 16 deleted lines.",
+      "evidence_refs": [
+        "metadata.changed_files",
+        "loaded_files.changed_files"
+      ]
+    },
+    {
+      "text": "The automated report recorded one improvement for `main/sysdolphin/baselib/cobj` item `HSD_CObjGetLeftVector`, from 33.92% before to 98.65% after.",
+      "evidence_refs": [
+        "loaded_files.text_corpus issue_comment decomp-dev[bot]"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Reused an existing semantic helper (`HSD_CObjGetUpVector`) rather than preserving duplicated generated-looking control flow inside `HSD_CObjGetLeftVector`.",
+      "evidence_refs": [
+        "loaded_files.raw_diff"
+      ]
+    },
+    {
+      "text": "Kept the transformation narrow: the PR touched only one function area in one file and did not introduce data, header, or symbol churn.",
+      "evidence_refs": [
+        "metadata.changed_files",
+        "loaded_files.changed_files"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a function locally duplicates the behavior of an existing helper, trying the helper call can both improve readability and substantially improve the match score.",
+      "scope": [
+        "src/sysdolphin/baselib/cobj.c",
+        "HSD_CObjGetLeftVector",
+        "HSD_CObjGetUpVector"
+      ],
+      "evidence_refs": [
+        "loaded_files.raw_diff",
+        "loaded_files.text_corpus issue_comment decomp-dev[bot]"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "lesson": "Do not assume an inlined reconstruction of flag checks and fallback vector initialization is original source when a nearby named API function expresses the same operation.",
+      "scope": [
+        "CObj vector helpers",
+        "helper reuse"
+      ],
+      "evidence_refs": [
+        "loaded_files.raw_diff"
+      ],
+      "confidence": 0.74
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "No new naming convention is established. Existing names in the evidence include `HSD_CObjGetLeftVector`, `HSD_CObjGetUpVector`, `HSD_CObjGetEyeVector`, `roll2upvec`, `vec_normalize_check`, `eye`, `up`, and `left`.",
+      "evidence_refs": [
+        "loaded_files.raw_diff"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Replace duplicated local logic with an existing helper call to alter codegen toward the target.",
+      "evidence_refs": [
+        "loaded_files.raw_diff",
+        "loaded_files.text_corpus issue_comment decomp-dev[bot]"
+      ],
+      "result_supported_by_pr": "Automated report shows `HSD_CObjGetLeftVector` improved from 33.92% to 98.65%; no full match is shown."
+    },
+    {
+      "tactic": "Avoided adding pragmas, register steering, dummy locals, data anchors, or literal/symbol churn in this slice.",
+      "evidence_refs": [
+        "loaded_files.raw_diff",
+        "metadata.changed_files"
+      ],
+      "result_supported_by_pr": "The diff shows only the helper-call replacement."
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "author": "decomp-dev[bot]",
+      "text": "Report for GALE01 recorded 1 improvement in an unmatched item: `main/sysdolphin/baselib/cobj` / `HSD_CObjGetLeftVector`, +412 bytes, 33.92% before, 98.65% after.",
+      "evidence_refs": [
+        "loaded_files.text_corpus issue_comment decomp-dev[bot]"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2635",
+    "PsiLupan",
+    "CObjGetUpVector",
+    "HSD_CObjGetUpVector",
+    "HSD_CObjGetLeftVector",
+    "HSD_CObjGetEyeVector",
+    "roll2upvec",
+    "PSVECCrossProduct",
+    "vec_normalize_check",
+    "src/sysdolphin/baselib/cobj.c",
+    "main/sysdolphin/baselib/cobj",
+    "helper reuse",
+    "up vector",
+    "left vector",
+    "GALE01",
+    "33.92",
+    "98.65"
+  ],
+  "follow_up_queries": [
+    "HSD_CObjGetLeftVector HSD_CObjGetUpVector helper reuse",
+    "roll2upvec cobj flags u.up fallback vector",
+    "src/sysdolphin/baselib/cobj.c CObj vector helpers",
+    "decomp PR HSD_CObjGetLeftVector 98.65"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json",
+      "loaded_files.raw_diff",
+      "loaded_files.changed_files",
+      "loaded_files.text_corpus"
+    ],
+    "notes": [
+      "Strong evidence for the exact file and code change from the loaded diff.",
+      "Strong evidence for score movement from the automated bot report.",
+      "PR body is empty and there are no review comments, so there is no direct author explanation or human reviewer rationale.",
+      "The title says closer to a match and the bot report shows 98.65%, so this intake does not claim the function fully matched."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson_candidate",
+        "title": "Prefer existing helper calls over duplicated reconstructed logic when the helper expresses the same local operation",
+        "text": "In PR 2635, `HSD_CObjGetLeftVector` improved substantially after replacing a duplicated local up-vector reconstruction with `HSD_CObjGetUpVector(cobj, &up)`. This is a graph-safe candidate lesson for helper reuse in decomp matching, scoped to the CObj vector-helper context.",
+        "scope": [
+          "src/sysdolphin/baselib/cobj.c",
+          "HSD_CObjGetLeftVector",
+          "HSD_CObjGetUpVector",
+          "helper reuse"
+        ],
+        "evidence_refs": [
+          "loaded_files.raw_diff",
+          "loaded_files.text_corpus issue_comment decomp-dev[bot]"
+        ],
+        "confidence": 0.82
+      }
+    ],
+    "source_update_candidates": [],
+    "rejection_notes": [
+      "Do not promote a full-match claim: the available evidence only reports improvement to 98.65%.",
+      "Do not infer reviewer intent or acceptance rationale beyond merge metadata and the bot report; no human review comments are present.",
+      "Do not generalize this into a global rule that helper calls are always preferred over inlining; this PR only supports a scoped helper-reuse tactic for this CObj vector case."
+    ]
+  },
+  "confidence": 0.84,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

@@ -2,7 +2,7 @@
 
 CLI-style worker access:
 
-- `python3 tools/research/ghidra/api/status.py --json`
+- `python3 tools/research/ghidra/api/status.py --repo-root <repo_root> --json`
 - `python3 tools/research/ghidra/api/lookup.py --query <query> --limit <n> --json`
 
 The lookup API should prefer cached indexes. Live Ghidra calls belong in

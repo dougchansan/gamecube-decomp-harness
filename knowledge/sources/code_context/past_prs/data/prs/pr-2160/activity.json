@@ -1,0 +1,10 @@
+{
+  "pr": 2160,
+  "title": "Decompile stub functions across it/, gr/, gm/, ft/, lb/, and mn/ modules",
+  "url": "https://github.com/doldecomp/melee/pull/2160",
+  "text_records_with_body": 17,
+  "review_comments": 15,
+  "changed_files": 63,
+  "added_lines": 1305,
+  "deleted_lines": 146
+}

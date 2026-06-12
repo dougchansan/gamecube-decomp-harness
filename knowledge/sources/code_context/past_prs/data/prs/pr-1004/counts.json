@@ -1,0 +1,17 @@
+{
+  "number": 1004,
+  "title": "Fix artifact output directories",
+  "state": "MERGED",
+  "createdAt": "2023-11-12T00:27:58Z",
+  "updatedAt": "2023-11-12T00:40:52Z",
+  "mergedAt": "2023-11-12T00:40:51Z",
+  "closedAt": "2023-11-12T00:40:51Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1004",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 2353
+  }
+}

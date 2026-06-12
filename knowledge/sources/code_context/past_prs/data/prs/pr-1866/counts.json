@@ -1,0 +1,17 @@
+{
+  "number": 1866,
+  "title": "Match most of ftmetal, and rename related struct members",
+  "state": "MERGED",
+  "createdAt": "2025-08-24T02:00:47Z",
+  "updatedAt": "2025-08-24T02:09:09Z",
+  "mergedAt": "2025-08-24T02:09:06Z",
+  "closedAt": "2025-08-24T02:09:06Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1866",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 22608
+  }
+}

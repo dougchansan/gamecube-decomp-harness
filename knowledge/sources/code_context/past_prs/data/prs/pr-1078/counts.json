@@ -1,0 +1,17 @@
+{
+  "number": 1078,
+  "title": "Port `Makefile` options to `configure.py`",
+  "state": "MERGED",
+  "createdAt": "2024-01-18T02:56:18Z",
+  "updatedAt": "2024-01-18T03:19:25Z",
+  "mergedAt": "2024-01-18T03:19:25Z",
+  "closedAt": "2024-01-18T03:19:25Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1078",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 2814
+  }
+}

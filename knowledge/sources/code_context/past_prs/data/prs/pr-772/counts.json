@@ -1,0 +1,17 @@
+{
+  "number": 772,
+  "title": "Implement symbol replace tools and pull symbols from #766",
+  "state": "MERGED",
+  "createdAt": "2023-04-13T05:25:33Z",
+  "updatedAt": "2023-04-13T17:34:09Z",
+  "mergedAt": "2023-04-13T17:34:07Z",
+  "closedAt": "2023-04-13T17:34:08Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/772",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 0
+  }
+}

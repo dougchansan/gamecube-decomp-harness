@@ -1,0 +1,17 @@
+{
+  "number": 904,
+  "title": "Match `ftCo_CaptureCaptain`",
+  "state": "MERGED",
+  "createdAt": "2023-05-30T10:38:55Z",
+  "updatedAt": "2023-05-30T10:49:55Z",
+  "mergedAt": "2023-05-30T10:49:54Z",
+  "closedAt": "2023-05-30T10:49:54Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/904",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 31752
+  }
+}

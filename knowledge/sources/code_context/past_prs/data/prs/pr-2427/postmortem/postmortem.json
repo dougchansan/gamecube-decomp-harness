@@ -1,0 +1,349 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2427",
+  "pr": {
+    "number": 2427,
+    "title": "Jj/gmallstar",
+    "url": "https://github.com/doldecomp/melee/pull/2427",
+    "state": "MERGED",
+    "author": "jurrejelle",
+    "created_at": "2026-04-20T08:35:13Z",
+    "merged_at": "2026-04-28T10:39:12Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2427 added partial decompilation work for All-Star mode in src/melee/gm/gmallstar.c, including four previously stubbed functions, local data definitions for gm_803DEBE8 and gm_803DEC4C, include updates, and symbol-table split/size metadata for the new data object. The bot report recorded fuzzy-score improvements for gm_801B5324, gm_801B5624, gm_801B59AC, gm_801B5ACC, .data, and .bss, but also a regression in gm_801B60A4_OnLoad; the author described the result as a base for others rather than polished final source.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "data-symbols",
+      "partial-progress"
+    ],
+    "systems": [
+      "game-mode",
+      "gm",
+      "gmallstar",
+      "config"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gm/gmallstar.c",
+      "role": "Main decompilation target; added All-Star data definitions and implementations for gm_801B5324, gm_801B5624, gm_801B59AC, and gm_801B5ACC, plus edits in gm_801B60A4_OnLoad.",
+      "evidence_refs": [
+        "changed_files: src/melee/gm/gmallstar.c added 379 deleted 8 hunks 4",
+        "raw_diff: gmallstar.c added gm_803DEBE8, gm_803DEC4C, gm_80490940 and replaced stubs for gm_801B5324/gm_801B5624/gm_801B59AC/gm_801B5ACC",
+        "text_corpus: decomp-dev bot report lists improvements for gm_801B5324, gm_801B5624, gm_801B59AC, gm_801B5ACC and regression for gm_801B60A4_OnLoad"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmallstar.static.h",
+      "role": "Local static header cleanup; removed extern declarations/commented initializer block and added AllstarRoundInfo struct.",
+      "evidence_refs": [
+        "changed_files: src/melee/gm/gmallstar.static.h added 4 deleted 30 hunks 1",
+        "raw_diff: removed extern gm_803DEBE8/gm_80490940 and commented gm_803DEBE8 initializer; added typedef struct AllstarRoundInfo"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Symbol/data metadata update; resized gm_803DEBE8 and introduced gm_803DEC4C at .data:0x803DEC4C.",
+      "evidence_refs": [
+        "changed_files: config/GALE01/symbols.txt added 2 deleted 1 hunks 1",
+        "raw_diff: gm_803DEBE8 size changed from 0xD0 to 0x64; gm_803DEC4C added as type:object size:0x6C"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Added includes for gmregcommon.h and melee/lb/lbaudio_ax.h in gmallstar.c to support newly decompiled All-Star code paths.",
+    "Moved/defined gm_803DEBE8 as a static 25-entry gm_803DEBE8_t table in gmallstar.c and added static AllstarRoundInfo gm_803DEC4C table.",
+    "Added global gm_80490940_t gm_80490940[5] in gmallstar.c.",
+    "Replaced stub markers for gm_801B5324, gm_801B5624, gm_801B59AC, and gm_801B5ACC with partial C implementations involving All-Star opponent selection, preload/game cache setup, audio preload masks, match setup, match exit handling, and next-round bookkeeping.",
+    "Changed gm_801B60A4_OnLoad by removing PAD_STACK(12) and rewriting a byte-zeroing loop from pointer increment form to an indexed for loop.",
+    "Updated gmallstar.static.h by adding AllstarRoundInfo and removing data externs/commented table initializer.",
+    "Updated symbols.txt so gm_803DEBE8 covers only 0x64 bytes and gm_803DEC4C owns the following 0x6C bytes."
+  ],
+  "smart_moves": [
+    {
+      "text": "The PR split a previously single data symbol into gm_803DEBE8 plus gm_803DEC4C and introduced a small typed struct for the round start/count table, making code references more reviewable than raw offsets.",
+      "evidence_refs": [
+        "raw_diff: symbols.txt gm_803DEBE8 size 0xD0 -> 0x64 and added gm_803DEC4C",
+        "raw_diff: gmallstar.static.h added AllstarRoundInfo { u32 start; u32 count; }",
+        "raw_diff: gmallstar.c uses gm_803DEC4C[round].start/count"
+      ]
+    },
+    {
+      "text": "The decompilation connected gmallstar.c to existing subsystem APIs rather than leaving all interactions opaque, adding includes and calls for gmRegSetupEnemyColorTable, lbDvd cache helpers, and lbAudioAx preload helpers.",
+      "evidence_refs": [
+        "raw_diff: added includes gmregcommon.h and melee/lb/lbaudio_ax.h",
+        "raw_diff: gm_801B5324 calls gmRegSetupEnemyColorTable, lbDvd_8001822C/lbDvd_80018C6C/lbDvd_80018254/lbDvd_80018C2C/lbDvd_80017700, and lbAudioAx_80026E84/lbAudioAx_80026EBC/lbAudioAx_80026F2C/lbAudioAx_8002702C/lbAudioAx_80027168"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a data blob is used as two logical tables, a symbols.txt split plus a small local struct can clarify code and improve data matching, but the split should remain tied to section/address evidence.",
+      "scope": [
+        "src/melee/gm/gmallstar.c",
+        "config/GALE01/symbols.txt"
+      ],
+      "evidence_refs": [
+        "raw_diff: gm_803DEBE8 size reduced to 0x64 and gm_803DEC4C added at .data:0x803DEC4C size 0x6C",
+        "raw_diff: AllstarRoundInfo added and used for .start/.count lookups"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "Partial decomp progress may still be useful as a handoff base, but bot-reported regressions and author self-critique should keep the result classified as mixed evidence rather than a polished matching pattern.",
+      "scope": [
+        "src/melee/gm/gmallstar.c"
+      ],
+      "evidence_refs": [
+        "text_corpus: author says not the biggest fan and calls it a base for others",
+        "text_corpus: bot report shows improvements for four functions but regression for gm_801B60A4_OnLoad"
+      ],
+      "confidence": 0.84
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Kept address-style names for not-yet-semantic globals and functions, while adding a descriptive local type name AllstarRoundInfo for the newly identified start/count table.",
+      "examples": [
+        "gm_803DEBE8",
+        "gm_803DEC4C",
+        "gm_80490940",
+        "gm_801B5324",
+        "AllstarRoundInfo"
+      ],
+      "evidence_refs": [
+        "raw_diff: added typedef struct AllstarRoundInfo",
+        "raw_diff: global symbols remain address-style"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "convention": "Local variable names use short role names for recovered concepts such as chars, colors, opp_data, allstar, round, color, next_count, opp_start, and opp_idx.",
+      "examples": [
+        "chars",
+        "colors",
+        "opp_data",
+        "allstar",
+        "round",
+        "opp_idx"
+      ],
+      "evidence_refs": [
+        "raw_diff: implementations of gm_801B5324, gm_801B5624, gm_801B59AC, gm_801B5ACC"
+      ],
+      "confidence": 0.74
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Used PAD_STACK in newly added functions to influence stack shape.",
+      "instances": [
+        "PAD_STACK(12) in gm_801B5324",
+        "PAD_STACK(16) in gm_801B5624",
+        "PAD_STACK(24) in gm_801B5ACC"
+      ],
+      "evidence_refs": [
+        "raw_diff: added PAD_STACK calls in gm_801B5324/gm_801B5624/gm_801B5ACC"
+      ],
+      "notes": "No narrow objdiff proof for these PAD_STACK uses is present in the slice; current standards require explicit verifier evidence for such tactics before treating them as accepted style.",
+      "confidence": 0.86
+    },
+    {
+      "tactic": "Copied opponent IDs from gm_803DEBE8 into fixed-size char arrays using an 8-at-a-time unrolled loop followed by a remainder loop.",
+      "instances": [
+        "gm_801B5324",
+        "gm_801B5624"
+      ],
+      "evidence_refs": [
+        "raw_diff: gm_801B5324 count > 8 block with dst[0] through dst[7] assignments and remainder do-while",
+        "raw_diff: gm_801B5624 similar count > 8 block with dst[0] through dst[7] assignments and remainder do-while"
+      ],
+      "notes": "This resembles generated or assembly-shaped code. The loaded natural-loops standard says repeated blocks varying by index/pointer/stride should be checked against natural loops before preserving copied generated blocks.",
+      "confidence": 0.79
+    },
+    {
+      "tactic": "Adjusted data-symbol ownership in symbols.txt to separate gm_803DEBE8 from gm_803DEC4C.",
+      "instances": [
+        "gm_803DEBE8 .data:0x803DEBE8 size 0x64",
+        "gm_803DEC4C .data:0x803DEC4C size 0x6C"
+      ],
+      "evidence_refs": [
+        "raw_diff: symbols.txt hunk at gm_803DEBE8/gm_803DEC4C"
+      ],
+      "notes": "This is supported by the diff and bot-reported .data improvement, but the slice does not include a full data ownership explanation beyond the changed metadata.",
+      "confidence": 0.76
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "text": "decomp-dev bot reported six unmatched-item improvements: gm_801B5ACC to 79.89%, gm_801B5624 to 78.42%, gm_801B5324 to 74.50%, gm_801B59AC to 72.68%, .data to 96.22%, and .bss to 50.00%.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev[bot] issue comment 2026-04-20T08:38:56Z"
+      ]
+    },
+    {
+      "kind": "bot_report",
+      "text": "decomp-dev bot also reported a regression in gm_801B60A4_OnLoad from 87.40% to 80.20%, -40 bytes.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev[bot] issue comment regression table"
+      ]
+    },
+    {
+      "kind": "author_comment",
+      "text": "The author said they were not the biggest fan of how the PR turned out and framed it as a base for others to work from.",
+      "evidence_refs": [
+        "human_pr_text: issuecomment-4334459894",
+        "text_corpus: jurrejelle issue comment 2026-04-28T10:39:02Z"
+      ]
+    },
+    {
+      "kind": "missing_review",
+      "text": "No human review comments or review records are present in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata_json: counts.review_comments 0 and reviews 0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2427",
+    "Jj/gmallstar",
+    "jurrejelle",
+    "gmallstar",
+    "gm_801B5324",
+    "gm_801B5624",
+    "gm_801B59AC",
+    "gm_801B5ACC",
+    "gm_801B60A4_OnLoad",
+    "gm_803DEBE8",
+    "gm_803DEC4C",
+    "gm_80490940",
+    "AllstarRoundInfo",
+    "UnkAllstarData",
+    "StartMeleeData",
+    "MatchExitInfo",
+    "gmRegSetupEnemyColorTable",
+    "lbAudioAx_80026E84",
+    "lbDvd_8001822C",
+    "PAD_STACK",
+    "allstar",
+    "MinorScene",
+    "symbols.txt",
+    "data split",
+    "bot regression"
+  ],
+  "follow_up_queries": [
+    "gm_803DEC4C AllstarRoundInfo start count gmallstar",
+    "gm_801B5324 PAD_STACK opp_data chars colors",
+    "gm_801B5624 count_processed unrolled loop chars",
+    "gm_801B5ACC HSD_Randi allstar x76 _94 next_count",
+    "gm_801B60A4_OnLoad regression PR 2427",
+    "gm_803DEBE8 symbols size 0x64 gm_803DEC4C 0x6C",
+    "gmallstar All-Star mode partial decomp base for others"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR #2427 metadata, changed files, merged_at",
+      "raw_diff: full diff for three changed files",
+      "text_corpus: bot report and author comment",
+      "changed_files: three changed files with add/delete counts"
+    ],
+    "notes": [
+      "The slice includes full diff and bot report, so changed files and concrete edits are well supported.",
+      "No human review comments are present, so reviewer intent and acceptance rationale cannot be inferred.",
+      "The bot report gives fuzzy progress/regression percentages but not exact objdiff match closure for the functions.",
+      "The author explicitly characterized the work as imperfect and a base for others, which lowers confidence in treating the source shapes as reusable accepted style.",
+      "PAD_STACK and unrolled-copy shapes are visible in the diff, but the slice lacks narrow verifier evidence justifying them as necessary."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "pr_lesson",
+        "title": "Data-table split plus local struct can make gmallstar partial decomp more tractable",
+        "text": "In PR #2427, gmallstar split gm_803DEBE8 in symbols.txt, added gm_803DEC4C, and introduced AllstarRoundInfo so All-Star round start/count accesses could be written as table fields rather than opaque offsets. Treat this as a PR-specific candidate pattern, not a global rule without more examples.",
+        "scope": [
+          "src/melee/gm/gmallstar.c",
+          "src/melee/gm/gmallstar.static.h",
+          "config/GALE01/symbols.txt"
+        ],
+        "evidence_refs": [
+          "raw_diff: symbols.txt gm_803DEBE8 size 0xD0 -> 0x64 and gm_803DEC4C added",
+          "raw_diff: gmallstar.static.h added AllstarRoundInfo",
+          "raw_diff: gmallstar.c uses gm_803DEC4C[round].start/count"
+        ],
+        "confidence": 0.78
+      },
+      {
+        "record_type": "pr_lesson",
+        "title": "Mixed-score partial PRs should retain regression context",
+        "text": "PR #2427 improved several gmallstar unmatched items but regressed gm_801B60A4_OnLoad and was described by the author as an imperfect base. Future curation should preserve both the improvements and the regression/self-critique when using this PR as precedent.",
+        "scope": [
+          "src/melee/gm/gmallstar.c"
+        ],
+        "evidence_refs": [
+          "text_corpus: bot report improvements and gm_801B60A4_OnLoad regression",
+          "human_pr_text: author comment calling it a base for others"
+        ],
+        "confidence": 0.86
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "gmallstar.c owns All-Star round/opponent data around gm_803DEBE8 and gm_803DEC4C",
+        "text": "PR #2427 changed config/GALE01/symbols.txt so gm_803DEBE8 is .data:0x803DEBE8 size 0x64 and gm_803DEC4C is .data:0x803DEC4C size 0x6C, and defined both in src/melee/gm/gmallstar.c for All-Star mode logic. Curator should verify against current symbols/source before promoting as a path fact.",
+        "source_path": "src/melee/gm/gmallstar.c",
+        "scope": [
+          "gmallstar",
+          "All-Star mode",
+          "data symbols"
+        ],
+        "evidence_refs": [
+          "raw_diff: symbols.txt data split",
+          "raw_diff: gmallstar.c static gm_803DEBE8 and static AllstarRoundInfo gm_803DEC4C"
+        ],
+        "reason": "This is a concrete ownership/split fact from the PR diff, but path facts must be checked against current source before promotion."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "PAD_STACK in partial decomp PRs should carry narrow verifier evidence",
+        "text": "PR #2427 contains PAD_STACK uses in newly added partial implementations while the loaded slice only shows fuzzy progress and one regression. This may reinforce the existing matching-tactics standard rather than require a new standard.",
+        "source_path": null,
+        "scope": [
+          "matching tactics",
+          "PAD_STACK",
+          "partial decomp"
+        ],
+        "evidence_refs": [
+          "raw_diff: PAD_STACK(12), PAD_STACK(16), PAD_STACK(24)",
+          "text_corpus: bot report includes improvements and gm_801B60A4_OnLoad regression",
+          "decomp_standards: matching-tactics-need-evidence"
+        ],
+        "reason": "Potential source-corpus note for curator review; not promoted because the standard already covers this and the PR lacks explicit verifier discussion."
+      }
+    ],
+    "rejection_notes": [
+      "Do not treat the unrolled 8-at-a-time copy loops as an accepted style lesson; the loaded natural-loops standard suggests such patterns need loop-form checking, and the author did not defend the shape.",
+      "Do not claim the four newly implemented functions matched exactly; the bot report only shows partial percentages below 100%.",
+      "Do not infer human reviewer approval or rationale; the slice has zero review comments and zero reviews.",
+      "Do not generalize gm_803DEC4C naming as semantic; it remains address-style despite the AllstarRoundInfo type."
+    ]
+  },
+  "confidence": 0.8,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

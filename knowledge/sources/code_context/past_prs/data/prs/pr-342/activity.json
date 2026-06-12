@@ -1,0 +1,10 @@
+{
+  "pr": 342,
+  "title": "Convert Special attributes in Fighter struct to a union.",
+  "url": "https://github.com/doldecomp/melee/pull/342",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 17,
+  "added_lines": 262,
+  "deleted_lines": 77
+}

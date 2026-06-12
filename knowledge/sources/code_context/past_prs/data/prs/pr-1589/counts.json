@@ -1,0 +1,17 @@
+{
+  "number": 1589,
+  "title": "Match 55% of `plbonuslib`",
+  "state": "MERGED",
+  "createdAt": "2025-06-11T23:44:10Z",
+  "updatedAt": "2025-06-27T01:56:52Z",
+  "mergedAt": "2025-06-12T02:12:01Z",
+  "closedAt": "2025-06-12T02:12:01Z",
+  "author": "Avery-Brinkman",
+  "url": "https://github.com/doldecomp/melee/pull/1589",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 5,
+    "reviews": 5,
+    "diff_bytes": 57946
+  }
+}

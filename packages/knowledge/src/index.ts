@@ -1,7 +1,6 @@
 export {
   agentSharedStateEnrichmentPath,
   codeGraphFunctionsIndexPath,
-  decompResourcesRoot,
   knowledgeCuratorEnrichmentPath,
   knowledgeSourceRegistryPath,
   knowledgeSourcesRoot,
@@ -14,6 +13,7 @@ export {
   resourceGraphDbPath,
   resourceGraphRoot,
   sourceDataRoot,
+  sourceRoot,
   toolsRoot,
 } from "./paths.js";
 export { loadKnowledgeBoardSnapshot, type LoadKnowledgeBoardSnapshotOptions } from "./board.js";
@@ -27,5 +27,5 @@ export {
   type CurateKnowledgeResult,
 } from "./curator.js";
 export { resourceMap } from "./resources.js";
-export { globalStandardsContext, resolvePathFactsContext, type PathFactResolution } from "./decomp-context.js";
+export { globalStandardsContext, globalStandardsPromptXml, resolvePathFactsContext, type PathFactResolution } from "./decomp-context.js";
 export * from "./graph/index.js";

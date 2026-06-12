@@ -1,0 +1,535 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2527",
+  "pr": {
+    "number": 2527,
+    "title": "Jj/ft 0 c31",
+    "url": "https://github.com/doldecomp/melee/pull/2527",
+    "state": "MERGED",
+    "author": "jurrejelle",
+    "created_at": "2026-05-23T19:28:07Z",
+    "merged_at": "2026-05-26T09:10:40Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2527 split the tail of `src/melee/ft/ft_0C31.c` into ten new fighter-common translation units from `ftCo_800C703C.c` through `ftCo_800C7CA0.c`, added matching headers and build/split metadata, and updated call sites/includes across fighter and item code. The bot report shows net code/data progress and 55 new matches, while also reporting old `ft_0C31` matches as broken because symbols moved to the new units.",
+  "change_classification": {
+    "primary_type": "decomp-matching-tu-split",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "splits",
+      "symbols",
+      "build-config"
+    ],
+    "systems": [
+      "fighter",
+      "ftCommon",
+      "items",
+      "config",
+      "repo-root"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/ft/ft_0C31.c",
+      "role": "Original fighter source shortened; functions from 0x800C703C onward removed into new per-address units while local `fake_HSD_JObjSetTranslate` comments/asserts were adjusted.",
+      "evidence_refs": [
+        "changed_files: src/melee/ft/ft_0C31.c added 14 deleted 355",
+        "raw_diff: ft_0C31.c removes function bodies from ftCo_800C703C through ft_800C80A4",
+        "raw_diff: comments on fake_HSD_JObjSetTranslate preserving jobj.h file/line asserts while calling fighter-local dirty helper"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ft_0C31.h",
+      "role": "Original header reduced after moving prototypes to new per-address headers.",
+      "evidence_refs": [
+        "changed_files: src/melee/ft/ft_0C31.h added 1 deleted 42"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftCo_800C703C.c",
+      "role": "New split unit for `ftCo_800C703C`.",
+      "evidence_refs": [
+        "changed_files: src/melee/ft/ftCo_800C703C.c added 17",
+        "raw_diff: split range 0x800C703C-0x800C7070"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftCo_800C7070.c",
+      "role": "New split unit for rebirth-wait helper and inline wrapper chain.",
+      "evidence_refs": [
+        "changed_files: src/melee/ft/ftCo_800C7070.c added 32",
+        "raw_diff: defines ftCo_800C7070 and inlineB0/inlineB1/inlineB2"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftCo_800C70D0.c",
+      "role": "New split unit for Mario/Luigi wait path helpers.",
+      "evidence_refs": [
+        "changed_files: src/melee/ft/ftCo_800C70D0.c added 48",
+        "bot_report: new match `main/melee/ft/ftCo_800C70D0` `ftCo_800C70D0` +136 bytes"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftCo_800C7178.c",
+      "role": "New split unit for Mario/Luigi walk-slow path helpers.",
+      "evidence_refs": [
+        "changed_files: src/melee/ft/ftCo_800C7178.c added 48",
+        "bot_report: new match `main/melee/ft/ftCo_800C7178` `ftCo_800C7178` +136 bytes"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftCo_800C7220.c",
+      "role": "New split unit for Kirby wait/walk helpers.",
+      "evidence_refs": [
+        "changed_files: src/melee/ft/ftCo_800C7220.c added 67",
+        "bot_report: new matches `ftCo_800C7220`, `ftCo_800C7294`, `ftCo_800C7308`"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftCo_800C739C.c",
+      "role": "New split unit for Kirby walk-fast helper.",
+      "evidence_refs": [
+        "changed_files: src/melee/ft/ftCo_800C739C.c added 46",
+        "bot_report: new match `ftCo_800C739C` +120 bytes"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftCo_800C7434.c",
+      "role": "New split unit for Giga Koopa and Leadead capture trigger helpers.",
+      "evidence_refs": [
+        "changed_files: src/melee/ft/ftCo_800C7434.c added 75",
+        "raw_diff: includes `itleadead.h`, uses `mv.co.captureleadead`, `ftCo_800C74F4`, and `fn_800C74CC/fn_800C7568`"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftCo_800C7590.c",
+      "role": "New split unit for Leadead capture state and callbacks.",
+      "evidence_refs": [
+        "changed_files: src/melee/ft/ftCo_800C7590.c added 107",
+        "bot_report: new matches `ftCo_800C7590`, `ftCo_CaptureLeadead_Anim`, `ftCo_CaptureLeadead_Coll`, `ftCo_800C7800`"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftCo_800C78B0.c",
+      "role": "New split unit for Likelike capture state and collision/damage helpers.",
+      "evidence_refs": [
+        "changed_files: src/melee/ft/ftCo_800C78B0.c added 130",
+        "bot_report: new matches `ftCo_800C78B0`, `ftCo_800C7B0C`, `ftCo_CaptureLikelike_Anim`"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftCo_800C7CA0.c",
+      "role": "New split unit for down-reflect state, wall collision reflection helper, material object global, and `ft_800C80A4` loop.",
+      "evidence_refs": [
+        "changed_files: src/melee/ft/ftCo_800C7CA0.c added 191",
+        "bot_report: new matches `fn_800C7DC4`, `ftCo_800C7CA0`, `ft_800C80A4`, `ftCo_DownReflect_Anim`, `ftCo_DownReflect_Coll`",
+        "raw_diff: uses `PAD_STACK`, goto-marked branch structure, and for/while loops over fighter parts/dobjs"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftCo_800C703C.h",
+      "role": "New header for split unit prototypes.",
+      "evidence_refs": [
+        "changed_files: src/melee/ft/ftCo_800C703C.h added 8"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftCo_800C7070.h",
+      "role": "New header for split unit prototypes.",
+      "evidence_refs": [
+        "changed_files: src/melee/ft/ftCo_800C7070.h added 8"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftCo_800C70D0.h",
+      "role": "New header for split unit prototypes.",
+      "evidence_refs": [
+        "changed_files: src/melee/ft/ftCo_800C70D0.h added 9"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftCo_800C7178.h",
+      "role": "New header for split unit prototypes.",
+      "evidence_refs": [
+        "changed_files: src/melee/ft/ftCo_800C7178.h added 9"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftCo_800C7220.h",
+      "role": "New header for split unit prototypes.",
+      "evidence_refs": [
+        "changed_files: src/melee/ft/ftCo_800C7220.h added 11"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftCo_800C739C.h",
+      "role": "New header for split unit prototypes.",
+      "evidence_refs": [
+        "changed_files: src/melee/ft/ftCo_800C739C.h added 9"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftCo_800C7434.h",
+      "role": "New header for split unit prototypes, including bool capture predicate and address-style callbacks.",
+      "evidence_refs": [
+        "changed_files: src/melee/ft/ftCo_800C7434.h added 12"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftCo_800C7590.h",
+      "role": "New header for Leadead capture prototypes.",
+      "evidence_refs": [
+        "changed_files: src/melee/ft/ftCo_800C7590.h added 15"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftCo_800C78B0.h",
+      "role": "New header for Likelike capture prototypes and typed collision helper signature.",
+      "evidence_refs": [
+        "changed_files: src/melee/ft/ftCo_800C78B0.h added 19"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftCo_800C7CA0.h",
+      "role": "New header for down-reflect prototypes and `extern HSD_MObj* ft_804D6580`.",
+      "evidence_refs": [
+        "changed_files: src/melee/ft/ftCo_800C7CA0.h added 21"
+      ]
+    },
+    {
+      "path": "config/GALE01/splits.txt",
+      "role": "Split metadata updated to end `ft_0C31.c` at 0x800C703C and add the ten new text/sdata2 ranges; sbss ownership split between `ftCo_800C7CA0.c` and `ft_0C88.c`.",
+      "evidence_refs": [
+        "raw_diff: `ft_0C31.c` text range changed from 0x800C61B0-0x800C8170 to 0x800C61B0-0x800C703C",
+        "raw_diff: new split ranges for `ftCo_800C703C.c` through `ftCo_800C7CA0.c`",
+        "raw_diff: `ft_0C88.c` gains sbss start 0x804D6588 end 0x804D6590"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Symbol metadata updated for local/global names, sdata2 literals, and sbss object sizes/scopes affected by the split.",
+      "evidence_refs": [
+        "changed_files: config/GALE01/symbols.txt added 133 deleted 132",
+        "raw_diff: many `ftCo_804D8D*`/`ftCo_804D8E*` sdata2 symbols renamed to local `@NNN` labels",
+        "raw_diff: `ft_804D6580` and `ft_804D6588` sizes changed from 0x8 to 0x4"
+      ]
+    },
+    {
+      "path": "configure.py",
+      "role": "Build config updated to list the new matching objects.",
+      "evidence_refs": [
+        "raw_diff: added Object(Matching, `melee/ft/ftCo_800C703C.c`) through `melee/ft/ftCo_800C7CA0.c`"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCommon/types.h",
+      "role": "Fighter common type surface updated for moved capture/down-reflect state fields.",
+      "evidence_refs": [
+        "changed_files: src/melee/ft/chara/ftCommon/types.h added 5"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ft_0819.c, src/melee/ft/ft_0C88.c, src/melee/ft/ft_0C8C.c, src/melee/ft/ftcpuattack.c, src/melee/ft/ftdemo.c, src/melee/ft/ftmaterial.c, src/melee/ft/ftmotionstates.c, src/melee/ft/fighter.c, src/melee/ft/chara/ftCommon/ftCo_Damage.c, src/melee/ft/chara/ftCommon/ftCo_DownBound.c, src/melee/ft/chara/ftCommon/ftCo_DownDamage.c, src/melee/ft/chara/ftGigaKoopa/ftGk_Init.c, src/melee/ft/chara/ftKirby/ftKb_Init.c, src/melee/ft/chara/ftLuigi/ftLg_Init.c, src/melee/ft/chara/ftMario/ftMr_Init.c, src/melee/it/items/itleadead.c, src/melee/it/items/itleadead.h, src/melee/it/items/itlikelike.c",
+      "role": "Call sites, includes, item hooks, and dependent source files updated to reference the new split headers/symbol locations.",
+      "evidence_refs": [
+        "changed_files: listed dependent fighter and item files with small include/prototype/call-site edits",
+        "raw_diff: examples include replacing `ft/ft_0C31.h` with split headers such as `ft/ftCo_800C703C.h`, `ft/ftCo_800C7434.h`, and `ft/ftCo_800C7CA0.h`"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Split the address range 0x800C703C-0x800C8170 out of `ft_0C31.c` into ten new `src/melee/ft/ftCo_800C*.c` files with matching `.h` files.",
+    "Updated `config/GALE01/splits.txt` so `ft_0C31.c` now ends at 0x800C703C and the new units own consecutive text/sdata2 ranges through 0x800C8170.",
+    "Updated `configure.py` to add the ten new matching objects.",
+    "Updated `config/GALE01/symbols.txt` for split-local literals/labels and for sbss object size/ownership around `ft_804D6580` and `ft_804D6588`.",
+    "Moved or exposed prototypes for capture, down-reflect, and helper functions into new headers and changed dependent fighter/item files to include those headers.",
+    "Bot report recorded +2192 matched code bytes, +8128 linked code bytes, +152 matched data bytes, and 55 new matches; it also reported moved symbols as 36 broken matches in old `main/melee/ft/ft_0C31`."
+  ],
+  "smart_moves": [
+    {
+      "text": "The PR kept the split mechanically consistent by updating source files, per-unit headers, `splits.txt`, `symbols.txt`, and `configure.py` together.",
+      "evidence_refs": [
+        "changed_files: 45 changed files across source, headers, config, and build config",
+        "raw_diff: new split ranges plus configure Object(Matching) entries"
+      ]
+    },
+    {
+      "text": "Header names and guards follow the new unit start address, making moved prototypes searchable by address while leaving unknown callbacks as `fn_800C....`.",
+      "evidence_refs": [
+        "raw_diff: headers use guards like `GALE01_800C7CA0` and address comments like `/* 7DC4 */ void fn_800C7DC4(...)`"
+      ]
+    },
+    {
+      "text": "The code uses real fighter/item fields for recovered capture state where visible, such as `mv.co.captureleadead`, `mv.co.capturelikelike`, and `mv.co.downreflect`, rather than raw byte offsets.",
+      "evidence_refs": [
+        "raw_diff: `fp->mv.co.captureleadead.x0`, `fp->mv.co.capturelikelike.x0`, `fp->mv.co.downreflect.x4`"
+      ]
+    },
+    {
+      "text": "The bot report makes the TU split easy to audit: new matches appear under the new units and corresponding old-unit matches appear as broken in `ft_0C31`.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev bot report lists 55 new matches and 36 broken matches"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For a translation-unit split, a bot report may show old-unit matches as broken while the same code reappears as new matches in the new units; judge the split using the full report and the split/config updates, not the broken-match list alone.",
+      "evidence_refs": [
+        "text_corpus: new matches for `main/melee/ft/ftCo_800C703C` through `ftCo_800C7CA0`",
+        "text_corpus: broken matches in `main/melee/ft/ft_0C31` for the same symbol names",
+        "raw_diff: `splits.txt` moves the range out of `ft_0C31.c`"
+      ]
+    },
+    {
+      "lesson": "When extracting functions into new files, update owning headers and downstream includes at the same time so call sites reference the split unit rather than the old aggregate header.",
+      "evidence_refs": [
+        "raw_diff: `ft_0819.c` include changes from `ft/ft_0C31.h` to `ft/ftCo_800C703C.h`",
+        "raw_diff: dependent files add split headers such as `ftCo_800C7434.h`, `ftCo_800C7220.h`, `ftCo_800C7CA0.h`"
+      ]
+    },
+    {
+      "lesson": "Split work can require symbol metadata cleanup for local literals and section ownership; this PR updated `symbols.txt` and `splits.txt` together rather than compensating only in C.",
+      "evidence_refs": [
+        "raw_diff: sdata2 `ftCo_804D8D*`/`ftCo_804D8E*` names changed to local `@NNN` symbols",
+        "raw_diff: `splits.txt` assigns sdata2 ranges to each new split unit"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "New split source/header files are named by the first function address, e.g. `ftCo_800C703C.c` and `ftCo_800C7CA0.h`.",
+      "evidence_refs": [
+        "changed_files: ten new `src/melee/ft/ftCo_800C*.c/.h` files"
+      ]
+    },
+    {
+      "convention": "Header guards use `GALE01_` plus the unit start address, such as `GALE01_800C703C` and `GALE01_800C7CA0`.",
+      "evidence_refs": [
+        "raw_diff: new headers show `#ifndef GALE01_800C703C` and `#ifndef GALE01_800C7CA0`"
+      ]
+    },
+    {
+      "convention": "Prototype comments retain low address suffixes, such as `/* 7CA0 */ bool ftCo_800C7CA0(...)`, improving search by address.",
+      "evidence_refs": [
+        "raw_diff: new headers contain address comments before prototypes"
+      ]
+    },
+    {
+      "convention": "Known gameplay state names are used where supported by existing names, e.g. `ftCo_CaptureLeadead_Anim`, `ftCo_CaptureLikelike_Anim`, and `ftCo_DownReflect_Coll`; unresolved callbacks keep address-style `fn_800C....` names.",
+      "evidence_refs": [
+        "raw_diff: headers and source mix semantic capture/down-reflect names with `fn_800C74CC`, `fn_800C7568`, `fn_800C7DC4`"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Several new units preserve a three-level inline wrapper chain (`inlineB0`, `inlineB1`, `inlineB2`) that delegates to `ftCo_800C7070`; likely a codegen-shape tactic, but no review explanation is present.",
+      "evidence_refs": [
+        "raw_diff: `ftCo_800C7070.c`, `ftCo_800C70D0.c`, `ftCo_800C7178.c`, `ftCo_800C7220.c`, `ftCo_800C739C.c`, `ftCo_800C7434.c` define inlineB wrappers"
+      ]
+    },
+    {
+      "tactic": "`ftCo_800C7CA0.c` uses `PAD_STACK(8)` and `PAD_STACK(4)` around the down-reflect logic.",
+      "evidence_refs": [
+        "raw_diff: `ftCo_800C7CA0` and `fn_800C7DC4` include `PAD_STACK`"
+      ]
+    },
+    {
+      "tactic": "`fn_800C7DC4` keeps a goto-based branch section with an explicit `@todo fix branch structure`, indicating an unresolved control-flow shape retained for matching.",
+      "evidence_refs": [
+        "raw_diff: `// @todo fix branch structure` followed by labels `t1`, `t2`, and `end`"
+      ]
+    },
+    {
+      "tactic": "`fake_HSD_JObjSetTranslate` preserves `jobj.h` assert file/line/condition text while routing the dirty-matrix call through a fighter-local helper; the PR evidence is code/comment only, not reviewer endorsement.",
+      "evidence_refs": [
+        "raw_diff: comments above `fake_HSD_JObjSetTranslate` and raw `__assert(\"jobj.h\", 916, \"jobj\")` / `__assert(\"jobj.h\", 917, \"translate\")`"
+      ]
+    },
+    {
+      "tactic": "Temporary source-local prototypes were used in new C files for cross-split callbacks, e.g. `fn_800C74CC`, `fn_800C7568`, and `fn_800C7890`.",
+      "evidence_refs": [
+        "raw_diff: `ftCo_800C7590.c` declares `/* 0C74CC */ void fn_800C74CC(...)` and `/* 0C7568 */ void fn_800C7568(...)`",
+        "raw_diff: `ftCo_800C78B0.c` declares `/* 0C7890 */ void fn_800C7890(...)`"
+      ]
+    },
+    {
+      "tactic": "`ft_800C80A4` was expressed as a natural `for` loop over fighter parts plus a `while` loop over `HSD_DObj` siblings.",
+      "evidence_refs": [
+        "raw_diff: `for (i = idx = 0; i < ftPartsTable[fp->kind]->parts_num; idx++, i++)` and `while (dobj != NULL)` in `ft_800C80A4`"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "type": "bot_report",
+      "author": "decomp-dev[bot]",
+      "text": "Automated report showed progress: matched code 68.47% (+0.06%, +2192 bytes), linked code 40.46% (+0.21%, +8128 bytes), matched data 39.77% (+0.01%, +152 bytes), linked data 33.51% (+0.02%, +184 bytes), with 55 new matches.",
+      "evidence_refs": [
+        "text_corpus: issue_comment by decomp-dev[bot] at 2026-05-23T19:32:28Z"
+      ]
+    },
+    {
+      "type": "bot_report_caveat",
+      "author": "decomp-dev[bot]",
+      "text": "The same report listed 36 broken matches, mostly under old unit `main/melee/ft/ft_0C31`, consistent with moved functions after the split.",
+      "evidence_refs": [
+        "text_corpus: broken matches table lists `ft_800C80A4`, `ftCo_800C7800`, `ftCo_800C70D0`, and other moved symbols under `ft_0C31`"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2527",
+    "Jj/ft 0 c31",
+    "jurrejelle",
+    "ft_0C31",
+    "ftCo_800C703C",
+    "ftCo_800C7070",
+    "ftCo_800C70D0",
+    "ftCo_800C7178",
+    "ftCo_800C7220",
+    "ftCo_800C739C",
+    "ftCo_800C7434",
+    "ftCo_800C7590",
+    "ftCo_800C78B0",
+    "ftCo_800C7CA0",
+    "ftCo_CaptureLeadead_Anim",
+    "ftCo_CaptureLikelike_Anim",
+    "ftCo_DownReflect_Coll",
+    "fn_800C7DC4",
+    "ft_800C80A4",
+    "ft_804D6580",
+    "ft_804D6588",
+    "fake_HSD_JObjSetTranslate",
+    "inlineB0",
+    "PAD_STACK",
+    "splits.txt",
+    "symbols.txt",
+    "configure.py",
+    "translation unit split"
+  ],
+  "follow_up_queries": [
+    "Search later PRs for cleanup of `fake_HSD_JObjSetTranslate` or replacement with a shared JObj inline/helper.",
+    "Search later PRs for removal of `PAD_STACK` in `ftCo_800C7CA0.c` or cleanup of `fn_800C7DC4` branch structure.",
+    "Search later PRs for semantic naming of `fn_800C74CC`, `fn_800C7568`, `fn_800C7890`, and `fn_800C7DC4`.",
+    "Search later PRs for prototype movement out of source-local declarations in `ftCo_800C7590.c` and `ftCo_800C78B0.c`.",
+    "Search later PRs touching `ft_804D6580`, `ft_804D6588`, and `ft_0C88.c` sbss ownership."
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR metadata, changed-file counts, merge time, author, and file list",
+      "raw_diff: split/config/symbol/source excerpts",
+      "text_corpus: bot report issue comment",
+      "changed_files: complete changed file list"
+    ],
+    "notes": [
+      "PR body is empty and there are no human review comments in the loaded slice.",
+      "The raw diff is truncated in the loaded context, but targeted local reads covered the main new source sections and split/build metadata.",
+      "No local build, objdiff, or manual reviewer validation beyond the bot report is present in the slice.",
+      "Some tactics are visible in source (`PAD_STACK`, inline wrappers, gotos, source-local prototypes), but the slice does not explain whether each was required or temporary."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "lesson",
+        "title": "TU split reports can show old-unit broken matches and new-unit matches simultaneously",
+        "text": "When a PR splits functions out of a translation unit, the automated report may list the moved functions as broken in the old unit while listing them as new matches in the new units. For intake/curation, compare symbol names, split ranges, and configure entries before treating the broken-match list as a regression.",
+        "scope": [
+          "decomp-matching",
+          "translation-unit-splits",
+          "bot-reports"
+        ],
+        "evidence_refs": [
+          "pr-2527 text_corpus: 55 new matches in `ftCo_800C*` units",
+          "pr-2527 text_corpus: broken matches in old `ft_0C31` unit",
+          "pr-2527 raw_diff: `splits.txt` and `configure.py` add the new units"
+        ]
+      },
+      {
+        "record_type": "lesson",
+        "title": "Keep split metadata, build objects, headers, and call-site includes synchronized",
+        "text": "A clean function extraction/split should update `splits.txt`, `configure.py`, owning headers, and dependent includes together, otherwise the move is difficult to audit and can strand prototypes in the old aggregate header.",
+        "scope": [
+          "decomp-matching",
+          "headers",
+          "splits"
+        ],
+        "evidence_refs": [
+          "pr-2527 changed_files: new source/header files plus config/build/call-site edits",
+          "pr-2527 raw_diff: configure adds ten `Object(Matching, ...)` entries",
+          "pr-2527 raw_diff: dependent files include new split headers"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Header inline exception: local helper call with original header assert identity",
+        "text": "PR 2527 contains a commented `fake_HSD_JObjSetTranslate` that preserves `jobj.h` assert file/line/condition identity while routing the dirty-matrix call through a fighter-local helper. Curator should decide whether this is a narrow accepted exception under header-inlines/assert standards or only a temporary tactic needing later cleanup.",
+        "source_path": "src/melee/ft/ft_0C31.c",
+        "scope": [
+          "header-inlines",
+          "assert-report-macros",
+          "matching-tactics"
+        ],
+        "evidence_refs": [
+          "raw_diff: comments above `fake_HSD_JObjSetTranslate`",
+          "raw_diff: raw `__assert(\"jobj.h\", 916, \"jobj\")` and `__assert(\"jobj.h\", 917, \"translate\")`"
+        ],
+        "reason": "Current standards prefer mapping expanded header asserts back to existing helpers/macros; this PR shows a special local-call shape but no review discussion."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "TU split bot-report interpretation",
+        "text": "For large TU splits, document that old-unit broken matches can be expected if the same symbols become new matches in newly listed objects and the split ranges/config entries support the move.",
+        "source_path": null,
+        "scope": [
+          "verification-and-regression-ledger",
+          "data-sections-and-tu-splits"
+        ],
+        "evidence_refs": [
+          "text_corpus: bot report lists both new matches under `ftCo_800C*` and broken matches under `ft_0C31`",
+          "raw_diff: `splits.txt` and `configure.py` create new object boundaries"
+        ],
+        "reason": "This is a reusable interpretation rule for curation, but it should be reviewed before being promoted as a global standard."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "`ft_0C31` tail split into `ftCo_800C703C` through `ftCo_800C7CA0`",
+        "text": "PR 2527 moved the 0x800C703C-0x800C8170 range from `src/melee/ft/ft_0C31.c` into ten separate files named by starting address: `ftCo_800C703C.c`, `ftCo_800C7070.c`, `ftCo_800C70D0.c`, `ftCo_800C7178.c`, `ftCo_800C7220.c`, `ftCo_800C739C.c`, `ftCo_800C7434.c`, `ftCo_800C7590.c`, `ftCo_800C78B0.c`, and `ftCo_800C7CA0.c`.",
+        "source_path": "config/GALE01/splits.txt",
+        "scope": [
+          "src/melee/ft",
+          "splits"
+        ],
+        "evidence_refs": [
+          "raw_diff: `splits.txt` new ranges for the ten files",
+          "changed_files: ten new `ftCo_800C*.c` files and headers"
+        ],
+        "reason": "Concrete path ownership fact supported by split metadata, routed for curator review."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer human reviewer approval or final style endorsement for `PAD_STACK`, inline wrapper chains, goto branch shape, or source-local prototypes; the slice has no human review comments.",
+      "Do not claim the PR fully matched every touched function solely from the summary; the loaded bot report lists 55 new matches but is truncated after the first 30 plus '25 more'.",
+      "Do not promote the raw `__assert` form in `fake_HSD_JObjSetTranslate` as a general assert style; it may be a narrow matching exception."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

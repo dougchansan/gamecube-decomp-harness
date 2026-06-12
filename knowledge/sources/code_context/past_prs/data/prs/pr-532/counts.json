@@ -1,0 +1,17 @@
+{
+  "number": 532,
+  "title": "Use `#include <path/to/file.h>` everywhere",
+  "state": "MERGED",
+  "createdAt": "2022-09-02T14:17:13Z",
+  "updatedAt": "2022-09-02T14:19:20Z",
+  "mergedAt": "2022-09-02T14:19:19Z",
+  "closedAt": "2022-09-02T14:19:19Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/532",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 59455
+  }
+}

@@ -1,0 +1,114 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2314",
+  "pr": {
+    "number": 2314,
+    "title": "Overnight decomp run — 2026-03-17",
+    "url": "https://github.com/doldecomp/melee/pull/2314",
+    "state": "CLOSED",
+    "author": "johnwinston",
+    "created_at": "2026-03-17T17:12:18Z",
+    "merged_at": null
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Closed draft overnight decomp PR with no diff and no changed files in the slice. The PR body reports 0 matched, 0 failed, and 1 in-progress function: grpura.c / grPura_80212FC0. A bot report says GALE01 comparison from 56e1280 to 727ec34 had no changes.",
+  "change_classification": {
+    "primary_type": "no-op decomp progress report",
+    "categories": [
+      "decomp-matching",
+      "draft",
+      "no-changes"
+    ],
+    "systems": [
+      "grpura"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "grpura.c",
+      "role": "Mentioned in PR body as containing in-progress function grPura_80212FC0; no actual file changes are present in the diff slice.",
+      "evidence_refs": [
+        "human_pr_text: in-progress table lists `grpura.c` / `grPura_80212FC0`",
+        "metadata_json: changed_files=0, added_lines=0, deleted_lines=0",
+        "raw_diff: empty diff"
+      ]
+    }
+  ],
+  "what_changed": [
+    "No changed files are present in the PR slice.",
+    "PR body records decomp progress only: 0 matched, 0 failed, 1 in progress.",
+    "The only named work item is `grPura_80212FC0` in `grpura.c`, marked pending."
+  ],
+  "smart_moves": [
+    "The PR body clearly separated matched, failed, and in-progress status, making the absence of completed matches explicit.",
+    "The bot report recorded that the GALE01 comparison had no changes, preventing a no-diff PR from being mistaken for landed decomp work."
+  ],
+  "decomp_lessons": [],
+  "naming_conventions": [],
+  "assembly_or_matching_tactics": [],
+  "review_feedback": [
+    {
+      "source": "issue_comment",
+      "author": "decomp-dev[bot]",
+      "created_at": "2026-03-17T17:15:44Z",
+      "text": "Report for GALE01 (56e1280 - 727ec34): No changes.",
+      "evidence_refs": [
+        "text_corpus: issue_comment by decomp-dev[bot]"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR 2314",
+    "Overnight decomp run",
+    "2026-03-17",
+    "johnwinston",
+    "grpura.c",
+    "grPura_80212FC0",
+    "pending",
+    "0 matched",
+    "0 failed",
+    "No changes",
+    "GALE01",
+    "Claude Code"
+  ],
+  "follow_up_queries": [
+    "grPura_80212FC0",
+    "grpura.c grPura_80212FC0 pending",
+    "PRs mentioning grPura_80212FC0",
+    "GALE01 No changes overnight decomp run"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR metadata, counts, state, author, timestamps, changed_files=0",
+      "human_pr_text: progress table names grpura.c / grPura_80212FC0 as pending",
+      "raw_diff: empty, original_chars=0",
+      "text_corpus: bot issue comment says No changes"
+    ],
+    "notes": [
+      "Evidence is strong for PR identity, no changed files, and the pending function named in the PR body.",
+      "Evidence is weak for reusable decomp lessons or matching tactics because there is no diff, no review comments, and no implementation content.",
+      "The PR is closed with merged_at null; no merge or acceptance status is inferred.",
+      "The raw PR JSON is truncated, but loaded metadata, human PR text, empty diff, and text corpus cover the required intake facts."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [],
+    "source_update_candidates": [],
+    "rejection_notes": [
+      "Do not promote `grpura.c` or `grPura_80212FC0` as changed or matched from this PR; the PR body marks it pending and the diff is empty.",
+      "Do not infer decomp tactics, naming conventions, validation success, or reviewer intent; the slice contains no implementation diff and no review comments.",
+      "No source-corpus or standards update is supported by this no-change PR slice."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

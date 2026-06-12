@@ -1,0 +1,19 @@
+{
+  "build_seconds": 6.423,
+  "built_at": "2026-06-09T22:18:40Z",
+  "chunking": {
+    "overlap_tokens": 100,
+    "target_tokens": 700,
+    "tokenizer": "cl100k_base"
+  },
+  "dimensions": 1536,
+  "index_records": 624,
+  "metric": "cosine",
+  "model": "text-embedding-3-small",
+  "normalization": "l2",
+  "provider": "openai",
+  "schema_version": "vector_index_v1",
+  "source": "powerpc_docs",
+  "source_fingerprint": "86046ed4a8ba35dda2ca706299cca5bdfe328a892e0c0e28a185b8fa8cfaa249",
+  "vector_chunks": 722
+}

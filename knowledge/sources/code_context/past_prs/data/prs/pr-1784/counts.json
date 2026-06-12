@@ -1,0 +1,17 @@
+{
+  "number": 1784,
+  "title": "Add tools/table-typer and infer more types",
+  "state": "MERGED",
+  "createdAt": "2025-08-03T04:21:06Z",
+  "updatedAt": "2025-08-04T01:55:18Z",
+  "mergedAt": "2025-08-04T01:55:18Z",
+  "closedAt": "2025-08-04T01:55:18Z",
+  "author": "lukechampine",
+  "url": "https://github.com/doldecomp/melee/pull/1784",
+  "counts": {
+    "issue_comments": 3,
+    "review_comments": 0,
+    "reviews": 2,
+    "diff_bytes": 29847
+  }
+}

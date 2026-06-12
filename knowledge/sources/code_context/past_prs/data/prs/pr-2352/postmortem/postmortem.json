@@ -1,0 +1,417 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2352",
+  "pr": {
+    "number": 2352,
+    "title": "Jj/mnname",
+    "url": "https://github.com/doldecomp/melee/pull/2352",
+    "state": "MERGED",
+    "author": "jellejurre",
+    "created_at": "2026-03-25T13:43:07Z",
+    "merged_at": "2026-03-26T16:11:17Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Large mnname decomp/matching PR. It added many implementations and partial improvements in src/melee/mn/mnname.c, updated mnname.h and gmmain_lib.h prototypes, and split mnName data symbols in config/GALE01/symbols.txt. The only discussion evidence is the bot report, which records +3956 matched-code bytes, 11 new matches, and 14 unmatched-item improvements in main/melee/mn/mnname.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "naming",
+      "data-symbol-metadata"
+    ],
+    "systems": [
+      "game-mode",
+      "menu-name-entry",
+      "config-symbols"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/mn/mnname.c",
+      "role": "Primary decomp source file; added implementations and matching work for mnname functions, includes, extern data declarations, helper structs, name sorting, deletion, input handling, and menu/UI routines.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mnname.c added 1433 deleted 48 hunks 11",
+        "diff.diff: mnname.c include and extern additions; implementations for CompareNameStrings, DeleteName, mnName_SortNames, mnName_80237D94, mnName_ConfirmNameDeleteInput, mnName_MainInput",
+        "text_corpus.jsonl: bot report lists mnname new matches and improvements"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnname.h",
+      "role": "Header prototype cleanup for recovered mnname signatures and MnName_GObj layout.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mnname.h added 16 deleted 15 hunks 2",
+        "diff.diff: added MnName_GObj.text2; changed CompareNameStrings, IsNameUnique, DeleteName, mnName_SortNames, mnName_80237D94, and multiple later prototypes from UNK_RET/UNK_PARAMS to typed signatures"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmmain_lib.h",
+      "role": "Supporting header signature update for gmMainLib_8015DBF4 used from mnname deletion flow.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gm/gmmain_lib.h added 1 deleted 1 hunk 1",
+        "diff.diff: gmMainLib_8015DBF4 changed from UNK_RET gmMainLib_8015DBF4(UNK_PARAMS) to UNK_RET gmMainLib_8015DBF4(s32)",
+        "diff.diff: mnName_ConfirmNameDeleteInput calls gmMainLib_8015DBF4(nameIdx)"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Symbol metadata split for mnName .data region around 0x803ED618.",
+      "evidence_refs": [
+        "changed_files.jsonl: config/GALE01/symbols.txt added 6 deleted 1 hunk 1",
+        "diff.diff: mnName_803ED618 size reduced from 0x440 to 0x18 and new symbols mnName_803ED630, mnName_803ED644, mnName_803ED650, mnName_803ED668, mnName_803ED672 added"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Implemented or improved many mnname functions, replacing several placeholder comments such as CompareNameStrings, DeleteName, mnName_SortNames, mnName_80237D94, mnName_ConfirmNameDeleteInput, and mnName_MainInput with C bodies.",
+      "evidence_refs": [
+        "diff.diff: mnname.c placeholder removals and added function bodies",
+        "text_corpus.jsonl: bot report lists 11 new matches and 14 improvements"
+      ]
+    },
+    {
+      "text": "Removed a local opt_common_subs pragma wrapper around mnName_8023749C while adjusting locals and loop expression shape enough for the bot to report that function as 100% matched.",
+      "evidence_refs": [
+        "diff.diff: deleted #pragma push, #pragma opt_common_subs off, #pragma pop around mnName_8023749C",
+        "text_corpus.jsonl: mnName_8023749C improved from 97.84% to 100.00%"
+      ]
+    },
+    {
+      "text": "Added local helper and data declarations such as GetNameCount_noinline, GetNumNameList, checkStringRest, mnName_NameDisplayOrder, MnNameArchive, and multiple mnName externs.",
+      "evidence_refs": [
+        "diff.diff: mnname.c top-of-file additions and helper definitions"
+      ]
+    },
+    {
+      "text": "Updated mnname.h with typed prototypes for recovered functions and added a text2 field to MnName_GObj.",
+      "evidence_refs": [
+        "diff.diff: mnname.h prototype and struct changes"
+      ]
+    },
+    {
+      "text": "Updated gmMainLib_8015DBF4 prototype to accept an s32 argument, matching the mnname callsite added in deletion input handling.",
+      "evidence_refs": [
+        "diff.diff: gmmain_lib.h signature change",
+        "diff.diff: gmMainLib_8015DBF4(nameIdx) call"
+      ]
+    },
+    {
+      "text": "Split a broad mnName_803ED618 .data symbol into a smaller object plus several string/object symbols.",
+      "evidence_refs": [
+        "diff.diff: symbols.txt hunk around mnName_803ED618"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Header updates followed recovered body evidence instead of leaving UNK_RET/UNK_PARAMS in mnname.h for functions that now have concrete argument and return types.",
+      "evidence_refs": [
+        "diff.diff: mnname.h changes from UNK_RET/UNK_PARAMS to typed prototypes"
+      ]
+    },
+    {
+      "text": "The PR paired source implementations with a bot-reported match ledger, giving narrow evidence for which functions fully matched and which only improved.",
+      "evidence_refs": [
+        "text_corpus.jsonl: decomp-dev bot report with 11 new matches and 14 improvements"
+      ]
+    },
+    {
+      "text": "A local data-order array, mnName_NameDisplayOrder, made name display sorting state explicit in source.",
+      "evidence_refs": [
+        "diff.diff: static u8 mnName_NameDisplayOrder[0x78]",
+        "diff.diff: mnName_SortNames uses mnName_NameDisplayOrder"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a function body proves signatures, update the owning header in the same PR so downstream callsites stop depending on UNK_RET/UNK_PARAMS.",
+      "scope": [
+        "headers",
+        "decomp-matching"
+      ],
+      "evidence_refs": [
+        "diff.diff: mnname.h typed prototypes added for CompareNameStrings, IsNameUnique, DeleteName, mnName_SortNames, mnName_80237D94 and others",
+        "diff.diff: gmmain_lib.h gmMainLib_8015DBF4(s32)"
+      ],
+      "confidence": 0.86
+    },
+    {
+      "lesson": "Do not infer that a partial implementation is fully matched just because it was added in a large decomp PR; use the bot ledger to separate 100% matches from score improvements.",
+      "scope": [
+        "verification",
+        "bot-report-intake"
+      ],
+      "evidence_refs": [
+        "text_corpus.jsonl: 11 new matches listed separately from 14 improvements in unmatched items"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "lesson": "Data symbol splits may accompany code-matching work when source needs more precise externs, but the PR evidence here only supports recording the metadata change, not a broader naming or data-ownership rule.",
+      "scope": [
+        "symbols.txt",
+        "data-metadata"
+      ],
+      "evidence_refs": [
+        "diff.diff: mnName_803ED618 split into smaller object plus string/data symbols",
+        "text_corpus.jsonl: .data improved from 0.00% to 9.58%"
+      ],
+      "confidence": 0.68
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "Address-style names retained for uncertain functions/data",
+      "examples": [
+        "mnName_80237D94",
+        "fn_80239574",
+        "mnName_803ED618",
+        "mnName_804D4BF0"
+      ],
+      "evidence_refs": [
+        "diff.diff: retained address-style function and data names throughout mnname.c and mnname.h"
+      ],
+      "note": "The PR does not provide review or body text explaining semantics for these symbols, so address-style names should not be upgraded from this evidence alone."
+    },
+    {
+      "name": "Semantic names used for clearer recovered helpers and state",
+      "examples": [
+        "GetNameCount_noinline",
+        "GetNumNameList",
+        "checkStringRest",
+        "mnName_NameDisplayOrder",
+        "MnNameArchive"
+      ],
+      "evidence_refs": [
+        "diff.diff: helper and struct declarations in mnname.c"
+      ],
+      "note": "Some helper names are descriptive, but the PR gives no human rationale for exact naming choices."
+    },
+    {
+      "name": "Header prototypes use typed parameters where recovered",
+      "examples": [
+        "bool IsNameUnique(char* name)",
+        "void DeleteName(u8)",
+        "u8 mnName_80237D94(s32, u8)",
+        "HSD_GObj* mnName_8023A59C(u8)"
+      ],
+      "evidence_refs": [
+        "diff.diff: mnname.h prototype changes"
+      ],
+      "note": "This aligns with the loaded truthful-headers-and-includes standard."
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Local pragma removal",
+      "description": "mnName_8023749C no longer uses #pragma opt_common_subs off; local variable and loop shape changes accompany a bot-reported 100% match.",
+      "evidence_refs": [
+        "diff.diff: deleted pragma wrapper around mnName_8023749C",
+        "text_corpus.jsonl: mnName_8023749C improved to 100.00%"
+      ],
+      "caveat": "The PR does not state which exact source edit removed the need for the pragma."
+    },
+    {
+      "tactic": "Narrow PAD_STACK use",
+      "description": "PAD_STACK appears in added mnname routines such as mnName_80237D94, mnName_ConfirmNameDeleteInput, and mnName_MainInput.",
+      "evidence_refs": [
+        "diff.diff: PAD_STACK(8) in mnName_80237D94",
+        "diff.diff: PAD_STACK(0x20) in mnName_ConfirmNameDeleteInput and mnName_MainInput"
+      ],
+      "caveat": "No human review or objdiff details explain why padding was required; only the bot score report is available."
+    },
+    {
+      "tactic": "Noinline-style wrapper helper",
+      "description": "A static GetNameCount_noinline wrapper was added and used in mnName_MainInput's name-list-full branch.",
+      "evidence_refs": [
+        "diff.diff: static int GetNameCount_noinline(void)",
+        "diff.diff: mnName_MainInput uses GetNameCount_noinline() < 0x78"
+      ],
+      "caveat": "The name suggests an inlining/codegen tactic, but intent is not documented in PR text."
+    },
+    {
+      "tactic": "Precise symbol metadata split",
+      "description": "The symbols file splits mnName_803ED618's former 0x440 object into a 0x18 object plus several string/object entries.",
+      "evidence_refs": [
+        "diff.diff: symbols.txt hunk for mnName_803ED618 through mnName_803ED672"
+      ],
+      "caveat": "The PR evidence shows the split and a small .data score improvement, not broader data ownership rationale."
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot-report",
+      "author": "decomp-dev[bot]",
+      "created_at": "2026-03-25T13:48:09Z",
+      "text": "GALE01 report: matched code 60.49% (+0.10%, +3956 bytes); 11 new matches and 14 improvements in unmatched items, all reported for main/melee/mn/mnname.",
+      "evidence_refs": [
+        "text_corpus.jsonl: issue_comment by decomp-dev[bot]"
+      ]
+    },
+    {
+      "kind": "missing-human-review",
+      "author": null,
+      "created_at": null,
+      "text": "No review comments or human issue discussion were present in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata_json: review_comments 0, reviews 0, issue_comments 1",
+        "text_corpus.jsonl: only PR body and bot issue comment"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2352",
+    "Jj/mnname",
+    "jellejurre",
+    "mnname",
+    "src/melee/mn/mnname.c",
+    "src/melee/mn/mnname.h",
+    "config/GALE01/symbols.txt",
+    "gmmain_lib.h",
+    "CompareNameStrings",
+    "DeleteName",
+    "IsNameUnique",
+    "IsNameListFull",
+    "mnName_SortNames",
+    "mnName_80237D94",
+    "mnName_ConfirmNameDeleteInput",
+    "mnName_MainInput",
+    "mnName_80239878",
+    "fn_80239574",
+    "fn_8023A0BC",
+    "mnName_80238AE0",
+    "mnName_80238A04",
+    "mnName_NameDisplayOrder",
+    "GetNameCount_noinline",
+    "PAD_STACK",
+    "opt_common_subs",
+    "gmMainLib_8015DBF4",
+    "mnName_803ED618",
+    "mnName_803ED630",
+    "mnName_803ED644",
+    "mnName_803ED650",
+    "mnName_803ED668",
+    "mnName_803ED672"
+  ],
+  "follow_up_queries": [
+    "PR 2352 mnname PAD_STACK GetNameCount_noinline",
+    "mnName_8023749C opt_common_subs removed match",
+    "mnName_803ED618 symbols split mnName_803ED630 mnName_803ED672",
+    "mnname.h UNK_RET UNK_PARAMS typed prototype cleanup",
+    "mnName_SortNames CompareNameStrings DeleteName matching",
+    "gmMainLib_8015DBF4 s32 mnname DeleteName"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR metadata, changed files, counts",
+      "raw_diff/diff_excerpt: source, header, and symbols changes",
+      "text_corpus.jsonl: bot report with match metrics"
+    ],
+    "notes": [
+      "PR body is empty.",
+      "No human reviews or review comments are present in the loaded slice.",
+      "The raw diff is truncated in the loaded file, though targeted lookup recovered the mnname.h hunk.",
+      "Bot report gives useful match/improvement evidence but no build command, objdiff details, or author rationale.",
+      "Several apparent matching tactics, including PAD_STACK and GetNameCount_noinline, are observable but not explained by PR comments."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson_candidate",
+        "title": "Separate bot-reported new matches from partial improvements",
+        "text": "For large decomp PRs, record exact bot report categories: PR 2352 had 11 new 100% matches and 14 improvements that remained unmatched, all in main/melee/mn/mnname.",
+        "scope": [
+          "verification",
+          "pr-intake",
+          "mnname"
+        ],
+        "evidence_refs": [
+          "text_corpus.jsonl: decomp-dev bot report"
+        ]
+      },
+      {
+        "record_type": "decomp_lesson_candidate",
+        "title": "Recovered source signatures should be mirrored in headers",
+        "text": "PR 2352 updated mnname.h and gmmain_lib.h prototypes alongside recovered mnname bodies, replacing several UNK_RET/UNK_PARAMS declarations with typed signatures.",
+        "scope": [
+          "headers",
+          "decomp-matching"
+        ],
+        "evidence_refs": [
+          "diff.diff: mnname.h prototype changes",
+          "diff.diff: gmmain_lib.h gmMainLib_8015DBF4(s32)"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "mnname source owns name-list menu matching work",
+        "text": "src/melee/mn/mnname.c is the source file for name-entry/name-list menu routines such as CompareNameStrings, DeleteName, mnName_SortNames, mnName_80237D94, mnName_ConfirmNameDeleteInput, and mnName_MainInput; PR 2352 added or improved these functions.",
+        "source_path": "src/melee/mn/mnname.c",
+        "scope": [
+          "mnname",
+          "menu-name-entry",
+          "main/melee/mn/mnname"
+        ],
+        "evidence_refs": [
+          "diff.diff: mnname.c added function bodies",
+          "text_corpus.jsonl: bot report lists mnname functions"
+        ],
+        "reason": "Useful source path classification for future mnname matching searches."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "mnname.h contains recovered mnname function prototypes and MnName_GObj layout",
+        "text": "src/melee/mn/mnname.h declares mnname functions and the MnName_GObj struct; PR 2352 added a text2 field and replaced multiple unknown prototypes with typed signatures.",
+        "source_path": "src/melee/mn/mnname.h",
+        "scope": [
+          "mnname",
+          "headers"
+        ],
+        "evidence_refs": [
+          "diff.diff: mnname.h hunk"
+        ],
+        "reason": "Useful header ownership fact; route for curator review rather than promoting directly."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "GALE01 symbols file carries mnName data split metadata",
+        "text": "config/GALE01/symbols.txt contains mnName .data symbol metadata; PR 2352 split mnName_803ED618 and added mnName_803ED630, mnName_803ED644, mnName_803ED650, mnName_803ED668, and mnName_803ED672.",
+        "source_path": "config/GALE01/symbols.txt",
+        "scope": [
+          "symbols",
+          "mnname",
+          ".data"
+        ],
+        "evidence_refs": [
+          "diff.diff: symbols.txt hunk"
+        ],
+        "reason": "May help future data/symbol ownership searches, but the historical PR gives limited rationale."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that PAD_STACK or GetNameCount_noinline is generally recommended; this PR shows those tactics but does not document necessity.",
+      "Do not treat mnName_803ED618 symbol splitting as a global data-section standard from this PR alone.",
+      "Do not infer human reviewer acceptance reasoning; no human review comments were loaded.",
+      "Do not claim all added mnname functions fully matched; the bot report distinguishes new matches from partial improvements."
+    ]
+  },
+  "confidence": 0.76,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 1289,
+  "title": "Create `link.py`",
+  "state": "MERGED",
+  "createdAt": "2024-02-21T04:50:14Z",
+  "updatedAt": "2024-02-21T04:52:22Z",
+  "mergedAt": "2024-02-21T04:52:22Z",
+  "closedAt": "2024-02-21T04:52:22Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1289",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 1773
+  }
+}

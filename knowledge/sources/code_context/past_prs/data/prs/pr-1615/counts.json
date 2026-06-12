@@ -1,0 +1,17 @@
+{
+  "number": 1615,
+  "title": "Match grlast (Final Destination)",
+  "state": "MERGED",
+  "createdAt": "2025-06-21T01:32:49Z",
+  "updatedAt": "2025-06-21T01:49:21Z",
+  "mergedAt": "2025-06-21T01:49:16Z",
+  "closedAt": "2025-06-21T01:49:16Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1615",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 51464
+  }
+}

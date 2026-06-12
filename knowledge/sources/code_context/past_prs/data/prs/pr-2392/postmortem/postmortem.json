@@ -1,0 +1,290 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2392",
+  "pr": {
+    "number": 2392,
+    "title": "Jj/lbshadow",
+    "url": "https://github.com/doldecomp/melee/pull/2392",
+    "state": "MERGED",
+    "author": "jurrejelle",
+    "created_at": "2026-04-07T19:59:59Z",
+    "merged_at": "2026-04-07T20:59:00Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2392 replaced lbshadow skeleton markers with C implementations in src/melee/lb/lbshadow.c, mainly adding lbShadow_8000E9F0 spline-direction logic and lbShadow_8000F38C fighter shadow/light/camera update logic, plus required baselib, fighter, ground, vector, spline, video, and math includes. The slice contains no review comments or verifier output, so matching status and reviewer rationale are not evidenced beyond the merged PR metadata and diff.",
+  "change_classification": {
+    "primary_type": "decompilation-code",
+    "categories": [
+      "code-change",
+      "function-decompilation",
+      "library"
+    ],
+    "systems": [
+      "src/melee/lb",
+      "lbshadow",
+      "baselib-shadow",
+      "fighter-shadow-rendering"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/lb/lbshadow.c",
+      "role": "Only changed file; replaces skeleton comments for lbShadow_8000E9F0 and lbShadow_8000F38C with C bodies, removes a duplicate skeleton marker near lbShadow_8000EE8C, and adds headers needed by the recovered logic.",
+      "evidence_refs": [
+        "metadata_json.changed_files[0]",
+        "raw_diff"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Added includes for math_ppc, baselib initialize/lobj/spline/video, cm and fighter types/drawcommon, ground, and lbvector to support the new lbshadow code.",
+      "evidence_refs": [
+        "raw_diff:include block"
+      ]
+    },
+    {
+      "text": "Implemented lbShadow_8000E9F0(Vec3* p, HSD_Spline* spline, f32 u), including range check, spline segment indexing, and a switch over spline->type for line, Bezier-like, Catmull-style, and tension-based calculations.",
+      "evidence_refs": [
+        "raw_diff:lbShadow_8000E9F0"
+      ]
+    },
+    {
+      "text": "Implemented lbShadow_8000F38C(s32 arg0), including fighter iteration, light object selection from HSD_GObj_804D7824[4], light vector normalization/fallback behavior, shadow object membership updates, active-state toggling, camera setup, viewing rectangle adjustment loop, offscreen shadow render, and render cleanup.",
+      "evidence_refs": [
+        "raw_diff:lbShadow_8000F38C"
+      ]
+    },
+    {
+      "text": "Used HSD_ASSERT and HSD_ASSERTREPORT for lobj and light-position checks, while a direct __assert remains for the shadow pointer check from shadow.h line 0x63.",
+      "evidence_refs": [
+        "raw_diff:lbShadow_8000F38C assertions"
+      ]
+    },
+    {
+      "text": "Introduced PAD_STACK(16) in lbShadow_8000E9F0 and PAD_STACK(0x48) in lbShadow_8000F38C.",
+      "evidence_refs": [
+        "raw_diff:lbShadow_8000E9F0",
+        "raw_diff:lbShadow_8000F38C"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "The PR expresses repeated fighter traversal as ordinary for loops over HSD_GObj_Entities->fighters rather than duplicated blocks.",
+      "evidence_refs": [
+        "raw_diff:lbShadow_8000F38C fighter loops"
+      ]
+    },
+    {
+      "text": "The spline-type dispatch is represented as a switch on spline->type, keeping each basis calculation localized in a case block.",
+      "evidence_refs": [
+        "raw_diff:lbShadow_8000E9F0 switch"
+      ]
+    },
+    {
+      "text": "The rendering flow keeps named vector temporaries such as lightPos, lightDir, upVec, rightVec, normDir, eyePos, and interestPos, which makes the shadow-camera math more reviewable than anonymous temporaries.",
+      "evidence_refs": [
+        "raw_diff:lbShadow_8000F38C locals"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For recovered library code that iterates engine object lists, ordinary for loops over next/next_gx can be reviewable and align with the natural-loops standard when the iteration structure is clear in the decompiled logic.",
+      "scope": [
+        "src/melee/lb/lbshadow.c",
+        "HSD_GObj iteration"
+      ],
+      "evidence_refs": [
+        "raw_diff:for (gobj = HSD_GObj_Entities->fighters; ...)",
+        "raw_diff:for (lgobj = HSD_GObj_804D7824[4]; ...)"
+      ]
+    },
+    {
+      "lesson": "Switch-based dispatch is a natural source form for spline type variants when each case has distinct basis math and uses the same control-point array.",
+      "scope": [
+        "lbShadow_8000E9F0",
+        "HSD_Spline"
+      ],
+      "evidence_refs": [
+        "raw_diff:lbShadow_8000E9F0 switch (spline->type)"
+      ]
+    },
+    {
+      "lesson": "Use typed engine structs and subsystem helpers where available: this diff accesses HSD_Spline, HSD_LObj, HSD_Shadow, Fighter, CmSubject, and helper APIs instead of raw offset-only pointer arithmetic for the main recovered behavior.",
+      "scope": [
+        "lbshadow",
+        "fighter shadow update"
+      ],
+      "evidence_refs": [
+        "raw_diff:lbShadow_8000E9F0 signature and spline fields",
+        "raw_diff:lbShadow_8000F38C typed locals and helper calls"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "Short role names are used for common engine objects: gobj for HSD_GObj, lobj for HSD_LObj, fp/fp2 for Fighter, cm for CmSubject, and lbs for LbShadow.",
+      "evidence_refs": [
+        "raw_diff:lbShadow_8000F38C locals and loop bodies"
+      ]
+    },
+    {
+      "text": "Vector temporaries are named by geometric role, including lightPos, lightDir, upVec, lightVec, rightVec, normDir, eyePos, interestPos, and camPos.",
+      "evidence_refs": [
+        "raw_diff:lbShadow_8000F38C local declarations"
+      ]
+    },
+    {
+      "text": "Some recovered struct members remain offset-style or bitfield-style names such as x20A4, x0_b0, x0_b3, x21FC_flag.b7, x221E_b5, and x5AC.xC[1], indicating semantics were not renamed in this PR.",
+      "evidence_refs": [
+        "raw_diff:lbShadow_8000F38C Fighter field accesses"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "PAD_STACK was used narrowly in both newly implemented functions.",
+      "evidence_refs": [
+        "raw_diff:PAD_STACK(16)",
+        "raw_diff:PAD_STACK(0x48)"
+      ],
+      "caveat": "The PR slice provides no objdiff/build evidence explaining why the stack padding was required."
+    },
+    {
+      "tactic": "The viewing-rectangle expansion uses a do-while loop with an explicit s32 counter and break on HSD_ViewingRectCheck.",
+      "evidence_refs": [
+        "raw_diff:do { ... } while (i < 0x14)"
+      ],
+      "caveat": "The slice does not state whether this loop shape was chosen for matching or source readability."
+    },
+    {
+      "tactic": "The light object scan preserves next_gx before walking an HSD_LObj chain, then can null nextGx to break the outer traversal after finding a flagged light.",
+      "evidence_refs": [
+        "raw_diff:HSD_GObj_804D7824[4] scan"
+      ],
+      "caveat": "Intent is inferred only from control flow in the diff, not from author or reviewer explanation."
+    }
+  ],
+  "review_feedback": [],
+  "searchable_terms": [
+    "pr-2392",
+    "Jj/lbshadow",
+    "jurrejelle",
+    "src/melee/lb/lbshadow.c",
+    "lbShadow_8000E9F0",
+    "lbShadow_8000F38C",
+    "HSD_Spline",
+    "spline->type",
+    "PAD_STACK",
+    "HSD_GObj_Entities->fighters",
+    "HSD_GObj_804D7824",
+    "HSD_LObjGetFlags",
+    "HSD_LObjGetPosition",
+    "HSD_LObjGetInterest",
+    "lbVector_Diff",
+    "lbVector_Normalize",
+    "lbVector_CrossprodNormalized",
+    "HSD_ShadowSetActive",
+    "HSD_ShadowSetViewingRect",
+    "HSD_ViewingRectInit",
+    "HSD_ViewingRectCheck",
+    "HSD_CObjSetOrtho",
+    "Ground_801C0508",
+    "ftDrawCommon_80081200",
+    "ftDrawCommon_80081168"
+  ],
+  "follow_up_queries": [
+    "Search later PRs touching lbShadow_8000F38C for cleanup of PAD_STACK(0x48), direct __assert(\"shadow.h\", 0x63, \"shadow\"), or x20A4 flag names.",
+    "Search lbshadow.c history for verifier or objdiff notes proving lbShadow_8000E9F0 and lbShadow_8000F38C matched after this PR.",
+    "Search for HSD_ViewingRectAddRect/HSD_ViewingRectCheck patterns in other files to compare loop shape and naming.",
+    "Search for HSD_LObjGetFlags(lobj) & 0x400 usage to identify light-selection naming or constants.",
+    "Search fighter shadow field names x20A4.x0_b0 through x20A4.x0_b5 for later semantic renames."
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json",
+      "human_pr_text",
+      "changed_files.jsonl",
+      "raw_diff"
+    ],
+    "notes": [
+      "Changed-file and diff evidence are strong: one changed file with 317 additions and 4 deletions is fully loaded.",
+      "There are no review comments, issue comments, or review records in the slice.",
+      "The PR body only says \"Tracking PR as per usual\" and does not explain matching strategy, validation, or author intent.",
+      "No build, objdiff, checkdiff, or regression output is included, so claimed match status cannot be independently recorded from this slice.",
+      "Merged metadata is present, but merge status is not evidence for the exact technical rationale behind any code shape."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "pr_specific_decomp_lesson",
+        "title": "lbshadow PR used typed engine structs and natural loops for large recovered function bodies",
+        "text": "In PR #2392, lbshadow recovery used typed structs and helper APIs such as HSD_Spline, HSD_LObj, HSD_Shadow, Fighter, CmSubject, lbVector helpers, HSD_ViewingRect helpers, and HSD_Shadow APIs, with ordinary for/do-while loops for object traversal and viewing-rect iteration. This is supported as a PR-specific observation, not as proof of match validation.",
+        "scope": [
+          "src/melee/lb/lbshadow.c",
+          "lbShadow_8000E9F0",
+          "lbShadow_8000F38C"
+        ],
+        "evidence_refs": [
+          "raw_diff"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "src/melee/lb/lbshadow.c includes fighter shadow, light-object, and viewing-rect render logic",
+        "text": "PR #2392 shows src/melee/lb/lbshadow.c containing lbShadow_8000F38C logic that iterates fighters, selects an HSD_LObj light, computes light/up vectors, updates Fighter shadow state, configures HSD_Shadow camera/viewing rectangle, and renders shadows offscreen.",
+        "source_path": "src/melee/lb/lbshadow.c",
+        "scope": [
+          "lbshadow",
+          "fighter shadow rendering",
+          "HSD_Shadow",
+          "HSD_LObj",
+          "HSD_ViewingRect"
+        ],
+        "evidence_refs": [
+          "raw_diff:lbShadow_8000F38C"
+        ],
+        "reason": "Useful path-level search fact for future lbshadow/fighter-shadow curation; should be checked against current source before promotion."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "lbShadow_8000E9F0 computes spline derivative-like vectors by HSD_Spline type",
+        "text": "PR #2392 shows lbShadow_8000E9F0 taking Vec3*, HSD_Spline*, and f32 u, range-checking u, selecting control points, and dispatching on spline->type to write a Vec3 result using per-type basis math.",
+        "source_path": "src/melee/lb/lbshadow.c",
+        "scope": [
+          "lbShadow_8000E9F0",
+          "HSD_Spline",
+          "Vec3"
+        ],
+        "evidence_refs": [
+          "raw_diff:lbShadow_8000E9F0"
+        ],
+        "reason": "Potential symbol/path fact; exact semantic label should be verified against current source and callsites before naming beyond the evidence."
+      }
+    ],
+    "rejection_notes": [
+      "Do not record that lbShadow_8000E9F0 or lbShadow_8000F38C matched from this slice alone; no verifier evidence is loaded.",
+      "Do not infer reviewer approval rationale; there are no review comments.",
+      "Do not promote PAD_STACK use as an accepted style from this PR; the diff contains PAD_STACK but no justification.",
+      "Do not rename x20A4/x0_b* fighter fields from this PR alone; the diff preserves offset-style names and provides no semantic proof for the individual flags."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

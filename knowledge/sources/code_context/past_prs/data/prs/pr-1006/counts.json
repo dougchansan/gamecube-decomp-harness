@@ -1,0 +1,17 @@
+{
+  "number": 1006,
+  "title": "Partially match `ftCo_Bury`",
+  "state": "MERGED",
+  "createdAt": "2023-11-16T22:04:16Z",
+  "updatedAt": "2023-11-16T22:20:25Z",
+  "mergedAt": "2023-11-16T22:20:24Z",
+  "closedAt": "2023-11-16T22:20:24Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1006",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 144753
+  }
+}

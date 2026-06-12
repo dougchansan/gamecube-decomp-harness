@@ -1,0 +1,17 @@
+{
+  "number": 108,
+  "title": "Cleanup Kirby's Char Copy table, start cleanup of Copy Costumes",
+  "state": "MERGED",
+  "createdAt": "2021-11-16T23:43:28Z",
+  "updatedAt": "2021-11-16T23:43:36Z",
+  "mergedAt": "2021-11-16T23:43:33Z",
+  "closedAt": "2021-11-16T23:43:33Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/108",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 24589
+  }
+}

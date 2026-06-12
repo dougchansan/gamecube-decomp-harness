@@ -1,0 +1,395 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2464",
+  "pr": {
+    "number": 2464,
+    "title": "Match 8 functions across stage, fighter, and menu TUs",
+    "url": "https://github.com/doldecomp/melee/pull/2464",
+    "state": "MERGED",
+    "author": "davidfeira",
+    "created_at": "2026-05-07T20:25:58Z",
+    "merged_at": "2026-05-07T21:07:40Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2464 matched several functions across fighter, stage, and game-mode translation units, plus one header signature refinement for gm_8016A9E8. The PR body claims 8 matched functions with ninja main.dol linking and per-function objdiff-cli 100% results; the bot report lists 12 new matches including functions and data-section items, plus 9 unmatched-item improvements. The PR also records that an earlier gricemt const-section reorder was dropped after CI surfaced a 4-byte neighboring regression.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "cleanup",
+      "decomp-matching",
+      "headers",
+      "types-structs",
+      "data-section-touch"
+    ],
+    "systems": [
+      "fighter",
+      "game-mode",
+      "stage"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_SpecialNYs.c",
+      "role": "Matched or completed ftKb_SpecialNPe_8010BF90 by selecting motion state from cmd_vars and Kirby hat kind, using ftKb_Init globals for Fighter_ChangeMotionState speed/frame fields, and preserving hitlag callbacks.",
+      "evidence_refs": [
+        "changed_files.jsonl: ftKb_SpecialNYs.c added 10 deleted 6",
+        "raw_diff: ftKb_SpecialNPe_8010BF90 hunk",
+        "human_pr_text: ftKb_SpecialNPe_8010BF90 description",
+        "text_corpus issue_comment: bot report lists ftKb_SpecialNPe_8010BF90 99.82% to 100.00%"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftPopo/ftPp_SpecialS.c",
+      "role": "Adjusted Ice Climbers Special-S/Hi logic and matched ftPp_SpecialHiStart_0_Anim, ftPp_SpecialAirHiStart_0_Anim, and ftPp_SpecialLw_Coll per bot report.",
+      "evidence_refs": [
+        "changed_files.jsonl: ftPp_SpecialS.c added 20 deleted 10",
+        "raw_diff: checkNanaInRange, ftPp_SpecialHiStart_0_Anim, ftPp_SpecialAirHiStart_0_Anim, ftPp_SpecialLw_Coll hunks",
+        "human_pr_text: ftPp_SpecialAirHiStart_0_Anim description",
+        "text_corpus issue_comment: bot report lists three ftPp_SpecialS function matches to 100.00%"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftchangeparam.c",
+      "role": "Matched ftCo_800D0EC8 by correcting argument order to ftCo_CalcYScaledKnockback.",
+      "evidence_refs": [
+        "changed_files.jsonl: ftchangeparam.c added 2 deleted 2",
+        "raw_diff: ftCo_800D0EC8 argument-order hunk",
+        "human_pr_text: ftCo_800D0EC8 description",
+        "text_corpus issue_comment: bot report lists ftCo_800D0EC8 99.96% to 100.00%"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftdynamics.c",
+      "role": "Added body for ftCo_8009CB40 as an unmatched-item improvement and matched ftCo_8009DB50 dynamics installer; changed assert file argument to __FILE__ and used bone_id local for dynamic bone slots.",
+      "evidence_refs": [
+        "changed_files.jsonl: ftdynamics.c added 82 deleted 7",
+        "raw_diff: ftCo_8009CB40 and ftCo_8009DB50 hunks",
+        "human_pr_text: ftCo_8009DB50 description",
+        "text_corpus issue_comment: bot report lists ftCo_8009DB50 to 100.00%, ftCo_8009CB40 0.00% to 92.02%, and .sdata/.sdata2 changes"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1601.c",
+      "role": "Implemented gm_8016A9E8 as a 27-entry two-array MRU push using -2 sentinel search and head insertion.",
+      "evidence_refs": [
+        "changed_files.jsonl: gm_1601.c added 24 deleted 1",
+        "raw_diff: gm_8016A9E8 implementation hunk",
+        "human_pr_text: gm_8016A9E8 description",
+        "text_corpus issue_comment: bot report lists gm_8016A9E8 0.00% to 100.00%"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1601.h",
+      "role": "Refined gm_8016A9E8 prototype from UNK_RET/UNK_PARAMS to int gm_8016A9E8(u8 arg0, s8 arg1).",
+      "evidence_refs": [
+        "changed_files.jsonl: gm_1601.h added 1 deleted 1",
+        "raw_diff: gm_1601.h prototype hunk",
+        "human_pr_text: Header refinements section"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grbigblueroute.c",
+      "role": "Added Big Blue route StageCallbacks/data definitions, adjusted OSReport data usage, matched grBigBlueRoute_8020B9D4, and improved grBigBlueRoute_8020C530 and .data/.sdata per bot report.",
+      "evidence_refs": [
+        "changed_files.jsonl: grbigblueroute.c added 115 deleted 3",
+        "raw_diff: grBb_Route_803E5E78, grBb_Route_803E617C, grBigBlueRoute_8020B9D4, grBigBlueRoute_8020C530 hunks",
+        "human_pr_text: grBigBlueRoute_8020B9D4 description",
+        "text_corpus issue_comment: bot report lists grBigBlueRoute_8020B9D4 to 100.00%, .data improvement, .sdata match, and grBigBlueRoute_8020C530 improvement"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grpura.c",
+      "role": "Matched grPura_80211FD8 by passing the Ground_GObj through grPura_80213030 and updating its local prototype/signature.",
+      "evidence_refs": [
+        "changed_files.jsonl: grpura.c added 3 deleted 3",
+        "raw_diff: grPura_80211FD8 and grPura_80213030 signature hunks",
+        "human_pr_text: grPura_80211FD8 description",
+        "text_corpus issue_comment: bot report lists grPura_80211FD8 94.44% to 100.00%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grzebes.c",
+      "role": "Added Brinstar callback/data definitions and matched grZebes_801D8558 per PR body and bot report.",
+      "evidence_refs": [
+        "changed_files.jsonl: grzebes.c added 56 deleted 6",
+        "raw_diff: grZe_803E1A10, grZe_callbacks, grZe_803E1B2C, grZebes_801D8558 surrounding hunk",
+        "human_pr_text: grZebes_801D8558 description",
+        "text_corpus issue_comment: bot report lists grZebes_801D8558 94.88% to 100.00% and .data improvement"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Matched or completed claimed functions across ftPp_SpecialS, ftdynamics, ftchangeparam, grzebes, grbigblueroute, grpura, gm_1601, and ftKb_SpecialNYs.",
+    "Refined gm_8016A9E8 declaration in gm_1601.h to int gm_8016A9E8(u8 arg0, s8 arg1), matching the recovered body.",
+    "Added or exposed stage data/callback tables in grbigblueroute.c and grzebes.c as part of matching stage setup routines.",
+    "Used PAD_STACK in ftKb_SpecialNPe_8010BF90, ftPp_SpecialHiStart_0_Anim, ftPp_SpecialAirHiStart_0_Anim, and ftPp_SpecialLw_Coll according to the diff.",
+    "Dropped an earlier gricemt const-section reorder after CI reported a 4-byte regression in neighboring grIceMt_801F7A2C, according to the PR notes."
+  ],
+  "smart_moves": [
+    "The PR body records narrow verification: ninja main.dol linked cleanly and per-function objdiff-cli diff reported 100.0% for the claimed 8 functions.",
+    "The gm_1601.h prototype was updated alongside the recovered gm_8016A9E8 body instead of leaving UNK_RET/UNK_PARAMS.",
+    "The author removed the gricemt commit after CI detected a neighboring regression from const-section reorder, keeping the submitted PR focused on non-regressing matches.",
+    "The ftCo_800D0EC8 fix demonstrates a small high-leverage match: only the first and third ftCo_CalcYScaledKnockback arguments changed."
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a recovered function body proves a signature, update the owning header prototype in the same PR rather than leaving UNK_RET/UNK_PARAMS.",
+      "scope": [
+        "headers",
+        "game-mode",
+        "gm_1601"
+      ],
+      "evidence_refs": [
+        "raw_diff: gm_1601.c implements int gm_8016A9E8(u8 arg0, s8 arg1)",
+        "raw_diff: gm_1601.h changes UNK_RET gm_8016A9E8(UNK_PARAMS) to int gm_8016A9E8(u8 arg0, s8 arg1)",
+        "human_pr_text: Header refinements section"
+      ]
+    },
+    {
+      "lesson": "Data or const-section reorder work can regress neighboring functions; if a reorder creates CI/report noise, split or drop it and resubmit with a non-regressing approach.",
+      "scope": [
+        "data-sections",
+        "stage",
+        "regression-control"
+      ],
+      "evidence_refs": [
+        "human_pr_text: Notes section about gricemt commit 1e672b30a, const-section reorder, 4-byte grIceMt_801F7A2C regression, and dropping the commit"
+      ]
+    },
+    {
+      "lesson": "Small argument-order corrections can close near-matched helper wrappers; ftCo_800D0EC8 reached 100% by changing ftCo_CalcYScaledKnockback argument order.",
+      "scope": [
+        "fighter",
+        "helper-call-matching"
+      ],
+      "evidence_refs": [
+        "raw_diff: ftCo_800D0EC8 swaps Fighter_804D6524->x30 and p_ftCommonData->x310 positions",
+        "text_corpus issue_comment: ftCo_800D0EC8 99.96% to 100.00%"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Recovered address-style symbols were generally kept as address-style names, such as gm_8016A9E8, ftCo_800D0EC8, grZebes_801D8558, grBigBlueRoute_8020B9D4, and grPura_80211FD8.",
+      "evidence_refs": [
+        "human_pr_text: function names listed by TU",
+        "raw_diff: implementations and edits use address-style names"
+      ]
+    },
+    {
+      "convention": "Local role names in new code include short names such as fp, gp, ptr, bone_id, found, idx, and nana_pos when the role is apparent.",
+      "evidence_refs": [
+        "raw_diff: ftKb_SpecialNPe_8010BF90 uses fp and msid",
+        "raw_diff: gm_8016A9E8 uses ptr and found",
+        "raw_diff: ftCo_8009DB50 uses bone_id",
+        "raw_diff: checkNanaInRange uses nana_pos"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "PAD_STACK was introduced narrowly in several fighter functions to satisfy stack/codegen shape.",
+      "evidence_refs": [
+        "raw_diff: ftKb_SpecialNPe_8010BF90 has PAD_STACK(16)",
+        "raw_diff: ftPp_SpecialHiStart_0_Anim and ftPp_SpecialAirHiStart_0_Anim add PAD_STACK(32)",
+        "raw_diff: ftPp_SpecialLw_Coll adds PAD_STACK(8)"
+      ],
+      "caveat": "The diff shows tactic use and the PR body claims objdiff 100% for 8 functions, but no inline reviewer rationale is present for each PAD_STACK instance."
+    },
+    {
+      "tactic": "Preserved explicit user_data casts in ftKb_SpecialNPe_8010BF90 instead of reusing fp for all reads, apparently for matching.",
+      "evidence_refs": [
+        "raw_diff: ftKb_SpecialNPe_8010BF90 changes fp->cmd_vars and fp->fv.kb.hat.kind reads to ((Fighter*) gobj->user_data)->..."
+      ],
+      "caveat": "No review comment explains whether this is preferred style or only a local matching shape."
+    },
+    {
+      "tactic": "Stage setup matching included materializing callback/data tables and using data-backed OSReport format/file strings in grbigblueroute.c.",
+      "evidence_refs": [
+        "raw_diff: grBb_Route_803E5E78 table and grBb_Route_803E617C struct added",
+        "raw_diff: OSReport changed from literal __FILE__ form to grBb_Route_803E617C.fmt and grBb_Route_803E61D4"
+      ],
+      "caveat": "This touched .data/.sdata according to the bot report; evidence supports improvement, but broad data-ownership conclusions need curator review."
+    },
+    {
+      "tactic": "Natural loops were used in newly recovered gm_8016A9E8 and grBigBlueRoute_8020C530 instead of unrolled repeated blocks.",
+      "evidence_refs": [
+        "raw_diff: gm_8016A9E8 uses for loops over 27 entries and shift loop",
+        "raw_diff: grBigBlueRoute_8020C530 uses for loops over 30 entries",
+        "text_corpus issue_comment: gm_8016A9E8 reached 100.00%; grBigBlueRoute_8020C530 improved to 98.72%"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "source": "decomp-dev[bot]",
+      "feedback": "Bot report for GALE01 showed matched code improved by +0.07% / +2604 bytes and matched data by +48 bytes, with 12 new matches and 9 improvements in unmatched items.",
+      "evidence_refs": [
+        "text_corpus issue_comment: decomp-dev[bot] report"
+      ]
+    },
+    {
+      "source": "PR body notes",
+      "feedback": "An earlier gricemt commit with three extra matches and const-section reorder was dropped because CI surfaced a 4-byte regression in grIceMt_801F7A2C; author planned a follow-up PR with a non-regressing approach.",
+      "evidence_refs": [
+        "human_pr_text: Notes section"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2464",
+    "davidfeira",
+    "Match 8 functions across stage fighter menu TUs",
+    "ftKb_SpecialNPe_8010BF90",
+    "ftKb_Init_804D9570",
+    "ftKb_Init_804D9574",
+    "ftPp_SpecialHiStart_0_Anim",
+    "ftPp_SpecialAirHiStart_0_Anim",
+    "ftPp_SpecialLw_Coll",
+    "checkNanaInRange",
+    "PAD_STACK",
+    "ftCo_800D0EC8",
+    "ftCo_CalcYScaledKnockback",
+    "ftCo_8009DB50",
+    "ftCo_8009CB40",
+    "gm_8016A9E8",
+    "lbl_8046B668",
+    "UNK_RET",
+    "UNK_PARAMS",
+    "grBigBlueRoute_8020B9D4",
+    "grBigBlueRoute_8020C530",
+    "grBb_Route_803E5E78",
+    "grZebes_801D8558",
+    "grZe_callbacks",
+    "grPura_80211FD8",
+    "grPura_80213030",
+    "gricemt",
+    "grIceMt_801F7A2C",
+    "const-section reorder",
+    "4-byte regression"
+  ],
+  "follow_up_queries": [
+    "PR 2464 gricemt 1e672b30a fn_801F9338 fn_801F9448 fn_801F9558 grIceMt_801F7A2C regression follow-up",
+    "ftKb_SpecialNPe_8010BF90 PAD_STACK user_data ftKb_Init_804D9574 ftKb_Init_804D9570",
+    "gm_8016A9E8 lbl_8046B668 arr1 arr2 -2 sentinel MRU history",
+    "grBigBlueRoute_8020B9D4 grZebes_801D8558 StageCallbacks callback3 callback0 callback2",
+    "grbigblueroute .data .sdata callback table data ownership PR 2464",
+    "ftdynamics ftCo_8009CB40 ftCo_8009DB50 dynamic_bone_sets flags_b0 flags_b7"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR metadata, state MERGED, changed files, counts",
+      "human_pr_text: full PR body with summary, function descriptions, verification, and notes",
+      "raw_diff: full diff excerpt for changed files",
+      "changed_files.jsonl: changed-file list and line counts",
+      "text_corpus.jsonl: PR body plus decomp-dev bot report"
+    ],
+    "notes": [
+      "There are no human review comments in the loaded slice.",
+      "The PR body says 8 matched functions, while the bot report lists 12 new matches including data-section items and additional function matches in ftPp_SpecialS; this record preserves both without resolving intent beyond evidence.",
+      "Verification claims are from the PR body and bot report, not independently rerun during intake.",
+      "Several data additions in stage files appear in the diff and bot report, but source ownership and split correctness are not independently established here.",
+      "PAD_STACK and explicit user_data access are treated as local matching tactics, not accepted global style."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "type": "decomp_lesson",
+        "title": "Header prototypes should follow proven recovered bodies",
+        "text": "PR #2464 recovered gm_8016A9E8 as int gm_8016A9E8(u8 arg0, s8 arg1) and updated gm_1601.h from UNK_RET/UNK_PARAMS in the same PR. This is a concrete example of keeping owning headers truthful after a match proves a signature.",
+        "scope": [
+          "headers",
+          "gm_1601",
+          "truthful-headers"
+        ],
+        "evidence_refs": [
+          "raw_diff: gm_1601.c gm_8016A9E8 implementation",
+          "raw_diff: gm_1601.h prototype change",
+          "human_pr_text: Header refinements"
+        ]
+      },
+      {
+        "type": "decomp_lesson",
+        "title": "Drop data reorder work when it regresses neighbors",
+        "text": "PR #2464 notes that an earlier gricemt commit with three extra matches and const-section reorder was removed after CI showed a 4-byte regression in neighboring grIceMt_801F7A2C, with follow-up deferred for a non-regressing approach.",
+        "scope": [
+          "data-sections",
+          "regression-ledger",
+          "stage"
+        ],
+        "evidence_refs": [
+          "human_pr_text: Notes section"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Add PR #2464 as an example under text-before-data-matching or data-sections-and-tu-splits",
+        "text": "Possible example: PR #2464 dropped an earlier gricemt const-section reorder because CI found a 4-byte regression in grIceMt_801F7A2C, even though it bundled three additional matches. This supports keeping data/const reorder work separate or non-regressing when the submitted PR is primarily code matching.",
+        "source_path": null,
+        "scope": [
+          "text-before-data-matching",
+          "data-sections-and-tu-splits",
+          "verification-and-regression-ledger"
+        ],
+        "evidence_refs": [
+          "human_pr_text: Notes section"
+        ],
+        "reason": "The loaded standards already cover this principle; curator may want to add PR #2464 as a concrete historical example rather than a new rule."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Use PR #2464 as an example for truthful header updates after body recovery",
+        "text": "Possible example: gm_8016A9E8's recovered body proved int return and u8/s8 parameters, and gm_1601.h was updated from UNK_RET/UNK_PARAMS in the same PR.",
+        "source_path": "src/melee/gm/gm_1601.h",
+        "scope": [
+          "truthful-headers-and-includes",
+          "gm_1601"
+        ],
+        "evidence_refs": [
+          "raw_diff: gm_1601.h prototype change",
+          "raw_diff: gm_1601.c gm_8016A9E8 implementation",
+          "human_pr_text: Header refinements"
+        ],
+        "reason": "This is a source-backed example of an existing accepted standard, not a new path fact."
+      },
+      {
+        "target_source_id": "other",
+        "update_kind": "source_update",
+        "title": "Track possible follow-up PR for dropped gricemt matches",
+        "text": "The PR body says three gricemt matches fn_801F9338, fn_801F9448, and fn_801F9558 were dropped because a const-section reorder regressed grIceMt_801F7A2C, and that they would be resubmitted later with a non-regressing approach.",
+        "source_path": "src/melee/gr/gricemt.c",
+        "scope": [
+          "stage",
+          "gricemt",
+          "follow-up"
+        ],
+        "evidence_refs": [
+          "human_pr_text: Notes section"
+        ],
+        "reason": "Useful for curator search/backlinking; not evidence that the follow-up exists or landed."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote the explicit ((Fighter*) gobj->user_data) reads in ftKb_SpecialNPe_8010BF90 as preferred style; evidence only shows a local matching shape.",
+      "Do not promote PAD_STACK use as a general recommendation; the PR evidence only supports narrow use in touched fighter functions with claimed matching.",
+      "Do not infer final ownership of grbigblueroute or grzebes data tables solely from this intake; the diff and bot report show data-section changes, but broader split/ownership validation is outside the slice.",
+      "Do not treat the bot report's 12 new matches as contradicting the PR title/body's 8 claimed functions; the bot includes data-section items and additional function matches not emphasized by the author."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

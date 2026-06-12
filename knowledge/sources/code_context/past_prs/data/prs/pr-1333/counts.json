@@ -1,0 +1,17 @@
+{
+  "number": 1333,
+  "title": "Match 13.16% of `gmcamera` (5.21 KB)",
+  "state": "MERGED",
+  "createdAt": "2024-02-26T19:19:36Z",
+  "updatedAt": "2024-02-26T19:21:49Z",
+  "mergedAt": "2024-02-26T19:21:48Z",
+  "closedAt": "2024-02-26T19:21:48Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1333",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 9558
+  }
+}

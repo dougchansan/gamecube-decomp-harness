@@ -1,0 +1,17 @@
+{
+  "number": 1428,
+  "title": "Allow `wiki_tu.py` to update existing wiki page",
+  "state": "MERGED",
+  "createdAt": "2024-08-12T21:45:06Z",
+  "updatedAt": "2024-08-12T21:47:28Z",
+  "mergedAt": "2024-08-12T21:47:28Z",
+  "closedAt": "2024-08-12T21:47:28Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1428",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 5201
+  }
+}

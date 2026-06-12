@@ -1,8 +1,7 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { basename, dirname, extname, relative, resolve } from "node:path";
-import { knowledgeSourcesRoot, sourceDataRoot } from "../paths.js";
+import { sourceDataRoot, sourceRoot } from "../paths.js";
 import { fileEntityId } from "./code-graph.js";
-import { readToolRegistryEntries, resolveToolRoot } from "./sources.js";
 import type { GraphEdge, GraphEntity, GraphFact, GraphRecords, SearchChunk, TrustTier } from "./types.js";
 import { filesFingerprint, shortHash, stableJson, truncate } from "./util.js";
 
@@ -40,26 +39,6 @@ export function buildDiscordKnowledgeGraphRecords(): GraphRecords | null {
     dataRoot: sourceDataRoot("discord_knowledge"),
     indexFileName: "chunks.jsonl",
     defaultEntityType: "discord_knowledge_chunk",
-  });
-}
-
-export function buildReferenceDocsGraphRecords(): GraphRecords | null {
-  return buildDocumentSource({
-    sourceId: "reference_docs",
-    trustTier: "historical",
-    dataRoot: sourceDataRoot("reference_docs"),
-    indexFileName: "chunks.jsonl",
-    defaultEntityType: "reference_doc_chunk",
-  });
-}
-
-export function buildResourceGuidesGraphRecords(): GraphRecords | null {
-  return buildDocumentSource({
-    sourceId: "resource_guides",
-    trustTier: "historical",
-    dataRoot: sourceDataRoot("resource_guides"),
-    indexFileName: "chunks.jsonl",
-    defaultEntityType: "resource_guide_chunk",
   });
 }
 
@@ -257,47 +236,6 @@ export function buildExternalMirrorsGraphRecords(): GraphRecords | null {
     factType: "external_mirror_reference",
     edgeType: "HAS_EXTERNAL_MIRROR_REFERENCE",
   });
-}
-
-export function buildToolOutputsGraphRecords(): GraphRecords | null {
-  const sourceId = "tool_outputs";
-  const inputPaths: string[] = [];
-  const records: IndexedSliceRecord[] = [];
-
-  for (const tool of readToolRegistryEntries()) {
-    const toolId = tool.id;
-    const toolDir = resolveToolRoot(toolId);
-    const indexesRoot = resolve(toolDir, "indexes");
-    const indexFiles = recursiveFiles(indexesRoot).filter((path) => extname(path).toLowerCase() === ".jsonl");
-    for (const indexFile of indexFiles) {
-      inputPaths.push(indexFile);
-      readJsonlObjects(indexFile).forEach((row, index) => {
-        const text = compactText([stringField(row, "title"), stringField(row, "text"), stableJson(row)]);
-        records.push({
-          id: `${toolId}:${relative(indexesRoot, indexFile)}:${stringField(row, "id") || index + 1}`,
-          title: `${toolId}: ${stringField(row, "title") || stringField(row, "symbol") || `record ${index + 1}`}`,
-          text,
-          evidenceRef: stringField(row, "evidence_ref") || `${indexFile}:${index + 1}`,
-          payload: { source_id: sourceId, tool_id: toolId, index_file: relative(indexesRoot, indexFile), row },
-          linkedFilePaths: extractLinkedFilePaths(text),
-          entityType: "tool_finding",
-          entityKey: `${toolId}:${stringField(row, "id") || shortHash(text)}`,
-        });
-      });
-    }
-  }
-
-  const graphRecords = buildIndexBackedGraphRecords({
-    sourceId,
-    trustTier: "tool_evidence",
-    indexFileName: "tool_findings.jsonl",
-    inputPaths,
-    records,
-    defaultEntityType: "tool_finding",
-    factType: "tool_finding",
-    edgeType: "HAS_TOOL_FINDING",
-  });
-  return graphRecords;
 }
 
 export function buildDecompStandardsGraphRecords(): GraphRecords | null {
@@ -560,7 +498,7 @@ function addCsvIndexRecords(options: {
 }
 
 function writeSourceIndex(sourceId: string, fileName: string, rows: Array<Record<string, unknown>>): void {
-  const path = resolve(knowledgeSourcesRoot(), sourceId, "indexes", fileName);
+  const path = resolve(sourceRoot(sourceId), "indexes", fileName);
   mkdirSync(dirname(path), { recursive: true });
   const body = rows.map((row) => JSON.stringify(row)).join("\n");
   writeFileSync(path, body ? `${body}\n` : "", "utf8");
@@ -654,7 +592,7 @@ function readJsonlObjects(path: string): Array<Record<string, unknown>> {
       const parsed = JSON.parse(line) as unknown;
       if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) rows.push(parsed as Record<string, unknown>);
     } catch {
-      // Ignore malformed tool cache rows; the tool API smoke check will expose bad indexes.
+      // Ignore malformed JSONL rows; source and tool smoke checks expose bad indexes.
     }
   }
   return rows;

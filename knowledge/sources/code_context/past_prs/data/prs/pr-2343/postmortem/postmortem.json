@@ -1,0 +1,360 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2343",
+  "pr": {
+    "number": 2343,
+    "title": "ft/ftKirby: decompile 7 Kirby special N functions",
+    "url": "https://github.com/doldecomp/melee/pull/2343",
+    "state": "MERGED",
+    "author": "johnwinston",
+    "created_at": "2026-03-21T15:02:20Z",
+    "merged_at": "2026-03-21T20:41:25Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Decompiled several Kirby copied-neutral-B and swallow-related functions across ftKb_SpecialN, ftKb_SpecialNZd, ftKb_SpecialNNs, and ftKb_Init, plus one header signature update. The PR body claims all 7 target functions matched via an overnight script, while the loaded bot report shows 2 new 100% matches and 5 target functions as high-percentage improvements rather than 100%, so validation evidence is mixed.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "fighter"
+    ],
+    "systems": [
+      "fighter",
+      "ftKirby",
+      "Kirby special N"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_Init.c",
+      "role": "Added ftanim include and decompiled ftKb_SpecialN_800EF35C, a Kirby hat model/matanim loading helper using costume data, ftParts filtering, HSD_DObjAddAnimAll, ftAnim_GetNextMatAnimJointInTree, and PAD_STACK(8).",
+      "evidence_refs": [
+        "changed_files.jsonl: ftKb_Init.c added 28 deleted 1 hunks 2",
+        "raw_diff: ftKb_Init.c include ft/ftanim.h and ftKb_SpecialN_800EF35C implementation",
+        "human_pr_text: Hat model loading description"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_Init.h",
+      "role": "Updated ftKb_SpecialN_800EF35C prototype from UNK_RET to void after body recovery.",
+      "evidence_refs": [
+        "changed_files.jsonl: ftKb_Init.h added 1 deleted 1",
+        "raw_diff: UNK_RET ftKb_SpecialN_800EF35C -> void ftKb_SpecialN_800EF35C"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_SpecialN.c",
+      "role": "Added includes for throw/thrown-Kirby/ftanim dependencies and decompiled ftKb_SpecialNDrink0_Anim, ftKb_SpecialNDrink1_Anim, and ftKb_SpecialAirNDrink_Anim.",
+      "evidence_refs": [
+        "changed_files.jsonl: ftKb_SpecialN.c added 56 deleted 3 hunks 3",
+        "raw_diff: ftKb_SpecialNDrink0_Anim, ftKb_SpecialNDrink1_Anim, ftKb_SpecialAirNDrink_Anim implementations",
+        "human_pr_text: Inhale swallowing animation description"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_SpecialNNs.c",
+      "role": "Decompiled ftKb_PrSpecialAirNStart_Anim for copied Jigglypuff aerial Rollout startup, including motion-state transition, callback setup, animation rate, tiny horizontal velocity, and part rotation.",
+      "evidence_refs": [
+        "changed_files.jsonl: ftKb_SpecialNNs.c added 23 deleted 1",
+        "raw_diff: ftKb_PrSpecialAirNStart_Anim implementation",
+        "human_pr_text: Copied Jigglypuff neutral B description"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_SpecialNZd.c",
+      "role": "Decompiled copied Sheik loop IASA functions and copied Mewtwo neutral-B entry helper, adding a forward declaration for fn_80106DB0 and an inline change-action helper.",
+      "evidence_refs": [
+        "changed_files.jsonl: ftKb_SpecialNZd.c added 73 deleted 3 hunks 4",
+        "raw_diff: ftKb_SkSpecialNLoop_IASA, ftKb_SkSpecialAirNLoop_IASA, ftKb_SpecialNMt_ChangeAction, ftKb_SpecialNMt_80107568 implementations",
+        "human_pr_text: copied Sheik and Mewtwo neutral B descriptions"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Replaced placeholder comments for eight listed implementations in the diff: ftKb_SpecialN_800EF35C, ftKb_SpecialNDrink0_Anim, ftKb_SpecialNDrink1_Anim, ftKb_SpecialAirNDrink_Anim, ftKb_PrSpecialAirNStart_Anim, ftKb_SkSpecialNLoop_IASA, ftKb_SkSpecialAirNLoop_IASA, and ftKb_SpecialNMt_80107568 via an inline helper.",
+    "Added required includes for recovered callsites: ft/ftanim.h in ftKb_Init.c and ftKb_SpecialN.c, plus ftCo_Throw.h and ftCo_ThrownKirby.h in ftKb_SpecialN.c.",
+    "Updated the public prototype of ftKb_SpecialN_800EF35C from UNK_RET to void in ftKb_Init.h.",
+    "Used input checks in copied Sheik IASA functions: release B transitions to end state and assigns accessory4_cb; shoulder input transitions to cancel state.",
+    "Used animation-completion checks in drink and Jigglypuff startup anim functions to transition to fall/wait/full states or adjust callbacks and animation rate.",
+    "Used PAD_STACK in ftKb_SpecialN_800EF35C, ftKb_SpecialAirNDrink_Anim, ftKb_PrSpecialAirNStart_Anim, and ftKb_SpecialNMt_80107568."
+  ],
+  "smart_moves": [
+    {
+      "text": "Header signature was updated alongside the recovered body for ftKb_SpecialN_800EF35C, avoiding a stale UNK_RET declaration.",
+      "evidence_refs": [
+        "raw_diff: ftKb_Init.h prototype change",
+        "raw_diff: ftKb_Init.c body returns void"
+      ]
+    },
+    {
+      "text": "The hat-loading helper used a small local struct to describe costume data entries with HSD_Joint and HSD_MatAnimJoint fields instead of leaving raw offset-only access in the excerpt.",
+      "evidence_refs": [
+        "raw_diff: ftKb_SpecialN_800EF35C local struct costume_data"
+      ]
+    },
+    {
+      "text": "Copied Sheik ground and air loop IASA implementations were kept structurally parallel, differing only in the motion states used for ground versus air.",
+      "evidence_refs": [
+        "raw_diff: ftKb_SkSpecialNLoop_IASA and ftKb_SkSpecialAirNLoop_IASA"
+      ]
+    },
+    {
+      "text": "The Mewtwo neutral-B entry logic was factored into a static inline ftKb_SpecialNMt_ChangeAction that the exported function calls, suggesting a narrow codegen/matching strategy within the same file.",
+      "evidence_refs": [
+        "raw_diff: static inline ftKb_SpecialNMt_ChangeAction and ftKb_SpecialNMt_80107568"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a recovered function body proves a return type, update the owning header prototype in the same change rather than leaving UNK_RET.",
+      "scope": [
+        "headers",
+        "decompiled fighter functions"
+      ],
+      "evidence_refs": [
+        "raw_diff: ftKb_Init.h changes ftKb_SpecialN_800EF35C from UNK_RET to void",
+        "raw_diff: ftKb_Init.c defines void ftKb_SpecialN_800EF35C"
+      ],
+      "confidence": 0.86
+    },
+    {
+      "lesson": "Small temporary structs can make recovered data-table entries readable when the diff shows adjacent typed fields are known, as with Kirby costume data entries containing joint and matanim pointers.",
+      "scope": [
+        "fighter data tables",
+        "Kirby hat loading"
+      ],
+      "evidence_refs": [
+        "raw_diff: ftKb_SpecialN_800EF35C local struct with HSD_Joint* joint and HSD_MatAnimJoint* matanim"
+      ],
+      "confidence": 0.72
+    },
+    {
+      "lesson": "For sibling ground/air action handlers, matching source can preserve parallel control flow while swapping only the ground/air motion-state constants.",
+      "scope": [
+        "fighter IASA handlers",
+        "Kirby copied specials"
+      ],
+      "evidence_refs": [
+        "raw_diff: ftKb_SkSpecialNLoop_IASA",
+        "raw_diff: ftKb_SkSpecialAirNLoop_IASA"
+      ],
+      "confidence": 0.78
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "fp",
+      "meaning": "local Fighter* retrieved from GET_FIGHTER/getFighter",
+      "evidence_refs": [
+        "raw_diff: repeated Fighter* fp locals in all implemented functions"
+      ]
+    },
+    {
+      "name": "gobj",
+      "meaning": "Fighter_GObj* function parameter",
+      "evidence_refs": [
+        "raw_diff: all recovered functions take Fighter_GObj* gobj"
+      ]
+    },
+    {
+      "name": "item_gobj",
+      "meaning": "Item_GObj* target item object in drink animations",
+      "evidence_refs": [
+        "raw_diff: ftKb_SpecialNDrink0_Anim and ftKb_SpecialNDrink1_Anim"
+      ]
+    },
+    {
+      "name": "victim_gobj",
+      "meaning": "Fighter_GObj* victim object in aerial drink capture handling",
+      "evidence_refs": [
+        "raw_diff: ftKb_SpecialAirNDrink_Anim"
+      ]
+    },
+    {
+      "name": "matanimjoint",
+      "meaning": "HSD_MatAnimJoint* iterator in hat animation loading",
+      "evidence_refs": [
+        "raw_diff: ftKb_SpecialN_800EF35C"
+      ]
+    },
+    {
+      "name": "ftKb_SpecialNMt_ChangeAction",
+      "meaning": "static inline helper introduced for copied Mewtwo neutral-B motion-state setup",
+      "evidence_refs": [
+        "raw_diff: ftKb_SpecialNMt_ChangeAction"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "PAD_STACK was used narrowly in four recovered functions, with sizes 8 or 32, presumably for stack-shape matching; the PR body claims overnight 100% verification but the bot report does not confirm all of these as 100%.",
+      "evidence_refs": [
+        "raw_diff: PAD_STACK(8) in ftKb_SpecialN_800EF35C",
+        "raw_diff: PAD_STACK(32) in ftKb_SpecialAirNDrink_Anim",
+        "raw_diff: PAD_STACK(8) in ftKb_PrSpecialAirNStart_Anim",
+        "raw_diff: PAD_STACK(8) in ftKb_SpecialNMt_80107568",
+        "text_corpus: PR body verification claim",
+        "text_corpus: decomp-dev bot report percentages"
+      ],
+      "confidence": 0.61
+    },
+    {
+      "tactic": "Used an inline wrapper/helper for ftKb_SpecialNMt_80107568, separating the change-action body from the exported function that only calls it and pads the stack.",
+      "evidence_refs": [
+        "raw_diff: static inline ftKb_SpecialNMt_ChangeAction",
+        "raw_diff: ftKb_SpecialNMt_80107568 calls helper then PAD_STACK(8)"
+      ],
+      "confidence": 0.76
+    },
+    {
+      "tactic": "Used a static const motion flag expression in ftKb_PrSpecialAirNStart_Anim instead of spelling the combined bitmask inline at the callsite.",
+      "evidence_refs": [
+        "raw_diff: static u32 const mf = (1 << 1) | (1 << 4) | (1 << 18)"
+      ],
+      "confidence": 0.69
+    },
+    {
+      "tactic": "Used comma expression '(0, GET_FIGHTER(gobj))' in two drink animation functions, likely to preserve codegen shape; the loaded evidence does not include reviewer or objdiff rationale.",
+      "evidence_refs": [
+        "raw_diff: ftKb_SpecialNDrink0_Anim",
+        "raw_diff: ftKb_SpecialNDrink1_Anim"
+      ],
+      "confidence": 0.55
+    }
+  ],
+  "review_feedback": [],
+  "searchable_terms": [
+    "pr-2343",
+    "ftKirby",
+    "Kirby special N",
+    "ftKb_SpecialNDrink0_Anim",
+    "ftKb_SpecialNDrink1_Anim",
+    "ftKb_SpecialAirNDrink_Anim",
+    "ftKb_SpecialNMt_80107568",
+    "ftKb_SpecialNMt_ChangeAction",
+    "ftKb_SkSpecialNLoop_IASA",
+    "ftKb_SkSpecialAirNLoop_IASA",
+    "ftKb_SpecialN_800EF35C",
+    "ftKb_PrSpecialAirNStart_Anim",
+    "ftKb_Init.h",
+    "UNK_RET to void",
+    "PAD_STACK",
+    "GET_FIGHTER",
+    "getFighter",
+    "ftAnim_IsFramesRemaining",
+    "Fighter_ChangeMotionState",
+    "ftKirbyDmgInline",
+    "HSD_MatAnimJoint",
+    "HSD_DObjAddAnimAll",
+    "ftAnim_GetNextMatAnimJointInTree",
+    "copied Sheik Needle Storm",
+    "copied Mewtwo Shadow Ball",
+    "copied Jigglypuff Rollout",
+    "Kirby inhale swallowing"
+  ],
+  "follow_up_queries": [
+    "Find later PRs touching ftKb_SpecialN_800EF35C for cleanup of PAD_STACK or costume_data typing.",
+    "Search ftKb_SpecialNDrink0_Anim and ftKb_SpecialNDrink1_Anim for later removal of comma-expression GET_FIGHTER patterns.",
+    "Search ftKb_SpecialNMt_ChangeAction for whether the inline helper persisted or was refactored.",
+    "Check later validation reports for PR 2343 functions to reconcile PR body 100% claim with bot report high-percentage improvements.",
+    "Search ftKb_Init.h UNK_RET removals in ftKirby for similar header-signature recovery patterns."
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR metadata, merged state, changed files",
+      "human_pr_text: author summary and claimed verification",
+      "raw_diff: full diff excerpt for all changed files",
+      "changed_files.jsonl: file-level added/deleted/hunk counts",
+      "text_corpus: decomp-dev bot report"
+    ],
+    "notes": [
+      "No review comments or reviews are loaded, so review_feedback is empty and no reviewer intent is inferred.",
+      "The PR body says all 7 functions 100% match via overnight script, but the loaded bot report says only ftKb_SkSpecialNLoop_IASA and ftKb_SkSpecialAirNLoop_IASA are new 100% matches, while other target functions are reported as 95.20%-99.98% improvements. Treat validation as mixed rather than accepting the broad 100% claim.",
+      "The title says 7 functions, but the PR body and diff list eight named placeholder replacements if ftKb_PrSpecialAirNStart_Anim is included alongside the seven summary bullets; this intake preserves both the title and observed diff evidence without resolving the count.",
+      "PAD_STACK and comma-expression tactics are visible in the diff, but the loaded evidence does not provide narrow objdiff rationale for each tactic."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson",
+        "title": "Update owning header when a recovered body proves the signature",
+        "text": "PR 2343 recovered ftKb_SpecialN_800EF35C as void in ftKb_Init.c and updated ftKb_Init.h from UNK_RET to void in the same PR.",
+        "scope": [
+          "headers",
+          "fighter decompilation"
+        ],
+        "evidence_refs": [
+          "raw_diff: ftKb_Init.c ftKb_SpecialN_800EF35C definition",
+          "raw_diff: ftKb_Init.h prototype change"
+        ]
+      },
+      {
+        "record_type": "decomp_lesson",
+        "title": "Keep sibling ground/air IASA handlers structurally parallel",
+        "text": "PR 2343's copied Sheik ground and air loop IASA handlers share the same B-release and shoulder-cancel structure while selecting the corresponding ground or air motion states.",
+        "scope": [
+          "fighter IASA handlers",
+          "Kirby copied specials"
+        ],
+        "evidence_refs": [
+          "raw_diff: ftKb_SkSpecialNLoop_IASA",
+          "raw_diff: ftKb_SkSpecialAirNLoop_IASA"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Require explicit evidence when retaining comma-expression codegen steering",
+        "text": "PR 2343 contains '(0, GET_FIGHTER(gobj))' in two recovered drink animation functions. This may be a narrow matching tactic similar to PAD_STACK/register-shape steering, but the loaded evidence does not explain why it is needed. Curator may consider whether comma-expression steering should be named in matching-tactics evidence requirements.",
+        "source_path": null,
+        "scope": [
+          "matching tactics",
+          "fighter decompilation"
+        ],
+        "evidence_refs": [
+          "raw_diff: ftKb_SpecialNDrink0_Anim uses Fighter* fp = (0, GET_FIGHTER(gobj))",
+          "raw_diff: ftKb_SpecialNDrink1_Anim uses Fighter* fp = (0, GET_FIGHTER(gobj))"
+        ],
+        "reason": "Visible tactic-like source shape is not explicitly covered by current standards except generally as codegen steering; evidence is insufficient to make it an accepted standard without curator review."
+      },
+      {
+        "target_source_id": "other",
+        "update_kind": "source_update",
+        "title": "Record validation discrepancy for PR 2343 if maintaining a PR validation ledger",
+        "text": "The PR body claims all 7 functions 100% match via overnight script, but the loaded decomp-dev bot report records 2 new 100% matches and 7 improvements in unmatched items, with several target functions below 100%.",
+        "source_path": "knowledge/sources/code_context/past_prs/data/prs/pr-2343/extracted/text_corpus.jsonl",
+        "scope": [
+          "PR validation evidence",
+          "historical PR corpus"
+        ],
+        "evidence_refs": [
+          "human_pr_text: Verification - All 7 functions 100% match",
+          "text_corpus: decomp-dev bot report showing 2 new matches and high-percentage improvements"
+        ],
+        "reason": "Useful for downstream consumers so they do not overstate historical validation strength."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote 'all 7 functions 100% matched' as an accepted validation fact from this slice because loaded bot output conflicts with the PR body.",
+      "Do not infer reviewer approval rationale; no review comments or reviews are loaded.",
+      "Do not generalize PAD_STACK use in this PR into accepted style; it remains a tactic requiring narrow evidence under existing standards.",
+      "Do not rename or semantically resolve address-style functions such as fn_80106DB0, fn_80100E0C, or fn_80105978 from this evidence alone."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

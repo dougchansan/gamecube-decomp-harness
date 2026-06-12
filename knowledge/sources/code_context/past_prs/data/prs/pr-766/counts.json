@@ -1,0 +1,17 @@
+{
+  "number": 766,
+  "title": "Refactor a lot of stuff",
+  "state": "CLOSED",
+  "createdAt": "2023-03-21T06:36:18Z",
+  "updatedAt": "2023-10-09T07:34:56Z",
+  "mergedAt": null,
+  "closedAt": "2023-04-21T11:07:13Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/766",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 0
+  }
+}

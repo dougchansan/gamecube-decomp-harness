@@ -1,0 +1,10 @@
+{
+  "pr": 892,
+  "title": "Clean up `ftCommon` symbol prefixes",
+  "url": "https://github.com/doldecomp/melee/pull/892",
+  "text_records_with_body": 0,
+  "review_comments": 0,
+  "changed_files": 199,
+  "added_lines": 3022,
+  "deleted_lines": 3007
+}

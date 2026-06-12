@@ -1,0 +1,17 @@
+{
+  "number": 1639,
+  "title": "itmball.c matches",
+  "state": "MERGED",
+  "createdAt": "2025-06-26T05:16:24Z",
+  "updatedAt": "2025-06-29T04:20:38Z",
+  "mergedAt": "2025-06-29T04:20:31Z",
+  "closedAt": "2025-06-29T04:20:31Z",
+  "author": "MikeBooon",
+  "url": "https://github.com/doldecomp/melee/pull/1639",
+  "counts": {
+    "issue_comments": 2,
+    "review_comments": 2,
+    "reviews": 2,
+    "diff_bytes": 2259
+  }
+}

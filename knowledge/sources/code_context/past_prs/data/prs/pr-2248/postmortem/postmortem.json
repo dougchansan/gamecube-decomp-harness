@@ -1,0 +1,348 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2248",
+  "pr": {
+    "number": 2248,
+    "title": "grcastle: match 3 functions",
+    "url": "https://github.com/doldecomp/melee/pull/2248",
+    "state": "CLOSED",
+    "author": "johnwinston",
+    "created_at": "2026-03-10T13:26:26Z",
+    "merged_at": null
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2248 attempted to decompile three grcastle functions in src/melee/gr/grcastle.c and update the fn_801CFAFC prototype in grcastle.h. The PR body and decomp-dev bot report claimed all three functions reached 100% fuzzy match, but the PR was closed unmerged with an issue comment saying it was consolidated into other PRs. The main unresolved theme was pointer math in grCastle_801CD960 and grCastle_801CF750, which the author said was non-trivial to replace because relevant castle GroundVars fields were not named or structurally represented.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "types-structs",
+      "pointer-math",
+      "matching-tactics"
+    ],
+    "systems": [
+      "stage",
+      "grcastle"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gr/grcastle.c",
+      "role": "Replaced three undecompiled function markers with C bodies for grCastle_801CD960, grCastle_801CF750, and fn_801CFAFC.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gr/grcastle.c added 35 deleted 3 hunks 3",
+        "raw_diff: grCastle_801CD960 body added",
+        "raw_diff: grCastle_801CF750 body added",
+        "raw_diff: fn_801CFAFC body added"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grcastle.h",
+      "role": "Added item forward include and changed fn_801CFAFC from UNK_RET/UNK_PARAMS to a typed void prototype.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gr/grcastle.h added 2 deleted 1 hunks 2",
+        "raw_diff: added #include <melee/it/forward.h>",
+        "raw_diff: fn_801CFAFC prototype changed to void fn_801CFAFC(Item_GObj*, Ground*, Vec3*, HSD_GObj*, f32)"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "grCastle_801CD960 was implemented as a do-while loop over 12 entries, calling grLib_801C9B6C on addresses computed from Ground plus 0xE0 plus i * 0x14.",
+      "evidence_refs": [
+        "raw_diff: grCastle_801CD960"
+      ]
+    },
+    {
+      "text": "grCastle_801CF750 was implemented with a PAD_STACK(16), an idx chosen from arg1 == 4, a CollData x34_flags.b1234 check, Ground pointer shifting by idx * 16, and a float add at offset 0xD0.",
+      "evidence_refs": [
+        "raw_diff: grCastle_801CF750"
+      ]
+    },
+    {
+      "text": "fn_801CFAFC was implemented with a casted s16 write to gp->gv.castle2.xC4, then conditionally calls ftLib_80086A4C when ftLib_80086960(gobj) is true.",
+      "evidence_refs": [
+        "raw_diff: fn_801CFAFC"
+      ]
+    },
+    {
+      "text": "grcastle.h gained the Item_GObj forward include and a typed fn_801CFAFC declaration.",
+      "evidence_refs": [
+        "raw_diff: grcastle.h include/prototype hunk"
+      ]
+    },
+    {
+      "text": "The PR body claimed ninja built clean and fuzzy_match_percent was 100.0 for all three functions; the decomp-dev bot reported 3 new 100% matches totaling +288 matched bytes.",
+      "evidence_refs": [
+        "human_pr_text.md: PR body Verification",
+        "text_corpus.jsonl: decomp-dev[bot] report for GALE01"
+      ]
+    },
+    {
+      "text": "The PR was closed with merged_at null and an issue comment saying 'Consolidated into other PRs'.",
+      "evidence_refs": [
+        "metadata_json: pr.merged_at null and state CLOSED",
+        "human_pr_text.md: issuecomment-4056023214"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "The grCastle_801CD960 solution used a natural do-while loop for a repeated 12-entry operation instead of copying repeated calls.",
+      "evidence_refs": [
+        "raw_diff: grCastle_801CD960 do { ... } while (i < 12)",
+        "decomp_standards:natural-loops"
+      ]
+    },
+    {
+      "text": "fn_801CFAFC's recovered signature was propagated to the owning header rather than leaving UNK_RET/UNK_PARAMS in the public declaration.",
+      "evidence_refs": [
+        "raw_diff: grcastle.h prototype update",
+        "decomp_standards:truthful-headers-and-includes"
+      ]
+    },
+    {
+      "text": "The author explicitly called out remaining pointer-math debt and why it was not a simple field-access cleanup in the current type layout.",
+      "evidence_refs": [
+        "human_pr_text.md: issuecomment-4034974200",
+        "decomp_standards:typed-fields-over-pointer-math"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a function accesses a repeated inline structure not represented by current GroundVars fields, a matching PR may expose raw offset math as type debt rather than solve it locally; keep the debt explicit and route structural fixes to the owning types.",
+      "scope": [
+        "src/melee/gr/grcastle.c",
+        "GroundVars",
+        "stage ground code"
+      ],
+      "evidence_refs": [
+        "raw_diff: grCastle_801CD960 uses (u8*) gp + 0xE0 + i * 0x14",
+        "human_pr_text.md: issuecomment-4034974200"
+      ]
+    },
+    {
+      "lesson": "Recovered function bodies that prove parameter types should update the header prototype and required forward includes in the same review slice.",
+      "scope": [
+        "src/melee/gr/grcastle.h",
+        "headers"
+      ],
+      "evidence_refs": [
+        "raw_diff: fn_801CFAFC body signature",
+        "raw_diff: grcastle.h Item_GObj include and prototype update",
+        "decomp_standards:truthful-headers-and-includes"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "The PR kept address-style function names grCastle_801CD960, grCastle_801CF750, and fn_801CFAFC rather than inventing semantic names.",
+      "evidence_refs": [
+        "raw_diff: function definitions",
+        "decomp_standards:conservative-naming"
+      ]
+    },
+    {
+      "text": "Local variables used short role-style names such as gp, gobj, cd, idx, and pos where their types/roles were evident.",
+      "evidence_refs": [
+        "raw_diff: grCastle_801CD960",
+        "raw_diff: grCastle_801CF750",
+        "raw_diff: fn_801CFAFC"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Used PAD_STACK(16) in grCastle_801CF750 to satisfy stack/codegen shape.",
+      "evidence_refs": [
+        "raw_diff: grCastle_801CF750 PAD_STACK(16)"
+      ],
+      "caution": "The PR evidence contains a 100% match claim and bot report, but no narrow objdiff excerpt explaining why PAD_STACK was necessary."
+    },
+    {
+      "tactic": "Used casted pointer arithmetic for Ground offsets 0xE0, 0xD0, i * 0x14, and idx * 16 where the current types allegedly did not model the accessed layout.",
+      "evidence_refs": [
+        "raw_diff: grCastle_801CD960 pointer math",
+        "raw_diff: grCastle_801CF750 pointer math",
+        "human_pr_text.md: issuecomment-4034974200"
+      ],
+      "caution": "This is a bridge tactic and possible type debt under typed-fields-over-pointer-math, not a general style recommendation."
+    },
+    {
+      "tactic": "Used a casted s16 store to gp->gv.castle2.xC4 in fn_801CFAFC.",
+      "evidence_refs": [
+        "raw_diff: fn_801CFAFC"
+      ],
+      "caution": "The evidence does not explain whether xC4 is correctly typed or should be refined."
+    }
+  ],
+  "review_feedback": [
+    {
+      "text": "No formal GitHub review comments were present in the slice.",
+      "evidence_refs": [
+        "metadata_json: counts.review_comments 0, counts.reviews 0"
+      ]
+    },
+    {
+      "text": "Author comment acknowledged pointer math would be fixed soon.",
+      "evidence_refs": [
+        "human_pr_text.md: issuecomment-4034545536"
+      ]
+    },
+    {
+      "text": "Author later explained pointer math in grCastle_801CD960 and grCastle_801CF750 was not easy to replace with struct field access because castle GroundVars lacked named fields at the accessed offsets and a proper fix would require shared Ground/GroundVars structural changes.",
+      "evidence_refs": [
+        "human_pr_text.md: issuecomment-4034974200"
+      ]
+    },
+    {
+      "text": "Final issue comment stated the work was consolidated into other PRs.",
+      "evidence_refs": [
+        "human_pr_text.md: issuecomment-4056023214"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2248",
+    "grcastle",
+    "grCastle_801CD960",
+    "grCastle_801CF750",
+    "fn_801CFAFC",
+    "src/melee/gr/grcastle.c",
+    "src/melee/gr/grcastle.h",
+    "GroundVars",
+    "Ground_GObj",
+    "Ground",
+    "CollData",
+    "Item_GObj",
+    "HSD_GObj",
+    "Vec3",
+    "grLib_801C9B6C",
+    "ftLib_80086960",
+    "ftLib_80086A4C",
+    "grCs_804D6970",
+    "PAD_STACK",
+    "pointer math",
+    "offset 0xE0",
+    "offset 0xD0",
+    "idx * 16",
+    "i * 0x14",
+    "x34_flags.b1234",
+    "gv.castle2.xC4",
+    "UNK_RET",
+    "UNK_PARAMS",
+    "consolidated into other PRs"
+  ],
+  "follow_up_queries": [
+    "grCastle_801CD960 pointer math 0xE0 0x14 GroundVars castle",
+    "grCastle_801CF750 idx * 16 offset 0xD0 CollData x34_flags.b1234",
+    "fn_801CFAFC gp->gv.castle2.xC4 s16",
+    "PR 2248 consolidated into other PRs grcastle",
+    "GroundVars castle2 xC4 xD0 xE0 struct fields",
+    "PAD_STACK(16) grCastle_801CF750"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json",
+      "human_pr_text.md",
+      "raw_diff",
+      "changed_files.jsonl",
+      "text_corpus.jsonl"
+    ],
+    "notes": [
+      "Changed files, diff content, PR state, and comments are directly available.",
+      "The PR body and decomp-dev bot report support the 100% match claim for three functions, but no objdiff or build log details are included beyond the summarized report.",
+      "There were no review comments in the slice, so pointer-math concerns come from author issue comments rather than reviewer feedback.",
+      "The PR was closed with merged_at null and a comment saying it was consolidated into other PRs; this intake does not infer the outcome of those other PRs.",
+      "The pointer-math structural explanation is author-provided PR evidence; it should be treated as a candidate investigation lead, not an accepted current path fact."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson",
+        "title": "Header prototypes should be updated when a recovered body proves the signature",
+        "text": "In PR #2248, recovering fn_801CFAFC included changing grcastle.h from UNK_RET/UNK_PARAMS to void fn_801CFAFC(Item_GObj*, Ground*, Vec3*, HSD_GObj*, f32) and adding the needed Item_GObj forward include.",
+        "scope": [
+          "headers",
+          "src/melee/gr/grcastle.h"
+        ],
+        "evidence_refs": [
+          "raw_diff: grcastle.h prototype update",
+          "decomp_standards:truthful-headers-and-includes"
+        ]
+      },
+      {
+        "record_type": "decomp_lesson",
+        "title": "Keep pointer-math type debt explicit when current structs cannot express a matched access",
+        "text": "PR #2248 matched grCastle_801CD960 and grCastle_801CF750 with raw Ground pointer arithmetic, and the author documented that replacing it would require non-trivial Ground/GroundVars structural changes.",
+        "scope": [
+          "src/melee/gr/grcastle.c",
+          "GroundVars"
+        ],
+        "evidence_refs": [
+          "raw_diff: grCastle_801CD960 and grCastle_801CF750",
+          "human_pr_text.md: issuecomment-4034974200"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "Investigate castle GroundVars layout around offsets 0xC4, 0xD0, and 0xE0",
+        "text": "PR #2248 suggests castle GroundVars did not have named fields for accesses used by grCastle_801CD960 and grCastle_801CF750: offset 0xE0 behaved like an inline array of 0x14-byte elements, grCastle_801CF750 shifted the Ground pointer by idx * 16 and modified offset 0xD0, and fn_801CFAFC wrote a s16 to gv.castle2.xC4. This should be verified against current source and later consolidated PRs before becoming a path fact.",
+        "source_path": "src/melee/gr/grcastle.c",
+        "scope": [
+          "grcastle",
+          "GroundVars",
+          "Ground",
+          "castle2"
+        ],
+        "evidence_refs": [
+          "raw_diff: grCastle_801CD960",
+          "raw_diff: grCastle_801CF750",
+          "raw_diff: fn_801CFAFC",
+          "human_pr_text.md: issuecomment-4034974200"
+        ],
+        "reason": "The PR exposes likely struct/type debt, but the slice does not prove the final current layout or accepted field names."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "PAD_STACK uses in matched functions need explicit verifier notes",
+        "text": "grCastle_801CF750 used PAD_STACK(16) while the PR only supplied a general 100% match report. This aligns with the existing matching-tactics-need-evidence standard; curator may consider adding this PR as an example of evidence that is useful but not fully explanatory.",
+        "source_path": "src/melee/gr/grcastle.c",
+        "scope": [
+          "matching tactics",
+          "PAD_STACK"
+        ],
+        "evidence_refs": [
+          "raw_diff: grCastle_801CF750 PAD_STACK(16)",
+          "text_corpus.jsonl: decomp-dev[bot] 100% match report",
+          "decomp_standards:matching-tactics-need-evidence"
+        ],
+        "reason": "This is a standards example candidate only; the current standards already cover the principle."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote the PR's pointer-math shapes as preferred style; they are explicitly tied to missing struct fields and non-trivial type work.",
+      "Do not claim the PR was merged or accepted; metadata shows merged_at null and the final comment says it was consolidated into other PRs.",
+      "Do not infer reviewer intent because there were no review comments in the slice.",
+      "Do not treat the Claude-generated note as independent validation of type layout without current-source or later-PR corroboration."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

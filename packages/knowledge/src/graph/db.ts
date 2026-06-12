@@ -140,6 +140,8 @@ export function ensureKnowledgeGraphSchema(store: KnowledgeGraphStore): void {
 
 export function resetKnowledgeGraph(store: KnowledgeGraphStore): void {
   store.db.exec(`
+    DELETE FROM knowledge_sources;
+    DELETE FROM knowledge_tools;
     DELETE FROM resource_versions;
     DELETE FROM graph_entities;
     DELETE FROM graph_facts;
@@ -282,8 +284,13 @@ function insertSearchChunk(sourceId: string, chunk: SearchChunk, query: ReturnTy
 export function searchKnowledgeGraph(store: KnowledgeGraphStore, params: { query: string; sourceId?: string; limit: number }): SearchResult[] {
   const queryText = params.query.trim();
   if (!queryText) return [];
+  const terms = searchTerms(queryText);
   const sourceFilter = params.sourceId ? "AND search_chunks.source_id = ?" : "";
-  const likePattern = `%${queryText}%`;
+  const candidateLimit = Math.max(params.limit * 25, 100);
+  const clauses = terms.length
+    ? terms.map(() => "(lower(search_chunks.title) LIKE ? ESCAPE '\\' OR lower(search_chunks.text) LIKE ? ESCAPE '\\')").join(" OR ")
+    : "(search_chunks.title LIKE ? OR search_chunks.text LIKE ?)";
+  const likeParams = terms.length ? terms.flatMap((term) => [`%${escapeLike(term)}%`, `%${escapeLike(term)}%`]) : [`%${queryText}%`, `%${queryText}%`];
   const rows = store.db
     .query(
       `
@@ -297,26 +304,81 @@ export function searchKnowledgeGraph(store: KnowledgeGraphStore, params: { query
           knowledge_sources.trust_tier
         FROM search_chunks
         LEFT JOIN knowledge_sources ON knowledge_sources.id = search_chunks.source_id
-        WHERE (search_chunks.title LIKE ? OR search_chunks.text LIKE ?)
+        WHERE (${clauses})
         ${sourceFilter}
         ORDER BY length(search_chunks.text) ASC
         LIMIT ?
       `,
     )
-    .all(...(params.sourceId ? [likePattern, likePattern, params.sourceId, params.limit] : [likePattern, likePattern, params.limit])) as Array<
+    .all(...(params.sourceId ? [...likeParams, params.sourceId, candidateLimit] : [...likeParams, candidateLimit])) as Array<
     Record<string, unknown>
   >;
 
-  return rows.map((row) => ({
-    source_id: String(row.source_id ?? ""),
-    result_id: String(row.id ?? ""),
-    title: String(row.title ?? ""),
-    snippet: truncate(String(row.text ?? ""), 360),
-    evidence_ref: String(row.evidence_ref ?? ""),
-    entity_id: row.entity_id == null ? undefined : String(row.entity_id),
-    confidence: 0.5,
-    trust_tier: String(row.trust_tier ?? "historical") as SearchResult["trust_tier"],
-  }));
+  return rows
+    .map((row) => scoredSearchResult(row, queryText, terms))
+    .sort((left, right) => right.score - left.score || left.textLength - right.textLength || left.result.title.localeCompare(right.result.title))
+    .slice(0, params.limit)
+    .map((row) => row.result);
+}
+
+function scoredSearchResult(
+  row: Record<string, unknown>,
+  queryText: string,
+  terms: string[],
+): { result: SearchResult; score: number; textLength: number } {
+  const title = String(row.title ?? "");
+  const text = String(row.text ?? "");
+  const lowerTitle = title.toLowerCase();
+  const lowerText = text.toLowerCase();
+  const lowerQuery = queryText.toLowerCase();
+  let score = 0;
+  if (lowerTitle.includes(lowerQuery)) score += 12;
+  if (lowerText.includes(lowerQuery)) score += 8;
+  for (const term of terms) {
+    if (lowerTitle.includes(term)) score += 4;
+    if (lowerText.includes(term)) score += 2;
+  }
+  return {
+    result: {
+      source_id: String(row.source_id ?? ""),
+      result_id: String(row.id ?? ""),
+      title,
+      snippet: searchSnippet(text, [lowerQuery, ...terms]),
+      evidence_ref: String(row.evidence_ref ?? ""),
+      entity_id: row.entity_id == null ? undefined : String(row.entity_id),
+      confidence: Math.min(0.95, 0.35 + score * 0.04),
+      trust_tier: String(row.trust_tier ?? "historical") as SearchResult["trust_tier"],
+    },
+    score,
+    textLength: text.length,
+  };
+}
+
+function searchTerms(queryText: string): string[] {
+  const seen = new Set<string>();
+  for (const term of queryText.toLowerCase().split(/[^a-z0-9_]+/)) {
+    if (term.length < 2 || seen.has(term)) continue;
+    seen.add(term);
+  }
+  return [...seen];
+}
+
+function escapeLike(value: string): string {
+  return value.replace(/[\\%_]/g, (match) => `\\${match}`);
+}
+
+function searchSnippet(text: string, needles: string[]): string {
+  const normalizedText = text.replace(/\s+/g, " ").trim();
+  const lowerText = normalizedText.toLowerCase();
+  const found = needles
+    .filter(Boolean)
+    .map((needle) => lowerText.indexOf(needle))
+    .filter((index) => index >= 0)
+    .sort((left, right) => left - right)[0];
+  if (found === undefined) return truncate(normalizedText, 360);
+  const start = Math.max(0, found - 90);
+  const end = Math.min(normalizedText.length, found + 270);
+  return `${start > 0 ? "..." : ""}${truncate(normalizedText.slice(start, end), 360)}${end < normalizedText.length ? "..." : ""}`;
 }
 
 export function graphStats(store: KnowledgeGraphStore): Record<string, number> {

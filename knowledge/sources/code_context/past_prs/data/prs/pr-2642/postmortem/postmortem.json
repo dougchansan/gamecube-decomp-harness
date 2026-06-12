@@ -1,0 +1,137 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2642",
+  "pr": {
+    "number": 2642,
+    "title": "fix: upgrade mio to 0.8.11 (CVE-2024-27308)",
+    "url": "https://github.com/doldecomp/melee/pull/2642",
+    "state": "MERGED",
+    "author": "orbisai0security",
+    "created_at": "2026-06-10T01:32:21Z",
+    "merged_at": "2026-06-10T12:32:46Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Automated security dependency update PR that changed Cargo.lock to move mio from 0.8.10 to 0.8.11, update the crate checksum, and update the Cargo.lock format version from 3 to 4. The PR body claims this addresses CVE-2024-27308 based on trivy output, but the loaded diff only shows Cargo.lock changes and no review discussion.",
+  "change_classification": {
+    "primary_type": "dependency_security_update",
+    "categories": [
+      "fix",
+      "security",
+      "tooling",
+      "dependency-update",
+      "cargo-lock"
+    ],
+    "systems": [
+      "repo-root",
+      "rust-tooling"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "Cargo.lock",
+      "role": "Only changed file in loaded metadata and diff; updates Cargo lockfile version and the mio package entry.",
+      "evidence_refs": [
+        "changed_files.jsonl: Cargo.lock added 3 deleted 3 hunks 2",
+        "raw_diff: Cargo.lock version = 3 -> 4",
+        "raw_diff: mio version 0.8.10 -> 0.8.11",
+        "raw_diff: mio checksum changed"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Cargo.lock lockfile format version changed from 3 to 4.",
+      "evidence_refs": [
+        "raw_diff: version = 3 -> version = 4"
+      ]
+    },
+    {
+      "text": "The locked mio crate version changed from 0.8.10 to 0.8.11.",
+      "evidence_refs": [
+        "raw_diff: name = \"mio\"; version = \"0.8.10\" -> \"0.8.11\""
+      ]
+    },
+    {
+      "text": "The mio crate checksum was updated to match the new locked version.",
+      "evidence_refs": [
+        "raw_diff: checksum changed from 8f3d0b... to a4a650..."
+      ]
+    },
+    {
+      "text": "The PR body states the update was intended to address CVE-2024-27308 and was flagged by trivy.",
+      "evidence_refs": [
+        "human_pr_text: Summary",
+        "human_pr_text: Vulnerability table",
+        "human_pr_text: Evidence"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "The dependency change was narrow in the loaded diff: only the lockfile entry and lockfile format version changed.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff"
+      ]
+    }
+  ],
+  "decomp_lessons": [],
+  "naming_conventions": [],
+  "assembly_or_matching_tactics": [],
+  "review_feedback": [],
+  "searchable_terms": [
+    "pr-2642",
+    "Cargo.lock",
+    "mio",
+    "0.8.10",
+    "0.8.11",
+    "CVE-2024-27308",
+    "trivy",
+    "orbisai0security",
+    "automated security fix",
+    "dependency update",
+    "lockfile version 4",
+    "rust tooling"
+  ],
+  "follow_up_queries": [
+    "Cargo.lock mio 0.8.11 CVE-2024-27308",
+    "orbisai0security automated security fix Cargo.lock",
+    "PR 2642 mio dependency update",
+    "lockfile version 3 version 4 Cargo.lock"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR metadata and changed_files",
+      "human_pr_text: PR body",
+      "raw_diff: complete diff excerpt",
+      "changed_files.jsonl: changed-file metadata"
+    ],
+    "notes": [
+      "Loaded changed-file metadata and raw diff show only Cargo.lock changed, while the PR body lists both Cargo.toml and Cargo.lock.",
+      "No review comments, issue comments, or reviews are present in the loaded slice.",
+      "Verification items such as build passes, scanner re-scan, and LLM code review passed are PR-body claims only; no independent build or scanner logs are loaded.",
+      "The PR body description says CVE-2024-27308 affects rpm-ostree versions less than 2024.4-1, while the actual diff updates mio; this mismatch should not be promoted as a verified vulnerability fact beyond what the PR body claims.",
+      "This PR contains no decompilation source, matching, assembly, naming, or review evidence."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [],
+    "source_update_candidates": [],
+    "rejection_notes": [
+      "Do not extract decompilation lessons from this PR; the loaded evidence is a Rust dependency lockfile update only.",
+      "Do not promote the CVE-to-mio relationship as a verified security fact from this intake alone because the PR body contains a package-description mismatch and no scanner log is loaded.",
+      "Do not record Cargo.toml as a changed file from this slice; the body mentions it, but changed-file metadata and diff only show Cargo.lock."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

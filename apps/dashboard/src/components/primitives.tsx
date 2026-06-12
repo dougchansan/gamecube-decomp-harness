@@ -3,10 +3,10 @@ import type { ComponentProps, ReactNode } from "react";
 type ButtonTone = "default" | "primary" | "warning" | "danger";
 
 const buttonTone: Record<ButtonTone, string> = {
-  default: "border-[#363a38] bg-[#2a2d2b] hover:bg-[#343835]",
-  primary: "border-[#1f8c42] bg-[#1f6f35] hover:bg-[#278640]",
-  warning: "border-[#8b6d32] bg-[#5f4b24] hover:bg-[#725b2c]",
-  danger: "border-[#8d3838] bg-[#693030] hover:bg-[#803b3b]",
+  default: "border-line2 bg-raised text-soft hover:border-faint hover:text-fg",
+  primary: "border-up/50 bg-up/10 text-up hover:bg-up/20",
+  warning: "border-warn/50 bg-warn/10 text-warn hover:bg-warn/20",
+  danger: "border-down/50 bg-down/10 text-down hover:bg-down/20",
 };
 
 export function Button({
@@ -18,7 +18,7 @@ export function Button({
 }: ComponentProps<"button"> & { icon?: ReactNode; tone?: ButtonTone }) {
   return (
     <button
-      className={`inline-flex min-h-7 items-center justify-center gap-1.5 rounded-[5px] border px-2.5 py-1 text-[#e2e5e2] disabled:cursor-not-allowed disabled:opacity-55 ${buttonTone[tone]} ${className}`}
+      className={`inline-flex min-h-7 items-center justify-center gap-1.5 border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] disabled:cursor-not-allowed disabled:opacity-45 ${buttonTone[tone]} ${className}`}
       {...props}
     >
       {icon}
@@ -28,11 +28,24 @@ export function Button({
 }
 
 export function PanelSection({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return <section className={`border-b border-[#292d2b] p-3 ${className}`}>{children}</section>;
+  return <section className={`border border-line bg-panel p-4 ${className}`}>{children}</section>;
 }
 
-export function PanelTitle({ children }: { children: ReactNode }) {
-  return <div className="mb-2 text-xs font-bold uppercase text-[#c0c5c1]">{children}</div>;
+export function PanelTitle({ children, className = "" }: { children: ReactNode; className?: string }) {
+  return <div className={`panel-heading ${className}`}>{children}</div>;
+}
+
+/**
+ * Shared header zone for the top-bar sections: a fixed 28px title row, so
+ * every section's first card starts at the same y.
+ */
+export function PanelHeader({ right, title }: { right?: ReactNode; title: ReactNode }) {
+  return (
+    <div className="flex h-7 items-center justify-between gap-2">
+      <PanelTitle className="mb-0 min-w-0 flex-1">{title}</PanelTitle>
+      {right}
+    </div>
+  );
 }
 
 export function Field({
@@ -41,9 +54,9 @@ export function Field({
   ...props
 }: ComponentProps<"input"> & { label: string }) {
   return (
-    <label className={`mb-2 block text-xs text-[#969b97] ${className}`} title={props.title}>
+    <label className={`mb-3 block text-[10px] uppercase tracking-[0.08em] text-dim ${className}`} title={props.title}>
       <span>{label}</span>
-      <input className="mt-1" {...props} />
+      <input className="mt-1.5 text-[13px] normal-case tracking-normal" {...props} />
     </label>
   );
 }
@@ -55,9 +68,9 @@ export function SelectField({
   ...props
 }: ComponentProps<"select"> & { label: string; options: Array<string | number> }) {
   return (
-    <label className={`mb-2 block text-xs text-[#969b97] ${className}`} title={props.title}>
+    <label className={`mb-3 block text-[10px] uppercase tracking-[0.08em] text-dim ${className}`} title={props.title}>
       <span>{label}</span>
-      <select className="mt-1" {...props}>
+      <select className="mt-1.5 text-[13px] normal-case tracking-normal" {...props}>
         {options.map((option) => (
           <option key={option} value={option}>
             {option}
@@ -73,7 +86,7 @@ export function CheckboxField({
   ...props
 }: Omit<ComponentProps<"input">, "type"> & { label: string }) {
   return (
-    <label className="mt-1 flex items-center gap-2 text-xs text-[#969b97]" title={props.title}>
+    <label className="mt-2 flex items-center gap-2.5 text-xs text-dim" title={props.title}>
       <input className="min-h-4 w-4" type="checkbox" {...props} />
       <span>{label}</span>
     </label>
@@ -81,24 +94,29 @@ export function CheckboxField({
 }
 
 export function EmptyState({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return <div className={`rounded-md border border-dashed border-[#363a38] bg-[#151615] p-4 text-center text-[#969b97] ${className}`}>{children}</div>;
+  return <div className={`border border-dashed border-line2 bg-card p-4 text-center text-dim ${className}`}>{children}</div>;
 }
 
 export function Pill({ state }: { state: string }) {
   const tone =
     state === "running" || state === "detached"
-      ? "border-[#2a7d38] text-[#45e05e]"
+      ? "status-tag-live"
       : state === "stopping" || state === "draining"
-        ? "border-[#8b6d32] text-[#d7a64b]"
-        : "border-[#363a38] text-[#969b97]";
-  return <span className={`min-w-[72px] rounded-full border bg-black px-2.5 py-1 text-center ${tone}`}>{state}</span>;
+        ? "status-tag-warn"
+        : "";
+  return (
+    <span className={`status-tag ${tone}`}>
+      <span className="lamp" />
+      {state}
+    </span>
+  );
 }
 
 export function StackCell({ primary, secondary }: { primary: ReactNode; secondary?: ReactNode }) {
   return (
     <>
-      <span className="block min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-[#e2e5e2]">{primary}</span>
-      {secondary ? <span className="mt-0.5 block min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-[11px] text-[#969b97]">{secondary}</span> : null}
+      <span className="block min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-fg">{primary}</span>
+      {secondary ? <span className="mt-0.5 block min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-[11px] text-dim">{secondary}</span> : null}
     </>
   );
 }

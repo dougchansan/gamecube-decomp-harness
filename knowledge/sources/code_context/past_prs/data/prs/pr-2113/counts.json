@@ -1,0 +1,17 @@
+{
+  "number": 2113,
+  "title": "grFourside work",
+  "state": "MERGED",
+  "createdAt": "2026-01-20T23:55:13Z",
+  "updatedAt": "2026-01-21T04:57:20Z",
+  "mergedAt": "2026-01-21T04:57:20Z",
+  "closedAt": "2026-01-21T04:57:20Z",
+  "author": "MarioLover63",
+  "url": "https://github.com/doldecomp/melee/pull/2113",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 41016
+  }
+}

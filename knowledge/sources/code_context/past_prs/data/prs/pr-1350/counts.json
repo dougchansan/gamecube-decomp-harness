@@ -1,0 +1,17 @@
+{
+  "number": 1350,
+  "title": "Match 97.89% of `itheart` (1.74 KB)",
+  "state": "MERGED",
+  "createdAt": "2024-02-28T20:48:02Z",
+  "updatedAt": "2024-03-05T19:39:45Z",
+  "mergedAt": "2024-02-28T22:43:49Z",
+  "closedAt": "2024-02-28T22:43:49Z",
+  "author": "wyatt-avilla",
+  "url": "https://github.com/doldecomp/melee/pull/1350",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 2,
+    "reviews": 3,
+    "diff_bytes": 12325
+  }
+}

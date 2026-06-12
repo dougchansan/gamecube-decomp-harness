@@ -1,0 +1,516 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2200",
+  "pr": {
+    "number": 2200,
+    "title": "Automatic permuter fixes",
+    "url": "https://github.com/doldecomp/melee/pull/2200",
+    "state": "MERGED",
+    "author": "jellejurre",
+    "created_at": "2026-03-04T01:54:41Z",
+    "merged_at": "2026-03-04T02:20:23Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "A broad automatic permuter pass over high-percent unmatched functions touched 35 files across fighter, item, interface, game-mode, stage, effect, library, menu, and toy code. The bot report says the PR produced +6896 matched-code bytes, +20 matched-data bytes, 50 new matches, 2 unmatched-item improvements, and 1 unmatched-item regression in ftKb_Init .sdata. The diff evidence shows many small source-shape edits typical of permuter output, including temporary variables named new_var, helper inlines, expression splitting, and removal of a large block from ftKb_Init.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "automatic-permuter",
+      "decomp-matching",
+      "source-shape-fix",
+      "headers"
+    ],
+    "systems": [
+      "effect",
+      "fighter",
+      "Kirby",
+      "game-mode",
+      "item",
+      "interface",
+      "library",
+      "menu",
+      "stage",
+      "toy"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/ef/eflib.c",
+      "role": "Permuter-shaped edit to Effect_RemoveUserData; bot reports it reached 100%.",
+      "evidence_refs": [
+        "raw_diff: Effect_RemoveUserData hunk",
+        "text_corpus: decomp-dev bot report"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_DownBound.c",
+      "role": "Permuter-shaped temporary variable introduced in ftCo_80097F38; bot reports 100%.",
+      "evidence_refs": [
+        "raw_diff: ftCo_80097F38 hunk",
+        "text_corpus: decomp-dev bot report"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_Init.c",
+      "role": "Largest file change; small SpecialN fixes plus deletion of a very large block of Kirby functions; bot reports several matches, .data improvement, and .sdata regression.",
+      "evidence_refs": [
+        "changed_files: added 4 deleted 7962 hunks 3",
+        "raw_diff: ftKb_Init excerpt",
+        "text_corpus: decomp-dev bot report"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_SpecialN.c",
+      "role": "Kirby SpecialN matching edits; bot lists multiple 100% symbols.",
+      "evidence_refs": [
+        "changed_files",
+        "text_corpus: decomp-dev bot report"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_SpecialNPk.c",
+      "role": "Kirby copied-special matching edits.",
+      "evidence_refs": [
+        "changed_files"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_SpecialNYs.c",
+      "role": "Kirby copied-special matching edits.",
+      "evidence_refs": [
+        "changed_files"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_SpecialNZd.c",
+      "role": "Kirby copied-special matching edits.",
+      "evidence_refs": [
+        "changed_files"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ft_0CD1.c",
+      "role": "Small fighter matching edit; bot reports ftCo_800CD278 reached 100%.",
+      "evidence_refs": [
+        "changed_files",
+        "text_corpus: decomp-dev bot report"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ft_0D31.c",
+      "role": "Small fighter matching edit; bot reports fn_800D55B4 reached 100%.",
+      "evidence_refs": [
+        "changed_files",
+        "text_corpus: decomp-dev bot report"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1601.c",
+      "role": "Small game-mode matching edit.",
+      "evidence_refs": [
+        "changed_files"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1601.h",
+      "role": "Header change associated with gm_1601 edits.",
+      "evidence_refs": [
+        "changed_files"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_16AE.c",
+      "role": "Small game-mode matching edit; bot reports gm_8016ECE8 reached 100%.",
+      "evidence_refs": [
+        "changed_files",
+        "text_corpus: decomp-dev bot report"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmcamera.c",
+      "role": "Small game camera matching edit; bot reports gmCamera_801A2798 reached 100%.",
+      "evidence_refs": [
+        "changed_files",
+        "text_corpus: decomp-dev bot report"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmresult.h",
+      "role": "Header change associated with result/game-mode code.",
+      "evidence_refs": [
+        "changed_files"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grfourside.c",
+      "role": "Small stage matching edit.",
+      "evidence_refs": [
+        "changed_files"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grzakogenerator.static.h",
+      "role": "Static header addition associated with stage code.",
+      "evidence_refs": [
+        "changed_files"
+      ]
+    },
+    {
+      "path": "src/melee/if/if_2F72.c",
+      "role": "Small interface matching edit.",
+      "evidence_refs": [
+        "changed_files"
+      ]
+    },
+    {
+      "path": "src/melee/if/if_2FC93.c",
+      "role": "Interface matching edit; bot reports un_802FD9D8 reached 100%.",
+      "evidence_refs": [
+        "changed_files",
+        "text_corpus: decomp-dev bot report"
+      ]
+    },
+    {
+      "path": "src/melee/if/ifcoget.c",
+      "role": "Interface matching edits; bot reports un_802FF6A0 and un_802FF710 reached 100%.",
+      "evidence_refs": [
+        "changed_files",
+        "text_corpus: decomp-dev bot report"
+      ]
+    },
+    {
+      "path": "src/melee/if/soundtest.c",
+      "role": "Sound test matching edits; bot reports un_802FF88C and un_803009E0 reached 100%.",
+      "evidence_refs": [
+        "changed_files",
+        "text_corpus: decomp-dev bot report"
+      ]
+    },
+    {
+      "path": "src/melee/it/it_266F.c",
+      "role": "Small item system matching edit.",
+      "evidence_refs": [
+        "changed_files"
+      ]
+    },
+    {
+      "path": "src/melee/it/it_266F.h",
+      "role": "Header cleanup associated with item system code.",
+      "evidence_refs": [
+        "changed_files"
+      ]
+    },
+    {
+      "path": "src/melee/it/it_2725.c",
+      "role": "Item system matching edits; bot reports it_80275788 and it_80272828 reached 100%.",
+      "evidence_refs": [
+        "changed_files",
+        "text_corpus: decomp-dev bot report"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/it_2E5A.c",
+      "role": "Item matching edits; bot reports several 100% symbols and .sdata2 improvement.",
+      "evidence_refs": [
+        "changed_files",
+        "text_corpus: decomp-dev bot report"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itclimbersstring.c",
+      "role": "Small item matching edit.",
+      "evidence_refs": [
+        "changed_files"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/ithouou.c",
+      "role": "Small item matching edit.",
+      "evidence_refs": [
+        "changed_files"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itkyasarinegg.c",
+      "role": "Item matching edits with multiple hunks.",
+      "evidence_refs": [
+        "changed_files"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itkyasarinegg.h",
+      "role": "Header change associated with itkyasarinegg.",
+      "evidence_refs": [
+        "changed_files"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itrshell.c",
+      "role": "Item matching edit; bot reports it_8028D4E4 reached 100%.",
+      "evidence_refs": [
+        "changed_files",
+        "text_corpus: decomp-dev bot report"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itsamuschargeshot.c",
+      "role": "Small item cleanup with deleted lines only.",
+      "evidence_refs": [
+        "changed_files"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/ittaru.c",
+      "role": "Item matching edit; bot reports it_3F14_Logic2_Spawned reached 100%.",
+      "evidence_refs": [
+        "changed_files",
+        "text_corpus: decomp-dev bot report"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lbcardnew.c",
+      "role": "Library/card matching edit; bot reports lb_8001B99C reached 100%.",
+      "evidence_refs": [
+        "changed_files",
+        "text_corpus: decomp-dev bot report"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mndiagram2.c",
+      "role": "Menu diagram matching edit; bot reports mnDiagram2_ClearDetailView reached 100%.",
+      "evidence_refs": [
+        "changed_files",
+        "text_corpus: decomp-dev bot report"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mndiagram3.c",
+      "role": "Menu diagram matching edits; bot reports mnDiagram3_80246D40 reached 100%.",
+      "evidence_refs": [
+        "changed_files",
+        "text_corpus: decomp-dev bot report"
+      ]
+    },
+    {
+      "path": "src/melee/ty/toy.c",
+      "role": "Toy matching edit; bot reports un_80306C5C reached 100%.",
+      "evidence_refs": [
+        "changed_files",
+        "text_corpus: decomp-dev bot report"
+      ]
+    }
+  ],
+  "what_changed": [
+    "The author described the work as running the permuter on all high-percent functions for about one minute.",
+    "35 files changed with 202 additions and 8100 deletions.",
+    "The bot report recorded +0.18% matched code, +6896 matched-code bytes, +20 matched-data bytes, and 50 new matches.",
+    "The largest deletion was in src/melee/ft/chara/ftKirby/ftKb_Init.c, where changed-file metadata reports 7962 deleted lines.",
+    "The diff excerpt shows source-shape changes such as introducing new_var/new_var2 temporaries, extracting a pointer argument into a temporary before a call, adding a tiny inline wrapper returning &Effect_AllocData, and splitting a ternary expression into a local variable.",
+    "The bot report also recorded 2 improvements in unmatched items and 1 unmatched-item regression: ftKb_Init .sdata moved from 19.55% to 0.00%."
+  ],
+  "smart_moves": [
+    {
+      "text": "The PR used a broad, short permuter sweep to harvest many small high-percent matches quickly, then relied on the automated report to enumerate exact matched symbols and regressions.",
+      "evidence_refs": [
+        "human_pr_text",
+        "text_corpus: decomp-dev bot report"
+      ]
+    },
+    {
+      "text": "The report makes text/data tradeoffs visible: many new text matches landed while ftKb_Init .sdata regressed.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev bot report"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "Automatic permuter output can close many near-matching functions, but PR evidence should be reviewed symbol-by-symbol because the same sweep may introduce mechanical source shapes and data-section regressions.",
+      "evidence_refs": [
+        "human_pr_text",
+        "raw_diff: new_var and helper-inline examples",
+        "text_corpus: decomp-dev bot report"
+      ],
+      "scope": [
+        "permuter-driven decomp matching",
+        "high-percent unmatched functions"
+      ]
+    },
+    {
+      "lesson": "For broad permuter PRs, treat the bot report as a ledger: record new 100% text matches separately from unmatched data improvements and regressions.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev bot report"
+      ],
+      "scope": [
+        "verification reporting",
+        "regression review"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "new_var / new_var2",
+      "convention": "These names appear as permuter-introduced temporaries in the diff; the PR evidence does not support treating them as a desired naming convention.",
+      "evidence_refs": [
+        "raw_diff: Effect_RemoveUserData",
+        "raw_diff: ftCo_80097F38",
+        "raw_diff: ftKb_SpecialN_800F15D8"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Introduce temporaries to affect register allocation or expression ordering.",
+      "examples": [
+        "Effect_RemoveUserData assigns effect through new_var/new_var2 before field access and HSD_ObjFree.",
+        "ftCo_80097F38 stores the ternary motion-state result in int new_var before Fighter_ChangeMotionState.",
+        "ftKb_SpecialN_800F15D8 stores ft_80459B88.hats[FTKIND_PICHU] in a KirbyHatStruct* temporary before the call."
+      ],
+      "evidence_refs": [
+        "raw_diff"
+      ]
+    },
+    {
+      "tactic": "Use a tiny inline wrapper to alter a call argument shape.",
+      "examples": [
+        "Effect_RemoveUserData_inline returns &Effect_AllocData and is passed to HSD_ObjFree instead of passing &Effect_AllocData directly."
+      ],
+      "evidence_refs": [
+        "raw_diff: eflib.c"
+      ]
+    },
+    {
+      "tactic": "Use automated report output to identify exact new 100% matches and regressions.",
+      "examples": [
+        "Bot report lists 50 new matches and a ftKb_Init .sdata regression."
+      ],
+      "evidence_refs": [
+        "text_corpus: decomp-dev bot report"
+      ]
+    }
+  ],
+  "review_feedback": [],
+  "searchable_terms": [
+    "PR 2200",
+    "Automatic permuter fixes",
+    "jellejurre",
+    "permuter-slop",
+    "high percent functions",
+    "new_var",
+    "new_var2",
+    "Effect_RemoveUserData",
+    "Effect_RemoveUserData_inline",
+    "ftCo_80097F38",
+    "ftKb_Init",
+    "ftKb_SpecialN_800EFF9C",
+    "ftKb_SpecialN_800F15D8",
+    "ftKb_SpecialN.c",
+    "ftKb_SpecialNPk.c",
+    "ftKb_SpecialNYs.c",
+    "ftKb_SpecialNZd.c",
+    "it_2E5A",
+    "if_2FC93",
+    "ifcoget",
+    "soundtest",
+    "gmCamera_801A2798",
+    "lb_8001B99C",
+    "mnDiagram2_ClearDetailView",
+    "matched code +6896",
+    "50 new matches",
+    "ftKb_Init .sdata regression"
+  ],
+  "follow_up_queries": [
+    "PR 2200 new_var permuter",
+    "Effect_RemoveUserData_inline HSD_ObjFree Effect_AllocData",
+    "ftKb_Init .sdata regression PR 2200",
+    "permuter high % functions 50 new matches",
+    "ftCo_80097F38 new_var Fighter_ChangeMotionState",
+    "ftKb_SpecialN_800F15D8 FTKIND_PICHU new_var",
+    "automatic permuter fixes mechanical temporaries"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json",
+      "human_pr_text",
+      "changed_files.jsonl",
+      "raw_diff excerpt",
+      "text_corpus: decomp-dev bot report"
+    ],
+    "notes": [
+      "Changed-file metadata and bot report are strong for file list, counts, matched symbols, and reported regression.",
+      "The raw diff is truncated, so file-specific source-shape observations are limited to visible excerpts and the changed-file list.",
+      "There were no review comments and no human reviewer feedback in the loaded slice.",
+      "The bot report provides match/regression metrics, but the intake slice does not include local build commands, objdiff screenshots, or human validation notes.",
+      "The PR was merged according to metadata, but no acceptance rationale is available beyond merge state and bot report."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "pr_lesson",
+        "title": "Broad permuter sweeps need a report ledger",
+        "text": "PR #2200 shows a short automatic permuter pass can produce many small 100% matches, but the resulting postmortem should record matched-code wins, matched-data changes, and regressions separately rather than treating the sweep as uniformly beneficial.",
+        "scope": [
+          "automatic permuter",
+          "decomp matching",
+          "regression review"
+        ],
+        "evidence_refs": [
+          "human_pr_text",
+          "text_corpus: decomp-dev bot report"
+        ]
+      },
+      {
+        "record_type": "pr_lesson",
+        "title": "Permuter artifacts are evidence of matching tactics, not naming style",
+        "text": "The diff shows temporaries such as new_var/new_var2 and tiny inline wrappers used in matched functions. These are useful search terms for recognizing permuter-driven source-shape edits, but the PR does not establish them as preferred source style.",
+        "scope": [
+          "permuter artifacts",
+          "naming review",
+          "source-shape tactics"
+        ],
+        "evidence_refs": [
+          "raw_diff: eflib.c",
+          "raw_diff: ftCo_DownBound.c",
+          "raw_diff: ftKb_Init.c"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Record automatic permuter reports as match/regression ledgers",
+        "text": "For broad automatic permuter PRs, require the postmortem or review note to separate new 100% text matches from data-section changes and regressions, because PR #2200 shows both many new text matches and a ftKb_Init .sdata regression in the same sweep.",
+        "source_path": null,
+        "scope": [
+          "automatic permuter",
+          "verification-and-regression-ledger",
+          "text-before-data-matching"
+        ],
+        "evidence_refs": [
+          "human_pr_text",
+          "text_corpus: decomp-dev bot report"
+        ],
+        "reason": "This is consistent with existing verification/data-risk standards, but curator should decide whether PR #2200 adds enough historical support for an explicit permuter-specific note."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote new_var/new_var2 as accepted naming convention; the evidence only shows these names were used by or from the permuter output.",
+      "Do not infer reviewer approval of source style from merge state; no review comments are present.",
+      "Do not claim all 35 touched functions were manually validated; the loaded evidence only includes the bot report and PR body.",
+      "Do not treat the ftKb_Init .sdata regression as acceptable policy; the evidence only reports that it occurred."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

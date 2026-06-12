@@ -7,15 +7,15 @@ import { arrayValue, numberValue, objectValue, stringValue } from "./util.js";
 
 const RESOURCE_EDGE_TYPES = [
   "HAS_PATH_FACT",
-  "HAS_TOOL_FINDING",
   "HAS_DATA_SHEET_REFERENCE",
   "HAS_POWERPC_REFERENCE",
   "HAS_EXTERNAL_MIRROR_REFERENCE",
   "HAS_DECOMP_STANDARD",
   "HAS_DOCUMENT_REFERENCE",
   "HAS_RESOURCE_EVIDENCE",
+  "HAS_MISMATCH_PATTERN",
+  "HAS_MISMATCH_PATTERN_EVIDENCE",
 ];
-const TOOL_EDGE_TYPES = ["HAS_TOOL_FINDING"];
 const HISTORICAL_EDGE_TYPES = ["HAS_HISTORICAL_FUNCTION_HINT", "HAS_HISTORICAL_TOOL_LESSON", "MENTIONED_IN_HISTORICAL_TOOL_ISSUE"];
 const CURATED_EDGE_TYPES = ["HAS_CURATED_WORKER_LESSON", "HAS_CURATED_PR_LESSON", "HAS_SOURCE_UPDATE_PROPOSAL", "HAS_CURATED_KNOWLEDGE"];
 
@@ -39,7 +39,6 @@ export function rankFeatureForSourcePath(store: KnowledgeGraphStore, sourcePath:
   const duplicateReferenceCount = edgeTypeCount(store.db, targetIds, ["ANALOGOUS_TO"]);
   const acceptedEdgeCount = statusEdgeCount(store.db, targetIds, "accepted");
   const pathFactCount = edgeTypeCount(store.db, [entityId], ["HAS_PATH_FACT"]);
-  const toolFindingCount = edgeTypeCount(store.db, targetIds, TOOL_EDGE_TYPES);
   const resourceEvidenceCount = Math.max(
     edgeTypeCount(store.db, targetIds, RESOURCE_EDGE_TYPES),
     nonCodeSearchChunkCount(store.db, targetIds),
@@ -54,7 +53,7 @@ export function rankFeatureForSourcePath(store: KnowledgeGraphStore, sourcePath:
 
   const informationGainScore = roundScore(
     Math.min(26, graphDegree * 0.35 + functionGraphDegree * 0.6) +
-      Math.min(28, resourceEvidenceCount * 2.5 + pathFactCount * 2 + toolFindingCount * 3) +
+      Math.min(28, resourceEvidenceCount * 2.5 + pathFactCount * 2) +
       Math.min(34, historicalLessonCount * 5 + curatedSignalCount * 5 + proposalFactCount * 4 + staleFactCount * 3),
   );
   const unlockScore = roundScore(
@@ -66,10 +65,10 @@ export function rankFeatureForSourcePath(store: KnowledgeGraphStore, sourcePath:
   const contextQualityScore = roundScore(
     Math.min(20, connectedMatchedReferenceCount * 2) +
       Math.min(18, relevantPrCount * 1.3) +
-      Math.min(22, pathFactCount * 4 + toolFindingCount * 3 + historicalLessonCount * 2),
+      Math.min(22, pathFactCount * 4 + historicalLessonCount * 2),
   );
   const completionReadinessScore = roundScore(
-    Math.min(32, toolFindingCount * 5 + pathFactCount * 3 + historicalLessonCount * 4 + curatedSignalCount * 4 + proposalFactCount * 2) +
+    Math.min(32, pathFactCount * 3 + historicalLessonCount * 4 + curatedSignalCount * 4 + proposalFactCount * 2) +
       Math.min(24, duplicateReferenceCount * 6 + connectedMatchedReferenceCount * 2.5) +
       Math.min(14, relevantPrCount * 1.4) +
       Math.min(8, functionGraphDegree * 0.25),
@@ -85,7 +84,6 @@ export function rankFeatureForSourcePath(store: KnowledgeGraphStore, sourcePath:
     relevantPrCount ? `relevant_pr_count=${relevantPrCount}` : "",
     resourceEvidenceCount ? `resource_evidence=${resourceEvidenceCount}` : "",
     pathFactCount ? `path_facts=${pathFactCount}` : "",
-    toolFindingCount ? `tool_findings=${toolFindingCount}` : "",
     historicalLessonCount ? `historical_lessons=${historicalLessonCount}` : "",
     curatedSignalCount ? `curated_signals=${curatedSignalCount}` : "",
     connectedIncompleteFunctionCount ? `linked_incomplete_functions=${connectedIncompleteFunctionCount}` : "",
@@ -111,7 +109,6 @@ export function rankFeatureForSourcePath(store: KnowledgeGraphStore, sourcePath:
     connected_incomplete_function_count: connectedIncompleteFunctionCount,
     connected_matched_reference_count: connectedMatchedReferenceCount,
     resource_evidence_count: resourceEvidenceCount,
-    tool_finding_count: toolFindingCount,
     path_fact_count: pathFactCount,
     historical_lesson_count: historicalLessonCount,
     curated_signal_count: curatedSignalCount,

@@ -1,0 +1,17 @@
+{
+  "number": 1076,
+  "title": "Sysdolphin DTK",
+  "state": "MERGED",
+  "createdAt": "2024-01-18T01:05:47Z",
+  "updatedAt": "2024-01-18T02:06:54Z",
+  "mergedAt": "2024-01-18T01:27:06Z",
+  "closedAt": "2024-01-18T01:27:06Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/1076",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 62389
+  }
+}

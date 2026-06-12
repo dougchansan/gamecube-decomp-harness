@@ -1,0 +1,370 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2196",
+  "pr": {
+    "number": 2196,
+    "title": "Multiple item cleanup",
+    "url": "https://github.com/doldecomp/melee/pull/2196",
+    "state": "MERGED",
+    "author": "jurrejelle",
+    "created_at": "2026-03-02T16:12:44Z",
+    "merged_at": "2026-03-02T21:23:57Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Aggregate item/game-mode cleanup PR targeting high-fuzzy-match low-hanging fruit. The diff updates item collision and item_266F helpers, a Fox Blaster item routine, and gm_1601 signatures/control-flow/local cleanup. The automated report says matched code improved by 3040 bytes, with 16 new 100% matches and 7 additional fuzzy improvements.",
+  "change_classification": {
+    "primary_type": "cleanup_and_decomp_matching",
+    "categories": [
+      "cleanup",
+      "decomp-matching",
+      "headers",
+      "prototype-update",
+      "control-flow-cleanup"
+    ],
+    "systems": [
+      "item",
+      "item-collision",
+      "foxblaster",
+      "game-mode"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/it/it_266F.c",
+      "role": "Primary item cleanup and matching work: rewrote binary-search-like helper logic, changed signatures and casts, added small wrapper functions, adjusted PAD_STACK/local variable shapes, and scoped a dont_inline pragma around it_8026E7E0.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/it/it_266F.c added 116 deleted 97 hunks 21",
+        "raw_diff.diff: it_8026C530 and it_8026C65C hunks",
+        "raw_diff.diff: it_8026E15C/it_8026E248/it_8026E32C/it_8026E7E0 hunks",
+        "text_corpus.jsonl: decomp-dev bot report lists multiple it_266F new matches and improvements"
+      ]
+    },
+    {
+      "path": "src/melee/it/it_266F.h",
+      "role": "Header prototype updates for recovered/changed item helper signatures and declarations for newly added wrapper helpers.",
+      "evidence_refs": [
+        "raw_diff.diff: it_8026C65C return changed u8 to int",
+        "raw_diff.diff: it_8026EA20 arg4 changed UNK_T* to int*",
+        "raw_diff.diff: declarations added for it_8026E15C_inline1, it_8026E15C_inline2, it_8026E248_inline, it_8026E32C_inline"
+      ]
+    },
+    {
+      "path": "src/melee/it/itcoll.c",
+      "role": "Item collision cleanup: removed large disabled alternative blocks and replaced copied hitbox checks with an ARRAY_SIZE loop; adjusted GET_ITEM use and left/right bounding box swap logic.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/it/itcoll.c added 14 deleted 88 hunks 4",
+        "raw_diff.diff: it_8026FCF8 removed #if 0 alternatives and introduced for loop over ARRAY_SIZE(item->x5D4_hitboxes)",
+        "raw_diff.diff: it_80271A58 switched item_gobj->user_data to GET_ITEM(item_gobj) and changed left/right negation order",
+        "text_corpus.jsonl: bot report lists it_8026FC00, it_8026FCF8, and it_80271A58 as new 100% matches"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itfoxblaster.c",
+      "role": "Fox Blaster item routine fuzzy-match adjustment using a temporary zero local, with an in-diff TODO warning it may be a fake improvement versus an idiomatic for loop.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/it/items/itfoxblaster.c added 6 deleted 2 hunks 4",
+        "raw_diff.diff: it_802ADF10 added TODO about probable fake improvement and new_var2",
+        "text_corpus.jsonl: bot report lists it_802ADF10 improvement from 96.22% to 98.15%"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1601.c",
+      "role": "Game-mode cleanup: added gm/types.h include, renamed locals, adjusted pointer math, switch/control-flow, bool compare, signature body for fn_80169574, and stack/local shaping in gm_801674C4.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gm/gm_1601.c added 37 deleted 35 hunks 7",
+        "raw_diff.diff: gm_80163298 local renames and pointer-math TODO",
+        "raw_diff.diff: gm_80167470 changed if/return shape to switch case",
+        "raw_diff.diff: fn_80169574 signature changed void* buf to s8* buf",
+        "text_corpus.jsonl: bot report lists gm_80167470, fn_80169574, and fn_8016A488 as new 100% matches"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1601.h",
+      "role": "Header signature update matching fn_80169574 body change.",
+      "evidence_refs": [
+        "raw_diff.diff: fn_80169574 prototype changed from void* buf to s8* buf"
+      ]
+    }
+  ],
+  "what_changed": [
+    "PR body frames the work as an aggregate PR for multiple files, ideally matching high-fuzzy low-hanging-fruit item files.",
+    "Automated report records matched code at 54.29%, +0.08%, +3040 bytes, with 16 new matches.",
+    "New 100% matches listed by the bot include it_8026F6BC, it_8026E7E0, it_8026C65C, it_80271A58, it_8026FCF8, it_8026FC00, gm_80167470, fn_80169574, and fn_8016A488.",
+    "itcoll.c removed large #if 0 alternate implementations in it_8026FCF8 and replaced repeated hitbox checks with a for loop over ARRAY_SIZE(item->x5D4_hitboxes).",
+    "it_266F.c introduced several matching-oriented local variable and stack changes, wrapper functions around direct calls, a scoped dont_inline pragma around it_8026E7E0, and signature changes for it_8026C65C and it_8026EA20.",
+    "gm_1601.c updated local naming in gm_80163298, preserved a pointer-math TODO, changed gm_80167470 control flow to a switch shape, and typed fn_80169574's buffer as s8*.",
+    "itfoxblaster.c added a temporary zero local in it_802ADF10 and an explicit TODO that the change may be a fake improvement because the idiomatic for-loop shape was not yet matching."
+  ],
+  "smart_moves": [
+    {
+      "title": "Converted repeated hitbox-copy checks into a bounded ARRAY_SIZE loop",
+      "details": "In it_8026FCF8, copied generated-looking checks over four hitboxes were replaced with a for loop using ARRAY_SIZE(item->x5D4_hitboxes), while the bot report shows it_8026FCF8 reached 100%.",
+      "evidence_refs": [
+        "raw_diff.diff: it_8026FCF8 loop hunk",
+        "text_corpus.jsonl: it_8026FCF8 +13 bytes, 96.60% to 100.00%"
+      ]
+    },
+    {
+      "title": "Updated headers when body signatures changed",
+      "details": "fn_80169574 changed from void* to s8* in both gm_1601.c and gm_1601.h; it_8026C65C and it_8026EA20 signature changes were mirrored in it_266F.h.",
+      "evidence_refs": [
+        "raw_diff.diff: gm_1601.c/gm_1601.h fn_80169574",
+        "raw_diff.diff: it_266F.c/it_266F.h it_8026C65C and it_8026EA20"
+      ]
+    },
+    {
+      "title": "Left uncertainty in source comments instead of pretending a cleanup was final",
+      "details": "The diff explicitly marks remaining pointer math in gm_80163298 and the Fox Blaster temporary variable as potential TODO/fake-improvement areas.",
+      "evidence_refs": [
+        "raw_diff.diff: gm_80163298 POTENTIAL TODO pointer math comment",
+        "raw_diff.diff: it_802ADF10 TODO about fake improvement and idiomatic for loop"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "A natural fixed-size loop can match where copied generated-looking blocks existed, as shown by it_8026FCF8 replacing manual hitbox checks with a for loop over ARRAY_SIZE and reaching 100% in the bot report.",
+      "evidence_refs": [
+        "raw_diff.diff: it_8026FCF8 loop over ARRAY_SIZE(item->x5D4_hitboxes)",
+        "text_corpus.jsonl: it_8026FCF8 96.60% to 100.00%"
+      ],
+      "confidence": 0.86
+    },
+    {
+      "lesson": "When a recovered body proves a more specific pointer type, update both implementation and header; fn_80169574 uses s8* buf so indexed writes no longer need ((s8*) buf)[size].",
+      "evidence_refs": [
+        "raw_diff.diff: fn_80169574 body and prototype change",
+        "text_corpus.jsonl: fn_80169574 99.44% to 100.00%"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "lesson": "Matching-oriented local lifetime/register-shape changes can improve scores, but PR evidence here labels some of them as unfinished or possibly fake, so they should not be generalized without verifier evidence.",
+      "evidence_refs": [
+        "raw_diff.diff: it_802ADF10 TODO fake-improvement comment",
+        "raw_diff.diff: gm_801674C4 new_var/PAD_STACK changes",
+        "raw_diff.diff: it_8026E7E0 scoped dont_inline pragma"
+      ],
+      "confidence": 0.68
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "Clear local role names over v/temp numbering when role is evident",
+      "details": "gm_80163298 renames v1/v2/v3/v4/v5 to score/index/record/save_data/offset, making the data roles clearer while retaining a TODO for unresolved pointer math.",
+      "evidence_refs": [
+        "raw_diff.diff: gm_80163298 local rename hunk"
+      ]
+    },
+    {
+      "name": "Use short subsystem object locals when role is clear",
+      "details": "it_8026E_inline uses Item* ip from GET_ITEM and CollData* coll for item/collision roles.",
+      "evidence_refs": [
+        "raw_diff.diff: it_8026E_inline hunk"
+      ]
+    },
+    {
+      "name": "Avoid treating placeholder names as accepted style",
+      "details": "The diff introduces placeholder names such as new_var, new_val, and new_var2 for matching; PR evidence does not support promoting these as naming conventions.",
+      "evidence_refs": [
+        "raw_diff.diff: multiple it_266F.c hunks with new_var/new_val",
+        "raw_diff.diff: it_802ADF10 new_var2"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "PAD_STACK size adjustments",
+      "details": "Several functions changed PAD_STACK amounts, including it_8026E_inline, it_8026E32C, it_8026EA20, gm_801674C4, and it_8026FCF8. Evidence shows score/match improvements, but not a detailed objdiff rationale for each stack pad.",
+      "evidence_refs": [
+        "raw_diff.diff: PAD_STACK changes in gm_801674C4, it_8026E_inline, it_8026E32C, it_8026EA20, it_8026FCF8",
+        "text_corpus.jsonl: bot report"
+      ]
+    },
+    {
+      "tactic": "Scoped pragma to prevent inlining",
+      "details": "it_8026E7E0 is wrapped in #pragma push / #pragma dont_inline on / #pragma pop and is reported as a new 100% match. This is evidence for the local tactic, not a global endorsement of pragmas.",
+      "evidence_refs": [
+        "raw_diff.diff: it_8026E7E0 pragma hunk",
+        "text_corpus.jsonl: it_8026E7E0 50.44% to 100.00%"
+      ]
+    },
+    {
+      "tactic": "Wrapper helpers to affect call/inlining shape",
+      "details": "Small wrappers it_8026E15C_inline1, it_8026E15C_inline2, it_8026E248_inline, and it_8026E32C_inline were added around existing item collision helpers and declared in the header.",
+      "evidence_refs": [
+        "raw_diff.diff: wrapper function additions in it_266F.c",
+        "raw_diff.diff: wrapper declarations in it_266F.h",
+        "text_corpus.jsonl: it_8026E15C, it_8026E248, it_8026E32C improved but not all reached 100%"
+      ]
+    },
+    {
+      "tactic": "Control-flow shape changes",
+      "details": "gm_80167470 changed from an if/return pattern to a switch-case shape and was reported as a new 100% match.",
+      "evidence_refs": [
+        "raw_diff.diff: gm_80167470 hunk",
+        "text_corpus.jsonl: gm_80167470 95.00% to 100.00%"
+      ]
+    },
+    {
+      "tactic": "Pointer arithmetic retained with explicit TODO",
+      "details": "gm_80163298 keeps raw save_data + offset accesses with a comment that removing pointer math seems hard due to addi + lwzx.",
+      "evidence_refs": [
+        "raw_diff.diff: gm_80163298 pointer-math TODO"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "source": "decomp-dev[bot] issue comment",
+      "feedback": "Automated report recorded +3040 bytes matched code, 16 new matches, and 7 fuzzy improvements.",
+      "evidence_refs": [
+        "text_corpus.jsonl: decomp-dev[bot] report for GALE01"
+      ]
+    },
+    {
+      "source": "review metadata",
+      "feedback": "No human review comments or reviews are present in the loaded slice.",
+      "evidence_refs": [
+        "metadata_json: counts.review_comments 0, reviews 0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR 2196",
+    "Multiple item cleanup",
+    "jurrejelle",
+    "it_266F",
+    "itcoll",
+    "itfoxblaster",
+    "gm_1601",
+    "it_8026FCF8",
+    "it_80271A58",
+    "it_8026E7E0",
+    "it_8026C65C",
+    "it_8026EA20",
+    "it_802ADF10",
+    "gm_80167470",
+    "fn_80169574",
+    "ARRAY_SIZE hitboxes",
+    "PAD_STACK",
+    "pragma dont_inline",
+    "fake improvement",
+    "pointer math TODO",
+    "HSD_ObjAllocUnk6",
+    "GET_ITEM",
+    "mpCheckAllRemap"
+  ],
+  "follow_up_queries": [
+    "it_8026FCF8 ARRAY_SIZE item->x5D4_hitboxes for loop match",
+    "it_8026E7E0 pragma dont_inline PAD_STACK 100% match",
+    "it_802ADF10 fake-improvement idiomatic for loop TODO",
+    "gm_80163298 save_data offset pointer math addi lwzx",
+    "fn_80169574 s8* buf header prototype",
+    "it_8026EA20 mpCheckAllRemap int* arg4"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR identity, state, changed files, line counts",
+      "human_pr_text.md: author stated aggregate matching/cleanup intent",
+      "raw_diff.diff: concrete code changes",
+      "text_corpus.jsonl: automated match report"
+    ],
+    "notes": [
+      "Changed files, major code edits, and automated match deltas are well supported.",
+      "There are no human review comments in the slice, so reviewer intent and acceptance rationale cannot be inferred.",
+      "The bot report supports match/improvement outcomes at symbol level, but the slice does not include per-function objdiff details or local build logs.",
+      "Several edits are explicitly matching tactics or possible fake improvements; they should not be promoted as general style without curator review."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson_candidate",
+        "title": "Fixed-size repeated hitbox checks may be recoverable as ARRAY_SIZE loops",
+        "text": "In PR #2196, it_8026FCF8 replaced repeated manual checks of item hitboxes with `for (i = 0; i < ARRAY_SIZE(item->x5D4_hitboxes); i++)` and the automated report shows the function reached 100%. This supports trying a natural fixed-size loop before preserving copied generated blocks.",
+        "scope": [
+          "src/melee/it/itcoll.c",
+          "item hitbox scans",
+          "fixed-size arrays"
+        ],
+        "evidence_refs": [
+          "raw_diff.diff: it_8026FCF8 hunk",
+          "text_corpus.jsonl: it_8026FCF8 +13 bytes, 96.60% to 100.00%"
+        ],
+        "confidence": 0.86
+      },
+      {
+        "record_type": "decomp_lesson_candidate",
+        "title": "Specific recovered pointer types can remove casts and should be mirrored in headers",
+        "text": "fn_80169574 changed from `void* buf` plus `((s8*) buf)[size]` to `s8* buf` plus `buf[size]`, and the gm_1601.h prototype was updated in the same PR. The bot report lists fn_80169574 as a new 100% match.",
+        "scope": [
+          "src/melee/gm/gm_1601.c",
+          "src/melee/gm/gm_1601.h",
+          "prototype recovery"
+        ],
+        "evidence_refs": [
+          "raw_diff.diff: fn_80169574 implementation and header",
+          "text_corpus.jsonl: fn_80169574 99.44% to 100.00%"
+        ],
+        "confidence": 0.82
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Use PR #2196 as a cautionary example for matching tactics that need narrow evidence",
+        "text": "PR #2196 contains local matching tactics including PAD_STACK adjustments, wrapper helpers, placeholder locals such as new_var/new_var2, and a scoped dont_inline pragma. Some symbols reached 100%, but one source comment explicitly says a Fox Blaster change is probably a fake improvement and that the idiomatic for loop did not yet match. This PR is suitable as an example for requiring narrow objdiff/build evidence and not generalizing tactics as style.",
+        "source_path": null,
+        "scope": [
+          "matching tactics",
+          "PAD_STACK",
+          "pragma dont_inline",
+          "wrapper helpers",
+          "placeholder locals"
+        ],
+        "evidence_refs": [
+          "raw_diff.diff: it_8026E7E0 pragma hunk",
+          "raw_diff.diff: it_802ADF10 fake-improvement TODO",
+          "text_corpus.jsonl: bot report"
+        ],
+        "reason": "Existing standards already warn about pragmas and matching tactics; this PR provides a concrete historical example for curator review, not a new accepted standard."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "itcoll.c includes item hitbox collision-copy helpers matched by natural loops",
+        "text": "In PR #2196, src/melee/it/itcoll.c function it_8026FCF8 scans item hitboxes and copies a matching HitCapsule via lbColl_CopyHitCapsule; the PR changed this to an ARRAY_SIZE loop and the bot reported a 100% match.",
+        "source_path": "src/melee/it/itcoll.c",
+        "scope": [
+          "it_8026FCF8",
+          "item collision",
+          "HitCapsule"
+        ],
+        "evidence_refs": [
+          "raw_diff.diff: it_8026FCF8 hunk",
+          "text_corpus.jsonl: it_8026FCF8 match report"
+        ],
+        "reason": "Potentially useful path-level search fact; should be curated against current source before promotion."
+      }
+    ],
+    "rejection_notes": [
+      "Do not treat placeholder locals named new_var/new_val/new_var2 as a naming convention; they appear to be matching artifacts.",
+      "Do not infer that #pragma dont_inline is broadly acceptable; this PR only shows a scoped local use with an automated match report.",
+      "Do not claim all changed functions fully matched; the bot report lists several as improvements below 100%, including it_8026E15C, it_8026E248, it_8026E32C, gm_801674C4, it_802ADF10, it_8026C530, and gm_80162A98.",
+      "Do not infer human reviewer approval rationale; no human review comments are present in the loaded evidence."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

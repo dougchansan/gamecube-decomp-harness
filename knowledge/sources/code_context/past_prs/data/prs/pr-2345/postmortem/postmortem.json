@@ -1,0 +1,419 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2345",
+  "pr": {
+    "number": 2345,
+    "title": "Match progress",
+    "url": "https://github.com/doldecomp/melee/pull/2345",
+    "state": "MERGED",
+    "author": "johnwinston",
+    "created_at": "2026-03-22T16:22:29Z",
+    "merged_at": "2026-05-10T23:33:16Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Large matching-progress PR with a final slice touching gm, gr, it, and mn code. The loaded diff changes a gm_1601 header parameter type, extends grHomeRun ground variable typing, adds an itlugia switch default, and rewrites mn_80230198 from generated-looking branch/goto control flow into a switch with a bounded loop. PR body claims 14 matched and 8 failed functions, while a later comment says the work was split into subsystem draft PRs and some commits were dropped because equivalent or better decompilations were already upstream.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "headers",
+      "naming",
+      "typed-struct-fields",
+      "control-flow-cleanup",
+      "matching-progress"
+    ],
+    "systems": [
+      "game-mode",
+      "stage",
+      "item",
+      "menu"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/mn/mnmainrule.c",
+      "role": "Reworked mn_80230198 control flow, renamed arg2 to mode, changed loop counter to int, retained PAD_STACK(8), and normalized float suffixes in AnimLoopSettings initializers.",
+      "evidence_refs": [
+        "changed_files: src/melee/mn/mnmainrule.c added 34 deleted 57 hunks 2",
+        "diff: mnmainrule.c mn_80230198 branch/goto ladder replaced by switch(mode) and for (i = 0; i < 5; i++)",
+        "pr_body: mnmainrule.c mn_80230198 listed as ✓ 100%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/types.h",
+      "role": "Expanded grHomeRun_GroundVars layout with offset comments, pad_D4, and an xE8 bitfield union.",
+      "evidence_refs": [
+        "changed_files: src/melee/gr/types.h added 19 deleted 5 hunks 1",
+        "diff: grHomeRun_GroundVars adds gp+C4 through gp+E8 comments, pad_D4[0x14], and xE8_b0..xE8_b7 bitfields"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1601.h",
+      "role": "Adjusted fn_80161C90 prototype second parameter from s32 to int.",
+      "evidence_refs": [
+        "changed_files: src/melee/gm/gm_1601.h added 1 deleted 1 hunks 1",
+        "diff: fn_80161C90(MatchEnd*, s32, u16*) changed to fn_80161C90(MatchEnd*, int, u16*)"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itlugia.c",
+      "role": "Added an explicit default case to a switch in it_802D24A0.",
+      "evidence_refs": [
+        "changed_files: src/melee/it/items/itlugia.c added 2 deleted 0 hunks 1",
+        "diff: it_802D24A0 switch adds default: break",
+        "pr_body: itlugia.c it_802D1830 listed as ✓ 100%"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "mn_80230198 was simplified from an option variable plus gotos and range tests into a switch over mode, with cases 0, 2, and 4 executing frame lookup and cases 1, 3, 5, and 6 doing nothing.",
+      "evidence_refs": [
+        "diff: mnmainrule.c mn_80230198"
+      ]
+    },
+    {
+      "text": "The mn_80230198 loop condition changed from i != 5 to i < 5, while still selecting between mn_803EC770 and mn_803EC734 entries and passing the chosen settings to mn_8022ED6C.",
+      "evidence_refs": [
+        "diff: mnmainrule.c for-loop body"
+      ]
+    },
+    {
+      "text": "The local parameter name arg2 became mode in mn_80230198.",
+      "evidence_refs": [
+        "diff: void mn_80230198(HSD_GObj* gobj, HSD_JObj* jobj, u8 mode)"
+      ]
+    },
+    {
+      "text": "AnimLoopSettings initializers in mnmainrule.c changed float suffix spelling from lowercase f to uppercase F.",
+      "evidence_refs": [
+        "diff: mn_803EC734 and mn_803EC770 initializer changes"
+      ]
+    },
+    {
+      "text": "grHomeRun_GroundVars received more explicit layout information, including offset comments, typed padding, and an xE8 byte/bitfield union.",
+      "evidence_refs": [
+        "diff: src/melee/gr/types.h grHomeRun_GroundVars"
+      ]
+    },
+    {
+      "text": "fn_80161C90's header prototype was updated from s32 to int for the second parameter.",
+      "evidence_refs": [
+        "diff: src/melee/gm/gm_1601.h"
+      ]
+    },
+    {
+      "text": "it_802D24A0 now has an explicit default: break in its switch before multiplying ip->x40_vel.z by multiplier.",
+      "evidence_refs": [
+        "diff: src/melee/it/items/itlugia.c"
+      ]
+    },
+    {
+      "text": "A later issue comment says this broad PR was split into smaller draft PRs by subsystem and that some commits were dropped because upstream already had equivalent or better decompilations.",
+      "evidence_refs": [
+        "issue_comment: https://github.com/doldecomp/melee/pull/2345#issuecomment-4226538679"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Converted generated-looking branch/goto control flow in mn_80230198 into a direct switch over the semantic mode parameter, matching the loaded standard's preference for canonical control flow when ordinary C expresses the dispatch.",
+      "evidence_refs": [
+        "diff: mn_80230198 switch(mode)",
+        "decomp_standards: canonical-control-flow-and-macros"
+      ]
+    },
+    {
+      "text": "Kept the repeated frame-range search as a natural bounded loop instead of unrolling it, consistent with natural-loop guidance.",
+      "evidence_refs": [
+        "diff: mn_80230198 for (i = 0; i < 5; i++)",
+        "decomp_standards: natural-loops"
+      ]
+    },
+    {
+      "text": "Added typed ground-var layout rather than relying only on anonymous offsets for grHomeRun_GroundVars.",
+      "evidence_refs": [
+        "diff: grHomeRun_GroundVars xC4..xE8 fields",
+        "decomp_standards: typed-fields-over-pointer-math"
+      ]
+    },
+    {
+      "text": "The author chose to split a broad multi-subsystem PR into smaller subsystem PRs for easier review.",
+      "evidence_refs": [
+        "issue_comment: Split this PR into four smaller draft PRs by subsystem for easier review"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a decompiled branch ladder only selects a few valid modes, test a switch with grouped active and no-op cases before preserving gotos.",
+      "scope": [
+        "menu functions",
+        "mode dispatch",
+        "matching cleanup"
+      ],
+      "evidence_refs": [
+        "diff: mn_80230198 replaces option/goto ladder with switch(mode)",
+        "decomp_standards: canonical-control-flow-and-macros"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "lesson": "For repeated table scans over animation settings, a natural for-loop can be the reviewable shape when the loop bounds and indexed table access are clear.",
+      "scope": [
+        "animation settings tables",
+        "menu JObj animation"
+      ],
+      "evidence_refs": [
+        "diff: mn_80230198 scans mn_803EC770 and mn_803EC734 with for (i = 0; i < 5; i++)",
+        "decomp_standards: natural-loops"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "Recovering a struct layout may involve adding explicit padding and bitfield union arms when the PR evidence identifies offsets and flag bits.",
+      "scope": [
+        "ground vars",
+        "stage structs"
+      ],
+      "evidence_refs": [
+        "diff: grHomeRun_GroundVars adds pad_D4[0x14] and xE8_b0..xE8_b7"
+      ],
+      "confidence": 0.7
+    },
+    {
+      "lesson": "Large multi-subsystem matching batches can become review-heavy; the PR author later routed the work into subsystem-specific draft PRs.",
+      "scope": [
+        "PR review process",
+        "decomp batching"
+      ],
+      "evidence_refs": [
+        "issue_comment: split into #2402 ft, #2404 gr, #2405 gm+mn, #2406 it"
+      ],
+      "confidence": 0.76
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "Local parameter arg2 in mn_80230198 was renamed to mode, a short semantic name supported by the switch dispatch over mode values.",
+      "evidence_refs": [
+        "diff: mn_80230198 signature and switch(mode)",
+        "decomp_standards: conservative-naming"
+      ]
+    },
+    {
+      "text": "grHomeRun_GroundVars kept address-style field names xC4, xC6, xC8, xCC, xD0, xE8 and bit names xE8_b0..xE8_b7 rather than inventing more semantic names.",
+      "evidence_refs": [
+        "diff: src/melee/gr/types.h grHomeRun_GroundVars",
+        "decomp_standards: conservative-naming"
+      ]
+    },
+    {
+      "text": "Header signature cleanup used int rather than s32 for fn_80161C90's second parameter, but the PR slice does not explain the reason beyond the diff.",
+      "evidence_refs": [
+        "diff: src/melee/gm/gm_1601.h"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "text": "mn_80230198 retained PAD_STACK(8), indicating a stack-shape matching tactic remained in the final diff.",
+      "evidence_refs": [
+        "diff: mn_80230198 contains PAD_STACK(8)",
+        "decomp_standards: matching-tactics-need-evidence"
+      ],
+      "caution": "The slice shows the tactic but does not include objdiff or adjacent-regression evidence specifically justifying PAD_STACK."
+    },
+    {
+      "text": "Switch grouping of cases 0, 2, and 4 versus no-op cases 1, 3, 5, and 6 is the main visible control-flow matching tactic.",
+      "evidence_refs": [
+        "diff: mn_80230198 switch(mode)"
+      ]
+    },
+    {
+      "text": "The PR body reports 14 functions at ✓ 100% and 8 failed candidates, but the loaded diff only contains four changed files and does not include verifier output per touched function.",
+      "evidence_refs": [
+        "pr_body: Progress table",
+        "changed_files.jsonl: four changed files"
+      ]
+    },
+    {
+      "text": "A bot report says GALE01 had no changes for one checked revision.",
+      "evidence_refs": [
+        "issue_comment: decomp-dev[bot] Report for GALE01 (53a261a - faff6e1): No changes"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "text": "No review comments were loaded for this PR slice.",
+      "evidence_refs": [
+        "metadata_json: review_comments 0, reviews 0"
+      ]
+    },
+    {
+      "text": "The author later commented that the PR was split into four smaller draft PRs by subsystem for easier review.",
+      "evidence_refs": [
+        "issue_comment: https://github.com/doldecomp/melee/pull/2345#issuecomment-4226538679"
+      ]
+    },
+    {
+      "text": "The same comment says some commits were dropped because upstream already had equivalent or better decompilations.",
+      "evidence_refs": [
+        "issue_comment: dropped lbAudioAx_800243F4, fn_800244F4, grOldPupupu_8021119C, fn_8023DAEC in mnnamenew.c"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2345",
+    "Match progress",
+    "johnwinston",
+    "mnmainrule.c",
+    "mn_80230198",
+    "mn_80230D18",
+    "mn_803EC734",
+    "mn_803EC770",
+    "AnimLoopSettings",
+    "mn_8022F298",
+    "mn_8022ED6C",
+    "PAD_STACK(8)",
+    "switch(mode)",
+    "grHomeRun_GroundVars",
+    "pad_D4",
+    "xE8_b0",
+    "xE8_b7",
+    "gm_1601.h",
+    "fn_80161C90",
+    "itlugia.c",
+    "it_802D24A0",
+    "it_802D1830",
+    "subsystem split",
+    "#2402",
+    "#2404",
+    "#2405",
+    "#2406"
+  ],
+  "follow_up_queries": [
+    "PR 2405 gm mn mn_80230198 mn_80230D18",
+    "mn_80230198 PAD_STACK(8) objdiff",
+    "grHomeRun_GroundVars xE8_b0 xE8_b7 pad_D4",
+    "fn_80161C90 MatchEnd int u16 prototype",
+    "itlugia it_802D24A0 default break multiplier",
+    "PR 2404 grhomerun fn_8021E994 grHomeRun_GroundVars",
+    "PR 2406 itlugia it_802D1830"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR #2345 state MERGED, changed_files 4, diff_bytes 4815",
+      "human_pr_text: PR body reports 14 matched and 8 failed",
+      "raw_diff: four changed files only",
+      "text_corpus: issue comment says PR was split and some commits dropped",
+      "metadata_json: review_comments 0, reviews 0"
+    ],
+    "notes": [
+      "The PR body lists many matched and failed functions across files not present in the final loaded diff, so broad matched-function claims are preserved as PR-body claims rather than independently accepted validation.",
+      "No inline review comments or reviewer intent are available.",
+      "The diff is small and concrete for the four changed files, but it does not include objdiff/checkdiff logs for individual tactics such as PAD_STACK.",
+      "The later author comment says the PR was closed in favor of split PRs, while metadata says the PR merged; both are recorded without inferring the exact repository workflow beyond the loaded evidence.",
+      "Function descriptions in the PR body may be generated text and are not used as source-of-truth path facts."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson",
+        "title": "Replace generated mode branch ladders with grouped switch cases when supported",
+        "text": "In mn_80230198, a generated-looking sequence of option tests and gotos was replaced by switch(mode), grouping active cases 0/2/4 and no-op cases 1/3/5/6. This is a PR-backed example of the canonical-control-flow standard.",
+        "scope": [
+          "src/melee/mn/mnmainrule.c",
+          "mode dispatch",
+          "control-flow cleanup"
+        ],
+        "evidence_refs": [
+          "diff: src/melee/mn/mnmainrule.c mn_80230198",
+          "decomp_standards: canonical-control-flow-and-macros"
+        ],
+        "confidence": 0.82
+      },
+      {
+        "record_type": "decomp_lesson",
+        "title": "Use bounded table scans for animation setting selection",
+        "text": "mn_80230198 keeps a natural for-loop over five animation setting slots while selecting from mn_803EC770 or mn_803EC734 based on frame range. This supports trying clean loops for repeated table checks before preserving generated branch shapes.",
+        "scope": [
+          "menu animation",
+          "table scans",
+          "natural loops"
+        ],
+        "evidence_refs": [
+          "diff: mn_80230198 for (i = 0; i < 5; i++)",
+          "decomp_standards: natural-loops"
+        ],
+        "confidence": 0.78
+      },
+      {
+        "record_type": "process_lesson",
+        "title": "Split broad matching batches by subsystem for review",
+        "text": "The author later split this broad matching PR into subsystem draft PRs for ft, gr, gm+mn, and it review, and dropped commits already covered upstream.",
+        "scope": [
+          "PR review process",
+          "matching batch management"
+        ],
+        "evidence_refs": [
+          "issue_comment: https://github.com/doldecomp/melee/pull/2345#issuecomment-4226538679"
+        ],
+        "confidence": 0.76
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "grHomeRun_GroundVars layout has pad_D4 and xE8 bitfield union in this PR slice",
+        "text": "The diff expands struct grHomeRun_GroundVars with offset comments for xC4, xC6, xC8, xCC, xD0, adds pad_D4[0x14], and adds a union at xE8 with byte access and bitfields xE8_b0 through xE8_b7. Curator should verify against current source before promoting as a path fact.",
+        "source_path": "src/melee/gr/types.h",
+        "scope": [
+          "grHomeRun_GroundVars",
+          "stage ground vars",
+          "gr/types.h"
+        ],
+        "evidence_refs": [
+          "diff: src/melee/gr/types.h grHomeRun_GroundVars"
+        ],
+        "reason": "This is concrete diff evidence for a struct layout change, but current source may have evolved after PR #2345."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "mn_80230198 uses mode dispatch for menu rule animation settings in this PR slice",
+        "text": "The diff renames mn_80230198's third parameter to mode and dispatches cases 0, 2, and 4 to a frame-range scan over mn_803EC770 and mn_803EC734 before calling mn_8022ED6C. Curator should verify current code and any later PR #2405 changes before promoting.",
+        "source_path": "src/melee/mn/mnmainrule.c",
+        "scope": [
+          "mn_80230198",
+          "mnmainrule.c",
+          "menu rule animation"
+        ],
+        "evidence_refs": [
+          "diff: src/melee/mn/mnmainrule.c mn_80230198",
+          "pr_body: mnmainrule.c mn_80230198 listed as ✓ 100%"
+        ],
+        "reason": "Useful local behavior/path fact candidate, but the loaded slice does not include full current-source validation."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote the PR body's full list of 14 matched functions as accepted validation from this slice; the final diff only shows four files and no per-function objdiff logs.",
+      "Do not infer reviewer approval or reviewer-requested changes; no review comments or reviews were loaded.",
+      "Do not treat PAD_STACK(8) as generally endorsed style from this PR; it appears in the diff without explicit verifier evidence in the loaded slice.",
+      "Do not promote generated function descriptions from the PR body as authoritative semantic documentation without current-source or subsystem evidence."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

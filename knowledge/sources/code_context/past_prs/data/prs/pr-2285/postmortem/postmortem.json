@@ -1,0 +1,548 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2285",
+  "pr": {
+    "number": 2285,
+    "title": "ifcoget + random permuters",
+    "url": "https://github.com/doldecomp/melee/pull/2285",
+    "state": "MERGED",
+    "author": "jurrejelle",
+    "created_at": "2026-03-14T17:03:15Z",
+    "merged_at": "2026-03-14T21:22:15Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Merged tracking PR with broad matching edits across ifcoget, Kirby specials, game-mode, ground/stage, menu, library, and baselib files. The bot report credits +5580 matched bytes, 22 newly matched functions, and 5 additional unmatched-item improvements. The diff shows a mix of type/signature recovery, field-based access replacing raw pointer math, small motion-state and cast fixes, recovered local structs, and several explicit permuter/regalloc tactics such as PAD_STACK, temporary inline wrappers, redundant variables, and comments labeled 'Permuter slop' or 'FAKE MATCH'.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "type-recovery",
+      "permuter-tactics",
+      "pointer-math-cleanup"
+    ],
+    "systems": [
+      "fighter",
+      "game-mode",
+      "stage",
+      "interface",
+      "menu",
+      "library",
+      "baselib"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/if/ifcoget.c",
+      "role": "largest focused matching target; struct/storage reshaping, accessor use, text formatting calls, PAD_STACK, and table-size TODOs",
+      "evidence_refs": [
+        "changed_files: ifcoget.c +36/-20 in 10 hunks",
+        "diff_excerpt: un_803F9E08 initialized with IfCoGet.dat and ScInfCgt_scene_data; un_804A1F58 changed to struct array[7]; HSD_GObjGetHSDObj; HSD_SisLib_803A70A0 format arguments; PAD_STACK in un_802FF364/un_802FF498",
+        "bot_report: ifcoget matches un_802FF364, un_802FEFAC, fn_802FED14, un_802FF1B4, un_802FF498; ifcoget .data/.sdata and other functions improved"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_SpecialNPk.c",
+      "role": "Kirby copy-special matching using small inline accessor, PAD_STACK, HSD_GObjGetUserData, and split fp/fp2 locals",
+      "evidence_refs": [
+        "changed_files: ftKb_SpecialNPk.c +20/-9 in 8 hunks",
+        "diff_excerpt: ftKb_KpSpecialN_Anim_inline returns dat_attrs; PAD_STACK added; GET_FIGHTER replaced by HSD_GObjGetUserData in one site; fp2 introduced for callback writes",
+        "bot_report: five ftKb_SpecialNPk functions newly 100%"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_SpecialNZd.c",
+      "role": "Kirby Zelda-special matching with explicit permuter slop locals and HSD_GObjGetUserData reloads",
+      "evidence_refs": [
+        "changed_files: ftKb_SpecialNZd.c +6/-2 in 2 hunks",
+        "diff_excerpt: void *new_var comments 'Permuter slop'; PAD_STACK; fp reloaded through HSD_GObjGetUserData",
+        "bot_report: ftKb_SpecialNSk_80105E8C and ftKb_SpecialNSk_80105F3C newly 100%"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_SpecialN.c",
+      "role": "motion-state enum corrections for two Kirby neutral-special functions",
+      "evidence_refs": [
+        "changed_files: ftKb_SpecialN.c +2/-2 in 2 hunks",
+        "diff_excerpt: ftKb_MS_EatWait to ftKb_MS_Eat; ftKb_MS_EatFall to ftKb_MS_EatAir",
+        "bot_report: both touched functions newly 100%"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1601.c",
+      "role": "game-mode score update cleanup using typed save-data fields and unsigned record pointer",
+      "evidence_refs": [
+        "changed_files: gm_1601.c +7/-13 in 1 hunk",
+        "diff_excerpt: raw save_data/offset pointer math removed; gmMainLib_8015EDBC()->x114[index] used; s16* record changed to u16*",
+        "bot_report: gm_80163298 newly 100%"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmmain_lib.c",
+      "role": "return type update for gmMainLib_8015D7EC",
+      "evidence_refs": [
+        "changed_files: gmmain_lib.c +1/-1",
+        "diff_excerpt: gmMainLib_8015D7EC return type s16* to u16*"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmmain_lib.h",
+      "role": "header prototype synced with recovered unsigned return type",
+      "evidence_refs": [
+        "changed_files: gmmain_lib.h +1/-1",
+        "diff_excerpt: prototype for gmMainLib_8015D7EC changed to u16*"
+      ]
+    },
+    {
+      "path": "src/melee/gm/types.h",
+      "role": "FighterData field signedness update backing gmMainLib_8015D7EC",
+      "evidence_refs": [
+        "changed_files: gm/types.h +1/-1",
+        "diff_excerpt: FighterData x7E changed from s16 to u16"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_18A5.c",
+      "role": "SisLib call cast cleanup",
+      "evidence_refs": [
+        "changed_files: gm_18A5.c +2/-2",
+        "diff_excerpt: HSD_SisLib_803A70A0 first arg no longer cast to void*; third arg cast to char*"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grcastle.c",
+      "role": "castle parameter struct expanded to cover offset 0x12C and replace raw pointer math",
+      "evidence_refs": [
+        "changed_files: grcastle.c +11/-9 in 2 hunks",
+        "diff_excerpt: grCastleParams gains offset comments, padding, x12C flexible array TODO; grCastle_801CE7E8 uses grCs_804D6970->x12C[index]",
+        "bot_report: grCastle_801CE7E8 newly 100%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grmaterial.c",
+      "role": "matching via small inline user_data accessor with TODO about GET_GROUND",
+      "evidence_refs": [
+        "changed_files: grmaterial.c +7/-1",
+        "diff_excerpt: grMaterial_801C9604_inline returns arg0->user_data; function uses inline instead of direct gobj->user_data",
+        "bot_report: grMaterial_801C9604 newly 100%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grpstadium.c",
+      "role": "permuter-style local aliasing and HSD_GObjGetUserData cast for matching",
+      "evidence_refs": [
+        "changed_files: grpstadium.c +8/-4",
+        "diff_excerpt: new_var/new_var2 comments 'Permuter slop'; wrapper alias; GET_GROUND replaced by HSD_GObjGetUserData cast",
+        "bot_report: fn_801D3084 newly 100%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grrcruise.c",
+      "role": "function signature/type recovery and field access replacement for collision and rcruise entries",
+      "evidence_refs": [
+        "changed_files: grrcruise.c +15/-9",
+        "diff_excerpt: fn_802010A4 arg2 changed from u8* to CollData*; coll->x34_flags.b1234 used; grRCruise_Entry fields replace byte-offset access",
+        "bot_report: fn_802010A4 newly 100%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grrcruise.h",
+      "role": "header signature synced with recovered CollData* parameter",
+      "evidence_refs": [
+        "changed_files: grrcruise.h +1/-1",
+        "diff_excerpt: fn_802010A4 prototype changed to CollData*"
+      ]
+    },
+    {
+      "path": "src/melee/gr/types.h",
+      "role": "new grRCruise_Entry and grRCruise_GroundVars entries pointer layout",
+      "evidence_refs": [
+        "changed_files: gr/types.h +13/-0 in 2 hunks",
+        "diff_excerpt: struct grRCruise_Entry added; grRCruise_GroundVars gets pad_3C and entries pointer"
+      ]
+    },
+    {
+      "path": "src/melee/if/textdraw.c",
+      "role": "matched DevText_Remove per bot report; diff details not fully present in loaded excerpt",
+      "evidence_refs": [
+        "changed_files: textdraw.c +10/-7",
+        "bot_report: DevText_Remove newly 100%"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lbsnap.c",
+      "role": "small library changes; exact diff not present in loaded excerpt",
+      "evidence_refs": [
+        "changed_files: lbsnap.c +2/-0"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mncharsel.c",
+      "role": "small menu change; exact diff not present in loaded excerpt",
+      "evidence_refs": [
+        "changed_files: mncharsel.c +1/-1"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mncharsel.static.h",
+      "role": "small menu static-header deletion; exact diff not present in loaded excerpt",
+      "evidence_refs": [
+        "changed_files: mncharsel.static.h +0/-1"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnmain.c",
+      "role": "menu matching; two functions reached 100% per bot report; exact diff not present in loaded excerpt",
+      "evidence_refs": [
+        "changed_files: mnmain.c +12/-5 in 5 hunks",
+        "bot_report: mn_8022BA1C and mn_80229F60 newly 100%"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/particle.c",
+      "role": "small baselib particle changes; exact diff not present in loaded excerpt",
+      "evidence_refs": [
+        "changed_files: particle.c +2/-4"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/sislib.h",
+      "role": "small SisLib header signature/cast-related change; exact diff not present in loaded excerpt",
+      "evidence_refs": [
+        "changed_files: sislib.h +1/-1",
+        "diff_excerpt: gm_18A5 call sites cast third argument to char* for HSD_SisLib_803A70A0"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Bot report states matched code rose to 57.52%, +0.14%, +5580 bytes, with 22 newly matched functions and 5 improvements in unmatched items.",
+    "ifcoget.c gained data/struct reshaping around un_803F9E08 and un_804A1F58, asset-name storage in the struct initializer, HSD_GObjGetHSDObj usage, adjusted HSD_SisLib_803A70A0 arguments, and several stack/control-flow shaping edits.",
+    "Kirby special files changed motion-state constants, dat_attrs access shape, object user-data reloads, callback writes through separate locals, and PAD_STACK/permuter slop locals to close small match gaps.",
+    "gm_1601/gmmain_lib/gm types changed a record field and accessor return type from signed to unsigned and replaced raw save-data offset math with gmMainLib_8015EDBC()->x114[index].",
+    "Ground/stage edits added or expanded structs for grCastle and grRCruise, changed fn_802010A4 to take CollData*, and replaced byte-offset access with field access.",
+    "Several small touched files are only evidenced by changed-file metadata and the bot report because the loaded diff excerpt is truncated."
+  ],
+  "smart_moves": [
+    "Recovered typed access in gm_80163298 and fn_802010A4 rather than preserving raw byte/word pointer math.",
+    "Updated owning headers/prototypes where the body evidence changed signatures or return types, including gmMainLib_8015D7EC and fn_802010A4.",
+    "Kept questionable match-only constructs visibly labeled with TODO, FAKE MATCH, or Permuter slop comments, making curator/reviewer cleanup targets searchable.",
+    "Paired grRCruise.c field access changes with gr/types.h layout additions, so the recovered field usage has a declared structure rather than isolated casts."
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a function match exposes repeated raw offset access into a known game struct, introducing a narrow temporary struct or field can both improve readability and support matching.",
+      "scope": [
+        "gm_80163298",
+        "fn_802010A4",
+        "grCastle_801CE7E8"
+      ],
+      "evidence_refs": [
+        "diff_excerpt: gm_80163298 uses gmMainLib_8015EDBC()->x114[index]",
+        "diff_excerpt: grRCruise_Entry replaces entry + offsets in fn_802010A4",
+        "diff_excerpt: grCastleParams x12C replaces pointer math at offset 0x12C"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "lesson": "Signature and signedness fixes should propagate through implementation, header, and backing struct field when a matching edit changes the recovered type.",
+      "scope": [
+        "gmMainLib_8015D7EC",
+        "FighterData.x7E",
+        "fn_802010A4"
+      ],
+      "evidence_refs": [
+        "diff_excerpt: gmMainLib_8015D7EC s16* to u16* in .c and .h",
+        "diff_excerpt: FighterData.x7E s16 to u16",
+        "diff_excerpt: fn_802010A4 u8* to CollData* in .c and .h"
+      ],
+      "confidence": 0.86
+    },
+    {
+      "lesson": "Small one-line accessor inlines can be used as a matching tactic, but this PR's TODO comments show that such helpers may be provisional when direct GET_GROUND or field access does not match.",
+      "scope": [
+        "ftKb_KpSpecialN_Anim_inline",
+        "grMaterial_801C9604_inline",
+        "fn_802010A4_inline"
+      ],
+      "evidence_refs": [
+        "diff_excerpt: inline dat_attrs accessor in ftKb_SpecialNPk.c",
+        "diff_excerpt: grMaterial TODO 'is this GET_GROUND? calling it directly didn't work'",
+        "diff_excerpt: grRCruise TODO 'is this GET_GROUND? calling it directly didn't work'"
+      ],
+      "confidence": 0.68
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "For newly recovered but still semantically weak layout fields, this PR keeps address-style placeholder names such as x00, x02, x04, x08, x12C, pad_3C, and entries rather than inventing rich semantics.",
+      "evidence_refs": [
+        "diff_excerpt: grRCruise_Entry fields x00/x02/x04/x08/x0C/x14",
+        "diff_excerpt: grCastleParams x12C with TODO about array size"
+      ]
+    },
+    {
+      "convention": "Temporary match-only variables are named generically and commented when they are not semantic, e.g. new_var/new_var2 with 'Permuter slop'.",
+      "evidence_refs": [
+        "diff_excerpt: ftKb_SpecialNZd.c new_var comments",
+        "diff_excerpt: grpstadium.c new_var/new_var2 comments"
+      ]
+    },
+    {
+      "convention": "Recovered local role names continue common decomp shorthand such as fp, gp, gp2, jobj, gobj, wrapper, record, score, and index.",
+      "evidence_refs": [
+        "diff_excerpt: multiple touched functions use fp/gp/gobj/jobj/wrapper/record/index"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "PAD_STACK was added narrowly in several functions to close stack/register-sensitive matches.",
+      "evidence_refs": [
+        "diff_excerpt: PAD_STACK(8) in ftKb_SpecialNSs_800FCD60, ftKb_SpecialNSs_800FCF74, ftKb_SpecialNSs_800FD020, ftKb_SpecialNSk_80105E8C, ftKb_SpecialNSk_80105F3C, grCastle_801CE7E8, un_802FF498",
+        "diff_excerpt: PAD_STACK(0x10) in un_802FF364"
+      ],
+      "caveat": "Loaded evidence includes bot match results but no per-function objdiff logs beyond the bot summary."
+    },
+    {
+      "tactic": "Direct HSD_GObjGetUserData or HSD_GObjGetHSDObj calls were sometimes used instead of convenience macros or direct field access to affect codegen.",
+      "evidence_refs": [
+        "diff_excerpt: fn_802FED14 uses HSD_GObjGetHSDObj",
+        "diff_excerpt: ftKb_SpecialNSs_800FCD60 and grpstadium use HSD_GObjGetUserData",
+        "diff_excerpt: ftKb_SpecialNZd reloads fp through HSD_GObjGetUserData"
+      ],
+      "caveat": "PR evidence does not prove this as general style; it appears as match-specific codegen steering."
+    },
+    {
+      "tactic": "Local aliasing and separate pointer locals were introduced to influence register allocation.",
+      "evidence_refs": [
+        "diff_excerpt: fp2 introduced in ftKb_SpecialNSs_800FCF74 and ftKb_SpecialNSs_800FD020",
+        "diff_excerpt: wrapper copied to new_var in fn_801D3084",
+        "diff_excerpt: comment 'FAKE MATCH: redundant NULL checks required for regalloc'"
+      ],
+      "caveat": "This is a tactic, not an accepted naming or style standard."
+    },
+    {
+      "tactic": "Typed field recovery replaced casts and byte offsets where a plausible struct was added or already existed.",
+      "evidence_refs": [
+        "diff_excerpt: gmMainLib_8015EDBC()->x114[index]",
+        "diff_excerpt: coll->x34_flags.b1234",
+        "diff_excerpt: gp->gv.rcruise.entries[i]"
+      ],
+      "caveat": "Some newly added layouts still carry TODOs or placeholder fields."
+    },
+    {
+      "tactic": "For ifcoget, data layout was adjusted by adding literal strings into a static struct initializer and using a hard-coded memzero size with a TODO because sizeof was not yet matching.",
+      "evidence_refs": [
+        "diff_excerpt: un_803F9E08 initializer includes 'IfCoGet.dat' and 'ScInfCgt_scene_data'",
+        "diff_excerpt: TODO says sizeof(un_804A1F58) should be 0x80; memzero uses 0x80"
+      ],
+      "caveat": "This is high-risk data/layout work and should remain a curator/reviewer follow-up rather than a general lesson."
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "automation_report",
+      "author": "decomp-dev[bot]",
+      "summary": "Reported GALE01 matched-code improvement to 57.52%, +0.14%, +5580 bytes, with 22 new matches and 5 unmatched-item improvements.",
+      "evidence_refs": [
+        "text_corpus: issue_comment by decomp-dev[bot] at 2026-03-14T17:11:45Z"
+      ]
+    },
+    {
+      "kind": "missing_human_review",
+      "author": null,
+      "summary": "No review comments or reviews are present in the loaded PR metadata.",
+      "evidence_refs": [
+        "metadata_json: counts.review_comments=0 and counts.reviews=0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2285",
+    "ifcoget",
+    "random permuters",
+    "jurrejelle",
+    "un_802FF364",
+    "un_802FEFAC",
+    "fn_802FED14",
+    "un_802FF1B4",
+    "un_802FF498",
+    "un_802FF570",
+    "un_802FF620",
+    "fn_802FF218",
+    "ftKb_KpSpecialN_Anim",
+    "ftKb_KpSpecialAirN_Anim",
+    "ftKb_SpecialNSs_800FCD60",
+    "ftKb_SpecialNSs_800FCF74",
+    "ftKb_SpecialNSs_800FD020",
+    "ftKb_SpecialNSk_80105E8C",
+    "ftKb_SpecialNSk_80105F3C",
+    "gm_80163298",
+    "gmMainLib_8015D7EC",
+    "FighterData.x7E",
+    "grCastle_801CE7E8",
+    "grMaterial_801C9604",
+    "fn_801D3084",
+    "fn_802010A4",
+    "grRCruise_Entry",
+    "CollData",
+    "HSD_GObjGetUserData",
+    "HSD_GObjGetHSDObj",
+    "PAD_STACK",
+    "Permuter slop",
+    "FAKE MATCH",
+    "typed fields over pointer math"
+  ],
+  "follow_up_queries": [
+    "Find later PRs touching un_804A1F58 sizeof 0x80 TODO or ifcoget memzero size cleanup.",
+    "Search for 'Permuter slop' in ftKb_SpecialNZd.c and grpstadium.c to see whether temporary variables were later removed.",
+    "Search later changes to grRCruise_Entry and grRCruise_GroundVars entries layout for field-name refinement.",
+    "Search later changes to grCastleParams x12C TODO to determine array size and whether flexible array naming was refined.",
+    "Search HSD_SisLib_803A70A0 signature updates around sislib.h and call-site casts after PR 2285.",
+    "Search for follow-up cleanup of inline helpers named ftKb_KpSpecialN_Anim_inline, grMaterial_801C9604_inline, and fn_802010A4_inline.",
+    "Search gmMainLib_8015D7EC and FighterData.x7E later history for confirmation of unsigned score/record semantics."
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR identity, merge state, changed files, counts",
+      "human_pr_text: body only says 'Tracking PR as per usual'",
+      "raw_diff/diff_excerpt: detailed but truncated diff",
+      "text_corpus: decomp-dev bot report with match deltas",
+      "metadata_json: no human review comments"
+    ],
+    "notes": [
+      "PR title and body give little rationale beyond 'ifcoget + random permuters' and tracking text.",
+      "The loaded diff excerpt is truncated, so exact changes for textdraw.c, lbsnap.c, mncharsel.c, mncharsel.static.h, mnmain.c, particle.c, and sislib.h are only partially or not directly visible.",
+      "The bot report supports match outcomes, but no per-symbol objdiff logs, build commands, or human review discussion are loaded.",
+      "Several edits are explicitly labeled TODO, FAKE MATCH, or Permuter slop; they should be treated as match tactics or cleanup candidates, not accepted decomp style."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "postmortem_lesson_candidate",
+        "title": "Propagate recovered signedness and pointer types through headers and structs",
+        "text": "PR 2285 changed gmMainLib_8015D7EC from s16* to u16* in both implementation and header and changed FighterData.x7E from s16 to u16; it also changed fn_802010A4 from u8* to CollData* in both source and header.",
+        "scope": [
+          "src/melee/gm/gmmain_lib.c",
+          "src/melee/gm/gmmain_lib.h",
+          "src/melee/gm/types.h",
+          "src/melee/gr/grrcruise.c",
+          "src/melee/gr/grrcruise.h"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: gmMainLib_8015D7EC return type changes",
+          "diff_excerpt: FighterData.x7E signedness change",
+          "diff_excerpt: fn_802010A4 CollData* signature changes"
+        ],
+        "confidence": 0.86
+      },
+      {
+        "record_type": "postmortem_lesson_candidate",
+        "title": "Prefer recovered field access over raw offset math when a plausible layout is available",
+        "text": "PR 2285 replaced raw offset access in gm_80163298, grCastle_801CE7E8, and fn_802010A4 with typed fields such as x114[index], x12C[index], CollData flags, and grRCruise_Entry fields.",
+        "scope": [
+          "src/melee/gm/gm_1601.c",
+          "src/melee/gr/grcastle.c",
+          "src/melee/gr/grrcruise.c",
+          "src/melee/gr/types.h"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: gm_80163298 pointer math removal",
+          "diff_excerpt: grCastleParams x12C",
+          "diff_excerpt: grRCruise_Entry and CollData usage"
+        ],
+        "confidence": 0.82
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "grRCruise ground vars include an entries pointer at +0x6C/+gp+0x130 in PR 2285 evidence",
+        "text": "The PR added struct grRCruise_Entry and grRCruise_GroundVars.entries, then used gp->gv.rcruise.entries[i] in fn_802010A4. Candidate only; verify against current source/symbol metadata before promoting.",
+        "source_path": "src/melee/gr/types.h",
+        "scope": [
+          "src/melee/gr/grrcruise.c",
+          "src/melee/gr/types.h"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: struct grRCruise_Entry added",
+          "diff_excerpt: grRCruise_GroundVars gets entries pointer",
+          "diff_excerpt: fn_802010A4 uses gp->gv.rcruise.entries[i]"
+        ],
+        "reason": "Potential durable layout fact, but PR evidence alone does not prove final field semantics or later refinements."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "gmMainLib_8015D7EC and FighterData.x7E unsigned candidate",
+        "text": "The PR changed gmMainLib_8015D7EC to return u16* and changed FighterData.x7E to u16, with gm_80163298 comparing and writing unsigned scores. Candidate only; verify against current headers and usage before promoting.",
+        "source_path": "src/melee/gm/types.h",
+        "scope": [
+          "src/melee/gm/gm_1601.c",
+          "src/melee/gm/gmmain_lib.c",
+          "src/melee/gm/gmmain_lib.h",
+          "src/melee/gm/types.h"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: gmMainLib_8015D7EC s16* to u16*",
+          "diff_excerpt: FighterData.x7E s16 to u16",
+          "diff_excerpt: gm_80163298 uses u16* record and u16 score"
+        ],
+        "reason": "Likely type fact from implementation/header/struct consistency, but should be checked against current source and any later history."
+      },
+      {
+        "target_source_id": "other",
+        "update_kind": "source_update",
+        "title": "ifcoget un_804A1F58 size/layout TODO follow-up",
+        "text": "PR 2285 contains TODOs that sizeof(un_804A1F58) should be 0x80 and memzero currently uses hard-coded 0x80 until the struct size is fixed. Curator may want a cleanup/search task, not a standard.",
+        "source_path": "src/melee/if/ifcoget.c",
+        "scope": [
+          "src/melee/if/ifcoget.c"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: TODO above un_804A1F58",
+          "diff_excerpt: memzero(un_804A1F58, 0x80) TODO"
+        ],
+        "reason": "Explicit TODO in PR evidence; not suitable as accepted decomp practice."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Do not normalize visible 'Permuter slop' into accepted style",
+        "text": "This PR used temporary locals, PAD_STACK, and direct HSD_GObjGetUserData calls to achieve matches, with comments explicitly labeling some as 'Permuter slop' or 'FAKE MATCH'. Existing standards already cover evidence requirements for tactics; this PR can be an example if the curator wants more examples, not a new rule.",
+        "source_path": null,
+        "scope": [
+          "src/melee/ft/chara/ftKirby/ftKb_SpecialNPk.c",
+          "src/melee/ft/chara/ftKirby/ftKb_SpecialNZd.c",
+          "src/melee/gr/grpstadium.c"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: 'Permuter slop' comments",
+          "diff_excerpt: 'FAKE MATCH: redundant NULL checks required for regalloc'",
+          "diff_excerpt: multiple PAD_STACK insertions",
+          "decomp_standards: matching-tactics-need-evidence"
+        ],
+        "reason": "Useful as a cautionary example; do not promote match-only slop as source style."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer human reviewer approval of the tactics; no human reviews or review comments are loaded.",
+      "Do not treat all direct HSD_GObjGetUserData uses as preferred style; the diff and TODO comments suggest match-specific codegen steering.",
+      "Do not promote ifcoget hard-coded memzero size or struct-size TODO as accepted practice.",
+      "Do not claim exact changes for files whose hunks are absent from the loaded truncated diff beyond changed-file metadata and bot summary."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

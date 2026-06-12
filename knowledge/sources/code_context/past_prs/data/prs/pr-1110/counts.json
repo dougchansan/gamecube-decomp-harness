@@ -1,0 +1,17 @@
+{
+  "number": 1110,
+  "title": "Re-link `dolphin/card`",
+  "state": "MERGED",
+  "createdAt": "2024-01-25T12:52:54Z",
+  "updatedAt": "2024-01-25T12:54:05Z",
+  "mergedAt": "2024-01-25T12:54:04Z",
+  "closedAt": "2024-01-25T12:54:04Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1110",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 6174
+  }
+}

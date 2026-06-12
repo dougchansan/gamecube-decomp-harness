@@ -1,0 +1,17 @@
+{
+  "number": 403,
+  "title": "Fighter callback functions",
+  "state": "MERGED",
+  "createdAt": "2022-07-06T07:22:14Z",
+  "updatedAt": "2022-07-08T15:11:10Z",
+  "mergedAt": "2022-07-08T15:11:09Z",
+  "closedAt": "2022-07-08T15:11:09Z",
+  "author": "snuffysasa",
+  "url": "https://github.com/doldecomp/melee/pull/403",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 606714
+  }
+}

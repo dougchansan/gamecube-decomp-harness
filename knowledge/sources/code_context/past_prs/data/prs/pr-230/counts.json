@@ -1,0 +1,17 @@
+{
+  "number": 230,
+  "title": "align object files in makefile log",
+  "state": "MERGED",
+  "createdAt": "2022-01-04T15:12:06Z",
+  "updatedAt": "2022-01-04T15:18:36Z",
+  "mergedAt": "2022-01-04T15:18:36Z",
+  "closedAt": "2022-01-04T15:18:36Z",
+  "author": "EpochFlame",
+  "url": "https://github.com/doldecomp/melee/pull/230",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 412
+  }
+}

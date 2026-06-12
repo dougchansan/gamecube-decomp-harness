@@ -1,0 +1,17 @@
+{
+  "number": 670,
+  "title": "Fix `generate_context.sh`",
+  "state": "MERGED",
+  "createdAt": "2023-01-12T11:47:44Z",
+  "updatedAt": "2023-01-13T08:50:21Z",
+  "mergedAt": "2023-01-13T08:50:20Z",
+  "closedAt": "2023-01-13T08:50:20Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/670",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 4,
+    "reviews": 6,
+    "diff_bytes": 2202
+  }
+}

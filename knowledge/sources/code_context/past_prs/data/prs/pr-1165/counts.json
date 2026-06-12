@@ -1,0 +1,17 @@
+{
+  "number": 1165,
+  "title": "Match `mpColl_800477E0`",
+  "state": "MERGED",
+  "createdAt": "2024-02-01T00:11:48Z",
+  "updatedAt": "2024-02-01T00:13:06Z",
+  "mergedAt": "2024-02-01T00:13:05Z",
+  "closedAt": "2024-02-01T00:13:05Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1165",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 1205190
+  }
+}

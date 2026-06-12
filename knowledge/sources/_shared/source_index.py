@@ -10,7 +10,10 @@ from typing import Any, Callable
 
 
 def package_root_for_source(source_root: Path) -> Path:
-    return source_root.parents[2]
+    for parent in source_root.parents:
+        if (parent / "knowledge" / "sources" / "registry.json").exists():
+            return parent
+    return source_root.parents[3]
 
 
 def source_root_from_api_file(api_file: str) -> Path:
@@ -83,7 +86,7 @@ def status_payload(source_root: Path) -> dict[str, Any]:
     descriptor = load_source_descriptor(source_root)
     rows = load_index_rows(source_root)
     files = index_files(source_root)
-    return {
+    payload = {
         "source": descriptor.get("id", source_root.name),
         "title": descriptor.get("title", source_root.name),
         "trust_tier": descriptor.get("trust_tier"),
@@ -95,6 +98,17 @@ def status_payload(source_root: Path) -> dict[str, Any]:
         "index_records": len(rows),
         "message": "Index is ready for local lookup." if rows else "No generated index rows were found.",
     }
+    try:
+        from vector_index import vector_status_payload
+
+        payload["vector_index"] = vector_status_payload(source_root)
+    except Exception as exc:
+        payload["vector_index"] = {
+            "available": False,
+            "status": "error",
+            "message": f"Vector status unavailable: {exc}",
+        }
+    return payload
 
 
 def search_payload(source_root: Path, query: str, limit: int, *, tool_id: str | None = None) -> dict[str, Any]:

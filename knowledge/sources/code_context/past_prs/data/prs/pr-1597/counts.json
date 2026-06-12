@@ -1,0 +1,17 @@
+{
+  "number": 1597,
+  "title": "Ignore `diff_changes` return code in CI",
+  "state": "MERGED",
+  "createdAt": "2025-06-14T16:09:19Z",
+  "updatedAt": "2025-06-14T16:12:19Z",
+  "mergedAt": "2025-06-14T16:12:18Z",
+  "closedAt": "2025-06-14T16:12:18Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1597",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 478
+  }
+}

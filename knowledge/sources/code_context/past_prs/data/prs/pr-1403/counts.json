@@ -1,0 +1,17 @@
+{
+  "number": 1403,
+  "title": "Partially match `grflatzone`",
+  "state": "MERGED",
+  "createdAt": "2024-07-26T20:58:12Z",
+  "updatedAt": "2024-07-31T20:15:30Z",
+  "mergedAt": "2024-07-26T23:52:31Z",
+  "closedAt": "2024-07-26T23:52:31Z",
+  "author": "thefoxcam",
+  "url": "https://github.com/doldecomp/melee/pull/1403",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 27098
+  }
+}

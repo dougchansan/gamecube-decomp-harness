@@ -1,0 +1,17 @@
+{
+  "number": 2650,
+  "title": "Link lb_00ce",
+  "state": "MERGED",
+  "createdAt": "2026-06-10T18:58:26Z",
+  "updatedAt": "2026-06-10T19:26:21Z",
+  "mergedAt": "2026-06-10T19:26:21Z",
+  "closedAt": "2026-06-10T19:26:21Z",
+  "author": "jellejurre",
+  "url": "https://github.com/doldecomp/melee/pull/2650",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 4,
+    "diff_bytes": 4930
+  }
+}

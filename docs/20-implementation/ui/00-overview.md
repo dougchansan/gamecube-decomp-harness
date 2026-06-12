@@ -67,18 +67,78 @@ when stable state changes and compact tick payloads for elapsed-time updates.
 
 The React app has three regions:
 
-- Left controls rail: compact project disclosure, run/process controls, and PR
-  handoff controls.
-- Center work area: progress metrics, trusted report or worker-score movement,
-  improved files/symbols, and active/queued work.
-- Right details rail: `Logs` and `Active Run` tabs. Logs are the default process
-  view; Active Run holds worker report filters and full run details.
+- Left controls rail: five panels that all share one shape — a title row with
+  right-aligned status meta, always-visible primary content, and at most one
+  disclosure for secondary detail. In order: Status (campaign pill plus
+  readiness rows: run/leases, workers, upstream rebase position, baseline
+  freshness, checkpoint lanes, QA verdict, plan lanes, with artifact paths
+  behind the disclosure), Actions (every operator button in one panel,
+  sectioned Run / Handoff / Session, grayed by flow position with the
+  blocking reason as the tooltip and the recommended next action
+  highlighted), Project, Run Setup, and Process. See the
+  [operator runbook](10-operator-runbook.md) for how a full cycle reads.
+- Center work area: progress metrics, the match-verification ladder, and
+  active/queued work. The ladder is three tabs: **Confirmed** (new exact
+  matches in the trusted `report_changes.json` — byte-level truth vs the
+  baseline), **Tentative** (runner-validated worker match claims newer than
+  the current report; each report rebuild either confirms them into the first
+  tab or clears them), and **Improvements** (report-level fuzzy gains plus
+  fresh worker gains since the report). Workers add tentative rows between
+  report builds; epoch boundaries and QA rebuild the report and settle them.
+- Right details rail: `Run`, `Agents`, and `Logs` tabs — the view into the
+  system, while the left rail stays controls-only. The Logs tab opens with an
+  operation activity card: the server tracks the one long-running dashboard
+  operation (sync, prepare handoff, checkpoint, QA, plan PRs, reconcile, fresh
+  run) as named steps with per-step status and elapsed time, exposed as
+  `process.operation` in the dashboard payload. The card shows which step is
+  running, keeps the last result (including the failing step and error) until
+  the next operation starts, and sits directly above the live command output
+  it summarizes. Triggering any of these operations auto-opens the details
+  rail on the Logs tab, and while one runs (or after one fails) a slim
+  clickable strip across the top of the center column shows the operation,
+  its current step, and elapsed time even when the rail is collapsed.
 
 Both side rails are collapsible. The open left controls rail uses the same
 responsive track as the open right details rail, `minmax(440px, 560px)`, so
 handoff controls have enough horizontal space. Collapsed rails use a `44px`
 icon strip and persist their collapsed state in `localStorage` as
 `sidebarCollapsed` and `detailsCollapsed`.
+
+## Session Phase Stepper
+
+`apps/dashboard/src/components/PhaseStepper.tsx` derives the operating phase of
+the session cycle from durable dashboard state — run status, active lease
+count, process liveness, sync activity, and handoff artifacts — and renders a
+six-step stepper (Sync & Intake → Baseline & Init → Run → Checkpoint & Validate
+→ Ship PRs → Resync) at the top of the left rail. No new state is stored; the
+phase is recomputed from each dashboard payload.
+
+The same derivation produces the sync lock: while the run is `active`,
+`Intake Merged PRs` is disabled with the lock reason as its tooltip, and the
+server independently rejects `POST /api/project/sync` so the lock is hard, not
+UI-only. The full design rationale lives in
+[../../sidebar-flow-design.html](../../sidebar-flow-design.html).
+
+## Campaign Strip And Save Points
+
+The center column opens with a where-we-are strip driven by the dashboard's
+`campaign` block: latest save point (commit, trigger, matched percent, age),
+current head (sha, branch, dirty), and the count of commits not yet merged into
+the base ref. When the checkout has moved past the save point the strip shows a
+staleness banner instead of silently presenting old numbers. The `Save Point`
+button posts to `POST /api/save-point`; the server also records automatic save
+points after init, pause, checkpoint, QA, sync, and fresh-run boundary actions.
+
+## Epoch Checkpoints
+
+The dashboard payload carries an `epochs` array: save points with trigger kind
+`epoch`, oldest first, each with matched-code percent, measures, regression
+counts, and repair results. The Progress panel renders them as an "Epoch
+checkpoints" table — per-epoch matched percent, delta against the previous
+epoch, and regression/repair status — with the total delta since the first
+epoch in the header. The run's starting position stays anchored to the
+existing `initial` measures, so the start never moves while the current
+position advances one epoch at a time.
 
 ## Process Controls
 
@@ -104,14 +164,20 @@ preset so the browser state cannot leave a mismatched worker/queue policy:
 | Large | 16 | 64 | 16 |
 | XL | 32 | 128 | 32 |
 
-The ready queue is the pool of queued targets that workers can lease. The
-trigger refills that pool deterministically whenever it is below the target, and
-requests a director replan when queued work falls to the refill watermark while
-workers are active.
+The ready queue is the pool of queued targets that workers can lease. In the
+default epoch cycle the ready-queue size is the epoch batch size: the trigger
+fills it once, lets it drain to zero, runs the epoch checkpoint pipeline
+(commit, worktree report rebuild, regression repair requeue, `epoch` save
+point), and then refills the next batch. The refill watermark column applies
+to legacy continuous mode (`--no-epoch-cycle`), where the trigger tops the
+pool up whenever it is below target and requests a director replan at the
+watermark.
 
-Fresh Run has a `Checkpoint before fresh` option enabled by default. This
-preserves PR candidates and carry-forward work before the next baseline/session
-is created.
+Fresh Run (the `New Session` dock action) always checkpoints the current run
+first, preserving PR candidates and carry-forward work before the next
+baseline/session is created. There is no longer a UI toggle for skipping that
+checkpoint; pass `checkpointBeforeFresh: false` to the endpoint directly for
+the rare intentional-discard case.
 
 ## PR Handoff Controls
 
@@ -123,21 +189,21 @@ artifacts.
 | --- | --- | --- |
 | `Pause Intake` | `POST /api/pr/pause` | Drains the managed process and marks the run `paused`. Worker and trigger commands reject non-active runs, so no new worker edits can be introduced until the run is resumed. |
 | `Resume` | `POST /api/pr/resume` | Marks the run `active` again so scheduling can continue. |
-| `Checkpoint` | `POST /api/run/checkpoint` | Calls `createRunCheckpoint` for the current run and writes `checkpoint.json`, `pr_candidates.md`, and `carry_forward.md`. |
-| `Run QA` | `POST /api/pr/qa` | Runs `regression-check --require-pr-promotion` by default and returns the generated summary/report artifact paths even when the gate fails. |
-| `Plan PRs` | `POST /api/pr/split-plan` | Runs `pr-split-plan` and writes a Markdown plan plus `summary.json` under the handoff artifact directory. |
-| `Prepare` | `POST /api/pr/prepare` | Runs the combined pause, checkpoint, QA, and split-plan sequence. Split planning runs only if QA passes. |
+| `Checkpoint` | `POST /api/run/checkpoint` | Calls `createRunCheckpoint` for the current run and writes `checkpoint.json`, `pr_candidates.md` (match and improvement lanes), and `carry_forward.md`. |
+| `Run QA` | `POST /api/pr/qa` | Runs `regression-check --require-pr-promotion` by default (plus the project's improvement byte floor as `--promotion-min-unmatched-improvement-bytes`) and returns the generated summary/report artifact paths even when the gate fails. |
+| `Reconcile` | `POST /api/pr/reconcile` | Runs the reconcile agent in `ship-validate` mode against the latest QA summary to fix regressions before handoff. Rejected while the run is `active`. |
+| `Plan PRs` | `POST /api/pr/split-plan` | Runs `pr-split-plan` with the latest checkpoint for lane splitting and writes a Markdown plan plus `summary.json` under the handoff artifact directory. |
+| `Prepare` | `POST /api/pr/prepare` | Runs the full ship pipeline: pause → pull upstream & rebase → rebuild production baseline (worktree at the base SHA, cached per SHA) → QA vs the new baseline → checkpoint (regressed symbols forced to `needs_rework`) → lane-aware split plan. Stops with the QA hint as the error if the gate fails; the checkpoint still lands. |
 
-The section also exposes the key QA and split-plan inputs:
+Checkpoint, QA, split planning, and Prepare refuse to run while a worker
+process is alive (server-side `assertHandoffIdle`); the dashboard disables the
+matching buttons until workers are stopped and all leases are released. Pause
+and Resume stay available because pausing is how the operator stops intake.
 
-- QA target, default `changes_all`.
-- QA report row limit, default `300`.
-- PR promotion requirement, enabled by default.
-- Split base ref, default `origin/master`.
-- Split group mode, `melee-subsystem` or `top-dir`.
-- Maximum files per suggested PR.
-- Branch/title prefixes.
-- Whether to include untracked files or restrict to committed changes.
+QA and split-plan inputs (QA target, base ref, group mode, max files per PR,
+branch/title prefixes, improvement promotion floors) are not editable in the
+UI: they come from `projects/<id>/project.json`, with `local.project.json` as
+the per-machine override.
 
 Latest handoff artifacts are summarized in the dashboard under
 `dashboard.handoff`:

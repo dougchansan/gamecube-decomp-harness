@@ -1,0 +1,17 @@
+{
+  "number": 350,
+  "title": "Match grlib",
+  "state": "MERGED",
+  "createdAt": "2022-04-09T17:55:25Z",
+  "updatedAt": "2022-04-09T18:00:45Z",
+  "mergedAt": "2022-04-09T18:00:38Z",
+  "closedAt": "2022-04-09T18:00:38Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/350",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 55162
+  }
+}

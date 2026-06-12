@@ -248,7 +248,7 @@ bun run orch -- --project melee bootstrap \
 For long-running development runs, put the guardian around the system process:
 
 ```sh
-bun run orch -- --project melee --agent-timeout-seconds 7200 babysit \
+bun run orch -- --project melee --agent-timeout-seconds 14400 babysit \
   --max-workers 16 \
   --idle-sleep-ms 5000 \
   --worker-thinking-level low
@@ -368,7 +368,7 @@ agent. Refresh it explicitly before live runs when recent PR knowledge matters:
 ```sh
 bun run pr:refresh:dry
 bun run pr:refresh
-bun run pr:postmortems -- --dump-root knowledge/sources/past_prs/data/current --run-agent --pending-only --complete-only --jobs 16
+bun run pr:postmortems -- --dump-root knowledge/sources/code_context/past_prs/data --run-agent --pending-only --complete-only --jobs 16
 ```
 
 For combined branch sync plus PR-library refresh:

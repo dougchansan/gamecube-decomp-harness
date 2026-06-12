@@ -1,0 +1,17 @@
+{
+  "number": 313,
+  "title": "HSD Class match",
+  "state": "MERGED",
+  "createdAt": "2022-02-26T00:11:00Z",
+  "updatedAt": "2022-05-02T20:22:29Z",
+  "mergedAt": "2022-05-02T20:22:27Z",
+  "closedAt": "2022-05-02T20:22:27Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/313",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 16597
+  }
+}

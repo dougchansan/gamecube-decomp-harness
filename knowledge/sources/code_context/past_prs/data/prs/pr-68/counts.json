@@ -1,0 +1,17 @@
+{
+  "number": 68,
+  "title": "Reorganize project, cleanup makefile",
+  "state": "MERGED",
+  "createdAt": "2021-08-24T19:11:52Z",
+  "updatedAt": "2021-08-24T19:12:02Z",
+  "mergedAt": "2021-08-24T19:11:59Z",
+  "closedAt": "2021-08-24T19:11:59Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/68",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 65119
+  }
+}

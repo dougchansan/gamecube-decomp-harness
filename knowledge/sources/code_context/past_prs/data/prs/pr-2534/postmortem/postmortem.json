@@ -1,0 +1,389 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2534",
+  "pr": {
+    "number": 2534,
+    "title": "Jj/rest of gr",
+    "url": "https://github.com/doldecomp/melee/pull/2534",
+    "state": "MERGED",
+    "author": "jurrejelle",
+    "created_at": "2026-05-25T05:11:36Z",
+    "merged_at": "2026-05-31T12:55:54Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Stage decomp/matching PR touching Green Greens, Pura, and Push On ground code. It adds or improves several stage functions, updates ground variable types and headers, and adjusts a Green Greens data split. Bot report records +1960 matched code bytes, +32 matched data bytes, 8 new matches, 17 unmatched-item improvements, and 2 Green Greens unmatched-item regressions.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "types",
+      "data-symbol-metadata"
+    ],
+    "systems": [
+      "stage",
+      "ground",
+      "config"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gr/grpura.c",
+      "role": "Largest source change; decompiled/cleaned multiple Pura functions, added typed accesses, camera subject handling, HSD_ASSERT use, and matching tactics such as PAD_STACK and noinline wrappers.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:grpura.c",
+        "text_corpus:decomp-dev bot report"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grpushon.c",
+      "role": "Added implementation for grPushOn_80218888 and matched fn_802192A4; added vector/math includes and an extern Vec3 used in light-position logic.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:grpushon.c lines 738-950",
+        "text_corpus:decomp-dev bot report"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grgreens.c",
+      "role": "Green Greens matching cleanup and behavior/data adjustments: block accessor cast, new index table, bomb helper, row/column access changes, swaps via getBlock, and weight switch reorder.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "diff_excerpt:grgreens.c"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grpura.h",
+      "role": "Header signature cleanup and typed data declaration for grPu_803E6C0C as GrPuVtxMapEntry[42].",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:grpura.h lines 706-737"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grpushon.h",
+      "role": "Replaced UNK_RET/UNK_PARAMS for fn_802192A4 with s32 fn_802192A4(void*, HSD_GObj*, s32*).",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:grpushon.h lines 952-963"
+      ]
+    },
+    {
+      "path": "src/melee/gr/types.h",
+      "role": "Updated Pura ground variable field types and added grPura_GroundVars3 with HSD_JObj and CmSubject arrays to Ground union.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:types.h lines 965-1686"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Split grGr_803E787C symbol size from 0xC4 to 0x3C and added grGr_803E78B8 at .data:0x803E78B8 size 0x88.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "diff_excerpt:symbols.txt"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Added or improved source for Pura functions including grPura_80211D00, grPura_802120E0, grPura_8021231C, grPura_802125F0, grPura_80212CD4, grPura_80212EF4, grPura_80212FC0, grPura_80213030, and grPura_80213250.",
+    "Added full source for Push On lighting/selection routine grPushOn_80218888 and source for fn_802192A4, with the bot report listing fn_802192A4 as a new 100% match and grPushOn_80218888 as improved to 92.87%.",
+    "Replaced Pura raw array/M2C_FIELD style accesses to grPu_803E6C0C with a GrPuVtxMapEntry struct and typed indexed fields.",
+    "Updated headers to expose recovered signatures for Pura and Push On functions instead of UNK_RET/UNK_PARAMS where changed.",
+    "Changed Pura GroundVars typing: xC4 to s16, xC8 to s16, added grPura_GroundVars3 arrays for JObjs and camera subjects.",
+    "Green Greens changes include a 2D-array cast in getBlock, a new grGr_803E787C index table, switch-case row weighting reorder, block coordinate order changes in grGreens_802159B8, and a helper-like BOMB inline for repeated bomb initialization calls.",
+    "Adjusted GALE01 symbol metadata by splitting grGr_803E787C and adding grGr_803E78B8.",
+    "Bot report says new matches include fn_802192A4, grPura_80212EF4, grPura_8021231C, fn_80216DE4, grPura .sdata, grPura_80212FC0, grPura_80213030, and grPura_80211D00."
+  ],
+  "smart_moves": [
+    "Typed the Pura vertex map data as GrPuVtxMapEntry and then used field accesses in grPura_80212FC0 and grPura_80213030 instead of raw u16 pointer stepping and M2C_FIELD.",
+    "Updated owning headers when function signatures were recovered, particularly fn_802192A4 and grPura_80212CD4/grPura_80212EF4/grPura_80213250.",
+    "Used HSD_ASSERT in grPura_802125F0 after including baselib/debug.h, replacing raw __assert blocks in the diff excerpt.",
+    "Used local helper/accessor patterns such as getBlock and GET_JOBJ to make stage code less offset-driven where the diff supports the role.",
+    "Kept stage-specific data/symbol changes narrow: the visible config edit only adjusts one Green Greens data symbol size and adds one adjacent symbol."
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When an array-like data symbol is repeatedly accessed by fixed record stride, recovering a small struct type can remove M2C_FIELD and pointer-step code while improving reviewability.",
+      "scope": [
+        "src/melee/gr/grpura.c",
+        "src/melee/gr/grpura.h"
+      ],
+      "evidence_refs": [
+        "raw_diff:grpura.h GrPuVtxMapEntry",
+        "raw_diff:grpura.c grPura_80212FC0",
+        "raw_diff:grpura.c grPura_80213030"
+      ]
+    },
+    {
+      "lesson": "Function-body recovery should be paired with header prototype cleanup when the signature becomes concrete.",
+      "scope": [
+        "src/melee/gr/grpushon.h",
+        "src/melee/gr/grpura.h"
+      ],
+      "evidence_refs": [
+        "raw_diff:grpushon.h fn_802192A4",
+        "raw_diff:grpura.h signature changes"
+      ]
+    },
+    {
+      "lesson": "For grid-like stage state, a typed helper/accessor can make row/column operations and struct swaps clearer than manual byte or stride arithmetic.",
+      "scope": [
+        "src/melee/gr/grgreens.c"
+      ],
+      "evidence_refs": [
+        "diff_excerpt:getBlock cast",
+        "diff_excerpt:grGreens_80215D54 swap loop"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "GrPuVtxMapEntry",
+      "kind": "type",
+      "convention": "Stage-prefixed struct typedef for a recovered Pura vertex/JObj mapping record.",
+      "evidence_refs": [
+        "raw_diff:grpura.h GrPuVtxMapEntry"
+      ]
+    },
+    {
+      "name": "grPura_80211E08_noinline / grPura_80211E08_noinline2",
+      "kind": "helper",
+      "convention": "Explicit noinline-style wrapper names document a matching/codegen tactic rather than inferred game semantics.",
+      "evidence_refs": [
+        "diff_excerpt:grpura.c noinline wrappers"
+      ]
+    },
+    {
+      "name": "left_max, left_min, left_top, left_bottom, right_max, right_min, right_top, right_bottom",
+      "kind": "local variables",
+      "convention": "Directional extrema locals are used in Green Greens boundary calculations.",
+      "evidence_refs": [
+        "diff_excerpt:grGreens_8021483C"
+      ]
+    },
+    {
+      "name": "child, iter, jobj",
+      "kind": "local variables",
+      "convention": "Pura JObj traversal cleanup replaces more generic arg/temp-style naming where roles are clear.",
+      "evidence_refs": [
+        "raw_diff:grpura.c grPura_80213250"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "PAD_STACK was used in grPura_802120E0 and grPushOn_80218888, indicating stack-shape steering for matching.",
+      "evidence_refs": [
+        "diff_excerpt:grPura_802120E0",
+        "raw_diff:grPushOn_80218888"
+      ],
+      "caution": "Loaded evidence does not include objdiff details for why each PAD_STACK was necessary; keep as PR-specific tactic evidence, not a global style rule."
+    },
+    {
+      "tactic": "Noinline wrapper chain grPura_80211E08_noinline -> grPura_80211E08_noinline2 was introduced and used in grPura_802125F0.",
+      "evidence_refs": [
+        "diff_excerpt:grpura.c noinline wrappers",
+        "diff_excerpt:grPura_802125F0"
+      ],
+      "caution": "The name and call placement support a matching tactic, but no reviewer explanation or verifier trace is present."
+    },
+    {
+      "tactic": "Repeated BOMB calls replaced an index array loop in grGreens_80214B58, improving the bot score for that function to 99.26% but creating generated-looking unrolled calls.",
+      "evidence_refs": [
+        "diff_excerpt:grGreens_80214B58",
+        "text_corpus:bot report grGreens_80214B58 +1049 to 99.26%"
+      ],
+      "caution": "This conflicts with the natural-loops standard unless backed by verifier evidence; PR evidence only shows score improvement, not rationale."
+    },
+    {
+      "tactic": "Inline numeric float maxima such as 3.4028235e38f replaced F32_MAX in grGreens_8021483C.",
+      "evidence_refs": [
+        "diff_excerpt:grGreens_8021483C"
+      ],
+      "caution": "The loaded PR evidence does not explain why macro removal was needed."
+    },
+    {
+      "tactic": "A local data-symbol split in symbols.txt plus a new static s16 table grGr_803E787C supported Green Greens .data improvement.",
+      "evidence_refs": [
+        "diff_excerpt:symbols.txt",
+        "diff_excerpt:grgreens.c grGr_803E787C",
+        "text_corpus:bot report grgreens .data +60"
+      ],
+      "caution": "Treat as a candidate path/data fact, not a general license to split data symbols without ownership evidence."
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "author": "decomp-dev[bot]",
+      "feedback": "GALE01 report: matched code 69.18% (+0.05%, +1960 bytes), matched data 41.19% (+0.00%, +32 bytes), 8 new matches, 17 improvements in unmatched items, and 2 regressions in unmatched Green Greens items.",
+      "evidence_refs": [
+        "text_corpus:issue_comment decomp-dev[bot] 2026-05-25T05:16:40Z"
+      ]
+    },
+    {
+      "kind": "regression_notice",
+      "author": "decomp-dev[bot]",
+      "feedback": "Reported regressions: main/melee/gr/grgreens grGreens_80215ED8 -12 bytes, fn_80215B84 -6 bytes.",
+      "evidence_refs": [
+        "text_corpus:bot report regressions"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2534",
+    "Jj/rest of gr",
+    "jurrejelle",
+    "grgreens",
+    "grpura",
+    "grpushon",
+    "GrPuVtxMapEntry",
+    "grPu_803E6C0C",
+    "grPura_80212EF4",
+    "grPura_8021231C",
+    "grPura_80212FC0",
+    "grPura_80213030",
+    "grPura_80212CD4",
+    "grPura_802120E0",
+    "grPushOn_80218888",
+    "fn_802192A4",
+    "fn_80216DE4",
+    "grGreens_80214B58",
+    "grGreens_80215D54",
+    "grGreens_802159B8",
+    "grGreens_802166C4",
+    "grGr_803E787C",
+    "grGr_803E78B8",
+    "PAD_STACK",
+    "HSD_ASSERT",
+    "M2C_FIELD",
+    "GET_JOBJ",
+    "CmSubject",
+    "GroundVars3"
+  ],
+  "follow_up_queries": [
+    "Find later PRs touching grPura_80211E08_noinline or grPura_80211E08_noinline2 to see whether the noinline wrappers were cleaned up or kept.",
+    "Search for later cleanup of grGreens_80214B58 BOMB unrolled calls or restoration of a natural loop/index table.",
+    "Search for grPu_803E6C0C and GrPuVtxMapEntry in later changes to confirm whether the typed data model remained stable.",
+    "Check later Green Greens PRs for fixes to bot-reported regressions in grGreens_80215ED8 and fn_80215B84.",
+    "Search for grPushOn_803B844C extern placement to determine whether it was later moved to an owning header or data declaration."
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json",
+      "changed_files.jsonl",
+      "raw_diff",
+      "text_corpus.jsonl"
+    ],
+    "notes": [
+      "PR body is empty and there are no human review comments in the loaded slice.",
+      "The bot report provides matching deltas and new-match/improvement/regression lists, but no narrow objdiff logs or author rationale.",
+      "The raw diff in loaded_files was truncated; targeted local reads recovered the header, Push On, and types hunks needed for this intake.",
+      "Several tactics are visible in source, including PAD_STACK, noinline wrappers, literal float changes, and unrolled BOMB calls, but the loaded PR evidence does not prove why each was required.",
+      "Merge state is supported by metadata, but acceptance of any tactic as a global standard is not inferred."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "title": "Typed record recovery removed M2C_FIELD in Pura vertex map code",
+        "text": "PR 2534 recovered grPu_803E6C0C as GrPuVtxMapEntry[42] and updated grPura_80212FC0/grPura_80213030 to use typed fields instead of raw u16 pointer stepping and M2C_FIELD.",
+        "scope": [
+          "src/melee/gr/grpura.c",
+          "src/melee/gr/grpura.h"
+        ],
+        "evidence_refs": [
+          "raw_diff:grpura.h GrPuVtxMapEntry",
+          "raw_diff:grPura_80212FC0",
+          "raw_diff:grPura_80213030"
+        ]
+      },
+      {
+        "title": "Recovered function signatures should be reflected in owning headers",
+        "text": "PR 2534 changed fn_802192A4 from UNK_RET/UNK_PARAMS to s32 fn_802192A4(void*, HSD_GObj*, s32*) in grpushon.h and updated several Pura prototypes after adding bodies.",
+        "scope": [
+          "src/melee/gr/grpushon.h",
+          "src/melee/gr/grpura.h"
+        ],
+        "evidence_refs": [
+          "raw_diff:grpushon.h",
+          "raw_diff:grpura.h"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "Green Greens data symbol split in PR 2534",
+        "text": "config/GALE01/symbols.txt changed grGr_803E787C size from 0xC4 to 0x3C and added grGr_803E78B8 at .data:0x803E78B8 size 0x88.",
+        "source_path": "config/GALE01/symbols.txt",
+        "scope": [
+          "main/melee/gr/grgreens",
+          ".data",
+          "grGr_803E787C",
+          "grGr_803E78B8"
+        ],
+        "evidence_refs": [
+          "diff_excerpt:symbols.txt"
+        ],
+        "reason": "This is symbol metadata/data ownership information and should be curated as a path fact only after checking current symbols/splits."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Tactics with visible score gains still need verifier rationale",
+        "text": "PR 2534 visibly used PAD_STACK, noinline wrappers, literal float substitutions, and unrolled calls. The bot report shows matching improvements, but the slice lacks narrow objdiff rationale for each tactic.",
+        "source_path": null,
+        "scope": [
+          "matching tactics",
+          "PAD_STACK",
+          "noinline wrappers",
+          "unrolled calls"
+        ],
+        "evidence_refs": [
+          "diff_excerpt:grPura_802120E0",
+          "raw_diff:grPushOn_80218888",
+          "diff_excerpt:grGreens_80214B58",
+          "text_corpus:bot report"
+        ],
+        "reason": "This supports reinforcing the existing standard that matching tactics require evidence; it should not be promoted as a new accepted tactic without more verification evidence."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "Pura ground vars typed in PR 2534",
+        "text": "types.h changed grPura_GroundVars xC4 to s16, xC8 to s16, and added grPura_GroundVars3 containing HSD_JObj* xC4[25] and CmSubject* x128[25], then added pura3 to the Ground union.",
+        "source_path": "src/melee/gr/types.h",
+        "scope": [
+          "src/melee/gr/types.h",
+          "grPura_GroundVars",
+          "grPura_GroundVars3"
+        ],
+        "evidence_refs": [
+          "raw_diff:types.h"
+        ],
+        "reason": "Type layout facts belong in source/path-fact curation and should be checked against current headers before promotion."
+      }
+    ],
+    "rejection_notes": [
+      "Do not treat the BOMB unrolled-call shape as an accepted decomp style; PR evidence shows score improvement but not why a natural loop failed.",
+      "Do not infer human reviewer approval or intent; no human review comments are present.",
+      "Do not treat noinline wrappers or PAD_STACK as generally acceptable from this PR alone; they are visible tactics with insufficient rationale in the slice.",
+      "Do not claim all changed functions matched; the bot report distinguishes 8 new matches from 17 partial improvements and 2 regressions."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

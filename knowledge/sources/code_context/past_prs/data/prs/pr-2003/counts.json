@@ -1,0 +1,17 @@
+{
+  "number": 2003,
+  "title": "link itkoopaflame",
+  "state": "MERGED",
+  "createdAt": "2025-12-22T22:29:02Z",
+  "updatedAt": "2025-12-23T03:23:16Z",
+  "mergedAt": "2025-12-23T03:04:32Z",
+  "closedAt": "2025-12-23T03:04:32Z",
+  "author": "BR-",
+  "url": "https://github.com/doldecomp/melee/pull/2003",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 2608
+  }
+}

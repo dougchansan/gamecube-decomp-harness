@@ -1,0 +1,17 @@
+{
+  "number": 2652,
+  "title": "Fix column enum assignment in `wiki_tu.py`",
+  "state": "MERGED",
+  "createdAt": "2026-06-10T22:02:18Z",
+  "updatedAt": "2026-06-10T22:02:28Z",
+  "mergedAt": "2026-06-10T22:02:27Z",
+  "closedAt": "2026-06-10T22:02:27Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/2652",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 281
+  }
+}

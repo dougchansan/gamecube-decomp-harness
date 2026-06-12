@@ -8,7 +8,7 @@
 import { globalStandardsContext, resolvePathFactsContext } from "@decomp-orchestrator/knowledge";
 import { graphFileCard, graphSearch, runSourceApi } from "./knowledge-api.js";
 import type { AgentToolRegistration, AgentToolRuntimeContext, PiToolDefinition } from "./types.js";
-import { boundedLimit, jsonToolResult, safeRegistryId } from "./util.js";
+import { boundedLimit, jsonToolResult } from "./util.js";
 
 const searchParameters = {
   type: "object",
@@ -87,17 +87,6 @@ const termsParameters = {
     limit: { type: "number", description: "Maximum results to return. Values are clamped to a small safe bound." },
   },
   required: ["terms"],
-  additionalProperties: false,
-};
-
-const toolOutputLookupParameters = {
-  type: "object",
-  properties: {
-    tool_id: { type: "string", description: "Registered knowledge tool id such as ghidra, opseq, mismatch_db, mwcc_debug, checkdiff, type_oracle, or source_permuter." },
-    query: { type: "string", description: "Optional symbol, source path, address, opcode, mismatch term, or compiler-shape term." },
-    limit: { type: "number", description: "Maximum results to return. Values are clamped to a small safe bound." },
-  },
-  required: ["tool_id"],
   additionalProperties: false,
 };
 
@@ -181,27 +170,6 @@ function fixedSourceApiTool(params: {
       };
     },
   };
-}
-
-/** Create a source-specific query tool whose API accepts --query and --limit. */
-function querySourceApiTool(params: {
-  id: string;
-  sourceId: string;
-  label: string;
-  purpose: string;
-  description: string;
-  guidance: string;
-  scriptName: string;
-}): AgentToolRegistration {
-  return fixedSourceApiTool({
-    ...params,
-    parameters: searchParameters,
-    args(toolParams) {
-      const query = String(toolParams.query ?? "").trim();
-      if (!query) return { status: "missing_query" };
-      return ["--query", query, "--limit", String(boundedLimit(toolParams.limit)), "--json"];
-    },
-  });
 }
 
 /** Create a source API tool that lists pending update proposals for a silo. */
@@ -396,88 +364,6 @@ export const externalSymbolLookupToolRegistration = fixedSourceApiTool({
   },
 });
 
-/** Tool for searching resource guide notes and trust rules. */
-export const resourceGuidesSearchToolRegistration = sourceSearchTool({
-  id: "resource_guides_search",
-  sourceId: "resource_guides",
-  label: "Resource Guides Search",
-  purpose: "Search curated resource guide notes and trust rules.",
-  description: "Search curated guide notes describing available resources, trust tiers, and usage guidance.",
-  guidance: "Use resource_guides_search when deciding which external or local knowledge source is appropriate for a concrete target question.",
-});
-
-/** Tool for searching repo-local reference docs and imported notes. */
-export const referenceDocsSearchToolRegistration = sourceSearchTool({
-  id: "reference_docs_search",
-  sourceId: "reference_docs",
-  label: "Reference Docs Search",
-  purpose: "Search local reference docs and imported decomp skills/docs.",
-  description: "Search local reference documentation chunks for workflow, tooling, matching, and project notes.",
-  guidance: "Use reference_docs_search for repo-local docs and imported references that are not graph facts or PR records.",
-});
-
-/** Tool for broad normalized cross-tool output search. */
-export const toolOutputsSearchToolRegistration = sourceSearchTool({
-  id: "tool_outputs_search",
-  sourceId: "tool_outputs",
-  label: "Tool Outputs Search",
-  purpose: "Search normalized cross-tool output indexes when unsure which specialized tool owns a clue.",
-  description: "Search normalized tool-output chunks across registered tool evidence.",
-  guidance: "Use tool_outputs_search when you know a symbol, opcode, mismatch term, or file but not which tool-specific API should own the next lookup.",
-});
-
-/** Tool for normalized cross-tool similar-function evidence. */
-export const toolOutputsSimilarFunctionsToolRegistration = querySourceApiTool({
-  id: "tool_outputs_similar_functions",
-  sourceId: "tool_outputs",
-  label: "Tool Output Similar Functions",
-  purpose: "Search normalized similar-function evidence across tool outputs.",
-  description: "Search normalized tool output for similar-function and shape-neighbor evidence.",
-  scriptName: "similar_functions.py",
-  guidance: "Use tool_outputs_similar_functions for cross-tool similar-function hints before narrowing to opseq or a matched local analog.",
-});
-
-/** Tool for normalized cross-tool mismatch-pattern evidence. */
-export const toolOutputsMismatchPatternsToolRegistration = querySourceApiTool({
-  id: "tool_outputs_mismatch_patterns",
-  sourceId: "tool_outputs",
-  label: "Tool Output Mismatch Patterns",
-  purpose: "Search normalized mismatch-pattern evidence across tool outputs.",
-  description: "Search normalized tool output for mismatch-pattern hints.",
-  scriptName: "mismatch_patterns.py",
-  guidance: "Use tool_outputs_mismatch_patterns when a first mismatch symptom needs a cross-tool pattern check.",
-});
-
-/** Tool for looking up normalized output from one registered knowledge tool. */
-export const toolOutputsToolLookupToolRegistration = fixedSourceApiTool({
-  id: "tool_outputs_tool_lookup",
-  sourceId: "tool_outputs",
-  label: "Tool Output Tool Lookup",
-  purpose: "Search normalized cached output for one registered knowledge tool.",
-  description: "Search the tool_outputs source filtered to one registered tool id.",
-  guidance: "Use tool_outputs_tool_lookup when you want cached normalized evidence from a specific registered tool before calling that tool's first-class API.",
-  parameters: toolOutputLookupParameters,
-  scriptName: "tool_lookup.py",
-  args(params) {
-    const toolId = safeRegistryId(params.tool_id);
-    if (!toolId) return { status: "missing_tool_id" };
-    const query = String(params.query ?? "").trim();
-    const args = ["--tool", toolId, "--limit", String(boundedLimit(params.limit)), "--json"];
-    if (query) args.push("--query", query);
-    return args;
-  },
-});
-
-/** Tool for follow-up searches over global decomp standards. */
-export const decompStandardsSearchToolRegistration = sourceSearchTool({
-  id: "decomp_standards_search",
-  sourceId: "decomp_standards",
-  label: "Decomp Standards Search",
-  purpose: "Search global decomp standards when the preloaded standards context is not enough.",
-  description: "Search decomp standards for source quality, review, naming, validation, and anti-pattern policy.",
-  guidance: "Use decomp_standards_search for follow-up standards questions; core standards are already preloaded in worker context.",
-});
-
 /** Tool for listing proposed updates to global decomp standards. */
 export const decompStandardsProposalsToolRegistration = proposalSourceApiTool({
   id: "decomp_standards_proposals",
@@ -541,16 +427,6 @@ export const pathFactsResolveToolRegistration: AgentToolRegistration = {
   },
 };
 
-/** Tool for searching path-scoped fact records by subsystem or source term. */
-export const pathFactsSearchToolRegistration = sourceSearchTool({
-  id: "path_facts_search",
-  sourceId: "path_facts",
-  label: "Path Facts Search",
-  purpose: "Search path-fact records across directories and source slices.",
-  description: "Search path facts when the path is unknown or the worker needs directory-slice hints by term.",
-  guidance: "Use path_facts_search to discover path-scoped hints by subsystem, directory, symbol, or source-shape term.",
-});
-
 /** Tool for listing proposal-only path fact updates. */
 export const pathFactsProposalsToolRegistration = proposalSourceApiTool({
   id: "path_facts_proposals",
@@ -575,16 +451,8 @@ export const sourceSiloToolRegistrations = [
   powerpcInstructionLookupToolRegistration,
   externalMirrorsSearchToolRegistration,
   externalSymbolLookupToolRegistration,
-  resourceGuidesSearchToolRegistration,
-  referenceDocsSearchToolRegistration,
-  toolOutputsSearchToolRegistration,
-  toolOutputsSimilarFunctionsToolRegistration,
-  toolOutputsMismatchPatternsToolRegistration,
-  toolOutputsToolLookupToolRegistration,
-  decompStandardsSearchToolRegistration,
   decompStandardsProposalsToolRegistration,
   decompStandardsContextToolRegistration,
   pathFactsResolveToolRegistration,
-  pathFactsSearchToolRegistration,
   pathFactsProposalsToolRegistration,
 ] as const;

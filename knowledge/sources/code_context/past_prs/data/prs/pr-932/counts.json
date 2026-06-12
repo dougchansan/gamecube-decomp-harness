@@ -1,0 +1,17 @@
+{
+  "number": 932,
+  "title": "Match itcapsule state tables",
+  "state": "MERGED",
+  "createdAt": "2023-06-21T04:08:59Z",
+  "updatedAt": "2023-06-21T04:51:08Z",
+  "mergedAt": "2023-06-21T04:51:05Z",
+  "closedAt": "2023-06-21T04:51:05Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/932",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 189642
+  }
+}

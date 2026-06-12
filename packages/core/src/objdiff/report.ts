@@ -54,6 +54,7 @@ export interface MetricChange {
 export interface ReportEntry {
   unitName: string;
   itemName: string;
+  sourcePath: string;
   size: number;
   fromPercent: number;
   toPercent: number;
@@ -267,6 +268,8 @@ function sortedEntries(report: ObjdiffReportChanges): Omit<
   const fuzzyRegressions: ReportEntry[] = [];
 
   for (const unit of asArray<ReportUnit>(report.units)) {
+    const metadata = (unit as { metadata?: { source_path?: unknown } }).metadata ?? {};
+    const sourcePath = typeof metadata.source_path === "string" ? metadata.source_path : "";
     const rows = [
       ...asArray<ReportRow>(unit.sections).filter((row) => row.name !== ".text"),
       ...asArray<ReportRow>(unit.functions),
@@ -279,6 +282,7 @@ function sortedEntries(report: ObjdiffReportChanges): Omit<
       const entry: ReportEntry = {
         unitName: unit.name,
         itemName: row.name,
+        sourcePath,
         size,
         fromPercent,
         toPercent,

@@ -1,0 +1,10 @@
+{
+  "pr": 695,
+  "title": "Support `-requireprotos`, pass 1",
+  "url": "https://github.com/doldecomp/melee/pull/695",
+  "text_records_with_body": 0,
+  "review_comments": 0,
+  "changed_files": 28,
+  "added_lines": 186,
+  "deleted_lines": 18
+}

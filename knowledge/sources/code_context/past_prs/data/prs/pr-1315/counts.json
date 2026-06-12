@@ -1,0 +1,17 @@
+{
+  "number": 1315,
+  "title": "Match 5.97% of `ftKb_Init` (127.51 KB)",
+  "state": "MERGED",
+  "createdAt": "2024-02-24T12:37:38Z",
+  "updatedAt": "2024-02-24T12:39:41Z",
+  "mergedAt": "2024-02-24T12:39:40Z",
+  "closedAt": "2024-02-24T12:39:40Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1315",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 3930348
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 846,
+  "title": "Match `ftCo_Attack1`",
+  "state": "MERGED",
+  "createdAt": "2023-05-13T04:25:52Z",
+  "updatedAt": "2023-05-13T04:30:54Z",
+  "mergedAt": "2023-05-13T04:30:53Z",
+  "closedAt": "2023-05-13T04:30:53Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/846",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 100249
+  }
+}

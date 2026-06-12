@@ -1,0 +1,10 @@
+{
+  "pr": 1893,
+  "title": "Split `ft_0D14` and link completed segments",
+  "url": "https://github.com/doldecomp/melee/pull/1893",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 135,
+  "added_lines": 3934,
+  "deleted_lines": 2881
+}

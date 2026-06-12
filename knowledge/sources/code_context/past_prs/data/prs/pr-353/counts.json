@@ -1,0 +1,17 @@
+{
+  "number": 353,
+  "title": "Minor fixes to ground.c",
+  "state": "MERGED",
+  "createdAt": "2022-04-10T21:09:09Z",
+  "updatedAt": "2022-04-11T18:23:53Z",
+  "mergedAt": "2022-04-10T21:39:49Z",
+  "closedAt": "2022-04-10T21:39:49Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/353",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 13735
+  }
+}

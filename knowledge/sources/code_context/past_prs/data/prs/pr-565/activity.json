@@ -1,0 +1,10 @@
+{
+  "pr": 565,
+  "title": "use enum item ID in ftMewtwo_SpecialN, move more ASM struct definitions to C and fix typo in ClampFallSpeed function name",
+  "url": "https://github.com/doldecomp/melee/pull/565",
+  "text_records_with_body": 0,
+  "review_comments": 0,
+  "changed_files": 9,
+  "added_lines": 50,
+  "deleted_lines": 55
+}

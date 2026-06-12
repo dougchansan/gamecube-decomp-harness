@@ -1,0 +1,17 @@
+{
+  "number": 2643,
+  "title": "Match grInishie2_801FD4F0",
+  "state": "MERGED",
+  "createdAt": "2026-06-10T12:18:56Z",
+  "updatedAt": "2026-06-10T12:27:21Z",
+  "mergedAt": "2026-06-10T12:27:21Z",
+  "closedAt": "2026-06-10T12:27:21Z",
+  "author": "MFS-code",
+  "url": "https://github.com/doldecomp/melee/pull/2643",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 400
+  }
+}

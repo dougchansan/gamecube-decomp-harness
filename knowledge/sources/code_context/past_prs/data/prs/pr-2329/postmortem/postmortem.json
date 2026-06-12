@@ -1,0 +1,388 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2329",
+  "pr": {
+    "number": 2329,
+    "title": "gm_1832",
+    "url": "https://github.com/doldecomp/melee/pull/2329",
+    "state": "MERGED",
+    "author": "jurrejelle",
+    "created_at": "2026-03-19T20:02:48Z",
+    "merged_at": "2026-03-24T11:30:11Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Large game-mode decomp/matching PR for src/melee/gm/gm_1832.c with companion header/type updates. It replaced many placeholder function stubs with C implementations, added local Classic-mode data-layout structs and STATIC_ASSERT size checks, updated prototypes away from UNK_RET/UNK_PARAMS where bodies exposed signatures, and produced measurable match progress while retaining many fuzzy matches plus one reported broken match attributed by the author to data/offset/linking work.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "types",
+      "data-layout-recovery",
+      "fuzzy-matching"
+    ],
+    "systems": [
+      "game-mode",
+      "classic-mode",
+      "gm_1832"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gm/gm_1832.c",
+      "role": "Primary implementation file; large replacement of placeholder decomp markers with C bodies, helper structs, data declarations, includes, and matching tactics.",
+      "evidence_refs": [
+        "changed_files: src/melee/gm/gm_1832.c added 2131 deleted 67 hunks 19",
+        "raw_diff: implementations added for fn_8018325C, fn_80184138, fn_80184AB8, fn_8018504C, fn_801851C0, fn_801857C4, fn_80185A0C, fn_80185E34, fn_80185F5C, fn_80186080, fn_801861B8, fn_80186634, gm_80186E30_OnEnter, fn_80186F6C, fn_80187910, fn_80187AB4, fn_80187CF4, gm_80187F48_OnEnter, fn_80188550, fn_80188644, fn_80188738, fn_80188910, fn_80188B3C, fn_80188D3C, fn_80188EE8, fn_801891F4, fn_80189B88, gm_80189CDC, fn_8018A000, fn_8018A364",
+        "text_corpus: bot report lists 5 new matches and 30 improved unmatched items in main/melee/gm/gm_1832"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1832.h",
+      "role": "Header prototype cleanup for recovered gm_1832 functions.",
+      "evidence_refs": [
+        "changed_files: src/melee/gm/gm_1832.h added 21 deleted 21 hunks 4",
+        "raw_diff: multiple UNK_RET/UNK_PARAMS prototypes changed to typed signatures, e.g. fn_8018504C(void), fn_801851C0(void), fn_80185A0C(void), fn_80185E34(void), fn_80185F5C(s32), fn_80186634(void*), fn_80187910(HSD_GObj*)"
+      ]
+    },
+    {
+      "path": "src/melee/gm/types.h",
+      "role": "Shared game-mode type additions supporting recovered bodies.",
+      "evidence_refs": [
+        "changed_files: src/melee/gm/types.h added 25 deleted 0 hunks 1"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1601.h",
+      "role": "Cross-header signature update for a helper called from gm_1832.",
+      "evidence_refs": [
+        "changed_files: src/melee/gm/gm_1601.h added 1 deleted 1 hunks 1",
+        "raw_diff: fn_80160DE8 changed from UNK_RET fn_80160DE8(UNK_PARAMS) to void fn_80160DE8(HSD_JObj*, u8, s32, u8, f32, f32)"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Converted a large set of gm_1832 placeholder functions into C implementations, including Classic-mode intro/splash/menu-related functions and OnEnter handlers.",
+      "evidence_refs": [
+        "raw_diff: many /// #fn_* markers replaced by function bodies in src/melee/gm/gm_1832.c",
+        "text_corpus: bot report lists new matches for fn_801861B8, fn_8018A364, fn_80188D3C, fn_8018504C, gm_80186E30_OnEnter"
+      ]
+    },
+    {
+      "text": "Recovered file-local layout information with ClassicSlotVals, ClassicCharLayout, ClassicTeamEntry, ClassicSplashRow, ClassicCharData, ClassicModeEnterData, and related static assertions or offset comments.",
+      "evidence_refs": [
+        "raw_diff: typedefs and STATIC_ASSERTs added near lbl_804D6604 and Classic-mode enter-data code"
+      ]
+    },
+    {
+      "text": "Expanded gm_1832.c includes to cover used baselib, game-mode, interface, item, language, and menu APIs.",
+      "evidence_refs": [
+        "raw_diff: added includes for aobj/cobj/dobj/mobj/wobj/gobjplink/sislib/random/runtime/gm_1601/gm_1A36/gmmain_lib/ifstatus/ifall/it_266F/lb_0192/lblanguage/mn types/mnname"
+      ]
+    },
+    {
+      "text": "Updated prototypes in gm_1832.h and gm_1601.h as implementations exposed concrete return and parameter types.",
+      "evidence_refs": [
+        "raw_diff: gm_1832.h prototype replacements",
+        "raw_diff: gm_1601.h fn_80160DE8 signature replacement"
+      ]
+    },
+    {
+      "text": "Produced progress but not full closure: report showed +1932 matched-code bytes, 5 new 100% matches, 30 improved unmatched items, one broken match, and one unmatched .bss regression.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev bot report for GALE01 802c37b - 2f0587a"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Used narrow local structs plus size checks to make large offset-based tables reviewable without pretending all semantic names were known.",
+      "evidence_refs": [
+        "raw_diff: ClassicSlotVals, ClassicCharLayout, ClassicTeamEntry, ClassicSplashRow with STATIC_ASSERT sizes and offset comments"
+      ]
+    },
+    {
+      "text": "Synchronized headers after recovering bodies, reducing UNK_RET/UNK_PARAMS surface instead of hiding signatures locally.",
+      "evidence_refs": [
+        "raw_diff: gm_1832.h and gm_1601.h signature updates"
+      ]
+    },
+    {
+      "text": "Author explicitly called out that many results were fuzzy and that a broken function was data/offset related, preserving uncertainty rather than overclaiming full matches.",
+      "evidence_refs": [
+        "human_pr_text: 'Lots of fuzzy matches, not a lot of 100% ones'",
+        "human_pr_text: 'The function that broke is data / offset stuff, will be resolved when linking'"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a large C replacement mainly improves fuzzy scores, keep the report ledger attached: distinguish new 100% matches from fuzzy improvements and record regressions separately.",
+      "evidence_refs": [
+        "text_corpus: bot report separates 5 new matches, 30 improvements, 1 broken match, and .bss regression",
+        "human_pr_text: author says there are many fuzzy matches and not many 100% ones"
+      ],
+      "related_standards": [
+        "verification-and-regression-ledger"
+      ]
+    },
+    {
+      "lesson": "Typed interim structs with offsets and STATIC_ASSERTs are useful for turning raw data/offset regions into readable source while layout is still being recovered.",
+      "evidence_refs": [
+        "raw_diff: ClassicSlotVals/ClassicCharLayout/ClassicTeamEntry/ClassicSplashRow/ClassicModeEnterData added with offsets and size assertions"
+      ],
+      "related_standards": [
+        "typed-fields-over-pointer-math",
+        "data-sections-and-tu-splits"
+      ]
+    },
+    {
+      "lesson": "Function-body recovery should be accompanied by owning-header prototype cleanup when signatures become known.",
+      "evidence_refs": [
+        "raw_diff: gm_1832.h and gm_1601.h prototypes changed from UNK_RET/UNK_PARAMS to concrete signatures"
+      ],
+      "related_standards": [
+        "truthful-headers-and-includes"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "Kept many address-style symbol names for unresolved globals/functions while adding conservative role names for local helper structs such as ClassicSlotVals, ClassicCharLayout, ClassicTeamEntry, ClassicSplashRow, ClassicCharData, and ClassicModeEnterData.",
+      "evidence_refs": [
+        "raw_diff: globals remain lbl_804735A8, lbl_804735E8, lbl_804D6604, lbl_803D9248 while new local typedefs use Classic* names"
+      ],
+      "related_standards": [
+        "conservative-naming"
+      ]
+    },
+    {
+      "text": "Local variables use short role names where roles are evident, such as gobj, jobj, src, pos, scale, arrow, proc, player_slot.",
+      "evidence_refs": [
+        "raw_diff: fn_8018325C and fn_80184138 locals include HSD_JObj* jobj/src/arrow and Vec3 pos/scale"
+      ],
+      "related_standards": [
+        "conservative-naming"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "text": "PAD_STACK was used in at least fn_80184138 and fn_8018504C.",
+      "evidence_refs": [
+        "raw_diff: PAD_STACK(8) in fn_80184138",
+        "raw_diff: PAD_STACK(16) in fn_8018504C"
+      ],
+      "caution": "Loaded evidence shows use of the tactic but not the exact objdiff justification for each instance."
+    },
+    {
+      "text": "Inline/no-inline steering appears around fn_801884F8/fn_8018846C call shaping, including an inline helper, a noInline wrapper, and pragmas.",
+      "evidence_refs": [
+        "raw_diff: inline int fn_801884F8_inline(void)",
+        "raw_diff: fn_8018846C_noInline wrapper calls fn_8018846C",
+        "raw_diff: pragma push/pop and dont_inline around nearby code"
+      ],
+      "caution": "Treat as matching tactics requiring narrow verification; the slice does not include reviewer acceptance rationale."
+    },
+    {
+      "text": "Data tables were represented through typed casts and file-local structs, e.g. ClassicCharData* data = (ClassicCharData*) lbl_803D9248.",
+      "evidence_refs": [
+        "raw_diff: static f32 lbl_803D9248[] and ClassicCharData cast in fn_801851C0"
+      ],
+      "caution": "This is evidence of a data-layout tactic, not proof that final data ownership was resolved."
+    },
+    {
+      "text": "Repeated JObj transform code was expressed as loops over player/entity slots in recovered functions.",
+      "evidence_refs": [
+        "raw_diff: for (i = 0; i < 6; i++) loops in fn_8018325C and fn_80184138"
+      ],
+      "related_standards": [
+        "natural-loops"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "text": "decomp-dev bot reported matched code 59.50% (+0.05%, +1932 bytes), 5 new matches, 30 improvements in unmatched items, 1 broken match, and 1 unmatched .bss regression.",
+      "evidence_refs": [
+        "text_corpus: issue_comment by decomp-dev[bot] at 2026-03-19T20:06:32Z"
+      ]
+    },
+    {
+      "kind": "author_comment",
+      "text": "Author stated there were lots of fuzzy matches and not many 100% matches, but believed the PR was an improvement.",
+      "evidence_refs": [
+        "human_pr_text: issuecomment-4113503152"
+      ]
+    },
+    {
+      "kind": "author_comment",
+      "text": "Author stated the broken function was data/offset related and would be resolved when linking.",
+      "evidence_refs": [
+        "human_pr_text: issuecomment-4113508986"
+      ]
+    },
+    {
+      "kind": "absence",
+      "text": "No loaded review comments or formal review feedback are present in the slice.",
+      "evidence_refs": [
+        "metadata_json: counts.review_comments = 0 and reviews = 0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2329",
+    "gm_1832",
+    "jurrejelle",
+    "src/melee/gm/gm_1832.c",
+    "src/melee/gm/gm_1832.h",
+    "src/melee/gm/gm_1601.h",
+    "src/melee/gm/types.h",
+    "ClassicSlotVals",
+    "ClassicCharLayout",
+    "ClassicTeamEntry",
+    "ClassicSplashRow",
+    "ClassicCharData",
+    "ClassicModeEnterData",
+    "fn_8018325C",
+    "fn_80184138",
+    "fn_80184AB8",
+    "fn_8018504C",
+    "fn_801851C0",
+    "fn_801861B8",
+    "fn_80186634",
+    "gm_80186E30_OnEnter",
+    "fn_801884F8",
+    "fn_801891F4",
+    "gm_80189CDC",
+    "fn_8018A364",
+    "fuzzy matches",
+    "data offset stuff",
+    "PAD_STACK",
+    "dont_inline",
+    "STATIC_ASSERT"
+  ],
+  "follow_up_queries": [
+    "gm_1832 fuzzy matches data offset broken fn_801884F8",
+    "gm_1832 ClassicModeEnterData lbl_804735E8 layout",
+    "gm_1832 PAD_STACK fn_80184138 fn_8018504C",
+    "gm_1832 fn_801884F8_inline fn_8018846C_noInline dont_inline",
+    "gm_1832 ClassicSlotVals ClassicCharLayout ClassicSplashRow STATIC_ASSERT",
+    "gm_1832 header UNK_RET UNK_PARAMS prototype cleanup"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR identity, merge timestamp, changed-file list, counts",
+      "changed_files.jsonl: exact changed paths and line counts",
+      "raw_diff: truncated but includes large relevant portions of gm_1601.h, gm_1832.c, and gm_1832.h changes",
+      "text_corpus.jsonl: PR body, bot report, and author comments"
+    ],
+    "notes": [
+      "The raw diff is loaded as truncated in the prompt, though targeted lookup confirmed additional header and function evidence in the local slice.",
+      "No review comments are available; reviewer intent or acceptance rationale cannot be inferred.",
+      "The bot report provides match/progress evidence but the slice does not include complete objdiff/build logs for every tactic.",
+      "The author explicitly describes many fuzzy matches, so lessons should not be promoted as proof of full function matching beyond the 5 bot-listed new 100% matches."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "pr_lesson",
+        "title": "Keep fuzzy-match progress separate from confirmed matches",
+        "text": "In PR #2329, the bot report separated 5 new 100% matches from 30 fuzzy improvements, while the author noted many fuzzy matches and a data/offset-related broken function. For similar PRs, preserve this distinction in summaries and do not overclaim fuzzy improvements as final matches.",
+        "scope": [
+          "gm_1832",
+          "large decomp-matching PRs",
+          "fuzzy matching reports"
+        ],
+        "evidence_refs": [
+          "text_corpus: decomp-dev bot report",
+          "human_pr_text: issuecomment-4113503152",
+          "human_pr_text: issuecomment-4113508986"
+        ]
+      },
+      {
+        "record_type": "pr_lesson",
+        "title": "Use interim typed layout structs with size checks for offset-heavy game-mode data",
+        "text": "PR #2329 made gm_1832 data accesses more reviewable by introducing file-local Classic* layout structs with offsets and STATIC_ASSERT size checks instead of leaving only broad padding.",
+        "scope": [
+          "src/melee/gm/gm_1832.c",
+          "game-mode data layout recovery"
+        ],
+        "evidence_refs": [
+          "raw_diff: ClassicSlotVals, ClassicCharLayout, ClassicTeamEntry, ClassicSplashRow, ClassicModeEnterData typedefs and assertions"
+        ]
+      },
+      {
+        "record_type": "pr_lesson",
+        "title": "Update owning headers when recovered bodies prove signatures",
+        "text": "PR #2329 updated gm_1832.h and gm_1601.h prototypes from UNK_RET/UNK_PARAMS to concrete signatures alongside the recovered C bodies.",
+        "scope": [
+          "headers",
+          "prototype cleanup",
+          "game-mode functions"
+        ],
+        "evidence_refs": [
+          "raw_diff: gm_1832.h prototype replacements",
+          "raw_diff: gm_1601.h fn_80160DE8 signature replacement"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "gm_1832 is Classic/game-mode splash and menu matching work with offset-heavy data layouts",
+        "text": "PR #2329 evidence shows src/melee/gm/gm_1832.c contains Classic-mode intro/splash/menu-related decomp work, with file-local Classic* layout structs and many address-style globals. Treat path work here as offset/data-layout sensitive and verify fuzzy progress carefully.",
+        "source_path": "src/melee/gm/gm_1832.c",
+        "scope": [
+          "src/melee/gm/gm_1832.c",
+          "game-mode",
+          "classic-mode"
+        ],
+        "evidence_refs": [
+          "raw_diff: Classic* structs and gm_80186E30_OnEnter",
+          "text_corpus: bot report for main/melee/gm/gm_1832",
+          "human_pr_text: data/offset broken-function comment"
+        ],
+        "reason": "Useful path-scoped caution for future gm_1832 curation; should be reviewed before adding to path facts."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Fuzzy progress PRs should preserve report categories and known regressions",
+        "text": "Consider clarifying that PR summaries should distinguish new 100% matches, fuzzy improvements, broken matches, and data-section regressions when the author/report indicates partial progress.",
+        "source_path": null,
+        "scope": [
+          "decomp-matching",
+          "verification ledger",
+          "fuzzy matching"
+        ],
+        "evidence_refs": [
+          "text_corpus: bot report categories",
+          "human_pr_text: author fuzzy-match comment"
+        ],
+        "reason": "This is consistent with the existing verification-and-regression-ledger standard but PR #2329 provides a concrete example for curator review."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote every function touched in the diff as matched; bot evidence only lists 5 new 100% matches and many fuzzy improvements.",
+      "Do not infer reviewer approval or requested changes; the loaded slice has no review comments.",
+      "Do not treat PAD_STACK, pragmas, inline/no-inline wrappers, or data casts as accepted general style from this PR alone; loaded evidence lacks per-tactic verifier rationale.",
+      "Do not claim the data/offset broken function was actually resolved by linking; only the author's expectation is present in the slice."
+    ]
+  },
+  "confidence": 0.74,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

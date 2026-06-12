@@ -1,0 +1,17 @@
+{
+  "number": 2181,
+  "title": "Update Discord channel name",
+  "state": "MERGED",
+  "createdAt": "2026-02-21T12:02:00Z",
+  "updatedAt": "2026-02-21T12:06:53Z",
+  "mergedAt": "2026-02-21T12:06:52Z",
+  "closedAt": "2026-02-21T12:06:52Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/2181",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 1889
+  }
+}

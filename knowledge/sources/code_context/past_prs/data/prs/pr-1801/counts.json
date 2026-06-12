@@ -1,0 +1,17 @@
+{
+  "number": 1801,
+  "title": "Split out game mode files from gm_1B03",
+  "state": "MERGED",
+  "createdAt": "2025-08-07T00:48:23Z",
+  "updatedAt": "2025-08-07T00:59:34Z",
+  "mergedAt": "2025-08-07T00:59:31Z",
+  "closedAt": "2025-08-07T00:59:31Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1801",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 53592
+  }
+}

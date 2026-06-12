@@ -1,0 +1,396 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2433",
+  "pr": {
+    "number": 2433,
+    "title": "mnsnap: decompile fn_802545C4 (99.37%)",
+    "url": "https://github.com/doldecomp/melee/pull/2433",
+    "state": "MERGED",
+    "author": "malvarezcastillo",
+    "created_at": "2026-04-26T08:11:53Z",
+    "merged_at": "2026-04-26T11:08:08Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2433 decompiled the Snap menu per-frame update function fn_802545C4 in src/melee/mn/mnsnap.c as a large state-machine switch for slot selection, photo browsing, dialogs, and copy/move/delete card operations. It also updated mnsnap.h prototypes for mnSnap_8025409C and mnSnap_8025441C. Review focused on reverting expanded assert/string storage hacks and keeping HSD_ASSERT and inline format strings instead.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "types-structs",
+      "review-cleanup"
+    ],
+    "systems": [
+      "melee-core",
+      "mn",
+      "mnsnap",
+      "snap-menu"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/mn/mnsnap.c",
+      "role": "Main decompilation target; adds/reworks fn_802545C4, dialog text helper, prototype-driven callsite changes, and matching tactics such as PAD_STACK and a dont_inline pragma.",
+      "evidence_refs": [
+        "changed_files:src/melee/mn/mnsnap.c added=1007 deleted=973 hunks=13",
+        "pr_body:decompile main per-frame update for Snap menu; function is 99.373% match",
+        "diff:fn_802545C4 large switch cases 0-23 and mnSnap_InitDialogText",
+        "review_comments:discussion_r3143224540",
+        "review_comments:discussion_r3143224838",
+        "review_comments:discussion_r3143225870",
+        "review_comments:discussion_r3143227916",
+        "review_comments:discussion_r3143275555"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnsnap.h",
+      "role": "Header prototype cleanup for recovered function signatures.",
+      "evidence_refs": [
+        "changed_files:src/melee/mn/mnsnap.h added=1 deleted=1 hunks=1",
+        "pr_body:fixes mnSnap_8025409C arg type and mnSnap_8025441C return type",
+        "diff:mnSnap_8025409C changed from HSD_JObj* jobj_flag to s32 dlg_type"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Decompiled fn_802545C4, the Snap menu main per-frame update, as a state-machine switch covering states 0-23 for slot selection, photo browsing, dialog confirmation, and copy/move/delete card operations.",
+      "evidence_refs": [
+        "pr_body",
+        "diff:fn_802545C4"
+      ]
+    },
+    {
+      "text": "Changed button input handling in fn_802545C4 to use u64 buttons and assigns mn_804A04F0.buttons from mn_80229624(4).",
+      "evidence_refs": [
+        "diff:fn_802545C4 local declaration u64 buttons",
+        "diff:buttons = (mn_804A04F0.buttons = mn_80229624(4))"
+      ]
+    },
+    {
+      "text": "Added a static inline helper mnSnap_InitDialogText for repeated dialog text allocation/setup using HSD_SisLib_803A5ACC and HSD_Text font/default fields.",
+      "evidence_refs": [
+        "diff:static inline void mnSnap_InitDialogText"
+      ]
+    },
+    {
+      "text": "Updated mnSnap_8025409C from a pointer-like parameter to s32 dlg_type and adjusted comparisons/calls to use integer dialog type values.",
+      "evidence_refs": [
+        "pr_body:mnSnap_8025409C arg type",
+        "diff:void mnSnap_8025409C(s32 dlg_type)"
+      ]
+    },
+    {
+      "text": "Updated mnSnap_8025441C return type according to the PR body; exact header diff details are not loaded beyond changed-file metadata and PR text.",
+      "evidence_refs": [
+        "pr_body:mnSnap_8025441C return type",
+        "changed_files:src/melee/mn/mnsnap.h"
+      ]
+    },
+    {
+      "text": "The bot report recorded one unmatched-item improvement for main/melee/mn/mnsnap fn_802545C4 from 80.82% to 98.94%, while the PR body/title state 99.37%/99.373%.",
+      "evidence_refs": [
+        "text_corpus:issue_comment decomp-dev[bot]",
+        "pr_title",
+        "pr_body"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Factored repeated dialog text initialization into mnSnap_InitDialogText, reducing duplicated setup of dlg_text, alignment, kerning, and font size across state transitions.",
+      "evidence_refs": [
+        "diff:mnSnap_InitDialogText",
+        "diff:case 0 and case 2 call mnSnap_InitDialogText"
+      ]
+    },
+    {
+      "text": "Recovered mnSnap_8025409C's parameter as a dialog type integer instead of treating it as an HSD_JObj pointer cast, improving signature truthfulness and callsite readability.",
+      "evidence_refs": [
+        "diff:mnSnap_8025409C(s32 dlg_type)",
+        "pr_body:fixes mnSnap_8025409C arg type"
+      ]
+    },
+    {
+      "text": "Kept ordinary loops for repeated thumbnail/count label formatting in mnSnap_80253964 rather than expanding per-slot code.",
+      "evidence_refs": [
+        "diff:for (i = 0; i < 4; i++, base++)",
+        "diff:for (i = 0; i < 2; i++)"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "Expanded assert blocks that only spell out __assert calls should be reverted to HSD_ASSERT when the original macro form and implicit strings are available.",
+      "evidence_refs": [
+        "review_comments:discussion_r3143224540",
+        "review_comments:discussion_r3143224838",
+        "decomp_standards:assert-report-macros"
+      ]
+    },
+    {
+      "lesson": "Do not introduce named SDATA/static string storage for ordinary assert strings or format literals merely because generated output exposes those addresses; keep literals inline unless data ownership evidence justifies the storage.",
+      "evidence_refs": [
+        "review_comments:discussion_r3143225870",
+        "review_comments:discussion_r3143227916",
+        "review_comments:discussion_r3143275555",
+        "decomp_standards:literals-and-data-ownership",
+        "decomp_standards:no-string-literal-symbol-regression"
+      ]
+    },
+    {
+      "lesson": "When a recovered function body proves a more accurate signature, update the owning header and callsites rather than preserving fake pointer casts.",
+      "evidence_refs": [
+        "pr_body:fixes mnsnap.h prototypes",
+        "diff:mnSnap_8025409C HSD_JObj* jobj_flag to s32 dlg_type",
+        "decomp_standards:truthful-headers-and-includes"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "The PR uses descriptive local names for recovered state-machine concepts such as dlg_type, active_slot, other_slot, dlg_timer, dlg_active, dlg_text, slot_a_jobj, slot_b_jobj, and fullview_jobj where roles are evident from mnsnap state fields.",
+      "evidence_refs": [
+        "diff:mnSnap_8025409C(s32 dlg_type)",
+        "diff:fn_802545C4 references mnSnap_804A0A10.active_slot/dlg_timer/dlg_active/dlg_text"
+      ]
+    },
+    {
+      "text": "No evidence supports accepting new semantic global names for the attempted assert/format strings; reviewer questioned the need and author said the hack was reverted.",
+      "evidence_refs": [
+        "review_comments:discussion_r3143227916",
+        "review_comments:discussion_r3143275555"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Used PAD_STACK(336) inside fn_802545C4.",
+      "evidence_refs": [
+        "diff:PAD_STACK(336)"
+      ],
+      "confidence": "medium",
+      "notes": "The diff shows the tactic, but loaded evidence does not include objdiff rationale beyond the PR's percentage claim and bot report."
+    },
+    {
+      "tactic": "Scoped mnSnap_80254014 with #pragma dont_inline on/reset.",
+      "evidence_refs": [
+        "diff:#pragma dont_inline on before mnSnap_80254014",
+        "diff:#pragma dont_inline reset after mnSnap_80254014"
+      ],
+      "confidence": "medium",
+      "notes": "The pragma is tightly scoped in the diff; loaded evidence does not show reviewer discussion or adjacent-function verification for the pragma."
+    },
+    {
+      "tactic": "Introduced a small static inline helper for repeated dialog text initialization, likely to help source shape while avoiding large duplicated blocks.",
+      "evidence_refs": [
+        "diff:static inline void mnSnap_InitDialogText"
+      ],
+      "confidence": "medium",
+      "notes": "Evidence supports the helper's presence and repeated use; exact matching rationale is not documented in loaded comments."
+    },
+    {
+      "tactic": "Used direct global mnSnap_804A0A10 field accesses in fn_802545C4 rather than preserving a local snap pointer throughout.",
+      "evidence_refs": [
+        "diff:removed mnSnap_State* snap local",
+        "diff:mnSnap_804A0A10.state/card_status/active_slot accesses"
+      ],
+      "confidence": "medium",
+      "notes": "The diff shows the access pattern, but loaded evidence does not explain whether this was required for matching."
+    }
+  ],
+  "review_feedback": [
+    {
+      "reviewer": "jellejurre",
+      "path": "src/melee/mn/mnsnap.c",
+      "comment": "Expanded __assert blocks should be reverted; use HSD_ASSERT with implicit strings.",
+      "evidence_refs": [
+        "review_comments:discussion_r3143224540",
+        "review_comments:discussion_r3143224838"
+      ]
+    },
+    {
+      "reviewer": "jellejurre",
+      "path": "src/melee/mn/mnsnap.c",
+      "comment": "Format strings such as \"%03d\" and \"%d\" were likely inline constants rather than variables that were inlined.",
+      "evidence_refs": [
+        "review_comments:discussion_r3143225870"
+      ]
+    },
+    {
+      "reviewer": "jellejurre",
+      "path": "src/melee/mn/mnsnap.c",
+      "comment": "Questioned the need for added SDATA/static string declarations and the local inline block in the shown hunk.",
+      "evidence_refs": [
+        "review_comments:discussion_r3143227916"
+      ]
+    },
+    {
+      "reviewer": "malvarezcastillo",
+      "path": "src/melee/mn/mnsnap.c",
+      "comment": "Author replied that the questioned string/assert hack was reverted as unnecessary.",
+      "evidence_refs": [
+        "review_comments:discussion_r3143275555"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2433",
+    "mnsnap",
+    "fn_802545C4",
+    "mnSnap_8025409C",
+    "mnSnap_8025441C",
+    "mnSnap_InitDialogText",
+    "mnSnap_804A0A10",
+    "Snap menu",
+    "large state-machine switch",
+    "cases 0-23",
+    "slot selection",
+    "photo browsing",
+    "copy move delete card operations",
+    "dialog confirmations",
+    "HSD_ASSERT",
+    "__assert",
+    "implicit strings",
+    "SDATA strings",
+    "inline constants",
+    "%03d",
+    "%d",
+    "PAD_STACK(336)",
+    "pragma dont_inline",
+    "HSD_SisLib_803A5ACC",
+    "HSD_SisLib_803A6368",
+    "HSD_JObjReqAnim",
+    "HSD_JObjAnim",
+    "lbSnap_8001D338",
+    "lbSnap_8001D350",
+    "lbAudioAx_80024030"
+  ],
+  "follow_up_queries": [
+    "mnsnap fn_802545C4 PAD_STACK 336",
+    "mnSnap_80254014 dont_inline",
+    "mnsnap HSD_ASSERT implicit strings",
+    "mnSnap_8025409C dlg_type",
+    "mnSnap_8025441C return type",
+    "mnsnap inline format strings %03d %d",
+    "mnSnap_InitDialogText HSD_SisLib_803A5ACC",
+    "mnsnap SDATA jobj jobj.h reverted unnecessary hack"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json",
+      "human_pr_text",
+      "changed_files",
+      "raw_diff excerpt",
+      "review_comments",
+      "text_corpus bot report"
+    ],
+    "notes": [
+      "PR identity, changed files, title/body, review comments, and changed-file counts are well supported.",
+      "The raw diff is truncated, so details from later fn_802545C4 switch cases and exact mnsnap.h header hunk are not fully visible in loaded evidence.",
+      "The PR title/body claim 99.37%/99.373%, while the bot report in text_corpus shows fn_802545C4 improving to 98.94%; this postmortem records both without resolving the discrepancy.",
+      "Review comments show requested cleanup and author response for the string/assert hack, but loaded evidence does not include a final full diff proving every requested change after revision.",
+      "Matching tactics such as PAD_STACK and #pragma dont_inline are visible in the diff but lack loaded objdiff/adjacent-regression rationale."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "title": "Use HSD_ASSERT instead of expanded __assert blocks when implicit assert strings match",
+        "text": "In mnsnap review, expanded __assert sequences for jobj/dobj checks were called out for revert in favor of HSD_ASSERT with implicit strings. This reinforces the existing assert macro cleanup rule.",
+        "scope": [
+          "src/melee/mn/mnsnap.c",
+          "assert cleanup",
+          "HSD_ASSERT"
+        ],
+        "evidence_refs": [
+          "review_comments:discussion_r3143224540",
+          "review_comments:discussion_r3143224838"
+        ]
+      },
+      {
+        "title": "Keep ordinary format strings inline unless data ownership is proven",
+        "text": "Reviewer feedback on mnsnap noted that \"%03d\" and related format strings were likely inline constants, not variables that were inlined. Added SDATA/static string declarations were questioned and the author said the hack was reverted.",
+        "scope": [
+          "src/melee/mn/mnsnap.c",
+          "string literals",
+          "format strings",
+          "data ownership"
+        ],
+        "evidence_refs": [
+          "review_comments:discussion_r3143225870",
+          "review_comments:discussion_r3143227916",
+          "review_comments:discussion_r3143275555"
+        ]
+      },
+      {
+        "title": "Recovered signatures should flow into headers and callsites",
+        "text": "The PR body says mnsnap.h prototypes were fixed for mnSnap_8025409C and mnSnap_8025441C; the diff shows mnSnap_8025409C's parameter becoming s32 dlg_type and callsites using integer dialog types.",
+        "scope": [
+          "src/melee/mn/mnsnap.h",
+          "src/melee/mn/mnsnap.c",
+          "headers",
+          "prototypes"
+        ],
+        "evidence_refs": [
+          "pr_body",
+          "diff:mnSnap_8025409C(s32 dlg_type)"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Add mnsnap as an example for inline literals over generated SDATA strings",
+        "text": "PR #2433 review provides a concrete example where generated-looking SDATA/static strings for \"jobj\", \"jobj.h\", \"%03d\", and \"%d\" were questioned, and the author described the change as a reverted unnecessary hack. This could be cited under literals-and-data-ownership or no-string-literal-symbol-regression if examples are desired.",
+        "source_path": null,
+        "scope": [
+          "string literals",
+          "format strings",
+          "assert strings",
+          "mnsnap"
+        ],
+        "evidence_refs": [
+          "review_comments:discussion_r3143225870",
+          "review_comments:discussion_r3143227916",
+          "review_comments:discussion_r3143275555"
+        ],
+        "reason": "Existing standards already cover the rule; this PR offers a grounded example for future curation."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Add mnsnap as an example for preferring HSD_ASSERT over expanded __assert",
+        "text": "Reviewer feedback explicitly requested reverting expanded __assert blocks and using HSD_ASSERT with implicit strings in mnsnap. This can be added as an example under assert-report-macros.",
+        "source_path": null,
+        "scope": [
+          "assert macros",
+          "HSD_ASSERT",
+          "mnsnap"
+        ],
+        "evidence_refs": [
+          "review_comments:discussion_r3143224540",
+          "review_comments:discussion_r3143224838"
+        ],
+        "reason": "The global standard already exists; curator may add this PR as supporting historical evidence."
+      }
+    ],
+    "rejection_notes": [
+      "Do not treat the attempted SDATA/static declarations for assert and format strings as accepted path facts; review evidence says they were questioned and author called them an unnecessary hack.",
+      "Do not infer that PAD_STACK(336), direct global field access, or #pragma dont_inline are generally accepted for mnsnap; loaded evidence shows use but not the objdiff rationale or adjacent regression checks.",
+      "Do not claim final exact match status beyond the PR title/body and bot report values; loaded evidence contains conflicting percentages and no final objdiff output."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

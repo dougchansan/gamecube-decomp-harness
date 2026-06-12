@@ -1,0 +1,459 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2461",
+  "pr": {
+    "number": 2461,
+    "title": "Match 11 functions across stage and fighter TUs",
+    "url": "https://github.com/doldecomp/melee/pull/2461",
+    "state": "MERGED",
+    "author": "davidfeira",
+    "created_at": "2026-05-05T23:48:57Z",
+    "merged_at": "2026-05-06T02:30:20Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Multi-TU matching PR touching fighter, stage, and interface code. It adds or improves implementations in ftcpuattack, ftCo_Attack100, ifstatus, gricemt, grpura, and grfourside, plus header signature refinements for ftcpuattack and gricemt. The bot report confirms 11 new matched items, but one listed item is .sdata and grPura_80212024 is reported as an unmatched improvement, so the PR body's '11 matched functions' claim has mixed support in the loaded evidence.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "types-structs",
+      "cleanup",
+      "verification"
+    ],
+    "systems": [
+      "fighter",
+      "stage",
+      "interface",
+      "melee-core"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_Attack100.c",
+      "role": "Adds ftCo_800D72A0 and ftCo_800D74A4 as score improvements and implements fn_800DB6C8 as a reported 100% match; uses victim/captor fighter fields, kind-specific item cleanup, PAD_STACK, and a scoped dont_inline pragma.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/ft/chara/ftCommon/ftCo_Attack100.c added 84 deleted 0",
+        "raw_diff: ftCo_Attack100.c additions for ftCo_800D72A0, ftCo_800D74A4, fn_800DB6C8",
+        "text_corpus issue_comment: fn_800DB6C8 0.00% -> 100.00%; ftCo_800D74A4 and ftCo_800D72A0 listed as unmatched improvements"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftcpuattack.c",
+      "role": "Implements ftCo_800B6208 as weighted random selection over a local ftCo_AttackEntry structure, including null-terminated scan, near-zero sum guard, and assert fallback.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/ft/ftcpuattack.c added 50 deleted 1",
+        "raw_diff: typedef struct ftCo_AttackEntry and int ftCo_800B6208(ftCo_AttackEntry* arr)",
+        "text_corpus issue_comment: ftCo_800B6208 0.00% -> 100.00%"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftcpuattack.h",
+      "role": "Refines ftCo_800B6208 prototype from UNK_T to struct ftCo_AttackEntry* and adds forward declaration.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/ft/ftcpuattack.h added 3 deleted 1",
+        "raw_diff: ftCo_800B6208 prototype changed to int ftCo_800B6208(struct ftCo_AttackEntry*)",
+        "human_pr_text: header refinement required for typed signature in matched body"
+      ]
+    },
+    {
+      "path": "src/melee/if/ifstatus.c",
+      "role": "Implements ifStatus_802F7034, reading gm_8016AE38 status data, converting zero/nonzero indices, and dispatching to ifStatus_802F6EA4 based on unk_B, match_result, and x24C8.x5_1.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/if/ifstatus.c added 46 deleted 1",
+        "raw_diff: ifStatus_802F7034 implementation",
+        "text_corpus issue_comment: ifStatus_802F7034 0.00% -> 100.00%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/gricemt.c",
+      "role": "Refines Ice Mountain stage code: static Vec3 lookup table, joint translation setup, wave/cloud update call shape, material refresh loops, dirty-bit joint rebinding, and grIceMt_801F9ACC signature body alignment.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gr/gricemt.c added 48 deleted 51",
+        "raw_diff: grIm_803B8220 made static; grIceMt_801F72D4, grIceMt_801F7728, grIceMt_801F7F1C, grIceMt_801F81B4, grIceMt_801F98A8, grIceMt_801F9ACC changes",
+        "text_corpus issue_comment: grIceMt_801F7728, grIceMt_801F7F1C, grIceMt_801F81B4, grIceMt_801F98A8, grIceMt_801F72D4 listed as 100% matched items"
+      ]
+    },
+    {
+      "path": "src/melee/gr/gricemt.h",
+      "role": "Updates grIceMt_801F98A8 return type to void and expands grIceMt_801F9ACC prototype to include HSD_GObjEvent and Ground_GObj* arguments.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gr/gricemt.h added 2 deleted 2",
+        "raw_diff: grIceMt_801F98A8 bool -> void; grIceMt_801F9ACC two args -> four args",
+        "human_pr_text: header refinements required by matched bodies and call site"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grpura.c",
+      "role": "Improves Pokemon Stadium stage routines including grPura_80212024, grPura_80212290, grPura_802125F0 field use, and grPura_80213030 pointer stepping. Bot confirms grPura_80212290 as 100%; grPura_80212024 remains an improvement in bot evidence.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gr/grpura.c added 20 deleted 22",
+        "raw_diff: grPura_80212024, grPura_80212290, grPura_802125F0, grPura_80213030 changes",
+        "text_corpus issue_comment: grPura_80212290 79.58% -> 100.00%; grPura_80212024 76.51% -> 93.58%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grfourside.c",
+      "role": "Corrects mpJointSetCb1 registration argument in grFourside_801F2F34 from Ground* to Ground_GObj*.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gr/grfourside.c added 1 deleted 1",
+        "raw_diff: mpJointSetCb1(0, gp, ...) changed to mpJointSetCb1(0, gobj, ...)",
+        "text_corpus issue_comment: grFourside_801F2F34 99.94% -> 100.00%"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Implemented ftCo_800B6208 as weighted random command selection from a null-terminated ftCo_AttackEntry array with HSD_Randf sampling and zero/near-zero fallback to 0.",
+    "Refined ftcpuattack.h so ftCo_800B6208 takes struct ftCo_AttackEntry* instead of UNK_T.",
+    "Added ftCo_Attack100 implementations/improvements: ftCo_800D72A0 checks current motion ranges from fp->x2D0, ftCo_800D74A4 computes velocity and motion id for a common attack path, and fn_800DB6C8 performs capture-pulled cleanup with kind-specific attached item cleanup.",
+    "Implemented ifStatus_802F7034 dispatch over gm_8016AE38 status fields, including -1 sentinel conversion for zero-valued index fields.",
+    "In gricemt.c, made grIm_803B8220 static and refined several Ice Mountain routines: joint translation setup, wave/cloud update, two material-refresh helper loops, dirty-bit joint rebind callback, and grIceMt_801F9ACC call/signature shape.",
+    "In gricemt.h, changed grIceMt_801F98A8 to void and changed grIceMt_801F9ACC to accept HSD_GObjEvent and Ground_GObj* in addition to gobj and float.",
+    "In grpura.c, refined Pokemon Stadium initializer/model setup and nearby field/pointer use, including render callback assignment and toon texture setup in grPura_80212290.",
+    "In grfourside.c, changed grFourside_801F2F34 to pass the ground GObj to mpJointSetCb1 rather than the Ground user-data pointer."
+  ],
+  "smart_moves": [
+    "Header prototypes were updated alongside the recovered bodies instead of leaving UNK_T or speculative return types in public declarations.",
+    "The Ice Mountain material-refresh helpers were expressed as short two-iteration loops over gp->gv.icemt.xF8[] rather than preserving generated-looking repeated code.",
+    "The Fourside one-line fix targeted the callback registration argument directly, minimizing unrelated churn.",
+    "The PR body included narrow verification claims: full ninja SHA1 match, per-function objdiff-cli 100% reports, and no adjacent fuzzy regressions; bot output independently reports matched-code increase and per-item match status.",
+    "The ftcpuattack function introduced a local structure for cmd and weight fields, improving reviewability over an untyped UNK_T parameter and raw offsets."
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a recovered function body proves an argument type or return type, update the owning header in the same change rather than leaving UNK_T or a speculative bool signature.",
+      "scope": [
+        "ftcpuattack.h",
+        "gricemt.h",
+        "matched function bodies with call-site evidence"
+      ],
+      "evidence_refs": [
+        "raw_diff: ftCo_800B6208 prototype changed from UNK_T to struct ftCo_AttackEntry*",
+        "raw_diff: grIceMt_801F98A8 bool -> void",
+        "raw_diff: grIceMt_801F9ACC prototype expanded to four parameters",
+        "human_pr_text: header refinements required by typed signature and call-site type checking"
+      ]
+    },
+    {
+      "lesson": "Small fixed-count repeated helper behavior can match cleanly as a natural loop when the repeated operation is indexed over a cached array.",
+      "scope": [
+        "gricemt.c",
+        "grIceMt_801F7F1C",
+        "grIceMt_801F81B4"
+      ],
+      "evidence_refs": [
+        "raw_diff: both helpers use for (i = 0; i < 2; i++) over gp->gv.icemt.xF8[i]",
+        "text_corpus issue_comment: both helpers improved to 100.00%"
+      ]
+    },
+    {
+      "lesson": "Callback registration mismatches may be solved by checking whether an API expects the GObj wrapper rather than the user-data struct.",
+      "scope": [
+        "grfourside.c",
+        "mpJointSetCb1",
+        "Ground_GObj versus Ground"
+      ],
+      "evidence_refs": [
+        "raw_diff: mpJointSetCb1 argument changed from gp to gobj",
+        "text_corpus issue_comment: grFourside_801F2F34 99.94% -> 100.00%"
+      ]
+    },
+    {
+      "lesson": "A null-terminated weighted table can be recovered as a typed local struct with explicit cmd and weight fields, preserving the sentinel scan and degenerate-weight fallback.",
+      "scope": [
+        "ftcpuattack.c",
+        "ftCo_800B6208",
+        "ftCo_AttackEntry"
+      ],
+      "evidence_refs": [
+        "raw_diff: ftCo_AttackEntry cmd at +00 and weight at +18",
+        "raw_diff: ftCo_800B6208 scans until p->cmd == 0 and returns 0 on empty or near-zero sum",
+        "text_corpus issue_comment: ftCo_800B6208 0.00% -> 100.00%"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "ftCo_AttackEntry",
+      "kind": "local typedef and header forward declaration",
+      "evidence": "The struct name is introduced for ftCo_800B6208 entries with cmd and weight fields and is forward-declared in ftcpuattack.h.",
+      "evidence_refs": [
+        "raw_diff: typedef struct ftCo_AttackEntry",
+        "raw_diff: struct ftCo_AttackEntry; in ftcpuattack.h"
+      ]
+    },
+    {
+      "name": "victim_fp",
+      "kind": "local variable",
+      "evidence": "fn_800DB6C8 names the captured victim fighter pointer victim_fp, matching its use for victim kind and item cleanup.",
+      "evidence_refs": [
+        "raw_diff: Fighter* victim_fp = fp->victim_gobj->user_data"
+      ]
+    },
+    {
+      "name": "gobj",
+      "kind": "local parameter rename",
+      "evidence": "Several functions use gobj instead of arg0 where the value is treated as an HSD/Ground object wrapper, including grIceMt_801F7728 and material helpers.",
+      "evidence_refs": [
+        "raw_diff: grIceMt_801F7728(Ground_GObj* gobj)",
+        "raw_diff: grIceMt_801F7F1C(Ground_GObj* gobj)",
+        "raw_diff: grIceMt_801F81B4(Ground_GObj* gobj)"
+      ]
+    },
+    {
+      "name": "a, b, c, unkB, mr, big_thing",
+      "kind": "placeholder locals",
+      "evidence": "ifStatus_802F7034 still uses low-semantic or placeholder names for incompletely understood status fields.",
+      "evidence_refs": [
+        "raw_diff: ifStatus_802F7034 local declarations"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "PAD_STACK used narrowly to preserve stack shape in several functions.",
+      "evidence_refs": [
+        "raw_diff: PAD_STACK(0x14) in ftCo_800D74A4",
+        "raw_diff: PAD_STACK(0x10) in fn_800DB6C8",
+        "raw_diff: PAD_STACK(8) in grIceMt_801F98A8",
+        "raw_diff: PAD_STACK(16) in grPura_80212024",
+        "raw_diff: PAD_STACK(8) in grPura_80212290"
+      ],
+      "notes": "Loaded PR evidence contains verification claims and bot scores, but does not explain why each PAD_STACK was required."
+    },
+    {
+      "tactic": "Scoped #pragma dont_inline around fn_800DB6C8.",
+      "evidence_refs": [
+        "raw_diff: #pragma push / #pragma dont_inline on before fn_800DB6C8 and #pragma pop after it",
+        "text_corpus issue_comment: fn_800DB6C8 0.00% -> 100.00%"
+      ],
+      "notes": "The scope is tight, but the loaded evidence does not include a specific objdiff excerpt showing that dont_inline was unavoidable."
+    },
+    {
+      "tactic": "Natural for loops over fixed two-element material arrays replaced generated-looking do/while placeholders in grIceMt_801F7F1C and grIceMt_801F81B4.",
+      "evidence_refs": [
+        "raw_diff: for (i = 0; i < 2; i++) over gp->gv.icemt.xF8[i]",
+        "text_corpus issue_comment: both helpers at 100.00%"
+      ],
+      "notes": "This aligns with the loaded natural-loops standard."
+    },
+    {
+      "tactic": "Bitfield-style access replaced raw byte mask manipulation for grIceMt_801F98A8 dirty flag.",
+      "evidence_refs": [
+        "raw_diff: flags byte and mask removed; ((UnkFlagStruct*) &gp->gv.icemt2.xC4)->b1 read and cleared",
+        "text_corpus issue_comment: grIceMt_801F98A8 91.08% -> 100.00%"
+      ],
+      "notes": "Evidence supports the changed access pattern in this PR, but UnkFlagStruct remains a generic name."
+    },
+    {
+      "tactic": "Use of direct field/union access and M2C_FIELD remains mixed: ftcpuattack gains a typed struct, while grPura_80213030 still uses M2C_FIELD for unresolved layout.",
+      "evidence_refs": [
+        "raw_diff: ftCo_AttackEntry typed fields cmd and weight",
+        "raw_diff: grPura_80213030 still uses M2C_FIELD(var_r31, HSD_JObj**, 8) and M2C_FIELD(var_r31, s16*, 0)"
+      ],
+      "notes": "The PR improves some typing but does not fully resolve all nearby layouts."
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "automated_report",
+      "author": "decomp-dev[bot]",
+      "summary": "Bot report for GALE01 shows matched code +0.06% (+2388 bytes), matched data +24 bytes, 11 new matched items, and 6 improvements in unmatched items.",
+      "evidence_refs": [
+        "text_corpus issue_comment by decomp-dev[bot] created 2026-05-06T00:10:08Z"
+      ]
+    },
+    {
+      "kind": "review_comments",
+      "author": null,
+      "summary": "No review comments or reviews are present in the loaded metadata.",
+      "evidence_refs": [
+        "metadata_json counts: review_comments 0, reviews 0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2461",
+    "davidfeira",
+    "Match 11 functions across stage and fighter TUs",
+    "ftCo_800B6208",
+    "ftCo_AttackEntry",
+    "HSD_Randf",
+    "ftcpuattack.h UNK_T",
+    "fn_800DB6C8",
+    "ftCo_MS_CapturePulledHi",
+    "FTKIND_YOSHI",
+    "FTKIND_LINK",
+    "FTKIND_CLINK",
+    "FTKIND_SAMUS",
+    "ftCo_800D72A0",
+    "ftCo_800D74A4",
+    "PAD_STACK",
+    "pragma dont_inline",
+    "ifStatus_802F7034",
+    "gm_8016AE38",
+    "ifStatus_802F6EA4",
+    "grIceMt_801F72D4",
+    "grIceMt_801F7728",
+    "grIceMt_801F7F1C",
+    "grIceMt_801F81B4",
+    "grIceMt_801F98A8",
+    "grIceMt_801F9ACC",
+    "grIm_803B8220",
+    "grMaterial_801C8CDC",
+    "Ground_801C2D0C",
+    "grPura_80212024",
+    "grPura_80212290",
+    "grPura_80213030",
+    "Camera_SetBackgroundColor",
+    "HSD_MObjSetToonTextureImage",
+    "grFourside_801F2F34",
+    "mpJointSetCb1"
+  ],
+  "follow_up_queries": [
+    "PR2461 grPura_80212024 93.58 not 100 mismatch",
+    "ftCo_800B6208 ftCo_AttackEntry struct ownership header placement",
+    "fn_800DB6C8 dont_inline PAD_STACK required evidence",
+    "grIceMt_801F98A8 UnkFlagStruct b1 xC4 dirty bit",
+    "grPura_80213030 M2C_FIELD layout grPu_803E6C0C",
+    "mpJointSetCb1 Ground_GObj argument grFourside_801F2F34",
+    "grIceMt_801F9ACC signature HSD_GObjEvent Ground_GObj"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "human_pr_text: PR summary and verification claims",
+      "raw_diff: complete loaded diff excerpt",
+      "changed_files.jsonl: 8 changed files",
+      "text_corpus issue_comment: decomp-dev bot report with per-item scores"
+    ],
+    "notes": [
+      "Strong evidence exists for changed files, concrete code edits, and bot-reported per-item match/improvement status.",
+      "The PR body claims 11 matched functions and per-function 100% objdiff for each of 11 functions, but the bot report lists 11 new matched items including .sdata and lists grPura_80212024 only as an unmatched improvement to 93.58%. This conflict should be preserved for curator review.",
+      "No human review comments are loaded.",
+      "Verification commands are PR-author claims in the body plus bot report; no raw objdiff logs are loaded.",
+      "PAD_STACK and dont_inline usage is visible, but exact necessity is not explained beyond match-score context."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "type": "lesson_candidate",
+        "title": "Header signatures should follow recovered matched bodies",
+        "text": "PR2461 shows body-driven header cleanup: ftCo_800B6208 changes from UNK_T to struct ftCo_AttackEntry*, grIceMt_801F98A8 changes from speculative bool to void, and grIceMt_801F9ACC gains the event and Ground_GObj arguments needed by its recovered call site.",
+        "scope": [
+          "headers",
+          "matched functions",
+          "truthful prototypes"
+        ],
+        "evidence_refs": [
+          "raw_diff: ftcpuattack.h prototype update",
+          "raw_diff: gricemt.h prototype updates",
+          "human_pr_text: Header refinements section"
+        ]
+      },
+      {
+        "type": "lesson_candidate",
+        "title": "Prefer natural fixed-count loops for repeated cached-material refresh helpers",
+        "text": "In grIceMt_801F7F1C and grIceMt_801F81B4, two repeated material refresh operations are recovered as for-loops over gp->gv.icemt.xF8[i], and the bot report shows both helpers reached 100%.",
+        "scope": [
+          "gricemt.c",
+          "stage material refresh",
+          "natural loops"
+        ],
+        "evidence_refs": [
+          "raw_diff: grIceMt_801F7F1C loop",
+          "raw_diff: grIceMt_801F81B4 loop",
+          "text_corpus issue_comment: both helpers 69.52% -> 100.00%"
+        ]
+      },
+      {
+        "type": "lesson_candidate",
+        "title": "Callback APIs may require object wrappers, not user-data structs",
+        "text": "grFourside_801F2F34 reached 100% after changing mpJointSetCb1's second argument from gp to gobj, indicating the callback registration expected the Ground_GObj wrapper at that call site.",
+        "scope": [
+          "grfourside.c",
+          "mpJointSetCb1",
+          "stage callback registration"
+        ],
+        "evidence_refs": [
+          "raw_diff: mpJointSetCb1(0, gp, ...) -> mpJointSetCb1(0, gobj, ...)",
+          "text_corpus issue_comment: grFourside_801F2F34 99.94% -> 100.00%"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "ftcpuattack.h owns ftCo_800B6208's typed prototype",
+        "text": "PR2461 changed ftCo_800B6208 from int ftCo_800B6208(UNK_T) to int ftCo_800B6208(struct ftCo_AttackEntry*) and added a forward declaration for struct ftCo_AttackEntry.",
+        "source_path": "src/melee/ft/ftcpuattack.h",
+        "scope": [
+          "src/melee/ft/ftcpuattack.c",
+          "src/melee/ft/ftcpuattack.h",
+          "ftCo_800B6208",
+          "ftCo_AttackEntry"
+        ],
+        "evidence_refs": [
+          "raw_diff: ftcpuattack.h hunk",
+          "raw_diff: ftcpuattack.c typedef and function body"
+        ],
+        "reason": "Potential path fact about prototype ownership and recovered argument type; curator should verify current source before accepting."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "gricemt.h owns grIceMt_801F98A8 and grIceMt_801F9ACC signature refinements",
+        "text": "PR2461 changed grIceMt_801F98A8 to return void and changed grIceMt_801F9ACC to take HSD_GObj*, float, HSD_GObjEvent, and Ground_GObj*.",
+        "source_path": "src/melee/gr/gricemt.h",
+        "scope": [
+          "src/melee/gr/gricemt.c",
+          "src/melee/gr/gricemt.h",
+          "grIceMt_801F98A8",
+          "grIceMt_801F9ACC"
+        ],
+        "evidence_refs": [
+          "raw_diff: gricemt.h hunk",
+          "human_pr_text: Header refinements section"
+        ],
+        "reason": "Potential path fact about recovered stage function signatures; curator should verify against current source."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Require explanation for PAD_STACK and dont_inline in intake records",
+        "text": "PR2461 uses several PAD_STACK calls and a tightly scoped #pragma dont_inline around fn_800DB6C8. The loaded evidence shows match-score context but not the specific codegen necessity for each tactic.",
+        "source_path": null,
+        "scope": [
+          "matching tactics",
+          "PAD_STACK",
+          "pragma dont_inline",
+          "verification notes"
+        ],
+        "evidence_refs": [
+          "raw_diff: PAD_STACK occurrences",
+          "raw_diff: #pragma dont_inline around fn_800DB6C8",
+          "text_corpus issue_comment: relevant match/improvement scores"
+        ],
+        "reason": "This reinforces the existing standard that matching tactics need explicit evidence; curator may decide whether a source note or checklist update is useful."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote the PR body's '11 matched functions' phrasing as an unqualified fact: loaded bot evidence lists 11 new matched items but includes .sdata and lists grPura_80212024 as only 93.58%.",
+      "Do not treat all PAD_STACK or dont_inline uses here as generally acceptable style; the loaded evidence lacks per-tactic necessity details.",
+      "Do not infer final semantics for placeholder names such as big_thing, unkB, a, b, c, or UnkFlagStruct beyond what the diff shows.",
+      "Do not promote grPura_80212024 as fully matched from this slice; the bot report contradicts that specific claim."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

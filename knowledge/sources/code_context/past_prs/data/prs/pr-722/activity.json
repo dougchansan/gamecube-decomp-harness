@@ -1,0 +1,10 @@
+{
+  "pr": 722,
+  "title": "Migrate most of `ftcoll` to C",
+  "url": "https://github.com/doldecomp/melee/pull/722",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 17,
+  "added_lines": 3142,
+  "deleted_lines": 2925
+}

@@ -1,0 +1,17 @@
+{
+  "number": 2074,
+  "title": "lb audio",
+  "state": "MERGED",
+  "createdAt": "2026-01-09T10:06:52Z",
+  "updatedAt": "2026-05-16T08:46:16Z",
+  "mergedAt": "2026-01-11T00:30:57Z",
+  "closedAt": "2026-01-11T00:30:57Z",
+  "author": "itsgrimetime",
+  "url": "https://github.com/doldecomp/melee/pull/2074",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 27945
+  }
+}

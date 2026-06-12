@@ -1,0 +1,17 @@
+{
+  "number": 793,
+  "title": "Clean up `ftMario`and `ftDrMario` motion definitions",
+  "state": "MERGED",
+  "createdAt": "2023-04-22T14:11:45Z",
+  "updatedAt": "2023-04-22T14:46:16Z",
+  "mergedAt": "2023-04-22T14:46:15Z",
+  "closedAt": "2023-04-22T14:46:15Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/793",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 22044
+  }
+}

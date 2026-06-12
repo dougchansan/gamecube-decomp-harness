@@ -1,0 +1,17 @@
+{
+  "number": 1486,
+  "title": "match `itnokonoko`",
+  "state": "MERGED",
+  "createdAt": "2024-12-04T16:53:13Z",
+  "updatedAt": "2024-12-13T21:33:11Z",
+  "mergedAt": "2024-12-13T21:33:11Z",
+  "closedAt": "2024-12-13T21:33:11Z",
+  "author": "thefoxcam",
+  "url": "https://github.com/doldecomp/melee/pull/1486",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 36215
+  }
+}

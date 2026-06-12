@@ -1,0 +1,17 @@
+{
+  "number": 43,
+  "title": "Fix linker warnings",
+  "state": "MERGED",
+  "createdAt": "2020-08-07T00:59:08Z",
+  "updatedAt": "2020-08-07T00:59:13Z",
+  "mergedAt": "2020-08-07T00:59:13Z",
+  "closedAt": "2020-08-07T00:59:13Z",
+  "author": "RevoSucks",
+  "url": "https://github.com/doldecomp/melee/pull/43",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 467
+  }
+}

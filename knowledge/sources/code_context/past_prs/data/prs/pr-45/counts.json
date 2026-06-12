@@ -1,0 +1,17 @@
+{
+  "number": 45,
+  "title": "Split text_3 and work on making large fighter file splits",
+  "state": "MERGED",
+  "createdAt": "2020-08-07T07:44:27Z",
+  "updatedAt": "2020-08-07T07:44:42Z",
+  "mergedAt": "2020-08-07T07:44:38Z",
+  "closedAt": "2020-08-07T07:44:38Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/45",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 50319582
+  }
+}

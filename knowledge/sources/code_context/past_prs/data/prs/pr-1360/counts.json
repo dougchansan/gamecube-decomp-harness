@@ -1,0 +1,17 @@
+{
+  "number": 1360,
+  "title": "Use `objdiff-cli report` to check for regressions",
+  "state": "MERGED",
+  "createdAt": "2024-02-29T15:32:33Z",
+  "updatedAt": "2024-02-29T16:22:52Z",
+  "mergedAt": "2024-02-29T16:22:51Z",
+  "closedAt": "2024-02-29T16:22:51Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1360",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 2364
+  }
+}

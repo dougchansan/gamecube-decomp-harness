@@ -31,6 +31,7 @@ export function fileGraphCard(store: KnowledgeGraphStore, sourcePath: string): F
         SELECT source_id, title, evidence_ref
         FROM search_chunks
         WHERE entity_id = ?
+          AND source_id != 'mismatch_patterns'
         ORDER BY source_id, title
         LIMIT 16
       `,
@@ -53,9 +54,88 @@ export function fileGraphCard(store: KnowledgeGraphStore, sourcePath: string): F
       title: stringValue(row.title),
       evidence_ref: stringValue(row.evidence_ref),
     })),
+    mismatch_patterns: mismatchPatternsForFile(store, entityId),
     tool_hits: [],
     scheduling_signals: rankFeatureForSourcePath(store, sourcePath),
   };
+}
+
+function mismatchPatternsForFile(store: KnowledgeGraphStore, entityId: string): Array<Record<string, unknown>> {
+  const patternRows = store.db
+    .query(
+      `
+        SELECT
+          graph_entities.id AS pattern_entity_id,
+          graph_entities.payload_json AS pattern_payload_json,
+          graph_edges.evidence_ref,
+          graph_edges.weight
+        FROM graph_edges
+        JOIN graph_entities ON graph_entities.id = graph_edges.to_entity_id
+        WHERE graph_edges.from_entity_id = ?
+          AND graph_edges.edge_type = 'HAS_MISMATCH_PATTERN'
+          AND graph_edges.status = 'accepted'
+          AND graph_entities.entity_type = 'mismatch_pattern'
+        ORDER BY graph_edges.weight DESC, graph_entities.stable_key
+        LIMIT 48
+      `,
+    )
+    .all(entityId) as Array<Record<string, unknown>>;
+  const evidenceRows = store.db
+    .query(
+      `
+        SELECT
+          graph_entities.payload_json AS evidence_payload_json,
+          graph_edges.evidence_ref,
+          graph_edges.weight
+        FROM graph_edges
+        JOIN graph_entities ON graph_entities.id = graph_edges.to_entity_id
+        WHERE graph_edges.from_entity_id = ?
+          AND graph_edges.edge_type = 'HAS_MISMATCH_PATTERN_EVIDENCE'
+          AND graph_edges.status = 'accepted'
+          AND graph_entities.entity_type = 'mismatch_pattern_evidence'
+        ORDER BY graph_edges.weight DESC, graph_edges.evidence_ref
+        LIMIT 48
+      `,
+    )
+    .all(entityId) as Array<Record<string, unknown>>;
+
+  const evidenceByPattern = new Map<string, Array<Record<string, unknown>>>();
+  for (const row of evidenceRows) {
+    const payload = objectValue(JSON.parse(stringValue(row.evidence_payload_json, "{}")));
+    const patternId = stringValue(payload.pattern_id);
+    if (!patternId) continue;
+    const records = evidenceByPattern.get(patternId) ?? [];
+    records.push({
+      title: stringValue(payload.title),
+      kind: stringValue(payload.kind),
+      evidence_ref: stringValue(payload.evidence_ref, stringValue(row.evidence_ref)),
+      source_paths: arrayValue(payload.source_paths).map(String),
+      unit: stringValue(payload.unit) || null,
+      symbol: stringValue(payload.symbol) || null,
+      pr: payload.pr ?? null,
+    });
+    evidenceByPattern.set(patternId, records);
+  }
+
+  const byPattern = new Map<string, Record<string, unknown>>();
+  for (const row of patternRows) {
+    const payload = objectValue(JSON.parse(stringValue(row.pattern_payload_json, "{}")));
+    const patternId = stringValue(payload.id, stringValue(row.pattern_entity_id));
+    const existing = byPattern.get(patternId);
+    const evidenceRefs = new Set(arrayValue(existing?.linked_evidence_refs).map(String));
+    evidenceRefs.add(stringValue(row.evidence_ref));
+    byPattern.set(patternId, {
+      pattern_id: patternId,
+      title: stringValue(payload.title),
+      category: stringValue(payload.category),
+      symptoms: arrayValue(payload.symptoms).map(String),
+      tactics: arrayValue(payload.tactics).map(String),
+      evidence_count: payload.evidence_count ?? 0,
+      linked_evidence_refs: [...evidenceRefs].filter(Boolean),
+      linked_evidence: evidenceByPattern.get(patternId) ?? [],
+    });
+  }
+  return [...byPattern.values()].slice(0, 16);
 }
 
 function factPayload(store: KnowledgeGraphStore, entityId: string, factType: string): Record<string, unknown> {

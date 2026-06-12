@@ -1,0 +1,17 @@
+{
+  "number": 1764,
+  "title": "Fix link in `getting_started.md`",
+  "state": "MERGED",
+  "createdAt": "2025-07-29T02:30:40Z",
+  "updatedAt": "2025-07-29T02:34:06Z",
+  "mergedAt": "2025-07-29T02:34:05Z",
+  "closedAt": "2025-07-29T02:34:05Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1764",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 873
+  }
+}

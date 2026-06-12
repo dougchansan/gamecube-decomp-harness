@@ -26,29 +26,29 @@ diffs, searchable postmortems, file-card context, or past-PR graph/search data.
 Preview the fetch scope:
 
 ```bash
-python3 decomp-orchestrator/knowledge/sources/past_prs/commands/fetch_recent_pr_dump.py --dry-run
+python3 decomp-orchestrator/knowledge/sources/code_context/past_prs/commands/fetch_recent_pr_dump.py --dry-run
 ```
 
 Fetch missing recent PRs and scaffold searchable records:
 
 ```bash
-python3 decomp-orchestrator/knowledge/sources/past_prs/commands/fetch_recent_pr_dump.py
+python3 decomp-orchestrator/knowledge/sources/code_context/past_prs/commands/fetch_recent_pr_dump.py
 ```
 
 Refresh recently updated PRs whose comments or reviews may have changed:
 
 ```bash
-python3 decomp-orchestrator/knowledge/sources/past_prs/commands/fetch_recent_pr_dump.py \
+python3 decomp-orchestrator/knowledge/sources/code_context/past_prs/commands/fetch_recent_pr_dump.py \
   --activity updated \
   --refresh-existing \
   --postmortem-scope fetched
 ```
 
-Run Pi-reviewed postmortems for the current dump:
+Run Pi-reviewed postmortems for the active corpus:
 
 ```bash
-python3 decomp-orchestrator/knowledge/sources/past_prs/commands/build_pr_postmortems.py \
-  --dump-root decomp-orchestrator/knowledge/sources/past_prs/data/current \
+python3 decomp-orchestrator/knowledge/sources/code_context/past_prs/commands/build_pr_postmortems.py \
+  --dump-root decomp-orchestrator/knowledge/sources/code_context/past_prs/data \
   --run-agent \
   --rerun-existing \
   --jobs 16
@@ -63,7 +63,7 @@ bun run --cwd decomp-orchestrator kg:rebuild -- --repo-root "$PWD" --sources pas
 Notes:
 
 - `kg-maintain` and `trigger-agent` can index pending postmortems and rebuild graph state, but they do not fetch fresh GitHub PR data.
-- The PR corpus lives under `decomp-orchestrator/knowledge/sources/past_prs/data`.
+- The PR corpus lives under `decomp-orchestrator/knowledge/sources/code_context/past_prs/data`.
 - The fetcher uses `gh api`; GitHub CLI auth must be available.
 
 ## Sync Repo And PR Corpus
@@ -74,7 +74,7 @@ checkout and PR library together.
 Standard sync:
 
 ```bash
-python3 decomp-orchestrator/knowledge/sources/past_prs/commands/sync_repo_and_pr_library.py \
+python3 decomp-orchestrator/knowledge/sources/code_context/past_prs/commands/sync_repo_and_pr_library.py \
   --postmortem-scope fetched \
   --postmortem-jobs 16
 ```
@@ -82,7 +82,7 @@ python3 decomp-orchestrator/knowledge/sources/past_prs/commands/sync_repo_and_pr
 Refresh recently updated PR records while syncing:
 
 ```bash
-python3 decomp-orchestrator/knowledge/sources/past_prs/commands/sync_repo_and_pr_library.py \
+python3 decomp-orchestrator/knowledge/sources/code_context/past_prs/commands/sync_repo_and_pr_library.py \
   --pr-activity updated \
   --refresh-existing-prs \
   --postmortem-scope fetched \
@@ -92,7 +92,7 @@ python3 decomp-orchestrator/knowledge/sources/past_prs/commands/sync_repo_and_pr
 Skip git and only refresh the PR corpus:
 
 ```bash
-python3 decomp-orchestrator/knowledge/sources/past_prs/commands/sync_repo_and_pr_library.py \
+python3 decomp-orchestrator/knowledge/sources/code_context/past_prs/commands/sync_repo_and_pr_library.py \
   --skip-git \
   --postmortem-scope fetched \
   --postmortem-jobs 16
@@ -109,6 +109,15 @@ or explain Melee PRs.
 Load `references/pr-shaping-reviewer-guidance.md` before proposing or applying a
 PR split. Design PRs around reviewer cognition and regression-tool signal:
 
+- **Only exact matches ship.** Match PRs carry runner-validated exact matches
+  (plus supporting headers/declarations the matches need to build); they are
+  byte-verified and should read as easy approvals. Fuzzy improvements never go
+  into PRs — they stay on the local branch (the split plan's `local-*` slices)
+  until they become matches. If a match-lane file also carries unshipped fuzzy
+  improvements in other functions, call that out in the PR body.
+- Treat the configured max-files-per-PR as a hard ceiling, not a packing
+  target. Aim for the fewest PRs that are still comfortable to review in one
+  sitting; do not shave slices down to produce a pile of small PRs.
 - Keep broad header, naming, symbol, build, metadata, and rename churn separate
   from ordinary implementation/matching work when possible.
 - Group small changes only when they share one review context and risk class.
@@ -124,6 +133,15 @@ PR split. Design PRs around reviewer cognition and regression-tool signal:
 
 Use this path when the user asks to prepare, finalize, refresh, build-check,
 regression-check, update, or hand off a Melee PR.
+
+The dashboard's `Prepare Handoff` automates the core of this path (pause →
+pull upstream & rebase → PR intake → rebuild the production baseline in a
+per-SHA worktree → branch QA vs that baseline → checkpoint with regressed
+symbols forced to needs_rework → requeue rework at repair priority →
+match-only split plan → ship-set verification, where the match-lane diff is
+applied onto the baseline worktree and must build with zero regressions) and
+shares the `/tmp/melee-baseline-<sha>` cache with step 5 below. Use the
+manual steps for PR-comment triage, PR-body work, and pushing.
 
 For review-style cleanup and regression triage, use the local QA reference in
 `references/pr-review-qa-standards.md`. Keep that reference in the workflow
@@ -144,7 +162,7 @@ gh pr status --repo doldecomp/melee
 2. Sync mainline and recently updated PR knowledge:
 
 ```bash
-python3 decomp-orchestrator/knowledge/sources/past_prs/commands/sync_repo_and_pr_library.py \
+python3 decomp-orchestrator/knowledge/sources/code_context/past_prs/commands/sync_repo_and_pr_library.py \
   --pr-activity updated \
   --refresh-existing-prs \
   --postmortem-scope fetched \
@@ -164,6 +182,8 @@ gh api --paginate repos/doldecomp/melee/pulls/<PR_NUMBER>/reviews
 4. Evaluate PR shape before validation:
 
 - Inventory touched file types and high-risk churn.
+- Check the latest checkpoint (`pr_candidates.md`): only the match candidates
+  ship; notable improvements are listed in `carry_forward.md` and stay local.
 - Decide whether the PR should stay grouped, split, or isolate header/naming
   changes.
 - Draft/update the PR body with a clear summary, PR shape, reviewer notes, and
@@ -204,7 +224,34 @@ bun run --cwd decomp-orchestrator orch -- \
 - zero unit, section, or function metric regressions
 - no unresolved actionable review comments or relevant build warnings/errors
 
-8. Commit or amend only parent Melee PR files, then push safely:
+8. Run the mandatory pre-ship adversarial review gate (blocks handoff):
+
+Save the match-only split plan as JSON if you do not already have one, then run
+the pr-review agent in preship mode over every shipping slice:
+
+```bash
+bun run --cwd decomp-orchestrator orch -- \
+  --project melee \
+  pr-split-plan --checkpoint <checkpoint.json> --ship-status <ship_status.json> --json \
+  > /tmp/melee-pr-split-plan.json
+bun run --cwd decomp-orchestrator orch -- \
+  --project melee \
+  pr-preship-review --plan /tmp/melee-pr-split-plan.json --all
+```
+
+- ANY `reject` finding blocks handoff; exit 1 means do not draft PR bodies or
+  push. Agent/tool failures also exit 1 (the gate fails closed) — fix the
+  infrastructure and rerun rather than skipping the gate.
+- Disposition of rejects, consistent with the MATCHES-only promotion policy:
+  mark the affected symbols `needs_rework`, requeue them at repair priority,
+  and ship the slice without them or not at all. Never keep a rejected hunk to
+  preserve a match score.
+- Per-slice verdicts, findings, and prompts land under
+  `decomp-orchestrator/projects/melee/state/preship_reviews/<run-id>/<slice-id>/`
+  (`review.md` is the human-readable digest); cite them in the PR body's
+  verification section.
+
+9. Commit or amend only parent Melee PR files, then push safely:
 
 ```bash
 git status --short --untracked-files=no --ignore-submodules=all
@@ -214,7 +261,7 @@ git commit --amend --no-edit
 git push --force-with-lease fork HEAD:<branch>
 ```
 
-9. Update or create the PR, then watch CI:
+10. Update or create the PR, then watch CI:
 
 ```bash
 gh pr edit <PR_NUMBER> --repo doldecomp/melee --body-file <report.md>
@@ -231,7 +278,8 @@ For skill maintenance or command sanity checks:
 
 ```bash
 python3 -m py_compile \
-  decomp-orchestrator/knowledge/sources/past_prs/commands/sync_repo_and_pr_library.py \
-  decomp-orchestrator/knowledge/sources/past_prs/commands/fetch_recent_pr_dump.py \
-  decomp-orchestrator/knowledge/sources/past_prs/commands/build_pr_postmortems.py
+  decomp-orchestrator/knowledge/sources/code_context/past_prs/commands/sync_repo_and_pr_library.py \
+  decomp-orchestrator/knowledge/sources/code_context/past_prs/commands/fetch_recent_pr_dump.py \
+  decomp-orchestrator/knowledge/sources/code_context/past_prs/commands/build_pr_postmortems.py \
+  decomp-orchestrator/knowledge/sources/code_context/past_prs/commands/migrate_pr_data_layout.py
 ```

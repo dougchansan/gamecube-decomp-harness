@@ -1,0 +1,17 @@
+{
+  "number": 2067,
+  "title": "fully match and link `ftanim`",
+  "state": "MERGED",
+  "createdAt": "2026-01-07T18:21:19Z",
+  "updatedAt": "2026-01-19T14:25:18Z",
+  "mergedAt": "2026-01-07T23:23:55Z",
+  "closedAt": "2026-01-07T23:23:55Z",
+  "author": "Giga-Bowser",
+  "url": "https://github.com/doldecomp/melee/pull/2067",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 63321
+  }
+}

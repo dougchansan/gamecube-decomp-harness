@@ -1,0 +1,17 @@
+{
+  "number": 1371,
+  "title": "Match 1.81% of `grcorneria` (25.39 KB)",
+  "state": "MERGED",
+  "createdAt": "2024-03-02T06:39:47Z",
+  "updatedAt": "2024-03-02T06:42:51Z",
+  "mergedAt": "2024-03-02T06:42:50Z",
+  "closedAt": "2024-03-02T06:42:50Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1371",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 503813
+  }
+}

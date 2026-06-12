@@ -1,0 +1,384 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2051",
+  "pr": {
+    "number": 2051,
+    "title": "ty: Match trophy/toy functions (part 1)",
+    "url": "https://github.com/doldecomp/melee/pull/2051",
+    "state": "MERGED",
+    "author": "itsgrimetime",
+    "created_at": "2025-12-30T17:25:10Z",
+    "merged_at": "2026-01-06T23:31:39Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Matched or improved several trophy/toy functions in the ty subsystem, added a TyModeState struct to replace some raw M2C_FIELD access to un_804A284C, added small local tyfigupon temporary structs, updated relevant headers/prototypes, and adjusted symbol metadata for ty data strings used by lbArchive_LoadSymbols.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "types-structs",
+      "symbol-metadata"
+    ],
+    "systems": [
+      "melee-core",
+      "ty",
+      "config"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/ty/toy.c",
+      "role": "Implemented un_80306D14, un_803102D0, and un_80312018_OnFrame; added externs for ty archive globals.",
+      "evidence_refs": [
+        "raw_diff:src/melee/ty/toy.c",
+        "pr_body:summary"
+      ]
+    },
+    {
+      "path": "src/melee/ty/tyfigupon.c",
+      "role": "Added local TyFiguponData and TyFiguponInner structs and implemented fn_80315574.",
+      "evidence_refs": [
+        "raw_diff:src/melee/ty/tyfigupon.c",
+        "pr_body:summary"
+      ]
+    },
+    {
+      "path": "src/melee/ty/tydisplay.c",
+      "role": "Included ty/types.h and replaced raw field reads of un_804A284C with TyModeState access in OnFrame functions; added placeholder comments for later functions.",
+      "evidence_refs": [
+        "raw_diff:src/melee/ty/tydisplay.c"
+      ]
+    },
+    {
+      "path": "src/melee/ty/types.h",
+      "role": "Introduced TyModeState with offset-style fields x0, x4, x8, and xA.",
+      "evidence_refs": [
+        "raw_diff:src/melee/ty/types.h"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Shrank un_803FE678 size and split out str_TyDataf_dat, str_tyModelFileTbl, and str_tyModelFileUsTbl string symbols.",
+      "evidence_refs": [
+        "raw_diff:config/GALE01/symbols.txt"
+      ]
+    },
+    {
+      "path": "src/melee/ty/toy.h",
+      "role": "Added extern declarations for ty data strings and adjusted prototype parameter names.",
+      "evidence_refs": [
+        "raw_diff:src/melee/ty/toy.h"
+      ]
+    },
+    {
+      "path": "src/melee/ty/tylist.c",
+      "role": "Changed include from baselib/gobj.h to baselib/forward.h and typed un_804D6ECC as HSD_Archive*.",
+      "evidence_refs": [
+        "raw_diff:src/melee/ty/tylist.c"
+      ]
+    },
+    {
+      "path": "src/melee/ty/tyfigupon.h",
+      "role": "Removed parameter names from tyFigupon_80314BE4 prototype.",
+      "evidence_refs": [
+        "raw_diff:src/melee/ty/tyfigupon.h"
+      ]
+    },
+    {
+      "path": "src/melee/ty/tylist.h",
+      "role": "Removed parameter name from fn_80314504 prototype.",
+      "evidence_refs": [
+        "raw_diff:src/melee/ty/tylist.h"
+      ]
+    }
+  ],
+  "what_changed": [
+    "PR body claimed 100% matches for un_80306D14, fn_80315574, and un_80312018_OnFrame, and improvement for un_803102D0 from 0% to 72.38%.",
+    "Bot report recorded 3 new matches totaling +232 bytes and one unmatched-function improvement for un_803102D0.",
+    "un_80306D14 now reads TyModeState.x0 from un_804A284C and conditionally plays audio IDs 0xAA or 0xAB through lbAudioAx_800237A8.",
+    "un_80312018_OnFrame now checks TyModeState.x4 and calls un_80311F5C plus gm_801A4B60 when nonzero.",
+    "tydisplay OnFrame functions similarly replaced M2C_FIELD(un_804A284C, s8*, 4) with TyModeState.x4.",
+    "un_803102D0 now lazily loads ty data symbols through lbArchive_LoadSymbols when un_804D6ECC is NULL.",
+    "fn_80315574 now manipulates local TyFiguponData and TyFiguponInner fields and either clears state plus stops a GObj proc or decrements x24.",
+    "symbols.txt split three string symbols out of the prior un_803FE678 range.",
+    "Headers were updated for string externs, parameter-name cleanup, and HSD_Archive typing."
+  ],
+  "smart_moves": [
+    {
+      "text": "The author explicitly noted switching to draft to clean up pointer arithmetic and maybe pull a struct out; the final diff added TyModeState and replaced multiple M2C_FIELD-style reads with typed field access.",
+      "evidence_refs": [
+        "issue_comment:https://github.com/doldecomp/melee/pull/2051#issuecomment-3706896466",
+        "raw_diff:src/melee/ty/types.h",
+        "raw_diff:src/melee/ty/tydisplay.c",
+        "raw_diff:src/melee/ty/toy.c"
+      ]
+    },
+    {
+      "text": "The PR kept uncertain field meanings as offset-style field names such as x0, x4, x10, x18, and x24 instead of inventing semantic names.",
+      "evidence_refs": [
+        "raw_diff:src/melee/ty/types.h",
+        "raw_diff:src/melee/ty/tyfigupon.c"
+      ]
+    },
+    {
+      "text": "For archive loading, the diff paired symbol metadata changes with source declarations and use sites for str_TyDataf_dat, str_tyModelFileTbl, and str_tyModelFileUsTbl.",
+      "evidence_refs": [
+        "raw_diff:config/GALE01/symbols.txt",
+        "raw_diff:src/melee/ty/toy.h",
+        "raw_diff:src/melee/ty/toy.c"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a shared state pointer is used across related ty files, recovering even a partial struct can replace repeated raw offset access and make similar OnFrame functions clearer.",
+      "scope": [
+        "src/melee/ty/toy.c",
+        "src/melee/ty/tydisplay.c",
+        "src/melee/ty/types.h"
+      ],
+      "evidence_refs": [
+        "raw_diff:src/melee/ty/types.h",
+        "raw_diff:src/melee/ty/toy.c",
+        "raw_diff:src/melee/ty/tydisplay.c",
+        "issue_comment:https://github.com/doldecomp/melee/pull/2051#issuecomment-3706896466"
+      ]
+    },
+    {
+      "lesson": "Temporary padded structs can be useful for matching a function while preserving uncertainty about unknown fields, as shown by TyFiguponData and TyFiguponInner.",
+      "scope": [
+        "src/melee/ty/tyfigupon.c"
+      ],
+      "evidence_refs": [
+        "raw_diff:src/melee/ty/tyfigupon.c"
+      ]
+    },
+    {
+      "lesson": "A partial match can still be worth landing when the PR clearly reports it as an improvement rather than a full match; un_803102D0 was reported as 0% to 72.38%, not complete.",
+      "scope": [
+        "src/melee/ty/toy.c"
+      ],
+      "evidence_refs": [
+        "pr_body:summary",
+        "bot_report:https://github.com/doldecomp/melee/pull/2051#issuecomment-3700020329"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Use subsystem-prefixed struct names for recovered ty structs, e.g. TyModeState, TyFiguponData, and TyFiguponInner.",
+      "evidence_refs": [
+        "raw_diff:src/melee/ty/types.h",
+        "raw_diff:src/melee/ty/tyfigupon.c"
+      ]
+    },
+    {
+      "convention": "Keep unknown fields in offset-style names such as x0, x4, x10, x18, x24, and x4D when semantics are not evidenced.",
+      "evidence_refs": [
+        "raw_diff:src/melee/ty/types.h",
+        "raw_diff:src/melee/ty/tyfigupon.c"
+      ]
+    },
+    {
+      "convention": "String data symbols introduced here use str_ prefixes and preserve source-like asset/table names such as str_TyDataf_dat and str_tyModelFileTbl.",
+      "evidence_refs": [
+        "raw_diff:config/GALE01/symbols.txt",
+        "raw_diff:src/melee/ty/toy.h"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Replace M2C_FIELD reads from un_804A284C with a typed TyModeState pointer while retaining offset-style fields.",
+      "evidence_refs": [
+        "raw_diff:src/melee/ty/types.h",
+        "raw_diff:src/melee/ty/toy.c",
+        "raw_diff:src/melee/ty/tydisplay.c"
+      ]
+    },
+    {
+      "tactic": "Use local padded structs in tyfigupon to express offsets needed by fn_80315574 without claiming full type recovery.",
+      "evidence_refs": [
+        "raw_diff:src/melee/ty/tyfigupon.c"
+      ]
+    },
+    {
+      "tactic": "Type a global archive pointer as HSD_Archive* where it is checked and assigned from lbArchive_LoadSymbols.",
+      "evidence_refs": [
+        "raw_diff:src/melee/ty/toy.c",
+        "raw_diff:src/melee/ty/tylist.c"
+      ]
+    },
+    {
+      "tactic": "Split symbol metadata for adjacent ty data strings so source can call lbArchive_LoadSymbols with named string symbols.",
+      "evidence_refs": [
+        "raw_diff:config/GALE01/symbols.txt",
+        "raw_diff:src/melee/ty/toy.c"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "author_note",
+      "text": "Author said they were switching to draft while cleaning up pointer arithmetic and maybe trying to pull out a struct.",
+      "evidence_refs": [
+        "issue_comment:https://github.com/doldecomp/melee/pull/2051#issuecomment-3706896466"
+      ]
+    },
+    {
+      "kind": "review_absence",
+      "text": "No review comments or reviews were present in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata_json:counts.review_comments=0",
+        "metadata_json:counts.reviews=0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2051",
+    "ty trophy toy functions part 1",
+    "itsgrimetime",
+    "un_80306D14",
+    "fn_80315574",
+    "un_80312018_OnFrame",
+    "un_803102D0",
+    "TyModeState",
+    "TyFiguponData",
+    "TyFiguponInner",
+    "un_804A284C",
+    "un_804D6ECC",
+    "lbArchive_LoadSymbols",
+    "str_TyDataf_dat",
+    "str_tyModelFileTbl",
+    "str_tyModelFileUsTbl",
+    "M2C_FIELD",
+    "pointer arithmetic",
+    "HSD_Archive",
+    "gm_801A4B60"
+  ],
+  "follow_up_queries": [
+    "TyModeState un_804A284C ty toy tydisplay",
+    "fn_80315574 TyFiguponData TyFiguponInner x24 x4D",
+    "un_803102D0 lbArchive_LoadSymbols str_TyDataf_dat",
+    "PR 2051 pointer arithmetic pull a struct out",
+    "ty subsystem M2C_FIELD un_804A284C x4 OnFrame"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "raw_diff",
+      "human_pr_text",
+      "text_corpus",
+      "changed_files",
+      "metadata_json"
+    ],
+    "notes": [
+      "Diff and bot report directly support the changed files, implemented functions, and reported match/improvement percentages.",
+      "There are no loaded review comments, so no reviewer intent or requested changes can be inferred.",
+      "The PR body reports narrow matching outcomes, but the slice does not include build logs or objdiff artifacts beyond the decomp-dev bot report.",
+      "Data symbol ownership for the newly split string symbols is shown by symbols.txt and source use, but broader data-section correctness should not be generalized from this slice alone."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "title": "Partial struct recovery replaced pointer arithmetic in ty state access",
+        "text": "PR #2051 supports a decomp pattern where a partial TyModeState struct was introduced for un_804A284C and used to replace M2C_FIELD/raw offset access in related ty OnFrame and audio-selection functions.",
+        "scope": [
+          "src/melee/ty/toy.c",
+          "src/melee/ty/tydisplay.c",
+          "src/melee/ty/types.h"
+        ],
+        "evidence_refs": [
+          "raw_diff:src/melee/ty/types.h",
+          "raw_diff:src/melee/ty/toy.c",
+          "raw_diff:src/melee/ty/tydisplay.c",
+          "issue_comment:https://github.com/doldecomp/melee/pull/2051#issuecomment-3706896466"
+        ]
+      },
+      {
+        "title": "Offset-style names are appropriate for uncertain recovered fields",
+        "text": "PR #2051 used semantic struct names but retained offset-style field names for unknown members, e.g. TyModeState.x0/x4 and TyFiguponData.x10/x18/x24.",
+        "scope": [
+          "src/melee/ty/types.h",
+          "src/melee/ty/tyfigupon.c"
+        ],
+        "evidence_refs": [
+          "raw_diff:src/melee/ty/types.h",
+          "raw_diff:src/melee/ty/tyfigupon.c"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "ty subsystem shared mode state pointer",
+        "text": "In PR #2051, un_804A284C is cast to TyModeState* in src/melee/ty/toy.c and src/melee/ty/tydisplay.c; field x0 drives audio selection in un_80306D14 and field x4 gates OnFrame callbacks.",
+        "source_path": "src/melee/ty/types.h",
+        "scope": [
+          "src/melee/ty/toy.c",
+          "src/melee/ty/tydisplay.c",
+          "src/melee/ty/types.h"
+        ],
+        "evidence_refs": [
+          "raw_diff:src/melee/ty/types.h",
+          "raw_diff:src/melee/ty/toy.c",
+          "raw_diff:src/melee/ty/tydisplay.c"
+        ],
+        "reason": "Could become a scoped path fact for future ty work, but should be curated against current source before promotion."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "ty data archive string symbols for un_803102D0",
+        "text": "PR #2051 split str_TyDataf_dat, str_tyModelFileTbl, and str_tyModelFileUsTbl from the prior un_803FE678 range and used them in un_803102D0's lbArchive_LoadSymbols call.",
+        "source_path": "config/GALE01/symbols.txt",
+        "scope": [
+          "config/GALE01/symbols.txt",
+          "src/melee/ty/toy.c",
+          "src/melee/ty/toy.h"
+        ],
+        "evidence_refs": [
+          "raw_diff:config/GALE01/symbols.txt",
+          "raw_diff:src/melee/ty/toy.c",
+          "raw_diff:src/melee/ty/toy.h"
+        ],
+        "reason": "Potentially useful path/data fact, but data symbol ownership should be verified against current symbols and source."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Author self-review can signal cleanup direction but is not reviewer feedback",
+        "text": "This PR includes an author comment about cleaning up pointer arithmetic and maybe pulling out a struct; the final diff did add structs and typed access. Curators may consider whether author self-notes should be indexed separately from review feedback.",
+        "source_path": null,
+        "scope": [
+          "past_pr_intake"
+        ],
+        "evidence_refs": [
+          "issue_comment:https://github.com/doldecomp/melee/pull/2051#issuecomment-3706896466",
+          "raw_diff:src/melee/ty/types.h",
+          "raw_diff:src/melee/ty/tydisplay.c"
+        ],
+        "reason": "This is a curation/workflow consideration, not an accepted decomp standard."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that the TyModeState field names or meanings are final; the PR uses offset-style names and gives no semantic field documentation.",
+      "Do not generalize the string-symbol split into a broad rule that code-matching PRs should name all exposed string literals; the loaded standards warn that data ownership needs evidence.",
+      "Do not claim reviewer approval of any tactic; the loaded slice has no review comments or reviews.",
+      "Do not claim un_803102D0 fully matched; the PR and bot report only state improvement to 72.38%."
+    ]
+  },
+  "confidence": 0.84,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

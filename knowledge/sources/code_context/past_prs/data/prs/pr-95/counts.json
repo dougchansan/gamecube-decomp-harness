@@ -1,0 +1,17 @@
+{
+  "number": 95,
+  "title": "Cleanup pointers in sdata2",
+  "state": "MERGED",
+  "createdAt": "2021-11-07T20:26:09Z",
+  "updatedAt": "2021-11-07T20:26:16Z",
+  "mergedAt": "2021-11-07T20:26:13Z",
+  "closedAt": "2021-11-07T20:26:13Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/95",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 1394
+  }
+}

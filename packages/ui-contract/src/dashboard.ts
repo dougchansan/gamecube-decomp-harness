@@ -47,21 +47,6 @@ export interface FormState {
   model: string;
   thinkingLevel: string;
   workerThinkingLevel: string;
-  dryRunAgents: boolean;
-  checkpointBeforeFresh: boolean;
-  pauseBeforeHandoff: boolean;
-  qaTarget: string;
-  qaReportMaxRows: number;
-  requirePrPromotion: boolean;
-  prBaseRef: string;
-  prGroupMode: string;
-  prMaxFilesPerPr: number;
-  prBranchPrefix: string;
-  prTitlePrefix: string;
-  prCommittedOnly: boolean;
-  prIncludeUntracked: boolean;
-  refreshPrLibrary: boolean;
-  resetReportBaseline: boolean;
 }
 
 export interface Dashboard {
@@ -75,6 +60,8 @@ export interface Dashboard {
   initial: JsonObject;
   current: JsonObject;
   trustedReport: JsonObject;
+  /** Current report vs the production (upstream) baseline; survives session baseline resets. */
+  productionReport?: JsonObject | null;
   checkpoint?: JsonObject | null;
   handoff?: JsonObject | null;
   runSummary: JsonObject;
@@ -87,6 +74,11 @@ export interface Dashboard {
   touchedFiles: JsonObject[];
   events: JsonObject[];
   process: JsonObject;
+  campaign?: JsonObject | null;
+  epochs?: JsonObject[];
+  /** Completed leases since the last epoch checkpoint vs the checkpoint interval. */
+  checkpointProgress?: JsonObject | null;
+  prs?: JsonObject | null;
 }
 
 export interface RunDetails {
@@ -104,15 +96,14 @@ export interface RunDetails {
   queueTargets?: JsonObject[];
   improvements?: JsonObject[];
   improvedFiles?: JsonObject[];
+  knowledgeIntake?: JsonObject;
 }
 
 export type PromptPreviewAgentId = "director" | "worker" | "pr-review" | "knowledge-curator";
 export type PromptPreviewSource = "latest" | "sample";
 
 export interface PromptPreviewStats {
-  characters: number;
-  lines: number;
-  words: number;
+  tokens: number;
   unresolvedPlaceholders: string[];
 }
 

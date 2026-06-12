@@ -1,0 +1,17 @@
+{
+  "number": 377,
+  "title": "README Update",
+  "state": "MERGED",
+  "createdAt": "2022-05-15T22:55:10Z",
+  "updatedAt": "2022-05-16T04:37:52Z",
+  "mergedAt": "2022-05-16T04:37:52Z",
+  "closedAt": "2022-05-16T04:37:52Z",
+  "author": "ElectronicsArchiver",
+  "url": "https://github.com/doldecomp/melee/pull/377",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 2561
+  }
+}

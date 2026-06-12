@@ -1,0 +1,17 @@
+{
+  "number": 1812,
+  "title": "mnmain matches",
+  "state": "MERGED",
+  "createdAt": "2025-08-08T18:47:21Z",
+  "updatedAt": "2025-08-08T18:50:58Z",
+  "mergedAt": "2025-08-08T18:50:56Z",
+  "closedAt": "2025-08-08T18:50:56Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1812",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 6638
+  }
+}

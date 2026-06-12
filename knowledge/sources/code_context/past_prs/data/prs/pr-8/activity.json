@@ -1,0 +1,10 @@
+{
+  "pr": 8,
+  "title": "add global headers for function and variable declarations",
+  "url": "https://github.com/doldecomp/melee/pull/8",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 2,
+  "added_lines": 19158,
+  "deleted_lines": 0
+}

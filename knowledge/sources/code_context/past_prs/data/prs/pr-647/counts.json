@@ -1,0 +1,17 @@
+{
+  "number": 647,
+  "title": "Fix whitespace treewide",
+  "state": "MERGED",
+  "createdAt": "2023-01-05T08:32:50Z",
+  "updatedAt": "2023-01-05T08:36:24Z",
+  "mergedAt": "2023-01-05T08:36:21Z",
+  "closedAt": "2023-01-05T08:36:21Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/647",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 1,
+    "diff_bytes": 0
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 1654,
+  "title": "gmmainlib matches",
+  "state": "MERGED",
+  "createdAt": "2025-06-29T21:46:27Z",
+  "updatedAt": "2025-06-29T21:54:34Z",
+  "mergedAt": "2025-06-29T21:54:30Z",
+  "closedAt": "2025-06-29T21:54:30Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1654",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 13598
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 1071,
+  "title": "Splitting and matching of parts of sysdolphin via DTK",
+  "state": "MERGED",
+  "createdAt": "2024-01-17T09:05:19Z",
+  "updatedAt": "2024-01-17T23:23:33Z",
+  "mergedAt": "2024-01-17T09:17:02Z",
+  "closedAt": "2024-01-17T09:17:02Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/1071",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 6,
+    "reviews": 4,
+    "diff_bytes": 133925
+  }
+}

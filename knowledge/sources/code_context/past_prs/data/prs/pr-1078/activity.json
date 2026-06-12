@@ -1,0 +1,10 @@
+{
+  "pr": 1078,
+  "title": "Port `Makefile` options to `configure.py`",
+  "url": "https://github.com/doldecomp/melee/pull/1078",
+  "text_records_with_body": 0,
+  "review_comments": 0,
+  "changed_files": 1,
+  "added_lines": 64,
+  "deleted_lines": 8
+}

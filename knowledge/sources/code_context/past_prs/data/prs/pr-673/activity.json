@@ -1,0 +1,10 @@
+{
+  "pr": 673,
+  "title": "Implement `stdbool.h`",
+  "url": "https://github.com/doldecomp/melee/pull/673",
+  "text_records_with_body": 4,
+  "review_comments": 3,
+  "changed_files": 268,
+  "added_lines": 1938,
+  "deleted_lines": 1932
+}

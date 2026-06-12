@@ -1,0 +1,17 @@
+{
+  "number": 402,
+  "title": "Decompile mtx.s",
+  "state": "MERGED",
+  "createdAt": "2022-07-06T01:51:32Z",
+  "updatedAt": "2022-07-12T19:28:32Z",
+  "mergedAt": "2022-07-08T17:09:37Z",
+  "closedAt": "2022-07-08T17:09:37Z",
+  "author": "CelestialAmber",
+  "url": "https://github.com/doldecomp/melee/pull/402",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 7,
+    "reviews": 7,
+    "diff_bytes": 98977
+  }
+}

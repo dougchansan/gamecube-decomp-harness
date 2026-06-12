@@ -1,0 +1,17 @@
+{
+  "number": 1128,
+  "title": "Remove deprecated rust tools",
+  "state": "MERGED",
+  "createdAt": "2024-01-26T10:56:29Z",
+  "updatedAt": "2024-01-26T10:57:37Z",
+  "mergedAt": "2024-01-26T10:57:37Z",
+  "closedAt": "2024-01-26T10:57:37Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1128",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 219521
+  }
+}

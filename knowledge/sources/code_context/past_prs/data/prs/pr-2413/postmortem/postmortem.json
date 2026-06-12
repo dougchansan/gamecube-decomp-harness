@@ -1,0 +1,466 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2413",
+  "pr": {
+    "number": 2413,
+    "title": "Fix various function signatures",
+    "url": "https://github.com/doldecomp/melee/pull/2413",
+    "state": "MERGED",
+    "author": "lukechampine",
+    "created_at": "2026-04-14T02:44:50Z",
+    "merged_at": "2026-04-14T09:24:36Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Broad signature-correction PR across camera, fighter, game-mode, stage, item, lb, and baselib code. The author says an asm-examining Claude-assisted script produced many false positives/negatives but also legitimate signature mismatches. The diff updates function return types, removes unused parameters, reorders call arguments, synchronizes headers with implementations, and uses bool/PAD_STACK cleanup in several decomp functions. Bot report shows small text-match progress, including two new gm_1601 matches and eleven improved unmatched items.",
+  "change_classification": {
+    "primary_type": "signature-and-prototype-fix",
+    "categories": [
+      "decomp-matching",
+      "fix",
+      "headers",
+      "types-structs",
+      "tool-assisted-audit"
+    ],
+    "systems": [
+      "camera",
+      "fighter",
+      "game-mode",
+      "stage",
+      "item",
+      "lb",
+      "baselib"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/cm/camera.c",
+      "role": "Implementation signature and bool-return cleanup for Camera_8002E158 and Camera_8002E234, plus local formatting/cast cleanup.",
+      "evidence_refs": [
+        "diff_excerpt: Camera_8002E158 s32->bool and var_r6->ret",
+        "diff_excerpt: Camera_8002E234 s32->bool and var_r30->ret"
+      ]
+    },
+    {
+      "path": "src/melee/cm/camera.h",
+      "role": "Header prototypes synchronized with camera.c bool return types.",
+      "evidence_refs": [
+        "diff_excerpt: Camera_8002E158 and Camera_8002E234 prototypes changed to bool"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_AirCatch.c",
+      "role": "Call sites updated after tether item helper signatures dropped an x-position argument.",
+      "evidence_refs": [
+        "diff_excerpt: it_802A78B8(tether_gobj, &pos) replaces three-argument call",
+        "diff_excerpt: it_802BAAE4(temp_r29_2, &pos) replaces three-argument call"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_Attack100.c",
+      "role": "Tether call signature update and stack padding cleanup in catch-related code.",
+      "evidence_refs": [
+        "diff_excerpt: UNUSED volatile u8 pad_b[8] replaced with PAD_STACK(8)",
+        "diff_excerpt: it_802A78B8(tether_gobj, &pos) replaces three-argument call"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_Damage.c",
+      "role": "Call site updated after Fighter_8006CDA4 lost a third parameter.",
+      "evidence_refs": [
+        "diff_excerpt: Fighter_8006CDA4(fp, fp->dmg.x1838_percentTemp)"
+      ]
+    },
+    {
+      "path": "src/melee/ft/fighter.c",
+      "role": "Implementation signature for Fighter_8006CDA4 reduced from three parameters to two; bool locals and PAD_STACK used.",
+      "evidence_refs": [
+        "diff_excerpt: void Fighter_8006CDA4(Fighter* fp, s32 arg1)",
+        "diff_excerpt: bool hold_item_bool = false",
+        "diff_excerpt: PAD_STACK(8)"
+      ]
+    },
+    {
+      "path": "src/melee/ft/fighter.h",
+      "role": "Header prototype synchronized with Fighter_8006CDA4 implementation.",
+      "evidence_refs": [
+        "diff_excerpt: Fighter_8006CDA4 prototype changed to two parameters"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_ThrownKirby.c",
+      "role": "Call site updated after ftKb_SpecialN_800F5898 lost an unused second parameter.",
+      "evidence_refs": [
+        "diff_excerpt: ftKb_SpecialN_800F5898(thrower_gobj)"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_Init.h",
+      "role": "Header prototype synchronized for ftKb_SpecialN_800F5898.",
+      "evidence_refs": [
+        "diff_excerpt: HSD_Joint* ftKb_SpecialN_800F5898(Fighter_GObj* gobj)"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_SpecialN.c",
+      "role": "Implementation signature for ftKb_SpecialN_800F5898 reduced to one parameter.",
+      "evidence_refs": [
+        "diff_excerpt: ftKb_SpecialN_800F5898(Fighter_GObj* gobj)"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftYoshi/ftYs_SpecialN.c",
+      "role": "Implementation signature for ftYs_SpecialN_GetExtAttr28 changed to void parameter list because it reads Yoshi ext_attr globally.",
+      "evidence_refs": [
+        "diff_excerpt: float ftYs_SpecialN_GetExtAttr28(void)",
+        "diff_excerpt: gFtDataList[FTKIND_YOSHI]->ext_attr"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftYoshi/ftYs_SpecialN.h",
+      "role": "Header prototype synchronized for ftYs_SpecialN_GetExtAttr28.",
+      "evidence_refs": [
+        "diff_excerpt: ftYs_SpecialN_GetExtAttr28(void)"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftNess/ftNs_AttackHi4.c",
+      "role": "Call argument order corrected for it_802BE9D8.",
+      "evidence_refs": [
+        "diff_excerpt: it_802BE9D8(gobj, fp->facing_dir, &sp10, fp->motion_id)"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_ThrownMewtwo.c",
+      "role": "Removed temporary SOLUTION preprocessor branch and replaced manual stack array with PAD_STACK.",
+      "evidence_refs": [
+        "diff_excerpt: removed #define SOLUTION block",
+        "diff_excerpt: PAD_STACK(8)"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1601.c",
+      "role": "Game-mode implementation touched; bot report attributes two new full matches in this unit.",
+      "evidence_refs": [
+        "changed_files: gm_1601.c 20 added/27 deleted/5 hunks",
+        "text_corpus: decomp-dev bot reports fn_80168A6C and fn_80169444 newly 100%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grshrineroute.c",
+      "role": "Largest changed file by hunk count; exact signature changes not visible in excerpt.",
+      "evidence_refs": [
+        "changed_files: grshrineroute.c 130 added/167 deleted/27 hunks"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lb_00F9.c",
+      "role": "Large lb implementation signature cleanup area; exact changes not visible in excerpt.",
+      "evidence_refs": [
+        "changed_files: lb_00F9.c 64 added/72 deleted/21 hunks"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/hsd_3AA7.h",
+      "role": "Baselib header signature cleanup area; exact changes not visible in excerpt.",
+      "evidence_refs": [
+        "changed_files: hsd_3AA7.h 10 added/9 deleted/3 hunks"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Changed 63 files with 427 additions and 515 deletions, mostly in source/header pairs across camera, fighter, game-mode, stage, item, lb, and baselib areas.",
+    "Converted Camera_8002E158 and Camera_8002E234 from s32 return types to bool in both implementation and header, and renamed local integer return flags to bool-style ret variables.",
+    "Removed apparently unused function parameters from several signatures and updated callers, including Fighter_8006CDA4, ftKb_SpecialN_800F5898, ftYs_SpecialN_GetExtAttr28, it_802A78B8, and it_802BAAE4 as shown in excerpted call sites.",
+    "Corrected at least one argument ordering mismatch for it_802BE9D8 in ftNs_AttackHi4_YoyoCreateItem.",
+    "Replaced some manual or temporary stack padding constructs with PAD_STACK and removed a temporary SOLUTION preprocessor branch in ftCo_ThrownMewtwo.c.",
+    "Synchronized headers with recovered function bodies for visible signature changes, including camera.h, fighter.h, ftKb_Init.h, and ftYs_SpecialN.h.",
+    "Bot report recorded +292 matched-code bytes, two new gm_1601 matches, and eleven improved unmatched items."
+  ],
+  "smart_moves": [
+    {
+      "text": "The PR updated both declarations and call sites together rather than changing implementations in isolation.",
+      "evidence_refs": [
+        "diff_excerpt: Fighter_8006CDA4 changed in fighter.c, fighter.h, and ftCo_Damage.c",
+        "diff_excerpt: ftKb_SpecialN_800F5898 changed in ftKb_SpecialN.c, ftKb_Init.h, and ftCo_ThrownKirby.c",
+        "diff_excerpt: Camera_8002E158/Camera_8002E234 changed in camera.c and camera.h"
+      ]
+    },
+    {
+      "text": "Bool-like return values were represented with bool return types and true/false locals where the code uses truth-state results.",
+      "evidence_refs": [
+        "diff_excerpt: Camera_8002E158 uses bool ret=false/true",
+        "diff_excerpt: Camera_8002E234 returns bool ret"
+      ]
+    },
+    {
+      "text": "The author explicitly treated the asm-inference script as noisy rather than authoritative.",
+      "evidence_refs": [
+        "human_pr_text: script returned false negatives and false positives"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "Asm-driven signature audits can be useful for finding real mismatches, but PR evidence shows they require manual filtering because the author reported many false positives and false negatives.",
+      "scope": [
+        "tool-assisted signature cleanup",
+        "function prototype recovery"
+      ],
+      "evidence_refs": [
+        "human_pr_text: Claude script inferred types by examining asm",
+        "human_pr_text: not perfect, false negatives and false positives, but found legitimate mismatches"
+      ]
+    },
+    {
+      "lesson": "When a recovered signature changes, update the owning header and all visible call sites in the same PR slice to keep prototype surfaces truthful.",
+      "scope": [
+        "headers",
+        "call sites",
+        "signature recovery"
+      ],
+      "evidence_refs": [
+        "diff_excerpt: camera.c and camera.h bool return changes",
+        "diff_excerpt: fighter.c/fighter.h/ftCo_Damage.c Fighter_8006CDA4 arity change",
+        "diff_excerpt: ftKb_SpecialN.c/ftKb_Init.h/ftCo_ThrownKirby.c ftKb_SpecialN_800F5898 arity change"
+      ]
+    },
+    {
+      "lesson": "Do not preserve unused parameters solely because an old prototype had them; if the implementation and callers support a smaller signature, remove the parameter and synchronize callers.",
+      "scope": [
+        "function signatures",
+        "unused parameters"
+      ],
+      "evidence_refs": [
+        "diff_excerpt: Fighter_8006CDA4 removes arg2 and corresponding call argument",
+        "diff_excerpt: ftYs_SpecialN_GetExtAttr28 changes from Fighter_GObj* parameter to void",
+        "diff_excerpt: ftKb_SpecialN_800F5898 removes int parameter"
+      ]
+    },
+    {
+      "lesson": "Bool-returning helper behavior should be reflected in the type when evidence supports true/false return use, improving reviewability over raw s32 flags.",
+      "scope": [
+        "bool returns",
+        "camera helpers"
+      ],
+      "evidence_refs": [
+        "diff_excerpt: Camera_8002E158 return type s32->bool and ret false/true",
+        "diff_excerpt: Camera_8002E234 return type s32->bool and ret &= Camera_8002E158"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "ret",
+      "convention": "For bool-return helper functions, local return accumulator variables may use a neutral name like ret instead of generated register-style names such as var_r6 or var_r30.",
+      "evidence_refs": [
+        "diff_excerpt: var_r6 renamed to ret in Camera_8002E158",
+        "diff_excerpt: var_r30 renamed to ret in Camera_8002E234"
+      ]
+    },
+    {
+      "name": "hold_item_bool",
+      "convention": "Existing semantic bool local naming was retained while converting integer literal initialization to false/true.",
+      "evidence_refs": [
+        "diff_excerpt: bool hold_item_bool = false",
+        "diff_excerpt: hold_item_bool = true"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Use asm-derived type/signature inference only as a candidate generator, then inspect and commit specific legitimate mismatches.",
+      "evidence_refs": [
+        "human_pr_text: script infers types by examining asm",
+        "human_pr_text: reports now mostly garbage but found legitimate mismatches"
+      ]
+    },
+    {
+      "tactic": "Replace manual stack padding arrays or volatile padding with PAD_STACK where matching still needs explicit padding.",
+      "evidence_refs": [
+        "diff_excerpt: UNUSED volatile u8 pad_b[8] -> PAD_STACK(8)",
+        "diff_excerpt: u8 _[8] = { 0 } -> PAD_STACK(8)"
+      ],
+      "caveat": "The excerpt does not include independent objdiff proof for each PAD_STACK use; bot report only provides aggregate match improvements."
+    },
+    {
+      "tactic": "Changing function arity can improve text matching when old prototypes forced dummy arguments; bot report showed several improvements after the signature changes.",
+      "evidence_refs": [
+        "diff_excerpt: multiple call sites drop unused arguments",
+        "text_corpus: decomp-dev bot reports +292 matched-code bytes and improved unmatched items"
+      ],
+      "caveat": "The bot report does not attribute each improvement to a specific signature edit."
+    }
+  ],
+  "review_feedback": [
+    {
+      "type": "bot_report",
+      "author": "decomp-dev[bot]",
+      "text": "Report for GALE01 showed matched code 63.10% (+0.01%, +292 bytes), two new matches in main/melee/gm/gm_1601, and eleven improvements in unmatched items.",
+      "evidence_refs": [
+        "text_corpus: issue_comment by decomp-dev[bot] at 2026-04-14T02:49:32Z"
+      ]
+    },
+    {
+      "type": "missing_human_review",
+      "author": null,
+      "text": "No review comments or reviews were loaded in the slice.",
+      "evidence_refs": [
+        "metadata_json: review_comments 0",
+        "metadata_json: reviews 0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR 2413",
+    "Fix various function signatures",
+    "lukechampine",
+    "Claude script",
+    "asm inferred types",
+    "function signatures",
+    "prototype cleanup",
+    "truthful headers",
+    "Camera_8002E158",
+    "Camera_8002E234",
+    "Fighter_8006CDA4",
+    "ftKb_SpecialN_800F5898",
+    "ftYs_SpecialN_GetExtAttr28",
+    "it_802A78B8",
+    "it_802BAAE4",
+    "it_802BE9D8",
+    "PAD_STACK",
+    "bool return",
+    "gm_1601",
+    "fn_80168A6C",
+    "fn_80169444"
+  ],
+  "follow_up_queries": [
+    "PR 2413 Fighter_8006CDA4 arg2 removed",
+    "Camera_8002E158 bool return signature",
+    "Camera_8002E234 bool return signature",
+    "ftYs_SpecialN_GetExtAttr28 void signature",
+    "ftKb_SpecialN_800F5898 unused int parameter",
+    "it_802A78B8 it_802BAAE4 signature two arguments",
+    "it_802BE9D8 argument order fp->facing_dir gobj",
+    "PAD_STACK signature cleanup false positives asm script",
+    "gm_1601 fn_80168A6C fn_80169444 PR 2413"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR identity, merge state, counts, changed files",
+      "human_pr_text: author explanation of asm-inference script and false positives",
+      "raw_diff/diff_excerpt: representative signature and call-site changes",
+      "changed_files: full 63-file path list",
+      "text_corpus: decomp-dev bot report"
+    ],
+    "notes": [
+      "The loaded raw diff is truncated; only representative hunks are visible, so exact edits in many of the 63 changed files are not described beyond changed-file metadata.",
+      "The author explicitly says the script was noisy; this supports a lesson about candidate generation but not blind trust in the script.",
+      "No human review comments were loaded, so reviewer intent or acceptance rationale beyond merge metadata cannot be inferred.",
+      "Bot report gives aggregate and item-level match improvements but does not prove which individual signature edit caused each improvement."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "title": "Signature recovery should synchronize body, header, and call sites",
+        "text": "PR 2413 repeatedly changes function implementations, owning headers, and call sites together when correcting recovered signatures, e.g. Camera_8002E158/Camera_8002E234, Fighter_8006CDA4, ftKb_SpecialN_800F5898, and ftYs_SpecialN_GetExtAttr28.",
+        "scope": [
+          "signature recovery",
+          "headers",
+          "call sites"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: camera.c and camera.h bool return updates",
+          "diff_excerpt: fighter.c/fighter.h/ftCo_Damage.c Fighter_8006CDA4 arity update",
+          "diff_excerpt: ftKb_SpecialN.c/ftKb_Init.h/ftCo_ThrownKirby.c arity update",
+          "diff_excerpt: ftYs_SpecialN.c/ftYs_SpecialN.h/ftCo_YoshiEgg.c arity update"
+        ]
+      },
+      {
+        "title": "Asm-derived signature hints need manual validation",
+        "text": "The PR body says an asm-examining Claude-assisted script found legitimate function signature mismatches, but also many false positives and false negatives; use such output as triage, not authority.",
+        "scope": [
+          "tool-assisted decomp",
+          "function signatures"
+        ],
+        "evidence_refs": [
+          "human_pr_text: script infers types by examining asm",
+          "human_pr_text: false negatives and false positives"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Signature-audit tools are candidate generators, not proof",
+        "text": "When using scripts or AI-assisted asm analysis to infer function signatures, treat the results as candidates. Validate each candidate against implementation use, call sites, owning headers, and narrow objdiff/checkdiff evidence before committing signature changes.",
+        "source_path": null,
+        "scope": [
+          "tool-assisted signature recovery",
+          "truthful headers",
+          "verification"
+        ],
+        "evidence_refs": [
+          "human_pr_text: script inferred types by examining asm",
+          "human_pr_text: script returned many false positives and false negatives",
+          "diff_excerpt: visible manually-applied signature/call-site/header updates",
+          "text_corpus: bot report shows aggregate match improvements"
+        ],
+        "reason": "This PR provides concrete historical evidence that asm-derived signature inference can find real mismatches but is noisy enough to require manual validation."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Bool-like return signatures should use bool when validated",
+        "text": "If a helper's return value is used only as a truth value and the implementation naturally assigns true/false, prefer a bool return type and bool local accumulator over s32 flag variables, while keeping headers and callers synchronized.",
+        "source_path": null,
+        "scope": [
+          "bool returns",
+          "function signatures",
+          "headers"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: Camera_8002E158 s32->bool, var_r6->ret false/true",
+          "diff_excerpt: Camera_8002E234 s32->bool, var_r30->ret and ret &= Camera_8002E158",
+          "diff_excerpt: camera.h prototypes updated"
+        ],
+        "reason": "The camera changes are a clear example of type cleanup improving source truthfulness, but curator should decide whether this is already covered by existing truthful-header and conservative-naming standards."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Use PAD_STACK instead of ad hoc padding arrays only with match evidence",
+        "text": "When stack padding is still required, prefer the project padding macro over manual dummy arrays or volatile padding, but preserve the requirement for narrow objdiff/checkdiff evidence for each use.",
+        "source_path": null,
+        "scope": [
+          "PAD_STACK",
+          "stack matching tactics"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: ftCo_Attack100 replaces UNUSED volatile u8 pad_b[8] with PAD_STACK(8)",
+          "diff_excerpt: ftCo_ThrownMewtwo replaces u8 _[8] = { 0 } with PAD_STACK(8)",
+          "decomp_standards: matching-tactics-need-evidence"
+        ],
+        "reason": "The PR demonstrates cleanup from ad hoc padding to PAD_STACK, but the loaded slice lacks per-function objdiff proof; retain evidence requirement."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote the Claude/script output as an accepted validation method; the author explicitly reports many false positives and false negatives.",
+      "Do not infer that every changed file had a signature fix; many exact hunks are not loaded because the raw diff is truncated.",
+      "Do not claim every listed bot improvement was caused by a specific visible signature edit; the report is aggregate/item-level only.",
+      "Do not infer human reviewer approval rationale; no human review comments were loaded."
+    ]
+  },
+  "confidence": 0.74,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

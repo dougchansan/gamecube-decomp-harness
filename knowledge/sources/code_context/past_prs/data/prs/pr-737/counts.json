@@ -1,0 +1,17 @@
+{
+  "number": 737,
+  "title": "Mark `set_x2` as `inline`",
+  "state": "MERGED",
+  "createdAt": "2023-02-10T05:24:07Z",
+  "updatedAt": "2023-02-10T07:59:56Z",
+  "mergedAt": "2023-02-10T07:59:55Z",
+  "closedAt": "2023-02-10T07:59:55Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/737",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 1,
+    "diff_bytes": 359
+  }
+}

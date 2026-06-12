@@ -1,0 +1,17 @@
+{
+  "number": 890,
+  "title": "Match `ftCo_CliffEscape`",
+  "state": "MERGED",
+  "createdAt": "2023-05-29T00:22:28Z",
+  "updatedAt": "2023-05-29T00:30:36Z",
+  "mergedAt": "2023-05-29T00:30:35Z",
+  "closedAt": "2023-05-29T00:30:35Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/890",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 9868
+  }
+}

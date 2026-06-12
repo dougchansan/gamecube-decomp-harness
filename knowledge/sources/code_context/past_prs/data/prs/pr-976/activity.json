@@ -1,0 +1,10 @@
+{
+  "pr": 976,
+  "title": "Fix iref_INC to have a void type",
+  "url": "https://github.com/doldecomp/melee/pull/976",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 1,
+  "added_lines": 1,
+  "deleted_lines": 1
+}

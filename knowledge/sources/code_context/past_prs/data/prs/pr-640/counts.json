@@ -1,0 +1,17 @@
+{
+  "number": 640,
+  "title": "Improve dolphin forward declarations",
+  "state": "MERGED",
+  "createdAt": "2023-01-03T09:39:00Z",
+  "updatedAt": "2023-01-04T01:43:31Z",
+  "mergedAt": "2023-01-04T01:43:28Z",
+  "closedAt": "2023-01-04T01:43:28Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/640",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 1,
+    "diff_bytes": 24397
+  }
+}

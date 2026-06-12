@@ -1,0 +1,17 @@
+{
+  "number": 1103,
+  "title": "fix path issues on Windows in tools/report_score.py",
+  "state": "MERGED",
+  "createdAt": "2024-01-24T14:36:57Z",
+  "updatedAt": "2024-01-27T05:45:57Z",
+  "mergedAt": "2024-01-24T14:50:55Z",
+  "closedAt": "2024-01-24T14:50:55Z",
+  "author": "BR-",
+  "url": "https://github.com/doldecomp/melee/pull/1103",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 1142
+  }
+}

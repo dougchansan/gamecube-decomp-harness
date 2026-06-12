@@ -1,0 +1,486 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2396",
+  "pr": {
+    "number": 2396,
+    "title": "Jj/lbaudio_ax",
+    "url": "https://github.com/doldecomp/melee/pull/2396",
+    "state": "MERGED",
+    "author": "jurrejelle",
+    "created_at": "2026-04-09T09:07:51Z",
+    "merged_at": "2026-04-09T20:46:49Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Large lbaudio_ax decompilation/matching PR centered on src/melee/lb/lbaudio_ax.c, with supporting lbaudio_ax header/static-header type and prototype updates, one baselib axdriver symbol rename, and one ftcoll include addition. The bot report shows 6 new matches and 16 unmatched-item improvements, but also reports regressions in .bss, AXDriver_8038E034, fn_80023254, .sdata, and fn_800268B4. No human review comments were present in the loaded slice.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "type-recovery",
+      "symbol-rename"
+    ],
+    "systems": [
+      "melee/lb/lbaudio_ax",
+      "sysdolphin/baselib/axdriver",
+      "melee/ft/ftcoll"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/lb/lbaudio_ax.c",
+      "role": "Primary decomp/matching body; adds or improves multiple lbAudioAx functions, adjusts includes, typed accesses, loops, switch/fallthrough logic, data padding, pan interpolation code, and audio bank/load logic.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/lb/lbaudio_ax.c +1321/-116, 32 hunks",
+        "raw_diff: lbaudio_ax.c include additions and fn_80023254 changes",
+        "raw_diff: implementations replacing markers for lbAudioAx_800233EC, lbAudioAx_80023B24, lbAudioAx_800243F4, fn_800253D8, fn_800256BC",
+        "text_corpus.jsonl bot report: 6 new matches and 16 improvements in main/melee/lb/lbaudio_ax"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lbaudio_ax.static.h",
+      "role": "Static local type/data surface updated for lbaudio_ax: lbAudioAx_UserData fields expanded, lbAudioAx_PoolAlloc enlarged with named arrays/regions, static data and extern declarations adjusted.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/lb/lbaudio_ax.static.h +33/-11, 5 hunks",
+        "raw_diff: lbAudioAx_UserData replaces byte padding with fields x0, gobj, xC, x10, x14, x40",
+        "raw_diff: lbAudioAx_PoolAlloc grows from size 0xB4 to 0x1F554 with xB4/x194/x274/x354/x434/x514/x554/xD954",
+        "raw_diff: adds static sfx_remap_803BC6A4 and lbl_804D3870/lbl_804D3878"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lbaudio_ax.h",
+      "role": "Public prototypes updated to match recovered signatures and remove some UNK_RET/UNK_PARAMS placeholders.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/lb/lbaudio_ax.h +10/-10, 3 hunks",
+        "raw_diff: lbAudioAx_80023B24 f32 to s32",
+        "raw_diff: lbAudioAx_800243F4 UNK_RET to s32",
+        "raw_diff: fn_80027488, lbAudioAx_8002785C, lbAudioAx_80027AB0, lbAudioAx_80027DF8, lbAudioAx_80028690 prototype updates"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/axdriver.c",
+      "role": "Renames AXDriver_8038E034 implementation to HSD_AudioGetAuxHeapSize.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/sysdolphin/baselib/axdriver.c +1/-1, 1 hunk",
+        "raw_diff: function name AXDriver_8038E034 changed to HSD_AudioGetAuxHeapSize",
+        "text_corpus.jsonl bot report: regression listed for main/sysdolphin/baselib/axdriver AXDriver_8038E034"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/axdriver.h",
+      "role": "Header declaration updated to match the axdriver rename.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/sysdolphin/baselib/axdriver.h +1/-1, 1 hunk",
+        "raw_diff: prototype AXDriver_8038E034 renamed to HSD_AudioGetAuxHeapSize"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftcoll.c",
+      "role": "Adds baselib/random.h include.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/ft/ftcoll.c +1/-0, 1 hunk",
+        "raw_diff: adds #include <baselib/random.h>"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Implemented several previously marked lbaudio_ax functions, including lbAudioAx_800233EC, lbAudioAx_80023B24, lbAudioAx_800243F4, fn_800253D8, and fn_800256BC in the loaded diff excerpt.",
+    "Improved existing lbaudio_ax functions such as fn_800251EC, fn_80025B44, and fn_80025CBC, with the bot report showing those three reaching 100.00%.",
+    "Converted some raw object/classifier access in fn_800251EC from a local HSD_GObj* plus *(u16*) cast to repeated access through lbAudioAx_UserData->entity and entity->classifier.",
+    "Added or exposed more structure in lbAudioAx_UserData and lbAudioAx_PoolAlloc in lbaudio_ax.static.h.",
+    "Updated lbaudio_ax.h prototypes for recovered return types and parameters.",
+    "Renamed baselib axdriver symbol AXDriver_8038E034 to HSD_AudioGetAuxHeapSize in both .c and .h.",
+    "Adjusted data/padding in lbaudio_ax.c, including data_pad_0 size changing from 0x1014 - 0xC80 to 0x144.",
+    "Bot report records overall matched code improvement of +0.05%/+1780 bytes and matched data improvement of +40 bytes."
+  ],
+  "smart_moves": [
+    {
+      "title": "Header signatures were updated alongside recovered bodies",
+      "details": "lbaudio_ax.h changed UNK_RET/UNK_PARAMS and an incorrect f32 return to concrete s32/void signatures for several functions, matching the standard that recovered bodies should update owning headers.",
+      "evidence_refs": [
+        "raw_diff: lbaudio_ax.h prototype changes",
+        "decomp_standards: truthful-headers-and-includes"
+      ]
+    },
+    {
+      "title": "Opaque local structs were partially replaced with named fields",
+      "details": "lbaudio_ax.static.h changed byte arrays in lbAudioAx_UserData into concrete fields and expanded lbAudioAx_PoolAlloc to expose field arrays used by lbaudio_ax.c.",
+      "evidence_refs": [
+        "raw_diff: lbAudioAx_UserData field expansion",
+        "raw_diff: lbAudioAx_PoolAlloc field expansion",
+        "decomp_standards: typed-fields-over-pointer-math"
+      ]
+    },
+    {
+      "title": "Switch/fallthrough form was used for a range of hard-coded audio IDs",
+      "details": "lbAudioAx_800243F4 uses a switch with explicit fallthrough comments and cumulative var_r6 increments rather than a raw branch ladder in the loaded diff.",
+      "evidence_refs": [
+        "raw_diff: lbAudioAx_800243F4 implementation",
+        "decomp_standards: canonical-control-flow-and-macros"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a recovered lbaudio function proves signatures, update lbaudio_ax.h rather than leaving UNK_RET/UNK_PARAMS or stale return types.",
+      "scope": [
+        "src/melee/lb/lbaudio_ax.h",
+        "src/melee/lb/lbaudio_ax.c"
+      ],
+      "evidence_refs": [
+        "raw_diff: lbAudioAx_80023B24 f32 to s32",
+        "raw_diff: lbAudioAx_800243F4 UNK_RET to s32",
+        "raw_diff: fn_80027488/lbAudioAx_8002785C/lbAudioAx_80028690 prototype changes"
+      ],
+      "confidence": 0.86
+    },
+    {
+      "lesson": "Recovering local structs can make audio code more reviewable: this PR replaces some padding and raw indexed state with lbAudioAx_UserData and lbAudioAx_PoolAlloc fields used by lbaudio_ax.c.",
+      "scope": [
+        "src/melee/lb/lbaudio_ax.static.h",
+        "src/melee/lb/lbaudio_ax.c"
+      ],
+      "evidence_refs": [
+        "raw_diff: lbAudioAx_UserData field expansion",
+        "raw_diff: lbAudioAx_PoolAlloc xB4/x194/x274/x354/x434 fields",
+        "raw_diff: lbAudioAx_80023B24 uses st->x274, st->xB4, st->x194, st->x354"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "Automated match reports can show useful wins while still surfacing regressions; record both, especially when a PR mixes code, data, header, and symbol-name changes.",
+      "scope": [
+        "PR intake",
+        "lbaudio_ax matching reports"
+      ],
+      "evidence_refs": [
+        "text_corpus.jsonl bot report: 6 new matches",
+        "text_corpus.jsonl bot report: 16 improvements",
+        "text_corpus.jsonl bot report: 5 regressions"
+      ],
+      "confidence": 0.91
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "HSD_AudioGetAuxHeapSize",
+      "kind": "renamed global function",
+      "from": "AXDriver_8038E034",
+      "scope": [
+        "src/sysdolphin/baselib/axdriver.c",
+        "src/sysdolphin/baselib/axdriver.h"
+      ],
+      "evidence_refs": [
+        "raw_diff: AXDriver_8038E034 renamed to HSD_AudioGetAuxHeapSize"
+      ],
+      "notes": "The slice shows the rename but does not include reviewer rationale or external source proof for the semantic name."
+    },
+    {
+      "name": "lbAudioAx_UserData fields",
+      "kind": "local struct field recovery",
+      "from": "u8 padding arrays",
+      "scope": [
+        "src/melee/lb/lbaudio_ax.static.h"
+      ],
+      "evidence_refs": [
+        "raw_diff: x0, gobj, xC, x10, x14, x40 replace padding regions"
+      ],
+      "notes": "Many field names remain offset-style xNN, consistent with conservative naming where semantics are not fully proven."
+    },
+    {
+      "name": "lbAudioAx_PoolAlloc fields",
+      "kind": "local struct field recovery",
+      "from": "small struct plus separate extern arrays",
+      "scope": [
+        "src/melee/lb/lbaudio_ax.static.h",
+        "src/melee/lb/lbaudio_ax.c"
+      ],
+      "evidence_refs": [
+        "raw_diff: lbAudioAx_PoolAlloc adds xB4/x194/x274/x354/x434/x514/x554/xD954",
+        "raw_diff: fn_80023254 uses lbl_80433710.x434"
+      ],
+      "notes": "Names are offset-style rather than semantic."
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Use explicit counted for-loops for decrementing copy/shift loops.",
+      "evidence_refs": [
+        "raw_diff: fn_80023254 changes do/while decrement loops to for (i = ...; i != 0; i--)"
+      ],
+      "risk_or_note": "Bot report lists fn_80023254 as regressed to 0.00%, so this tactic should not be promoted as successful for that function without more verification."
+    },
+    {
+      "tactic": "Use switch with intentional fallthrough comments for cumulative case mapping.",
+      "evidence_refs": [
+        "raw_diff: lbAudioAx_800243F4 switch cases with /* fallthrough */ and var_r6 increments",
+        "text_corpus.jsonl bot report: lbAudioAx_800243F4 0.00% to 100.00%"
+      ],
+      "risk_or_note": "Supported by a bot-reported match for this function."
+    },
+    {
+      "tactic": "Duplicate similar pan interpolation bodies when needed for near-match progress.",
+      "evidence_refs": [
+        "raw_diff: fn_800253D8 and fn_800256BC implementations are highly similar",
+        "text_corpus.jsonl bot report: fn_800253D8 and fn_800256BC improved to 97.00%"
+      ],
+      "risk_or_note": "Only improvement, not full match; no human review evidence says the duplication is preferred source style."
+    },
+    {
+      "tactic": "Introduce narrow dummy/no-op source shapes to affect codegen.",
+      "evidence_refs": [
+        "raw_diff: fn_80025B44 adds empty if (ud && ud) block",
+        "raw_diff: fn_80025CBC adds empty if (ud && ud) block",
+        "text_corpus.jsonl bot report: fn_80025B44 and fn_80025CBC 100.00%"
+      ],
+      "risk_or_note": "This is a matching tactic requiring explicit evidence and cleanup consideration under matching-tactics-need-evidence."
+    },
+    {
+      "tactic": "Use typed classifier field access instead of raw pointer casts when the object type is known.",
+      "evidence_refs": [
+        "raw_diff: fn_800251EC changes type = *(u16*) entity to entity->classifier",
+        "text_corpus.jsonl bot report: fn_800251EC 97.02% to 100.00%"
+      ],
+      "risk_or_note": "This aligns with typed-fields-over-pointer-math and has bot-reported match evidence in this PR."
+    },
+    {
+      "tactic": "Track data-section effects separately from text matches.",
+      "evidence_refs": [
+        "raw_diff: data_pad_0 size change",
+        "raw_diff: lbaudio_ax.static.h static data additions",
+        "text_corpus.jsonl bot report: .sdata2 match, .bss and .sdata regressions"
+      ],
+      "risk_or_note": "The slice shows mixed data effects; data edits should be curator-reviewed before extracting any broader rule."
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "automated_report",
+      "author": "decomp-dev[bot]",
+      "summary": "Reported matched code 62.51% (+0.05%, +1780 bytes) and matched data 38.05% (+0.00%, +40 bytes).",
+      "evidence_refs": [
+        "text_corpus.jsonl issue_comment 2026-04-09T09:11:29Z"
+      ]
+    },
+    {
+      "kind": "automated_report",
+      "author": "decomp-dev[bot]",
+      "summary": "Reported 6 new matches: fn_800262A0, lbAudioAx_800243F4, fn_800251EC, fn_80025B44, fn_80025CBC, and .sdata2.",
+      "evidence_refs": [
+        "text_corpus.jsonl bot report: ✅ 6 new matches"
+      ]
+    },
+    {
+      "kind": "automated_report",
+      "author": "decomp-dev[bot]",
+      "summary": "Reported 16 improvements in unmatched lbaudio_ax items, including lbAudioAx_80027DF8, lbAudioAx_80028690, lbAudioAx_80023B24, fn_800253D8, fn_800256BC, and lbAudioAx_800233EC.",
+      "evidence_refs": [
+        "text_corpus.jsonl bot report: 📈 16 improvements in unmatched items"
+      ]
+    },
+    {
+      "kind": "automated_report",
+      "author": "decomp-dev[bot]",
+      "summary": "Reported 5 regressions: lbaudio_ax .bss, baselib axdriver AXDriver_8038E034, lbaudio_ax fn_80023254, lbaudio_ax .sdata, and lbaudio_ax fn_800268B4.",
+      "evidence_refs": [
+        "text_corpus.jsonl bot report: 📉 5 regressions in unmatched items"
+      ]
+    },
+    {
+      "kind": "missing_human_review",
+      "author": null,
+      "summary": "Loaded slice contains no review comments and no human reviewer rationale beyond the PR body text 'Tracking PR as usual'.",
+      "evidence_refs": [
+        "metadata_json: review_comments 0, reviews 0",
+        "human_pr_text: Tracking PR as usual"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2396",
+    "Jj/lbaudio_ax",
+    "jurrejelle",
+    "lbaudio_ax",
+    "lbAudioAx_800233EC",
+    "lbAudioAx_80023B24",
+    "lbAudioAx_800243F4",
+    "fn_800251EC",
+    "fn_800253D8",
+    "fn_800256BC",
+    "fn_80025B44",
+    "fn_80025CBC",
+    "fn_800262A0",
+    "lbAudioAx_UserData",
+    "lbAudioAx_PoolAlloc",
+    "HSD_AudioGetAuxHeapSize",
+    "AXDriver_8038E034",
+    "sfx_remap_803BC6A4",
+    "data_pad_0",
+    "entity->classifier",
+    "fallthrough switch",
+    "empty if ud && ud",
+    "matched code +1780 bytes",
+    "lbaudio_ax .bss regression"
+  ],
+  "follow_up_queries": [
+    "PR 2396 lbaudio_ax fn_80023254 regression",
+    "PR 2396 HSD_AudioGetAuxHeapSize AXDriver_8038E034 rename rationale",
+    "PR 2396 lbaudio_ax .bss regression data_pad_0 PoolAlloc",
+    "lbAudioAx_800243F4 fallthrough switch match",
+    "fn_80025B44 fn_80025CBC empty if ud && ud matching tactic",
+    "lbAudioAx_UserData x10 x3C pan interpolation",
+    "lbAudioAx_PoolAlloc xB4 x194 x274 x354 x434",
+    "lbaudio_ax static.h sfx_remap_803BC6A4 data ownership"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR #2396 merged, changed_files count 6, diff_bytes 54338",
+      "changed_files.jsonl: exact changed files and line counts",
+      "raw_diff: loaded excerpt plus targeted local diff read for header/static/axdriver changes",
+      "text_corpus.jsonl: PR body and bot report",
+      "metadata_json: review_comments 0, reviews 0"
+    ],
+    "notes": [
+      "Diff evidence is substantial but the loaded raw_diff excerpt is truncated; targeted local reads were used only for exact header/static/axdriver details.",
+      "No human review comments are available in the slice, so reviewer intent and rationale cannot be inferred.",
+      "The automated report supports specific match/improvement/regression claims, but does not prove source-style acceptance for every tactic.",
+      "The bot report shows both new matches and regressions, especially around .bss, .sdata, AXDriver_8038E034, and fn_80023254, so data/symbol changes should be treated cautiously.",
+      "The PR body is generic and does not state detailed goals beyond tracking."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson_candidate",
+        "title": "Update owning headers when lbaudio_ax function bodies recover concrete signatures",
+        "text": "PR 2396 updates lbaudio_ax.h prototypes from f32 or UNK_RET/UNK_PARAMS to concrete s32/void signatures while implementing or improving corresponding lbaudio_ax.c functions. This is a candidate local example of truthful header maintenance.",
+        "scope": [
+          "src/melee/lb/lbaudio_ax.h",
+          "src/melee/lb/lbaudio_ax.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: lbAudioAx_80023B24 f32 to s32",
+          "raw_diff: lbAudioAx_800243F4 UNK_RET to s32",
+          "raw_diff: fn_80027488/lbAudioAx_8002785C/lbAudioAx_80028690 prototype changes"
+        ],
+        "confidence": 0.86
+      },
+      {
+        "record_type": "decomp_lesson_candidate",
+        "title": "Typed classifier access can replace raw HSD_GObj classifier casts in lbaudio_ax",
+        "text": "In fn_800251EC, the diff replaces a raw *(u16*) entity read with entity->classifier and the bot reports the function reached 100.00%. Candidate lesson: when HSD_GObj type information is available, use the typed field rather than raw casts.",
+        "scope": [
+          "src/melee/lb/lbaudio_ax.c",
+          "HSD_GObj access"
+        ],
+        "evidence_refs": [
+          "raw_diff: fn_800251EC type = entity->classifier",
+          "text_corpus.jsonl bot report: fn_800251EC 97.02% to 100.00%"
+        ],
+        "confidence": 0.82
+      },
+      {
+        "record_type": "matching_tactic_candidate",
+        "title": "Fallthrough switch matched lbAudioAx_800243F4",
+        "text": "lbAudioAx_800243F4 uses a large switch with explicit fallthrough comments and cumulative increments; the bot report lists this function as 0.00% to 100.00%. Candidate tactic: for ordered ID remaps, test fallthrough switch forms before preserving branch ladders.",
+        "scope": [
+          "src/melee/lb/lbaudio_ax.c",
+          "audio ID remapping"
+        ],
+        "evidence_refs": [
+          "raw_diff: lbAudioAx_800243F4 switch/fallthrough implementation",
+          "text_corpus.jsonl bot report: lbAudioAx_800243F4 +256 bytes, 100.00%"
+        ],
+        "confidence": 0.84
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "lbaudio_ax static header owns local audio userdata and pool allocator recovery",
+        "text": "PR 2396 shows src/melee/lb/lbaudio_ax.static.h being used as the local owner for lbAudioAx_UserData and lbAudioAx_PoolAlloc definitions, with fields exposed to support src/melee/lb/lbaudio_ax.c matching.",
+        "source_path": "src/melee/lb/lbaudio_ax.static.h",
+        "scope": [
+          "src/melee/lb/lbaudio_ax.static.h",
+          "src/melee/lb/lbaudio_ax.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: lbAudioAx_UserData field expansion",
+          "raw_diff: lbAudioAx_PoolAlloc field expansion",
+          "raw_diff: lbaudio_ax.c uses lbl_80433710.x434 and st->x274/xB4/x194/x354"
+        ],
+        "reason": "Potential path fact for curator review; do not promote automatically because the slice includes data-section regressions and no human rationale."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "AXDriver_8038E034 was renamed to HSD_AudioGetAuxHeapSize in PR 2396",
+        "text": "The PR changes the function and header declaration name from AXDriver_8038E034 to HSD_AudioGetAuxHeapSize.",
+        "source_path": "src/sysdolphin/baselib/axdriver.c",
+        "scope": [
+          "src/sysdolphin/baselib/axdriver.c",
+          "src/sysdolphin/baselib/axdriver.h"
+        ],
+        "evidence_refs": [
+          "raw_diff: axdriver.c rename",
+          "raw_diff: axdriver.h prototype rename"
+        ],
+        "reason": "Possible symbol/path fact, but curator should verify whether the semantic HSD_AudioGetAuxHeapSize name is backed by source, symbols, map, or later review, especially because the bot report lists AXDriver_8038E034 as a regression."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Empty no-op codegen steering blocks need explicit evidence and cleanup notes",
+        "text": "PR 2396 includes empty if (ud && ud) blocks in fn_80025B44 and fn_80025CBC, while the bot reports both functions reaching 100.00%. This reinforces that such no-op steering is a narrow matching tactic requiring evidence, not normal style.",
+        "source_path": null,
+        "scope": [
+          "matching tactics",
+          "src/melee/lb/lbaudio_ax.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: empty if (ud && ud) blocks",
+          "text_corpus.jsonl bot report: fn_80025B44 and fn_80025CBC 100.00%",
+          "decomp_standards: matching-tactics-need-evidence"
+        ],
+        "reason": "May be redundant with existing matching-tactics-need-evidence standard; route to curator only as a supporting historical example."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Mixed code/data matching PRs should preserve report regressions in the ledger",
+        "text": "The PR made lbaudio_ax text progress and .sdata2 progress, but the bot reported .bss and .sdata regressions plus an axdriver function regression. This is a candidate example for keeping data-section and adjacent-function regressions visible when reviewing code-match PRs.",
+        "source_path": null,
+        "scope": [
+          "verification ledger",
+          "text-before-data matching",
+          "data sections"
+        ],
+        "evidence_refs": [
+          "text_corpus.jsonl bot report: matched code +1780 bytes",
+          "text_corpus.jsonl bot report: .sdata2 new match",
+          "text_corpus.jsonl bot report: .bss/.sdata/AXDriver_8038E034 regressions"
+        ],
+        "reason": "Potential supporting example for existing verification-and-regression-ledger and text-before-data-matching standards."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that all lbaudio_ax functions in the PR were fully matched; the bot report distinguishes 6 new matches from 16 partial improvements.",
+      "Do not treat the AXDriver_8038E034 to HSD_AudioGetAuxHeapSize rename as globally validated source truth from this slice alone; no reviewer/source rationale is loaded and the bot report flags a regression for AXDriver_8038E034.",
+      "Do not promote empty no-op blocks such as if (ud && ud) as normal source style; they are only observed as a matching tactic with bot-reported evidence in two functions.",
+      "Do not claim data-section cleanup success broadly; the bot report includes .bss and .sdata regressions despite .sdata2 improvement.",
+      "Do not infer human reviewer approval of specific tactics; the loaded slice has no review comments."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

@@ -22,6 +22,7 @@ export function numberValue(value: unknown, fallback = 0): number {
 }
 
 export function pct(value: unknown): string {
+  if (value === null || value === undefined || value === "") return "n/a";
   return Number.isFinite(Number(value)) ? `${Number(value).toFixed(3)}%` : "n/a";
 }
 
@@ -30,6 +31,7 @@ export function num(value: unknown): string {
 }
 
 export function whole(value: unknown): string {
+  if (value === null || value === undefined || value === "") return "n/a";
   return Number.isFinite(Number(value)) ? String(Math.round(Number(value))) : "n/a";
 }
 

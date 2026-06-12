@@ -1,0 +1,17 @@
+{
+  "number": 2123,
+  "title": "Match vi0102, vi0801 & link, work on vi0501 and vi1202",
+  "state": "MERGED",
+  "createdAt": "2026-01-23T16:10:54Z",
+  "updatedAt": "2026-01-23T16:14:52Z",
+  "mergedAt": "2026-01-23T16:14:50Z",
+  "closedAt": "2026-01-23T16:14:50Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/2123",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 25338
+  }
+}

@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { BoardSnapshot, TargetCandidate } from "../types/index.js";
+import type { TargetCandidate } from "../types/index.js";
 import { immediateTransaction, now, type StateStore } from "./db.js";
 
 export interface QueueRefillResult {
@@ -58,6 +58,10 @@ function schedulableSourceCount(store: StateStore, runId: string): number {
 function targetKeysForRun(store: StateStore, runId: string): Set<string> {
   const rows = store.db.query("SELECT unit, symbol FROM targets WHERE run_id = ?").all(runId) as Record<string, unknown>[];
   return new Set(rows.map((row) => targetKey(String(row.unit), String(row.symbol))));
+}
+
+export function activeLockedSourcePaths(store: StateStore): Set<string> {
+  return activeLockedSources(store);
 }
 
 function activeLockedSources(store: StateStore): Set<string> {
@@ -132,21 +136,35 @@ function selectRefillCandidates(params: {
     eligible.push({ candidate, key, sourcePath });
   }
 
-  const selected: RefillCandidate[] = [];
-  const selectedKeys = new Set<string>();
-  const selectedSources = new Set(params.queuedSources);
+  // Workers take an exclusive write lock on a target's whole source file, so
+  // the number of distinct source files in the queue caps worker parallelism.
+  // Select round-robin across files — one target per file per round — instead
+  // of packing many targets from the same file. Files with nothing queued yet
+  // go first so each round of new files unlocks another worker slot.
+  const bySource = new Map<string, RefillCandidate[]>();
+  const seenKeys = new Set<string>();
   for (const entry of eligible) {
-    if (selected.length >= params.needed) break;
-    if (selectedSources.has(entry.sourcePath)) continue;
-    selected.push(entry);
-    selectedKeys.add(entry.key);
-    selectedSources.add(entry.sourcePath);
+    if (seenKeys.has(entry.key)) continue;
+    seenKeys.add(entry.key);
+    const group = bySource.get(entry.sourcePath);
+    if (group) group.push(entry);
+    else bySource.set(entry.sourcePath, [entry]);
   }
-  for (const entry of eligible) {
-    if (selected.length >= params.needed) break;
-    if (selectedKeys.has(entry.key)) continue;
-    selected.push(entry);
-    selectedKeys.add(entry.key);
+  const sources = [...bySource.keys()].sort(
+    (a, b) => Number(params.queuedSources.has(a)) - Number(params.queuedSources.has(b)),
+  );
+
+  const selected: RefillCandidate[] = [];
+  for (let round = 0; selected.length < params.needed; round += 1) {
+    let pickedAny = false;
+    for (const source of sources) {
+      if (selected.length >= params.needed) break;
+      const entry = bySource.get(source)?.[round];
+      if (!entry) continue;
+      selected.push(entry);
+      pickedAny = true;
+    }
+    if (!pickedAny) break;
   }
 
   return { selected, skippedExisting, skippedLockedSource, skippedMissingSource };
@@ -195,38 +213,6 @@ function refreshQueuedTargetPriorities(store: StateStore, runId: string, candida
     refreshed += 1;
   }
   return refreshed;
-}
-
-export function addBoardTargets(store: StateStore, runId: string, snapshot: BoardSnapshot): number {
-  const insertTarget = store.db.query(
-    "INSERT INTO targets (id, run_id, unit, symbol, source_path, size, fuzzy, status, priority, reason, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-  );
-  const insertQueue = store.db.query(
-    "INSERT INTO queue (id, run_id, target_id, priority, reason, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-  );
-  const createdAt = now();
-  return immediateTransaction(store.db, () => {
-    let count = 0;
-    for (const candidate of snapshot.candidates) {
-      const targetId = randomUUID();
-      insertTarget.run(
-        targetId,
-        runId,
-        candidate.unit,
-        candidate.symbol,
-        candidate.sourcePath,
-        candidate.size,
-        candidate.fuzzy,
-        "queued",
-        candidate.priority,
-        candidate.reason,
-        createdAt,
-      );
-      insertQueue.run(randomUUID(), runId, targetId, candidate.priority, candidate.reason, "queued", createdAt);
-      count += 1;
-    }
-    return count;
-  });
 }
 
 export function refillQueuedTargets(

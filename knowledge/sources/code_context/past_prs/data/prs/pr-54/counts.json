@@ -1,0 +1,17 @@
+{
+  "number": 54,
+  "title": "Initial work/corrections on GObj",
+  "state": "MERGED",
+  "createdAt": "2020-09-27T19:16:33Z",
+  "updatedAt": "2020-09-27T19:16:49Z",
+  "mergedAt": "2020-09-27T19:16:46Z",
+  "closedAt": "2020-09-27T19:16:46Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/54",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 4796
+  }
+}

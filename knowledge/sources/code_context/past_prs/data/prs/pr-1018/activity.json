@@ -1,0 +1,10 @@
+{
+  "pr": 1018,
+  "title": "Fix `build-melee` workflow make flags",
+  "url": "https://github.com/doldecomp/melee/pull/1018",
+  "text_records_with_body": 0,
+  "review_comments": 0,
+  "changed_files": 3,
+  "added_lines": 9,
+  "deleted_lines": 6
+}

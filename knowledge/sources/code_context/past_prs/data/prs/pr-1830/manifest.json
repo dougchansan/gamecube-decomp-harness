@@ -1,0 +1,26 @@
+{
+  "schema_version": "melee_pr_vertical_slice_v1",
+  "pr": 1830,
+  "title": "Run `clang-format` on all src files",
+  "state": "MERGED",
+  "path": "prs/pr-1830",
+  "files": {
+    "raw": [
+      "raw/pr.json",
+      "raw/issue_comments.json",
+      "raw/review_comments.json",
+      "raw/reviews.json",
+      "raw/diff.diff"
+    ],
+    "extracted": [
+      "extracted/text_corpus.jsonl"
+    ],
+    "postmortem": [
+      "postmortem/postmortem.json"
+    ],
+    "metadata": [
+      "counts.json",
+      "activity.json"
+    ]
+  }
+}

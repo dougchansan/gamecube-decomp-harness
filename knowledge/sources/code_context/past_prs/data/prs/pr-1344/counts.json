@@ -1,0 +1,17 @@
+{
+  "number": 1344,
+  "title": "Match 46.47% of `grmaterial` (3.86 KB)",
+  "state": "MERGED",
+  "createdAt": "2024-02-27T19:30:04Z",
+  "updatedAt": "2024-02-27T19:34:22Z",
+  "mergedAt": "2024-02-27T19:34:22Z",
+  "closedAt": "2024-02-27T19:34:22Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1344",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 11551
+  }
+}

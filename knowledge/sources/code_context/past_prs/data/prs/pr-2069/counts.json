@@ -1,0 +1,17 @@
+{
+  "number": 2069,
+  "title": "match and link `ftparts`",
+  "state": "MERGED",
+  "createdAt": "2026-01-08T18:21:51Z",
+  "updatedAt": "2026-01-19T14:25:13Z",
+  "mergedAt": "2026-01-09T00:59:10Z",
+  "closedAt": "2026-01-09T00:59:10Z",
+  "author": "Giga-Bowser",
+  "url": "https://github.com/doldecomp/melee/pull/2069",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 125081
+  }
+}

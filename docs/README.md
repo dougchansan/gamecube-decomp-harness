@@ -35,6 +35,10 @@ docs/
 - [Knowledge resource graph design](resource-graph-design.html) sketches the
   proposed resource registry, vertical-slice indexers, file graph, worker
   lookup APIs, and graph-ranked scheduling layer.
+- [Sidebar flow design](sidebar-flow-design.html) maps the session cycle
+  (sync → init → run → checkpoint/validate → ship → resync), the reconcile
+  agent, the hard sync lock, the local change ledger, and the phase-stepper
+  sidebar — including the canonical Figma-style system map.
 
 ## Documentation Rules
 

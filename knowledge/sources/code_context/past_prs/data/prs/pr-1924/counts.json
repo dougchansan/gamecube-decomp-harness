@@ -1,0 +1,17 @@
+{
+  "number": 1924,
+  "title": "Match all item functions <= 40 bytes",
+  "state": "MERGED",
+  "createdAt": "2025-09-18T20:19:23Z",
+  "updatedAt": "2025-09-19T20:41:13Z",
+  "mergedAt": "2025-09-19T20:41:03Z",
+  "closedAt": "2025-09-19T20:41:03Z",
+  "author": "lukechampine",
+  "url": "https://github.com/doldecomp/melee/pull/1924",
+  "counts": {
+    "issue_comments": 2,
+    "review_comments": 15,
+    "reviews": 6,
+    "diff_bytes": 128089
+  }
+}

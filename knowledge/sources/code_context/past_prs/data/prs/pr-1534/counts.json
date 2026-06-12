@@ -1,0 +1,17 @@
+{
+  "number": 1534,
+  "title": "vi matches for 0502 and 0601",
+  "state": "MERGED",
+  "createdAt": "2025-05-28T20:16:40Z",
+  "updatedAt": "2025-05-28T20:19:50Z",
+  "mergedAt": "2025-05-28T20:19:47Z",
+  "closedAt": "2025-05-28T20:19:47Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/1534",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 20655
+  }
+}

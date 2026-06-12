@@ -1,0 +1,17 @@
+{
+  "number": 406,
+  "title": "Correct Trophy Amount to 293.",
+  "state": "MERGED",
+  "createdAt": "2022-07-08T20:04:11Z",
+  "updatedAt": "2022-07-08T20:04:27Z",
+  "mergedAt": "2022-07-08T20:04:27Z",
+  "closedAt": "2022-07-08T20:04:27Z",
+  "author": "RevoSucks",
+  "url": "https://github.com/doldecomp/melee/pull/406",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 1003
+  }
+}

@@ -1,0 +1,138 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2555",
+  "pr": {
+    "number": 2555,
+    "title": "Remove `un` module from readme",
+    "url": "https://github.com/doldecomp/melee/pull/2555",
+    "state": "MERGED",
+    "author": "ribbanya",
+    "created_at": "2026-05-30T19:56:54Z",
+    "merged_at": "2026-05-30T19:57:22Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Documentation-only PR removing the `un`/Unknown module row from `.github/README.md`'s short-to-full module table. The deleted row stated that `un` is not an actual folder in the original code.",
+  "change_classification": {
+    "primary_type": "documentation",
+    "categories": [
+      "docs",
+      "readme-cleanup",
+      "module-list-maintenance"
+    ],
+    "systems": [
+      "docs",
+      ".github/README.md"
+    ]
+  },
+  "key_files": [
+    {
+      "path": ".github/README.md",
+      "role": "README module-prefix table; removed the `un` Unknown entry",
+      "evidence_refs": [
+        "changed_files:.github/README.md added=0 deleted=1 hunks=1",
+        "raw_diff:.github/README.md @@ -155,7 +155,6 @@"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Removed one table row from `.github/README.md`: `` `un`|Unknown|This isn't an actual folder in the original code.``",
+      "evidence_refs": [
+        "raw_diff:.github/README.md"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Kept the PR narrowly scoped to README documentation, with a one-line deletion and no code or data changes.",
+      "evidence_refs": [
+        "changed_files:.github/README.md added=0 deleted=1 hunks=1",
+        "metadata_json:activity changed_files=1 added_lines=0 deleted_lines=1"
+      ]
+    }
+  ],
+  "decomp_lessons": [],
+  "naming_conventions": [
+    {
+      "text": "Do not treat `un` as a documented module-prefix entry based on this PR; the removed README row explicitly described it as not an actual folder in the original code.",
+      "scope": [
+        ".github/README.md",
+        "module prefix documentation"
+      ],
+      "evidence_refs": [
+        "raw_diff:-`un`|Unknown|This isn't an actual folder in the original code."
+      ],
+      "confidence": 0.86
+    }
+  ],
+  "assembly_or_matching_tactics": [],
+  "review_feedback": [],
+  "searchable_terms": [
+    "pr-2555",
+    "Remove `un` module from readme",
+    "ribbanya",
+    ".github/README.md",
+    "README module table",
+    "module prefixes",
+    "`un`",
+    "Unknown",
+    "not an actual folder",
+    "docs"
+  ],
+  "follow_up_queries": [
+    "Search current README/module-prefix documentation for any remaining `un` Unknown entry before treating it as removed everywhere.",
+    "Search path facts or source docs for `un` module references if curator wants to reconcile module-prefix documentation."
+  ],
+  "evidence_quality": {
+    "status": "strong",
+    "evidence_refs": [
+      "metadata_json:pr number=2555 title=Remove `un` module from readme state=MERGED author=ribbanya merged_at=2026-05-30T19:57:22Z",
+      "changed_files.jsonl:.github/README.md added=0 deleted=1 hunks=1",
+      "raw_diff:.github/README.md removes `un` Unknown row",
+      "text_corpus.jsonl:empty PR body",
+      "metadata_json:counts issue_comments=0 review_comments=0 reviews=0"
+    ],
+    "notes": [
+      "Evidence is strong for the changed file and exact README deletion.",
+      "There is no PR body, review discussion, issue comments, or validation output in the slice.",
+      "No code, assembly, matching, or decompilation behavior is evidenced by this PR."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "`un` was removed from README module-prefix documentation",
+        "text": "PR 2555 removed the `.github/README.md` module table row for `` `un`|Unknown|This isn't an actual folder in the original code.`` Curator may use this as a candidate documentation/path fact that `un` should not be listed as an actual original-code module folder, pending current-source confirmation.",
+        "source_path": ".github/README.md",
+        "scope": [
+          "docs",
+          "module-prefix table",
+          "original-code folder list"
+        ],
+        "evidence_refs": [
+          "raw_diff:.github/README.md",
+          "changed_files:.github/README.md added=0 deleted=1 hunks=1"
+        ],
+        "reason": "The PR directly modifies documentation about module prefixes, but current source should be checked before promoting this as a maintained path fact."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer a repository-wide absence of every `un` path or symbol from this PR alone; the slice only proves a README row was removed.",
+      "Do not infer reviewer intent or validation status; no reviews, comments, or checks are included in the PR slice.",
+      "Do not extract assembly or matching tactics from this PR; it contains no code or decompilation diff."
+    ]
+  },
+  "confidence": 0.92,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

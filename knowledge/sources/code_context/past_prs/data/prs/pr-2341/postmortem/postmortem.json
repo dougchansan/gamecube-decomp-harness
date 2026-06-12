@@ -1,0 +1,414 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2341",
+  "pr": {
+    "number": 2341,
+    "title": "gr: decompile 7 stage functions",
+    "url": "https://github.com/doldecomp/melee/pull/2341",
+    "state": "MERGED",
+    "author": "johnwinston",
+    "created_at": "2026-03-21T15:02:14Z",
+    "merged_at": "2026-03-21T20:48:20Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Decompiled several stage-related functions across granime, Corneria, Home-Run Contest, Kongo Jungle, Dream Land, and Rainbow Cruise, with associated header/type updates. The PR body claims all 7 functions matched by overnight script, while the loaded bot report records one 100% new match and several high-percent unmatched improvements plus small data-section regressions.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "types",
+      "stage"
+    ],
+    "systems": [
+      "stage",
+      "ground",
+      "animation",
+      "collision"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gr/granime.c",
+      "role": "Decompiled grAnime_801C83D0 and added baselib/aobj.h include for HSD_AObjGetFlags.",
+      "evidence_refs": [
+        "diff: src/melee/gr/granime.c",
+        "pr_body: Summary lists grAnime_801C83D0"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grcorneria.c",
+      "role": "Decompiled grCorneria_801DDDA8, moved local Corneria data typedef/extern block earlier, and used Ground/JObj position data plus Corneria data offsets to fill a Vec3.",
+      "evidence_refs": [
+        "diff: src/melee/gr/grcorneria.c",
+        "pr_body: Summary lists grCorneria_801DDDA8"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grcorneria.h",
+      "role": "Updated grCorneria_801DDDA8 prototype from UNK_RET/UNK_PARAMS to void grCorneria_801DDDA8(HSD_GObj*, Vec3*).",
+      "evidence_refs": [
+        "diff: src/melee/gr/grcorneria.h"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grhomerun.c",
+      "role": "Decompiled grHomeRun_8021EDD4 and added grHr_804D6AD8 storage used by the setup calculation.",
+      "evidence_refs": [
+        "diff: src/melee/gr/grhomerun.c",
+        "pr_body: Summary lists grHomeRun_8021EDD4"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grkongo.c",
+      "role": "Decompiled fn_801D7700 collision-related callback and grKongo_801D7F78 entity-position proximity query.",
+      "evidence_refs": [
+        "diff: src/melee/gr/grkongo.c",
+        "pr_body: Summary lists fn_801D7700 and grKongo_801D7F78"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grkongo.h",
+      "role": "Updated grKongo_801D7E78 prototype from unknown signature to Vec3* grKongo_801D7E78(HSD_GObj*, Vec3*).",
+      "evidence_refs": [
+        "diff: src/melee/gr/grkongo.h"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grkongo.static.h",
+      "role": "Extended grKg_804D6980 static struct with unk9C, unkA0, and unkA4 fields used by Kongo decompiled code.",
+      "evidence_refs": [
+        "diff: src/melee/gr/grkongo.static.h"
+      ]
+    },
+    {
+      "path": "src/melee/gr/groldpupupu.c",
+      "role": "Decompiled grOldPupupu_80210A24 and added small animation-index tables used by switch cases.",
+      "evidence_refs": [
+        "diff: src/melee/gr/groldpupupu.c",
+        "bot_report: groldpupupu grOldPupupu_80210A24 reported as 100.00%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grrcruise.c",
+      "role": "Decompiled grRCruise_80200074 initialization loop for Rainbow Cruise platform subentries and added extern grRc_804D4790.",
+      "evidence_refs": [
+        "diff: src/melee/gr/grrcruise.c",
+        "pr_body: Summary lists grRCruise_80200074"
+      ]
+    },
+    {
+      "path": "src/melee/gr/types.h",
+      "role": "Added typed grRCruise_SubEntry and replaced grRCruise_GroundVars pad_3C with x3C[3].",
+      "evidence_refs": [
+        "diff: src/melee/gr/types.h"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Replaced placeholder comments for seven stage functions listed in the PR body: grAnime_801C83D0, grRCruise_80200074, grOldPupupu_80210A24, fn_801D7700, grKongo_801D7F78, grHomeRun_8021EDD4, and grCorneria_801DDDA8.",
+    "Updated header prototypes for recovered signatures in grcorneria.h and grkongo.h.",
+    "Added or refined stage-local data declarations and struct fields needed by the recovered bodies, including grRCruise_SubEntry and extra fields on grKg_804D6980.",
+    "Used natural loops in grRCruise_80200074 over three Rainbow Cruise subentries and in grKongo_801D7F78 over HSD_GObj_Entities.",
+    "Used stage/ground variable union fields such as gp->gv.rcruise.x3C, gp->gv.corneria, and gp->gv.unk rather than only raw pointer math, though grCorneria_801DDDA8 still uses pad-offset casts into grCn_Data."
+  ],
+  "smart_moves": [
+    {
+      "text": "When grRCruise_80200074 needed repeated initialization for three similar entries, the PR expressed it as a for loop over gp->gv.rcruise.x3C[i] rather than three copied blocks.",
+      "evidence_refs": [
+        "diff: src/melee/gr/grrcruise.c"
+      ]
+    },
+    {
+      "text": "The PR paired function body recovery with prototype updates, replacing UNK_RET/UNK_PARAMS for grCorneria_801DDDA8 and grKongo_801D7E78.",
+      "evidence_refs": [
+        "diff: src/melee/gr/grcorneria.h",
+        "diff: src/melee/gr/grkongo.h"
+      ]
+    },
+    {
+      "text": "The Rainbow Cruise update converted a raw 0x30-byte pad region into a typed array of three subentries, making field roles and stride explicit.",
+      "evidence_refs": [
+        "diff: src/melee/gr/types.h",
+        "diff: src/melee/gr/grrcruise.c"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For stage object initialization code, a small fixed array in GroundVars can often replace a raw pad region once the repeated per-joint fields are clear.",
+      "scope": [
+        "src/melee/gr/types.h",
+        "src/melee/gr/grrcruise.c"
+      ],
+      "evidence_refs": [
+        "diff: grRCruise_SubEntry added with x00/x02/x04/x08/x0C fields",
+        "diff: grRCruise_80200074 initializes x3C[i] in a loop"
+      ]
+    },
+    {
+      "lesson": "When a decompiled function proves a signature, update the owning header instead of leaving UNK_RET/UNK_PARAMS.",
+      "scope": [
+        "src/melee/gr/grcorneria.h",
+        "src/melee/gr/grkongo.h"
+      ],
+      "evidence_refs": [
+        "diff: grCorneria_801DDDA8 prototype updated",
+        "diff: grKongo_801D7E78 prototype updated",
+        "decomp_standard: truthful-headers-and-includes"
+      ]
+    },
+    {
+      "lesson": "Stage animation state checks can use baselib animation helpers directly when the needed type/include is recovered.",
+      "scope": [
+        "src/melee/gr/granime.c"
+      ],
+      "evidence_refs": [
+        "diff: added <baselib/aobj.h>",
+        "diff: grAnime_801C83D0 calls HSD_AObjGetFlags"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "grRCruise_SubEntry",
+      "kind": "struct",
+      "context": "Typed replacement for part of grRCruise_GroundVars previously represented as pad_3C[0x30].",
+      "evidence_refs": [
+        "diff: src/melee/gr/types.h"
+      ]
+    },
+    {
+      "name": "x3C",
+      "kind": "field",
+      "context": "Address-style field name retained for newly typed Rainbow Cruise subentry array where semantics remain partly unknown.",
+      "evidence_refs": [
+        "diff: src/melee/gr/types.h"
+      ]
+    },
+    {
+      "name": "unk9C/unkA0/unkA4",
+      "kind": "fields",
+      "context": "Unknown semantic field names added to a Kongo static struct; grKongo code uses unkA4 in angle accumulation.",
+      "evidence_refs": [
+        "diff: src/melee/gr/grkongo.static.h",
+        "diff: src/melee/gr/grkongo.c"
+      ]
+    },
+    {
+      "name": "fn_801D7700",
+      "kind": "function",
+      "context": "Address-style static function name retained despite PR body describing collision behavior, consistent with conservative naming when semantics are not fully proven.",
+      "evidence_refs": [
+        "diff: src/melee/gr/grkongo.c",
+        "pr_body: Kongo Jungle barrel cannon description"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "PAD_STACK used in recovered functions where stack shape apparently needed padding.",
+      "evidence_refs": [
+        "diff: grCorneria_801DDDA8 has PAD_STACK(4)",
+        "diff: grKongo_801D7F78 has PAD_STACK(16)"
+      ],
+      "notes": "Loaded evidence does not include objdiff details for why each PAD_STACK was required."
+    },
+    {
+      "tactic": "Introduced local typed struct overlays and extern data declarations to make stage data accesses compile and match.",
+      "evidence_refs": [
+        "diff: grCn_Entry and grCn_Data in grcorneria.c",
+        "diff: grRCruise_SubEntry in types.h"
+      ],
+      "notes": "Corneria still uses pad-offset casts into grCn_Data, suggesting incomplete data typing."
+    },
+    {
+      "tactic": "Used casts and duplicated locals to influence code shape in numeric routines.",
+      "evidence_refs": [
+        "diff: grHomeRun_8021EDD4 casts rounded tick calculation to int then stores in f32 num_ticks",
+        "diff: fn_801D7700 uses idx and idx2 from the same ratio before clamping"
+      ],
+      "notes": "No reviewer explanation is loaded; treat as observed matching-shaped source, not a global recommendation."
+    },
+    {
+      "tactic": "Used natural loops for repeated entity/subentry handling.",
+      "evidence_refs": [
+        "diff: grRCruise_80200074 for loop i < 3",
+        "diff: grKongo_801D7F78 iterates HSD_GObj_Entities->x14 linked list",
+        "decomp_standard: natural-loops"
+      ],
+      "notes": "This aligns with the loaded natural-loops standard."
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "author": "decomp-dev[bot]",
+      "text": "Report for GALE01 showed matched code 59.40% (+0.01%, +220 bytes), one new 100% match for groldpupupu grOldPupupu_80210A24, nine improvements in unmatched items, and two data-section regressions.",
+      "evidence_refs": [
+        "text_corpus: issue_comment by decomp-dev[bot] created_at 2026-03-21T15:07:06Z"
+      ]
+    },
+    {
+      "kind": "absence",
+      "author": null,
+      "text": "No loaded review comments or human review feedback were present in this PR slice.",
+      "evidence_refs": [
+        "metadata_json: review_comments 0, reviews 0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2341",
+    "gr decompile 7 stage functions",
+    "johnwinston",
+    "src/melee/gr/granime.c",
+    "src/melee/gr/grcorneria.c",
+    "src/melee/gr/grhomerun.c",
+    "src/melee/gr/grkongo.c",
+    "src/melee/gr/groldpupupu.c",
+    "src/melee/gr/grrcruise.c",
+    "src/melee/gr/types.h",
+    "grAnime_801C83D0",
+    "grRCruise_80200074",
+    "grOldPupupu_80210A24",
+    "fn_801D7700",
+    "grKongo_801D7F78",
+    "grHomeRun_8021EDD4",
+    "grCorneria_801DDDA8",
+    "grKongo_801D7E78",
+    "grRCruise_SubEntry",
+    "PAD_STACK",
+    "HSD_AObjGetFlags",
+    "Ground_801C3FA4",
+    "mpVtxGetPos",
+    "mpJointSetCb1",
+    "lbLang_IsSavedLanguageJP",
+    "grCn_Data",
+    "grKg_804D6980",
+    "grRc_804D4790"
+  ],
+  "follow_up_queries": [
+    "Find later PRs touching grCorneria_801DDDA8 or grCn_Data to see whether pad-offset casts were replaced with typed fields.",
+    "Search for later changes to grRCruise_SubEntry and grRCruise_GroundVars x3C field names.",
+    "Search for grKg_804D6980 unkA4 rename or struct refinement in Kongo stage files.",
+    "Check whether grHomeRun_8021EDD4 later became a full 100% match or had sbss/sdata2 cleanup after the bot-reported regressions.",
+    "Search PRs referencing PAD_STACK in grCorneria_801DDDA8 or grKongo_801D7F78 for cleanup or verifier evidence."
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR #2341 state MERGED and changed_files list",
+      "human_pr_text: summary and verification claim",
+      "raw_diff: full diff excerpt for ten changed files",
+      "text_corpus: decomp-dev[bot] report"
+    ],
+    "notes": [
+      "The diff strongly supports changed files and source-level edits.",
+      "The PR body claims all 7 functions were 100% matched by overnight script, but the loaded bot report only records grOldPupupu_80210A24 as a new 100.00% match and reports the other named functions as high-percent unmatched improvements from 98.98% to 99.89%. This intake does not resolve that discrepancy.",
+      "No review comments are loaded, so reviewer intent or requested changes cannot be inferred.",
+      "Several semantic descriptions come from the PR body; they are author-provided and not independently proven by review comments in this slice.",
+      "PAD_STACK usage is visible in the diff, but the loaded evidence lacks narrow objdiff justification for each instance."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson_candidate",
+        "title": "Replace recovered GroundVars pads with typed fixed arrays when repeated stage initialization reveals stride and fields",
+        "text": "In PR #2341, Rainbow Cruise initialization recovered a loop over three subentries and paired it with a new grRCruise_SubEntry type, replacing pad_3C[0x30] with x3C[3]. This is a graph-safe candidate for the lesson that repeated stage-object setup can justify a narrow typed GroundVars substructure.",
+        "scope": [
+          "src/melee/gr/types.h",
+          "src/melee/gr/grrcruise.c"
+        ],
+        "evidence_refs": [
+          "diff: struct grRCruise_SubEntry added",
+          "diff: grRCruise_80200074 initializes gp->gv.rcruise.x3C[i]"
+        ]
+      },
+      {
+        "record_type": "decomp_lesson_candidate",
+        "title": "Function recovery should update owning headers when signatures are proven",
+        "text": "PR #2341 updated grCorneria_801DDDA8 and grKongo_801D7E78 declarations from unknown prototypes to concrete signatures in their owning headers alongside decompiled bodies/calls.",
+        "scope": [
+          "src/melee/gr/grcorneria.h",
+          "src/melee/gr/grkongo.h"
+        ],
+        "evidence_refs": [
+          "diff: grcorneria.h prototype update",
+          "diff: grkongo.h prototype update",
+          "decomp_standard: truthful-headers-and-includes"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Require explicit verifier notes for PAD_STACK kept in matched stage functions",
+        "text": "PR #2341 contains PAD_STACK(4) in grCorneria_801DDDA8 and PAD_STACK(16) in grKongo_801D7F78, but the loaded slice does not show per-function objdiff justification. This supports curator review of whether standards should emphasize recording narrow evidence whenever PAD_STACK remains.",
+        "source_path": null,
+        "scope": [
+          "stage decomp",
+          "matching tactics",
+          "PAD_STACK"
+        ],
+        "evidence_refs": [
+          "diff: src/melee/gr/grcorneria.c",
+          "diff: src/melee/gr/grkongo.c",
+          "decomp_standard: matching-tactics-need-evidence"
+        ],
+        "reason": "Existing standards already say matching tactics need evidence; this PR is a concrete example that could be used to enrich guidance if curator wants examples."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "Stage ground variable types live in src/melee/gr/types.h and are used by stage source files",
+        "text": "PR #2341 added grRCruise_SubEntry to src/melee/gr/types.h and used it from src/melee/gr/grrcruise.c via gp->gv.rcruise.x3C[i].",
+        "source_path": "src/melee/gr/types.h",
+        "scope": [
+          "src/melee/gr",
+          "GroundVars",
+          "Rainbow Cruise"
+        ],
+        "evidence_refs": [
+          "diff: src/melee/gr/types.h",
+          "diff: src/melee/gr/grrcruise.c"
+        ],
+        "reason": "Possible path fact for where stage GroundVars layouts are refined; route to curator rather than accepting from a single PR intake."
+      },
+      {
+        "target_source_id": "other",
+        "update_kind": "source_update",
+        "title": "Investigate PR/report mismatch on claimed 100% matches",
+        "text": "The PR body says all 7 functions are 100% matched, but the loaded bot report lists only grOldPupupu_80210A24 as a new 100.00% match and shows the other functions as 98.98%-99.89% improvements in unmatched items.",
+        "source_path": null,
+        "scope": [
+          "PR evidence normalization",
+          "verification records"
+        ],
+        "evidence_refs": [
+          "human_pr_text: Verification section",
+          "text_corpus: decomp-dev[bot] issue_comment"
+        ],
+        "reason": "Curator may want to link both records or avoid promoting the PR-body verification claim as final without additional evidence."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote the PR body's statement that all 7 functions are 100% matched as an accepted validation result because the loaded bot report conflicts with it.",
+      "Do not infer human reviewer approval details; no review comments or reviews are present in the loaded slice.",
+      "Do not promote Corneria grCn_Data pad-offset casts as preferred style; they are observed in this PR but conflict with the broader typed-fields-over-pointer-math direction unless later evidence explains them.",
+      "Do not infer semantic names for unk fields such as grKg_804D6980->unkA4 or grRCruise_SubEntry fields beyond what the diff directly shows."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

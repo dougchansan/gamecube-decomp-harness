@@ -1,0 +1,17 @@
+{
+  "number": 2129,
+  "title": "mndiagram, mndiagram2 matches & naming",
+  "state": "MERGED",
+  "createdAt": "2026-01-25T03:20:39Z",
+  "updatedAt": "2026-05-16T08:46:16Z",
+  "mergedAt": "2026-01-27T02:26:27Z",
+  "closedAt": "2026-01-27T02:26:27Z",
+  "author": "itsgrimetime",
+  "url": "https://github.com/doldecomp/melee/pull/2129",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 1,
+    "reviews": 2,
+    "diff_bytes": 81191
+  }
+}

@@ -1,0 +1,183 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2474",
+  "pr": {
+    "number": 2474,
+    "title": "fix: the custom strcpy(char *dst, char *src) and str... in...",
+    "url": "https://github.com/doldecomp/melee/pull/2474",
+    "state": "CLOSED",
+    "author": "orbisai0security",
+    "created_at": "2026-05-10T01:52:04Z",
+    "merged_at": null
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Automated security-fix PR against an external Dolphin charPipeline header. It changed only the declarations of Strcat and Strcpy in dolphinString.h to add a u32 dst_size parameter. The slice contains no review comments, no implementation or callsite updates, and no merge evidence.",
+  "change_classification": {
+    "primary_type": "header_signature_change",
+    "categories": [
+      "fix",
+      "headers",
+      "external-sdk",
+      "api-signature"
+    ],
+    "systems": [
+      "extern/dolphin",
+      "charPipeline"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "extern/dolphin/include/charPipeline/structures/dolphinString.h",
+      "role": "Only changed file; Strcat and Strcpy prototypes gained a u32 dst_size parameter.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff",
+        "human_pr_text"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Changed Strcat declaration from `u8 Strcat(char *str1, char *str2, char *dst);` to `u8 Strcat(char *str1, char *str2, char *dst, u32 dst_size);`.",
+      "evidence_refs": [
+        "raw_diff"
+      ]
+    },
+    {
+      "text": "Changed Strcpy declaration from `void Strcpy(char *dst, char *src);` to `void Strcpy(char *dst, char *src, u32 dst_size);`.",
+      "evidence_refs": [
+        "raw_diff"
+      ]
+    },
+    {
+      "text": "PR body framed the change as a critical scanner-found bounds-checking fix for `extern/dolphin/include/charPipeline/structures/dolphinString.h:10`.",
+      "evidence_refs": [
+        "human_pr_text",
+        "text_corpus.jsonl"
+      ]
+    }
+  ],
+  "smart_moves": [],
+  "decomp_lessons": [
+    {
+      "lesson": "A header-only prototype change is not enough evidence to conclude a safe API migration in a decomp project; matching callsite and implementation updates would normally be needed before treating the signature change as integrated.",
+      "scope": [
+        "headers",
+        "external-sdk",
+        "api-signature"
+      ],
+      "evidence_refs": [
+        "raw_diff",
+        "changed_files.jsonl"
+      ],
+      "confidence": 0.72
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "dst_size",
+      "context": "New parameter name added to Strcat and Strcpy declarations.",
+      "evidence_refs": [
+        "raw_diff"
+      ],
+      "confidence": 0.95
+    }
+  ],
+  "assembly_or_matching_tactics": [],
+  "review_feedback": [],
+  "searchable_terms": [
+    "pr-2474",
+    "orbisai0security",
+    "dolphinString.h",
+    "extern/dolphin/include/charPipeline/structures/dolphinString.h",
+    "charPipeline",
+    "Strcat",
+    "Strcpy",
+    "dst_size",
+    "u32 dst_size",
+    "header signature change",
+    "bounds checking",
+    "scanner",
+    "multi_agent_ai",
+    "V-001",
+    "closed unmerged"
+  ],
+  "follow_up_queries": [
+    "Strcat dst_size dolphinString.h",
+    "Strcpy dst_size dolphinString.h",
+    "extern/dolphin/include/charPipeline/structures/dolphinString.h Strcat Strcpy",
+    "call sites of Strcat and Strcpy after PR 2474",
+    "definitions of Strcat Strcpy charPipeline"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json",
+      "human_pr_text",
+      "raw_diff",
+      "changed_files.jsonl",
+      "text_corpus.jsonl"
+    ],
+    "notes": [
+      "Changed file and exact diff are clear: one header, two prototype edits.",
+      "No implementation files or callsites are present in the PR slice.",
+      "No review comments, issue comments, or reviews are present.",
+      "PR body claims build passed, scanner re-scan confirmed, and LLM review passed, but the slice provides only the author's checklist text, not independent CI, scanner, or reviewer evidence.",
+      "PR state is closed with merged_at null; do not treat the change as merged or accepted."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "kind": "pr_postmortem_lesson",
+        "title": "Header-only API signature changes need implementation and callsite evidence",
+        "text": "PR #2474 changed only `dolphinString.h` declarations for `Strcat` and `Strcpy` to add `u32 dst_size`. Because no implementation or callsite updates are present in the slice, it is useful as a cautionary example: do not infer an integrated or safe API migration from a prototype-only diff.",
+        "scope": [
+          "headers",
+          "external-sdk",
+          "api-signature"
+        ],
+        "evidence_refs": [
+          "raw_diff",
+          "changed_files.jsonl",
+          "metadata_json"
+        ],
+        "confidence": 0.72
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Require body and callsite coverage for decomp header signature changes",
+        "text": "When a PR changes a public or shared header function signature, curator may consider adding guidance that the matching implementation, owning header, and callsites should be reviewed together unless the PR provides evidence that declarations are intentionally staged or unused.",
+        "source_path": null,
+        "scope": [
+          "headers",
+          "truthful-headers-and-includes",
+          "api-signature"
+        ],
+        "evidence_refs": [
+          "raw_diff",
+          "changed_files.jsonl"
+        ],
+        "reason": "This PR is a compact example of a header-only signature change with no accompanying body/callsite evidence. Existing `truthful-headers-and-includes` covers proven signatures, but curator may decide whether to make callsite/body consistency explicit."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote the PR body's security severity, scanner result, build pass, or LLM review pass as verified project facts; they are only author-provided checklist claims in this slice.",
+      "Do not infer reviewer intent or rejection rationale from the closed, unmerged state; there are no comments or reviews in the slice.",
+      "Do not record `dst_size` as an accepted project-wide naming standard from this single closed, unmerged header-only PR."
+    ]
+  },
+  "confidence": 0.74,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

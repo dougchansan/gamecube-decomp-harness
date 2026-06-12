@@ -1,0 +1,17 @@
+{
+  "number": 1640,
+  "title": "Match dolphin OSExi",
+  "state": "MERGED",
+  "createdAt": "2025-06-26T06:10:40Z",
+  "updatedAt": "2025-06-26T06:17:38Z",
+  "mergedAt": "2025-06-26T06:17:36Z",
+  "closedAt": "2025-06-26T06:17:36Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1640",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 11263
+  }
+}

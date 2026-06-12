@@ -1,0 +1,17 @@
+{
+  "number": 1723,
+  "title": "Consolidated particle structs",
+  "state": "MERGED",
+  "createdAt": "2025-07-22T15:16:11Z",
+  "updatedAt": "2025-07-23T01:37:27Z",
+  "mergedAt": "2025-07-23T01:37:27Z",
+  "closedAt": "2025-07-23T01:37:27Z",
+  "author": "AaronB-Hub",
+  "url": "https://github.com/doldecomp/melee/pull/1723",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 119388
+  }
+}

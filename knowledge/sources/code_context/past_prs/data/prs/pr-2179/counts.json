@@ -1,0 +1,17 @@
+{
+  "number": 2179,
+  "title": "Update CONTRIBUTING.md to reflect correct channel",
+  "state": "CLOSED",
+  "createdAt": "2026-02-21T10:32:57Z",
+  "updatedAt": "2026-02-21T12:13:39Z",
+  "mergedAt": null,
+  "closedAt": "2026-02-21T12:13:39Z",
+  "author": "jurrejelle",
+  "url": "https://github.com/doldecomp/melee/pull/2179",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 707
+  }
+}

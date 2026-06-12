@@ -7,6 +7,6 @@ Worker-facing commands:
 - `python3 tools/source_editing/source_permuter/api/replay.py --repo-root <repo_root> --replay <recipe.json> --json`
 - `python3 tools/source_editing/source_permuter/api/preview_mutation.py --repo-root <repo_root> --source-path <src.c> --function <symbol> --json`
 
-`run.py` and `replay.py` preserve the harness command output. `preview_mutation.py`
+`run.py` and `replay.py` preserve the tool-local command output. `preview_mutation.py`
 is useful for asking "what kind of source-shape change would this pass try?"
 before spending compile time.

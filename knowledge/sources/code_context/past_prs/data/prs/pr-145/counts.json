@@ -1,0 +1,17 @@
+{
+  "number": 145,
+  "title": "Fix some sdata2 placement from recent change",
+  "state": "MERGED",
+  "createdAt": "2021-12-04T06:12:17Z",
+  "updatedAt": "2021-12-04T06:12:27Z",
+  "mergedAt": "2021-12-04T06:12:24Z",
+  "closedAt": "2021-12-04T06:12:24Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/145",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 2440
+  }
+}

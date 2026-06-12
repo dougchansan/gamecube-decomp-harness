@@ -1,0 +1,10 @@
+{
+  "pr": 1088,
+  "title": "Import symbol names and scopes from `GALE01.map` to `symbols.txt`",
+  "url": "https://github.com/doldecomp/melee/pull/1088",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 4,
+  "added_lines": 19134,
+  "deleted_lines": 19124
+}

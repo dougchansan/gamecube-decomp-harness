@@ -1,0 +1,447 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2620",
+  "pr": {
+    "number": 2620,
+    "title": "Improvements to split up: FT",
+    "url": "https://github.com/doldecomp/melee/pull/2620",
+    "state": "MERGED",
+    "author": "fjooord",
+    "created_at": "2026-06-08T14:30:28Z",
+    "merged_at": "2026-06-08T15:10:00Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Fighter subsystem matching slice split from PR #2617. It touched nine src/melee/ft files, producing 6 new matches and 11 unmatched-item improvements in the decomp-dev report, including full matches for ftmaterial data, ftCo_800D730C, ftCo_80093BC0, ftCo_800978D4, ftMaterial_800BF260, and ftMaterial_800BF534.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "fighter subsystem matching",
+      "source cleanup",
+      "stack/codegen shaping",
+      "data matching"
+    ],
+    "systems": [
+      "fighter",
+      "ftCommon",
+      "ftKirby",
+      "ftNana",
+      "ftcoll",
+      "ftmaterial"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_0A01.c",
+      "role": "Cleaned fighter common matching code by replacing a temporary pointer to fp->co_attrs.grav with direct field access, reusing ftCo_800AD54C_inline0 for a repeated CPU-command sequence, using ftCo_800A1AB4 for distance, and replacing an M2C_FIELD access with Fighter_804D64FC->x20[fp->kind].",
+      "evidence_refs": [
+        "changed_files.jsonl: ftCo_0A01.c added 8 deleted 20 hunks 7",
+        "raw_diff: ftCo_800A9CB4, ftCo_800AB224, ftCo_800AF290, ftCo_800AF78C_inline0",
+        "text_corpus: decomp-dev report lists ftCo_800AF290 and ftCo_800A9CB4 improvements"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_Attack100.c",
+      "role": "Adjusted declaration/order and data access in ftCo_800D730C, used ftCo_804D9018 for vel.z, changed link catch attrs type, and passed fp->fv.lk.xC directly to it_802A2B10 in fn_800D8EC8.",
+      "evidence_refs": [
+        "changed_files.jsonl: ftCo_Attack100.c added 10 deleted 7 hunks 5",
+        "raw_diff: ftCo_800D730C and fn_800D8EC8",
+        "text_corpus: decomp-dev report lists ftCo_800D730C as 100% and fn_800D8EC8 improved to 99.99%"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_DamageIce.c",
+      "role": "Expanded rotation-matrix handling in ftCo_DamageIce_Init with HSD_JObjGetRotation, quaternion flag checks, HSD_MkRotationMtx/HSD_MtxQuat, and PSMTXTranspose.",
+      "evidence_refs": [
+        "changed_files.jsonl: ftCo_DamageIce.c added 21 deleted 4 hunks 2",
+        "raw_diff: ftCo_DamageIce_Init",
+        "text_corpus: decomp-dev report lists ftCo_DamageIce_Init improvement"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_DownBound.c",
+      "role": "Inlined the top joint argument into efAsync_Spawn in ftCo_800978D4, contributing to a reported full match.",
+      "evidence_refs": [
+        "changed_files.jsonl: ftCo_DownBound.c added 2 deleted 3 hunks 1",
+        "raw_diff: ftCo_800978D4",
+        "text_corpus: decomp-dev report lists ftCo_800978D4 as 100%"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_Guard.c",
+      "role": "Adjusted PAD_STACK sizing/placement and changed gobj->user_data access to GET_FIGHTER in ftCo_80093BC0, contributing to a reported full match.",
+      "evidence_refs": [
+        "changed_files.jsonl: ftCo_Guard.c added 3 deleted 2 hunks 3",
+        "raw_diff: ftCo_80092908, ftCo_80093BC0, ftCo_GuardReflect_Anim",
+        "text_corpus: decomp-dev report lists ftCo_80093BC0 as 100% and ftCo_80092908 improved"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftkirbyyoshiegg.c",
+      "role": "Introduced a local pointer to fp->co_attrs.xBC and PAD_STACK in inlineB0, improving ftKb_SpecialNYs_8010AC78 according to the bot report.",
+      "evidence_refs": [
+        "changed_files.jsonl: ftkirbyyoshiegg.c added 7 deleted 3 hunks 1",
+        "raw_diff: inlineB0",
+        "text_corpus: decomp-dev report lists ftKb_SpecialNYs_8010AC78 improvement"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftNana/ftNn_Init.c",
+      "role": "Introduced an inner block and fp2 alias before ftCommon_8007D5D4 in ftPp_SpecialS_0_Coll_inline3 for matching improvement.",
+      "evidence_refs": [
+        "changed_files.jsonl: ftNn_Init.c added 4 deleted 1 hunks 1",
+        "raw_diff: ftPp_SpecialS_0_Coll_inline3",
+        "text_corpus: decomp-dev report lists ftPp_SpecialS_0_Coll improvement"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftcoll.c",
+      "role": "Changed pl_8003E17C argument order, local declaration order, and a float zero comparison form in ftColl_80077C60.",
+      "evidence_refs": [
+        "changed_files.jsonl: ftcoll.c added 3 deleted 3 hunks 2",
+        "raw_diff: ftColl_80077C60",
+        "text_corpus: decomp-dev report lists ftColl_80077C60 improvement"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftmaterial.c",
+      "role": "Added static HSD_TevDesc and HSD_TECnst data near ftMObj, yielding reported 100% .data and full matches for ftMaterial_800BF260 and ftMaterial_800BF534.",
+      "evidence_refs": [
+        "changed_files.jsonl: ftmaterial.c added 17 deleted 0 hunks 1",
+        "raw_diff: ftMaterial_803C69D0 and ftMaterial_803C6A44 additions",
+        "text_corpus: decomp-dev report lists ftmaterial .data as 100% and ftMaterial_800BF260/ftMaterial_800BF534 as 100%"
+      ]
+    }
+  ],
+  "what_changed": [
+    "The PR was scoped to src/melee/ft and split from PR #2617 by directory/subsystem for reviewability.",
+    "The diff made targeted fighter-source matching changes across ftCommon, ftKirby, ftNana, ftcoll, and ftmaterial.",
+    "The decomp-dev bot reported +1280 matched-code bytes, +336 matched-data bytes, 6 new matches, and 11 improvements in unmatched items for this slice.",
+    "Several changes replaced generated-looking or less-typed access patterns with helper calls or typed fields, such as ftCo_800A1AB4 and Fighter_804D64FC->x20[fp->kind].",
+    "Several changes were codegen-shaping edits involving declaration order, local aliases, PAD_STACK, and small expression rewrites.",
+    "ftmaterial.c added static material/TEV data that the report ties to 100% ftmaterial .data."
+  ],
+  "smart_moves": [
+    {
+      "text": "Using the existing ftCo_800AD54C_inline0 helper replaced a repeated literal sequence of ftCo_800B46B8/ftCo_800B463C CPU-command calls in ftCo_800AB224.",
+      "evidence_refs": [
+        "raw_diff: ftCo_800AB224"
+      ]
+    },
+    {
+      "text": "Replacing manual dx/dy/sqrt distance code with ftCo_800A1AB4 reduced duplicated distance logic in ftCo_800AF290.",
+      "evidence_refs": [
+        "raw_diff: ftCo_800AF290"
+      ]
+    },
+    {
+      "text": "Replacing M2C_FIELD(Fighter_804D64FC, float**, 0x20)[fp->kind] with Fighter_804D64FC->x20[fp->kind] improved typed access in ftCo_800AF78C_inline0.",
+      "evidence_refs": [
+        "raw_diff: ftCo_800AF78C_inline0"
+      ]
+    },
+    {
+      "text": "The author kept the PR path-scoped to src/melee/ft and documented that per-PR CI/decomp-dev reporting is authoritative for the split slice.",
+      "evidence_refs": [
+        "human_pr_text: Scope and Preliminary Report",
+        "text_corpus: decomp-dev issue comment"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When matching fighter code, check for existing local helpers before preserving repeated generated-looking call sequences or hand-expanded math.",
+      "scope": [
+        "src/melee/ft/chara/ftCommon"
+      ],
+      "evidence_refs": [
+        "raw_diff: ftCo_800AB224 repeated CPU command calls replaced by ftCo_800AD54C_inline0",
+        "raw_diff: ftCo_800AF290 manual distance calculation replaced by ftCo_800A1AB4"
+      ],
+      "confidence": 0.86
+    },
+    {
+      "lesson": "Typed fighter globals and nested fields can be preferable to M2C_FIELD/raw offset access when the structure member is known.",
+      "scope": [
+        "src/melee/ft/chara/ftCommon/ftCo_0A01.c"
+      ],
+      "evidence_refs": [
+        "raw_diff: ftCo_800AF78C_inline0 changes M2C_FIELD(Fighter_804D64FC, float**, 0x20)[fp->kind] to Fighter_804D64FC->x20[fp->kind]",
+        "decomp_standards: typed-fields-over-pointer-math"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "lesson": "Declaration order, temporary aliases, direct field-vs-pointer access, and PAD_STACK sizing can affect MWCC matching, but this PR only supports them as narrow matching tactics tied to bot-reported improvements.",
+      "scope": [
+        "src/melee/ft"
+      ],
+      "evidence_refs": [
+        "raw_diff: ftCo_Attack100.c declaration/order changes",
+        "raw_diff: ftkirbyyoshiegg.c xBCp alias and PAD_STACK(16)",
+        "raw_diff: ftCo_Guard.c PAD_STACK changes",
+        "raw_diff: ftNn_Init.c fp2 alias",
+        "text_corpus: decomp-dev report"
+      ],
+      "confidence": 0.72
+    },
+    {
+      "lesson": "Data additions can be part of a matching slice when the decomp report directly ties them to .data closure, but their ownership should remain evidence-bound to the touched translation unit.",
+      "scope": [
+        "src/melee/ft/ftmaterial.c"
+      ],
+      "evidence_refs": [
+        "raw_diff: ftMaterial_803C69D0 and ftMaterial_803C6A44 static additions",
+        "text_corpus: decomp-dev report lists main/melee/ft/ftmaterial .data as 100.00%"
+      ],
+      "confidence": 0.78
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "ftCo_LinkCatchAttrs",
+      "kind": "type",
+      "text": "fn_800D8EC8 changed attrs from struct ftLk_DatAttrs* to ftCo_LinkCatchAttrs*, indicating a more specific local type name for the common Link catch attributes in this context.",
+      "evidence_refs": [
+        "raw_diff: ftCo_Attack100.c fn_800D8EC8"
+      ],
+      "confidence": 0.74
+    },
+    {
+      "name": "xBCp",
+      "kind": "local pointer",
+      "text": "ftkirbyyoshiegg inlineB0 used xBCp as a short pointer alias for fp->co_attrs.xBC.",
+      "evidence_refs": [
+        "raw_diff: ftkirbyyoshiegg.c inlineB0"
+      ],
+      "confidence": 0.7
+    },
+    {
+      "name": "fp2",
+      "kind": "local alias",
+      "text": "ftNn_Init introduced fp2 as an inner-block alias of fp before calling ftCommon_8007D5D4; evidence supports this as a matching tactic, not a semantic naming standard.",
+      "evidence_refs": [
+        "raw_diff: ftNn_Init.c ftPp_SpecialS_0_Coll_inline3"
+      ],
+      "confidence": 0.58
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Replace duplicated command-call sequence with an existing inline helper.",
+      "example": "ftCo_800AB224 uses ftCo_800AD54C_inline0(fp) instead of multiple ftCo_800B46B8 calls followed by ftCo_800B463C.",
+      "evidence_refs": [
+        "raw_diff: ftCo_800AB224"
+      ]
+    },
+    {
+      "tactic": "Use a known helper for repeated distance computation.",
+      "example": "ftCo_800AF290 uses ftCo_800A1AB4(fp, target) instead of local dx/dy/sqrtf__Ff math.",
+      "evidence_refs": [
+        "raw_diff: ftCo_800AF290"
+      ]
+    },
+    {
+      "tactic": "Use typed structure fields instead of M2C_FIELD where a field is known.",
+      "example": "Fighter_804D64FC->x20[fp->kind] replaces M2C_FIELD(..., 0x20)[fp->kind].",
+      "evidence_refs": [
+        "raw_diff: ftCo_800AF78C_inline0"
+      ]
+    },
+    {
+      "tactic": "Adjust local declaration order and initialization timing to match codegen.",
+      "example": "ftCo_800D730C moves fp and x2d0 initialization after declarations and introduces extern f32 ftCo_804D9018 for vel.z.",
+      "evidence_refs": [
+        "raw_diff: ftCo_Attack100.c ftCo_800D730C",
+        "text_corpus: decomp-dev report lists ftCo_800D730C as 100%"
+      ]
+    },
+    {
+      "tactic": "Use narrow stack padding edits only with report evidence.",
+      "example": "ftCo_Guard.c changes PAD_STACK values/placement, and ftkirbyyoshiegg.c adds PAD_STACK(16); the bot report shows related improvements but the PR does not include objdiff detail explaining each padding choice.",
+      "evidence_refs": [
+        "raw_diff: ftCo_Guard.c",
+        "raw_diff: ftkirbyyoshiegg.c",
+        "text_corpus: decomp-dev report"
+      ]
+    },
+    {
+      "tactic": "For JObj rotation matrix matching, expanding helper logic into explicit HSD_JObjGetRotation, quaternion flag branching, matrix construction, and transpose may improve local match.",
+      "example": "ftCo_DamageIce_Init replaced JObjRotMtx calls with explicit rotation/quaternion matrix handling for yrotn and xrotn.",
+      "evidence_refs": [
+        "raw_diff: ftCo_DamageIce_Init",
+        "text_corpus: decomp-dev report lists ftCo_DamageIce_Init improvement"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "text": "decomp-dev reported 6 new matches and 11 improvements, with matched code increasing by 1280 bytes and matched data increasing by 336 bytes for GALE01.",
+      "author": "decomp-dev[bot]",
+      "evidence_refs": [
+        "text_corpus: issue_comment created 2026-06-08T14:35:14Z"
+      ]
+    },
+    {
+      "kind": "missing_human_review_comments",
+      "text": "No review comments or reviews are present in the loaded PR slice.",
+      "author": null,
+      "evidence_refs": [
+        "metadata_json: counts.review_comments 0 and reviews 0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2620",
+    "Improvements to split up FT",
+    "src/melee/ft",
+    "fighter matching",
+    "ftCo_800A9CB4",
+    "ftCo_800AB224",
+    "ftCo_800AD54C_inline0",
+    "ftCo_800AF290",
+    "ftCo_800AF78C_inline0",
+    "ftCo_800A1AB4",
+    "Fighter_804D64FC->x20",
+    "M2C_FIELD",
+    "ftCo_800D730C",
+    "ftCo_804D9018",
+    "fn_800D8EC8",
+    "ftCo_LinkCatchAttrs",
+    "fp->fv.lk.xC",
+    "ftCo_DamageIce_Init",
+    "HSD_JObjGetRotation",
+    "JOBJ_USE_QUATERNION",
+    "HSD_MkRotationMtx",
+    "HSD_MtxQuat",
+    "PSMTXTranspose",
+    "ftCo_800978D4",
+    "ftCo_80093BC0",
+    "GET_FIGHTER",
+    "PAD_STACK",
+    "ftKb_SpecialNYs_8010AC78",
+    "ftPp_SpecialS_0_Coll",
+    "ftColl_80077C60",
+    "pl_8003E17C",
+    "ftMaterial_803C69D0",
+    "ftMaterial_803C6A44",
+    "HSD_TevDesc",
+    "HSD_TECnst"
+  ],
+  "follow_up_queries": [
+    "PR 2620 ftCo_800AD54C_inline0 CpuCmd_SetLstickX CpuCmd_Done",
+    "PR 2620 ftCo_800AF290 ftCo_800A1AB4 Fighter_804D64FC x20",
+    "PR 2620 ftCo_Attack100 ftCo_800D730C ftCo_804D9018",
+    "PR 2620 fn_800D8EC8 ftCo_LinkCatchAttrs fp->fv.lk.xC",
+    "PR 2620 ftCo_DamageIce_Init HSD_JObjGetRotation JOBJ_USE_QUATERNION",
+    "PR 2620 ftmaterial HSD_TevDesc HSD_TECnst .data 100%",
+    "PR 2620 PAD_STACK ftCo_Guard ftkirbyyoshiegg ftNn_Init"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR identity, merge state, changed-file counts",
+      "human_pr_text: scope, split rationale, preliminary report, local checks",
+      "raw_diff: exact source changes",
+      "changed_files.jsonl: file-level added/deleted/hunk counts",
+      "text_corpus: decomp-dev bot report"
+    ],
+    "notes": [
+      "The slice includes strong file/diff evidence and a bot report with specific new matches and improvements.",
+      "The PR body includes preliminary full-branch metrics from the unsplit source branch, but it explicitly says per-PR CI/decomp-dev reporting is authoritative for this draft; this postmortem therefore treats the decomp-dev issue comment as the slice-specific report.",
+      "No human review comments are loaded, so no reviewer intent or requested changes can be inferred.",
+      "The bot report provides match/improvement outcomes but not detailed objdiff listings for each local tactic, so PAD_STACK, aliasing, and declaration-order edits are recorded as narrow tactics rather than accepted style rules.",
+      "ftmaterial data additions are supported by the bot report as matching data progress, but the loaded PR evidence does not include independent section-ownership analysis beyond the diff and report."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "kind": "decomp_lesson",
+        "title": "Prefer existing fighter helpers over duplicated generated-looking sequences when matching",
+        "text": "In PR #2620, ftCo_800AB224 replaced a repeated CPU-command sequence with ftCo_800AD54C_inline0, and ftCo_800AF290 replaced manual distance math with ftCo_800A1AB4. For fighter matching, search local helpers before keeping duplicated call/math blocks.",
+        "scope": [
+          "src/melee/ft/chara/ftCommon"
+        ],
+        "evidence_refs": [
+          "raw_diff: ftCo_800AB224",
+          "raw_diff: ftCo_800AF290",
+          "text_corpus: decomp-dev report"
+        ],
+        "confidence": 0.86
+      },
+      {
+        "kind": "decomp_lesson",
+        "title": "Use known typed fighter fields instead of M2C_FIELD",
+        "text": "PR #2620 replaced M2C_FIELD(Fighter_804D64FC, float**, 0x20)[fp->kind] with Fighter_804D64FC->x20[fp->kind] in ftCo_800AF78C_inline0. This is a concrete example of converting a recovered raw field access to the typed field form.",
+        "scope": [
+          "src/melee/ft/chara/ftCommon/ftCo_0A01.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: ftCo_800AF78C_inline0",
+          "decomp_standards: typed-fields-over-pointer-math"
+        ],
+        "confidence": 0.9
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "PR #2620 fighter slice changed nine src/melee/ft files",
+        "text": "PR #2620 was scoped to src/melee/ft and changed ftCommon files, ftkirbyyoshiegg.c, ftNn_Init.c, ftcoll.c, and ftmaterial.c as a fighter matching slice split from PR #2617.",
+        "source_path": "src/melee/ft",
+        "scope": [
+          "src/melee/ft/chara/ftCommon/ftCo_0A01.c",
+          "src/melee/ft/chara/ftCommon/ftCo_Attack100.c",
+          "src/melee/ft/chara/ftCommon/ftCo_DamageIce.c",
+          "src/melee/ft/chara/ftCommon/ftCo_DownBound.c",
+          "src/melee/ft/chara/ftCommon/ftCo_Guard.c",
+          "src/melee/ft/chara/ftKirby/ftkirbyyoshiegg.c",
+          "src/melee/ft/chara/ftNana/ftNn_Init.c",
+          "src/melee/ft/ftcoll.c",
+          "src/melee/ft/ftmaterial.c"
+        ],
+        "evidence_refs": [
+          "human_pr_text: Scope and Files",
+          "changed_files.jsonl"
+        ],
+        "reason": "May help future path-scoped lookup for fighter matching history."
+      },
+      {
+        "target_source_id": "ssbm_data_sheet",
+        "update_kind": "source_update",
+        "title": "ftmaterial static TEV data names added in PR #2620",
+        "text": "PR #2620 added static HSD_TevDesc ftMaterial_803C69D0 and static HSD_TECnst ftMaterial_803C6A44 in src/melee/ft/ftmaterial.c; the bot report tied ftmaterial .data to 100%. Curator should verify section ownership before recording as data-sheet fact.",
+        "source_path": "src/melee/ft/ftmaterial.c",
+        "scope": [
+          "main/melee/ft/ftmaterial",
+          ".data",
+          "ftMaterial_803C69D0",
+          "ftMaterial_803C6A44"
+        ],
+        "evidence_refs": [
+          "raw_diff: ftmaterial.c additions",
+          "text_corpus: decomp-dev report lists ftmaterial .data as 100%"
+        ],
+        "reason": "Potential data ownership/path fact, but needs curator verification against symbols/sections."
+      }
+    ],
+    "rejection_notes": [
+      "Do not generalize the fp2 alias in ftNn_Init.c or xBCp alias in ftkirbyyoshiegg.c into a naming standard; evidence only shows local matching tactics.",
+      "Do not infer human reviewer approval rationale because no human review comments or reviews are loaded.",
+      "Do not promote PAD_STACK edits as ordinary style; the evidence supports them only as narrow matching tactics with bot-reported outcomes.",
+      "Do not treat the unsplit source branch preliminary metrics as this PR slice's final score; the PR body says per-PR CI/decomp-dev reporting is authoritative."
+    ]
+  },
+  "confidence": 0.83,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

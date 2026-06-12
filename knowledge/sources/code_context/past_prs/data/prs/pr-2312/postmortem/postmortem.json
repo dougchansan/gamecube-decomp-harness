@@ -1,0 +1,484 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2312",
+  "pr": {
+    "number": 2312,
+    "title": "mn work",
+    "url": "https://github.com/doldecomp/melee/pull/2312",
+    "state": "MERGED",
+    "author": "lukechampine",
+    "created_at": "2026-03-17T04:50:03Z",
+    "merged_at": "2026-03-17T20:16:57Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Menu subsystem decompilation work focused on previously 0% matched mn files. The PR added implementations and headers for mnevent and mnitemsw, added mncount functions and data structs, updated mnmain animation-loop helper typing to AnimLoopSettings, and propagated related typed call-site changes across several mn files. Bot output reported 15 new matches and 5 unmatched-item improvements; reviewer approved and stated AnimLoopSettings makes sense.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "types-structs",
+      "menu-subsystem"
+    ],
+    "systems": [
+      "melee-core",
+      "mn"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/mn/mnevent.c",
+      "role": "Added many event-menu function bodies, static AnimLoopSettings data, JObj animation handling, text cleanup, menu state transitions, and event initialization code.",
+      "evidence_refs": [
+        "changed_files: mnevent.c +271/-0",
+        "diff_excerpt: mnevent.c added mnEvent_8024CE74, mnEvent_8024D014, mnEvent_8024D0CC, mnEvent_8024D4E0, mnEvent_8024D7E0, mnEvent_8024E420, mnEvent_8024E838, fn_8024E1B4, fn_8024E2A0, fn_8024E34C",
+        "bot_report: mnevent new matches and improvements"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnevent.h",
+      "role": "Replaced many UNK_RET/UNK_PARAMS prototypes with typed signatures, added MnEventData, includes, and extern declarations.",
+      "evidence_refs": [
+        "changed_files: mnevent.h +35/-13",
+        "diff_excerpt: MnEventData and typed mnEvent prototypes"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnitemsw.c",
+      "role": "Added item-switch menu functions for JObj lookup and menu entry/setup.",
+      "evidence_refs": [
+        "changed_files: mnitemsw.c +44/-0",
+        "diff_excerpt: mnItemSw_8023405C and mnItemSw_802358C0",
+        "bot_report: mnItemSw_8023405C and mnItemSw_802358C0 new matches"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnitemsw.h",
+      "role": "Added include guard, MnItemSwData layout, typed prototypes, and extern for mnItemSw_804D6BEC.",
+      "evidence_refs": [
+        "changed_files: mnitemsw.h +31/-0",
+        "diff_excerpt: MnItemSwData and mnItemSw prototypes"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mncount.c",
+      "role": "Added mnCount_802513F4 and mnCount_802517E0, using MnCountData fields, JObj hide/show flags, loops for text arrays, and AnimLoopSettings.",
+      "evidence_refs": [
+        "changed_files: mncount.c +42/-0",
+        "diff_excerpt: mnCount_802513F4, mnCount_802517E0",
+        "bot_report: mnCount_802513F4 and mnCount_802517E0 new matches"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mncount.h",
+      "role": "Added MnCountData struct and typed prototypes for recovered mncount functions.",
+      "evidence_refs": [
+        "changed_files: mncount.h +12/-2",
+        "diff_excerpt: MnCountData and typed mnCount prototypes"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnmain.c",
+      "role": "Changed mn_8022EC18 from float-array parameter access to AnimLoopSettings field access.",
+      "evidence_refs": [
+        "changed_files: mnmain.c +11/-9",
+        "diff_excerpt: mn_8022EC18 signature and start_frame/end_frame/loop_frame field use"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnmain.h",
+      "role": "Updated mn_8022EC18 prototype to take AnimLoopSettings*.",
+      "evidence_refs": [
+        "changed_files: mnmain.h +1/-1",
+        "diff_excerpt: mn_8022EC18 prototype change"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnhyaku.c",
+      "role": "Converted two float[3] animation settings to AnimLoopSettings and updated call sites to field access.",
+      "evidence_refs": [
+        "changed_files: mnhyaku.c +6/-6",
+        "diff_excerpt: mnHyaku_803EF668 and mnHyaku_803EF674"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mndeflicker.c",
+      "role": "Updated mn_8022EC18 calls to pass AnimLoopSettings objects rather than address of start_frame.",
+      "evidence_refs": [
+        "changed_files: mndeflicker.c +2/-2",
+        "diff_excerpt: mnDeflicker_803EEFE4 and mnDeflicker_803EEFD8 call-site changes"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnlanguage.c",
+      "role": "Updated mn_8022EC18 call sites with AnimLoopSettings casts while retaining existing x/y field checks.",
+      "evidence_refs": [
+        "changed_files: mnlanguage.c +2/-2",
+        "diff_excerpt: casts to AnimLoopSettings* for mnLanguage_803EF5AC and mnLanguage_803EF5A0"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnmainrule.c",
+      "role": "Changed file with 80 additions and 4 deletions; bot report names new matches in this unit, but detailed diff content is not present in loaded excerpt.",
+      "evidence_refs": [
+        "changed_files: mnmainrule.c +80/-4",
+        "bot_report: mn_80231714, mn_8023164C, mn_80231F80 new matches"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnmainrule.h",
+      "role": "Header changed with 2 additions and 2 deletions; details not present in loaded diff excerpt.",
+      "evidence_refs": [
+        "changed_files: mnmainrule.h +2/-2"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnvibration.c",
+      "role": "Small implementation update; details not present in loaded diff excerpt.",
+      "evidence_refs": [
+        "changed_files: mnvibration.c +2/-2"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnsound.c",
+      "role": "Small implementation update; details not present in loaded diff excerpt.",
+      "evidence_refs": [
+        "changed_files: mnsound.c +1/-1"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnsoundtest.c",
+      "role": "Small implementation update; details not present in loaded diff excerpt.",
+      "evidence_refs": [
+        "changed_files: mnsoundtest.c +1/-0"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnsoundtest.h",
+      "role": "Small header update; details not present in loaded diff excerpt.",
+      "evidence_refs": [
+        "changed_files: mnsoundtest.h +1/-1"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Implemented substantial portions of src/melee/mn/mnevent.c from an empty/near-empty file, including event-count calculation, JObj visibility updates, animation transitions, text cleanup, and menu-entry setup.",
+    "Added typed menu data structs MnEventData, MnItemSwData, and MnCountData in their owning headers.",
+    "Replaced several UNK_RET/UNK_PARAMS declarations with concrete signatures for recovered mn event, item-switch, and count functions.",
+    "Changed mn_8022EC18 to accept AnimLoopSettings* and use start_frame, end_frame, and loop_frame fields instead of indexing a float[3].",
+    "Updated related mn call sites in mndeflicker, mnhyaku, mnlanguage, and mnmain to match the AnimLoopSettings-oriented helper signature.",
+    "Used natural loops to initialize or clean repeated arrays in MnEventData and MnCountData.",
+    "Bot report recorded +2768 matched code bytes, 15 new 100% matched items, and 5 improvements in unmatched items."
+  ],
+  "smart_moves": [
+    {
+      "text": "Typed recovered function prototypes in headers alongside function body recovery, reducing UNK_RET/UNK_PARAMS drift.",
+      "evidence_refs": [
+        "diff_excerpt: mnevent.h typed prototypes",
+        "diff_excerpt: mnitemsw.h typed prototypes",
+        "diff_excerpt: mncount.h typed prototypes"
+      ]
+    },
+    {
+      "text": "Recovered concrete per-menu data structs to express user_data fields directly rather than leaving raw offsets in the shown implementations.",
+      "evidence_refs": [
+        "diff_excerpt: MnEventData fields used in mnevent.c",
+        "diff_excerpt: MnItemSwData fields used in mnitemsw.c",
+        "diff_excerpt: MnCountData fields used in mncount.c"
+      ]
+    },
+    {
+      "text": "Applied a subsystem-wide helper type cleanup for mn_8022EC18 call sites after changing its signature to AnimLoopSettings*.",
+      "evidence_refs": [
+        "diff_excerpt: mnmain.c signature change",
+        "diff_excerpt: mndeflicker.c, mnhyaku.c, mnlanguage.c call-site updates"
+      ]
+    },
+    {
+      "text": "Used compact loops for repeated array initialization and cleanup, matching the decomp standard preference for natural loop forms over repeated blocks.",
+      "evidence_refs": [
+        "diff_excerpt: mnCount_802517E0 for loop over labels and values",
+        "diff_excerpt: mnEvent_8024E420 for loop over gobjs, texts, icons",
+        "diff_excerpt: fn_8024E1B4 for loop cleanup over gobjs, texts, icons"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When recovering menu user_data access, introduce a local data struct once field roles are supported by multiple accesses in the implementation; this improves signatures and avoids raw pointer arithmetic.",
+      "scope": [
+        "src/melee/mn/mnevent.c",
+        "src/melee/mn/mnitemsw.c",
+        "src/melee/mn/mncount.c"
+      ],
+      "evidence_refs": [
+        "diff_excerpt: MnEventData with page, first_event, gobjs, texts, icons, name_text, desc_text",
+        "diff_excerpt: MnItemSwData with menu_kind, cursor, items, jobjs",
+        "diff_excerpt: MnCountData with cursor, page_size, labels, values, title"
+      ]
+    },
+    {
+      "lesson": "Three-float animation setting tuples used by mn animation helpers may be better represented as AnimLoopSettings when call sites consistently use start, end, and loop-frame semantics.",
+      "scope": [
+        "src/melee/mn/mnmain.c",
+        "src/melee/mn/mnhyaku.c",
+        "src/melee/mn/mndeflicker.c"
+      ],
+      "evidence_refs": [
+        "diff_excerpt: mn_8022EC18 field accesses start_frame/end_frame/loop_frame",
+        "diff_excerpt: mnhyaku float[3] converted to AnimLoopSettings",
+        "review: ribbanya approved with 'I think `AnimLoopSettings` does make sense.'"
+      ],
+      "caveat": "Author explicitly said they were suspicious of the AnimLoopSettings changes; reviewer approval supports this PR but does not establish a global rule for all float[3] data."
+    },
+    {
+      "lesson": "When repeated menu arrays are cleared or initialized together, a single counted loop over parallel arrays can be both readable and match-friendly.",
+      "scope": [
+        "src/melee/mn/mnevent.c",
+        "src/melee/mn/mncount.c"
+      ],
+      "evidence_refs": [
+        "diff_excerpt: fn_8024E1B4 loops over data->gobjs/texts/icons",
+        "diff_excerpt: mnEvent_8024E420 initializes gobjs/texts/icons",
+        "diff_excerpt: mnCount_802517E0 initializes labels/values"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "Recovered structs use subsystem-prefixed PascalCase names such as MnEventData, MnItemSwData, and MnCountData, while unclear functions keep address-style names such as fn_8024E1B4 and mnEvent_8024E838.",
+      "evidence_refs": [
+        "diff_excerpt: typedef struct MnEventData",
+        "diff_excerpt: typedef struct MnItemSwData",
+        "diff_excerpt: typedef struct MnCountData",
+        "diff_excerpt: fn_8024E1B4/fn_8024E2A0/fn_8024E34C declarations"
+      ]
+    },
+    {
+      "text": "Local variables use short role names where roles are clear, including gobj, jobj, tree, data, proc, text, frame, count, and i.",
+      "evidence_refs": [
+        "diff_excerpt: mnevent.c local declarations",
+        "diff_excerpt: mncount.c local declarations",
+        "diff_excerpt: mnitemsw.c local declarations"
+      ]
+    },
+    {
+      "text": "Struct fields use semantic menu roles when apparent, such as cursor, page_size, labels, values, first_event, desc_text, name_text, items, and jobjs; less-supported byte fields remain x/pad-style.",
+      "evidence_refs": [
+        "diff_excerpt: MnCountData fields",
+        "diff_excerpt: MnEventData fields",
+        "diff_excerpt: MnItemSwData fields x21, pad, x23"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "PAD_STACK and FORCE_PAD_STACK macros were used narrowly in recovered functions to satisfy stack/codegen shape.",
+      "evidence_refs": [
+        "diff_excerpt: PAD_STACK(8) in mnEvent_8024CE74",
+        "diff_excerpt: PAD_STACK(8) in mnEvent_8024D7E0",
+        "diff_excerpt: PAD_STACK(8) in fn_8024E2A0",
+        "diff_excerpt: PAD_STACK(16) in fn_8024E34C",
+        "diff_excerpt: FORCE_PAD_STACK_4 in mnCount_802513F4 and mnEvent_8024D0CC",
+        "bot_report: new matches and improvements"
+      ],
+      "caveat": "The PR slice shows bot match results but not per-function objdiff traces explaining each padding macro."
+    },
+    {
+      "tactic": "Kept a volatile load when requesting the start frame in mn_8022EC18, now expressed as *(volatile float*) &arg1->start_frame.",
+      "evidence_refs": [
+        "diff_excerpt: mnmain.c HSD_JObjReqAnimAll(arg0, *(volatile float*) &arg1->start_frame)"
+      ]
+    },
+    {
+      "tactic": "Used explicit casts to AnimLoopSettings* for mnlanguage call sites where existing data still appeared as vector-like x/y fields.",
+      "evidence_refs": [
+        "diff_excerpt: mnlanguage.c casts to (AnimLoopSettings*) &mnLanguage_803EF5AC and &mnLanguage_803EF5A0"
+      ],
+      "caveat": "The loaded PR evidence does not explain whether these casts are a temporary bridge or final desired typing."
+    },
+    {
+      "tactic": "For resource loading in mnEvent_8024E838, used a char* base into nearby static data and pointer offsets for lbArchive_LoadSections arguments.",
+      "evidence_refs": [
+        "diff_excerpt: mnEvent_8024E838 char* base = (char*) &mnEvent_803EF740 and base + offsets"
+      ],
+      "caveat": "This may be data-layout-sensitive; no review discussion in the slice explains data ownership or section-layout reasoning."
+    }
+  ],
+  "review_feedback": [
+    {
+      "author": "lukechampine",
+      "kind": "author_note",
+      "text": "Author said they were suspicious of the AnimLoopSettings changes but Claude seemed confident.",
+      "evidence_refs": [
+        "human_pr_text: PR body"
+      ]
+    },
+    {
+      "author": "ribbanya",
+      "kind": "review",
+      "state": "APPROVED",
+      "text": "Reviewer stated: 'I think `AnimLoopSettings` does make sense.'",
+      "evidence_refs": [
+        "text_corpus: review by ribbanya at 2026-03-17T20:14:36Z"
+      ]
+    },
+    {
+      "author": "decomp-dev[bot]",
+      "kind": "report",
+      "text": "Bot reported matched code increased to 58.59% (+0.07%, +2768 bytes), with 15 new matches and 5 improvements.",
+      "evidence_refs": [
+        "text_corpus: issue_comment decomp-dev[bot] at 2026-03-17T04:53:52Z"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2312",
+    "mn work",
+    "lukechampine",
+    "ribbanya",
+    "mnevent",
+    "mnitemsw",
+    "mncount",
+    "mnmain",
+    "mnmainrule",
+    "mnhyaku",
+    "mndeflicker",
+    "mnlanguage",
+    "mnsound",
+    "mnsoundtest",
+    "mnvibration",
+    "AnimLoopSettings",
+    "mn_8022EC18",
+    "mn_8022ED6C",
+    "MnEventData",
+    "MnItemSwData",
+    "MnCountData",
+    "mnEvent_8024CE74",
+    "mnEvent_8024E838",
+    "mnEvent_8024E420",
+    "fn_8024E34C",
+    "fn_8024E2A0",
+    "fn_8024E1B4",
+    "mnItemSw_8023405C",
+    "mnItemSw_802358C0",
+    "mnCount_802513F4",
+    "mnCount_802517E0",
+    "PAD_STACK",
+    "FORCE_PAD_STACK_4",
+    "HSD_JObjSetFlagsAll",
+    "HSD_JObjClearFlagsAll",
+    "HSD_SisLib_803A5CC4",
+    "HSD_GObj_SetupProc",
+    "lbArchive_LoadSections"
+  ],
+  "follow_up_queries": [
+    "AnimLoopSettings mn_8022EC18 mnhyaku mndeflicker mnlanguage",
+    "PAD_STACK FORCE_PAD_STACK_4 mnEvent mnCount",
+    "MnEventData gobjs texts icons desc_text name_text",
+    "MnItemSwData jobjs items cursor",
+    "MnCountData labels values page_size",
+    "mnEvent_8024E838 lbArchive_LoadSections base offsets",
+    "mnmainrule mn_80231714 mn_8023164C mn_80231F80 PR2312"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR #2312 state MERGED, changed files, counts",
+      "human_pr_text: author body",
+      "diff_excerpt/raw_diff: detailed diff excerpts for many but not all changed files",
+      "changed_files.jsonl: complete changed-file list",
+      "text_corpus: bot report and approval review"
+    ],
+    "notes": [
+      "Loaded diff is truncated, so mnmainrule, mnvibration, mnsound, and mnsoundtest details are known mainly from changed-file metadata and bot report, not full hunks.",
+      "Bot report provides match outcomes but not per-function objdiff or build logs.",
+      "Author explicitly expressed uncertainty about AnimLoopSettings; reviewer approval supports that it made sense in this PR, but the slice is not enough to promote a global rule.",
+      "No inline review comments were present in the slice."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "title": "Menu user_data structs can replace raw access in recovered mn functions",
+        "text": "PR #2312 recovered MnEventData, MnItemSwData, and MnCountData and then used their fields directly in new matched menu functions. This is a graph-safe example of typed-fields-over-pointer-math within the mn subsystem.",
+        "scope": [
+          "src/melee/mn/mnevent.c",
+          "src/melee/mn/mnitemsw.c",
+          "src/melee/mn/mncount.c"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: struct typedefs and field uses",
+          "bot_report: functions using these structs listed as new matches"
+        ]
+      },
+      {
+        "title": "Keep unclear function names address-style while typing signatures",
+        "text": "PR #2312 typed many recovered prototypes but retained fn_/address-style names for functions whose semantics were not renamed in the evidence.",
+        "scope": [
+          "src/melee/mn/mnevent.h",
+          "src/melee/mn/mnitemsw.h"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: fn_8024D864, fn_8024E1B4, fn_8024E2A0, fn_8024E34C, fn_80233E10"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Treat AnimLoopSettings as a candidate type for three-frame mn animation tuples",
+        "text": "In PR #2312, mn_8022EC18 was changed from float* indexing to AnimLoopSettings* field access, with related call-site updates in mndeflicker, mnhyaku, mnlanguage, and mnmain. Reviewer feedback said AnimLoopSettings makes sense, while the author noted initial suspicion. Candidate standard should be scoped cautiously: use AnimLoopSettings when local call sites and data semantics support start_frame/end_frame/loop_frame; do not cast unrelated vector-like data solely to satisfy a helper signature without local evidence.",
+        "source_path": null,
+        "scope": [
+          "src/melee/mn/mnmain.c",
+          "src/melee/mn/mnmain.h",
+          "src/melee/mn/mnhyaku.c",
+          "src/melee/mn/mndeflicker.c",
+          "src/melee/mn/mnlanguage.c"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: mn_8022EC18 typed as AnimLoopSettings*",
+          "diff_excerpt: mnhyaku float[3] to AnimLoopSettings",
+          "review: 'I think `AnimLoopSettings` does make sense.'",
+          "author body: suspicious of AnimLoopSettings changes"
+        ],
+        "reason": "This may be reusable for mn animation helper typing, but evidence includes uncertainty and should not become an unconditional rule."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "mnmainrule details need full diff before curation",
+        "text": "PR metadata and bot report show mnmainrule.c changed and gained new matches for mn_80231714, mn_8023164C, and mn_80231F80, but the loaded diff excerpt does not include those hunks.",
+        "source_path": "src/melee/mn/mnmainrule.c",
+        "scope": [
+          "src/melee/mn/mnmainrule.c",
+          "src/melee/mn/mnmainrule.h"
+        ],
+        "evidence_refs": [
+          "changed_files: mnmainrule.c +80/-4",
+          "changed_files: mnmainrule.h +2/-2",
+          "bot_report: mnmainrule new matches"
+        ],
+        "reason": "Possible path fact exists, but the intake slice lacks enough detail to summarize implementation tactics."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote 'Claude confidence' as evidence; only the diff, bot report, and reviewer approval are usable PR evidence.",
+      "Do not infer full validation beyond the bot report; no local build logs or objdiff traces are included.",
+      "Do not generalize PAD_STACK/FORCE_PAD_STACK use as style; the slice shows their presence and bot results but not the exact necessity for each function.",
+      "Do not infer detailed changes for mnsound, mnsoundtest, mnvibration, or mnmainrule beyond changed-file metadata unless the full diff is inspected."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "pr": 663,
+  "title": "Remove redundant typedef",
+  "url": "https://github.com/doldecomp/melee/pull/663",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 2,
+  "added_lines": 0,
+  "deleted_lines": 4
+}

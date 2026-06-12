@@ -1,0 +1,17 @@
+{
+  "number": 1523,
+  "title": "camera.static.h work",
+  "state": "MERGED",
+  "createdAt": "2025-05-26T00:00:09Z",
+  "updatedAt": "2025-05-26T05:20:06Z",
+  "mergedAt": "2025-05-26T05:20:06Z",
+  "closedAt": "2025-05-26T05:20:06Z",
+  "author": "sadkellz",
+  "url": "https://github.com/doldecomp/melee/pull/1523",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 10262
+  }
+}

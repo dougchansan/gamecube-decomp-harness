@@ -1,6 +1,6 @@
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { decompResourcesRoot, resourceMap } from "@decomp-orchestrator/knowledge";
+import { resourceMap } from "@decomp-orchestrator/knowledge";
 import type { BoardSnapshot, PiPromptBundle, RunProjectMetadata, RunRecord } from "@decomp-orchestrator/core/types";
 import { agentContextScripts, agentContextSummary } from "../context.js";
 import { readTemplate, renderTemplate, stableJson } from "../runtime/index.js";
@@ -36,10 +36,6 @@ export function directorPrompt(options: DirectorPromptOptions): PiPromptBundle {
     {
       path: options.snapshot.objdiffPath,
       reason: "unit metadata and source path provenance",
-    },
-    {
-      path: resolve(decompResourcesRoot(), "index.md"),
-      reason: "resource library entry point for decomp evidence surfaces",
     },
   ];
   const currentState = {

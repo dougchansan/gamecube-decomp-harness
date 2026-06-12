@@ -1,0 +1,10 @@
+{
+  "pr": 481,
+  "title": "Port `dolphin/os` code from SMB",
+  "url": "https://github.com/doldecomp/melee/pull/481",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 30,
+  "added_lines": 903,
+  "deleted_lines": 1191
+}

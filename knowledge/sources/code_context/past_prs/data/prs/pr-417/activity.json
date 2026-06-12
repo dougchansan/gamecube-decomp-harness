@@ -1,0 +1,10 @@
+{
+  "pr": 417,
+  "title": "Split out lbarg and lbmemory from code_8000F9F8",
+  "url": "https://github.com/doldecomp/melee/pull/417",
+  "text_records_with_body": 0,
+  "review_comments": 0,
+  "changed_files": 4,
+  "added_lines": 1092,
+  "deleted_lines": 1076
+}

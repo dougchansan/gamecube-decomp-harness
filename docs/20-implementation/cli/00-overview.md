@@ -1,6 +1,6 @@
 ---
 covers: D-Comp Orchestrator CLI command modules and operator command surface
-concepts: [cli, commands, init-run, tick, worker, trigger-agent, babysit, recovery, checkpoint, regression-check, pr-split-plan, ui]
+concepts: [cli, commands, init-run, tick, worker, trigger-agent, babysit, recovery, checkpoint, regression-check, qa-ship-gate, pr-split-plan, pr-preship-review, ui]
 code-ref: decomp-orchestrator/apps/cli/src/cli, decomp-orchestrator/apps/cli/src/bin/decomp-orchestrator.ts
 ---
 
@@ -35,7 +35,10 @@ apps/cli/src/
         +-- index.ts
         +-- init-run.ts
         +-- kg.ts
+        +-- pr-preship-review.ts
         +-- pr-split-plan.ts
+        +-- qa-gate.ts
+        +-- reconcile.ts
         +-- recover-leases.ts
         +-- regression-check.ts
         +-- shared.ts
@@ -57,13 +60,17 @@ apps/cli/src/
 | `babysit` | Guardian wrapper that launches the decomp system command, captures process-health incidents, recovers failed or expired leases, and restarts according to policy. |
 | `checkpoint-run` | Harvests a drained run into PR-candidate exact matches and carry-forward items. |
 | `recover-leases` | Converts interrupted or expired active leases into durable stalled reports after operator confirmation. |
-| `regression-check` | Wraps the repo's global saved-baseline regression gate and writes run artifacts. |
+| `epoch-run` | Runs one epoch checkpoint cycle by hand: commits validated work (excluding active-lease files), rebuilds the full report in the persistent epoch worktree, records an `epoch` save point, and requeues regression repairs. `--no-requeue` plans repairs without touching the queue. |
+| `regression-check` | Wraps the repo's global saved-baseline regression gate, runs the QA ship gate (`review_lint` diff scan vs `--qa-base`, fail-closed, bypass only via `--skip-qa-gate`), and writes run artifacts. |
 | `pr-split-plan` | Plans review-sized PR slices from the current branch/worktree by grouping changed files by Melee subsystem or top-level directory. |
-| `kg-sources` | Lists registered knowledge source slices and external tool integrations. |
+| `pr-preship-review` | Runs the pr-review agent in adversarial pre-ship mode over planned PR slices (`--plan` from saved `pr-split-plan --json` output, `--all` or `--slice <id>`); any `reject` finding or infrastructure failure exits 1 and blocks handoff. Artifacts land under `state_dir/preship_reviews/<run-id>/<slice-id>/`. |
+| `reconcile` | Runs the reconcile Pi agent. `--mode ship-validate` fixes QA-gate regressions before PR handoff; `--mode sync-merge` resolves merge conflicts, duplicate matches, and build errors after an upstream sync. `--attempt-budget` bounds fix cycles; artifacts land under `state_dir/reconcile/<timestamp>/`. |
+| `save-point` | Records a campaign save point: commits the dirty worktree (never staging `decomp-orchestrator/` or the state dir), copies `report.json`/`report_changes.json` plus a board snapshot under `state_dir/save_points/<timestamp>/`, and inserts the row with commit/base SHAs and `matched_code_percent`. `--list` prints recent save points. |
+| `kg-sources` | Lists active knowledge source sections and external tool integrations. |
 | `kg-status` | Prints graph database path, source/tool registry summaries, and graph record counts. |
 | `kg-curate` | Reduces worker reports and PR postmortems into graph-owned curator enrichment records. |
 | `kg-maintain` | Runs pending PR postmortem indexing, curator reduction, optional curator-agent proposal review, and graph rebuild. |
-| `kg-rebuild-graph` | Rebuilds the v1 SQLite graph from selected graph inputs, currently `code_graph`, `past_prs`, and graph enrichments. |
+| `kg-rebuild-graph` | Rebuilds the v1 SQLite graph from selected active sources and graph-owned enrichments. |
 | `kg-search` | Searches indexed graph chunks with optional source filtering. |
 | `kg-file-card` | Prints file graph context, editability, PR history, resource hits, and scheduling signals for one source path. |
 | `kg-rank-features` | Shows graph-derived ranking features for current board candidates. |
@@ -116,39 +123,62 @@ optional command hook runs from the repo root and supports placeholders:
 a different thinking level from the director. For example, the director can stay
 on the global default while workers run with `--worker-thinking-level low`.
 
-The trigger actor also owns deterministic queue refill. Each loop reads the
-current board artifacts, ranks candidates with the configured knowledge graph
-when available, refills queued targets toward a ready-pool target, starts worker
-subprocesses for open slots, then handles one director wake event. This means a
-slow director replan does not prevent workers from picking up already queued,
-unlocked work.
+The trigger actor also owns queue shape, and by default runs the epoch cycle:
+refill fills the queue to `--queue-target-size` in one batch, workers drain it
+with no top-ups, and when queued work hits zero the epoch pipeline runs while
+in-flight workers finish. The pipeline commits validated work (excluding files
+under active leases), checks that commit out into a persistent worktree at
+`<state-dir>/epoch_worktree`, runs `--epoch-configure-command` plus the full
+report build there, publishes the fresh `report.json`/`report_changes.json`
+back to the live repo for board scoring, advances the worktree baseline so the
+next epoch diffs epoch-over-epoch, records an `epoch` save point with measures,
+regression counts, and a `qa_gate` payload (the `review_lint` scan of the
+epoch diff — observability for the dashboard only; the hard stop is the L2
+gate in `regression-check`), requeues regressed functions as priority repair
+targets, and finally refills the next batch from the re-scored board. Epoch
+failures emit `epoch_cycle_error` and back off `--epoch-retry-ms`; regressions
+above `--epoch-regression-pause-threshold` emit `epoch_regression_pause` and
+withhold the refill. `--no-epoch-cycle` restores the legacy continuous mode
+described further below.
 
 Queue size and board scan width are separate. `--candidate-limit` remains the
-initial seed size and compatibility pool size. `--queue-target-size` controls
-how much already-ranked work the trigger keeps queued, and defaults near active
-worker capacity so new graph facts can affect scheduling quickly.
+initial seed size and compatibility pool size. `--queue-target-size` is the
+epoch batch size (and in legacy mode, the level continuous refill maintains).
 `--candidate-window` controls the initial ranked board scan width used to find
 fresh work beyond the current pool. If that window is exhausted, deterministic
 refill expands the scan until it restores the pool target or reaches the end of
 the ranked board.
 
-Even when the queue is full, the trigger periodically rereads the graph-ranked
-board and refreshes priorities for queued-but-not-leased targets inside the scan
-window. Graph maintenance can therefore move newly informative targets upward
-without waiting for the old queue to drain completely.
+In both modes the trigger periodically rereads the graph-ranked board and
+refreshes priorities for queued-but-not-leased targets inside the scan window.
+Graph maintenance can therefore move newly informative targets upward without
+waiting for the old queue to drain completely. In epoch mode this refresh is
+priority-only and never inserts targets mid-batch.
 
-The trigger writes a prioritized `pool_below_target` event when deterministic
-refill is not enough and capacity is becoming inefficient. The CLI defaults wake
-the director when total queued work falls to 25% of `--queue-target-size`, when
-unlocked distinct-file work falls below `--max-workers`, when queued work is
-blocked by active file locks, or when a long-tail drain persists for five
-minutes. The dashboard uses a stricter preset policy: ready queue is always
-`4 * workers`, and `--queue-low-watermark` is always `workers`, so a 16-worker
-dashboard run keeps a 64-target queue and asks for fresh priority work when 16
-queued targets remain. Operators using the CLI directly can tune this with:
+In legacy continuous mode (`--no-epoch-cycle`) the trigger instead tops the
+queue back up toward the target on every pass and writes a prioritized
+`pool_below_target` event when deterministic refill is not enough and capacity
+is becoming inefficient. The CLI defaults wake the director when total queued
+work falls to 25% of `--queue-target-size`, when unlocked distinct-file work
+falls below `--max-workers`, when queued work is blocked by active file locks,
+or when a long-tail drain persists for five minutes. The dashboard uses a
+stricter preset policy: ready queue is always `4 * workers`, and
+`--queue-low-watermark` is always `workers`, so a 16-worker dashboard run
+keeps a 64-target queue and asks for fresh priority work when 16 queued
+targets remain. In epoch mode those watermark replans are suppressed — a
+draining queue is the intended shape — and `pool_below_target` is emitted only
+when a post-rebuild refill finds no fresh board work. Operators using the CLI
+directly can tune this with:
 
 | Flag | Meaning |
 | --- | --- |
+| `--no-epoch-cycle` | Restore continuous queue top-up and watermark-driven replan events. |
+| `--epoch-worktree <path>` | Persistent checkpoint worktree; default `<state-dir>/epoch_worktree`. |
+| `--epoch-configure-command <cmd>` | Shell command run in the worktree before each report build; default `python configure.py --require-protos`. |
+| `--epoch-link-paths <a,b>` | Untracked build inputs symlinked from the live repo into the worktree; default `orig`. |
+| `--epoch-regression-pause-threshold <n>` | Pause (no refill) when more than `n` report rows regress in one epoch; default 12. |
+| `--epoch-regression-requeue-limit <n>` | Max regressed functions requeued as priority repairs per epoch; default 32. |
+| `--epoch-retry-ms <n>` | Backoff after an epoch failure, pause, or exhausted board; default 600000. |
 | `--candidate-limit <n>` | Initial seed size and compatibility pool size; default is `max(32, max_workers * 2)`. |
 | `--queue-target-size <n>` | Maintain at least this many queued targets, subject to available fresh board candidates; default is `max(candidate_limit, max_workers * 2)`. |
 | `--candidate-window <n>` | Initial number of ranked board candidates scanned for director context and deterministic refill; refill expands this when the window is exhausted. |
@@ -174,6 +204,19 @@ stdout/stderr, parses `build/GALE01/report_changes.json`, writes
 the report cannot be parsed, or the report contains broken matches, fuzzy
 regressions, or metric regressions.
 
+The QA ship gate (L2) runs in the same command. After the build step,
+`regression-check` invokes the `review_lint` diff scanner
+(`tools/source_editing/review_lint/api/scan_diff.py`) against the merge-base
+with `--qa-base` (default: the project's `baseRef`, else `origin/master`) and
+folds the result into the verdict:
+`passed = regressionGatePassed && !promotionBlocked && qaGatePassed`. The
+summary gains `qaGateExitCode`, `qaGateSkipped`, `qaFindings`, `qaCounts`, and
+`qaScanPath`; raw scanner output lands beside it as `qa_scan.json` and
+`qa_scan.txt`. The gate fails closed — a scanner that cannot run blocks the
+handoff — and a failure hint lists the violating rules at `file:line`, with
+each finding citing the standard it violates. The only bypass is an explicit
+`--skip-qa-gate`, for emergencies.
+
 The same report evaluates PR promotion separately from regression cleanliness.
 Default promotion evidence requires no regressions plus an exact new match or
 matched code/data byte movement; fuzzy-only improvements are recorded as
@@ -190,11 +233,18 @@ It reads worker reports for the selected run, writes checkpoint artifacts under
 `run_checkpoints` and `checkpoint_items`.
 
 The checkpoint classifies exact-match `progress` or `score_candidate` reports
-as `pr_candidate`. Clean non-exact progress becomes `deferred_patch`;
-`needs_fact` and `stalled_no_useful_guess` reports stay visible as
-carry-forward evidence. The generated `pr_candidates.md` is the source list for
-match PR packaging, while `carry_forward.md` is the ledger of local work that
-should not be forgotten after the baseline or next run is reset.
+as `pr_candidate`. Clean non-exact progress is evaluated against the project's
+improvement promotion floors (`pr.improvementMinGainPoints`, default 2.0
+match-percent points, and `pr.improvementMinMatchedBytes`, default 64 estimated
+matched bytes from function size × gain): improvements that clear both floors
+become `improvement_candidate` and ship in a separate improvement PR lane,
+while sub-floor progress becomes `deferred_patch`. `needs_fact`,
+`stalled_no_useful_guess`, and `needs_rework` reports stay visible as
+carry-forward evidence. The generated `pr_candidates.md` lists both lanes
+(match candidates first, then improvement candidates with their gain and byte
+evidence) and is the source list for PR packaging, while `carry_forward.md` is
+the ledger of local work that should not be forgotten after the baseline or
+next run is reset.
 
 The dashboard Fresh Run action checkpoints the current run before resetting the
 report baseline by default. Disable that only when intentionally discarding or
@@ -218,6 +268,16 @@ for `it`, `gm`, `cm`, `ft`, and adjacent directories stay together. Support
 roots such as `sysdolphin`, `Runtime`, `MSL`, and `MetroTRK` become their own
 slices, while cross-cutting root/config files become shared slices. Use
 `--group-mode top-dir` for a simpler first-directory split.
+
+Passing `--checkpoint <checkpoint.json>` (the dashboard does this
+automatically using the latest run checkpoint) splits each subsystem slice
+into PR lanes: a match slice carrying `pr_candidate` files plus supporting
+files the matches need to build, and an improvement slice
+(`improve-<subsystem>` branch, `(fuzzy improvements)` title) carrying
+`improvement_candidate` files. Improvement slices warn that they need
+NONMATCHING framing and a lower review priority; match slices warn when a file
+also carries fuzzy improvements in other functions. `--max-files-per-pr` is a
+hard ceiling for slice refinement, not a packing target.
 
 Each slice includes a suggested branch name, PR title, pathspec list, patch
 workflow, isolation-check workflow, and unverified independence disposition.
@@ -248,8 +308,8 @@ The UI server wraps the same operator commands for PR preparation:
 | --- | --- |
 | `Pause Intake` | Drains the managed process and marks the run `paused`, which prevents `start`, `tick`, `worker`, and `trigger-agent` scheduling until the run is resumed. |
 | `Checkpoint` | Runs the checkpoint handoff logic and writes checkpoint artifacts under the run state directory. |
-| `Run QA` | Runs `regression-check` with `--require-pr-promotion` enabled by default. |
-| `Plan PRs` | Runs `pr-split-plan` with the selected base ref, group mode, branch prefix, title prefix, and worktree/untracked options. |
+| `Run QA` | Runs `regression-check` with `--require-pr-promotion` enabled by default, plus `--promotion-min-unmatched-improvement-bytes` from the project's improvement byte floor so improvement-only handoffs can still promote. |
+| `Plan PRs` | Runs `pr-split-plan` with the selected base ref, group mode, branch prefix, title prefix, worktree/untracked options, and the latest checkpoint for match/improvement lane splitting. |
 | `Prepare` | Runs pause, checkpoint, QA, and split planning in sequence; split planning runs only after QA passes. |
 
 The UI stores split-plan artifacts under
@@ -266,8 +326,8 @@ five-minute maintenance interval; dry-run agents default to disabled. Use
 `--knowledge-maintenance-interval-ms <n>` to tune it.
 
 Maintenance does not require the main loop to inspect individual PRs. The PR
-postmortem command uses pending-only discovery to find PRs in the current dump
-that do not have `postmortem.json` yet. Live trigger maintenance queues up to
+postmortem command uses pending-only discovery to find PRs in the active corpus
+that do not have `postmortem/postmortem.json` yet. Live trigger maintenance queues up to
 eight pending PRs per interval through the PR-review agent by default; use
 `--no-run-pr-agent` to keep the background pass deterministic or `--pr-limit`
 to tune the batch. Direct `kg-maintain` remains deterministic unless

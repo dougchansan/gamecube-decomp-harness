@@ -1,0 +1,17 @@
+{
+  "number": 441,
+  "title": "begin restructuring StateVars struct - ftFox complete",
+  "state": "MERGED",
+  "createdAt": "2022-08-06T23:24:05Z",
+  "updatedAt": "2022-08-09T01:39:44Z",
+  "mergedAt": "2022-08-09T01:39:44Z",
+  "closedAt": "2022-08-09T01:39:44Z",
+  "author": "VetriTheRetri",
+  "url": "https://github.com/doldecomp/melee/pull/441",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 5,
+    "diff_bytes": 301959
+  }
+}

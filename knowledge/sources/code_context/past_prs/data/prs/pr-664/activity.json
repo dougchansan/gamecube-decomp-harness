@@ -1,0 +1,10 @@
+{
+  "pr": 664,
+  "title": "Fix `implicit-function-declaration` warnings, pass 8",
+  "url": "https://github.com/doldecomp/melee/pull/664",
+  "text_records_with_body": 5,
+  "review_comments": 4,
+  "changed_files": 215,
+  "added_lines": 706,
+  "deleted_lines": 992
+}

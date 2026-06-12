@@ -1,0 +1,17 @@
+{
+  "number": 1377,
+  "title": "Link `itmew` (992 bytes)",
+  "state": "MERGED",
+  "createdAt": "2024-03-06T01:37:16Z",
+  "updatedAt": "2024-03-06T17:03:07Z",
+  "mergedAt": "2024-03-06T08:10:49Z",
+  "closedAt": "2024-03-06T08:10:49Z",
+  "author": "wyatt-avilla",
+  "url": "https://github.com/doldecomp/melee/pull/1377",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 24374
+  }
+}

@@ -13,7 +13,6 @@ import {
   fileGraphCard,
   globalStandardsContext,
   graphDbExists,
-  knowledgeSourcesRoot,
   openKnowledgeGraph,
   packageRoot,
   readSourceRegistry,
@@ -22,6 +21,7 @@ import {
   resolvePathFactsContext,
   resourceGraphDbPath,
   searchKnowledgeGraph,
+  sourceRoot,
 } from "@decomp-orchestrator/knowledge";
 import type { AgentToolRegistration, AgentToolRuntimeContext, PiToolDefinition } from "./types.js";
 import { boundedLimit, commandToolPayload, jsonToolResult, safeRegistryId } from "./util.js";
@@ -38,7 +38,6 @@ const lookupParameters = {
         "source_status",
         "tool_lookup",
         "tool_status",
-        "tool_outputs",
         "path_facts",
         "standards",
         "powerpc_instruction",
@@ -55,7 +54,7 @@ const lookupParameters = {
     },
     tool_id: {
       type: "string",
-      description: "Registered tool id for tool_lookup/tool_status/tool_outputs, such as ghidra, opseq, mismatch_db, or mwcc_debug.",
+      description: "Registered tool id for tool_lookup/tool_status, such as ghidra, opseq, mismatch_db, or mwcc_debug.",
     },
     source_path: {
       type: "string",
@@ -95,7 +94,7 @@ function registeredToolIds(): Set<string> {
 /** Run a source-local API script with fixed arguments. */
 async function runSourceApi(sourceId: string, scriptName: string, args: string[]): Promise<Record<string, unknown>> {
   const cwd = packageRoot();
-  const scriptPath = resolve(knowledgeSourcesRoot(), sourceId, "api", scriptName);
+  const scriptPath = resolve(sourceRoot(sourceId), "api", scriptName);
   if (!existsSync(scriptPath)) {
     return {
       status: "missing_api_script",
@@ -214,7 +213,9 @@ export function createDecompLookupTool(context: AgentToolRuntimeContext): PiTool
             sources: readSourceRegistry().map((source) => ({
               id: source.id,
               title: source.title,
+              section: source.section,
               trust_tier: source.trust_tier,
+              access_modes: source.access_modes ?? [],
               capabilities: source.capabilities,
             })),
           });
@@ -249,10 +250,12 @@ export function createDecompLookupTool(context: AgentToolRuntimeContext): PiTool
             })),
           });
         }
-        if (!registeredToolIds().has(toolId)) {
+        const tool = readToolRegistry().find((candidate) => candidate.id === toolId);
+        if (!tool) {
           return jsonToolResult("decomp_lookup", { status: "unknown_tool_id", tool_id: toolId, available_tool_ids: [...registeredToolIds()].sort() });
         }
-        return jsonToolResult("decomp_lookup", await runToolApi(toolId, "status.py", ["--json"]));
+        const args = tool.commands?.status?.includes("--repo-root") ? ["--repo-root", context.repoRoot, "--json"] : ["--json"];
+        return jsonToolResult("decomp_lookup", await runToolApi(toolId, "status.py", args));
       }
       if (operation === "tool_lookup") {
         if (!toolId) return jsonToolResult("decomp_lookup", { status: "missing_tool_id", operation });
@@ -262,12 +265,6 @@ export function createDecompLookupTool(context: AgentToolRuntimeContext): PiTool
           return jsonToolResult("decomp_lookup", { status: "unsupported_tool_lookup", tool_id: toolId, available_tool_ids: Object.keys(toolLookupScripts).sort() });
         }
         return jsonToolResult("decomp_lookup", await runToolApi(toolId, script, ["--query", query, "--limit", String(limit), "--json"]));
-      }
-      if (operation === "tool_outputs") {
-        if (!query) return jsonToolResult("decomp_lookup", { status: "missing_query", operation });
-        const args = ["--query", query, "--limit", String(limit), "--json"];
-        if (toolId) args.push("--tool", toolId);
-        return jsonToolResult("decomp_lookup", await runSourceApi("tool_outputs", "tool_lookup.py", args));
       }
       if (operation === "path_facts") {
         const path = sourcePath || query;

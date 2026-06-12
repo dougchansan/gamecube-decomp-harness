@@ -1,6 +1,6 @@
 # Source Permuter Tool Suite
 
-This suite wraps the harness source-level permuter. It works on the real C
+This suite wraps the tool-local source-level permuter. It works on the real C
 translation unit text, compiles candidates with the same MWCC rule as the
 project build, and scores candidates through objdiff.
 

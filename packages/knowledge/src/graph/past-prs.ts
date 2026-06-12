@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-import { knowledgeSourcesRoot, pastPrsRoot } from "../paths.js";
+import { pastPrsRoot, sourceRoot } from "../paths.js";
 import { fileEntityId } from "./code-graph.js";
 import type { GraphEdge, GraphEntity, GraphFact, GraphRecords, SearchChunk } from "./types.js";
 import { arrayValue, filesFingerprint, numberValue, objectValue, readJsonlLazy, shortHash, stringValue, truncate } from "./util.js";
@@ -14,10 +14,10 @@ interface FileRollup {
 
 export function buildPastPrsGraphRecords(): GraphRecords {
   const root = pastPrsRoot();
-  const changedFilesPath = resolve(root, "current/analysis/changed_files.jsonl");
-  const textCorpusPath = resolve(root, "current/analysis/text_corpus.jsonl");
-  const prIndexPath = resolve(root, "prs/index.jsonl");
-  const knownFixesPath = resolve(root, "prs/known_fixes.md");
+  const changedFilesPath = resolve(root, "aggregate/changed_files.jsonl");
+  const textCorpusPath = resolve(root, "aggregate/text_corpus.jsonl");
+  const prIndexPath = resolve(root, "library/index.jsonl");
+  const knownFixesPath = resolve(root, "library/known_fixes.md");
   const sourcePaths = [changedFilesPath, textCorpusPath, prIndexPath, knownFixesPath].filter(existsSync);
   const sourceVersionId = `source-version:past_prs:${shortHash(filesFingerprint(sourcePaths))}`;
   const entities: GraphEntity[] = [];
@@ -39,11 +39,11 @@ export function buildPastPrsGraphRecords(): GraphRecords {
       entityId: prEntityId(pr),
       title: `PR ${pr}: ${stringValue(row.title)}`,
       text: [row.title, row.summary, row.categories, row.systems, row.searchable_terms].map((value) => String(value ?? "")).join("\n"),
-      evidenceRef: stringValue(row.postmortem_json, `prs/index.jsonl:${pr}`),
+      evidenceRef: stringValue(row.postmortem_json, `library/index.jsonl:${pr}`),
       payload: row,
     });
     const postmortemRel = stringValue(row.postmortem_json);
-    if (postmortemRel) addPostmortemChunks(resolve(root, "prs", postmortemRel), pr, sourceVersionId, chunks, facts);
+    if (postmortemRel) addPostmortemChunks(resolve(root, postmortemRel), pr, sourceVersionId, chunks, facts);
   });
 
   readJsonlLazy(changedFilesPath, (row) => {
@@ -131,9 +131,9 @@ export function buildPastPrsGraphRecords(): GraphRecords {
     });
   }
 
-  writeJsonl(resolve(knowledgeSourcesRoot(), "past_prs/indexes/prs.jsonl"), [...knownPrs.values()].sort((left, right) => Number(right.pr) - Number(left.pr)));
+  writeJsonl(resolve(sourceRoot("past_prs"), "indexes/prs.jsonl"), [...knownPrs.values()].sort((left, right) => Number(right.pr) - Number(left.pr)));
   writeJsonl(
-    resolve(knowledgeSourcesRoot(), "past_prs/indexes/pr_file_edges.jsonl"),
+    resolve(sourceRoot("past_prs"), "indexes/pr_file_edges.jsonl"),
     [...fileRollups.values()].flatMap((rollup) =>
       [...rollup.prs.values()].map((pr) => ({
         source_path: rollup.sourcePath,
@@ -146,7 +146,7 @@ export function buildPastPrsGraphRecords(): GraphRecords {
     ),
   );
   writeJsonl(
-    resolve(knowledgeSourcesRoot(), "past_prs/indexes/file_rollups.jsonl"),
+    resolve(sourceRoot("past_prs"), "indexes/file_rollups.jsonl"),
     [...fileRollups.values()].map((rollup) => {
       const prRows = [...rollup.prs.values()].sort((left, right) => right.pr - left.pr);
       return {

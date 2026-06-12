@@ -1,0 +1,17 @@
+{
+  "number": 1190,
+  "title": "Clean up unknown `sysdolphin` files",
+  "state": "MERGED",
+  "createdAt": "2024-02-03T04:07:08Z",
+  "updatedAt": "2024-02-03T04:08:06Z",
+  "mergedAt": "2024-02-03T04:08:06Z",
+  "closedAt": "2024-02-03T04:08:06Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1190",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 82741
+  }
+}

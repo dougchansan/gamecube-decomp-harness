@@ -1,0 +1,17 @@
+{
+  "number": 1877,
+  "title": "Match various coll functions",
+  "state": "MERGED",
+  "createdAt": "2025-08-29T06:12:59Z",
+  "updatedAt": "2025-08-29T06:19:04Z",
+  "mergedAt": "2025-08-29T06:18:56Z",
+  "closedAt": "2025-08-29T06:18:56Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1877",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 43878
+  }
+}

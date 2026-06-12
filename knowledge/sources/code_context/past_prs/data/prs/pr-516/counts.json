@@ -1,0 +1,17 @@
+{
+  "number": 516,
+  "title": "Create `resync.sh`",
+  "state": "MERGED",
+  "createdAt": "2022-08-28T22:07:11Z",
+  "updatedAt": "2022-08-28T22:09:15Z",
+  "mergedAt": "2022-08-28T22:09:15Z",
+  "closedAt": "2022-08-28T22:09:15Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/516",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 460
+  }
+}

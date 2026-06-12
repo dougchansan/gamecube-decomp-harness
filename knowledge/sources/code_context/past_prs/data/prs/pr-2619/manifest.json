@@ -1,0 +1,28 @@
+{
+  "schema_version": "melee_pr_vertical_slice_v1",
+  "pr": 2619,
+  "title": "Improvements to split up: CM",
+  "state": "CLOSED",
+  "path": "prs/pr-2619",
+  "files": {
+    "raw": [
+      "raw/pr.json",
+      "raw/issue_comments.json",
+      "raw/review_comments.json",
+      "raw/reviews.json",
+      "raw/diff.diff"
+    ],
+    "extracted": [
+      "extracted/text_corpus.jsonl",
+      "extracted/human_pr_text.md",
+      "extracted/review_comments.md"
+    ],
+    "postmortem": [
+      "postmortem/postmortem.json"
+    ],
+    "metadata": [
+      "counts.json",
+      "activity.json"
+    ]
+  }
+}

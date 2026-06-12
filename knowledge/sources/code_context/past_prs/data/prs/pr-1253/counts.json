@@ -1,0 +1,17 @@
+{
+  "number": 1253,
+  "title": "ftAction matches",
+  "state": "MERGED",
+  "createdAt": "2024-02-19T09:48:04Z",
+  "updatedAt": "2024-02-19T09:55:45Z",
+  "mergedAt": "2024-02-19T09:55:31Z",
+  "closedAt": "2024-02-19T09:55:31Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/1253",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 17479
+  }
+}

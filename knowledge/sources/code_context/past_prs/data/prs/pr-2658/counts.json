@@ -1,0 +1,17 @@
+{
+  "number": 2658,
+  "title": "Melee decomp: IF + MN + TY",
+  "state": "OPEN",
+  "createdAt": "2026-06-11T20:06:27Z",
+  "updatedAt": "2026-06-11T20:26:17Z",
+  "mergedAt": null,
+  "closedAt": null,
+  "author": "fjooord",
+  "url": "https://github.com/doldecomp/melee/pull/2658",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 29856
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 1858,
+  "title": "Link `ftCo_AirCatch`",
+  "state": "MERGED",
+  "createdAt": "2025-08-20T18:15:45Z",
+  "updatedAt": "2025-08-20T18:21:22Z",
+  "mergedAt": "2025-08-20T18:21:20Z",
+  "closedAt": "2025-08-20T18:21:20Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1858",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 16809
+  }
+}

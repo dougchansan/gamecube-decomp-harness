@@ -1,0 +1,10 @@
+{
+  "pr": 172,
+  "title": "Move some of .sdata out to files, split up ef code",
+  "url": "https://github.com/doldecomp/melee/pull/172",
+  "text_records_with_body": 0,
+  "review_comments": 0,
+  "changed_files": 16,
+  "added_lines": 15990,
+  "deleted_lines": 16029
+}

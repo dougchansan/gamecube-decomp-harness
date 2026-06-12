@@ -11,7 +11,7 @@
     "Similarity search is lexical over indexed opcode fingerprints and metadata, not a full edit-distance engine."
   ],
   "commands": {
-    "status": "python3 tools/research/opseq/api/status.py --json",
+    "status": "python3 tools/research/opseq/api/status.py --repo-root <repo_root> --json",
     "similar_functions": "python3 tools/research/opseq/api/similar_functions.py --query <query> --json",
     "runner": "python3 tools/research/opseq/runners/extract_opcode_sequences.py --repo-root <repo_root>"
   },

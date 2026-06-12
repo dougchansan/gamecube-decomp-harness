@@ -1,0 +1,17 @@
+{
+  "number": 1962,
+  "title": "Match all ftKb_Init functions < 60B",
+  "state": "MERGED",
+  "createdAt": "2025-10-06T01:36:35Z",
+  "updatedAt": "2025-10-06T15:01:58Z",
+  "mergedAt": "2025-10-06T15:01:58Z",
+  "closedAt": "2025-10-06T15:01:58Z",
+  "author": "lukechampine",
+  "url": "https://github.com/doldecomp/melee/pull/1962",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 26139
+  }
+}

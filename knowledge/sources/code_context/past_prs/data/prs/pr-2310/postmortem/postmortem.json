@@ -1,0 +1,690 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2310",
+  "pr": {
+    "number": 2310,
+    "title": "gr work",
+    "url": "https://github.com/doldecomp/melee/pull/2310",
+    "state": "MERGED",
+    "author": "lukechampine",
+    "created_at": "2026-03-16T22:18:48Z",
+    "merged_at": "2026-03-16T22:39:58Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Unfocused GR-stage decomp PR that broadly factors a repeated stage-GObj callback setup sequence into Ground_SetupStageCallbacks across many src/melee/gr files, adds or recovers several StageCallbacks tables and stage setup functions, updates some headers/prototypes, and lands 8 complete grpushon matches plus several near-matches/improvements according to the bot report.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "helper-refactor",
+      "stage-callbacks",
+      "data-table-recovery"
+    ],
+    "systems": [
+      "src/melee/gr",
+      "src/melee/lb",
+      "src/melee/mn",
+      "src/sysdolphin/baselib"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gr/grpushon.c",
+      "role": "largest decomp/matching target; bot reports 8 new complete grpushon function matches and data-section improvements",
+      "evidence_refs": [
+        "changed_files: grpushon.c +226/-10",
+        "text_corpus: decomp-dev bot report lists 8 new matches in main/melee/gr/grpushon"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grpushon.h",
+      "role": "header updates for grpushon changes",
+      "evidence_refs": [
+        "changed_files: grpushon.h +5/-5"
+      ]
+    },
+    {
+      "path": "src/melee/gr/inlines.h",
+      "role": "adds shared helper support used by many GR files",
+      "evidence_refs": [
+        "changed_files: inlines.h +21/-0",
+        "PR body: factors out a very common pattern into a helper function",
+        "diff_excerpt: many files replace manual callback setup block with Ground_SetupStageCallbacks"
+      ]
+    },
+    {
+      "path": "src/melee/gr/types.h",
+      "role": "type/header support for GR changes",
+      "evidence_refs": [
+        "changed_files: types.h +10/-0"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grcorneria.c",
+      "role": "adds StageCallbacks table and recovers grCorneria_801DD534 as near-match; uses local dont_inline pragma",
+      "evidence_refs": [
+        "changed_files: grcorneria.c +72/-1",
+        "diff_excerpt: grCn_803E1D8C[19], grCorneria_801DD534 implementation, pragma push/dont_inline",
+        "text_corpus: bot reports grCorneria_801DD534 99.95% and .data improvement"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grhomerun.c",
+      "role": "adds StageCallbacks table, static data, grHomeRun_8021C754 and grHomeRun_8021C82C implementations",
+      "evidence_refs": [
+        "changed_files: grhomerun.c +60/-2",
+        "diff_excerpt: grHr_803E8140[11], grHomeRun_8021C754, grHomeRun_8021C82C",
+        "text_corpus: bot reports grHomeRun_8021C82C 99.97%, grHomeRun_8021C754 96.90%, and data improvements"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grhomerun.h",
+      "role": "replaces UNK_RET/UNK_PARAMS with recovered prototypes",
+      "evidence_refs": [
+        "changed_files: grhomerun.h +2/-2",
+        "diff_excerpt: grHomeRun_8021C82C becomes HSD_GObj* grHomeRun_8021C82C(int); grHomeRun_8021EDD4 becomes void grHomeRun_8021EDD4(int)"
+      ]
+    },
+    {
+      "path": "src/melee/gr/groldkongo.c",
+      "role": "adds StageCallbacks table and recovers grOldKongo_8020F52C as near-match",
+      "evidence_refs": [
+        "changed_files: groldkongo.c +27/-1",
+        "diff_excerpt: grOk_803E658C[4], grOldKongo_8020F52C",
+        "text_corpus: bot reports grOldKongo_8020F52C 94.88% and .data improvement"
+      ]
+    },
+    {
+      "path": "src/melee/gr/groldpupupu.c",
+      "role": "adds StageCallbacks table",
+      "evidence_refs": [
+        "changed_files: groldpupupu.c +21/-0",
+        "diff_excerpt: grOp_803E6688[9]"
+      ]
+    },
+    {
+      "path": "src/melee/gr/gricemt.c",
+      "role": "cleans callback setup implementation and fixes OSReport format string",
+      "evidence_refs": [
+        "changed_files: gricemt.c +5/-25",
+        "diff_excerpt: grIceMt_801F71E8 now uses callbacks pointer and Ground_SetupStageCallbacks; OSReport string changes from \"s:%d\" to \"%s:%d\"",
+        "text_corpus: bot reports grIceMt_801F71E8 99.95%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grpura.c",
+      "role": "replaces manual callback setup with helper and adjusts OSReport line constant",
+      "evidence_refs": [
+        "changed_files: grpura.c +2/-23",
+        "diff_excerpt: grPura_80211E08 now calls Ground_SetupStageCallbacks",
+        "text_corpus: bot reports grPura_80211E08 small improvement and grPura_802125F0 regression"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grfigure1.c",
+      "role": "helper refactor at stage GObj setup site",
+      "evidence_refs": [
+        "changed_files: grfigure1.c +3/-14",
+        "diff_excerpt: manual setup replaced with Ground_SetupStageCallbacks"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grfigure2.c",
+      "role": "helper refactor and include addition",
+      "evidence_refs": [
+        "changed_files: grfigure2.c +4/-14",
+        "diff_excerpt: adds gr/inlines.h and uses Ground_SetupStageCallbacks"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grfigure3.c",
+      "role": "helper refactor and include addition",
+      "evidence_refs": [
+        "changed_files: grfigure3.c +3/-14",
+        "diff_excerpt: adds gr/inlines.h and uses Ground_SetupStageCallbacks"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grfigureget.c",
+      "role": "helper refactor at stage GObj setup site",
+      "evidence_refs": [
+        "changed_files: grfigureget.c +3/-14",
+        "diff_excerpt: manual setup replaced with Ground_SetupStageCallbacks"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grfourside.c",
+      "role": "helper refactor at stage GObj setup site",
+      "evidence_refs": [
+        "changed_files: grfourside.c +1/-15",
+        "diff_excerpt: manual setup replaced with Ground_SetupStageCallbacks"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grgarden.c",
+      "role": "helper refactor and OSReport include adjustment",
+      "evidence_refs": [
+        "changed_files: grgarden.c +3/-20",
+        "diff_excerpt: adds dolphin/os/OSError.h and uses Ground_SetupStageCallbacks"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grshrine.c",
+      "role": "changed GR file, likely same helper-refactor family by metadata",
+      "evidence_refs": [
+        "changed_files: grshrine.c +5/-15"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grstory.c",
+      "role": "changed GR file, likely same helper-refactor family by metadata",
+      "evidence_refs": [
+        "changed_files: grstory.c +5/-17"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grtcaptain.c",
+      "role": "changed target-stage file",
+      "evidence_refs": [
+        "changed_files: grtcaptain.c +4/-18"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grtclink.c",
+      "role": "changed target-stage file",
+      "evidence_refs": [
+        "changed_files: grtclink.c +5/-18"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grtdonkey.c",
+      "role": "changed target-stage file",
+      "evidence_refs": [
+        "changed_files: grtdonkey.c +3/-14"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grtdrmario.c",
+      "role": "changed target-stage file",
+      "evidence_refs": [
+        "changed_files: grtdrmario.c +5/-17"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grtemblem.c",
+      "role": "changed target-stage file",
+      "evidence_refs": [
+        "changed_files: grtemblem.c +4/-17"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grtest.c",
+      "role": "changed target-stage/test GR file",
+      "evidence_refs": [
+        "changed_files: grtest.c +6/-16"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grtfalco.c",
+      "role": "changed target-stage file",
+      "evidence_refs": [
+        "changed_files: grtfalco.c +4/-19"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grtfox.c",
+      "role": "changed target-stage file",
+      "evidence_refs": [
+        "changed_files: grtfox.c +6/-17"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grtgamewatch.c",
+      "role": "changed target-stage file",
+      "evidence_refs": [
+        "changed_files: grtgamewatch.c +5/-19"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grtganon.c",
+      "role": "changed target-stage file",
+      "evidence_refs": [
+        "changed_files: grtganon.c +5/-18"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grticeclimber.c",
+      "role": "changed target-stage file",
+      "evidence_refs": [
+        "changed_files: grticeclimber.c +4/-19"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grtkirby.c",
+      "role": "changed target-stage file",
+      "evidence_refs": [
+        "changed_files: grtkirby.c +5/-17"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grtkoopa.c",
+      "role": "changed target-stage file",
+      "evidence_refs": [
+        "changed_files: grtkoopa.c +4/-14"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grtlink.c",
+      "role": "changed target-stage file",
+      "evidence_refs": [
+        "changed_files: grtlink.c +6/-17"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grtluigi.c",
+      "role": "changed target-stage file",
+      "evidence_refs": [
+        "changed_files: grtluigi.c +5/-17"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grtmario.c",
+      "role": "changed target-stage file",
+      "evidence_refs": [
+        "changed_files: grtmario.c +5/-17"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grtmars.c",
+      "role": "changed target-stage file",
+      "evidence_refs": [
+        "changed_files: grtmars.c +5/-17"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grtmewtwo.c",
+      "role": "changed target-stage file",
+      "evidence_refs": [
+        "changed_files: grtmewtwo.c +5/-17"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grtness.c",
+      "role": "changed target-stage file",
+      "evidence_refs": [
+        "changed_files: grtness.c +8/-16"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grtpeach.c",
+      "role": "changed target-stage file",
+      "evidence_refs": [
+        "changed_files: grtpeach.c +5/-17"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grtpichu.c",
+      "role": "changed target-stage file",
+      "evidence_refs": [
+        "changed_files: grtpichu.c +3/-14"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grtpikachu.c",
+      "role": "changed target-stage file",
+      "evidence_refs": [
+        "changed_files: grtpikachu.c +5/-18"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grtpurin.c",
+      "role": "changed target-stage file",
+      "evidence_refs": [
+        "changed_files: grtpurin.c +5/-18"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grtsamus.c",
+      "role": "changed target-stage file",
+      "evidence_refs": [
+        "changed_files: grtsamus.c +5/-17"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grtseak.c",
+      "role": "changed target-stage file",
+      "evidence_refs": [
+        "changed_files: grtseak.c +6/-17"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grtyoshi.c",
+      "role": "changed target-stage file",
+      "evidence_refs": [
+        "changed_files: grtyoshi.c +4/-14"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grtzelda.c",
+      "role": "changed target-stage file",
+      "evidence_refs": [
+        "changed_files: grtzelda.c +5/-17"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lb_00F9.c",
+      "role": "small non-GR code cleanup/change",
+      "evidence_refs": [
+        "changed_files: lb_00F9.c +1/-4"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnstagesel.c",
+      "role": "small menu code cleanup/change",
+      "evidence_refs": [
+        "changed_files: mnstagesel.c +1/-4"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/lobj.h",
+      "role": "baselib header/type support",
+      "evidence_refs": [
+        "changed_files: lobj.h +6/-0"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Introduced or used Ground_SetupStageCallbacks to replace repeated manual setup of Ground callbacks, GX link setup, callback0 invocation, and callback2 proc setup in many GR stage factory functions.",
+    "Recovered several StageCallbacks arrays in GR files, including grCn_803E1D8C, grHr_803E8140, grOk_803E658C, and grOp_803E6688 in the loaded diff excerpt.",
+    "Implemented or improved stage GObj setup functions such as grCorneria_801DD534, grHomeRun_8021C82C, grOldKongo_8020F52C, grIceMt_801F71E8, and grPura_80211E08.",
+    "Implemented grHomeRun_8021C754 with stage initialization calls, camera/blast-zone offset calculations, and calls to grHomeRun_8021C82C.",
+    "Updated grhomerun.h prototypes from UNK_RET/UNK_PARAMS to concrete signatures for grHomeRun_8021C82C and grHomeRun_8021EDD4.",
+    "Bot report recorded +0.04% matched code, +1740 bytes, 8 new full matches in main/melee/gr/grpushon, 14 unmatched-item improvements, and 1 unmatched-item regression in grPura_802125F0."
+  ],
+  "smart_moves": [
+    "Factored a visibly repeated callback setup sequence into a helper instead of leaving many copied blocks across stage files.",
+    "Used callback table pointers such as StageCallbacks* callbacks = &table[gobj_id] before setup, making the indexed stage-callback pattern explicit.",
+    "Updated headers when function bodies established concrete prototypes, matching the truthful-headers standard.",
+    "Kept the PR reviewer-visible context honest: the author called the PR unfocused and identified the helper extraction as the dominant part of the change."
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When many GR stage factory functions perform the same sequence after Ground_GetStageGObj, a shared helper can express the authored intent better than repeated generated-looking blocks, provided each site matches the same callback semantics.",
+      "evidence_refs": [
+        "PR body: factors out a very common pattern into a helper function",
+        "diff_excerpt: grfigure1/grfigure2/grfigure3/grfigureget/grfourside/grgarden/gricemt/grpura replace manual callback setup with Ground_SetupStageCallbacks",
+        "decomp_standards: infer-authored-source-style, typed-fields-over-pointer-math"
+      ],
+      "confidence": 0.86
+    },
+    {
+      "lesson": "Recovering StageCallbacks tables can unlock or improve nearby stage object setup functions, but data-table additions should be tracked as matching evidence rather than assumed semantic completion.",
+      "evidence_refs": [
+        "diff_excerpt: StageCallbacks tables added in grcorneria.c, grhomerun.c, groldkongo.c, groldpupupu.c",
+        "text_corpus: bot reports .data improvements for grcorneria, grhomerun, groldkongo and near-matches for setup functions",
+        "decomp_standards: data-sections-and-tu-splits, text-before-data-matching"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "When a recovered function proves a signature, update the owning header rather than leaving UNK_RET/UNK_PARAMS.",
+      "evidence_refs": [
+        "diff_excerpt: grhomerun.h updates grHomeRun_8021C82C and grHomeRun_8021EDD4 prototypes",
+        "decomp_standards: truthful-headers-and-includes"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "lesson": "A cleanup/refactor PR can still carry regression risk; bot-reported regressions in adjacent or same-TU unmatched functions should be recorded even when the primary matches improve.",
+      "evidence_refs": [
+        "text_corpus: bot reports 1 regression in main/melee/gr/grpura grPura_802125F0, -48 bytes, 75.26% to 72.51%",
+        "decomp_standards: verification-and-regression-ledger"
+      ],
+      "confidence": 0.82
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Stage callback tables use existing GR module prefixes plus address-style suffixes, e.g. grCn_803E1D8C, grHr_803E8140, grOk_803E658C, grOp_803E6688.",
+      "evidence_refs": [
+        "diff_excerpt: StageCallbacks table declarations"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "convention": "Clear local role names are used for stage setup helpers: gobj for HSD_GObj*, gp for Ground*, callbacks for StageCallbacks*, and gobj_id or arg0 for the stage object index.",
+      "evidence_refs": [
+        "diff_excerpt: grCorneria_801DD534, grHomeRun_8021C82C, grOldKongo_8020F52C, grPura_80211E08"
+      ],
+      "confidence": 0.8
+    },
+    {
+      "convention": "Unproven functions retain address-style names such as grHomeRun_8021C754 and grOldKongo_8020F52C rather than speculative semantic names.",
+      "evidence_refs": [
+        "diff_excerpt: recovered functions keep address-style names",
+        "decomp_standards: conservative-naming"
+      ],
+      "confidence": 0.86
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Use a shared inline/helper for repeated stage callback setup, but include the helper only where needed.",
+      "evidence_refs": [
+        "diff_excerpt: added gr/inlines.h includes in files using Ground_SetupStageCallbacks",
+        "changed_files: inlines.h +21/-0"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "tactic": "Recover indexed StageCallbacks tables before implementing setup functions that select callbacks by gobj_id.",
+      "evidence_refs": [
+        "diff_excerpt: callbacks = &grHr_803E8140[gobj_id], callbacks = &grOk_803E658C[arg0], callbacks = &grIm_803E4718[gobj_id]"
+      ],
+      "confidence": 0.8
+    },
+    {
+      "tactic": "A tightly scoped #pragma push / #pragma dont_inline on / #pragma pop was used around grCorneria_801DD534.",
+      "evidence_refs": [
+        "diff_excerpt: pragma block around grCorneria_801DD534",
+        "decomp_standards: avoid-pragmas-register-asm, matching-tactics-need-evidence"
+      ],
+      "confidence": 0.74
+    },
+    {
+      "tactic": "OSReport file/line formatting was adjusted at several failure paths, including __FILE__ use in some files and a corrected %s format in gricemt.",
+      "evidence_refs": [
+        "diff_excerpt: grfigure2/grfigure3/grgarden OSReport changes to __FILE__; gricemt OSReport string correction"
+      ],
+      "confidence": 0.72
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "author_scope_note",
+      "author": "lukechampine",
+      "text": "Author described the PR as unfocused and said most of it factors a very common pattern into a helper function; the author suggested that part could have been split into a separate PR.",
+      "evidence_refs": [
+        "human_pr_text",
+        "text_corpus: pr_body"
+      ]
+    },
+    {
+      "kind": "review_approval",
+      "author": "ribbanya",
+      "text": "Reviewer approved and stated that the scope was not a problem and was preferred over multiple smaller PRs.",
+      "evidence_refs": [
+        "text_corpus: review by ribbanya, state APPROVED"
+      ]
+    },
+    {
+      "kind": "bot_report",
+      "author": "decomp-dev[bot]",
+      "text": "Bot reported +1740 matched bytes, 8 new complete grpushon matches, 14 unmatched-item improvements, and 1 regression in grPura_802125F0.",
+      "evidence_refs": [
+        "text_corpus: issue_comment decomp-dev[bot]"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2310",
+    "gr work",
+    "lukechampine",
+    "Ground_SetupStageCallbacks",
+    "StageCallbacks",
+    "Ground_GetStageGObj",
+    "GObj_SetupGXLink",
+    "HSD_GObj_SetupProc",
+    "grpushon",
+    "grPushOn_80218ED4",
+    "grPushOn_802183E4",
+    "grPushOn_80218FC0",
+    "grPushOn_802186C8",
+    "grPushOn_802187A8",
+    "grPushOn_802185A0",
+    "grPushOn_80219458",
+    "grPushOn_802184CC",
+    "grCorneria_801DD534",
+    "grCn_803E1D8C",
+    "grHomeRun_8021C754",
+    "grHomeRun_8021C82C",
+    "grHr_803E8140",
+    "grOldKongo_8020F52C",
+    "grOk_803E658C",
+    "grOp_803E6688",
+    "grIceMt_801F71E8",
+    "grPura_80211E08",
+    "grPura_802125F0 regression",
+    "dont_inline",
+    "gr/inlines.h",
+    "grhomerun.h UNK_PARAMS"
+  ],
+  "follow_up_queries": [
+    "Search for remaining manual GR stage callback setup blocks that duplicate Ground_SetupStageCallbacks semantics.",
+    "Search src/melee/gr for StageCallbacks tables still missing or still declared with incomplete types.",
+    "Inspect whether grCorneria_801DD534 still requires the dont_inline pragma after later matching work.",
+    "Check later PRs touching grPura_802125F0 to see whether the bot-reported regression was resolved.",
+    "Search grhomerun.h for remaining UNK_RET or UNK_PARAMS after grHomeRun_8021C82C and grHomeRun_8021EDD4 were updated."
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR identity, state, author, changed-file list, counts",
+      "human_pr_text: PR body",
+      "raw_diff/diff_excerpt: representative but truncated diff",
+      "changed_files.jsonl: complete changed-file metadata",
+      "text_corpus.jsonl: PR body, bot report, approved review"
+    ],
+    "notes": [
+      "The loaded raw diff is truncated, so exact edits for many small changed files are known only from changed-file metadata, not inspected hunks.",
+      "The bot report gives match/improvement/regression data, but no local build logs or objdiff artifacts are loaded beyond the report.",
+      "No inline review comments are present; review feedback is limited to one approval comment and the bot report.",
+      "The PR was merged, but this intake does not infer that every tactic or helper pattern is a global standard."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson_candidate",
+        "title": "Factor repeated GR stage callback setup into a helper when semantics match",
+        "text": "PR #2310 shows many GR stage factory functions replacing an identical manual sequence with Ground_SetupStageCallbacks: clear x8/xC callbacks, set GX link, copy callback3 into x1C_callback, invoke callback0, and register callback2 as a proc. This is a candidate lesson for src/melee/gr cleanup, not a global rule for unrelated subsystems.",
+        "scope": [
+          "src/melee/gr",
+          "stage GObj setup",
+          "StageCallbacks"
+        ],
+        "evidence_refs": [
+          "PR body: factors out a very common pattern into a helper function",
+          "diff_excerpt: repeated replacements with Ground_SetupStageCallbacks",
+          "changed_files: many src/melee/gr files changed"
+        ],
+        "confidence": 0.86
+      },
+      {
+        "record_type": "matching_tactic_candidate",
+        "title": "StageCallbacks table recovery can support setup-function matching",
+        "text": "The PR adds StageCallbacks arrays and corresponding setup functions in several GR files; the bot report shows near-match improvements for grCorneria_801DD534, grHomeRun_8021C82C, grOldKongo_8020F52C, and grIceMt_801F71E8. Candidate should retain the caveat that data-table edits need section evidence and regression checks.",
+        "scope": [
+          "src/melee/gr",
+          "StageCallbacks",
+          "data-table recovery"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: grCn_803E1D8C, grHr_803E8140, grOk_803E658C, grOp_803E6688",
+          "text_corpus: bot report improvements"
+        ],
+        "confidence": 0.78
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "src/melee/gr stage callback setup helper pattern",
+        "text": "In src/melee/gr, many stage GObj factory functions use a StageCallbacks table indexed by gobj_id/arg0 and call Ground_SetupStageCallbacks(gobj, callbacks) after Ground_GetStageGObj succeeds; failure paths commonly OSReport \"couldn t get gobj(id=%d)\" with file and line.",
+        "source_path": "src/melee/gr",
+        "scope": [
+          "src/melee/gr",
+          "Ground_SetupStageCallbacks",
+          "StageCallbacks",
+          "Ground_GetStageGObj"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: grfigure1/grfigure2/grfigure3/grfigureget/grfourside/grgarden/gricemt/grpura/grhomerun/groldkongo setup functions",
+          "PR body: helper extraction"
+        ],
+        "reason": "Useful subsystem-specific path fact for future GR decomp work; should be curated against current source before acceptance."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Repeated callback setup blocks may indicate a source helper",
+        "text": "When many functions repeat the same typed setup sequence and a local helper exists or can be recovered, prefer the helper over copied generated-looking blocks, but only after verifying that each site's side effects and callback table indexing match.",
+        "source_path": null,
+        "scope": [
+          "helper refactors",
+          "repeated setup blocks",
+          "typed callbacks"
+        ],
+        "evidence_refs": [
+          "PR body: factors out a very common pattern into a helper function",
+          "diff_excerpt: manual blocks replaced by Ground_SetupStageCallbacks"
+        ],
+        "reason": "Potential refinement of existing infer-authored-source-style and typed-fields-over-pointer-math standards; should not be promoted without comparing broader project examples."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Record bot regressions even in approved matching PRs",
+        "text": "If a bot report lists regressions in unmatched items, preserve that detail in the matching ledger even when the PR is approved and has net positive matched bytes.",
+        "source_path": null,
+        "scope": [
+          "verification ledger",
+          "regression tracking",
+          "bot reports"
+        ],
+        "evidence_refs": [
+          "text_corpus: bot report lists one grPura_802125F0 regression",
+          "text_corpus: review state APPROVED"
+        ],
+        "reason": "Candidate reinforcement of verification-and-regression-ledger with concrete PR evidence."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer from this PR alone that #pragma dont_inline is an accepted GR matching style; the diff shows a narrowly scoped use in grCorneria_801DD534 but no explanatory review or objdiff detail.",
+      "Do not treat all 49 changed files as inspected at hunk level; the loaded diff is truncated and several file-specific changes are known only from changed-files metadata.",
+      "Do not promote StageCallbacks table names or contents as source-of-truth path facts without checking current source/symbol metadata."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 72,
+  "title": "Fix incorrectly named file from gmsinglebutton to gmcamera",
+  "state": "MERGED",
+  "createdAt": "2021-08-25T18:27:26Z",
+  "updatedAt": "2021-08-25T18:27:39Z",
+  "mergedAt": "2021-08-25T18:27:36Z",
+  "closedAt": "2021-08-25T18:27:37Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/72",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 639
+  }
+}

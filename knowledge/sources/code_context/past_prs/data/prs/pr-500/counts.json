@@ -1,0 +1,17 @@
+{
+  "number": 500,
+  "title": "Fix naming for GXInitTlutObj/GXInitTlutRegion",
+  "state": "MERGED",
+  "createdAt": "2022-08-27T06:02:06Z",
+  "updatedAt": "2022-08-27T06:15:43Z",
+  "mergedAt": "2022-08-27T06:08:49Z",
+  "closedAt": "2022-08-27T06:08:49Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/500",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 1,
+    "diff_bytes": 5417
+  }
+}

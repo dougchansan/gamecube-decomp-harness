@@ -1,0 +1,296 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2484",
+  "pr": {
+    "number": 2484,
+    "title": "Match HSD_ByteCodeEval",
+    "url": "https://github.com/doldecomp/melee/pull/2484",
+    "state": "MERGED",
+    "author": "itsgrimetime",
+    "created_at": "2026-05-11T17:50:19Z",
+    "merged_at": "2026-05-12T00:44:34Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Matched HSD_ByteCodeEval in sysdolphin/baselib/bytecode.c with small signature/type cleanup in bytecode.h and the robj.c extern, plus simplification of generated-looking expression/control-flow shapes inside the bytecode evaluator.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "cleanup",
+      "decomp-matching",
+      "headers"
+    ],
+    "systems": [
+      "src/sysdolphin/baselib"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/sysdolphin/baselib/bytecode.c",
+      "role": "Primary matched function implementation; edits HSD_ByteCodeEval locals/signature, fmodf helper, and several expression/control-flow shapes.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/sysdolphin/baselib/bytecode.c added 25 deleted 39 hunks 4",
+        "raw_diff: bytecode.c hunks for fmodf and HSD_ByteCodeEval",
+        "human_pr_text: Matches HSD_ByteCodeEval in sysdolphin/baselib/bytecode.c"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/bytecode.h",
+      "role": "Owning header prototype updated to match recovered HSD_ByteCodeEval signature types.",
+      "evidence_refs": [
+        "raw_diff: bytecode.h changes float* args/int nb_args to f32* args/s32 nb_args",
+        "changed_files.jsonl: src/sysdolphin/baselib/bytecode.h added 1 deleted 1"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/robj.c",
+      "role": "Caller-side extern declaration updated to the same HSD_ByteCodeEval signature types.",
+      "evidence_refs": [
+        "raw_diff: robj.c extern float HSD_ByteCodeEval(u8*, f32*, s32)",
+        "changed_files.jsonl: src/sysdolphin/baselib/robj.c added 1 deleted 1"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "HSD_ByteCodeEval was reported as newly matching, moving main/sysdolphin/baselib/bytecode HSD_ByteCodeEval from 99.92% to 100.00% in the bot report.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev[bot] report, 1 new match, HSD_ByteCodeEval 99.92% to 100.00%"
+      ]
+    },
+    {
+      "text": "The HSD_ByteCodeEval prototype and related extern were changed from float*/int or u32-style parameters to f32* args and s32 nb_args.",
+      "evidence_refs": [
+        "raw_diff: bytecode.c signature changed to float HSD_ByteCodeEval(u8* bytecode, f32* args, s32 nb_args)",
+        "raw_diff: bytecode.h prototype changed to f32* args, s32 nb_args",
+        "raw_diff: robj.c extern changed to f32*, s32"
+      ]
+    },
+    {
+      "text": "The local fmodf helper was rewritten from a compact ternary expression into explicit divisor/dividend parameters, a quotient local, and an early return branch.",
+      "evidence_refs": [
+        "raw_diff: fmodf hunk in bytecode.c"
+      ]
+    },
+    {
+      "text": "Generated-looking nested blocks around atan2f/RAD_TO_DEG were flattened without changing the visible arithmetic branches.",
+      "evidence_refs": [
+        "raw_diff: case 0x30/0x33 region flattening nested braces around fabsf_bitwise, 90.0F, -90.0F, atan2f"
+      ]
+    },
+    {
+      "text": "A verbose boolean/XOR-like branch ladder was simplified into a direct boolean expression: (d0 == 0 && d1 != 0) || (d0 != 0 && d1 == 0).",
+      "evidence_refs": [
+        "raw_diff: case 0x32 hunk replaces bool c/val ladder"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Kept the signature cleanup synchronized across implementation, public header, and the robj.c extern instead of only changing the function body.",
+      "evidence_refs": [
+        "raw_diff: bytecode.c, bytecode.h, robj.c all update HSD_ByteCodeEval parameter types"
+      ]
+    },
+    {
+      "text": "Reduced generated-looking nested scopes and temporary boolean variables in favor of clearer source-level expressions while still landing a reported 100% function match.",
+      "evidence_refs": [
+        "raw_diff: nested atan2f block removal",
+        "raw_diff: case 0x32 boolean expression simplification",
+        "text_corpus: bot report shows HSD_ByteCodeEval after 100.00%"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a matched function body proves a cleaner signature type, update the owning header and visible extern declarations together so call surfaces stay consistent.",
+      "scope": [
+        "function signature cleanup",
+        "headers",
+        "extern declarations"
+      ],
+      "evidence_refs": [
+        "raw_diff: HSD_ByteCodeEval signature in bytecode.c",
+        "raw_diff: matching prototype update in bytecode.h",
+        "raw_diff: matching extern update in robj.c"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "lesson": "Generated-looking nested blocks and boolean temporaries can sometimes be replaced by ordinary structured C expressions in a matching PR, as shown by the flattened atan2f branch and direct XOR-like boolean assignment.",
+      "scope": [
+        "control flow cleanup",
+        "expression cleanup",
+        "bytecode evaluator"
+      ],
+      "evidence_refs": [
+        "raw_diff: nested brace cleanup around fabsf_bitwise/atan2f",
+        "raw_diff: bool c/val ladder replaced with direct boolean expression",
+        "text_corpus: bot report shows HSD_ByteCodeEval reached 100.00%"
+      ],
+      "confidence": 0.82
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "The PR used platform typedef spellings f32 and s32 for the HSD_ByteCodeEval signature and related locals instead of raw float/int in several places.",
+      "evidence_refs": [
+        "raw_diff: float* args/int nb_args changed to f32* args/s32 nb_args",
+        "raw_diff: operand_count and d0/d1 changed to s32"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "text": "Parameter names in the local fmodf helper became divisor and dividend, but the review comment notes Codex-driven renaming may have been accidental and could be cleaned up.",
+      "evidence_refs": [
+        "raw_diff: fmodf(f32 divisor, f32 dividend)",
+        "review_comments: idk why codex insisted on renaming this everywhere. can clean up if preferred"
+      ],
+      "confidence": 0.55
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Use an explicit quotient local and early return in a float modulo helper when a compact ternary form does not match the desired codegen.",
+      "evidence_refs": [
+        "raw_diff: fmodf changed from return ternary to quotient local and branch"
+      ],
+      "confidence": 0.72
+    },
+    {
+      "tactic": "Inline the second stack float load directly into the helper call to reduce an extra temporary assignment where codegen requires it.",
+      "evidence_refs": [
+        "raw_diff: f1 assignment removed before fv = fmodf(f0, ((ByteCodeVal*) &stack->data)->f)"
+      ],
+      "confidence": 0.7
+    },
+    {
+      "tactic": "Flatten unnecessary nested scopes and express select-like logic directly when the resulting source still matches.",
+      "evidence_refs": [
+        "raw_diff: nested scope removal around atan2f branch",
+        "raw_diff: direct boolean expression for case 0x32",
+        "text_corpus: bot report HSD_ByteCodeEval 100.00%"
+      ],
+      "confidence": 0.8
+    }
+  ],
+  "review_feedback": [
+    {
+      "text": "The only loaded review comment is from the PR author, noting that Codex appeared to have renamed something broadly and offering cleanup if preferred.",
+      "author": "itsgrimetime",
+      "path": "src/sysdolphin/baselib/bytecode.c",
+      "evidence_refs": [
+        "review_comments: idk why codex insisted on renaming this everywhere. can clean up if preferred"
+      ],
+      "resolution": "No explicit resolution is present in the loaded slice."
+    }
+  ],
+  "searchable_terms": [
+    "PR 2484",
+    "HSD_ByteCodeEval",
+    "sysdolphin baselib bytecode",
+    "src/sysdolphin/baselib/bytecode.c",
+    "src/sysdolphin/baselib/bytecode.h",
+    "src/sysdolphin/baselib/robj.c",
+    "ByteCodeVal",
+    "fmodf",
+    "f32 args",
+    "s32 nb_args",
+    "HSD_SListRemove",
+    "fabsf_bitwise",
+    "RAD_TO_DEG",
+    "atan2f",
+    "HSD_ASSERTMSG",
+    "Codex renaming"
+  ],
+  "follow_up_queries": [
+    "HSD_ByteCodeEval f32 s32 signature extern robj.c",
+    "bytecode.c fmodf divisor dividend quotient matching",
+    "bytecode evaluator generated nested block cleanup atan2f RAD_TO_DEG",
+    "case 0x32 boolean expression d0 d1 HSD_ByteCodeEval",
+    "Codex renaming cleanup review comment PR 2484"
+  ],
+  "evidence_quality": {
+    "status": "strong",
+    "evidence_refs": [
+      "metadata_json: PR identity, state, author, timestamps, changed files",
+      "human_pr_text: match claim and verification commands",
+      "text_corpus: bot report with HSD_ByteCodeEval 100.00%",
+      "raw_diff: full diff excerpt for all changed files",
+      "review_comments: single loaded review comment"
+    ],
+    "notes": [
+      "The slice contains the complete raw diff and extracted text records needed for intake.",
+      "Verification commands are author-reported; the bot report independently states one new match for HSD_ByteCodeEval, but no raw objdiff output is loaded.",
+      "The loaded review feedback is an author comment, not clear external reviewer direction.",
+      "The renaming comment is vague; it should not be generalized into a naming standard without more context."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "type": "decomp_lesson",
+        "title": "Synchronize recovered function signatures across implementation, header, and extern users",
+        "text": "PR 2484 changed HSD_ByteCodeEval to f32* args/s32 nb_args in bytecode.c, bytecode.h, and the robj.c extern while matching the function. This supports a reusable lesson to keep proven signatures consistent across declarations when decomping a function.",
+        "scope": [
+          "headers",
+          "extern declarations",
+          "signature recovery",
+          "src/sysdolphin/baselib"
+        ],
+        "evidence_refs": [
+          "raw_diff: bytecode.c signature update",
+          "raw_diff: bytecode.h prototype update",
+          "raw_diff: robj.c extern update",
+          "text_corpus: bot report HSD_ByteCodeEval 100.00%"
+        ]
+      },
+      {
+        "type": "matching_tactic",
+        "title": "Replace generated-looking boolean ladders with direct boolean expressions when verified",
+        "text": "In HSD_ByteCodeEval case 0x32, a verbose bool c/val ladder was replaced by the direct expression (d0 == 0 && d1 != 0) || (d0 != 0 && d1 == 0), and the bot report showed the function reaching 100%.",
+        "scope": [
+          "control flow cleanup",
+          "boolean expressions",
+          "matching"
+        ],
+        "evidence_refs": [
+          "raw_diff: case 0x32 boolean ladder replacement",
+          "text_corpus: bot report HSD_ByteCodeEval 100.00%"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Header signature updates should include related extern declarations",
+        "text": "When a function body match proves more precise typedefs or parameter types, update the owning header and any visible extern declarations in touched callers together. PR 2484 demonstrates this with HSD_ByteCodeEval changed consistently in bytecode.c, bytecode.h, and robj.c.",
+        "source_path": null,
+        "scope": [
+          "truthful headers and includes",
+          "function signature recovery",
+          "extern declarations"
+        ],
+        "evidence_refs": [
+          "raw_diff: bytecode.c, bytecode.h, robj.c HSD_ByteCodeEval signature updates"
+        ],
+        "reason": "This is consistent with the existing truthful-headers-and-includes standard, but could be added as a concrete extern-declaration example if the curator wants more specificity."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote divisor/dividend naming from fmodf as an accepted naming convention; the author comment explicitly casts some Codex-driven renaming as potentially accidental.",
+      "Do not infer that all bytecode evaluator operations should use f32/s32 typedefs globally; the PR evidence only shows HSD_ByteCodeEval and related declarations.",
+      "Do not claim external reviewer approval or requested cleanup beyond the loaded author review comment."
+    ]
+  },
+  "confidence": 0.88,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

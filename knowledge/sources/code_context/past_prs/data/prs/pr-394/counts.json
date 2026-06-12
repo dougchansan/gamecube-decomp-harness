@@ -1,0 +1,17 @@
+{
+  "number": 394,
+  "title": "first item.c file complete - matching",
+  "state": "MERGED",
+  "createdAt": "2022-06-19T18:59:32Z",
+  "updatedAt": "2022-06-19T20:41:10Z",
+  "mergedAt": "2022-06-19T20:41:09Z",
+  "closedAt": "2022-06-19T20:41:10Z",
+  "author": "VetriTheRetri",
+  "url": "https://github.com/doldecomp/melee/pull/394",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 381502
+  }
+}

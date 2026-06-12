@@ -1,0 +1,17 @@
+{
+  "number": 1306,
+  "title": "Match 20.79% of `ftdata` (2.92 KB)",
+  "state": "MERGED",
+  "createdAt": "2024-02-22T16:17:15Z",
+  "updatedAt": "2024-02-22T17:00:54Z",
+  "mergedAt": "2024-02-22T16:19:33Z",
+  "closedAt": "2024-02-22T16:19:33Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1306",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 18171
+  }
+}

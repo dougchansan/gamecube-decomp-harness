@@ -1,0 +1,10 @@
+{
+  "pr": 550,
+  "title": "Exclude `asm` functions from `calcprogress`",
+  "url": "https://github.com/doldecomp/melee/pull/550",
+  "text_records_with_body": 0,
+  "review_comments": 0,
+  "changed_files": 6,
+  "added_lines": 53,
+  "deleted_lines": 20
+}

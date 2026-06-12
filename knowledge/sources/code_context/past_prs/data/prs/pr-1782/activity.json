@@ -1,0 +1,10 @@
+{
+  "pr": 1782,
+  "title": "Remove `ftCo_GObj` and `ftCo_Fighter`",
+  "url": "https://github.com/doldecomp/melee/pull/1782",
+  "text_records_with_body": 0,
+  "review_comments": 0,
+  "changed_files": 238,
+  "added_lines": 2883,
+  "deleted_lines": 2885
+}

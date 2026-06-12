@@ -1,0 +1,17 @@
+{
+  "number": 292,
+  "title": "Matched more ftKoopa functions",
+  "state": "MERGED",
+  "createdAt": "2022-02-20T18:18:06Z",
+  "updatedAt": "2022-02-20T21:32:12Z",
+  "mergedAt": "2022-02-20T21:32:12Z",
+  "closedAt": "2022-02-20T21:32:12Z",
+  "author": "Tri-Wing",
+  "url": "https://github.com/doldecomp/melee/pull/292",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 42032
+  }
+}

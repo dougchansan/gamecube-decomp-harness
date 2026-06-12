@@ -1,0 +1,17 @@
+{
+  "number": 1028,
+  "title": "Match `ftCo_HammerWalk` (416 bytes)",
+  "state": "MERGED",
+  "createdAt": "2023-11-21T09:59:38Z",
+  "updatedAt": "2023-11-21T10:23:44Z",
+  "mergedAt": "2023-11-21T10:23:43Z",
+  "closedAt": "2023-11-21T10:23:43Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1028",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 11257
+  }
+}

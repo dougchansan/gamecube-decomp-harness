@@ -1,0 +1,442 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2271",
+  "pr": {
+    "number": 2271,
+    "title": "items: match 11 functions",
+    "url": "https://github.com/doldecomp/melee/pull/2271",
+    "state": "MERGED",
+    "author": "johnwinston",
+    "created_at": "2026-03-11T03:56:03Z",
+    "merged_at": "2026-03-11T04:32:09Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2271 matched 11 item-system functions across Lugia, Oldkuri, Whitebea, Nessbat, Ness PK Thunder Ball, Matadogas, Hitodeman, Great Fox Laser, and Kirby item files. It also refined shared item attribute/item-var structs and replaced two UNK_RET/UNK_PARAMS header prototypes with concrete signatures. The PR body claims all 11 functions are 100% matched, and the bot report confirms 11 new 100% matches plus a small .sdata2 improvement in ithitodeman.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "typed-fields",
+      "item-functions"
+    ],
+    "systems": [
+      "item",
+      "it/items",
+      "itCommonItems"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/it/itCommonItems.h",
+      "role": "Shared item attribute/item-var struct updates for Lugia, Hitodeman, and Whitebea fields used by matched functions.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/it/itCommonItems.h added 12 deleted 4",
+        "raw_diff: itLugiaAttributes adds x8/xC/x10; itHitodeman_ItemVars adds x84; itWhiteBeaAttributes adds pad_x8 and x14; itLugia_ItemVars adds x60"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itgreatfoxlaser.c",
+      "role": "Matched it_802EB1EC and added it_2725 include.",
+      "evidence_refs": [
+        "PR body summary lists it_802EB1EC",
+        "raw_diff: placeholder /// #it_802EB1EC replaced with void it_802EB1EC(Item_GObj* gobj)",
+        "bot report: it_802EB1EC 0.00% to 100.00%"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/ithitodeman.c",
+      "role": "Matched it_802D4494 and expanded local Hitodeman attributes struct fields x14/x18.",
+      "evidence_refs": [
+        "PR body summary lists it_802D4494",
+        "raw_diff: it_802D4494 uses HSD_Randi and writes ip->xDD4_itemVar.hitodeman.x84",
+        "bot report: it_802D4494 0.00% to 100.00%; .sdata2 improvement"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/ithitodeman.h",
+      "role": "Header prototype updated for recovered it_802D4494 signature.",
+      "evidence_refs": [
+        "raw_diff: UNK_RET it_802D4494(UNK_PARAMS) changed to void it_802D4494(Item_GObj* gobj)"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itkirby_2F23.c",
+      "role": "Matched it_802F2810 and added item-related includes.",
+      "evidence_refs": [
+        "PR body summary lists it_802F2810",
+        "raw_diff: placeholder /// #it_802F2810 replaced with void it_802F2810(HSD_GObj* gobj)",
+        "bot report: it_802F2810 0.00% to 100.00%"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itlugia.c",
+      "role": "Matched itLugia_UnkMotion3_Phys and it_802D23F4 using Lugia attrs/item vars.",
+      "evidence_refs": [
+        "PR body summary lists itLugia_UnkMotion3_Phys and it_802D23F4",
+        "raw_diff: both placeholders replaced with function bodies",
+        "bot report: both Lugia functions 0.00% to 100.00%"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itlugia.h",
+      "role": "Header prototype updated for it_802D1830 signature used by Lugia phys function.",
+      "evidence_refs": [
+        "raw_diff: UNK_RET it_802D1830(UNK_PARAMS) changed to void it_802D1830(Item_GObj* gobj)"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itmatadogas.c",
+      "role": "Matched it_802CB798 item setup function.",
+      "evidence_refs": [
+        "PR body summary lists it_802CB798",
+        "raw_diff: placeholder /// #it_802CB798 replaced with void it_802CB798(Item_GObj* gobj)",
+        "bot report: it_802CB798 0.00% to 100.00%"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itnessbat.c",
+      "role": "Matched it_2725_Logic58_PickedUp with itcmd-var OR condition selecting animation update.",
+      "evidence_refs": [
+        "PR body summary lists it_2725_Logic58_PickedUp",
+        "raw_diff: placeholder replaced with function body",
+        "bot report: it_2725_Logic58_PickedUp 0.00% to 100.00%"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itnesspkthunderball.c",
+      "role": "Matched it_802AB3F0 with NULL guards, indexed item pointer adjustment, Vec3 output, and zero fallback.",
+      "evidence_refs": [
+        "PR body summary lists it_802AB3F0",
+        "raw_diff: placeholder replaced with void it_802AB3F0(Item_GObj* gobj, void* out, s32 idx)",
+        "bot report: it_802AB3F0 0.00% to 100.00%"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itoldkuri.c",
+      "role": "Matched itOldkuri_UnkMotion1_Phys using item var condition, floor normal, velocity helpers, and PAD_STACK.",
+      "evidence_refs": [
+        "PR body summary lists itOldkuri_UnkMotion1_Phys",
+        "raw_diff: placeholder replaced with function body",
+        "bot report: itOldkuri_UnkMotion1_Phys 0.00% to 100.00%"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itwhitebea.c",
+      "role": "Matched it_802E4558 and itWhitebea_UnkMotion7_Anim; added local declaration for grIceMt_801FA6D8.",
+      "evidence_refs": [
+        "PR body summary lists it_802E4558 and itWhitebea_UnkMotion7_Anim",
+        "raw_diff: both placeholders replaced with function bodies",
+        "bot report: both Whitebea functions 0.00% to 100.00%"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Replaced 11 decomp placeholder comments with C function bodies in item source files.",
+    "Updated shared item structs in itCommonItems.h so matched functions can access concrete fields such as itLugiaAttributes.x10, itLugia_ItemVars.x60, itHitodeman_ItemVars.x84, and itWhiteBeaAttributes.x14.",
+    "Recovered header signatures for ithitodeman.h: it_802D4494(Item_GObj* gobj), and itlugia.h: it_802D1830(Item_GObj* gobj).",
+    "Added item-related includes to itgreatfoxlaser.c and itkirby_2F23.c where the new bodies call item helpers or use item types.",
+    "Added a local forward declaration for grIceMt_801FA6D8 in itwhitebea.c.",
+    "Bot report recorded 11 new 100% matches totaling +1336 matched bytes and one .sdata2 improvement in ithitodeman."
+  ],
+  "smart_moves": [
+    {
+      "text": "The PR paired matched bodies with the struct field additions needed to express item attributes and item vars as typed accesses instead of leaving all accessed offsets hidden in padding.",
+      "evidence_refs": [
+        "raw_diff: itCommonItems.h field additions",
+        "raw_diff: it_802D4494 writes ip->xDD4_itemVar.hitodeman.x84",
+        "raw_diff: itLugia_UnkMotion3_Phys reads attrs->x10 and itemVar.lugia.x60"
+      ]
+    },
+    {
+      "text": "Header prototypes were updated when bodies established concrete signatures, reducing UNK_RET/UNK_PARAMS surface.",
+      "evidence_refs": [
+        "raw_diff: ithitodeman.h it_802D4494 signature update",
+        "raw_diff: itlugia.h it_802D1830 signature update"
+      ]
+    },
+    {
+      "text": "The PR kept many globally unknown address-style function names such as it_802D23F4 and it_802AB3F0 rather than inventing semantics not shown by the slice.",
+      "evidence_refs": [
+        "PR body summary",
+        "raw_diff function names"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For item matches, recovering small attribute/item-var fields in shared structs can be necessary to make short functions match with typed field accesses.",
+      "scope": [
+        "src/melee/it/itCommonItems.h",
+        "src/melee/it/items"
+      ],
+      "evidence_refs": [
+        "raw_diff: itCommonItems.h struct updates",
+        "raw_diff: new item function bodies consume those fields"
+      ]
+    },
+    {
+      "lesson": "When a matched body proves a function signature, update the owning header from UNK_RET/UNK_PARAMS to the concrete signature in the same change.",
+      "scope": [
+        "src/melee/it/items/ithitodeman.h",
+        "src/melee/it/items/itlugia.h"
+      ],
+      "evidence_refs": [
+        "raw_diff: ithitodeman.h prototype change",
+        "raw_diff: itlugia.h prototype change"
+      ]
+    },
+    {
+      "lesson": "Several matched item setup functions share a pattern of setting life timer or animation state, assigning hitlag callbacks, and calling common item helper routines; comparing sibling item setup functions may be useful for future matches.",
+      "scope": [
+        "it_802D23F4",
+        "it_802CB798",
+        "it_802E4558",
+        "it_802F2810"
+      ],
+      "evidence_refs": [
+        "raw_diff: it_802D23F4 body",
+        "raw_diff: it_802CB798 body",
+        "raw_diff: it_802E4558 body",
+        "raw_diff: it_802F2810 body"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Use short local role names like gobj, ip, and attrs for item GObj, Item*, and attribute pointer locals.",
+      "evidence_refs": [
+        "raw_diff: repeated Item* ip and attrs locals in matched functions"
+      ]
+    },
+    {
+      "convention": "Keep address-style names for still-unknown functions when the PR evidence does not prove a semantic name.",
+      "evidence_refs": [
+        "PR body summary includes it_802D23F4, it_802AB3F0, it_802CB798, it_802D4494, it_802EB1EC, it_802F2810",
+        "raw_diff function definitions retain address-style names"
+      ]
+    },
+    {
+      "convention": "Use item-specific union arms for item vars, such as ip->xDD4_itemVar.lugia, .hitodeman, .whitebea, .greatfoxlaser, and .pkthunder when the item context supports them.",
+      "evidence_refs": [
+        "raw_diff: itemVar union arm accesses across Lugia, Hitodeman, Whitebea, Great Fox Laser, PK Thunder Ball"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "PAD_STACK was used narrowly in several short matched item functions.",
+      "instances": [
+        "it_802EB1EC: PAD_STACK(16)",
+        "it_802D4494: PAD_STACK(8)",
+        "it_802CB798: PAD_STACK(8)",
+        "itOldkuri_UnkMotion1_Phys: PAD_STACK(8)",
+        "itWhitebea_UnkMotion7_Anim: PAD_STACK(16)"
+      ],
+      "evidence_refs": [
+        "raw_diff: PAD_STACK instances",
+        "bot report: affected functions reported 100.00%"
+      ],
+      "notes": "The slice shows bot match evidence, but no review discussion explaining why each PAD_STACK was required."
+    },
+    {
+      "tactic": "Use post-decrement in a countdown condition for Lugia phys: if (ip->xDD4_itemVar.lugia.x60-- != 0).",
+      "evidence_refs": [
+        "raw_diff: itLugia_UnkMotion3_Phys"
+      ]
+    },
+    {
+      "tactic": "Use a bitwise OR chain over itcmd vars to choose between two Item_80268E5C modes.",
+      "evidence_refs": [
+        "raw_diff: it_2725_Logic58_PickedUp"
+      ]
+    },
+    {
+      "tactic": "For nullable output helpers, preserve early NULL-return structure and explicit Vec3 zeroing fallback.",
+      "evidence_refs": [
+        "raw_diff: it_802AB3F0"
+      ]
+    },
+    {
+      "tactic": "A raw byte-pointer stride cast remains in it_802AB3F0: ip = (Item*) ((u8*) ip + idx * 0x18).",
+      "evidence_refs": [
+        "raw_diff: it_802AB3F0"
+      ],
+      "notes": "This matches the slice but remains a typed-fields/pointer-math follow-up candidate if a real element type is later recovered."
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "author": "decomp-dev[bot]",
+      "created_at": "2026-03-11T03:59:39Z",
+      "text": "Matched code increased to 56.03% (+0.03%, +1336 bytes), with 11 new matches all moving from 0.00% to 100.00%; also reported .sdata2 improvement in main/melee/it/items/ithitodeman from 37.50% to 57.89%.",
+      "evidence_refs": [
+        "text_corpus.jsonl issue_comment by decomp-dev[bot]"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2271",
+    "items: match 11 functions",
+    "johnwinston",
+    "itLugia_UnkMotion3_Phys",
+    "it_802D23F4",
+    "itOldkuri_UnkMotion1_Phys",
+    "itWhitebea_UnkMotion7_Anim",
+    "it_802E4558",
+    "it_2725_Logic58_PickedUp",
+    "it_802AB3F0",
+    "it_802CB798",
+    "it_802D4494",
+    "it_802EB1EC",
+    "it_802F2810",
+    "itCommonItems.h",
+    "itLugiaAttributes",
+    "itLugia_ItemVars",
+    "itHitodeman_ItemVars",
+    "itWhiteBeaAttributes",
+    "PAD_STACK",
+    "GET_ITEM",
+    "Item_80268E5C",
+    "ITEM_ANIM_UPDATE",
+    "efLib_PauseAll",
+    "efLib_ResumeAll",
+    "HSD_Randi",
+    "grIceMt_801FA6D8"
+  ],
+  "follow_up_queries": [
+    "Find later PRs touching it_802AB3F0 or pkthunder xDEC to see whether the raw idx * 0x18 pointer stride gained a real type.",
+    "Search later changes to itWhitebea.c for grIceMt_801FA6D8 declaration ownership or header placement.",
+    "Search later PRs replacing PAD_STACK in item functions matched here.",
+    "Search for sibling item setup functions using xD44_lifeTimer, Item_80268E5C, efLib_PauseAll, efLib_ResumeAll, and it_8026B3A8.",
+    "Search itCommonItems.h evolution for semantic names replacing x14/x18/x84/x60 in Lugia, Hitodeman, and Whitebea structs."
+  ],
+  "evidence_quality": {
+    "status": "strong",
+    "evidence_refs": [
+      "metadata_json: PR #2271 merged metadata and changed-file counts",
+      "human_pr_text.md: PR summary and all 100% matched claim",
+      "raw_diff: complete diff for 12 changed files",
+      "text_corpus.jsonl: bot match report"
+    ],
+    "notes": [
+      "There are no human review comments in the loaded slice, so reviewer intent and review-requested changes are unavailable.",
+      "The bot report supports 100% match status for the 11 named functions, but the slice does not include compiler commands, objdiff artifacts, or local build logs beyond the bot summary.",
+      "PAD_STACK uses have match evidence through the bot report, but the slice does not explain why each stack pad was necessary.",
+      "The raw PR JSON is truncated, but the loaded human text, changed-files list, raw diff, and text corpus are sufficient for this intake."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson",
+        "title": "Item matches may require shared struct field recovery",
+        "text": "In PR #2271, several 100% item function matches were landed together with itCommonItems.h field additions for Lugia, Hitodeman, and Whitebea, enabling typed accesses in the recovered bodies.",
+        "scope": [
+          "src/melee/it/itCommonItems.h",
+          "src/melee/it/items"
+        ],
+        "evidence_refs": [
+          "raw_diff: itCommonItems.h field additions",
+          "bot report: 11 new matches"
+        ]
+      },
+      {
+        "record_type": "decomp_lesson",
+        "title": "Recover headers when bodies prove signatures",
+        "text": "PR #2271 updated ithitodeman.h and itlugia.h from UNK_RET/UNK_PARAMS to concrete Item_GObj* signatures where the implementation bodies made those signatures explicit.",
+        "scope": [
+          "src/melee/it/items/ithitodeman.h",
+          "src/melee/it/items/itlugia.h"
+        ],
+        "evidence_refs": [
+          "raw_diff: header prototype changes"
+        ]
+      },
+      {
+        "record_type": "matching_tactic",
+        "title": "Narrow PAD_STACK use in matched item functions",
+        "text": "PR #2271 used PAD_STACK(8) or PAD_STACK(16) in multiple short item functions that the bot report then listed as 100% matched; keep this as PR-specific evidence, not a general style preference.",
+        "scope": [
+          "it_802EB1EC",
+          "it_802D4494",
+          "it_802CB798",
+          "itOldkuri_UnkMotion1_Phys",
+          "itWhitebea_UnkMotion7_Anim"
+        ],
+        "evidence_refs": [
+          "raw_diff: PAD_STACK instances",
+          "text_corpus.jsonl: bot report"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "it/items PR #2271 matched 11 item functions",
+        "text": "PR #2271 is evidence that src/melee/it/items contains short item motion/setup/helper functions whose matches often pair common item helper call sequences with Item* local access, item-specific itemVar union arms, and shared attribute structs in src/melee/it/itCommonItems.h.",
+        "source_path": "src/melee/it/items",
+        "scope": [
+          "src/melee/it/items",
+          "src/melee/it/itCommonItems.h"
+        ],
+        "evidence_refs": [
+          "PR body summary",
+          "raw_diff",
+          "bot report"
+        ],
+        "reason": "Could help future path-scoped search and matching triage for item functions, but should be curated as a path fact rather than promoted directly from intake."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Do not generalize PAD_STACK from matched PRs without narrow evidence",
+        "text": "PR #2271 contains several PAD_STACK uses in functions reported as 100% matched. This supports retaining PAD_STACK only with narrow match evidence, not treating it as preferred style.",
+        "source_path": null,
+        "scope": [
+          "matching tactics",
+          "item functions"
+        ],
+        "evidence_refs": [
+          "raw_diff: PAD_STACK uses",
+          "text_corpus.jsonl: bot report"
+        ],
+        "reason": "This aligns with the existing matching-tactics standard; curator may decide whether this PR should be linked as an example rather than a new rule."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "itwhitebea.c local ground callback declaration",
+        "text": "PR #2271 added a local declaration for grIceMt_801FA6D8(void) in itwhitebea.c so it_802E4558 could call it.",
+        "source_path": "src/melee/it/items/itwhitebea.c",
+        "scope": [
+          "itwhitebea.c",
+          "grIceMt_801FA6D8",
+          "it_802E4558"
+        ],
+        "evidence_refs": [
+          "raw_diff: void grIceMt_801FA6D8(void); and call in it_802E4558"
+        ],
+        "reason": "Possible path/include ownership follow-up; the slice does not prove whether a header should own this declaration."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote the raw pointer stride in it_802AB3F0 as preferred style; the slice only shows it was part of a matched function, and typed recovery may still be possible later.",
+      "Do not infer semantic names for address-style functions from this PR; the author retained address-style names for several functions.",
+      "Do not claim human reviewer approval details or requested changes; no human review comments are loaded.",
+      "Do not claim that .sdata2 improvement was an intentional data-matching goal beyond the bot report noting it."
+    ]
+  },
+  "confidence": 0.86,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

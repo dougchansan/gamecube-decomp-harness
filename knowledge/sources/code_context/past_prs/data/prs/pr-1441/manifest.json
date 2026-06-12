@@ -1,0 +1,28 @@
+{
+  "schema_version": "melee_pr_vertical_slice_v1",
+  "pr": 1441,
+  "title": "Finish match of grlib, fix fabsf declaration, fixup Fighter's x1860 naming based on usages, improved WIPs in ftCo_DamageFall and ftwaitanim",
+  "state": "MERGED",
+  "path": "prs/pr-1441",
+  "files": {
+    "raw": [
+      "raw/pr.json",
+      "raw/issue_comments.json",
+      "raw/review_comments.json",
+      "raw/reviews.json",
+      "raw/diff.diff"
+    ],
+    "extracted": [
+      "extracted/text_corpus.jsonl",
+      "extracted/changed_files.jsonl",
+      "extracted/diff_lines.jsonl"
+    ],
+    "postmortem": [
+      "postmortem/postmortem.json"
+    ],
+    "metadata": [
+      "counts.json",
+      "activity.json"
+    ]
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 393,
+  "title": "ftMario Complete and Matching",
+  "state": "MERGED",
+  "createdAt": "2022-06-09T05:09:05Z",
+  "updatedAt": "2022-06-16T02:47:04Z",
+  "mergedAt": "2022-06-16T02:47:04Z",
+  "closedAt": "2022-06-16T02:47:04Z",
+  "author": "nicolasrmerz",
+  "url": "https://github.com/doldecomp/melee/pull/393",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 125590
+  }
+}

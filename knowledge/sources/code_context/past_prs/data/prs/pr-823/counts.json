@@ -1,0 +1,17 @@
+{
+  "number": 823,
+  "title": "Clean up `Fighter` offset comments",
+  "state": "MERGED",
+  "createdAt": "2023-04-28T18:58:09Z",
+  "updatedAt": "2023-04-28T20:09:36Z",
+  "mergedAt": "2023-04-28T19:06:10Z",
+  "closedAt": "2023-04-28T19:06:10Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/823",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 80486
+  }
+}

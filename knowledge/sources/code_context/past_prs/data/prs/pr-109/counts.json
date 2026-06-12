@@ -1,0 +1,17 @@
+{
+  "number": 109,
+  "title": "Label Kirby Costume pointers, Shared Action States, and fix a bad label",
+  "state": "MERGED",
+  "createdAt": "2021-11-17T04:57:41Z",
+  "updatedAt": "2021-11-17T04:57:48Z",
+  "mergedAt": "2021-11-17T04:57:46Z",
+  "closedAt": "2021-11-17T04:57:46Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/109",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 53405
+  }
+}

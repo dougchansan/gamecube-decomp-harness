@@ -1,0 +1,17 @@
+{
+  "number": 1075,
+  "title": "Add most symbols from `GALE01.map` to `GALE01/symbols.txt`",
+  "state": "MERGED",
+  "createdAt": "2024-01-17T23:48:55Z",
+  "updatedAt": "2024-01-18T00:10:27Z",
+  "mergedAt": "2024-01-18T00:10:26Z",
+  "closedAt": "2024-01-18T00:10:26Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1075",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 1781084
+  }
+}

@@ -1,0 +1,370 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2430",
+  "pr": {
+    "number": 2430,
+    "title": "All item TUs > 80% fuzzy match",
+    "url": "https://github.com/doldecomp/melee/pull/2430",
+    "state": "MERGED",
+    "author": "lukechampine",
+    "created_at": "2026-04-22T04:24:44Z",
+    "merged_at": "2026-04-22T19:55:50Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2430 advanced multiple item translation units toward or into Matching status, with configure.py switching itrshell, itkabigon, itmatadogas, itpatapata, and ittools from NonMatching to Matching, plus substantial decomp work in item source files and headers. The bot report recorded 23 new matches and 6 unmatched-item improvements, including large fuzzy-score gains in itsamusgrapple. Review discussion focused on semantic field comments in itCharItems.h; the author agreed the commented meanings were AI guesswork and should not be treated as authoritative.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "tooling",
+      "symbols"
+    ],
+    "systems": [
+      "item",
+      "config",
+      "repo-root"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "configure.py",
+      "role": "Marks item objects itrshell, itkabigon, itmatadogas, itpatapata, and ittools as Matching instead of NonMatching.",
+      "evidence_refs": [
+        "diff_excerpt: configure.py MatchingFor changes",
+        "changed_files.jsonl: configure.py added 5 deleted 5"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Adjusts symbol metadata for rodata/data/sdata/sdata2 entries, often changing global it_* symbols to local @ labels and correcting sizes/scopes.",
+      "evidence_refs": [
+        "diff_excerpt: config/GALE01/symbols.txt hunks",
+        "changed_files.jsonl: config/GALE01/symbols.txt added 37 deleted 37"
+      ]
+    },
+    {
+      "path": "src/melee/it/itCharItems.h",
+      "role": "Updates item attribute structs, including Samus Grapple fields and itTools attributes; review discussion flagged AI-guessed semantic comments on itTools fields.",
+      "evidence_refs": [
+        "diff_excerpt: src/melee/it/itCharItems.h hunks",
+        "review_comments.md: jellejurre and lukechampine comments",
+        "changed_files.jsonl: src/melee/it/itCharItems.h added 15 deleted 12"
+      ]
+    },
+    {
+      "path": "src/melee/it/itCommonItems.h",
+      "role": "Updates common item attribute layouts, including itPatapataAttributes and new itKabigonAttributes.",
+      "evidence_refs": [
+        "diff_excerpt: src/melee/it/itCommonItems.h hunks",
+        "changed_files.jsonl: src/melee/it/itCommonItems.h added 18 deleted 6"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itkabigon.c",
+      "role": "Item source decomp changes for Kabigon; bot report lists itKabigon_UnkMotion1_Anim and .data as new 100% matches.",
+      "evidence_refs": [
+        "diff_excerpt: src/melee/it/items/itkabigon.c start",
+        "text_corpus.jsonl: decomp-dev bot report new matches",
+        "changed_files.jsonl: src/melee/it/items/itkabigon.c added 41 deleted 14"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itmatadogas.c",
+      "role": "Item source decomp changes for Matadogas; bot report lists several Matadogas code/data/sdata2 matches.",
+      "evidence_refs": [
+        "text_corpus.jsonl: decomp-dev bot report new matches",
+        "changed_files.jsonl: src/melee/it/items/itmatadogas.c added 70 deleted 7"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itpatapata.c",
+      "role": "Item source decomp changes for Patapata; bot report lists multiple Patapata functions and sections reaching 100%.",
+      "evidence_refs": [
+        "text_corpus.jsonl: decomp-dev bot report new matches",
+        "changed_files.jsonl: src/melee/it/items/itpatapata.c added 134 deleted 11"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itpatapata.h",
+      "role": "Header touched alongside Patapata decomp work.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/it/items/itpatapata.h added 1 deleted 1"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itrshell.c",
+      "role": "Item source decomp changes for red shell; bot report lists several itrshell functions and sections reaching 100%.",
+      "evidence_refs": [
+        "text_corpus.jsonl: decomp-dev bot report new matches",
+        "changed_files.jsonl: src/melee/it/items/itrshell.c added 173 deleted 5"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itsamusgrapple.c",
+      "role": "Large source decomp changes for Samus Grapple; bot report lists six fuzzy improvements in unmatched items rather than full Matching conversion.",
+      "evidence_refs": [
+        "text_corpus.jsonl: decomp-dev bot report unmatched-item improvements",
+        "changed_files.jsonl: src/melee/it/items/itsamusgrapple.c added 456 deleted 27"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itsamusgrapple.h",
+      "role": "Header updates accompanying Samus Grapple source changes.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/it/items/itsamusgrapple.h added 27 deleted 1"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/ittools.c",
+      "role": "Item source decomp changes for ittools; bot report lists it_802EF548, itTools_UnkMotion4_Anim, .data, and .sdata2 reaching 100%.",
+      "evidence_refs": [
+        "text_corpus.jsonl: decomp-dev bot report new matches",
+        "changed_files.jsonl: src/melee/it/items/ittools.c added 99 deleted 18"
+      ]
+    }
+  ],
+  "what_changed": [
+    "configure.py changed five item objects from NonMatching to Matching: itrshell.c, itkabigon.c, itmatadogas.c, itpatapata.c, and ittools.c.",
+    "The PR touched item source files for Kabigon, Matadogas, Patapata, red shell, Samus Grapple, and tools, with itsamusgrapple.c being the largest source-file change in the slice.",
+    "Headers were updated for item attributes and prototypes/layouts, including itCharItems.h, itCommonItems.h, itpatapata.h, and itsamusgrapple.h.",
+    "symbols.txt changed section metadata for numerous rodata/data/sdata/sdata2 objects, including global it_* labels converted to local @ labels and a rodata size adjustment at 0x803B8708.",
+    "The bot report recorded matched code increasing by 5460 bytes and linked code increasing by 17576 bytes for GALE01, with 23 new matches and 6 improvements in unmatched itsamusgrapple items.",
+    "Review comments challenged newly added semantic field comments in itCharItems.h as possibly AI-authored; the author replied that they were AI guesswork and should not be considered authoritative."
+  ],
+  "smart_moves": [
+    "Promotion to Matching in configure.py was limited to specific item TUs that the PR changed and the bot report showed as having new 100% matches.",
+    "Header layout changes accompanied source decomp work, suggesting recovered struct fields were propagated to shared item headers rather than hidden as source-local declarations.",
+    "The final diff excerpt for itTools attributes shows the semantic comments absent, while review comments show those comments were challenged and acknowledged as AI guesswork."
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "Semantic comments on unknown or partially recovered fields should not be treated as authoritative when they come from AI guesswork; keep field names/comments conservative unless supported by source, callsites, data, or review evidence.",
+      "evidence_refs": [
+        "review_comments.md: jellejurre asked whether comments were made up by a human or AI",
+        "review_comments.md: lukechampine replied they were AI guesswork and should not be taken as authoritative",
+        "decomp_standards: conservative-naming"
+      ],
+      "confidence": 0.92
+    },
+    {
+      "lesson": "When matching item TUs, update shared item attribute structs and configuration status together only where the PR evidence supports recovered layouts and Matching promotion.",
+      "evidence_refs": [
+        "diff_excerpt: itCharItems.h and itCommonItems.h struct layout edits",
+        "diff_excerpt: configure.py NonMatching to Matching changes",
+        "text_corpus.jsonl: bot report lists 23 new matches"
+      ],
+      "confidence": 0.72
+    },
+    {
+      "lesson": "Symbol metadata changes can be part of item-TU matching work, but they should be tracked as section/scope metadata changes rather than inferred semantic data ownership.",
+      "evidence_refs": [
+        "diff_excerpt: symbols.txt converts multiple it_* global labels to local @ labels in .data, .sdata, and .sdata2",
+        "decomp_standards: data-sections-and-tu-splits",
+        "decomp_standards: text-before-data-matching"
+      ],
+      "confidence": 0.68
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Renaming itToolsAttrEntry to itToolsMotionAttrs and entries to motions appeared in the diff, but semantic comments explaining individual fields were challenged as AI guesswork; do not generalize those field meanings without independent evidence.",
+      "evidence_refs": [
+        "diff_excerpt: itCharItems.h itToolsMotionAttrs and motions rename",
+        "review_comments.md: AI guesswork discussion"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "convention": "Address-style and x-offset field names remained for many recovered structs, such as x0, x4, xC, which is consistent with conservative naming when semantics are not proven.",
+      "evidence_refs": [
+        "diff_excerpt: itCharItems.h and itCommonItems.h struct fields",
+        "decomp_standards: conservative-naming"
+      ],
+      "confidence": 0.75
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Use configure.py Matching/NonMatching status as a ledger for object-level matching once functions/sections in that TU reach match thresholds.",
+      "evidence_refs": [
+        "diff_excerpt: configure.py object status changes",
+        "text_corpus.jsonl: bot report new matches"
+      ],
+      "confidence": 0.8
+    },
+    {
+      "tactic": "Recover attribute struct field types and padding into typed fields, such as changing itPatapataAttributes offset 0x28 to f32 and replacing pad_30 with f32 x30 and x34.",
+      "evidence_refs": [
+        "diff_excerpt: itCommonItems.h itPatapataAttributes changes",
+        "decomp_standards: typed-fields-over-pointer-math"
+      ],
+      "confidence": 0.74
+    },
+    {
+      "tactic": "Adjust symbols.txt section metadata for local labels and literal/float ownership when matching data sections are reported, while avoiding semantic claims about the data beyond symbol metadata shown in the diff.",
+      "evidence_refs": [
+        "diff_excerpt: symbols.txt @ label conversions",
+        "text_corpus.jsonl: bot report .data/.sdata2 new matches"
+      ],
+      "confidence": 0.7
+    }
+  ],
+  "review_feedback": [
+    {
+      "path": "src/melee/it/itCharItems.h",
+      "author": "jellejurre",
+      "feedback": "Questioned whether semantic comments added to itToolsMotionAttrs and itToolsAttributes were human-authored or AI-generated.",
+      "evidence_refs": [
+        "review_comments.md: discussion_r3126418397"
+      ]
+    },
+    {
+      "path": "src/melee/it/itCharItems.h",
+      "author": "lukechampine",
+      "feedback": "Acknowledged the comments were AI guesswork and should not be taken as authoritative.",
+      "evidence_refs": [
+        "review_comments.md: discussion_r3126449237"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR 2430",
+    "All item TUs > 80% fuzzy match",
+    "lukechampine",
+    "AI guesswork comments",
+    "itToolsMotionAttrs",
+    "itToolsAttributes",
+    "itToolsAttrEntry",
+    "itrshell",
+    "itkabigon",
+    "itmatadogas",
+    "itpatapata",
+    "ittools",
+    "itsamusgrapple",
+    "itSamusGrappleAttributes",
+    "itPatapataAttributes",
+    "itKabigonAttributes",
+    "configure.py MatchingFor",
+    "symbols.txt local labels",
+    "it_802EF548",
+    "itRshell_UnkMotion5_Phys",
+    "itKabigon_UnkMotion1_Anim",
+    "itMatadogas_UnkMotion1_Anim",
+    "itPatapata_UnkMotion3_Coll"
+  ],
+  "follow_up_queries": [
+    "PR 2430 AI guesswork comments itCharItems.h itToolsMotionAttrs",
+    "itToolsMotionAttrs motions field comments authoritative evidence",
+    "itpatapata attributes x28 x30 x34 PR 2430",
+    "item TU Matching configure.py itrshell itkabigon itmatadogas itpatapata ittools",
+    "symbols.txt it_804DD6C8 local @ label item matching",
+    "itsamusgrapple fuzzy improvements PR 2430"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR identity, state, changed-file counts",
+      "changed_files.jsonl: complete changed-file list",
+      "diff_excerpt/raw_diff: truncated diff excerpt with symbols/config/header examples",
+      "text_corpus.jsonl: bot report and review records",
+      "review_comments.md: full review discussion for itCharItems.h"
+    ],
+    "notes": [
+      "The raw diff is truncated, so detailed source-level tactics inside the larger item .c files cannot be fully inspected from the loaded slice.",
+      "The PR body is empty, so author intent beyond title, diff, bot report, and comments is not available.",
+      "The bot report provides match/improvement evidence, but this intake did not run builds, objdiff, or regression checks.",
+      "Review evidence strongly supports the narrow lesson about AI-guessed semantic comments, but not broader claims about all AI-generated code in the PR.",
+      "Merge status is available from metadata, but approval does not by itself prove every semantic rename or symbol metadata change should be generalized as a standard."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "review_lesson",
+        "title": "Do not treat AI-guessed field comments as authoritative",
+        "text": "In PR #2430, semantic comments on itTools attribute fields were challenged in review as possibly AI-authored, and the author replied that they were AI guesswork and should not be treated as authoritative. Use conservative field names/comments unless supported by concrete source, callsite, data, or review evidence.",
+        "scope": [
+          "decomp comments",
+          "field naming",
+          "item attribute structs"
+        ],
+        "evidence_refs": [
+          "review_comments.md: discussion_r3126418397",
+          "review_comments.md: discussion_r3126449237",
+          "decomp_standards: conservative-naming"
+        ],
+        "confidence": 0.92
+      },
+      {
+        "record_type": "matching_postmortem",
+        "title": "Item TU fuzzy-match push combined source, headers, config, and symbol metadata",
+        "text": "PR #2430 changed item source files and shared headers, adjusted symbols.txt metadata, and promoted five item objects to Matching in configure.py. The bot report listed 23 new matches and 6 additional unmatched-item improvements, including large itsamusgrapple gains.",
+        "scope": [
+          "item",
+          "configure.py",
+          "symbols.txt",
+          "matching status"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: configure.py status changes",
+          "diff_excerpt: symbols.txt metadata changes",
+          "changed_files.jsonl: changed file list",
+          "text_corpus.jsonl: decomp-dev bot report"
+        ],
+        "confidence": 0.83
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Explicitly reject unsupported AI-generated semantic comments",
+        "text": "Consider adding guidance that AI-generated or otherwise guessed semantic comments for unknown fields must be removed or marked unsupported unless backed by callsites, data, source evidence, or reviewer-confirmed domain knowledge. PR #2430 provides direct review evidence where such comments were identified as AI guesswork and not authoritative.",
+        "source_path": null,
+        "scope": [
+          "comments",
+          "field naming",
+          "conservative-naming",
+          "AI-generated suggestions"
+        ],
+        "evidence_refs": [
+          "review_comments.md: jellejurre questioned whether comments were human or AI",
+          "review_comments.md: lukechampine replied they were AI guesswork and not authoritative"
+        ],
+        "reason": "The existing conservative-naming standard covers not inventing meaning; this PR provides a concrete historical example involving AI-guessed field comments."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "Item matching status changes in configure.py are managed under MatchingFor item object entries",
+        "text": "PR #2430 changed item object entries in configure.py MatchingFor from NonMatching to Matching for melee/it/items/itrshell.c, itkabigon.c, itmatadogas.c, itpatapata.c, and ittools.c.",
+        "source_path": "configure.py",
+        "scope": [
+          "configure.py",
+          "item TUs",
+          "matching status"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: configure.py MatchingFor changes"
+        ],
+        "reason": "Useful path fact for future searches involving object-level Matching promotion in item TUs; curator should verify against current source before adding."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote the reviewed itTools field semantic comments, such as lifetime, fall speed, damage cap, or knockback scale, as accepted facts; the author explicitly called them AI guesswork.",
+      "Do not infer detailed implementation tactics for the item .c files from the truncated diff; only changed files and bot-reported match results are available in the loaded slice.",
+      "Do not generalize the symbols.txt global-to-local conversions into a blanket rule; the PR evidence shows specific metadata edits but not a universal policy."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

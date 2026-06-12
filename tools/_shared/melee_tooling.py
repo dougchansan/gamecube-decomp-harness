@@ -127,6 +127,7 @@ def tool_env(repo_root: Path) -> dict[str, str]:
     env = dict(os.environ)
     env["MELEE_ROOT"] = str(repo_root)
     env.setdefault("CLAUDE_PROJECT_DIR", str(repo_root))
+    env.setdefault("WINEDEBUG", "-all")
     paths = [str(tool_impl_tools_root()), str(tool_impl_root() / "m2c")]
     existing = env.get("PYTHONPATH")
     env["PYTHONPATH"] = os.pathsep.join(paths + ([existing] if existing else []))

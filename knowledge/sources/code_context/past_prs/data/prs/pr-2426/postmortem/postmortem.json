@@ -1,0 +1,448 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2426",
+  "pr": {
+    "number": 2426,
+    "title": "Jj/gmclassic",
+    "url": "https://github.com/doldecomp/melee/pull/2426",
+    "state": "MERGED",
+    "author": "jurrejelle",
+    "created_at": "2026-04-19T20:12:25Z",
+    "merged_at": "2026-04-28T09:38:07Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Decompiled and typed several Classic Mode game-mode routines in src/melee/gm/gmclassic.c, added local Classic matchup/data structs, tightened related gm types and prototypes, removed stale public declarations for now-static helpers, and received an automated report showing 3 new matches plus partial improvements in additional gmclassic functions.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "type-recovery",
+      "game-mode"
+    ],
+    "systems": [
+      "melee/gm",
+      "gmclassic",
+      "gmallstar",
+      "gmregclear",
+      "game-mode"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gm/gmclassic.c",
+      "role": "Primary decomp work: added Classic Mode local data structs, decompiled gmClassic_801B2BA4, gmClassic_801B2D54, gmClassic_OnLoad, gmClassic_801B3500, gmClassic_801B3A34, and gmClassic_801B3B40, and adjusted gmClassic_801B3E44 to use typed gmClassic_803DDEC8.x00.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gm/gmclassic.c +634/-8",
+        "raw_diff: gmclassic.c adds gmClassicMatchup, gmClassicIntroData, gmClassic_80490880Data, gmClassic_803DDEC8Data and STATIC_ASSERTs",
+        "raw_diff: replaces /// placeholders for gmClassic_801B2BA4, gmClassic_801B2D54, gmClassic_OnLoad, gmClassic_801B3500, gmClassic_801B3A34, gmClassic_801B3B40",
+        "text_corpus: decomp-dev bot report lists gmClassic_801B3B40 and gmClassic_801B3A34 as 100% matched, and other gmclassic routines as improved"
+      ]
+    },
+    {
+      "path": "src/melee/gm/types.h",
+      "role": "Header/type recovery for game-mode data: function pointer fields replaced UNK_T/u32 placeholders and gm_803DDEC8Struct was reshaped with concrete fields and a gmClassicMatchup pointer.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gm/types.h +26/-26",
+        "raw_diff: UnkAdventureData x5C/x60/x6C/x70 changed from UNK_T to function pointers",
+        "raw_diff: UnkAllstarData x48 through x70 changed from UNK_T/u32 placeholders to function pointers",
+        "raw_diff: gm_803DDEC8Struct changed from bitfields/void* to concrete x1/x2/x4/x6/x8 fields and struct gmClassicMatchup* xC"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmregclear.h",
+      "role": "Prototype formatting/signature surface used by gmclassic work; long gm_8017DB88 and fn_8017DD7C declarations were split across lines without apparent semantic signature change.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gm/gmregclear.h +6/-2",
+        "raw_diff: gm_8017DB88 prototype reformatted over multiple lines",
+        "raw_diff: fn_8017DD7C prototype reformatted over multiple lines"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmclassic.h",
+      "role": "Public header cleanup: removed stale declarations for helpers that became static/internal and removed a global gmClassic_803DDEC8 declaration from this header.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gm/gmclassic.h +0/-4",
+        "raw_diff: removes UNK_RET gmClassic_801B2BA4 and gmClassic_801B2D54 declarations",
+        "raw_diff: removes gm_803DDEC8Struct gmClassic_803DDEC8 declaration"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmallstar.c",
+      "role": "Small related cleanup: changed a null function/data callback assignment from integer 0 to NULL.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gm/gmallstar.c +1/-1",
+        "raw_diff: data->x58 = 0 changed to data->x58 = NULL in gm_801B60A4_OnLoad"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Added typed local Classic Mode structures for matchup entries, matchup data, intro data, gmClassic_80490880, and gmClassic_803DDEC8, each guarded with STATIC_ASSERT sizes.",
+      "evidence_refs": [
+        "raw_diff: gmclassic.c typedefs gmClassicMatchup, gmClassicMatchupData, gmClassicIntroData, gmClassic_80490880Data, gmClassic_803DDEC8Data"
+      ]
+    },
+    {
+      "text": "Implemented Classic matchup ordering and selection logic using a sentinel stage value 0x148, HSD_Randi shuffle order arrays, current player character filtering, prior matchup checks, and stage comparison via Stage_8022519C.",
+      "evidence_refs": [
+        "raw_diff: gmClassic_InitMatchupOrder loops until matchups[count].x00 != 0x148 and shuffles order with HSD_Randi",
+        "raw_diff: gmClassic_801B2BA4 checks gm_80164430, gm_80164840, target_char, existing temp->xC entries, and Stage_8022519C"
+      ]
+    },
+    {
+      "text": "Implemented gmClassic_OnLoad initialization: clears xC pointers in gmClassic_803DDEC8.x00, initializes four matchup order arrays, resets gm_804908A0 through nested loops, assigns callback fields, and enters minor scene 0x70.",
+      "evidence_refs": [
+        "raw_diff: gmClassic_OnLoad body"
+      ]
+    },
+    {
+      "text": "Implemented gmClassic_801B3500 setup for intro/preload/audio data, including enemy and ally arrays, color setup, game cache entries, stage selection, and audio bit accumulation.",
+      "evidence_refs": [
+        "raw_diff: gmClassic_801B3500 body",
+        "text_corpus: bot report shows gmClassic_801B3500 improved from 0.00% to 92.27%"
+      ]
+    },
+    {
+      "text": "Implemented gmClassic_801B3A34 and gmClassic_801B3B40, both reported by the decomp bot as new 100% matches.",
+      "evidence_refs": [
+        "raw_diff: gmClassic_801B3A34 body includes PAD_STACK(8), stage selection, gm_8017CE34, gm_8016F088",
+        "raw_diff: gmClassic_801B3B40 body includes PAD_STACK(4), match exit status updates, target-test record updates",
+        "text_corpus: bot report lists gmClassic_801B3A34 +268 0.00% to 100.00% and gmClassic_801B3B40 +516 0.00% to 100.00%"
+      ]
+    },
+    {
+      "text": "Typed several game-mode callback fields in UnkAdventureData and UnkAllstarData as concrete function pointers and updated gm_803DDEC8Struct from bitfields/void* to concrete scalar fields plus gmClassicMatchup* xC.",
+      "evidence_refs": [
+        "raw_diff: types.h UnkAdventureData and UnkAllstarData callback field changes",
+        "raw_diff: types.h gm_803DDEC8Struct changes"
+      ]
+    },
+    {
+      "text": "The automated report recorded overall matched code +784 bytes and matched data +24 bytes, with .sdata for main/melee/gm/gmclassic reported as a new 100% match.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev bot report for GALE01"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Recovered data layout before implementing logic: the PR defines small local structs and typed globals for gmClassic_80490880 and gmClassic_803DDEC8, allowing later code to use field access such as x00, x0CC, x1B8, x26C, x2B0, x74, and x80 instead of treating the data as an opaque blob.",
+      "evidence_refs": [
+        "raw_diff: gmclassic.c local typedefs and extern gmClassic_80490880Data/gmClassic_803DDEC8Data",
+        "raw_diff: gmClassic_OnLoad and gmClassic_801B2D54 use typed fields"
+      ]
+    },
+    {
+      "text": "Kept helper scope narrow: gmClassic_801B2BA4 and gmClassic_801B2D54 were removed from the public header and implemented as static/internal code in gmclassic.c.",
+      "evidence_refs": [
+        "raw_diff: gmclassic.h removes declarations for gmClassic_801B2BA4 and gmClassic_801B2D54",
+        "raw_diff: gmclassic.c implements static gmClassic_801B2BA4 and static gmClassic_801B2D54"
+      ]
+    },
+    {
+      "text": "Used typed function-pointer fields for callback tables rather than leaving UNK_T/u32 placeholders, making assignments and calls in Classic/All-Star load paths clearer.",
+      "evidence_refs": [
+        "raw_diff: types.h UnkAllstarData x48-x70 function pointer fields",
+        "raw_diff: gmClassic_OnLoad assigns gm_8017EB3C, gm_8017EB64, gm_8017EBCC, gm_8017EB98, gm_8017ECA0, gm_8017ED08, gm_8017ECD4, gm_8017EC00, gm_8017EC50"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For game-mode data-heavy routines, recovering the local table layout can unlock cleaner field-based decompilation of multiple functions in the same TU.",
+      "scope": [
+        "src/melee/gm/gmclassic.c",
+        "src/melee/gm/types.h"
+      ],
+      "evidence_refs": [
+        "raw_diff: gmclassic.c adds typed gmClassic_803DDEC8Data/gmClassic_80490880Data and then uses those fields throughout new implementations",
+        "text_corpus: bot report shows two new function matches and four additional gmclassic improvements"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "When a recovered helper is only used inside one C file, making it static and removing stale public UNK_RET/UNK_PARAMS declarations improves header truthfulness.",
+      "scope": [
+        "src/melee/gm/gmclassic.h",
+        "src/melee/gm/gmclassic.c"
+      ],
+      "evidence_refs": [
+        "raw_diff: gmclassic.h removes public gmClassic_801B2BA4/gmClassic_801B2D54 declarations",
+        "raw_diff: gmclassic.c implements these as static helpers"
+      ],
+      "confidence": 0.72
+    },
+    {
+      "lesson": "Use NULL for null callback/function-pointer fields after the relevant struct fields are typed as pointers.",
+      "scope": [
+        "src/melee/gm/gmallstar.c",
+        "src/melee/gm/types.h"
+      ],
+      "evidence_refs": [
+        "raw_diff: gmallstar.c data->x58 = 0 changed to NULL",
+        "raw_diff: types.h UnkAllstarData x58 typed as u8 (*)(u8, u8, u8)"
+      ],
+      "confidence": 0.69
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "New local Classic Mode types use the gmClassic prefix and descriptive table roles while preserving offset-style field names where semantics remain unclear.",
+      "examples": [
+        "gmClassicMatchup",
+        "gmClassicMatchupData",
+        "gmClassicIntroData",
+        "gmClassic_80490880Data",
+        "gmClassic_803DDEC8Data",
+        "x0C0",
+        "x0CC",
+        "x1B8",
+        "x26C",
+        "x2B0"
+      ],
+      "evidence_refs": [
+        "raw_diff: gmclassic.c typedef names and offset field names"
+      ]
+    },
+    {
+      "convention": "Recovered local variables mix role names where clear with temp/address-style names where meaning remains uncertain.",
+      "examples": [
+        "target_char",
+        "cur_char",
+        "swap_idx",
+        "enemy_count",
+        "ally_count",
+        "temp_r30",
+        "temp_r31",
+        "var_r27"
+      ],
+      "evidence_refs": [
+        "raw_diff: gmClassic_InitMatchupOrder, gmClassic_801B2BA4, gmClassic_801B3500, gmClassic_801B3A34"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Introduced local typed overlays for existing data symbols and used STATIC_ASSERTs to lock expected structure sizes.",
+      "evidence_refs": [
+        "raw_diff: gmclassic.c typedefs with STATIC_ASSERT(sizeof(...))",
+        "raw_diff: extern gmClassic_80490880Data gmClassic_80490880 and extern gmClassic_803DDEC8Data gmClassic_803DDEC8"
+      ],
+      "notes": "Evidence shows typed overlays were part of the PR; it does not independently prove each field name or semantic meaning."
+    },
+    {
+      "tactic": "Used natural loops for sentinel scans, order initialization, shuffle passes, callback-table clearing, enemy/ally processing, and audio accumulation.",
+      "evidence_refs": [
+        "raw_diff: gmClassic_InitMatchupOrder for loops over count",
+        "raw_diff: gmClassic_OnLoad for loop clearing entry->xC and nested loops zeroing gm_804908A0",
+        "raw_diff: gmClassic_801B3500 loops over enemy/ally arrays and audio accumulation"
+      ],
+      "notes": "This aligns with loaded natural-loop standards, though the PR evidence only shows the resulting source shape."
+    },
+    {
+      "tactic": "Used PAD_STACK in two matched functions.",
+      "evidence_refs": [
+        "raw_diff: gmClassic_801B3A34 contains PAD_STACK(8)",
+        "raw_diff: gmClassic_801B3B40 contains PAD_STACK(4)",
+        "text_corpus: bot report says both functions reached 100.00%"
+      ],
+      "notes": "The bot report supports the functions as matches, but the PR slice does not isolate PAD_STACK as necessary or sufficient."
+    },
+    {
+      "tactic": "Kept some generated-looking control-flow artifacts such as gotos and infinite loops in partially matched helper logic.",
+      "evidence_refs": [
+        "raw_diff: gmClassic_801B2BA4 uses goto next",
+        "raw_diff: gmClassic_801B2D54 uses for (;;) on missing result cases",
+        "text_corpus: bot report shows gmClassic_801B2BA4 at 93.87% and gmClassic_801B2D54 at 99.96%, not fully matched"
+      ],
+      "notes": "Because these helpers were not reported as 100%, avoid treating the exact control-flow shape as a general accepted pattern."
+    }
+  ],
+  "review_feedback": [
+    {
+      "type": "automated_report",
+      "author": "decomp-dev[bot]",
+      "created_at": "2026-04-19T20:15:56Z",
+      "text": "Automated report for GALE01 showed matched code 64.96% (+0.02%, +784 bytes), matched data 38.55% (+0.00%, +24 bytes), 3 new matches, and 4 improvements in unmatched gmclassic items.",
+      "evidence_refs": [
+        "text_corpus: issue_comment by decomp-dev[bot]"
+      ]
+    },
+    {
+      "type": "missing_human_review",
+      "author": null,
+      "created_at": null,
+      "text": "No human review comments or reviews were present in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata_json: review_comments 0, reviews 0",
+        "text_corpus: only PR body and decomp-dev bot issue comment are present"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2426",
+    "Jj/gmclassic",
+    "jurrejelle",
+    "gmclassic",
+    "src/melee/gm/gmclassic.c",
+    "src/melee/gm/types.h",
+    "src/melee/gm/gmclassic.h",
+    "src/melee/gm/gmregclear.h",
+    "src/melee/gm/gmallstar.c",
+    "gmClassic_801B2BA4",
+    "gmClassic_801B2D54",
+    "gmClassic_OnLoad",
+    "gmClassic_801B3500",
+    "gmClassic_801B3A34",
+    "gmClassic_801B3B40",
+    "gmClassicMatchup",
+    "gmClassicIntroData",
+    "gmClassic_80490880Data",
+    "gmClassic_803DDEC8Data",
+    "gm_803DDEC8Struct",
+    "UnkAllstarData",
+    "UnkAdventureData",
+    "gm_804908A0",
+    "HSD_Randi",
+    "Stage_8022519C",
+    "gmRegSetupEnemyColorTable",
+    "lbAudioAx_80026E84",
+    "PAD_STACK",
+    "STATIC_ASSERT",
+    "NULL callback"
+  ],
+  "follow_up_queries": [
+    "gmclassic PAD_STACK gmClassic_801B3A34 gmClassic_801B3B40",
+    "gmClassic_803DDEC8Data gmClassicMatchup x0CC x1B8 x26C x2B0",
+    "gmClassic_OnLoad matchup order HSD_Randi",
+    "UnkAllstarData function pointer fields x48 x4C x50 x54 x58 x5C x60 x64 x68 x6C x70",
+    "gmClassic_801B3500 preload cache audio lbAudioAx",
+    "gmclassic static helper removed from header gmClassic_801B2BA4 gmClassic_801B2D54",
+    "gm_804908A0 classic match exit status"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR identity, changed files, merge state, counts",
+      "raw_diff: code and header changes",
+      "changed_files.jsonl: full changed file list",
+      "text_corpus: decomp-dev bot report"
+    ],
+    "notes": [
+      "Strong evidence for files changed, code shapes, type/header edits, and automated match report.",
+      "PR body is empty and there are no human review comments, so reviewer intent and author rationale are not evidenced.",
+      "The loaded raw diff was truncated in the prompt, but targeted local lookup supplied the missing gmregclear.h and types.h hunks.",
+      "Automated report gives function-level match outcomes for some functions, but no narrow build log, objdiff details, or evidence isolating individual tactics such as PAD_STACK.",
+      "Several newly introduced field names remain offset-style; do not infer semantic meanings beyond the names present in the diff."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson",
+        "title": "Recover local table layouts before decompiling data-driven gm routines",
+        "text": "In gmclassic, adding local typed overlays for gmClassic_80490880 and gmClassic_803DDEC8 with STATIC_ASSERTs preceded field-based implementations of multiple Classic Mode routines and coincided with bot-reported matches/improvements.",
+        "scope": [
+          "src/melee/gm/gmclassic.c",
+          "src/melee/gm/types.h"
+        ],
+        "evidence_refs": [
+          "raw_diff: gmclassic.c local data typedefs and field-based uses",
+          "text_corpus: bot report 3 new matches and 4 improvements"
+        ],
+        "confidence": 0.78
+      },
+      {
+        "record_type": "decomp_lesson",
+        "title": "Static recovered helpers should not remain in public headers",
+        "text": "This PR removed public UNK_RET declarations for gmClassic_801B2BA4 and gmClassic_801B2D54 after implementing them as static helpers in gmclassic.c.",
+        "scope": [
+          "src/melee/gm/gmclassic.h",
+          "src/melee/gm/gmclassic.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: gmclassic.h removes helper declarations",
+          "raw_diff: gmclassic.c static helper definitions"
+        ],
+        "confidence": 0.72
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "gmclassic.c owns Classic Mode local data overlays and matchup selection routines",
+        "text": "PR 2426 indicates src/melee/gm/gmclassic.c contains Classic Mode local structs for matchup and intro data plus helper logic for matchup order/selection, on-load initialization, intro setup, match start, and match exit handling.",
+        "source_path": "src/melee/gm/gmclassic.c",
+        "scope": [
+          "gmclassic",
+          "game-mode",
+          "Classic Mode",
+          "gmClassic_801B2BA4",
+          "gmClassic_801B2D54",
+          "gmClassic_OnLoad",
+          "gmClassic_801B3500",
+          "gmClassic_801B3A34",
+          "gmClassic_801B3B40"
+        ],
+        "evidence_refs": [
+          "raw_diff: gmclassic.c added implementations and local typedefs",
+          "changed_files.jsonl: gmclassic.c +634/-8"
+        ],
+        "reason": "Useful source-owned path fact for future gmclassic searches; curator should verify against current source before accepting."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "types.h contains shared game-mode callback and gm_803DDEC8Struct typing used by Classic Mode",
+        "text": "PR 2426 changed UnkAdventureData and UnkAllstarData callback slots to concrete function pointers and reshaped gm_803DDEC8Struct to include scalar fields and a gmClassicMatchup pointer.",
+        "source_path": "src/melee/gm/types.h",
+        "scope": [
+          "UnkAdventureData",
+          "UnkAllstarData",
+          "gm_803DDEC8Struct",
+          "gmClassicMatchup"
+        ],
+        "evidence_refs": [
+          "raw_diff: types.h hunks around UnkAdventureData, UnkAllstarData, and gm_803DDEC8Struct"
+        ],
+        "reason": "Potential path fact for future type-recovery tasks; curator should check current source and naming stability."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Keep PAD_STACK claims narrow unless tactic necessity is isolated",
+        "text": "PR 2426 includes PAD_STACK in two functions that the bot reported as 100% matched, but the slice does not isolate PAD_STACK as the cause of the match. If generalized, record PAD_STACK as a narrowly evidenced tactic, not a style preference.",
+        "source_path": null,
+        "scope": [
+          "PAD_STACK",
+          "matching tactics",
+          "gmClassic_801B3A34",
+          "gmClassic_801B3B40"
+        ],
+        "evidence_refs": [
+          "raw_diff: PAD_STACK(8) in gmClassic_801B3A34 and PAD_STACK(4) in gmClassic_801B3B40",
+          "text_corpus: bot report marks both functions 100%"
+        ],
+        "reason": "This reinforces the loaded matching-tactics standard; curator may decide whether to add this PR as historical supporting evidence rather than a new rule."
+      }
+    ],
+    "rejection_notes": [
+      "Do not treat the exact goto-heavy shape in gmClassic_801B2BA4 as an accepted control-flow lesson; the bot report only shows 93.87% for that function.",
+      "Do not infer semantic field names for offset-style fields such as x0CC, x1B8, x26C, x2B0, x5C, x60, x6C, or x70 from this slice alone.",
+      "Do not claim all added gmclassic functions fully matched; only gmClassic_801B3A34 and gmClassic_801B3B40 are reported as 100%, while gmClassic_801B3500, gmClassic_OnLoad, gmClassic_801B2D54, and gmClassic_801B2BA4 are reported as improvements with less than 100%.",
+      "No human review feedback is available, so do not attribute acceptance rationale or requested changes to reviewers."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

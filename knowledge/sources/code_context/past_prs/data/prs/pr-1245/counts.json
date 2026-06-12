@@ -1,0 +1,17 @@
+{
+  "number": 1245,
+  "title": "Match 99.37% of `ft_07C1` (1.31 KB)",
+  "state": "MERGED",
+  "createdAt": "2024-02-18T05:32:19Z",
+  "updatedAt": "2024-02-18T05:33:35Z",
+  "mergedAt": "2024-02-18T05:33:34Z",
+  "closedAt": "2024-02-18T05:33:34Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1245",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 65891
+  }
+}

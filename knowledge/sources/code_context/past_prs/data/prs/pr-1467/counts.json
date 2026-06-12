@@ -1,0 +1,17 @@
+{
+  "number": 1467,
+  "title": "itrabbitc work",
+  "state": "MERGED",
+  "createdAt": "2024-09-25T19:24:48Z",
+  "updatedAt": "2024-09-25T23:13:35Z",
+  "mergedAt": "2024-09-25T23:13:35Z",
+  "closedAt": "2024-09-25T23:13:35Z",
+  "author": "AaronB-Hub",
+  "url": "https://github.com/doldecomp/melee/pull/1467",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 45220
+  }
+}

@@ -1,0 +1,233 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2589",
+  "pr": {
+    "number": 2589,
+    "title": "link some free files",
+    "url": "https://github.com/doldecomp/melee/pull/2589",
+    "state": "CLOSED",
+    "author": "BR-",
+    "created_at": "2026-06-06T19:12:59Z",
+    "merged_at": null
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Configure-only PR that changed several objects from NonMatching to Matching in configure.py, removed one NonMatching object entry, and produced a bot report showing linked-code and linked-data increases. The PR was closed without a recorded merge.",
+  "change_classification": {
+    "primary_type": "build_config_link_status_update",
+    "categories": [
+      "code-change",
+      "configure-only",
+      "matching-status"
+    ],
+    "systems": [
+      "repo-root",
+      "player",
+      "fighter",
+      "sysdolphin-baselib"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "configure.py",
+      "role": "Updated MatchingFor object list entries, changing selected source files from NonMatching to Matching and deleting one NonMatching ft_3C61 entry.",
+      "evidence_refs": [
+        "changed_files:configure.py added=5 deleted=6 hunks=5",
+        "raw_diff:configure.py MatchingFor hunks"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Changed Object(NonMatching, \"melee/pl/plattack.c\") to Object(Matching, \"melee/pl/plattack.c\").",
+      "evidence_refs": [
+        "raw_diff:configure.py lines around 484"
+      ]
+    },
+    {
+      "text": "Changed Object(NonMatching, \"melee/pl/plbonus.c\") to Object(Matching, \"melee/pl/plbonus.c\").",
+      "evidence_refs": [
+        "raw_diff:configure.py lines around 484"
+      ]
+    },
+    {
+      "text": "Removed Object(NonMatching, \"melee/ft/ft_3C61.c\") from the MatchingFor object list.",
+      "evidence_refs": [
+        "raw_diff:configure.py lines around 614"
+      ]
+    },
+    {
+      "text": "Changed Object(NonMatching, \"melee/ft/ftchangeparam.c\") to Object(Matching, \"melee/ft/ftchangeparam.c\").",
+      "evidence_refs": [
+        "raw_diff:configure.py lines around 681"
+      ]
+    },
+    {
+      "text": "Changed Object(NonMatching, \"melee/ft/chara/ftPp_SpecialS.c\") to Object(Matching, \"melee/ft/chara/ftPp_SpecialS.c\").",
+      "evidence_refs": [
+        "raw_diff:configure.py lines around 784"
+      ]
+    },
+    {
+      "text": "Changed Object(NonMatching, \"sysdolphin/baselib/bytecode.c\") to Object(Matching, \"sysdolphin/baselib/bytecode.c\").",
+      "evidence_refs": [
+        "raw_diff:configure.py lines around 1679"
+      ]
+    },
+    {
+      "text": "A decomp-dev bot report for GALE01 reported linked code 43.26% (+0.90%, +35120 bytes), linked data 35.06% (+0.07%, +824 bytes), and the text 'No changes'.",
+      "evidence_refs": [
+        "text_corpus:decomp-dev[bot] issue_comment 2026-06-06T19:16:33Z"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Kept the PR narrowly scoped to configure.py link-status changes rather than mixing in source decomp edits.",
+      "evidence_refs": [
+        "changed_files:only configure.py",
+        "raw_diff:configure.py"
+      ]
+    },
+    {
+      "text": "Grouped several apparently already-linkable or 'free' object status flips into a single small build-configuration change.",
+      "evidence_refs": [
+        "pr_title:link some free files",
+        "raw_diff:five NonMatching-to-Matching edits"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "A link-status cleanup PR can be configure-only when the work is to promote already-suitable objects from NonMatching to Matching; the evidence should name each object and rely on the generated link report rather than implying new source-level decomp changes.",
+      "evidence_refs": [
+        "pr_title:link some free files",
+        "changed_files:configure.py only",
+        "raw_diff:NonMatching-to-Matching object entries",
+        "text_corpus:bot linked code/data report"
+      ],
+      "confidence": 0.78
+    }
+  ],
+  "naming_conventions": [],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Use configure.py Object status flips from NonMatching to Matching to link source files once they are ready, keeping the change localized to MatchingFor.",
+      "evidence_refs": [
+        "raw_diff:configure.py MatchingFor edits"
+      ],
+      "notes": "The PR slice does not include objdiff/build logs for individual files, only the bot linked-code/data report."
+    }
+  ],
+  "review_feedback": [
+    {
+      "author": "decomp-dev[bot]",
+      "kind": "automated_report",
+      "text": "Report for GALE01 showed linked code 43.26% (+0.90%, +35120 bytes), linked data 35.06% (+0.07%, +824 bytes), and 'No changes'.",
+      "evidence_refs": [
+        "text_corpus:issue_comment https://github.com/doldecomp/melee/pull/2589#issuecomment-4640093658"
+      ]
+    },
+    {
+      "author": "PsiLupan",
+      "kind": "issue_comment",
+      "text": "Handling this in a separate PR.",
+      "evidence_refs": [
+        "human_pr_text",
+        "text_corpus:issue_comment https://github.com/doldecomp/melee/pull/2589#issuecomment-4641360451"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2589",
+    "link some free files",
+    "configure.py",
+    "MatchingFor",
+    "Object(Matching)",
+    "Object(NonMatching)",
+    "melee/pl/plattack.c",
+    "melee/pl/plbonus.c",
+    "melee/ft/ft_3C61.c",
+    "melee/ft/ftchangeparam.c",
+    "melee/ft/chara/ftPp_SpecialS.c",
+    "sysdolphin/baselib/bytecode.c",
+    "GALE01",
+    "linked code",
+    "linked data",
+    "free files"
+  ],
+  "follow_up_queries": [
+    "PR 2589 configure.py plattack plbonus ftchangeparam ftPp_SpecialS bytecode",
+    "Handling this in a separate PR PsiLupan PR 2589",
+    "ft_3C61 removed from configure.py MatchingFor",
+    "free files Object NonMatching to Matching configure.py"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json:pr state CLOSED merged_at null changed_files=1",
+      "raw_diff:complete diff for configure.py",
+      "text_corpus:bot report and issue comment",
+      "human_pr_text:Handling this in a separate PR"
+    ],
+    "notes": [
+      "The diff and changed-file metadata are strong for what changed in configure.py.",
+      "There are no review comments and no human explanation for why each object was safe to link.",
+      "The bot report gives aggregate linked-code/data deltas but does not provide per-object objdiff or build evidence.",
+      "The PR was closed with merged_at null in the loaded metadata, so this intake does not claim the PR was merged or accepted.",
+      "The human_pr_text excerpt labels the comment author PsiLupan, while PR metadata identifies the PR author as BR-; this record uses BR- as PR author and PsiLupan as issue-comment author."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "pr_lesson",
+        "title": "Configure-only linking PRs should identify exact Object status flips",
+        "text": "PR 2589 shows a narrow configure.py-only link-status update: several Object entries were changed from NonMatching to Matching, one NonMatching ft_3C61 entry was removed, and the bot report recorded aggregate linked-code/data increases. Curators can use this as a PR-specific example of keeping link-status cleanup separate from source edits.",
+        "scope": [
+          "configure.py",
+          "MatchingFor",
+          "link-status cleanup"
+        ],
+        "evidence_refs": [
+          "raw_diff:configure.py",
+          "changed_files:configure.py",
+          "text_corpus:decomp-dev[bot] report"
+        ],
+        "confidence": 0.78
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "configure.py MatchingFor owns Matching/NonMatching object link-status entries",
+        "text": "PR evidence shows configure.py MatchingFor containing Object(Matching, path) and Object(NonMatching, path) entries, with a configure-only PR changing object link status for several source paths.",
+        "source_path": "configure.py",
+        "scope": [
+          "MatchingFor",
+          "Object(Matching)",
+          "Object(NonMatching)"
+        ],
+        "evidence_refs": [
+          "raw_diff:configure.py MatchingFor hunks"
+        ],
+        "reason": "May be useful as a path fact for future PR intake and curation, but should be checked against current source before promotion."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that the listed source files were newly decompiled in this PR; the slice only shows configure.py status changes.",
+      "Do not promote per-file match acceptance or validation beyond the aggregate bot report because the slice lacks per-object objdiff/build logs.",
+      "Do not infer reviewer intent from the 'Handling this in a separate PR' comment beyond the literal statement that some handling was deferred."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

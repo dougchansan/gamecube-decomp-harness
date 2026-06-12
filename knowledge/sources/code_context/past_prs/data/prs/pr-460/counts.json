@@ -1,0 +1,17 @@
+{
+  "number": 460,
+  "title": "restore item2.c",
+  "state": "MERGED",
+  "createdAt": "2022-08-13T12:13:45Z",
+  "updatedAt": "2022-08-19T16:57:32Z",
+  "mergedAt": "2022-08-19T16:57:32Z",
+  "closedAt": "2022-08-19T16:57:32Z",
+  "author": "VetriTheRetri",
+  "url": "https://github.com/doldecomp/melee/pull/460",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 4,
+    "reviews": 3,
+    "diff_bytes": 568012
+  }
+}

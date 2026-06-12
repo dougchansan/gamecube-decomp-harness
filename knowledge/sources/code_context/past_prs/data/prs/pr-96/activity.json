@@ -1,0 +1,10 @@
+{
+  "pr": 96,
+  "title": "Remove final incbin from __ppc_eabi_init",
+  "url": "https://github.com/doldecomp/melee/pull/96",
+  "text_records_with_body": 0,
+  "review_comments": 0,
+  "changed_files": 2,
+  "added_lines": 11,
+  "deleted_lines": 1
+}

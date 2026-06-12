@@ -1,5 +1,6 @@
 import { knowledgeCuratorAgent } from "./knowledge-curator/index.js";
 import { prReviewAgent } from "./pr-review/index.js";
+import { reconcileAgent } from "./reconcile/index.js";
 
 export const agentRegistry = {
   director: {
@@ -16,6 +17,7 @@ export const agentRegistry = {
   },
   "pr-review": prReviewAgent,
   "knowledge-curator": knowledgeCuratorAgent,
+  reconcile: reconcileAgent,
 } as const;
 
 export type RegisteredAgentId = keyof typeof agentRegistry;

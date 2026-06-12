@@ -70,21 +70,30 @@ def existing_paths(paths: Any) -> list[str]:
     return existing
 
 
-def status_payload(tool: str, tool_root: Path, empty_message: str) -> dict[str, Any]:
+def status_payload(tool: str, tool_root: Path, empty_message: str, expected_repo_root: str | Path | None = None) -> dict[str, Any]:
     rows = load_index_rows(tool_root)
     descriptor = load_tool_descriptor(tool_root)
     operation_mode = str(descriptor.get("operation_mode") or ("index_backed_v1" if rows else "scaffolded"))
     runner_files = non_readme_runner_files(tool_root)
     runner_manifest = load_runner_manifest(tool_root)
     runner_success = bool(runner_manifest.get("success"))
+    expected_repo_root_value = normalized_path(expected_repo_root) if expected_repo_root else None
+    runner_repo_root = runner_manifest.get("repo_root")
+    cache_repo_root_matches = None
+    if expected_repo_root_value:
+        cache_repo_root_matches = bool(runner_repo_root) and normalized_path(runner_repo_root) == expected_repo_root_value
     generated_artifacts = existing_paths(runner_manifest.get("generated_artifacts"))
     generated_indexes = existing_paths(runner_manifest.get("generated_indexes"))
     smoke_status = "passed" if runner_success and (generated_artifacts or generated_indexes) else "not_run"
     if runner_manifest and not runner_success:
         smoke_status = "failed"
+    elif runner_success and cache_repo_root_matches is False:
+        smoke_status = "stale_repo_root"
     runner_status = descriptor.get("runner_status")
-    if runner_success and (generated_artifacts or generated_indexes):
+    if runner_success and (generated_artifacts or generated_indexes) and cache_repo_root_matches is not False:
         runner_status = "live_smoke_passed"
+    elif runner_success and cache_repo_root_matches is False:
+        runner_status = "live_smoke_stale"
     elif runner_files:
         runner_status = runner_status or "configured_never_run"
     else:
@@ -100,6 +109,9 @@ def status_payload(tool: str, tool_root: Path, empty_message: str) -> dict[str, 
         "runner_smoke_passed": smoke_status == "passed",
         "runner_last_success_at": runner_manifest.get("generated_at") if runner_success else None,
         "runner_command": runner_manifest.get("command"),
+        "runner_repo_root": runner_repo_root,
+        "expected_repo_root": expected_repo_root_value,
+        "cache_repo_root_matches": cache_repo_root_matches,
         "runner_manifest_path": runner_manifest.get("manifest_path"),
         "generated_artifacts": generated_artifacts,
         "generated_indexes": generated_indexes,
@@ -111,6 +123,12 @@ def status_payload(tool: str, tool_root: Path, empty_message: str) -> dict[str, 
         "index_records": len(rows),
         "message": descriptor.get("status_message") or ("Index is ready for local lookup." if rows else empty_message),
     }
+
+
+def normalized_path(value: str | Path | None) -> str:
+    if value is None:
+        return ""
+    return str(Path(str(value)).expanduser().resolve())
 
 
 def search_payload(tool: str, tool_root: Path, query: str, limit: int, empty_message: str) -> dict[str, Any]:

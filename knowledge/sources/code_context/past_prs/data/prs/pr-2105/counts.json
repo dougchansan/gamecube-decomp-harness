@@ -1,0 +1,17 @@
+{
+  "number": 2105,
+  "title": "grCorneria matches",
+  "state": "MERGED",
+  "createdAt": "2026-01-18T23:19:42Z",
+  "updatedAt": "2026-01-18T23:46:32Z",
+  "mergedAt": "2026-01-18T23:23:53Z",
+  "closedAt": "2026-01-18T23:23:53Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/2105",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 9985
+  }
+}

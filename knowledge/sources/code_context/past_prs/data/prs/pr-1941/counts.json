@@ -1,0 +1,17 @@
+{
+  "number": 1941,
+  "title": "Use HSD_PAD defines for held_inputs mask",
+  "state": "MERGED",
+  "createdAt": "2025-09-25T03:06:45Z",
+  "updatedAt": "2025-09-25T03:14:52Z",
+  "mergedAt": "2025-09-25T03:14:49Z",
+  "closedAt": "2025-09-25T03:14:49Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1941",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 19066
+  }
+}

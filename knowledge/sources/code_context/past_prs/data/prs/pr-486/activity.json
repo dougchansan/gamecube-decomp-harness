@@ -1,0 +1,10 @@
+{
+  "pr": 486,
+  "title": "Support logging (`-l`) in `build.sh`",
+  "url": "https://github.com/doldecomp/melee/pull/486",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 1,
+  "added_lines": 52,
+  "deleted_lines": 28
+}

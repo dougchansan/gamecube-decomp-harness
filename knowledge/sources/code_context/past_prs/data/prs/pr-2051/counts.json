@@ -1,0 +1,17 @@
+{
+  "number": 2051,
+  "title": "ty: Match trophy/toy functions (part 1)",
+  "state": "MERGED",
+  "createdAt": "2025-12-30T17:25:10Z",
+  "updatedAt": "2026-05-16T08:45:49Z",
+  "mergedAt": "2026-01-06T23:31:39Z",
+  "closedAt": "2026-01-06T23:31:39Z",
+  "author": "itsgrimetime",
+  "url": "https://github.com/doldecomp/melee/pull/2051",
+  "counts": {
+    "issue_comments": 2,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 7541
+  }
+}

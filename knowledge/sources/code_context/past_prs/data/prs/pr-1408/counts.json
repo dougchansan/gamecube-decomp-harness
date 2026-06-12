@@ -1,0 +1,17 @@
+{
+  "number": 1408,
+  "title": "Match `ftCo_800A5A5C`",
+  "state": "MERGED",
+  "createdAt": "2024-08-03T10:49:05Z",
+  "updatedAt": "2024-08-03T10:51:20Z",
+  "mergedAt": "2024-08-03T10:51:19Z",
+  "closedAt": "2024-08-03T10:51:19Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1408",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 2468
+  }
+}

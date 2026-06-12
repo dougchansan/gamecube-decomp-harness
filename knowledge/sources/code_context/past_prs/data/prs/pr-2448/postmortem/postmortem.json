@@ -1,0 +1,397 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2448",
+  "pr": {
+    "number": 2448,
+    "title": "Jj/mndatadel",
+    "url": "https://github.com/doldecomp/melee/pull/2448",
+    "state": "MERGED",
+    "author": "jurrejelle",
+    "created_at": "2026-05-01T06:01:58Z",
+    "merged_at": "2026-05-08T19:22:49Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Large mndatadel decomp/matching PR that replaced multiple placeholder functions with C implementations, added mndatadel-specific structs/static model descriptors, adjusted nearby menu files mostly for include/order/formatting, and produced bot-reported progress including a full match for mnDataDel_8024E940 plus substantial partial improvements for other mndatadel functions.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "menu"
+    ],
+    "systems": [
+      "melee-core",
+      "mn",
+      "mndatadel"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/mn/mndatadel.c",
+      "role": "Primary decomp work: added includes and implemented mnDataDel_8024E940, mnDataDel_8024EA6C, fn_8024F318, fn_8024F840, fn_8024FD40, mnDataDel_8024FE4C, and mnDataDel_80250170; adjusted fn_8024ECCC to use MnDataDelData access.",
+      "evidence_refs": [
+        "metadata.changed_files",
+        "raw_diff lines 1-576",
+        "text_corpus issuecomment-4358113233"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mndatadel.static.h",
+      "role": "Header/static layout support: changed MnDataDelData contiguous fields x3C..x50 into x3C[6], added MnDataDelGObjUserData, and added/static-declared mndatadel data/model descriptors.",
+      "evidence_refs": [
+        "metadata.changed_files",
+        "raw_diff lines 577-626"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnevent.c",
+      "role": "Adjacent menu formatting/include-order cleanup; no substantive behavior change is evident from the loaded diff excerpt.",
+      "evidence_refs": [
+        "metadata.changed_files",
+        "raw_diff lines 627-676"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnsoundtest.c",
+      "role": "Adjacent menu formatting cleanup for line wrapping and expression formatting; no substantive behavior change is evident from the loaded diff excerpt.",
+      "evidence_refs": [
+        "metadata.changed_files",
+        "raw_diff lines 677-719"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Implemented previously placeholder mndatadel functions, with the bot reporting mnDataDel_8024E940 as a new 100% match and several other functions as partial improvements.",
+      "evidence_refs": [
+        "raw_diff lines 28-132",
+        "raw_diff lines 169-576",
+        "text_corpus issuecomment-4358113233"
+      ]
+    },
+    {
+      "text": "Added includes needed by the new mndatadel code, including gobjuserdata, memory, gm/gmmain headers, lbarchive, lbaudio_ax, lbcardgame, debug, and toy.",
+      "evidence_refs": [
+        "raw_diff lines 9-26"
+      ]
+    },
+    {
+      "text": "Converted six consecutive MnDataDelData scalar fields x3C through x50 into s32 x3C[6], enabling indexed access in loops and cursor handling.",
+      "evidence_refs": [
+        "raw_diff lines 581-592",
+        "raw_diff lines 493-522"
+      ]
+    },
+    {
+      "text": "Added struct MnDataDelGObjUserData with byte state fields, an HSD_Text pointer, and HSD_JObj* x10[8], then used it for gobj user_data allocation and access.",
+      "evidence_refs": [
+        "raw_diff lines 599-612",
+        "raw_diff lines 474-545"
+      ]
+    },
+    {
+      "text": "Used HSD_ASSERTREPORT around HSD_MemAlloc user_data allocation in mnDataDel_8024FE4C.",
+      "evidence_refs": [
+        "raw_diff lines 489-491"
+      ]
+    },
+    {
+      "text": "Bot report recorded +300 bytes matched code, +48 bytes matched data, 2 new matches, and 9 unmatched-item improvements for main/melee/mn/mndatadel.",
+      "evidence_refs": [
+        "text_corpus issuecomment-4358113233"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Recovering x3C as an array allowed loops over six menu cursor/option entries instead of leaving six unrelated scalar fields.",
+      "evidence_refs": [
+        "raw_diff lines 581-592",
+        "raw_diff lines 507-535"
+      ]
+    },
+    {
+      "text": "Introducing MnDataDelGObjUserData made repeated gobj user_data accesses reviewable enough to distinguish state bytes, text pointer, and JObj child slots.",
+      "evidence_refs": [
+        "raw_diff lines 599-612",
+        "raw_diff lines 474-545"
+      ]
+    },
+    {
+      "text": "The implementation keeps asset/resource strings inline in lbArchive_LoadSections rather than moving them to named string symbols.",
+      "evidence_refs": [
+        "raw_diff lines 556-572",
+        "decomp_standard no-string-literal-symbol-regression"
+      ]
+    },
+    {
+      "text": "Natural loops were used for repeated JObj setup and animation updates where indexed data was available.",
+      "evidence_refs": [
+        "raw_diff lines 66-77",
+        "raw_diff lines 96-117",
+        "raw_diff lines 507-535",
+        "decomp_standard natural-loops"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When menu data has consecutive fields that are consumed by indexed loops or cursor movement, consider whether the original layout was an array before preserving generated scalar-field access.",
+      "scope": [
+        "src/melee/mn/mndatadel.static.h",
+        "src/melee/mn/mndatadel.c"
+      ],
+      "evidence_refs": [
+        "raw_diff lines 581-592",
+        "raw_diff lines 507-535",
+        "decomp_standard natural-loops",
+        "decomp_standard typed-fields-over-pointer-math"
+      ],
+      "confidence": 0.83
+    },
+    {
+      "lesson": "For gobj user_data-heavy menu code, adding a local struct can expose state bytes, text handles, and JObj arrays enough to replace some raw access patterns, even if field names remain provisional.",
+      "scope": [
+        "src/melee/mn/mndatadel.static.h",
+        "src/melee/mn/mndatadel.c"
+      ],
+      "evidence_refs": [
+        "raw_diff lines 599-612",
+        "raw_diff lines 489-545",
+        "decomp_standard typed-fields-over-pointer-math",
+        "decomp_standard conservative-naming"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "A single focused menu decomp PR may include nearby formatting-only churn, but evidence for decomp progress should be tied to the touched object/function report, not inferred from formatting edits.",
+      "scope": [
+        "src/melee/mn/mnevent.c",
+        "src/melee/mn/mnsoundtest.c"
+      ],
+      "evidence_refs": [
+        "raw_diff lines 627-719",
+        "text_corpus issuecomment-4358113233",
+        "decomp_standard verification-and-regression-ledger"
+      ],
+      "confidence": 0.72
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "MnDataDelGObjUserData",
+      "kind": "type",
+      "observation": "Semantic type name was added for mndatadel gobj user data, while individual fields remained offset-style x0/x1/x10 because stronger semantics are not evident in the slice.",
+      "evidence_refs": [
+        "raw_diff lines 599-612",
+        "decomp_standard conservative-naming"
+      ]
+    },
+    {
+      "name": "mnDataDel_8024E940_inline",
+      "kind": "local inline helper",
+      "observation": "A narrow inline wrapper around mn_8022F298 was introduced and used in mnDataDel_8024E940; the slice does not explain why this inline was required.",
+      "evidence_refs": [
+        "raw_diff lines 29-55"
+      ]
+    },
+    {
+      "name": "x3C[6]",
+      "kind": "struct field layout",
+      "observation": "Consecutive address-style fields were represented as an array while preserving the offset-style base name.",
+      "evidence_refs": [
+        "raw_diff lines 581-592"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "PAD_STACK was added in mnDataDel_8024EA6C, fn_8024ECCC, and fn_8024FD40.",
+      "evidence_refs": [
+        "raw_diff lines 83-95",
+        "raw_diff lines 140-144",
+        "raw_diff lines 448-456"
+      ],
+      "caution": "The loaded evidence shows PAD_STACK use but does not include an objdiff explanation; keep this as PR-specific tactic evidence, not a global style rule."
+    },
+    {
+      "tactic": "Used a do-while loop with pointer increment over mnDataDel_803EF870.x3C for six menu entries.",
+      "evidence_refs": [
+        "raw_diff lines 96-117"
+      ],
+      "caution": "Supported by changed header layout, but exact compiler-shape reason is not documented in comments."
+    },
+    {
+      "tactic": "Used switch dispatch for cursor cases in fn_8024F318, with repeated JObj animation restore blocks in several cases.",
+      "evidence_refs": [
+        "raw_diff lines 222-333"
+      ],
+      "caution": "Repeated blocks may invite helper/loop exploration, but this PR evidence does not prove a cleaner abstraction would match."
+    },
+    {
+      "tactic": "Used comma expressions/casts in a few calls, such as HSD_JObjReqAnimAll(sp18, (0, 1.0f)) and HSD_JObjAnimAll((0, sp18)).",
+      "evidence_refs": [
+        "raw_diff lines 55-62"
+      ],
+      "caution": "Treat as local matching artifact unless later evidence explains it."
+    },
+    {
+      "tactic": "Kept inline asset names in lbArchive_LoadSections while adding static model descriptors.",
+      "evidence_refs": [
+        "raw_diff lines 556-572",
+        "raw_diff lines 621-624"
+      ],
+      "caution": "Consistent with loaded standards on string literals, but the PR body does not discuss data ownership."
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "author": "decomp-dev[bot]",
+      "text": "GALE01 report: matched code 66.41% (+0.01%, +300 bytes), matched data 38.72% (+0.00%, +48 bytes); 2 new matches including mnDataDel_8024E940 and .bss; 9 improvements including fn_8024F318, mnDataDel_8024FE4C, fn_8024F840, .data, mnDataDel_8024EA6C, mnDataDel_80250170, fn_8024FD40, fn_8024ECCC, and .sdata2.",
+      "evidence_refs": [
+        "text_corpus issuecomment-4358113233"
+      ]
+    },
+    {
+      "kind": "human_review",
+      "author": null,
+      "text": "No human review comments were present in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata.counts.review_comments=0",
+        "metadata.counts.reviews=0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2448",
+    "Jj/mndatadel",
+    "jurrejelle",
+    "src/melee/mn/mndatadel.c",
+    "src/melee/mn/mndatadel.static.h",
+    "mnDataDel_8024E940",
+    "mnDataDel_8024EA6C",
+    "fn_8024F318",
+    "fn_8024F840",
+    "fn_8024FD40",
+    "mnDataDel_8024FE4C",
+    "mnDataDel_80250170",
+    "fn_8024ECCC",
+    "MnDataDelData",
+    "MnDataDelGObjUserData",
+    "mnDataDel_803EF870.x3C",
+    "mnDataDel_804D6C68",
+    "HSD_ASSERTREPORT",
+    "PAD_STACK",
+    "lbArchive_LoadSections",
+    "MenMainConDl_Top_joint",
+    "MenMainCursorDl_Top_joint",
+    "MenMainWarCmn_Top_joint"
+  ],
+  "follow_up_queries": [
+    "Find later PRs touching MnDataDelGObjUserData field names x0 x1 x2 x3 x10",
+    "Search for cleanup of PAD_STACK in mnDataDel_8024EA6C fn_8024ECCC fn_8024FD40",
+    "Search mndatadel.c for repeated HSD_JObjReqAnimAll mn_8022F3D8 HSD_JObjAnimAll animation restore pattern",
+    "Find later changes to mnDataDel_803EF870 x3C array or MnDataDelData field naming",
+    "Search for mnDataDel_8024E940_inline removal or explanation",
+    "Find PRs improving fn_8024F318 fn_8024F840 mnDataDel_8024FE4C matching percentages"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json",
+      "changed_files.jsonl",
+      "raw_diff.diff",
+      "text_corpus.jsonl",
+      "decomp_standards"
+    ],
+    "notes": [
+      "PR body is empty and there are no human review comments in the loaded slice.",
+      "The raw diff loaded in the prompt was truncated, but targeted local slice lookup provided the static header and adjacent file diff portions needed for classification.",
+      "Bot report gives progress percentages and matched/improved item names, but no objdiff command transcript or author rationale is included.",
+      "Some tactics such as PAD_STACK, comma expressions, and an inline wrapper are visible in the diff but not explained by reviewer or author comments."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "pr_decomp_progress",
+        "title": "PR 2448 mndatadel matching progress",
+        "text": "PR 2448 implemented several mndatadel functions and bot-reported a 100% match for mnDataDel_8024E940 plus partial improvements for fn_8024F318, mnDataDel_8024FE4C, fn_8024F840, mnDataDel_8024EA6C, mnDataDel_80250170, fn_8024FD40, and fn_8024ECCC.",
+        "scope": [
+          "src/melee/mn/mndatadel.c"
+        ],
+        "evidence_refs": [
+          "raw_diff lines 28-576",
+          "text_corpus issuecomment-4358113233"
+        ],
+        "confidence": 0.86
+      },
+      {
+        "record_type": "decomp_lesson_candidate",
+        "title": "Recover arrays from consecutive menu data fields when indexed use appears",
+        "text": "In mndatadel, six consecutive scalar fields x3C..x50 were changed to x3C[6] and then used by loops/cursor indexing, making the source align with repeated menu-entry logic.",
+        "scope": [
+          "src/melee/mn/mndatadel.static.h",
+          "src/melee/mn/mndatadel.c"
+        ],
+        "evidence_refs": [
+          "raw_diff lines 581-592",
+          "raw_diff lines 507-535"
+        ],
+        "confidence": 0.83
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "mndatadel static layout facts from PR 2448",
+        "text": "PR 2448 changed struct MnDataDelData to use s32 x3C[6] in place of six consecutive scalar fields and added struct MnDataDelGObjUserData containing u8 state fields x0-x8, HSD_Text* xC, and HSD_JObj* x10[8].",
+        "source_path": "src/melee/mn/mndatadel.static.h",
+        "scope": [
+          "src/melee/mn/mndatadel.static.h",
+          "src/melee/mn/mndatadel.c"
+        ],
+        "evidence_refs": [
+          "raw_diff lines 581-612"
+        ],
+        "reason": "May help future agents classify mndatadel user_data and array-indexed menu data without rediscovering the PR."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Treat unexplained PAD_STACK and comma-expression call arguments as local tactics requiring evidence",
+        "text": "This PR visibly used PAD_STACK and comma-expression call arguments while producing matching progress, but the slice contains no author/reviewer explanation. If promoted, phrase narrowly as a reminder to record objdiff evidence for such tactics rather than as approval of the tactic.",
+        "source_path": null,
+        "scope": [
+          "src/melee/mn/mndatadel.c"
+        ],
+        "evidence_refs": [
+          "raw_diff lines 55-62",
+          "raw_diff lines 83-95",
+          "raw_diff lines 140-144",
+          "raw_diff lines 448-456",
+          "decomp_standard matching-tactics-need-evidence"
+        ],
+        "reason": "Could reinforce existing matching-tactics standards with a concrete historical example, but evidence is only diff-level."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that all functions in the PR fully matched; the bot report shows only mnDataDel_8024E940 as a function-level 100% new match, while many others are partial improvements.",
+      "Do not promote the mndatadel field names x0/x1/x3/x10 as semantic names; the PR preserves offset-style names and the slice does not prove meanings.",
+      "Do not treat the adjacent mnevent.c and mnsoundtest.c edits as decomp lessons beyond formatting/include-order evidence.",
+      "Do not claim human reviewer intent or approval rationale; no loaded human review comments are present."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

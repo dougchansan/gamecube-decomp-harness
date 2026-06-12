@@ -1,0 +1,17 @@
+{
+  "number": 1180,
+  "title": "Remove remaining `MUST_MATCH` usages",
+  "state": "MERGED",
+  "createdAt": "2024-02-02T02:54:36Z",
+  "updatedAt": "2024-02-02T02:55:34Z",
+  "mergedAt": "2024-02-02T02:55:34Z",
+  "closedAt": "2024-02-02T02:55:34Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1180",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 21174
+  }
+}

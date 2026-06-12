@@ -1,0 +1,17 @@
+{
+  "number": 889,
+  "title": "Match `ftCo_CliffAttack`",
+  "state": "MERGED",
+  "createdAt": "2023-05-28T23:54:56Z",
+  "updatedAt": "2023-05-29T00:04:09Z",
+  "mergedAt": "2023-05-29T00:04:08Z",
+  "closedAt": "2023-05-29T00:04:08Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/889",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 14504
+  }
+}

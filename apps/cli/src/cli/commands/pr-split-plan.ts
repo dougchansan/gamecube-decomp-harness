@@ -1,11 +1,25 @@
-import { writeFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
+import { readRegressionReport } from "@decomp-orchestrator/core/objdiff/report";
 import { runCommand } from "@decomp-orchestrator/core/shell";
 import { booleanArg, numberArg, stringArg, type GlobalArgs } from "../args.js";
 
 type ChangeSource = "branch" | "worktree";
 type GroupMode = "melee-subsystem" | "top-dir";
 type IndependenceKind = "independent" | "shared-prep" | "stacked" | "needs-merge";
+type PrLane = "match" | "local";
+
+export interface PrLaneSets {
+  matchPaths: string[];
+  improvementPaths: string[];
+}
+
+// The ship-set verification verdict (ship_status.json): which match-lane
+// files survived the survivor loop and which were dropped, with reasons.
+export interface PrShipFilter {
+  shippedPaths: string[];
+  droppedReasons: Record<string, string[]>;
+}
 
 export interface PrChangedFile {
   path: string;
@@ -26,6 +40,8 @@ interface ChangeGroup {
   displayName: string;
   scope: string;
   category: "shared" | "subsystem" | "support";
+  lane?: PrLane | null;
+  laneWarnings?: string[];
   files: PrChangedFile[];
 }
 
@@ -43,6 +59,7 @@ export interface PrSplitSlice {
   displayName: string;
   title: string;
   branchName: string;
+  lane: PrLane | null;
   scope: string;
   directories: string[];
   fileCount: number;
@@ -63,6 +80,8 @@ export interface PrSplitPlan {
   currentBranch: string;
   groupMode: GroupMode;
   maxFilesPerPr: number;
+  lanesApplied: boolean;
+  shipFilterApplied: boolean;
   totalFiles: number;
   slices: PrSplitSlice[];
   warnings: string[];
@@ -75,9 +94,13 @@ interface BuildPlanOptions {
   currentBranch: string;
   groupMode: GroupMode;
   maxFilesPerPr: number;
+  /** Match slices below this size merge together (1 disables merging). */
+  minFilesPerPr?: number;
   branchPrefix: string;
   titlePrefix: string;
   sliceCheckCommand: string;
+  lanes?: PrLaneSets | null;
+  shipFilter?: PrShipFilter | null;
   warnings?: string[];
 }
 
@@ -90,6 +113,10 @@ function splitZ(output: string): string[] {
 function normalizePath(path: string): string {
   return path.replaceAll("\\", "/").replace(/^\.\//, "");
 }
+
+// decomp-permuter scratch copies (.permute-<id>.c, .permute-pch-<id>.mch)
+// that escape cleanup and land in the worktree, index, or a commit.
+const SCRATCH_FILE_PATTERN = /(^|\/)\.permute-/;
 
 function shellQuote(value: string): string {
   if (/^[A-Za-z0-9_./:=,@%+-]+$/.test(value)) return value;
@@ -267,6 +294,42 @@ function sortGroups(left: ChangeGroup, right: ChangeGroup): number {
   return categoryOrder[left.category] - categoryOrder[right.category] || left.id.localeCompare(right.id);
 }
 
+// Subsystem grouping is a starting proposal, not the PR boundary: a slice
+// only earns its own PR when it is big enough to justify one. Small
+// match-lane subsystem slices pack together (first-fit decreasing, capped by
+// maxFilesPerPr) so reviewers get the fewest comfortable PRs instead of a
+// pile of one-file ones. Shared/support slices never merge — their risk
+// class is the reason they are separate.
+function mergeSmallMatchGroups(groups: ChangeGroup[], minFilesPerPr: number, maxFilesPerPr: number): ChangeGroup[] {
+  if (minFilesPerPr <= 1) return groups;
+  const small = groups.filter((group) => group.lane === "match" && group.category === "subsystem" && group.files.length < minFilesPerPr);
+  if (small.length < 2) return groups;
+  const rest = groups.filter((group) => !small.includes(group));
+  const bins: ChangeGroup[][] = [];
+  for (const group of [...small].sort((left, right) => right.files.length - left.files.length)) {
+    const bin = bins.find((candidate) => candidate.reduce((total, member) => total + member.files.length, 0) + group.files.length <= maxFilesPerPr);
+    if (bin) bin.push(group);
+    else bins.push([group]);
+  }
+  const merged = bins.map((bin) => {
+    if (bin.length === 1) return bin[0];
+    const ordered = [...bin].sort(sortGroups);
+    return {
+      id: ordered.map((member) => member.id).join("-"),
+      displayName: ordered.map((member) => member.displayName).join(" + "),
+      scope: ordered.map((member) => member.scope).join(", "),
+      category: "subsystem" as const,
+      lane: "match" as const,
+      laneWarnings: [
+        `Merged ${ordered.length} small subsystem slices (${ordered.map((member) => `${member.displayName}: ${member.files.length} file${member.files.length === 1 ? "" : "s"}`).join(", ")}) — each was below --min-files-per-pr=${minFilesPerPr}.`,
+        ...new Set(ordered.flatMap((member) => member.laneWarnings ?? [])),
+      ],
+      files: ordered.flatMap((member) => member.files),
+    };
+  });
+  return [...rest, ...merged];
+}
+
 function maybeSplitLargeGroup(group: ChangeGroup, maxFilesPerPr: number): ChangeGroup[] {
   if (group.files.length <= maxFilesPerPr) return [group];
   const buckets = new Map<string, PrChangedFile[]>();
@@ -331,10 +394,12 @@ function classifyIndependence(group: ChangeGroup, files: PrChangedFile[], maxFil
   const hasUntracked = files.some((file) => file.statuses.some((status) => status.startsWith("??")));
   const hasWorktree = files.some((file) => file.sources.includes("worktree"));
   const hasDeletionOrRename = files.some((file) => file.statuses.some((status) => status.includes("D") || status.includes("R")));
+  const subsystemId =
+    group.category === "subsystem" ? sanitizeId(group.scope.split("/").filter(Boolean)[1] ?? "") || group.id : group.id;
   const allScopedSourceLike =
     group.category === "subsystem" &&
-    files.every((file) => isScopedToMeleeSubsystem(file.path, group.id) && isReviewableSourceLikePath(file.path));
-  const hasCrossCuttingHeader = files.some((file) => extensionForPath(file.path) === "h" && !isScopedToMeleeSubsystem(file.path, group.id));
+    files.every((file) => isScopedToMeleeSubsystem(file.path, subsystemId) && isReviewableSourceLikePath(file.path));
+  const hasCrossCuttingHeader = files.some((file) => extensionForPath(file.path) === "h" && !isScopedToMeleeSubsystem(file.path, subsystemId));
 
   if (files.length > maxFilesPerPr) {
     reasons.push(`slice has ${files.length} files, above --max-files-per-pr=${maxFilesPerPr}`);
@@ -377,6 +442,109 @@ function classifyIndependence(group: ChangeGroup, files: PrChangedFile[], maxFil
   return { kind: "stacked", verified: false, confidence: "low", reasons, requiredChecks, possibleDependencies: [] };
 }
 
+function lanePathMatcher(paths: string[]): (changedPath: string) => boolean {
+  const candidates = new Set(paths.map(normalizePath).filter(Boolean));
+  return (changedPath) => {
+    const path = normalizePath(changedPath);
+    if (candidates.has(path)) return true;
+    // Checkpoint source paths and git paths can differ by a repo-root prefix
+    // (e.g. "melee/mn/mnnamenew.c" vs "src/melee/mn/mnnamenew.c").
+    for (const candidate of candidates) {
+      if (path.endsWith(`/${candidate}`) || candidate.endsWith(`/${path}`)) return true;
+    }
+    return false;
+  };
+}
+
+// Splits one subsystem group into a match-lane group (what ships) and a
+// local-only group (what stays on the branch). Only matches ship; support
+// files (headers, declarations, build glue) ride the match lane when one
+// exists because the matches need them to build, and otherwise stay local.
+// When a ship filter is present (the survivor-loop verdict), files the
+// verification dropped are demoted to the local lane with their drop reasons.
+function splitGroupByLane(group: ChangeGroup, lanes: PrLaneSets, shipFilter: PrShipFilter | null): ChangeGroup[] {
+  const isMatch = lanePathMatcher(lanes.matchPaths);
+  const isImprovement = lanePathMatcher(lanes.improvementPaths);
+  const matchFiles: PrChangedFile[] = [];
+  const localFiles: PrChangedFile[] = [];
+  const supportFiles: PrChangedFile[] = [];
+  let mixedCount = 0;
+  for (const file of group.files) {
+    if (isMatch(file.path)) {
+      matchFiles.push(file);
+      if (isImprovement(file.path)) mixedCount += 1;
+    } else if (isImprovement(file.path)) {
+      localFiles.push(file);
+    } else {
+      supportFiles.push(file);
+    }
+  }
+
+  // The ship filter is the verified survivor set: anything the survivor loop
+  // dropped (or never verified) moves to the local lane instead of a PR.
+  const droppedFromShip: string[] = [];
+  if (shipFilter) {
+    const isShipped = lanePathMatcher(shipFilter.shippedPaths);
+    const isDropped = lanePathMatcher(Object.keys(shipFilter.droppedReasons));
+    const keepShipped = (files: PrChangedFile[]): PrChangedFile[] =>
+      files.filter((file) => {
+        if (isShipped(file.path)) return true;
+        if (isDropped(file.path)) {
+          const reasonKey = Object.keys(shipFilter.droppedReasons).find(
+            (dropped) => normalizePath(dropped) === normalizePath(file.path) || normalizePath(file.path).endsWith(`/${normalizePath(dropped)}`) || normalizePath(dropped).endsWith(`/${normalizePath(file.path)}`),
+          );
+          const reasons = reasonKey ? shipFilter.droppedReasons[reasonKey] ?? [] : [];
+          droppedFromShip.push(`${file.path}${reasons.length > 0 ? ` (${reasons.join("; ")})` : ""}`);
+          localFiles.push(file);
+          return false;
+        }
+        droppedFromShip.push(`${file.path} (not in the verified ship set)`);
+        localFiles.push(file);
+        return false;
+      });
+    const survivedMatches = keepShipped(matchFiles);
+    const survivedSupport = keepShipped(supportFiles);
+    matchFiles.length = 0;
+    matchFiles.push(...survivedMatches);
+    supportFiles.length = 0;
+    supportFiles.push(...survivedSupport);
+  }
+
+  const groups: ChangeGroup[] = [];
+  if (matchFiles.length > 0) {
+    const laneWarnings: string[] = [];
+    if (mixedCount > 0) {
+      laneWarnings.push(`${mixedCount} file(s) in this match slice also carry unshipped fuzzy improvements in other functions; call that out in the PR body.`);
+    }
+    if (supportFiles.length > 0) {
+      laneWarnings.push(`${supportFiles.length} supporting file(s) are not checkpoint candidates; confirm each is required for the matches to build.`);
+    }
+    if (droppedFromShip.length > 0) {
+      laneWarnings.push(`${droppedFromShip.length} file(s) dropped by ship-set verification moved to the local lane: ${droppedFromShip.join(", ")}`);
+    }
+    groups.push({ ...group, lane: "match", laneWarnings, files: [...matchFiles, ...supportFiles] });
+  }
+  if (localFiles.length > 0 || (matchFiles.length === 0 && supportFiles.length > 0)) {
+    const files = matchFiles.length > 0 ? localFiles : [...localFiles, ...supportFiles];
+    const laneWarnings = ["Local-only: improvements and support files that do not ship. They stay on the branch until the work becomes an exact match."];
+    if (matchFiles.length === 0 && droppedFromShip.length > 0) {
+      laneWarnings.push(`${droppedFromShip.length} file(s) dropped by ship-set verification: ${droppedFromShip.join(", ")}`);
+    }
+    groups.push({
+      ...group,
+      id: `local-${group.id}`,
+      displayName: `${group.displayName} (local only)`,
+      lane: "local",
+      laneWarnings,
+      files,
+    });
+  }
+  if (groups.length === 0) {
+    groups.push({ ...group, lane: null, laneWarnings: ["No files in this slice are checkpoint candidates; it likely predates the checkpoint or is shared prep."] });
+  }
+  return groups;
+}
+
 export function buildPrSplitPlanFromChanges(changes: RawChangedFile[], options: BuildPlanOptions): PrSplitPlan {
   const files = mergeChanges(changes);
   const groups = new Map<string, ChangeGroup>();
@@ -391,11 +559,15 @@ export function buildPrSplitPlanFromChanges(changes: RawChangedFile[], options: 
   }
 
   const warnings = [...(options.warnings ?? [])];
-  const slicesWithoutCommands: Array<Omit<PrSplitSlice, "commands" | "isolationCommands">> = Array.from(groups.values())
+  const lanes = options.lanes ?? null;
+  const shipFilter = options.shipFilter ?? null;
+  const splitGroups = lanes ? Array.from(groups.values()).flatMap((group) => splitGroupByLane(group, lanes, shipFilter)) : Array.from(groups.values());
+  const laneGroups = lanes ? mergeSmallMatchGroups(splitGroups, options.minFilesPerPr ?? 1, options.maxFilesPerPr) : splitGroups;
+  const slicesWithoutCommands: Array<Omit<PrSplitSlice, "commands" | "isolationCommands">> = laneGroups
     .sort(sortGroups)
     .flatMap((group) => maybeSplitLargeGroup(group, options.maxFilesPerPr))
     .map((group) => {
-      const groupWarnings: string[] = [];
+      const groupWarnings: string[] = [...(group.laneWarnings ?? [])];
       if (group.files.length > options.maxFilesPerPr) {
         groupWarnings.push(`This slice has ${group.files.length} files, above --max-files-per-pr=${options.maxFilesPerPr}; split it manually if review still feels heavy.`);
       }
@@ -414,6 +586,7 @@ export function buildPrSplitPlanFromChanges(changes: RawChangedFile[], options: 
         displayName: group.displayName,
         title: titleFor(options.titlePrefix, group.displayName),
         branchName: `${options.branchPrefix.replace(/\/+$/g, "")}/${branchPart}`,
+        lane: group.lane ?? null,
         scope: group.scope,
         directories,
         fileCount: group.files.length,
@@ -452,6 +625,8 @@ export function buildPrSplitPlanFromChanges(changes: RawChangedFile[], options: 
     currentBranch: options.currentBranch,
     groupMode: options.groupMode,
     maxFilesPerPr: options.maxFilesPerPr,
+    lanesApplied: Boolean(lanes),
+    shipFilterApplied: Boolean(lanes && shipFilter),
     totalFiles: files.length,
     slices,
     warnings,
@@ -535,7 +710,14 @@ async function collectChanges(options: {
 
   if (!options.includeBranchDiff) warnings.push("Branch diff was skipped; the plan only reflects worktree status.");
   if (!options.includeWorktree) warnings.push("Worktree status was skipped; the plan only reflects committed branch changes.");
-  return { changes, currentBranch, headRef, warnings };
+
+  // Tooling scratch files (decomp-permuter work copies) are never plan
+  // content, even when they leak into the index or a commit.
+  const scratch = changes.filter((change) => SCRATCH_FILE_PATTERN.test(change.path));
+  if (scratch.length > 0) {
+    warnings.push(`Excluded ${scratch.length} permuter scratch file(s) (.permute-*) from the plan: ${scratch.map((change) => change.path).join(", ")}`);
+  }
+  return { changes: changes.filter((change) => !SCRATCH_FILE_PATTERN.test(change.path)), currentBranch, headRef, warnings };
 }
 
 function renderFileLine(file: PrChangedFile): string {
@@ -555,8 +737,19 @@ export function renderPrSplitPlan(plan: PrSplitPlan): string {
     `Grouping: ${plan.groupMode}`,
     `Files: ${plan.totalFiles}`,
     `Slices: ${plan.slices.length}`,
-    `Max files per PR: ${plan.maxFilesPerPr}`,
+    `Max files per PR: ${plan.maxFilesPerPr} (hard ceiling, not a target — pack slices for easy review without producing a pile of PRs)`,
   ];
+
+  if (plan.lanesApplied) {
+    const matchSlices = plan.slices.filter((slice) => slice.lane === "match").length;
+    const localSlices = plan.slices.filter((slice) => slice.lane === "local").length;
+    lines.push(
+      `Lanes: ${matchSlices} match slice(s) ship, ${localSlices} local-only slice(s) stay on the branch. Only exact matches that survived the full build and regression gate go into PRs; improvements and other local work ship later, when they become matches.`,
+    );
+    if (plan.shipFilterApplied) {
+      lines.push("Ship filter: match slices contain only files that survived ship-set verification; files the survivor loop dropped ride the local lane.");
+    }
+  }
 
   if (plan.warnings.length > 0) {
     lines.push("", "Warnings:");
@@ -579,6 +772,7 @@ export function renderPrSplitPlan(plan: PrSplitPlan): string {
       `## ${index + 1}. ${slice.displayName} (${slice.fileCount} ${slice.fileCount === 1 ? "file" : "files"})`,
       "",
       `Scope: ${slice.scope}`,
+      ...(slice.lane ? [`Lane: ${slice.lane}`] : []),
       `Branch: ${slice.branchName}`,
       `Title: ${slice.title}`,
       `Directories: ${slice.directories.join(", ")}`,
@@ -610,11 +804,30 @@ export function renderPrSplitPlan(plan: PrSplitPlan): string {
   return lines.join("\n");
 }
 
+async function laneSetsFromCheckpoint(path: string): Promise<PrLaneSets> {
+  const parsed = JSON.parse(await readFile(path, "utf8")) as unknown;
+  const payload = parsed && typeof parsed === "object" && !Array.isArray(parsed) ? (parsed as Record<string, unknown>) : {};
+  const matchPaths: string[] = [];
+  const improvementPaths: string[] = [];
+  for (const value of Array.isArray(payload.items) ? payload.items : []) {
+    const item = value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : {};
+    const sourcePath = typeof item.sourcePath === "string" ? item.sourcePath : typeof item.source_path === "string" ? item.source_path : "";
+    if (!sourcePath) continue;
+    if (item.disposition === "pr_candidate") matchPaths.push(sourcePath);
+    else if (item.disposition === "improvement_candidate") improvementPaths.push(sourcePath);
+  }
+  return { matchPaths, improvementPaths };
+}
+
 export async function prSplitPlan(globals: GlobalArgs, args: Map<string, string | true>): Promise<void> {
   const baseRef = stringArg(args, "--base-ref", globals.project?.baseRef ?? "origin/master");
   const maxFilesPerPr = numberArg(args, "--max-files-per-pr", globals.project?.pr.maxFilesPerPr ?? 30);
   if (!Number.isInteger(maxFilesPerPr) || maxFilesPerPr < 1) {
     throw new Error("--max-files-per-pr must be a positive integer");
+  }
+  const minFilesPerPr = numberArg(args, "--min-files-per-pr", 4);
+  if (!Number.isInteger(minFilesPerPr) || minFilesPerPr < 1 || minFilesPerPr > maxFilesPerPr) {
+    throw new Error("--min-files-per-pr must be a positive integer no larger than --max-files-per-pr");
   }
   const groupMode = stringArg(args, "--group-mode", globals.project?.pr.groupMode ?? "melee-subsystem");
   if (groupMode !== "melee-subsystem" && groupMode !== "top-dir") {
@@ -627,6 +840,51 @@ export async function prSplitPlan(globals: GlobalArgs, args: Map<string, string 
   const includeBranchDiff = !booleanArg(args, "--worktree-only");
   const includeWorktree = !booleanArg(args, "--committed-only");
   const includeUntracked = !booleanArg(args, "--no-untracked");
+  const checkpointPath = stringArg(args, "--checkpoint", "");
+  let lanes = checkpointPath ? await laneSetsFromCheckpoint(resolve(checkpointPath)) : null;
+
+  // The regression report is the build-level truth for what the branch ships:
+  // every new exact match belongs in the match lane even when this run's
+  // worker reports don't cover it (work from earlier sessions, manual fixes).
+  // Improvements above the promotion floors are tagged so the local-only lane
+  // can name them, but they never ship.
+  // The ship-set verification verdict: when present, match slices are
+  // restricted to the files that survived the survivor loop; dropped files
+  // are demoted to the local lane with their drop reasons.
+  const shipStatusArg = stringArg(args, "--ship-status", "");
+  let shipFilter: PrShipFilter | null = null;
+  if (shipStatusArg) {
+    const parsed = JSON.parse(await readFile(resolve(globals.repoRoot, shipStatusArg), "utf8")) as unknown;
+    const payload = parsed && typeof parsed === "object" && !Array.isArray(parsed) ? (parsed as Record<string, unknown>) : {};
+    const shippedPaths = (Array.isArray(payload.shippedFiles) ? payload.shippedFiles : []).filter((value): value is string => typeof value === "string");
+    const droppedRaw = payload.droppedFiles && typeof payload.droppedFiles === "object" && !Array.isArray(payload.droppedFiles) ? (payload.droppedFiles as Record<string, unknown>) : {};
+    const droppedReasons: Record<string, string[]> = {};
+    for (const [path, reasons] of Object.entries(droppedRaw)) {
+      droppedReasons[path] = (Array.isArray(reasons) ? reasons : []).filter((value): value is string => typeof value === "string");
+    }
+    if (shippedPaths.length === 0 && Object.keys(droppedReasons).length === 0) {
+      throw new Error(`--ship-status ${shipStatusArg} has no shippedFiles or droppedFiles; run ship-set verification first or drop the flag.`);
+    }
+    shipFilter = { shippedPaths, droppedReasons };
+  }
+
+  const reportChangesArg = stringArg(args, "--report-changes", "");
+  if (reportChangesArg) {
+    const report = await readRegressionReport(resolve(globals.repoRoot, reportChangesArg), "pr split plan lanes", 0);
+    const minGainPoints = globals.project?.pr.improvementMinGainPoints ?? 2;
+    const minMatchedBytes = globals.project?.pr.improvementMinMatchedBytes ?? 64;
+    const merged = lanes ?? { matchPaths: [], improvementPaths: [] };
+    for (const entry of report.newMatches) {
+      if (entry.sourcePath) merged.matchPaths.push(entry.sourcePath);
+    }
+    for (const entry of report.improvements) {
+      if (!entry.sourcePath) continue;
+      if (entry.toPercent - entry.fromPercent >= minGainPoints && entry.bytesDelta >= minMatchedBytes) {
+        merged.improvementPaths.push(entry.sourcePath);
+      }
+    }
+    lanes = merged;
+  }
 
   const collected = await collectChanges({
     repoRoot: globals.repoRoot,
@@ -642,15 +900,19 @@ export async function prSplitPlan(globals: GlobalArgs, args: Map<string, string 
     currentBranch: collected.currentBranch,
     groupMode,
     maxFilesPerPr,
+    minFilesPerPr,
     branchPrefix,
     titlePrefix,
     sliceCheckCommand,
+    lanes,
+    shipFilter,
     warnings: collected.warnings,
   });
-  const rendered = booleanArg(args, "--json") ? JSON.stringify(plan, null, 2) : renderPrSplitPlan(plan);
+  // The output file is always the human-readable plan; --json only changes
+  // what stdout carries so callers can parse slice/lane data.
   const outputPath = args.get("--output");
   if (typeof outputPath === "string") {
-    await writeFile(resolve(globals.repoRoot, outputPath), `${rendered}\n`);
+    await writeFile(resolve(globals.repoRoot, outputPath), `${renderPrSplitPlan(plan)}\n`);
   }
-  console.log(rendered);
+  console.log(booleanArg(args, "--json") ? JSON.stringify(plan, null, 2) : renderPrSplitPlan(plan));
 }

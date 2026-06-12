@@ -1,0 +1,17 @@
+{
+  "number": 385,
+  "title": "More fighter matching",
+  "state": "MERGED",
+  "createdAt": "2022-05-22T20:08:11Z",
+  "updatedAt": "2022-05-25T18:23:48Z",
+  "mergedAt": "2022-05-25T11:29:58Z",
+  "closedAt": "2022-05-25T11:29:58Z",
+  "author": "snuffysasa",
+  "url": "https://github.com/doldecomp/melee/pull/385",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 483314
+  }
+}

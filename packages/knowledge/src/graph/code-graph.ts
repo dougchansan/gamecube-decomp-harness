@@ -1,6 +1,6 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
-import { knowledgeSourcesRoot } from "../paths.js";
+import { sourceRoot } from "../paths.js";
 import type { GraphEdge, GraphEntity, GraphFact, GraphRecords, SearchChunk } from "./types.js";
 import { arrayValue, filesFingerprint, numberValue, objectValue, readJson, readJsonl, shortHash, stableJson, stringValue } from "./util.js";
 
@@ -160,8 +160,8 @@ export function buildCodeGraphRecords(repoRoot: string): GraphRecords {
 }
 
 function buildCodeGraphRecordsFromIndexes(reportPath: string, objdiffPath: string): GraphRecords {
-  const filesIndex = resolve(knowledgeSourcesRoot(), "code_graph/indexes/files.jsonl");
-  const functionsIndex = resolve(knowledgeSourcesRoot(), "code_graph/indexes/functions.jsonl");
+  const filesIndex = resolve(sourceRoot("code_graph"), "indexes/files.jsonl");
+  const functionsIndex = resolve(sourceRoot("code_graph"), "indexes/functions.jsonl");
   if (!existsSync(filesIndex) || !existsSync(functionsIndex)) {
     const missing = [reportPath, objdiffPath, filesIndex, functionsIndex].filter((path) => !existsSync(path));
     throw new Error(`Missing code graph inputs: ${missing.join(", ")}`);

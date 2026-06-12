@@ -1,0 +1,10 @@
+{
+  "pr": 2636,
+  "title": "Split-up improvements across common, GM/MN, TY, and baselib",
+  "url": "https://github.com/doldecomp/melee/pull/2636",
+  "text_records_with_body": 2,
+  "review_comments": 0,
+  "changed_files": 12,
+  "added_lines": 88,
+  "deleted_lines": 77
+}

@@ -1,0 +1,17 @@
+{
+  "number": 396,
+  "title": "Rename `func_someCalcAngle_80022C30` to `func_fatan2_80022C30`",
+  "state": "CLOSED",
+  "createdAt": "2022-06-26T16:49:53Z",
+  "updatedAt": "2022-08-11T12:45:46Z",
+  "mergedAt": null,
+  "closedAt": "2022-07-04T19:49:17Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/396",
+  "counts": {
+    "issue_comments": 3,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 126930
+  }
+}

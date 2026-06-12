@@ -1,0 +1,17 @@
+{
+  "number": 1676,
+  "title": "Camera pause work",
+  "state": "MERGED",
+  "createdAt": "2025-07-10T16:22:31Z",
+  "updatedAt": "2025-07-11T01:05:08Z",
+  "mergedAt": "2025-07-11T01:02:54Z",
+  "closedAt": "2025-07-11T01:02:54Z",
+  "author": "sadkellz",
+  "url": "https://github.com/doldecomp/melee/pull/1676",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 42108
+  }
+}

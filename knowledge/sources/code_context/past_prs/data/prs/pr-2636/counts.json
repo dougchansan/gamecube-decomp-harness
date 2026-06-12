@@ -1,0 +1,17 @@
+{
+  "number": 2636,
+  "title": "Split-up improvements across common, GM/MN, TY, and baselib",
+  "state": "MERGED",
+  "createdAt": "2026-06-08T21:19:05Z",
+  "updatedAt": "2026-06-09T01:13:30Z",
+  "mergedAt": "2026-06-09T01:13:29Z",
+  "closedAt": "2026-06-09T01:13:29Z",
+  "author": "fjooord",
+  "url": "https://github.com/doldecomp/melee/pull/2636",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 14128
+  }
+}

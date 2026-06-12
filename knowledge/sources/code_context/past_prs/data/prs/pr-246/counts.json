@@ -1,0 +1,17 @@
+{
+  "number": 246,
+  "title": "Initial Contribution guidelines and README formatting changes",
+  "state": "MERGED",
+  "createdAt": "2022-01-21T18:02:13Z",
+  "updatedAt": "2022-01-21T18:02:28Z",
+  "mergedAt": "2022-01-21T18:02:21Z",
+  "closedAt": "2022-01-21T18:02:21Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/246",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 3616
+  }
+}

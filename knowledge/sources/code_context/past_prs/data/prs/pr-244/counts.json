@@ -1,0 +1,17 @@
+{
+  "number": 244,
+  "title": "Formatted README",
+  "state": "MERGED",
+  "createdAt": "2022-01-16T04:36:10Z",
+  "updatedAt": "2022-01-16T04:37:29Z",
+  "mergedAt": "2022-01-16T04:37:29Z",
+  "closedAt": "2022-01-16T04:37:29Z",
+  "author": "ElectronicsArchiver",
+  "url": "https://github.com/doldecomp/melee/pull/244",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 1,
+    "diff_bytes": 2398
+  }
+}

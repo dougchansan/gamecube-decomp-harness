@@ -1,0 +1,17 @@
+{
+  "number": 447,
+  "title": "Merge #446",
+  "state": "MERGED",
+  "createdAt": "2022-08-09T20:40:22Z",
+  "updatedAt": "2022-08-11T12:44:23Z",
+  "mergedAt": "2022-08-09T21:51:31Z",
+  "closedAt": "2022-08-09T21:51:31Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/447",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 127806
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 1620,
+  "title": "Finish matching gm_1A45",
+  "state": "MERGED",
+  "createdAt": "2025-06-21T20:48:20Z",
+  "updatedAt": "2025-06-21T21:03:50Z",
+  "mergedAt": "2025-06-21T21:03:48Z",
+  "closedAt": "2025-06-21T21:03:48Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1620",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 2233
+  }
+}

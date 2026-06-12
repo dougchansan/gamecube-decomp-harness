@@ -1,0 +1,17 @@
+{
+  "number": 1721,
+  "title": "yoshi specialn matches",
+  "state": "MERGED",
+  "createdAt": "2025-07-22T05:17:11Z",
+  "updatedAt": "2025-07-22T06:00:30Z",
+  "mergedAt": "2025-07-22T06:00:30Z",
+  "closedAt": "2025-07-22T06:00:30Z",
+  "author": "ArtlessAvian",
+  "url": "https://github.com/doldecomp/melee/pull/1721",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 1,
+    "diff_bytes": 1511
+  }
+}

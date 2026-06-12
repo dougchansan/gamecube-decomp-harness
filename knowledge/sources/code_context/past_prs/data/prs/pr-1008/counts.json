@@ -1,0 +1,17 @@
+{
+  "number": 1008,
+  "title": "Partially match `ftCo_FlyReflect`",
+  "state": "MERGED",
+  "createdAt": "2023-11-17T17:57:07Z",
+  "updatedAt": "2023-11-17T18:14:45Z",
+  "mergedAt": "2023-11-17T18:14:44Z",
+  "closedAt": "2023-11-17T18:14:44Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1008",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 62227
+  }
+}

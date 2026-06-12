@@ -1,0 +1,17 @@
+{
+  "number": 1060,
+  "title": "Match `it_2F2B` (412 bytes)",
+  "state": "MERGED",
+  "createdAt": "2024-01-14T15:28:37Z",
+  "updatedAt": "2024-01-14T15:36:18Z",
+  "mergedAt": "2024-01-14T15:36:17Z",
+  "closedAt": "2024-01-14T15:36:17Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1060",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 14813
+  }
+}

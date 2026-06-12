@@ -1,0 +1,17 @@
+{
+  "number": 2156,
+  "title": "Decompile Big Blue stage functions (grbigblue, grbigblueroute)",
+  "state": "MERGED",
+  "createdAt": "2026-02-05T22:00:58Z",
+  "updatedAt": "2026-02-07T06:03:20Z",
+  "mergedAt": "2026-02-06T22:06:30Z",
+  "closedAt": "2026-02-06T22:06:30Z",
+  "author": "malvarezcastillo",
+  "url": "https://github.com/doldecomp/melee/pull/2156",
+  "counts": {
+    "issue_comments": 2,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 98609
+  }
+}

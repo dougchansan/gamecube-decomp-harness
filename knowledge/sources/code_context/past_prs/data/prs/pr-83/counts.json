@@ -1,0 +1,17 @@
+{
+  "number": 83,
+  "title": "Splitting of some debug code and lbsnap out from larger text sections",
+  "state": "MERGED",
+  "createdAt": "2021-09-23T10:33:01Z",
+  "updatedAt": "2021-09-23T10:33:14Z",
+  "mergedAt": "2021-09-23T10:33:10Z",
+  "closedAt": "2021-09-23T10:33:10Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/83",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 19045389
+  }
+}

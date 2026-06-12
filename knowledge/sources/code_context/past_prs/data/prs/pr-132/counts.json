@@ -1,0 +1,17 @@
+{
+  "number": 132,
+  "title": "Fix lbsnap split, move some of the bss into files, split sbss out of bss.s",
+  "state": "MERGED",
+  "createdAt": "2021-11-29T05:34:04Z",
+  "updatedAt": "2021-11-29T05:34:10Z",
+  "mergedAt": "2021-11-29T05:34:08Z",
+  "closedAt": "2021-11-29T05:34:08Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/132",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 126292
+  }
+}

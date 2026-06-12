@@ -1,0 +1,17 @@
+{
+  "number": 1224,
+  "title": "Match 33.59% of `mpisland` (3.52 KB)",
+  "state": "MERGED",
+  "createdAt": "2024-02-14T21:26:02Z",
+  "updatedAt": "2024-02-14T21:27:18Z",
+  "mergedAt": "2024-02-14T21:27:17Z",
+  "closedAt": "2024-02-14T21:27:18Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1224",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 21682
+  }
+}

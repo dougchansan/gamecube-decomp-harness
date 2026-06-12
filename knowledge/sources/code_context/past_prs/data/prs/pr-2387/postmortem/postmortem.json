@@ -1,0 +1,426 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2387",
+  "pr": {
+    "number": 2387,
+    "title": "cm matches",
+    "url": "https://github.com/doldecomp/melee/pull/2387",
+    "state": "MERGED",
+    "author": "sadkellz",
+    "created_at": "2026-04-05T19:51:27Z",
+    "merged_at": "2026-04-05T19:57:24Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Large camera-system decompilation PR focused on src/melee/cm. It replaced several camera stubs with C, improved many existing camera functions, updated camera types/prototypes, and introduced Camera_x2D0 as a structured replacement for a run of raw Camera fields. The bot report records 8 new function matches and 20 unmatched-item improvements, alongside one .data regression.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "type-recovery",
+      "camera"
+    ],
+    "systems": [
+      "melee-core",
+      "cm",
+      "camera"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/cm/camera.c",
+      "role": "Primary decomp source; added implementations for multiple camera functions, refactored existing camera math/control-flow, added includes, added a static fn_800301D0 prototype, used PAD_STACK and macros such as ABS/MAX/HSD_ASSERTMSG.",
+      "evidence_refs": [
+        "changed_files.jsonl: camera.c +1669/-406 in 38 hunks",
+        "raw_diff: camera.c include additions and static fn_800301D0 prototype",
+        "raw_diff: Camera_8002C1A8, Camera_8002C5B4, Camera_8002C908, Camera_8002E234, Camera_8002E490, Camera_8002EF14, Camera_8002F0E4 implementations",
+        "text_corpus: bot report lists all new matches and improvements in main/melee/cm/camera"
+      ]
+    },
+    {
+      "path": "src/melee/cm/types.h",
+      "role": "Type recovery; introduced struct Camera_x2D0 and embedded it into struct Camera at 0x2D0; adjusted field comments and x37C union.",
+      "evidence_refs": [
+        "changed_files.jsonl: types.h +23/-16 in 3 hunks",
+        "raw_diff: added struct Camera_x2D0 fields y_max/y_min/x_min/x_max/z_max/z_min/angles/unk28/unk2C/callback",
+        "raw_diff: replaced Camera fields x2D0..x300 with Camera_x2D0 x2D0"
+      ]
+    },
+    {
+      "path": "src/melee/cm/camera.h",
+      "role": "Public prototype cleanup; replaced UNK_RET/UNK_PARAMS for recovered functions, narrowed signatures, removed public fn_800301D0, and exposed cm_803BCCA0 extern.",
+      "evidence_refs": [
+        "changed_files.jsonl: camera.h +6/-6 in 4 hunks",
+        "raw_diff: Camera_8002C1A8 void(void), Camera_8002C5B4(Camera_x2D0*), Camera_8002E158(f32*, f32, f32), Camera_800311EC(HSD_GObj*, u64), Camera_80031328(HSD_GObj*, u64)",
+        "raw_diff: removed fn_800301D0 from camera.h and added extern CameraUnkGlobals cm_803BCCA0"
+      ]
+    },
+    {
+      "path": "src/melee/cm/forward.h",
+      "role": "Forward declaration support for recovered Camera_x2D0 type.",
+      "evidence_refs": [
+        "changed_files.jsonl: forward.h +1/-0 in 1 hunk",
+        "raw_diff: added typedef struct Camera_x2D0 Camera_x2D0"
+      ]
+    },
+    {
+      "path": "src/melee/cm/camera.static.h",
+      "role": "Static/data declarations changed; cm_80453004 made non-static in .bss area and cm_803BCCA0 initializer was commented out in this slice.",
+      "evidence_refs": [
+        "changed_files.jsonl: camera.static.h +10/-9 in 2 hunks",
+        "raw_diff: added CameraDebugMode cm_80453004",
+        "raw_diff: commented out static CameraUnkGlobals cm_803BCCA0 initializer",
+        "text_corpus: bot report shows .data regression -240 bytes, 75.21% to 37.23%"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Converted stubs for Camera_8002C1A8, Camera_8002C5B4, Camera_8002C908, Camera_8002E234, Camera_8002E490, Camera_8002EF14, Camera_8002F0E4, and fn_800301D0 into C implementations or substantial partial implementations visible in the diff.",
+      "evidence_refs": [
+        "raw_diff: stub markers removed and functions added",
+        "text_corpus: bot report names new matches and partial improvements"
+      ]
+    },
+    {
+      "text": "Improved existing camera functions including Camera_80029CF8, Camera_8002A0C0, Camera_8002B0E0, Camera_8002CB0C, Camera_8002CDDC, Camera_8002D318, Camera_8002D85C, Camera_8002DDC4, Camera_8002F4D4, Camera_8002F9E4, Camera_8002FEEC, Camera_800304E0, Camera_80030E44, Camera_800311EC, Camera_80031328, and Camera_800313E0 according to the bot report.",
+      "evidence_refs": [
+        "text_corpus: 20 improvements in unmatched items"
+      ]
+    },
+    {
+      "text": "Recovered Camera_x2D0 as a typed substructure for Camera offset 0x2D0 and updated Camera_8002C5B4 and callback signatures to consume Camera_x2D0*.",
+      "evidence_refs": [
+        "raw_diff: types.h Camera_x2D0 definition",
+        "raw_diff: camera.h Camera_8002C5B4(Camera_x2D0*)",
+        "raw_diff: callback assignments cast to void (*)(Camera_x2D0*)"
+      ]
+    },
+    {
+      "text": "Adjusted source forms toward macros and typed/global field access: used ABS for input deadzone checks, MAX for a frustum-distance select, HSD_ASSERTMSG casts against M_PI_2, direct cm_803BCCA0 field access instead of temporary pointer dereferences, and Camera_x2D0 fields instead of min_distance/max_distance names.",
+      "evidence_refs": [
+        "raw_diff: Camera_80029CF8 ABS/MAX/HSD_ASSERTMSG and cm_803BCCA0 changes",
+        "raw_diff: Camera_8002B0E0 direct cm_803BCCA0 field access",
+        "raw_diff: Camera_8002BAA8 x2D0.unk28/unk2C"
+      ]
+    },
+    {
+      "text": "The report records text progress but also one .data regression in main/melee/cm/camera.",
+      "evidence_refs": [
+        "text_corpus: matched code +4140 bytes; .data -240 bytes, 75.21% to 37.23%",
+        "raw_diff: camera.static.h cm_803BCCA0 initializer commented out"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Recovered a contiguous camera parameter block as Camera_x2D0 instead of continuing as many flat x2D0..x300 fields, improving call signatures and field grouping.",
+      "evidence_refs": [
+        "raw_diff: types.h Camera_x2D0",
+        "raw_diff: Camera_8002C5B4(Camera_x2D0*)"
+      ]
+    },
+    {
+      "text": "Kept uncertain semantics conservative inside the recovered struct by using names such as unk28 and unk2C where the diff does not prove semantic meaning.",
+      "evidence_refs": [
+        "raw_diff: Camera_x2D0 has unk28 and unk2C"
+      ]
+    },
+    {
+      "text": "Used project/common macros for simple expressions, e.g. ABS for deadzone comparisons and MAX for the vertical/horizontal frustum distance selection.",
+      "evidence_refs": [
+        "raw_diff: ABS in Camera_8002C1A8 and Camera_8002CB0C",
+        "raw_diff: MAX in Camera_80029CF8"
+      ]
+    },
+    {
+      "text": "Moved fn_800301D0 out of the public header and made it a static camera.c declaration, matching its local implementation in the slice.",
+      "evidence_refs": [
+        "raw_diff: camera.h removed fn_800301D0 declaration",
+        "raw_diff: camera.c added static void fn_800301D0(HSD_GObj*, int)"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a run of adjacent opaque fields is consistently passed around as a parameter block, recover a temporary internal struct and update function signatures rather than keeping flat xNNN fields everywhere.",
+      "scope": [
+        "src/melee/cm/types.h",
+        "src/melee/cm/camera.c",
+        "src/melee/cm/camera.h"
+      ],
+      "evidence_refs": [
+        "raw_diff: Camera_x2D0 definition replaces Camera fields x2D0..x300",
+        "raw_diff: Camera_8002C5B4 signature changed from void* to Camera_x2D0*"
+      ]
+    },
+    {
+      "lesson": "For camera/input decompilation, ordinary source forms such as ABS deadzone tests, MAX clamps, and direct Vec3 helper calls can coexist with matching-oriented local ordering changes.",
+      "scope": [
+        "src/melee/cm/camera.c"
+      ],
+      "evidence_refs": [
+        "raw_diff: ABS checks around stick/substick values",
+        "raw_diff: vert_frustum_dist = MAX(vert_frustum_dist, temp_f28)",
+        "raw_diff: lbVector_Add/Sub/Diff/Normalize/RotateAboutUnitAxis use"
+      ]
+    },
+    {
+      "lesson": "Prototype cleanup should accompany recovered bodies: replace UNK_RET/UNK_PARAMS and void* arguments when the body establishes a narrower signature.",
+      "scope": [
+        "src/melee/cm/camera.h",
+        "src/melee/cm/forward.h"
+      ],
+      "evidence_refs": [
+        "raw_diff: Camera_8002C1A8 changed to void(void)",
+        "raw_diff: Camera_8002C5B4 changed to Camera_x2D0*",
+        "raw_diff: Camera_800311EC and Camera_80031328 signatures updated",
+        "raw_diff: forward declaration for Camera_x2D0 added"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "Camera_x2D0",
+      "kind": "type",
+      "lesson": "Address-offset style type names are appropriate when a structure boundary is recovered but full semantics are not proven.",
+      "evidence_refs": [
+        "raw_diff: typedef struct Camera_x2D0 Camera_x2D0",
+        "raw_diff: struct Camera_x2D0 fields include semantic bounds/angle names plus unk28/unk2C"
+      ]
+    },
+    {
+      "name": "x2C4 / x2C5 comments",
+      "kind": "field-comment",
+      "lesson": "Use comments to record limited field meaning when the evidence supports only a partial role, e.g. unk player slot and pauser slot.",
+      "evidence_refs": [
+        "raw_diff: x2C4 comment changed to 'unk player slot'",
+        "raw_diff: x2C5 comment changed to 'pauser slot'"
+      ]
+    },
+    {
+      "name": "fn_800301D0",
+      "kind": "function",
+      "lesson": "Keep address-style function names for local/static functions when semantic meaning is not established by the PR evidence.",
+      "evidence_refs": [
+        "raw_diff: static void fn_800301D0(HSD_GObj*, int)",
+        "raw_diff: no semantic rename for fn_800301D0"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Inserted narrow PAD_STACK calls in several camera functions to influence stack layout.",
+      "evidence_refs": [
+        "raw_diff: PAD_STACK(16) in Camera_80029CF8",
+        "raw_diff: PAD_STACK(8) in Camera_8002B0E0 and other camera functions",
+        "raw_diff: PAD_STACK(4) in Camera_8002E490",
+        "text_corpus: bot report shows new matches and improvements"
+      ],
+      "caveat": "The PR slice shows PAD_STACK use and matching progress, but it does not include author notes proving each padding site is individually required."
+    },
+    {
+      "tactic": "Changed expression staging and temporary lifetimes to affect codegen, including splitting multiply-by-10 steps, introducing local temporaries for tan(fov) results, and using scoped blocks for Stage_GetCamInfo values.",
+      "evidence_refs": [
+        "raw_diff: Camera_8002A0C0 splits var_f31/var_f30 multiply by 10.0f",
+        "raw_diff: Camera_80029CF8 tan_fov_u/tan_fov_l temporaries and scoped info_x20/info_x24"
+      ]
+    },
+    {
+      "tactic": "Used direct global field access and typed pointer temporaries to shape loads while improving readability.",
+      "evidence_refs": [
+        "raw_diff: Camera_8002B0E0 replaces (*new_var2).xE* with cm_803BCCA0.xE*",
+        "raw_diff: Camera_8002C908 uses globals = &cm_803BCCA0 then coeff = globals->x84"
+      ]
+    },
+    {
+      "tactic": "Reconstructed retry loops using do/while when repeatedly cycling camera slots until a valid subject/source is found.",
+      "evidence_refs": [
+        "raw_diff: Camera_8002C908 do { ... } while (valid == 0)"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot-report",
+      "author": "decomp-dev[bot]",
+      "created_at": "2026-04-05T19:56:17Z",
+      "text": "GALE01 report recorded matched code 61.94% (+0.11%, +4140 bytes), 8 new matches, 20 improvements in unmatched items, and 1 .data regression.",
+      "evidence_refs": [
+        "text_corpus: issue_comment by decomp-dev[bot]"
+      ]
+    },
+    {
+      "kind": "missing-human-review",
+      "text": "No review comments or reviews are present in the loaded slice.",
+      "evidence_refs": [
+        "metadata_json: review_comments 0, reviews 0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2387",
+    "cm matches",
+    "sadkellz",
+    "src/melee/cm/camera.c",
+    "src/melee/cm/types.h",
+    "src/melee/cm/camera.h",
+    "src/melee/cm/camera.static.h",
+    "src/melee/cm/forward.h",
+    "Camera_x2D0",
+    "Camera_8002C1A8",
+    "Camera_8002C5B4",
+    "Camera_8002C908",
+    "Camera_8002E234",
+    "Camera_8002E490",
+    "Camera_8002EF14",
+    "Camera_8002F0E4",
+    "fn_800301D0",
+    "Camera_80029CF8",
+    "Camera_8002A0C0",
+    "Camera_8002B0E0",
+    "Camera_8002CB0C",
+    "Camera_8002D318",
+    "Camera_8002D85C",
+    "Camera_8002DDC4",
+    "Camera_8002F4D4",
+    "Camera_800304E0",
+    "Camera_800311EC",
+    "Camera_800313E0",
+    "cm_803BCCA0",
+    "cm_80452C68",
+    "cm_80453004",
+    "PAD_STACK",
+    "ABS",
+    "MAX",
+    "HSD_ASSERTMSG",
+    "lbVector_RotateAboutUnitAxis",
+    ".data regression"
+  ],
+  "follow_up_queries": [
+    "Camera_x2D0 callback Camera_8002C5B4 fn_8002F488 fn_8002F908 fn_8002FBA0",
+    "cm_803BCCA0 camera.static.h .data regression PR 2387",
+    "PAD_STACK Camera_80029CF8 Camera_8002B0E0 Camera_8002E490",
+    "Camera_8002C908 do while valid Camera_8002BA00 Player_GetEntity ftLib_80086B74",
+    "Camera_8002E234 Camera_8002E490 new matches camera PR 2387",
+    "Camera_800311EC HSD_GObj u64 signature"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR identity, merge state, changed files, counts",
+      "changed_files.jsonl: exact changed file list and line counts",
+      "raw_diff: loaded but truncated; targeted local reads/grep used for header/type details",
+      "text_corpus: bot report with match/improvement/regression metrics"
+    ],
+    "notes": [
+      "PR body is empty and there are no human review comments in the loaded slice.",
+      "The raw diff is large and loaded excerpt is truncated, so the postmortem focuses on visible and targeted-read evidence.",
+      "The bot report supports match/improvement/regression outcomes, but the slice does not include build logs, objdiff screenshots, author explanations, or rationale for every local matching tactic.",
+      "The .data regression is explicitly reported; this intake does not infer whether maintainers accepted that regression as intentional beyond the PR being merged."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "title": "Recover contiguous opaque field ranges as scoped internal structs when signatures expose the grouping",
+        "text": "PR 2387 supports a graph-safe lesson for camera decompilation: a contiguous range of Camera fields at 0x2D0 was replaced by Camera_x2D0, signatures and callbacks were updated to Camera_x2D0*, and remaining uncertain members kept conservative names. This is an example of typed-fields-over-pointer-math and conservative naming rather than proof of final semantic field names.",
+        "scope": [
+          "src/melee/cm/types.h",
+          "src/melee/cm/camera.h",
+          "src/melee/cm/camera.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: struct Camera_x2D0 added",
+          "raw_diff: Camera has Camera_x2D0 x2D0 at offset 0x2D0",
+          "raw_diff: Camera_8002C5B4(Camera_x2D0*)"
+        ]
+      },
+      {
+        "title": "Header prototypes should be tightened after body recovery",
+        "text": "PR 2387 updated several camera.h prototypes after recovered bodies, including void(void), typed pointer, and u64 argument signatures, and moved a local helper out of the public header. This is a supported local example of truthful headers.",
+        "scope": [
+          "src/melee/cm/camera.h",
+          "src/melee/cm/forward.h",
+          "src/melee/cm/camera.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: camera.h prototype diffs",
+          "raw_diff: fn_800301D0 removed from camera.h and made static in camera.c",
+          "raw_diff: forward.h adds Camera_x2D0 forward typedef"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Require explicit ledger for PAD_STACK-heavy matching PRs",
+        "text": "PR 2387 shows several PAD_STACK insertions in a successful camera matching PR, but the slice lacks per-site rationale. Consider strengthening standards or review checklist text to ask PR authors to identify which PAD_STACK sites are required by objdiff and which are temporary.",
+        "source_path": null,
+        "scope": [
+          "matching tactics",
+          "PAD_STACK",
+          "camera.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: multiple PAD_STACK additions",
+          "text_corpus: bot report with text improvements",
+          "decomp_standards: matching-tactics-need-evidence"
+        ],
+        "reason": "The current standards already cover matching tactics; this PR is a useful example for a curator to decide whether a more specific PAD_STACK note or example belongs in the source corpus."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "src/melee/cm/types.h owns Camera_x2D0 forward-facing type definition",
+        "text": "PR 2387 introduced Camera_x2D0 in src/melee/cm/types.h and added its forward declaration in src/melee/cm/forward.h. If current source still matches this layout, path facts could record that camera type recovery lives in the cm headers.",
+        "source_path": "src/melee/cm/types.h",
+        "scope": [
+          "src/melee/cm/types.h",
+          "src/melee/cm/forward.h",
+          "src/melee/cm/camera.h"
+        ],
+        "evidence_refs": [
+          "raw_diff: Camera_x2D0 definition",
+          "raw_diff: forward.h typedef struct Camera_x2D0 Camera_x2D0"
+        ],
+        "reason": "Potential path ownership fact; needs curator/current-source confirmation before promotion."
+      },
+      {
+        "target_source_id": "other",
+        "update_kind": "source_update",
+        "title": "Investigate cm_803BCCA0 data ownership after PR 2387",
+        "text": "The PR commented out the static cm_803BCCA0 initializer in camera.static.h and added an extern declaration in camera.h, while the bot report shows a .data regression. Curator may want to inspect later history/current source to determine the accepted data ownership resolution.",
+        "source_path": "src/melee/cm/camera.static.h",
+        "scope": [
+          "cm_803BCCA0",
+          ".data",
+          "src/melee/cm/camera.static.h",
+          "src/melee/cm/camera.h"
+        ],
+        "evidence_refs": [
+          "raw_diff: cm_803BCCA0 initializer commented out",
+          "raw_diff: extern CameraUnkGlobals cm_803BCCA0 added to camera.h",
+          "text_corpus: .data regression -240 bytes"
+        ],
+        "reason": "The PR evidence flags a data regression but does not establish final data ownership or whether the regression was intentionally accepted."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote the .data regression as an accepted data-matching tactic; the slice only shows the regression report and changed declarations.",
+      "Do not infer full semantic meanings for Camera_x2D0.unk28/unk2C or address-style functions beyond what the diff names.",
+      "Do not claim every PAD_STACK site is required; the loaded evidence shows usage plus bot progress, not per-site objdiff proof."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

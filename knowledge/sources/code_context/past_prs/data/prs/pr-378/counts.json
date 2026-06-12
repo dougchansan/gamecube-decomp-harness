@@ -1,0 +1,17 @@
+{
+  "number": 378,
+  "title": "fix ftMasterHand.h's include guard",
+  "state": "MERGED",
+  "createdAt": "2022-05-17T16:48:08Z",
+  "updatedAt": "2022-05-21T01:56:04Z",
+  "mergedAt": "2022-05-21T01:19:20Z",
+  "closedAt": "2022-05-21T01:19:20Z",
+  "author": "BR-",
+  "url": "https://github.com/doldecomp/melee/pull/378",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 410
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 2143,
+  "title": "Miscellaneous matches",
+  "state": "MERGED",
+  "createdAt": "2026-01-28T22:21:18Z",
+  "updatedAt": "2026-02-01T20:53:33Z",
+  "mergedAt": "2026-02-01T18:28:21Z",
+  "closedAt": "2026-02-01T18:28:21Z",
+  "author": "malvarezcastillo",
+  "url": "https://github.com/doldecomp/melee/pull/2143",
+  "counts": {
+    "issue_comments": 11,
+    "review_comments": 41,
+    "reviews": 40,
+    "diff_bytes": 132156
+  }
+}

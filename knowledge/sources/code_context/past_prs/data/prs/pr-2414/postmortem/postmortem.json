@@ -1,0 +1,451 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2414",
+  "pr": {
+    "number": 2414,
+    "title": "Link itpikachutjoltair, itlipstickspore, and itlikelike",
+    "url": "https://github.com/doldecomp/melee/pull/2414",
+    "state": "MERGED",
+    "author": "lukechampine",
+    "created_at": "2026-04-14T17:56:50Z",
+    "merged_at": "2026-04-14T22:05:47Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2414 linked or improved several item translation units around Pikachu thunder-jolt air, Lipstick spore, Likelike, and Hitodeman. The diff marks itlipstickspore.c, itpikachutjoltair.c, ithitodeman.c, and itlikelike.c as Matching in configure.py, adds or exposes ItemStateTable data, fixes several item/fighter helper signatures and callsites, adjusts symbol scopes/data labels, and uses narrow matching tactics such as PAD_STACK, small inline helpers, local function scope, and a renamed zero_vec data symbol. The PR body notes that hitodeman was still difficult and might require a resplit; the bot report shows 9 new matches plus a partial ithitodeman .data improvement.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "symbols",
+      "data-layout",
+      "signature-cleanup"
+    ],
+    "systems": [
+      "item",
+      "fighter",
+      "config",
+      "repo-root"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "configure.py",
+      "role": "Marks itlipstickspore.c, itpikachutjoltair.c, ithitodeman.c, and itlikelike.c as Matching objects.",
+      "evidence_refs": [
+        "diff:configure.py Object(NonMatching)->Object(Matching) hunks",
+        "changed_files.jsonl:configure.py"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Updates function symbol scopes, local data labels, sdata/sdata2 labels, and zero_vec rodata metadata needed by the linked item units.",
+      "evidence_refs": [
+        "diff:symbols.txt scope global->local changes for itLipstickspore_UnkMotion1_Coll and itPikachutjoltair_UnkMotion0_Coll",
+        "diff:symbols.txt zero_vec at .rodata:0x803B86D8",
+        "changed_files.jsonl:config/GALE01/symbols.txt"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/ithitodeman.c",
+      "role": "Adds ItemStateTable definitions, include cleanup, a local ordering function, sqrtf inline, typed callback signature use, and matching-oriented stack/local adjustments.",
+      "evidence_refs": [
+        "diff:ithitodeman.c ItemStateTable it_803F8128 and it_803F8180 additions",
+        "diff:ithitodeman.c PAD_STACK(16), inline Article accessor, it_802D43AC(Item_GObj*)",
+        "text_corpus:bot report ithitodeman function match and .data improvement"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/ithitodeman.h",
+      "role": "Updates it_802D43AC prototype from void(void) to void(Item_GObj*).",
+      "evidence_refs": [
+        "diff:ithitodeman.h it_802D43AC prototype change",
+        "changed_files.jsonl:src/melee/it/items/ithitodeman.h"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itlikelike.c",
+      "role": "Refactors Likelike helper flow with an inline helper, ECB locals, zero_vec initialization, direct decrement, and PAD_STACK adjustments to close reported matches.",
+      "evidence_refs": [
+        "diff:itlikelike.c static inline it_802DC4BC_ptr",
+        "diff:itlikelike.c it_2725_Logic5_Dropped and itLikelike_UnkMotion6_Phys changes",
+        "diff:itlikelike.c Vec3 sp50 = zero_vec in it_802DC4BC",
+        "text_corpus:bot report itlikelike .rodata and three function matches"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itlipstick.c",
+      "role": "Updates it_8029A114 callsite argument order after the lipstick spore signature change.",
+      "evidence_refs": [
+        "diff:itlipstick.c it_8029A114(ip->owner, arg1, arg2, arg3)->it_8029A114(ip->owner, arg1, arg2, arg3) with facing_dir before arg4 as shown by changed signature",
+        "changed_files.jsonl:src/melee/it/items/itlipstick.c"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itlipstickspore.c",
+      "role": "Adds ItemStateTable data and changes it_8029A114 signature/order to use f32 facing_dir before s32 arg4 with PAD_STACK.",
+      "evidence_refs": [
+        "diff:itlipstickspore.c ItemStateTable it_803F6680",
+        "diff:itlipstickspore.c it_8029A114(Fighter_GObj*, Vec3*, f32 facing_dir, s32 arg4)",
+        "text_corpus:bot report itlipstickspore .data and it_8029A114 matches"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itlipstickspore.h",
+      "role": "Updates the it_8029A114 prototype to match the recovered call signature.",
+      "evidence_refs": [
+        "diff:itlipstickspore.h prototype change",
+        "changed_files.jsonl:src/melee/it/items/itlipstickspore.h"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itpikachutjoltair.c",
+      "role": "Adds ItemStateTable data, adjusts includes, uses GET_ITEM/GET_JOBJ forms, names owner/vector locals, narrows casts, and implements the local collision function body.",
+      "evidence_refs": [
+        "diff:itpikachutjoltair.c ItemStateTable it_803F71D8",
+        "diff:itpikachutjoltair.c GET_ITEM, GET_JOBJ, owner/v local names, PAD_STACK(4)",
+        "text_corpus:bot report itpikachutjoltair .data and reflected logic match"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ft_0C31.c",
+      "role": "Changes ftCo_800C78B0 source signature from UNK_PARAMS to HSD_GObj* gobj, HSD_GObj* owner while leaving body NOT_IMPLEMENTED.",
+      "evidence_refs": [
+        "diff:ft_0C31.c ftCo_800C78B0 signature change",
+        "changed_files.jsonl:src/melee/ft/ft_0C31.c"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ft_0C31.h",
+      "role": "Updates ftCo_800C78B0 header prototype to match recovered two-HSD_GObj parameter signature.",
+      "evidence_refs": [
+        "diff:ft_0C31.h ftCo_800C78B0 prototype change",
+        "changed_files.jsonl:src/melee/ft/ft_0C31.h"
+      ]
+    }
+  ],
+  "what_changed": [
+    "configure.py changed four item objects from NonMatching to Matching: itlipstickspore.c, itpikachutjoltair.c, ithitodeman.c, and itlikelike.c.",
+    "symbols.txt converted several generated global data/string/float labels to local labels, changed two small collision functions to local scope, and renamed .rodata:0x803B86D8 from it_803B86D8 to zero_vec with size 0xC.",
+    "ItemStateTable arrays were added for ithitodeman, itlipstickspore, and itpikachutjoltair, aligning C data definitions with the symbol table data matches.",
+    "Recovered or tightened signatures: ftCo_800C78B0 now takes HSD_GObj* gobj and HSD_GObj* owner; it_802D43AC now takes Item_GObj*; it_8029A114 now takes f32 facing_dir before s32 arg4.",
+    "itlikelike.c introduced an inline helper around repeated ECB/item reset behavior and changed local declarations/stack padding in matched functions.",
+    "itpikachutjoltair.c cleaned item access and local naming, used GET_JOBJ for jobj access, simplified zero-vector assignment, and moved the collision function from a decomp placeholder comment into a static local function body.",
+    "The bot report recorded +2360 matched code bytes, +15984 linked code bytes, +160 matched data bytes, +688 linked data bytes, 9 new matches, and a partial ithitodeman .data improvement."
+  ],
+  "smart_moves": [
+    {
+      "text": "Signature recovery was propagated to both headers and callsites instead of hiding mismatches behind local casts or UNK_PARAMS.",
+      "evidence_refs": [
+        "diff:ft_0C31.c and ft_0C31.h ftCo_800C78B0 signature",
+        "diff:itlipstickspore.c/.h and itlipstick.c it_8029A114 signature/callsite",
+        "diff:ithitodeman.c/.h it_802D43AC callback signature"
+      ]
+    },
+    {
+      "text": "Data/state-table definitions were added in the owning item source files while symbols.txt was adjusted to reflect local/global scope and local labels.",
+      "evidence_refs": [
+        "diff:ItemStateTable it_803F8128, it_803F8180, it_803F6680, it_803F71D8",
+        "diff:symbols.txt data and function scope changes"
+      ]
+    },
+    {
+      "text": "The PR left an explicit author note that hitodeman was difficult and might need resplitting, preserving uncertainty instead of claiming that all hitodeman work was complete.",
+      "evidence_refs": [
+        "human_pr_text:I tried linking hitodman as well... Might need to be resplit",
+        "text_corpus:bot report partial ithitodeman .data improvement"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a matching change recovers a helper signature, update the owning header and all visible callsites in the same slice.",
+      "scope": [
+        "item helper signatures",
+        "fighter helper signatures",
+        "headers"
+      ],
+      "evidence_refs": [
+        "diff:itlipstickspore.h and itlipstick.c for it_8029A114",
+        "diff:ft_0C31.h for ftCo_800C78B0",
+        "diff:ithitodeman.h for it_802D43AC"
+      ],
+      "standards_refs": [
+        "truthful-headers-and-includes"
+      ]
+    },
+    {
+      "lesson": "Item data matches may require adding source-level ItemStateTable arrays and correcting symbol scope/local labels rather than only changing code bodies.",
+      "scope": [
+        "src/melee/it/items",
+        "config/GALE01/symbols.txt"
+      ],
+      "evidence_refs": [
+        "diff:ItemStateTable additions in ithitodeman.c, itlipstickspore.c, itpikachutjoltair.c",
+        "diff:symbols.txt local data label and scope changes",
+        "text_corpus:bot report .data matches for itlipstickspore and itpikachutjoltair"
+      ],
+      "standards_refs": [
+        "data-sections-and-tu-splits"
+      ]
+    },
+    {
+      "lesson": "Small stack/local-shape tactics can be involved in closing item functions, but the PR evidence only supports them as narrow matching tactics, not as preferred style.",
+      "scope": [
+        "itlikelike.c",
+        "ithitodeman.c",
+        "itlipstickspore.c",
+        "itpikachutjoltair.c"
+      ],
+      "evidence_refs": [
+        "diff:PAD_STACK uses in it_2725_Logic24_Spawned, it_2725_Logic5_Dropped, itLikelike_UnkMotion6_Phys, it_802DC4BC, it_8029A114, it_802B3F20, it_802B3F88"
+      ],
+      "standards_refs": [
+        "matching-tactics-need-evidence"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Recovered function parameters used short role names such as gobj, owner, pos, facing_dir, and arg4 when roles were partially known.",
+      "evidence_refs": [
+        "diff:ftCo_800C78B0(HSD_GObj* gobj, HSD_GObj* owner)",
+        "diff:it_8029A114(Fighter_GObj* gobj, Vec3* pos, f32 facing_dir, s32 arg4)",
+        "diff:it_802B43D0(Item_GObj* gobj, HSD_GObj* owner)"
+      ]
+    },
+    {
+      "convention": "Address-style names were retained for uncertain item functions and data tables, while the known zero vector data symbol was named zero_vec.",
+      "evidence_refs": [
+        "diff:ItemStateTable it_803F8128, it_803F8180, it_803F6680, it_803F71D8",
+        "diff:symbols.txt zero_vec = .rodata:0x803B86D8"
+      ]
+    },
+    {
+      "convention": "Local item pointers are commonly named ip in touched item code when the role is clear.",
+      "evidence_refs": [
+        "diff:itpikachutjoltair.c Item* ip = GET_ITEM(gobj)",
+        "diff:itlikelike.c Item* ip = GET_ITEM(gobj)",
+        "diff:ithitodeman.c Item* ip = GET_ITEM(gobj)"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Use PAD_STACK narrowly to steer stack layout in item matching functions.",
+      "evidence_refs": [
+        "diff:PAD_STACK(16) in it_2725_Logic24_Spawned",
+        "diff:PAD_STACK(12), PAD_STACK(20), PAD_STACK(28) in itlikelike.c",
+        "diff:PAD_STACK(8) in it_8029A114",
+        "diff:PAD_STACK(4) in itpikachutjoltair.c"
+      ],
+      "caveat": "No local build or objdiff log is included beyond the bot report; treat as PR-specific matching evidence, not a general style rule."
+    },
+    {
+      "tactic": "Introduce small static or inline helpers to obtain a matching call/inline shape, as seen with it_802D472C_inline and it_802DC4BC_ptr.",
+      "evidence_refs": [
+        "diff:ithitodeman.c inline Article* it_802D472C_inline",
+        "diff:itlikelike.c static inline void it_802DC4BC_ptr"
+      ],
+      "caveat": "The diff includes a comment 'permuterslop' in one Likelike function, so curator should not generalize the exact source shape as ideal authored style."
+    },
+    {
+      "tactic": "Adjust symbol metadata for local functions and data labels when item-state data and static callbacks are owned locally.",
+      "evidence_refs": [
+        "diff:symbols.txt itLipstickspore_UnkMotion1_Coll scope global->local",
+        "diff:symbols.txt itPikachutjoltair_UnkMotion0_Coll scope global->local",
+        "diff:symbols.txt multiple @local data/string/float labels"
+      ],
+      "caveat": "The PR evidence shows these symbol edits but does not include detailed section-ownership rationale for every changed data label."
+    },
+    {
+      "tactic": "Use real typed accessors/macros such as GET_ITEM and GET_JOBJ where they produce the needed code shape.",
+      "evidence_refs": [
+        "diff:itpikachutjoltair.c Item* ip = GET_ITEM(gobj)",
+        "diff:itpikachutjoltair.c HSD_JObj* jobj = GET_JOBJ(gobj)"
+      ],
+      "caveat": "GET_JOBJ use is supported only for this local hunk by the diff; do not generalize beyond local evidence."
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "author_note",
+      "text": "The author tried linking hitodman as well but could not figure it out and suggested it might need to be resplit.",
+      "evidence_refs": [
+        "human_pr_text",
+        "raw_pr_json:body"
+      ]
+    },
+    {
+      "kind": "bot_report",
+      "text": "decomp-dev[bot] reported +0.06% matched code (+2360 bytes), +0.41% linked code (+15984 bytes), +0.01% matched data (+160 bytes), +0.06% linked data (+688 bytes), 9 new matches, and one improvement in unmatched ithitodeman .data.",
+      "evidence_refs": [
+        "text_corpus:issue_comment by decomp-dev[bot]"
+      ]
+    },
+    {
+      "kind": "absence",
+      "text": "No human review comments or review records were present in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata_json:counts review_comments=0 reviews=0",
+        "text_corpus:only PR body and bot issue comment loaded"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2414",
+    "lukechampine",
+    "itpikachutjoltair",
+    "itlipstickspore",
+    "itlikelike",
+    "ithitodeman",
+    "hitodman",
+    "configure.py MatchingFor",
+    "Object(Matching)",
+    "ItemStateTable",
+    "it_803F8128",
+    "it_803F8180",
+    "it_803F6680",
+    "it_803F71D8",
+    "it_8029A114",
+    "ftCo_800C78B0",
+    "it_802D43AC",
+    "it_802DC4BC_ptr",
+    "zero_vec",
+    "PAD_STACK",
+    "GET_JOBJ",
+    "GET_ITEM",
+    "symbols.txt scope local",
+    "resplit"
+  ],
+  "follow_up_queries": [
+    "PR 2414 hitodeman resplit ithitodeman data 63.37%",
+    "it_8029A114 facing_dir arg4 signature callsites",
+    "itlikelike it_802DC4BC_ptr permuterslop PAD_STACK",
+    "itpikachutjoltair ItemStateTable it_803F71D8 GET_JOBJ",
+    "zero_vec .rodata 0x803B86D8 item symbols.txt",
+    "itLipstickspore_UnkMotion1_Coll local scope",
+    "itPikachutjoltair_UnkMotion0_Coll local scope"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json",
+      "human_pr_text",
+      "raw_diff",
+      "changed_files.jsonl",
+      "text_corpus bot report"
+    ],
+    "notes": [
+      "Changed-file metadata, PR body, bot report, and targeted diff snippets are available.",
+      "The loaded raw diff is truncated in the prompt, but local slice reads supplied additional relevant hunks for changed item files.",
+      "No human review comments are available, so reviewer intent cannot be inferred.",
+      "The PR title names three linked items, while configure.py also marks ithitodeman.c Matching and the bot report lists ithitodeman as a partial unmatched-data improvement; the record preserves that uncertainty instead of claiming complete hitodeman linkage.",
+      "The bot report is accepted as evidence of reported progress, but no separate build/objdiff command log is present in the slice."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson_candidate",
+        "title": "Propagate recovered signatures through headers and callsites",
+        "text": "In PR #2414, recovered signatures for ftCo_800C78B0, it_802D43AC, and it_8029A114 were reflected in owning headers and visible callsites, supporting a reusable lesson to avoid leaving UNK_PARAMS or stale call ordering after a body/callsite proves the signature.",
+        "scope": [
+          "headers",
+          "item helper signatures",
+          "fighter helper signatures"
+        ],
+        "evidence_refs": [
+          "diff:ft_0C31.c/.h",
+          "diff:ithitodeman.c/.h",
+          "diff:itlipstick.c and itlipstickspore.c/.h"
+        ]
+      },
+      {
+        "record_type": "matching_tactic_candidate",
+        "title": "Item data matching via ItemStateTable definitions plus symbol metadata",
+        "text": "PR #2414 added ItemStateTable arrays in item source files and paired them with symbols.txt scope/local-label updates, coinciding with bot-reported .data matches for itlipstickspore and itpikachutjoltair.",
+        "scope": [
+          "src/melee/it/items",
+          "config/GALE01/symbols.txt"
+        ],
+        "evidence_refs": [
+          "diff:ItemStateTable additions",
+          "diff:symbols.txt data scope changes",
+          "text_corpus:bot report .data matches"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "PR #2414 left uncertainty around ithitodeman split/link status",
+        "text": "The PR body says the author tried linking hitodman but could not figure it out and thought it might need to be resplit. The diff still marks ithitodeman.c as Matching in configure.py, while the bot report lists ithitodeman .data as an improvement in an unmatched item, so curator should record this only as an investigation/path fact, not as a resolved split conclusion.",
+        "source_path": "src/melee/it/items/ithitodeman.c",
+        "scope": [
+          "ithitodeman",
+          "item TU split",
+          "matching status ambiguity"
+        ],
+        "evidence_refs": [
+          "human_pr_text",
+          "diff:configure.py ithitodeman Object(Matching)",
+          "text_corpus:bot report ithitodeman .data improvement in unmatched item"
+        ],
+        "reason": "Possible historical clue for future ithitodeman split or data-ownership investigations."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "PR #2414 uses zero_vec at .rodata:0x803B86D8 in item code",
+        "text": "symbols.txt renames .rodata:0x803B86D8 from it_803B86D8 to zero_vec with size 0xC, and itlikelike.c initializes Vec3 sp50 = zero_vec in it_802DC4BC.",
+        "source_path": "config/GALE01/symbols.txt",
+        "scope": [
+          "zero_vec",
+          "itlikelike",
+          "rodata"
+        ],
+        "evidence_refs": [
+          "diff:symbols.txt zero_vec",
+          "diff:itlikelike.c Vec3 sp50 = zero_vec"
+        ],
+        "reason": "Potential path/data fact for future data-symbol ownership review; do not promote without curator validation against current source and symbols."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Do not generalize PR-specific PAD_STACK and inline-helper shapes without verifier evidence",
+        "text": "PR #2414 contains several PAD_STACK uses and inline helper shapes, including a comment labelled 'permuterslop' in itlikelike.c. Existing matching-tactics standards already require evidence; curator may use this PR as an example if examples are maintained.",
+        "source_path": null,
+        "scope": [
+          "matching tactics",
+          "PAD_STACK",
+          "inline helpers"
+        ],
+        "evidence_refs": [
+          "diff:PAD_STACK uses",
+          "diff:itlikelike.c comment 'permuterslop'",
+          "decomp_standards:matching-tactics-need-evidence"
+        ],
+        "reason": "Example candidate only; the slice does not justify a new or changed global standard."
+      }
+    ],
+    "rejection_notes": [
+      "Do not claim that hitodeman was fully linked or that its split issue was resolved; the PR evidence is contradictory/uncertain.",
+      "Do not infer reviewer approval rationale; no human review comments are present.",
+      "Do not promote every symbols.txt local-label conversion as a global naming rule; the diff lacks detailed ownership rationale for each data label.",
+      "Do not treat the Likelike 'permuterslop' shape or broad PAD_STACK use as preferred authored style."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

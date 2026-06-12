@@ -1,0 +1,315 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2197",
+  "pr": {
+    "number": 2197,
+    "title": "Match and Link itkyasarinegg",
+    "url": "https://github.com/doldecomp/melee/pull/2197",
+    "state": "MERGED",
+    "author": "MarioLover63",
+    "created_at": "2026-03-02T16:16:21Z",
+    "merged_at": "2026-03-02T16:51:34Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Matched and linked the Kyasarin egg item translation unit by moving itkyasarinegg.c from NonMatching to Matching, adding item state/data definitions, typed Kyasarin egg item vars/attributes, headers, and several newly matched item behavior callbacks.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "typed-item-vars",
+      "build-configuration"
+    ],
+    "systems": [
+      "item",
+      "itkyasarinegg",
+      "configure.py"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "configure.py",
+      "role": "Build configuration changed itkyasarinegg.c from NonMatching to Matching.",
+      "evidence_refs": [
+        "raw_diff: configure.py hunk changes Object(NonMatching, \"melee/it/items/itkyasarinegg.c\") to Object(Matching, \"melee/it/items/itkyasarinegg.c\")"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itkyasarinegg.c",
+      "role": "Primary matched source: added ItemStateTable, spawn/setup behavior, physics/collision/animation callbacks, shared damage inline, and damage/reflection callback wrappers.",
+      "evidence_refs": [
+        "raw_diff: itkyasarinegg.c adds ItemStateTable it_803F9328",
+        "raw_diff: itkyasarinegg.c adds it_802EFA44, it_802EFB0C, it_802EFCC0, it_802EFD84, it_damage_inline, it_2725_Logic28_* callbacks, it_802F022C",
+        "text_corpus: decomp-dev bot reports 11 new matches in main/melee/it/items/itkyasarinegg"
+      ]
+    },
+    {
+      "path": "src/melee/it/itCommonItems.h",
+      "role": "Added Kyasarin egg item variable and special-attribute structs.",
+      "evidence_refs": [
+        "raw_diff: itCommonItems.h adds itKyasarinEgg_ItemVars and itKyasarinEggAttributes"
+      ]
+    },
+    {
+      "path": "src/melee/it/types.h",
+      "role": "Connected the new Kyasarin egg item vars into Item.xDD4_itemVar union.",
+      "evidence_refs": [
+        "raw_diff: types.h adds itKyasarinEgg_ItemVars kyasarinEgg to struct Item union"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itkyasarinegg.h",
+      "role": "Updated exported prototypes and return types for Kyasarin egg functions.",
+      "evidence_refs": [
+        "raw_diff: itkyasarinegg.h adds prototypes for it_802EFA44, it_802EFB0C, it_802EFD84 and updates return types for collision/anim functions"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Marked melee/it/items/itkyasarinegg.c as Matching in configure.py.",
+    "Added Kyasarin egg typed item vars and attributes, including kyasarinEgg union access under Item.xDD4_itemVar.",
+    "Added the Kyasarin egg item state table it_803F9328 and multiple item behavior functions in itkyasarinegg.c.",
+    "Used a shared inline helper, it_damage_inline, for several damage/contact callbacks that return the same behavior.",
+    "Updated itkyasarinegg.h prototypes to expose newly added functions and align return types.",
+    "Bot report records 11 new matches, including five +244 byte callbacks, several helper functions, .data, and .sdata2 for main/melee/it/items/itkyasarinegg."
+  ],
+  "smart_moves": [
+    {
+      "text": "Added a dedicated kyasarinEgg union arm and struct before accessing xDD4 item variables, avoiding raw offset use for the recovered item-local state.",
+      "evidence_refs": [
+        "raw_diff: itCommonItems.h adds itKyasarinEgg_ItemVars",
+        "raw_diff: types.h adds kyasarinEgg union member",
+        "raw_diff: itkyasarinegg.c uses egg->xDD4_itemVar.kyasarinEgg.x20"
+      ]
+    },
+    {
+      "text": "Factored repeated damage/contact behavior into it_damage_inline and used thin wrappers for DmgDealt, Clanked, HitShield, Reflected, and it_802F022C.",
+      "evidence_refs": [
+        "raw_diff: it_damage_inline added",
+        "raw_diff: it_2725_Logic28_DmgDealt, Clanked, HitShield, Reflected, and it_802F022C call it_damage_inline"
+      ]
+    },
+    {
+      "text": "Kept unproven helper symbols address-style while using semantic names where already present for Logic28 callbacks.",
+      "evidence_refs": [
+        "raw_diff: address-style names it_802EFA44, it_802EFB0C, it_802EFCC0, it_802EFD84 remain",
+        "raw_diff: semantic names itKyasarinEgg_Logic28_PickedUp/Dropped/Thrown remain"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When multiple item interaction callbacks compile to the same body, a shared inline helper plus small callback wrappers can match repeated functions while keeping the repeated logic centralized.",
+      "scope": [
+        "item callbacks",
+        "itkyasarinegg.c",
+        "damage/contact logic"
+      ],
+      "evidence_refs": [
+        "raw_diff: inline bool it_damage_inline(Item_GObj* gobj)",
+        "raw_diff: five wrappers use PAD_STACK(0x8) and return it_damage_inline(gobj)",
+        "text_corpus: bot reports five +244 byte callback matches at 100.00%"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "lesson": "Recovering an item-specific ItemVars union arm can make item state accesses reviewable and typed during matching.",
+      "scope": [
+        "item vars",
+        "Item.xDD4_itemVar",
+        "itkyasarinegg"
+      ],
+      "evidence_refs": [
+        "raw_diff: itCommonItems.h adds itKyasarinEgg_ItemVars",
+        "raw_diff: types.h adds kyasarinEgg union member",
+        "raw_diff: itkyasarinegg.c accesses kyasarinEgg.x20"
+      ],
+      "confidence": 0.86
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Use semantic item callback names where role is already established, such as itKyasarinEgg_Logic28_PickedUp, Dropped, Thrown, and ShieldBounced.",
+      "evidence_refs": [
+        "raw_diff: itkyasarinegg.c and itkyasarinegg.h retain/add itKyasarinEgg_Logic28_* names"
+      ]
+    },
+    {
+      "convention": "Keep address-style names for functions whose semantics are not established by the PR, such as it_802EFA44, it_802EFB0C, it_802EFCC0, it_802EFD84, and it_802F022C.",
+      "evidence_refs": [
+        "raw_diff: newly added prototypes and definitions use address-style names for these helpers"
+      ]
+    },
+    {
+      "convention": "Use item-specific typed names for recovered structs and union arms: itKyasarinEgg_ItemVars, itKyasarinEggAttributes, and kyasarinEgg.",
+      "evidence_refs": [
+        "raw_diff: itCommonItems.h adds itKyasarinEgg_ItemVars and itKyasarinEggAttributes",
+        "raw_diff: types.h adds kyasarinEgg"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Used PAD_STACK in narrow locations: PAD_STACK(0x50) in it_802EFA44 and PAD_STACK(0x8) in repeated damage/contact wrappers.",
+      "evidence_refs": [
+        "raw_diff: it_802EFA44 contains PAD_STACK(0x50)",
+        "raw_diff: it_2725_Logic28_DmgDealt, Clanked, HitShield, Reflected, and it_802F022C contain PAD_STACK(0x8)"
+      ],
+      "notes": "The bot report supports the resulting matches, but the PR has no body explaining why the stack padding was required."
+    },
+    {
+      "tactic": "Changed function return types in the header/source to match callback usage, including int collision callbacks and bool animation/contact callbacks.",
+      "evidence_refs": [
+        "raw_diff: itkyasarinegg.h changes itKyasarinegg_UnkMotion1_Coll to int",
+        "raw_diff: itkyasarinegg.h changes itKyasarinegg_UnkMotion3_Coll to int",
+        "raw_diff: itkyasarinegg.h changes itKyasarinegg_UnkMotion4_Anim to bool"
+      ]
+    },
+    {
+      "tactic": "Added required includes for newly referenced APIs: efsync, mpcoll, mplib, and baselib/random.",
+      "evidence_refs": [
+        "raw_diff: itkyasarinegg.c adds #include \"ef/efsync.h\"",
+        "raw_diff: itkyasarinegg.c adds #include \"mp/mpcoll.h\"",
+        "raw_diff: itkyasarinegg.c adds #include \"mp/mplib.h\"",
+        "raw_diff: itkyasarinegg.c adds #include <baselib/random.h>"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "author": "ribbanya",
+      "state": "APPROVED",
+      "body": "Very nice!",
+      "evidence_refs": [
+        "text_corpus: review by ribbanya at 2026-03-02T16:51:23Z, state APPROVED"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2197",
+    "itkyasarinegg",
+    "KyasarinEgg",
+    "itKyasarinEgg_ItemVars",
+    "itKyasarinEggAttributes",
+    "kyasarinEgg",
+    "it_damage_inline",
+    "it_802EFA44",
+    "it_802EFB0C",
+    "it_802EFCC0",
+    "it_802EFD84",
+    "it_802F022C",
+    "it_2725_Logic28_DmgDealt",
+    "it_2725_Logic28_Clanked",
+    "it_2725_Logic28_HitShield",
+    "it_2725_Logic28_Reflected",
+    "PAD_STACK",
+    "ItemStateTable",
+    "MatchingFor",
+    "Object(Matching)"
+  ],
+  "follow_up_queries": [
+    "itkyasarinegg PAD_STACK",
+    "it_damage_inline item callbacks",
+    "kyasarinEgg xDD4_itemVar",
+    "it_2725_Logic28_DmgDealt Clanked HitShield Reflected",
+    "itKyasarinEgg_ItemVars x20 x24",
+    "itkyasarinegg ItemStateTable it_803F9328"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR 2197 title, author, timestamps, merged state, changed file counts",
+      "raw_diff: complete diff excerpt for five changed files",
+      "text_corpus: decomp-dev bot report with 11 new matches and score deltas",
+      "text_corpus: approving review with short comment"
+    ],
+    "notes": [
+      "PR body is empty, so author intent and rationale for tactics such as PAD_STACK are not directly documented.",
+      "No inline review comments are present.",
+      "Bot report provides match evidence for new functions and sections, but no local build logs or objdiff details beyond the PR report are included in the slice.",
+      "Do not infer that all naming or stack-padding choices are global style from this single PR."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "type": "decomp_lesson",
+        "title": "Shared inline for repeated item contact callbacks",
+        "text": "In itkyasarinegg, several item contact callbacks matched as small wrappers around a shared inline helper, with the bot reporting 100% matches for the repeated +244 byte callbacks.",
+        "scope": [
+          "src/melee/it/items/itkyasarinegg.c",
+          "item contact callbacks"
+        ],
+        "evidence_refs": [
+          "raw_diff: it_damage_inline and wrappers",
+          "text_corpus: bot report lists DmgDealt, Clanked, HitShield, Reflected, and it_802F022C as new 100.00% matches"
+        ]
+      },
+      {
+        "type": "decomp_lesson",
+        "title": "Typed item vars for Kyasarin egg state",
+        "text": "The PR introduced itKyasarinEgg_ItemVars and connected it through Item.xDD4_itemVar.kyasarinEgg, enabling typed access to recovered item-local state.",
+        "scope": [
+          "src/melee/it/itCommonItems.h",
+          "src/melee/it/types.h",
+          "src/melee/it/items/itkyasarinegg.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: itCommonItems.h struct addition",
+          "raw_diff: types.h union addition",
+          "raw_diff: kyasarinEgg.x20 accesses"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "itkyasarinegg.c matched in PR 2197",
+        "text": "src/melee/it/items/itkyasarinegg.c was changed from NonMatching to Matching in configure.py as part of PR 2197.",
+        "source_path": "src/melee/it/items/itkyasarinegg.c",
+        "scope": [
+          "configure.py",
+          "melee/it/items/itkyasarinegg.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: configure.py hunk changes itkyasarinegg.c to Object(Matching)",
+          "text_corpus: bot report lists new matches for main/melee/it/items/itkyasarinegg"
+        ],
+        "reason": "Potential path fact for matched status history; curator should verify against current source before promoting."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "Kyasarin egg item vars are owned under item common types",
+        "text": "PR 2197 added itKyasarinEgg_ItemVars and itKyasarinEggAttributes in src/melee/it/itCommonItems.h and added kyasarinEgg to Item.xDD4_itemVar in src/melee/it/types.h.",
+        "source_path": "src/melee/it/itCommonItems.h",
+        "scope": [
+          "src/melee/it/itCommonItems.h",
+          "src/melee/it/types.h",
+          "src/melee/it/items/itkyasarinegg.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: itCommonItems.h adds structs",
+          "raw_diff: types.h adds kyasarinEgg union member"
+        ],
+        "reason": "Potential source/path ownership note for item-specific vars; curator should verify current type layout before promoting."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote PAD_STACK use in this PR as an accepted general tactic without additional objdiff/build rationale; the PR only shows its presence and a bot match report.",
+      "Do not infer semantic meanings for address-style functions such as it_802EFA44 or it_802F022C beyond their observed use in this diff.",
+      "Do not treat the inline helper name it_damage_inline as a proven original-source name; it is a source-level matching construct shown by this PR."
+    ]
+  },
+  "confidence": 0.86,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

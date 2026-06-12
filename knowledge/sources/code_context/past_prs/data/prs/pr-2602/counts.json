@@ -1,0 +1,17 @@
+{
+  "number": 2602,
+  "title": "Rename Kirby TUs",
+  "state": "MERGED",
+  "createdAt": "2026-06-07T11:05:01Z",
+  "updatedAt": "2026-06-07T11:08:45Z",
+  "mergedAt": "2026-06-07T11:08:44Z",
+  "closedAt": "2026-06-07T11:08:44Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/2602",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 26459
+  }
+}

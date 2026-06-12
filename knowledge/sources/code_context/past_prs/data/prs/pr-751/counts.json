@@ -1,0 +1,17 @@
+{
+  "number": 751,
+  "title": "Publish packages for building Melee and generating documentation",
+  "state": "CLOSED",
+  "createdAt": "2023-03-05T15:39:49Z",
+  "updatedAt": "2023-03-05T21:10:31Z",
+  "mergedAt": null,
+  "closedAt": "2023-03-05T20:50:33Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/751",
+  "counts": {
+    "issue_comments": 2,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 29216
+  }
+}

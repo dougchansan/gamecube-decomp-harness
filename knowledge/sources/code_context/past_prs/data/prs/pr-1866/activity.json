@@ -1,0 +1,10 @@
+{
+  "pr": 1866,
+  "title": "Match most of ftmetal, and rename related struct members",
+  "url": "https://github.com/doldecomp/melee/pull/1866",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 20,
+  "added_lines": 314,
+  "deleted_lines": 52
+}

@@ -1,0 +1,17 @@
+{
+  "number": 1473,
+  "title": "Match all 16-byte functions",
+  "state": "MERGED",
+  "createdAt": "2024-09-28T03:43:39Z",
+  "updatedAt": "2024-09-28T03:53:22Z",
+  "mergedAt": "2024-09-28T03:53:21Z",
+  "closedAt": "2024-09-28T03:53:21Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1473",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 5565395
+  }
+}

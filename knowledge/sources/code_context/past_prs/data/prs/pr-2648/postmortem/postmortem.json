@@ -1,0 +1,137 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2648",
+  "pr": {
+    "number": 2648,
+    "title": "Bump Actions versions",
+    "url": "https://github.com/doldecomp/melee/pull/2648",
+    "state": "MERGED",
+    "author": "ribbanya",
+    "created_at": "2026-06-10T17:00:11Z",
+    "merged_at": "2026-06-10T17:12:04Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Infrastructure-only PR updating pinned GitHub Actions versions in the build workflow. The only changed file was .github/workflows/build.yml, with version bumps for checkout, artifact upload, Docker registry login, Pages deployment actions, and Cachix/Nix setup actions. The PR body was empty; an automated decomp-dev bot comment reported GALE01 no changes.",
+  "change_classification": {
+    "primary_type": "ci-maintenance",
+    "categories": [
+      "workflow-update",
+      "dependency-version-bump",
+      "infrastructure"
+    ],
+    "systems": [
+      ".github",
+      "GitHub Actions",
+      "CI",
+      "Pages deployment",
+      "Nix/Cachix"
+    ]
+  },
+  "key_files": [
+    {
+      "path": ".github/workflows/build.yml",
+      "role": "GitHub Actions workflow receiving all action version bumps",
+      "evidence_refs": [
+        "changed_files.jsonl: .github/workflows/build.yml added 14 deleted 14 hunks 9",
+        "raw_diff: all hunks modify uses: action version pins in .github/workflows/build.yml"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Updated actions/checkout pins from v3 or v4 to v6 in multiple workflow jobs.",
+    "Updated actions/upload-artifact from v4 to v7 for map and report uploads.",
+    "Updated docker/login-action from v2 or v2.1.0 to v4 in container registry login steps.",
+    "Updated actions/upload-pages-artifact from v3 to v5.",
+    "Updated actions/configure-pages from v4 to v6 and actions/deploy-pages from v4 to v5.",
+    "Updated cachix/install-nix-action from v25 to v31 and cachix/cachix-action from v16 to v17."
+  ],
+  "smart_moves": [
+    "Kept the PR narrowly scoped to GitHub Actions version pins in a single workflow file.",
+    "Did not mix CI dependency updates with decomp source or data changes, based on the supplied diff."
+  ],
+  "decomp_lessons": [],
+  "naming_conventions": [],
+  "assembly_or_matching_tactics": [],
+  "review_feedback": [
+    {
+      "kind": "automated_issue_comment",
+      "author": "decomp-dev[bot]",
+      "text": "Report for GALE01 (184488c - 1df8d7e): No changes",
+      "evidence_refs": [
+        "text_corpus.jsonl issue_comment created_at 2026-06-10T17:07:31Z"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR 2648",
+    "Bump Actions versions",
+    ".github/workflows/build.yml",
+    "actions/checkout@v6",
+    "actions/upload-artifact@v7",
+    "docker/login-action@v4",
+    "actions/upload-pages-artifact@v5",
+    "actions/configure-pages@v6",
+    "actions/deploy-pages@v5",
+    "cachix/install-nix-action@v31",
+    "cachix/cachix-action@v17",
+    "GALE01 No changes",
+    "ribbanya"
+  ],
+  "follow_up_queries": [
+    "PR 2648 .github/workflows/build.yml actions checkout v6",
+    "PR 2648 GitHub Actions version bump upload-artifact v7",
+    "PR 2648 decomp-dev bot GALE01 No changes",
+    "build.yml docker/login-action v4 cachix install-nix-action v31"
+  ],
+  "evidence_quality": {
+    "status": "strong",
+    "evidence_refs": [
+      "metadata_json: PR number, title, author, state, timestamps, changed_files, counts",
+      "raw_diff: complete 3362-byte diff for .github/workflows/build.yml",
+      "changed_files.jsonl: one changed file with 14 additions and 14 deletions",
+      "text_corpus.jsonl: empty PR body and one automated issue comment"
+    ],
+    "notes": [
+      "Evidence is strong for file changes and action version bumps because the full diff is loaded.",
+      "PR body is empty and there are no review comments or reviews, so no human rationale or reviewer intent is available.",
+      "The raw PR JSON is truncated, but metadata_json and loaded extracted files cover the identity, changed files, diff, and comments needed for this intake.",
+      "No decomp source files, assembly, symbols, matching tactics, or naming decisions were present in this PR slice."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "build.yml owns repository CI workflow action pins",
+        "text": ".github/workflows/build.yml contains GitHub Actions workflow steps for checkout, artifact upload, container registry login, GitHub Pages artifact/configure/deploy, and Nix/Cachix setup; PR 2648 updated only the action version pins in these steps.",
+        "source_path": ".github/workflows/build.yml",
+        "scope": [
+          "CI",
+          "GitHub Actions",
+          "workflow maintenance"
+        ],
+        "evidence_refs": [
+          "raw_diff: version-only changes across checkout, upload-artifact, docker/login-action, pages actions, and cachix actions",
+          "changed_files.jsonl: only .github/workflows/build.yml changed"
+        ],
+        "reason": "Candidate path fact for curator review if the knowledge base tracks repository infrastructure ownership; not a decomp standard."
+      }
+    ],
+    "rejection_notes": [
+      "No reusable decomp lesson is promoted because the PR is infrastructure-only and does not touch decompiled source, headers, data ownership, assembly, or matching output.",
+      "The automated 'No changes' comment is recorded as PR evidence only; it is not treated as proof of any specific build matrix success beyond the comment text."
+    ]
+  },
+  "confidence": 0.94,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

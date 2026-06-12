@@ -1,0 +1,476 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2388",
+  "pr": {
+    "number": 2388,
+    "title": "great bay work",
+    "url": "https://github.com/doldecomp/melee/pull/2388",
+    "state": "MERGED",
+    "author": "lukechampine",
+    "created_at": "2026-04-06T03:39:07Z",
+    "merged_at": "2026-04-06T08:24:35Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Great Bay stage decomp work added several grgreatbay.c function bodies, introduced typed Great Bay stage and ground variable layouts, centralized a duplicated ground-stage random-range helper, and updated Tingle item prototypes needed by the new code. The bot report recorded four new grgreatbay text matches and several near-matches/improvements, with one .sdata regression.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "types",
+      "inline-helper-cleanup"
+    ],
+    "systems": [
+      "stage",
+      "ground",
+      "item"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gr/grgreatbay.c",
+      "role": "Primary Great Bay decomp file; adds StageAttr typing, item/stage includes, implementations for several previously stubbed functions, and cleanup of existing Great Bay logic.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "diff.diff:1-760",
+        "text_corpus.jsonl bot report"
+      ]
+    },
+    {
+      "path": "src/melee/gr/types.h",
+      "role": "Adds and reshapes Great Bay GroundVars layouts, including bitfields, gobj array, new greatbay4 vars, and union entry.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "diff.diff:970-1042"
+      ]
+    },
+    {
+      "path": "src/melee/gr/inlines.h",
+      "role": "Adds shared rand_range helper and ZRANDI macro using HSD_Randi, replacing duplicated local rand_inline helpers in several stage files.",
+      "evidence_refs": [
+        "diff.diff:940-970"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grizumi.c",
+      "role": "Removes local rand_inline and switches Izumi random timer sites to rand_range.",
+      "evidence_refs": [
+        "diff.diff:777-825"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grkraid.c",
+      "role": "Removes local rand_inline and switches Kraid random timer site to rand_range.",
+      "evidence_refs": [
+        "diff.diff:826-856"
+      ]
+    },
+    {
+      "path": "src/melee/gr/groldkongo.c",
+      "role": "Removes local rand_inline and switches Old Kongo random timer sites to rand_range.",
+      "evidence_refs": [
+        "diff.diff:857-899"
+      ]
+    },
+    {
+      "path": "src/melee/gr/groldyoshi.c",
+      "role": "Removes local rand_inline and switches Old Yoshi random timer sites to rand_range.",
+      "evidence_refs": [
+        "diff.diff:900-939"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grgreatbay.h",
+      "role": "Updates grGreatBay_801F63F4 prototype from unknown to bool grGreatBay_801F63F4(Ground_GObj*).",
+      "evidence_refs": [
+        "diff.diff:764-775"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/ittincle.h",
+      "role": "Updates Tingle item prototypes used by Great Bay code.",
+      "evidence_refs": [
+        "diff.diff:1046-1067"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Implemented grGreatBay_801F4694, grGreatBay_801F499C, grGreatBay_801F5460, grGreatBay_801F5600, grGreatBay_801F5AF8, grGreatBay_801F5E28, grGreatBay_801F60C4, and grGreatBay_801F63F4 or substantially filled their bodies in src/melee/gr/grgreatbay.c.",
+      "evidence_refs": [
+        "diff.diff:66-760"
+      ]
+    },
+    {
+      "text": "Introduced grGb_StageAttr and changed grGb_804D69E0.x0 from s16* to grGb_StageAttr*, replacing raw index accesses such as grGb_804D69E0.x0[1] with field accesses such as grGb_804D69E0.x0->x2.",
+      "evidence_refs": [
+        "diff.diff:16-62",
+        "diff.diff:420-446",
+        "diff.diff:630-688"
+      ]
+    },
+    {
+      "text": "Reworked Great Bay ground-variable structs: greatbay gained bitfields and typed slots; greatbay2 changed four separate gobj fields into HSD_GObj* gobjs[4] plus bitfields; greatbay4 was added and included in the Ground union.",
+      "evidence_refs": [
+        "diff.diff:970-1042"
+      ]
+    },
+    {
+      "text": "Added shared rand_range and ZRANDI in gr/inlines.h, then removed duplicate local rand_inline helpers from grizumi.c, grkraid.c, groldkongo.c, and groldyoshi.c.",
+      "evidence_refs": [
+        "diff.diff:777-970"
+      ]
+    },
+    {
+      "text": "Updated prototypes for grGreatBay_801F63F4, it_802EBFAC, and it_802ECA70 from unknown signatures to typed signatures used by the new Great Bay code.",
+      "evidence_refs": [
+        "diff.diff:764-775",
+        "diff.diff:1046-1067"
+      ]
+    },
+    {
+      "text": "Bot report recorded four new 100% matches in main/melee/gr/grgreatbay: grGreatBay_801F5600, grGreatBay_801F4694, grGreatBay_801F5E28, and grGreatBay_801F5AF8.",
+      "evidence_refs": [
+        "text_corpus.jsonl issue_comment decomp-dev[bot]"
+      ]
+    },
+    {
+      "text": "Bot report recorded improvements, but not full matches, for grGreatBay_801F499C, grGreatBay_801F60C4, grGreatBay_801F63F4, grGreatBay_801F5460, .sdata2, and grGreatBay_801F62F8.",
+      "evidence_refs": [
+        "text_corpus.jsonl issue_comment decomp-dev[bot]"
+      ]
+    },
+    {
+      "text": "Bot report recorded a broken .sdata match for main/melee/gr/grgreatbay, dropping from 100.00% to 81.82%.",
+      "evidence_refs": [
+        "text_corpus.jsonl issue_comment decomp-dev[bot]"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "The PR consolidated multiple identical local random-range helpers into a single ground inline, reducing duplicated generated-looking code across stage files.",
+      "evidence_refs": [
+        "diff.diff:777-970"
+      ]
+    },
+    {
+      "text": "The PR changed Great Bay stage attribute access from raw s16 pointer/indexing to a typed struct with offset-annotated fields before using those fields throughout new code.",
+      "evidence_refs": [
+        "diff.diff:16-62",
+        "diff.diff:420-446",
+        "diff.diff:630-688"
+      ]
+    },
+    {
+      "text": "The PR used arrays and loops for repeated child ground-object operations in grGreatBay_801F5A00 and grGreatBay_801F5AF8 instead of preserving four separate gobj fields and repeated calls.",
+      "evidence_refs": [
+        "diff.diff:420-506",
+        "diff.diff:970-1004"
+      ]
+    },
+    {
+      "text": "The PR updated owning headers for newly recovered signatures instead of leaving UNK_RET/UNK_PARAMS where bodies and callsites provided typed usage.",
+      "evidence_refs": [
+        "diff.diff:764-775",
+        "diff.diff:1046-1067"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When several stage files carry identical local random-range helpers, a shared inline can express the common source pattern and simplify callers, but the helper's semantics must preserve the zero-range HSD_Randi guard.",
+      "evidence_refs": [
+        "diff.diff:777-970"
+      ],
+      "standards": [
+        "infer-authored-source-style",
+        "canonical-control-flow-and-macros"
+      ]
+    },
+    {
+      "lesson": "For stage attributes loaded through an opaque pointer, recovering a TU-local offset-annotated struct can make decomp code more reviewable than repeated raw array indexing while preserving unknown field names until semantics are proven.",
+      "evidence_refs": [
+        "diff.diff:16-62",
+        "diff.diff:420-446",
+        "diff.diff:630-688"
+      ],
+      "standards": [
+        "typed-fields-over-pointer-math",
+        "conservative-naming"
+      ]
+    },
+    {
+      "lesson": "Repeated sibling stage objects can be represented as an array plus counted loops when the old fields differ only by index or map ID.",
+      "evidence_refs": [
+        "diff.diff:420-506",
+        "diff.diff:970-1004"
+      ],
+      "standards": [
+        "natural-loops"
+      ]
+    },
+    {
+      "lesson": "If a newly recovered function body proves a previously unknown public signature, update the owning header prototype rather than relying on unknown declarations.",
+      "evidence_refs": [
+        "diff.diff:764-775",
+        "diff.diff:1046-1067"
+      ],
+      "standards": [
+        "truthful-headers-and-includes"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "grGb_StageAttr",
+      "convention": "Use a stage-specific struct name for recovered Great Bay stage attributes while keeping unknown fields offset-named x0, x2, x4, etc.",
+      "evidence_refs": [
+        "diff.diff:16-58"
+      ]
+    },
+    {
+      "name": "rand_range",
+      "convention": "Shared ground inline name used for inclusive-looking range selection between two endpoints with zero-range guard.",
+      "evidence_refs": [
+        "diff.diff:940-970"
+      ]
+    },
+    {
+      "name": "gobjs[4]",
+      "convention": "Use an array name for four Great Bay child ground objects formerly represented as gobj5, gobj6, gobj7, and gobj8.",
+      "evidence_refs": [
+        "diff.diff:420-446",
+        "diff.diff:970-1004"
+      ]
+    },
+    {
+      "name": "xC5.b0123456 and xC5.b7 / x12.b0-b3",
+      "convention": "Use packed bitfield names when bit roles are not yet semantically named but bit access is known.",
+      "evidence_refs": [
+        "diff.diff:970-1004"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "PAD_STACK was used narrowly in several newly added Great Bay functions, including grGreatBay_801F5AF8, grGreatBay_801F5E28, grGreatBay_801F60C4, and grGreatBay_801F63F4.",
+      "evidence_refs": [
+        "diff.diff:450-460",
+        "diff.diff:513-522",
+        "diff.diff:569",
+        "diff.diff:689-705"
+      ],
+      "caution": "Standards require explicit verifier evidence for PAD_STACK; the bot report supports some function matches/improvements but does not explain each PAD_STACK necessity."
+    },
+    {
+      "tactic": "Used HSD_ASSERT macro forms for recovered assert sites in grGreatBay_801F499C and grGreatBay_801F62F8 instead of raw assert expansion.",
+      "evidence_refs": [
+        "diff.diff:121-122",
+        "diff.diff:224",
+        "diff.diff:266",
+        "diff.diff:681-685"
+      ]
+    },
+    {
+      "tactic": "Used ABS(dx) in grGreatBay_801F60C4 for a common absolute-value expression.",
+      "evidence_refs": [
+        "diff.diff:578-584"
+      ],
+      "standards": [
+        "canonical-control-flow-and-macros"
+      ]
+    },
+    {
+      "tactic": "Replaced manual ternary/HSD_Randi range code with rand_range calls in Great Bay and other stage files.",
+      "evidence_refs": [
+        "diff.diff:420-446",
+        "diff.diff:777-970"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "source": "decomp-dev[bot]",
+      "feedback": "Matched code improved by +0.07% / +2816 bytes; four new matches were reported for grGreatBay_801F5600, grGreatBay_801F4694, grGreatBay_801F5E28, and grGreatBay_801F5AF8.",
+      "evidence_refs": [
+        "text_corpus.jsonl issue_comment decomp-dev[bot]"
+      ]
+    },
+    {
+      "source": "decomp-dev[bot]",
+      "feedback": "One broken match was reported: main/melee/gr/grgreatbay .sdata changed from 100.00% to 81.82%, with matched data decreasing by 24 bytes.",
+      "evidence_refs": [
+        "text_corpus.jsonl issue_comment decomp-dev[bot]"
+      ]
+    },
+    {
+      "source": "pr_slice",
+      "feedback": "No human review comments or review records were included in the loaded PR evidence.",
+      "evidence_refs": [
+        "metadata_json counts.review_comments=0",
+        "metadata_json counts.reviews=0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2388",
+    "great bay work",
+    "grgreatbay",
+    "grGb_StageAttr",
+    "grGb_804D69E0",
+    "grGreatBay_801F4694",
+    "grGreatBay_801F499C",
+    "grGreatBay_801F5460",
+    "grGreatBay_801F5600",
+    "grGreatBay_801F5AF8",
+    "grGreatBay_801F5E28",
+    "grGreatBay_801F60C4",
+    "grGreatBay_801F62F8",
+    "grGreatBay_801F63F4",
+    "rand_range",
+    "ZRANDI",
+    "PAD_STACK",
+    "GET_GROUND",
+    "GET_JOBJ",
+    "greatbay4",
+    "ittincle",
+    "it_802ECA70",
+    "it_802EBFAC",
+    "sdata regression"
+  ],
+  "follow_up_queries": [
+    "Find later PRs touching grGreatBay_801F499C or grGreatBay_801F60C4 to see whether the near-matches reached 100%.",
+    "Search for subsequent fixes to main/melee/gr/grgreatbay .sdata after PR2388.",
+    "Search for later semantic renames of grGb_StageAttr fields x0 through x7C.",
+    "Search for rand_range or ZRANDI usage in ground stage files after PR2388.",
+    "Search for PAD_STACK in grgreatbay.c to see whether later cleanup removed or justified it.",
+    "Search for grGreatBay_801F63F4 follow-up changes or item spawn table data ownership notes."
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json",
+      "changed_files.jsonl",
+      "diff.diff",
+      "text_corpus.jsonl"
+    ],
+    "notes": [
+      "PR metadata, changed files, and bot report are available and concrete.",
+      "The PR body is empty and no human review comments are present.",
+      "The diff excerpt and loaded raw diff are truncated in the prompt, but targeted local reads covered the key non-primary changed files and helper/type sections.",
+      "Bot report provides validation for four new matches and several improvements, but it also records a .sdata regression.",
+      "No unsupported claim is made about author intent or complete object-level validation beyond the bot report."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "lesson_candidate",
+        "title": "Centralize repeated stage random-range helpers",
+        "text": "PR2388 replaced duplicated local rand_inline helpers in multiple ground stage files with a shared gr/inlines.h rand_range helper that preserves the HSD_Randi zero-range guard.",
+        "scope": [
+          "src/melee/gr/inlines.h",
+          "src/melee/gr/grizumi.c",
+          "src/melee/gr/grkraid.c",
+          "src/melee/gr/groldkongo.c",
+          "src/melee/gr/groldyoshi.c"
+        ],
+        "evidence_refs": [
+          "diff.diff:777-970"
+        ]
+      },
+      {
+        "record_type": "lesson_candidate",
+        "title": "Recover typed stage attribute structs before widespread field use",
+        "text": "PR2388 introduced grGb_StageAttr and changed grGb_804D69E0.x0 from s16* to a typed pointer before using offset-named fields throughout Great Bay functions.",
+        "scope": [
+          "src/melee/gr/grgreatbay.c"
+        ],
+        "evidence_refs": [
+          "diff.diff:16-62",
+          "diff.diff:420-446",
+          "diff.diff:630-688"
+        ]
+      },
+      {
+        "record_type": "lesson_candidate",
+        "title": "Use arrays and loops for repeated sibling ground objects",
+        "text": "PR2388 replaced separate Great Bay gobj5-gobj8 fields with gobjs[4] and looped over the repeated child operations in grGreatBay_801F5AF8.",
+        "scope": [
+          "src/melee/gr/grgreatbay.c",
+          "src/melee/gr/types.h"
+        ],
+        "evidence_refs": [
+          "diff.diff:420-506",
+          "diff.diff:970-1004"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "gr/inlines.h contains shared ground rand_range helper after PR2388",
+        "text": "PR2388 added ZRANDI and static inline int rand_range(int a, int b) to src/melee/gr/inlines.h and converted several stage files from local rand_inline helpers to this shared helper.",
+        "source_path": "src/melee/gr/inlines.h",
+        "scope": [
+          "ground stage helpers",
+          "random range timers"
+        ],
+        "evidence_refs": [
+          "diff.diff:777-970"
+        ],
+        "reason": "Could help future curators resolve repeated HSD_Randi range idioms in ground stage code."
+      },
+      {
+        "target_source_id": "ssbm_data_sheet",
+        "update_kind": "source_update",
+        "title": "Possible Great Bay stage attribute layout from PR2388",
+        "text": "PR2388 introduced a TU-local grGb_StageAttr layout with offsets 0x00 through 0xA4-ish, including x70[4], x78, and x7C[10] entries with kind/weight fields. This should be curated only if corroborated by data ownership/symbol evidence.",
+        "source_path": "src/melee/gr/grgreatbay.c",
+        "scope": [
+          "Great Bay stage attributes",
+          "grGb_804D69E0"
+        ],
+        "evidence_refs": [
+          "diff.diff:16-62",
+          "diff.diff:630-760"
+        ],
+        "reason": "The PR evidence supports the layout being used in source, but field semantics and data ownership are not fully established by the slice."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "Great Bay uses Tingle item prototypes in ittincle.h",
+        "text": "PR2388 updated it_802EBFAC to void it_802EBFAC(Item_GObj*) and it_802ECA70 to Item_GObj* it_802ECA70(HSD_GObj*) for calls from Great Bay code.",
+        "source_path": "src/melee/it/items/ittincle.h",
+        "scope": [
+          "Tingle item headers",
+          "Great Bay item interaction"
+        ],
+        "evidence_refs": [
+          "diff.diff:1046-1067",
+          "diff.diff:294-341"
+        ],
+        "reason": "Header ownership and callsite usage are evidenced, but broader item semantics should remain source-owned."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote PAD_STACK use in this PR as a general standard; the bot report supports some function matches but the slice does not explain each stack pad's necessity.",
+      "Do not infer semantic names for grGb_StageAttr fields from offset names alone.",
+      "Do not treat the .sdata change as accepted data cleanup; the bot report explicitly lists it as a broken match.",
+      "Do not claim human reviewer approval or intent; no human review comments were loaded."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

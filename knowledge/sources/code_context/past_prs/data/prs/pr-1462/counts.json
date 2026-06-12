@@ -1,0 +1,17 @@
+{
+  "number": 1462,
+  "title": "Create script for finding easy functions",
+  "state": "MERGED",
+  "createdAt": "2024-09-23T16:49:39Z",
+  "updatedAt": "2024-09-23T16:51:57Z",
+  "mergedAt": "2024-09-23T16:51:56Z",
+  "closedAt": "2024-09-23T16:51:56Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1462",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 7243
+  }
+}

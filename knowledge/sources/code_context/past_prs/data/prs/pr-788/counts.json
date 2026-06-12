@@ -1,0 +1,17 @@
+{
+  "number": 788,
+  "title": "Clean up fighter parts usages",
+  "state": "MERGED",
+  "createdAt": "2023-04-21T12:01:52Z",
+  "updatedAt": "2023-04-21T13:10:08Z",
+  "mergedAt": "2023-04-21T13:10:07Z",
+  "closedAt": "2023-04-21T13:10:07Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/788",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 238035
+  }
+}

@@ -1,0 +1,369 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2337",
+  "pr": {
+    "number": 2337,
+    "title": "Permuter fixes and itlinkarrow work",
+    "url": "https://github.com/doldecomp/melee/pull/2337",
+    "state": "MERGED",
+    "author": "lukechampine",
+    "created_at": "2026-03-21T03:09:59Z",
+    "merged_at": "2026-03-21T20:16:20Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2337 made permuter-driven matching fixes in Yoshi special-move code and substantial Link arrow item work. The bot report records +5220 matched-code bytes, +256 matched-data bytes, 9 new matches, full .data match for itlinkarrow, and several newly matched or improved functions. Human review comments were not present in the loaded slice.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "fix",
+      "headers",
+      "item-data"
+    ],
+    "systems": [
+      "fighter",
+      "item",
+      "Yoshi",
+      "Link arrow"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/it/items/itlinkarrow.c",
+      "role": "Primary item decomp/matching work: added includes, adjusted fake JObj helper assert filename handling, converted casts and locals, introduced address-named float arrays, rewrote fn_802A81C4 and it_802A850C shapes, and contributed most reported matches.",
+      "evidence_refs": [
+        "changed_files.jsonl: itlinkarrow.c +253/-311 in 25 hunks",
+        "diff.diff: itlinkarrow.c includes placeholder.h, baselib/forward.h, baselib/gobj.h",
+        "diff.diff: added __FILE__ override to jobj.h around fake_HSD_JObjSetRotation/fake_HSD_JObjSetTranslate and restored itlinkarrow.c",
+        "diff.diff: numbers/numbers_l removed; it_803F6A78 and it_803F6A98 added",
+        "diff.diff: fn_802A81C4 changed from void HSD_GObj* to s32 Item_GObj* and uses GET_ITEM/GET_JOBJ",
+        "text_corpus.jsonl: bot report lists itlinkarrow .data 32.13% to 100.00%, several itlinkarrow function matches, and improvements"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itlinkarrow.h",
+      "role": "Header signature and extern surface updated for Link arrow work.",
+      "evidence_refs": [
+        "changed_files.jsonl: itlinkarrow.h +2/-1 in 2 hunks",
+        "diff.diff: fn_802A81C4 prototype changed to s32 fn_802A81C4(Item_GObj*)",
+        "diff.diff: added extern f32 it_803F6A78[]"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftYoshi/ftYs_SpecialS.c",
+      "role": "Yoshi SpecialS matching fixes using small permuter helper inlines, expression reshaping, stack padding changes, and ABS/assignment simplification.",
+      "evidence_refs": [
+        "changed_files.jsonl: ftYs_SpecialS.c +47/-34 in 16 hunks",
+        "diff.diff: added perm_vel_inline, perm_neg_inline, perm_mul_inline, perm_vel_x_inline with comment 'permuter-generated helpers, almost certainly fake'",
+        "diff.diff: changed f64 casts in angle/rotation expressions to simpler M_PI/M_PI_2 expressions",
+        "diff.diff: PAD_STACK(4) changed to u8 pad[4]; PAD_STACK(40) changed to u8 pad[28]",
+        "diff.diff: fp->mv.ys.specials.x1C = ABS(fp->gr_vel = fp->self_vel.x)",
+        "text_corpus.jsonl: bot report lists Yoshi SpecialS new matches and improvements"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftYoshi/ftYs_SpecialHi.c",
+      "role": "Small local variable lifetime/name reshaping in ftYs_SpecialS_8012DF8C.",
+      "evidence_refs": [
+        "changed_files.jsonl: ftYs_SpecialHi.c +5/-5 in 1 hunk",
+        "diff.diff: temp_f4 renamed/reworked as mag and reused across the angle calculation",
+        "text_corpus.jsonl: bot report lists ftYs_SpecialS_8012DF8C +1 byte improvement, 97.06% to 97.22%"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Link arrow item code was heavily reshaped, including function signatures, casts, helper usage, local names, stack padding, and data arrays.",
+      "evidence_refs": [
+        "changed_files.jsonl: itlinkarrow.c +253/-311",
+        "diff.diff: itlinkarrow.c hunks around it_802A83E0, fn_802A81C4, it_802A850C",
+        "diff.diff: itlinkarrow.h prototype and extern changes"
+      ]
+    },
+    {
+      "text": "Yoshi SpecialS received narrow permuter-oriented expression and local-shape changes that the bot report associates with three newly matched collision functions and one improved animation function.",
+      "evidence_refs": [
+        "diff.diff: ftYs_SpecialS.c perm_* inline helpers and expression changes",
+        "text_corpus.jsonl: ftYs_SpecialAirSLoop_0_Coll, _1_Coll, _3_Coll reached 100%; ftYs_SpecialAirSLoop_1_Anim improved to 95.86%"
+      ]
+    },
+    {
+      "text": "Yoshi SpecialHi ftYs_SpecialS_8012DF8C changed a temporary float into a reused mag variable and slightly improved according to the bot report.",
+      "evidence_refs": [
+        "diff.diff: ftYs_SpecialHi.c temp_f4 to mag",
+        "text_corpus.jsonl: ftYs_SpecialS_8012DF8C +1 byte improvement"
+      ]
+    },
+    {
+      "text": "Automated report recorded 9 new matches, including itlinkarrow .data reaching 100%, several Link arrow functions, and three Yoshi SpecialS collision functions.",
+      "evidence_refs": [
+        "text_corpus.jsonl: decomp-dev[bot] report for GALE01"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "The Link arrow header was updated when fn_802A81C4's recovered body/signature changed, rather than hiding the signature locally.",
+      "evidence_refs": [
+        "diff.diff: itlinkarrow.h changes fn_802A81C4 to s32 fn_802A81C4(Item_GObj*)",
+        "diff.diff: itlinkarrow.c defines s32 fn_802A81C4(Item_GObj* gobj)"
+      ]
+    },
+    {
+      "text": "Several unnecessary HSD_GObj casts were removed where Item_GObj/HSD_GObj-compatible call sites already accepted the expression shape used in the PR.",
+      "evidence_refs": [
+        "diff.diff: GET_ITEM(gobj), it_80275158(gobj,...), Item_8026AB54(gobj,...), return gobj in it_802A83E0",
+        "diff.diff: itLinkArrow_Logic98_EvtUnk changes it_8026B894(gobj, (HSD_GObj*) arg1) to it_8026B894(gobj, arg1)"
+      ]
+    },
+    {
+      "text": "A repeated copy block in it_802A7E40 stayed as a compact loop rather than expanded assignments.",
+      "evidence_refs": [
+        "diff.diff: removed #if/#else assignment block and kept for (i = 0; i < 3; i++) pointer-index copy"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a recovered function body proves a narrower or more accurate signature, update the owning header in the same PR.",
+      "scope": [
+        "headers",
+        "item functions"
+      ],
+      "evidence_refs": [
+        "diff.diff: fn_802A81C4 definition changed to s32 fn_802A81C4(Item_GObj*)",
+        "diff.diff: itlinkarrow.h prototype updated accordingly"
+      ]
+    },
+    {
+      "lesson": "Small artificial inline wrappers can be used as matching tactics, but the PR evidence labels some of them as permuter-generated and 'almost certainly fake', so they should be treated as narrow tactics rather than source style.",
+      "scope": [
+        "fighter/Yoshi",
+        "permuter matching"
+      ],
+      "evidence_refs": [
+        "diff.diff: comment before perm_neg_inline/perm_mul_inline/perm_vel_x_inline says 'permuter-generated helpers, almost certainly fake'",
+        "text_corpus.jsonl: bot report shows Yoshi collision functions reached 100%"
+      ]
+    },
+    {
+      "lesson": "Assert filename evidence can force source-shape compromises: this PR temporarily overrides __FILE__ around fake JObj helpers to emit jobj.h assert locations, then restores itlinkarrow.c.",
+      "scope": [
+        "items",
+        "baselib JObj asserts"
+      ],
+      "evidence_refs": [
+        "diff.diff: #undef __FILE__ / #define __FILE__ \"jobj.h\" before fake_HSD_JObjSetRotation",
+        "diff.diff: #undef __FILE__ / #define __FILE__ \"itlinkarrow.c\" after fake helpers"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "Local object pointers were renamed to short role names such as ip for Item* and jobj for HSD_JObj* in itlinkarrow work.",
+      "evidence_refs": [
+        "diff.diff: fn_802A81C4 uses Item* ip and HSD_JObj* jobj",
+        "diff.diff: it_802A850C uses Item* ip and HSD_JObj* jobj"
+      ]
+    },
+    {
+      "text": "The SpecialHi temporary name was changed from register-style temp_f4 to role-ish mag once its value represented input magnitude.",
+      "evidence_refs": [
+        "diff.diff: ftYs_SpecialHi.c float temp_f4 changed to float mag"
+      ]
+    },
+    {
+      "text": "Recovered data arrays in itlinkarrow were address-style named it_803F6A78 and it_803F6A98 rather than semantic names.",
+      "evidence_refs": [
+        "diff.diff: added f32 it_803F6A78[] and f32 it_803F6A98[]",
+        "diff.diff: itlinkarrow.h added extern f32 it_803F6A78[]"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "text": "Introduced tiny inline access/math wrappers such as perm_vel_inline, perm_neg_inline, perm_mul_inline, and perm_vel_x_inline to steer codegen for Yoshi SpecialS.",
+      "evidence_refs": [
+        "diff.diff: ftYs_SpecialS.c adds perm_vel_inline returning fp->gr_vel",
+        "diff.diff: ftYs_SpecialS.c adds perm_neg_inline, perm_mul_inline, perm_vel_x_inline",
+        "text_corpus.jsonl: bot report lists Yoshi SpecialS functions newly matched/improved"
+      ]
+    },
+    {
+      "text": "Adjusted explicit stack padding forms and sizes in Yoshi and Link arrow functions.",
+      "evidence_refs": [
+        "diff.diff: ftYs_SpecialAirSLanding_Anim PAD_STACK(4) to u8 pad[4]",
+        "diff.diff: ftYs_SpecialAirSLoop_2_Coll PAD_STACK(40) to u8 pad[28]",
+        "diff.diff: it_802A850C introduces several u8 _pad arrays and PAD_STACK(12)"
+      ]
+    },
+    {
+      "text": "Used M_PI_2 and simpler float expressions instead of explicit f64 casts in several angle calculations.",
+      "evidence_refs": [
+        "diff.diff: ftYs_SpecialAirSLoop_1_Anim removes f64 casts around M_PI and M_PI_2 expressions",
+        "diff.diff: it_802A850C uses M_PI_2 * ip->facing_dir"
+      ]
+    },
+    {
+      "text": "Used a compact assignment inside ABS for gr_vel/self_vel synchronization in ftYs_SpecialAirSLoop_2_Coll.",
+      "evidence_refs": [
+        "diff.diff: fp->mv.ys.specials.x1C = ABS(fp->gr_vel = fp->self_vel.x)"
+      ]
+    },
+    {
+      "text": "Link arrow data matching involved removing generic numbers/numbers_l arrays and adding address-style float arrays near the state table.",
+      "evidence_refs": [
+        "diff.diff: removed f32 numbers[] and f32 numbers_l[]",
+        "diff.diff: added f32 it_803F6A78[] and f32 it_803F6A98[]",
+        "text_corpus.jsonl: bot report says itlinkarrow .data reached 100%"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "text": "No human review comments or reviews were present in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata_json: review_comments 0, reviews 0",
+        "text_corpus.jsonl: only PR body and decomp-dev[bot] issue comment loaded"
+      ]
+    },
+    {
+      "text": "Automated bot feedback reported matching progress: matched code +0.13% (+5220 bytes), matched data +0.02% (+256 bytes), 9 new matches, and 5 improvements.",
+      "evidence_refs": [
+        "text_corpus.jsonl: decomp-dev[bot] report for GALE01"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2337",
+    "lukechampine",
+    "Permuter fixes and itlinkarrow work",
+    "itlinkarrow",
+    "it_802A850C",
+    "fn_802A81C4",
+    "it_803F6A78",
+    "it_803F6A98",
+    "ftYs_SpecialS",
+    "ftYs_SpecialHi",
+    "ftYs_SpecialAirSLoop_1_Anim",
+    "ftYs_SpecialAirSLoop_0_Coll",
+    "ftYs_SpecialAirSLoop_1_Coll",
+    "ftYs_SpecialAirSLoop_2_Coll",
+    "ftYs_SpecialAirSLoop_3_Coll",
+    "perm_vel_inline",
+    "perm_neg_inline",
+    "perm_mul_inline",
+    "perm_vel_x_inline",
+    "fake_HSD_JObjSetRotation",
+    "fake_HSD_JObjSetTranslate",
+    "__FILE__ jobj.h",
+    "PAD_STACK",
+    "GET_JOBJ",
+    "Item_GObj"
+  ],
+  "follow_up_queries": [
+    "Search later PRs for removal or cleanup of perm_vel_inline perm_neg_inline perm_mul_inline perm_vel_x_inline in ftYs_SpecialS.c.",
+    "Search later PRs for fake_HSD_JObjSetRotation fake_HSD_JObjSetTranslate and __FILE__ jobj.h cleanup in itlinkarrow.c.",
+    "Search itlinkarrow follow-ups for it_803F6A78 it_803F6A98 naming, data ownership, or extern changes.",
+    "Search later Link arrow PRs for fn_802A81C4 return type and Item_GObj signature confirmation.",
+    "Search for it_802A850C remaining unmatched bytes or stack padding cleanup after PR 2337."
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: complete PR identity, changed file metadata, merge timestamp, counts",
+      "raw_diff/diff_excerpt: substantial but truncated diff excerpt",
+      "changed_files.jsonl: complete changed-file list",
+      "text_corpus.jsonl: PR body empty; one bot report; no human review comments"
+    ],
+    "notes": [
+      "The diff evidence is truncated for the large itlinkarrow.c file, so some detailed changed hunks are not represented in this postmortem.",
+      "There is no PR body explanation and no human review feedback in the loaded slice.",
+      "The bot report provides validation-like matching evidence, but no local build logs, objdiff command output, or reviewer rationale are included.",
+      "The PR itself contains comments calling some permuter helpers fake; this supports classifying them as tactics, not accepted decomp style."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "pr_lesson",
+        "title": "Header signatures should track recovered bodies",
+        "text": "PR 2337 changed fn_802A81C4 to s32 fn_802A81C4(Item_GObj*) in both itlinkarrow.c and itlinkarrow.h, supporting the reusable lesson that recovered signatures should be updated in the owning header.",
+        "scope": [
+          "headers",
+          "item functions"
+        ],
+        "evidence_refs": [
+          "diff.diff: itlinkarrow.c fn_802A81C4 definition",
+          "diff.diff: itlinkarrow.h prototype update"
+        ]
+      },
+      {
+        "record_type": "matching_tactic",
+        "title": "Permuter helper inlines are narrow tactics, not style",
+        "text": "PR 2337 used permuter helper inlines in ftYs_SpecialS.c and explicitly commented that some were 'permuter-generated helpers, almost certainly fake'; treat similar helpers as matching tactics needing cleanup review.",
+        "scope": [
+          "fighter/Yoshi",
+          "permuter matching"
+        ],
+        "evidence_refs": [
+          "diff.diff: perm_* helper definitions and comment",
+          "text_corpus.jsonl: Yoshi SpecialS functions newly matched/improved"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Document fake permuter helper wrappers as cleanup-sensitive tactics",
+        "text": "PR 2337 provides historical evidence of simple helper wrappers named perm_* being used for matching while also labeled 'almost certainly fake'. Consider adding or cross-linking guidance that such wrappers must remain narrow, evidence-backed tactics and should not be promoted to normal authored style.",
+        "source_path": null,
+        "scope": [
+          "matching tactics",
+          "permuter output",
+          "fighter source"
+        ],
+        "evidence_refs": [
+          "diff.diff: ftYs_SpecialS.c comment 'permuter-generated helpers, almost certainly fake'",
+          "diff.diff: perm_neg_inline, perm_mul_inline, perm_vel_x_inline definitions",
+          "text_corpus.jsonl: bot report Yoshi SpecialS matches"
+        ],
+        "reason": "This is consistent with existing standards but may be useful as a searchable, explicit example for curator review."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Assert filename overrides around fake header helpers need strict scoping",
+        "text": "PR 2337 temporarily redefined __FILE__ to jobj.h around fake HSD_JObj helpers and restored itlinkarrow.c afterward. Consider documenting this as a risky matching workaround that should be scoped tightly and revisited when real header inline/helper recovery becomes possible.",
+        "source_path": null,
+        "scope": [
+          "asserts",
+          "header inlines",
+          "baselib JObj"
+        ],
+        "evidence_refs": [
+          "diff.diff: __FILE__ set to \"jobj.h\" around fake_HSD_JObjSetRotation/fake_HSD_JObjSetTranslate",
+          "diff.diff: __FILE__ restored to \"itlinkarrow.c\""
+        ],
+        "reason": "The loaded standards already prefer header inlines/macros; this PR is a concrete historical example of a temporary workaround."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that perm_* inline helpers are accepted style; PR evidence calls some fake and the loaded standards require explicit matching evidence for such tactics.",
+      "Do not infer reviewer approval rationale because no human review comments were loaded.",
+      "Do not infer all itlinkarrow.c changed functions from the truncated diff; only the visible hunks and bot report are summarized.",
+      "Do not promote it_803F6A78 or it_803F6A98 semantic meaning beyond address-style float arrays; no semantic naming evidence was loaded."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

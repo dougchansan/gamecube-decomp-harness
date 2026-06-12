@@ -1,0 +1,17 @@
+{
+  "number": 323,
+  "title": "small fix to player.c",
+  "state": "MERGED",
+  "createdAt": "2022-03-08T08:32:22Z",
+  "updatedAt": "2022-03-08T14:05:01Z",
+  "mergedAt": "2022-03-08T14:05:00Z",
+  "closedAt": "2022-03-08T14:05:01Z",
+  "author": "snuffysasa",
+  "url": "https://github.com/doldecomp/melee/pull/323",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 1035
+  }
+}

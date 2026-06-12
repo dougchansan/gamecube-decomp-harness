@@ -1,0 +1,10 @@
+{
+  "pr": 1731,
+  "title": "Fix edge cases in `wiki_tu.py`",
+  "url": "https://github.com/doldecomp/melee/pull/1731",
+  "text_records_with_body": 0,
+  "review_comments": 0,
+  "changed_files": 1,
+  "added_lines": 16,
+  "deleted_lines": 4
+}

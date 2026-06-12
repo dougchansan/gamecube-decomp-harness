@@ -1,0 +1,17 @@
+{
+  "number": 2648,
+  "title": "Bump Actions versions",
+  "state": "MERGED",
+  "createdAt": "2026-06-10T17:00:11Z",
+  "updatedAt": "2026-06-10T17:12:05Z",
+  "mergedAt": "2026-06-10T17:12:04Z",
+  "closedAt": "2026-06-10T17:12:04Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/2648",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 3362
+  }
+}

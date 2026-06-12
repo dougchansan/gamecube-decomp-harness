@@ -1,0 +1,17 @@
+{
+  "number": 880,
+  "title": "Match `ftCo_Furafura`",
+  "state": "MERGED",
+  "createdAt": "2023-05-27T12:18:48Z",
+  "updatedAt": "2023-05-27T12:25:58Z",
+  "mergedAt": "2023-05-27T12:25:57Z",
+  "closedAt": "2023-05-27T12:25:57Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/880",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 11373
+  }
+}

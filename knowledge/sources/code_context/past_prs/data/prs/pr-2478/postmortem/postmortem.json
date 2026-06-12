@@ -1,0 +1,371 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2478",
+  "pr": {
+    "number": 2478,
+    "title": "Jj/hsd 3 aa7",
+    "url": "https://github.com/doldecomp/melee/pull/2478",
+    "state": "CLOSED",
+    "author": "jurrejelle",
+    "created_at": "2026-05-10T12:15:21Z",
+    "merged_at": null
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Closed, unmerged HSD/baselib matching slice focused mainly on src/sysdolphin/baselib/hsd_3AA7.c, with one reported new match for fn_803AC3F8, partial-score improvements for fn_803ADF90, fn_803AE7F8, and fn_803B0E9C, a small regression in fn_803B21E8, header prototype/type updates, and mostly formatting-only edits in psdisp.c and a few game/stage files. The author later closed it as superseded by PR #2512.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "formatting",
+      "typed-struct-recovery"
+    ],
+    "systems": [
+      "sysdolphin/baselib",
+      "melee/gm",
+      "melee/gr"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/sysdolphin/baselib/hsd_3AA7.c",
+      "role": "Primary decomp/matching target; added local structs and large C bodies for CARD/HSD routines including fn_803ADF90, fn_803AE7F8, and fn_803B0E9C; cleaned fn_803AC3F8 into a matched loop form.",
+      "evidence_refs": [
+        "changed_files: src/sysdolphin/baselib/hsd_3AA7.c +845/-83, 12 hunks",
+        "raw_diff: added HsdCmdEntry, Hsd803B2550Ctx, CardStateExt, CMD_QUEUE, and hsd_3B2B include",
+        "raw_diff: fn_803AC3F8 changed idx to file_idx and replaced zero-fill unroll block with for loop",
+        "text_corpus: bot report lists fn_803AC3F8 82.55% -> 100.00%, fn_803ADF90 0.00% -> 56.38%, fn_803AE7F8 0.00% -> 42.42%, fn_803B0E9C 0.00% -> 49.05%, fn_803B21E8 94.85% -> 92.73%"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/hsd_3AA7.h",
+      "role": "Header/prototype updates for hsd_3AA7 routines and partial struct layout recovery.",
+      "evidence_refs": [
+        "changed_files: src/sysdolphin/baselib/hsd_3AA7.h +15/-10, 3 hunks",
+        "raw_diff: hsd_803AAA48 changed from UNK_RET/UNK_PARAMS to s32 hsd_803AAA48(void)",
+        "raw_diff: fn_803AD16C changed to s32 fn_803AD16C(CardState* state)",
+        "raw_diff: fn_803ADF90/fn_803AE7F8/fn_803AF3F0/fn_803B0120/fn_803B21E8 prototypes changed to use struct hsd_803AC3E0_arg0_t* and named parameters"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/psdisp.c",
+      "role": "Formatting/include-order cleanup in psDispParticles and related long GX/math expressions; no bot-reported match item for this file in loaded evidence.",
+      "evidence_refs": [
+        "changed_files: src/sysdolphin/baselib/psdisp.c +275/-102, 27 hunks",
+        "raw_diff: baselib/forward.h moved after cobj/fog includes with blank-line grouping",
+        "raw_diff: long calls and expressions in psDispParticles split across lines"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_18A5.c",
+      "role": "Formatting-only compound-literal spacing for GXColor initializers.",
+      "evidence_refs": [
+        "changed_files: src/melee/gm/gm_18A5.c +3/-3, 1 hunk",
+        "raw_diff: GXColor casts changed from (GXColor){...} to (GXColor) {...}"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmclassic.c",
+      "role": "Formatting-only function-pointer cast spacing.",
+      "evidence_refs": [
+        "changed_files: src/melee/gm/gmclassic.c +3/-3, 1 hunk",
+        "raw_diff: casts changed from u8(*)(...) and f32(*)(...) to u8 (*)(...) and f32 (*)(...)"
+      ]
+    },
+    {
+      "path": "src/melee/gr/gricemt.c",
+      "role": "Formatting-only function-pointer cast spacing.",
+      "evidence_refs": [
+        "changed_files: src/melee/gr/gricemt.c +1/-1, 1 hunk",
+        "raw_diff: HSD_GObjEvent callback cast spacing changed to s32 (*)(HSD_GObj*, s32*)"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Added hsd_3B2B.h include in hsd_3AA7.c and introduced local temporary structures HsdCmdEntry, Hsd803B2550Ctx, and CardStateExt plus CMD_QUEUE macro for offsets/state fields.",
+    "Changed CardQueueEntry.x4 from s32 to void* while preserving s32 use at fn_803AA790 by casting entry->x4 back to s32.",
+    "Reworked fn_803AC3F8: renamed idx parameter to file_idx, removed remaining/unroll locals, used typed arg0 assignment, and replaced a generated-looking zero-fill do/while/unroll shape with a short for loop.",
+    "Implemented or partially implemented large hsd_3AA7.c routines previously represented by placeholder comments, including fn_803ADF90, fn_803AE7F8, and fn_803B0E9C in the loaded diff excerpt.",
+    "Updated hsd_3AA7.h prototypes from unknown or all-s32 signatures toward typed CardState/struct hsd_803AC3E0_arg0_t pointer signatures and named parameters.",
+    "Reformatted psdisp.c include grouping and long expressions/calls in psDispParticles.",
+    "Applied formatting-only cast/compound-literal spacing changes in gm_18A5.c, gmclassic.c, and gricemt.c.",
+    "Bot report recorded one new exact match, three unmatched-item improvements, and one unmatched-item regression in hsd_3AA7."
+  ],
+  "smart_moves": [
+    {
+      "text": "The fn_803AC3F8 cleanup replaced a bulky generated-looking zero-fill sequence with a compact for loop while the bot reported the function reached 100.00%. This is good evidence that testing natural loop forms can improve both readability and match quality.",
+      "evidence_refs": [
+        "raw_diff: fn_803AC3F8 removed remaining/unroll zero-fill block and added for (; i < 3; i++) zero-fill loop",
+        "text_corpus: bot report lists fn_803AC3F8 as 82.55% -> 100.00%"
+      ]
+    },
+    {
+      "text": "Header prototypes were updated alongside body/type recovery instead of leaving UNK_RET/UNK_PARAMS for recovered routines.",
+      "evidence_refs": [
+        "raw_diff: hsd_803AAA48 and fn_803AD16C prototype updates in hsd_3AA7.h",
+        "raw_diff: typed hsd_803AC3E0_arg0_t* prototypes for several hsd_3AA7 routines"
+      ]
+    },
+    {
+      "text": "The PR kept partially matched functions annotated by score/todo comments rather than claiming exact matches for fn_803AC168, fn_803AC6B8, and fn_803ADE4C.",
+      "evidence_refs": [
+        "raw_diff: @todo Currently 91.67% match for fn_803AC168",
+        "raw_diff: @todo Currently 76.6% match for fn_803AC6B8",
+        "raw_diff: @todo Currently 93.46% match for fn_803ADE4C"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For short repeated byte writes, try a natural counted loop before preserving generated unroll scaffolding; in this slice, removing the unrolled zero-fill tail in fn_803AC3F8 coincided with a bot-reported 100% match.",
+      "scope": [
+        "src/sysdolphin/baselib/hsd_3AA7.c",
+        "fn_803AC3F8"
+      ],
+      "evidence_refs": [
+        "raw_diff: fn_803AC3F8 zero-fill unroll removed",
+        "text_corpus: fn_803AC3F8 82.55% -> 100.00%"
+      ]
+    },
+    {
+      "lesson": "When recovering body signatures in a matching PR, update the owning header prototypes instead of leaving unknown signatures, but keep evidence narrow to the recovered functions.",
+      "scope": [
+        "src/sysdolphin/baselib/hsd_3AA7.h",
+        "src/sysdolphin/baselib/hsd_3AA7.c"
+      ],
+      "evidence_refs": [
+        "raw_diff: hsd_803AAA48 UNK_RET/UNK_PARAMS replaced with s32 hsd_803AAA48(void)",
+        "raw_diff: fn_803AD16C and fn_803B21E8 prototype updates"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Use short local role names for recovered storage and flow when the role is locally visible, such as file_idx, file_desc, blocks_before, file_blocks, block_map, callback_seq, seq_num, data_block, primary, secondary, free_blocks, and current_seq.",
+      "evidence_refs": [
+        "raw_diff: fn_803AC3F8 parameter renamed idx to file_idx and local file_desc retained",
+        "raw_diff: fn_803ADF90 and fn_803AE7F8 introduced block/file/sequence role locals"
+      ]
+    },
+    {
+      "convention": "For unrecovered global/function names, the PR retained address-style names such as fn_803ADF90, fn_803AE7F8, fn_803B0E9C, hsd_804D7998, and hsd_804D799C rather than inventing semantic public names.",
+      "evidence_refs": [
+        "raw_diff: added bodies/prototypes still use fn_803ADF90/fn_803AE7F8/fn_803B0E9C and hsd_804D79xx globals"
+      ]
+    },
+    {
+      "convention": "Formatting changes used project-style spacing for function-pointer casts and compound-literal casts: e.g. s32 (*)(...), u8 (*)(...), and (GXColor) {...}.",
+      "evidence_refs": [
+        "raw_diff: gmclassic.c and gricemt.c function-pointer cast spacing",
+        "raw_diff: gm_18A5.c GXColor compound-literal spacing"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Natural-loop replacement for generated-looking unrolled writes in fn_803AC3F8.",
+      "evidence_refs": [
+        "raw_diff: removed remaining/unroll do-while zeroing 0x20 chunks",
+        "raw_diff: added for (; i < 3; i++) zero-fill loop",
+        "text_corpus: fn_803AC3F8 reached 100.00%"
+      ]
+    },
+    {
+      "tactic": "Use temporary internal structs with known offsets/arrays to express CARD state access instead of pervasive raw pointer arithmetic.",
+      "evidence_refs": [
+        "raw_diff: added CardStateExt with fields x0, x4, x8, file_info, x20, x24, x28[9], x4C[9], x70[9], x170[64], x270[64], x370, x3B0, x460",
+        "raw_diff: fn_803ADF90 and fn_803AE7F8 cast arg0 to CardStateExt* and use state-> fields"
+      ]
+    },
+    {
+      "tactic": "For async CARD paths, command buffers were modeled as local s32 cmd[9] arrays initialized to zero and then filled by slot before calling fn_803AC168.",
+      "evidence_refs": [
+        "raw_diff: fn_803ADF90 uses s32 cmd[9] = { 0 } with cmd[0], cmd[1], cmd[4], cmd[6], cmd[7], cmd[8]",
+        "raw_diff: fn_803AE7F8 and fn_803B0E9C contain similar cmd[9] patterns"
+      ]
+    },
+    {
+      "tactic": "The slice documents unresolved codegen issues directly in @todo comments where functions are not exact matches.",
+      "evidence_refs": [
+        "raw_diff: fn_803AC168 todo mentions volatile load scheduling in critical section",
+        "raw_diff: fn_803AC6B8 todo mentions mwcc combined rlwimi",
+        "raw_diff: fn_803ADE4C todo mentions stwx vs stw+disp and register swap"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "text": "Bot report for GALE01 showed matched code 67.19% (+0.01%, +352 bytes), 1 new match, 3 unmatched-item improvements, and 1 unmatched-item regression.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev[bot] issue comment 2026-05-10T12:19:31Z"
+      ]
+    },
+    {
+      "kind": "bot_report_detail",
+      "text": "New match: main/sysdolphin/baselib/hsd_3AA7 fn_803AC3F8 +62 bytes, 82.55% -> 100.00%. Improvements: fn_803AE7F8 +1299 bytes to 42.42%, fn_803ADF90 +1213 bytes to 56.38%, fn_803B0E9C +578 bytes to 49.05%. Regression: fn_803B21E8 -8 bytes, 94.85% -> 92.73%.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev[bot] report tables"
+      ]
+    },
+    {
+      "kind": "closure_comment",
+      "text": "Author/commenter stated the PR was superseded by https://github.com/doldecomp/melee/pull/2512.",
+      "evidence_refs": [
+        "human_pr_text: Superseded by PR #2512",
+        "text_corpus: issue_comment by jellejurre at 2026-05-18T18:07:33Z"
+      ]
+    },
+    {
+      "kind": "missing_review",
+      "text": "No loaded human review comments or formal reviews are present in this slice.",
+      "evidence_refs": [
+        "metadata_json: review_comments 0, reviews 0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2478",
+    "Jj/hsd 3 aa7",
+    "jj/hsd_3AA7",
+    "jurrejelle",
+    "jellejurre",
+    "superseded by PR2512",
+    "src/sysdolphin/baselib/hsd_3AA7.c",
+    "src/sysdolphin/baselib/hsd_3AA7.h",
+    "src/sysdolphin/baselib/psdisp.c",
+    "fn_803AC3F8",
+    "fn_803ADF90",
+    "fn_803AE7F8",
+    "fn_803B0E9C",
+    "fn_803B21E8",
+    "fn_803AC168",
+    "fn_803AC6B8",
+    "fn_803ADE4C",
+    "hsd_803AAA48",
+    "fn_803AD16C",
+    "CardStateExt",
+    "HsdCmdEntry",
+    "Hsd803B2550Ctx",
+    "CMD_QUEUE",
+    "CARDFastOpen",
+    "CARDRead",
+    "CARDClose",
+    "OSDisableInterrupts",
+    "fn_803ACB74",
+    "fn_803AC7DC",
+    "psDispParticles",
+    "GXSetVtxAttrFmt",
+    "GXSetBlendMode",
+    "GXSetAlphaCompare",
+    "function pointer cast spacing",
+    "natural loop zero fill",
+    "UNK_RET UNK_PARAMS prototype cleanup"
+  ],
+  "follow_up_queries": [
+    "PR2512 hsd_3AA7 superseded fn_803AC3F8 fn_803ADF90 fn_803AE7F8 fn_803B0E9C",
+    "fn_803AC3F8 natural loop zero fill 100 match hsd_3AA7",
+    "fn_803B21E8 regression PR2478 hsd_3AA7",
+    "hsd_3AA7 CardStateExt x170 x270 block map sequence",
+    "hsd_3AA7.h UNK_RET UNK_PARAMS hsd_803AAA48 fn_803AD16C",
+    "psdisp.c PR2478 formatting psDispParticles GXSetVtxAttrFmt"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR number/title/state/author/url/timestamps and changed-file counts",
+      "raw_diff: loaded excerpt plus targeted local diff reads for hsd_3AA7.h and psdisp.c",
+      "text_corpus: bot report and superseded comment",
+      "human_pr_text: superseded note"
+    ],
+    "notes": [
+      "PR body is empty and there are no loaded human review comments.",
+      "The PR is closed with merged_at null; the slice explicitly says it was superseded by PR #2512, so changes should not be treated as accepted merely because they appeared here.",
+      "The raw diff was initially truncated; targeted local reads/greps were used only to identify hsd_3AA7.h and psdisp.c details.",
+      "Only bot score output supports match/regression claims; no local build, objdiff command output, or reviewer acceptance is loaded.",
+      "Large hsd_3AA7 function bodies are only partially represented in the excerpt; avoid over-interpreting exact behavior beyond visible CARD/block/command-buffer patterns."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "lesson",
+        "title": "Natural short loops can beat generated unroll scaffolding",
+        "text": "In PR #2478, fn_803AC3F8 removed a generated-looking remaining/unroll zero-fill block and used a compact counted for loop for the remaining 4-byte records; the bot report showed the function became a 100.00% match.",
+        "scope": [
+          "src/sysdolphin/baselib/hsd_3AA7.c",
+          "fn_803AC3F8"
+        ],
+        "evidence_refs": [
+          "raw_diff: fn_803AC3F8 zero-fill unroll replaced by for loop",
+          "text_corpus: bot report fn_803AC3F8 82.55% -> 100.00%"
+        ],
+        "confidence": 0.86
+      },
+      {
+        "record_type": "lesson",
+        "title": "Recovered bodies should tighten owning header signatures",
+        "text": "This slice updated hsd_3AA7.h from unknown/all-s32 declarations toward typed signatures for recovered hsd_3AA7 routines, including hsd_803AAA48, fn_803AD16C, fn_803ADF90, fn_803AE7F8, fn_803AF3F0, fn_803B0120, and fn_803B21E8.",
+        "scope": [
+          "src/sysdolphin/baselib/hsd_3AA7.h"
+        ],
+        "evidence_refs": [
+          "raw_diff: hsd_3AA7.h prototype changes"
+        ],
+        "confidence": 0.78
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "hsd_3AA7.c contains CARD save/load block-map and async command-buffer routines",
+        "text": "PR #2478 evidence shows src/sysdolphin/baselib/hsd_3AA7.c working on CARD state/block-map/sequence routines, with CARDFastOpen/CARDRead/CARDClose paths, fn_803AC168 command buffers, and functions fn_803ADF90, fn_803AE7F8, and fn_803B0E9C partially implemented.",
+        "source_path": "src/sysdolphin/baselib/hsd_3AA7.c",
+        "scope": [
+          "sysdolphin/baselib",
+          "CARD",
+          "hsd_3AA7"
+        ],
+        "evidence_refs": [
+          "raw_diff: fn_803ADF90/fn_803AE7F8/fn_803B0E9C bodies use CardStateExt, CARD APIs, block maps, sequence numbers, cmd[9]",
+          "text_corpus: bot report mentions hsd_3AA7 functions"
+        ],
+        "reason": "Could help future path/symbol lookup, but should be curated against current source and superseding PR #2512 before promotion."
+      },
+      {
+        "target_source_id": "other",
+        "update_kind": "source_update",
+        "title": "Check PR #2512 before using PR #2478 as final evidence",
+        "text": "The only human follow-up in this slice says PR #2478 was superseded by PR #2512. Any durable facts about hsd_3AA7 matching state, accepted function bodies, or final naming should be checked in PR #2512/current source.",
+        "source_path": null,
+        "scope": [
+          "PR2478",
+          "PR2512",
+          "hsd_3AA7"
+        ],
+        "evidence_refs": [
+          "human_pr_text: Superseded by https://github.com/doldecomp/melee/pull/2512",
+          "metadata_json: merged_at null"
+        ],
+        "reason": "Prevents superseded/unmerged PR evidence from being promoted as accepted project state."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote fn_803ADF90, fn_803AE7F8, or fn_803B0E9C as matched; bot report only shows partial unmatched-item improvements.",
+      "Do not treat fn_803B21E8 changes as a clean improvement; bot report shows a small regression.",
+      "Do not infer reviewer approval or merge acceptance; loaded evidence has no reviews and merged_at is null.",
+      "Do not generalize psdisp.c changes into a matching tactic; loaded evidence only shows formatting/include-order edits and no bot-reported psdisp match result."
+    ]
+  },
+  "confidence": 0.72,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

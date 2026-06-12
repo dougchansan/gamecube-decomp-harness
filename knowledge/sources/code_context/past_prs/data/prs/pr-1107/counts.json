@@ -1,0 +1,17 @@
+{
+  "number": 1107,
+  "title": "Assume that `data:float` means size 4 in `symbols.txt`",
+  "state": "MERGED",
+  "createdAt": "2024-01-24T16:24:19Z",
+  "updatedAt": "2024-01-24T16:25:26Z",
+  "mergedAt": "2024-01-24T16:25:25Z",
+  "closedAt": "2024-01-24T16:25:25Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1107",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 122186
+  }
+}

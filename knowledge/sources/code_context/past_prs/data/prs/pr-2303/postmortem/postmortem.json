@@ -1,0 +1,345 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2303",
+  "pr": {
+    "number": 2303,
+    "title": "gm/mn: match 4 functions",
+    "url": "https://github.com/doldecomp/melee/pull/2303",
+    "state": "MERGED",
+    "author": "johnwinston",
+    "created_at": "2026-03-15T23:04:07Z",
+    "merged_at": "2026-03-16T00:06:52Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Matched or improved menu/game-mode utility functions across gm_1832, mnname, and mnruleplus, replacing placeholder function markers with C implementations and updating recovered prototypes in headers. Bot report confirms 4 new 100% function matches and one additional 98.72% improvement, while the PR body claims all listed functions were 100% matched via objdiff and ninja built cleanly.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "naming",
+      "data",
+      "verification"
+    ],
+    "systems": [
+      "game-mode",
+      "menu",
+      "name-entry",
+      "rules-menu"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gm/gm_1832.c",
+      "role": "Implemented fn_8018846C using lbl_80473700 state, pl_8004134C, and Player_GetPlayerCharacter.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:src/melee/gm/gm_1832.c",
+        "text_corpus:bot_report"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1832.h",
+      "role": "Updated fn_8018846C prototype from UNK_RET/UNK_PARAMS to int fn_8018846C(void).",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:src/melee/gm/gm_1832.h"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnname.c",
+      "role": "Implemented mnName_GetPageCount, mnName_GetColumnCount, and mnName_802388D4 name-entry helpers.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:src/melee/mn/mnname.c",
+        "human_pr_text",
+        "text_corpus:bot_report"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnname.h",
+      "role": "Updated recovered prototypes for mnName_GetPageCount, mnName_GetColumnCount, and mnName_802388D4.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:src/melee/mn/mnname.h"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnruleplus.c",
+      "role": "Added AnimLoopSettings/data arrays and implemented mn_80232458 rules-menu helper.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:src/melee/mn/mnruleplus.c",
+        "text_corpus:bot_report"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Replaced placeholder /// #fn_8018846C with an int-returning implementation in gm_1832.c and updated its header prototype.",
+    "Replaced placeholders for mnName_GetPageCount and mnName_GetColumnCount with loops over 0x78 name slots using IsNameValid, calculating page count by 24 and column count by 6.",
+    "Implemented mnName_802388D4 as an HSD_JObj* lookup helper that walks child/next links for indices below 0x18 and uses a switch for indices 0x18 through 0x1A.",
+    "Updated mnname.h prototypes from unknown signatures to concrete s32/HSD_JObj* signatures.",
+    "Added mn_803ED270, mn_803ED294, and mn_803ED2E8 data in mnruleplus.c and implemented mn_80232458 to return AnimLoopSettings pointers based on option, value, and direction.",
+    "Bot report records 4 new 100% matches: mnName_GetPageCount, mnName_802388D4, fn_8018846C, and mn_80232458; it also records mnName_GetColumnCount as improved to 98.72%, not listed as a new full match."
+  ],
+  "smart_moves": [
+    "Recovered owning header prototypes alongside function bodies instead of leaving UNK_RET/UNK_PARAMS after signatures were known.",
+    "Used compact counting loops for name-entry pagination rather than preserving repeated generated blocks.",
+    "Used a bounded switch for special mnName_802388D4 index cases, which makes the non-grid object lookups explicit.",
+    "Kept address-style names such as fn_8018846C and mnName_802388D4 where the PR evidence does not prove better semantic names."
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When function bodies prove signatures, update the owning header in the same PR so UNK_RET/UNK_PARAMS do not persist.",
+      "scope": [
+        "src/melee/gm/gm_1832.h",
+        "src/melee/mn/mnname.h"
+      ],
+      "evidence_refs": [
+        "raw_diff:src/melee/gm/gm_1832.h",
+        "raw_diff:src/melee/mn/mnname.h",
+        "decomp_standards:truthful-headers-and-includes"
+      ]
+    },
+    {
+      "lesson": "Simple counted scans over fixed menu slots can be represented as natural for-loops when the recovered logic is a count over valid entries.",
+      "scope": [
+        "src/melee/mn/mnname.c",
+        "mnName_GetPageCount",
+        "mnName_GetColumnCount"
+      ],
+      "evidence_refs": [
+        "raw_diff:src/melee/mn/mnname.c",
+        "decomp_standards:natural-loops"
+      ]
+    },
+    {
+      "lesson": "For index-to-object helpers, a loop for regular sequential children plus a switch for special out-of-range indices can be a reviewable source shape when the diff supports that structure.",
+      "scope": [
+        "src/melee/mn/mnname.c",
+        "mnName_802388D4"
+      ],
+      "evidence_refs": [
+        "raw_diff:src/melee/mn/mnname.c",
+        "decomp_standards:canonical-control-flow-and-macros"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Preserved existing address-style names for functions without stronger semantic naming evidence, including fn_8018846C, mnName_802388D4, and mn_80232458.",
+      "evidence_refs": [
+        "raw_diff",
+        "decomp_standards:conservative-naming"
+      ]
+    },
+    {
+      "convention": "Used local role names such as gobj, jobj, index, count, value, direction, result, and ptr where the role is apparent from type or local use.",
+      "evidence_refs": [
+        "raw_diff:src/melee/mn/mnname.c",
+        "raw_diff:src/melee/mn/mnruleplus.c",
+        "raw_diff:src/melee/gm/gm_1832.c"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "PAD_STACK(16) was used in mnName_GetColumnCount.",
+      "evidence_refs": [
+        "raw_diff:src/melee/mn/mnname.c"
+      ],
+      "notes": "The bot report shows mnName_GetColumnCount improved to 98.72% rather than 100%, so the slice does not prove this tactic fully closed the match."
+    },
+    {
+      "tactic": "Added explicit data arrays mn_803ED270, mn_803ED294, and mn_803ED2E8 in mnruleplus.c to support mn_80232458 and improve .data matching.",
+      "evidence_refs": [
+        "raw_diff:src/melee/mn/mnruleplus.c",
+        "text_corpus:bot_report"
+      ],
+      "notes": "Bot report shows mnruleplus .data improved from 59.85% to 67.65%; the slice does not include deeper section ownership evidence."
+    },
+    {
+      "tactic": "Used concrete pointer casts and fixed offsets from HSD_GObj in mnName_802388D4 for JObj retrieval.",
+      "evidence_refs": [
+        "raw_diff:src/melee/mn/mnname.c"
+      ],
+      "notes": "This is supported by the diff as the implemented shape, but the slice does not show whether a typed struct field alternative was investigated."
+    }
+  ],
+  "review_feedback": [],
+  "searchable_terms": [
+    "pr-2303",
+    "gm/mn: match 4 functions",
+    "johnwinston",
+    "fn_8018846C",
+    "gm_1832",
+    "lbl_80473700",
+    "pl_8004134C",
+    "Player_GetPlayerCharacter",
+    "mn_80232458",
+    "mnruleplus",
+    "AnimLoopSettings",
+    "mn_803ED270",
+    "mn_803ED294",
+    "mn_803ED2E8",
+    "mnName_GetPageCount",
+    "mnName_GetColumnCount",
+    "mnName_802388D4",
+    "IsNameValid",
+    "Name Entry",
+    "Rules menu",
+    "PAD_STACK",
+    "HSD_GObj",
+    "HSD_JObj",
+    "UNK_RET",
+    "UNK_PARAMS",
+    "objdiff",
+    "ninja",
+    "Claude Code"
+  ],
+  "follow_up_queries": [
+    "mnName_GetColumnCount PAD_STACK 98.72 100 match",
+    "mnName_802388D4 HSD_GObj offsets 0x30 0x24 0x18 0x1C typed struct",
+    "mnruleplus mn_803ED270 mn_803ED294 mn_803ED2E8 data ownership",
+    "fn_8018846C lbl_80473700 results ranking callback",
+    "PR 2303 bot report mnName_GetColumnCount mismatch"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json",
+      "human_pr_text",
+      "raw_diff",
+      "changed_files.jsonl",
+      "text_corpus:bot_report"
+    ],
+    "notes": [
+      "No review comments were present in the loaded slice.",
+      "PR body claims all functions verified 100% via objdiff and ninja built cleanly, but the bot report lists only 4 new 100% matches and shows mnName_GetColumnCount at 98.72%.",
+      "The PR title says 4 functions, while the body lists fn_8018846C, mn_80232458, and three mnName functions; bot evidence supports 4 full new matches plus one partial improvement.",
+      "Data additions in mnruleplus.c are visible and improve .data according to the bot report, but section ownership rationale is not included in the slice.",
+      "The slice includes a PAD_STACK tactic but does not include enough evidence to treat it as a broadly accepted pattern."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "title": "Recover header prototypes with matched function bodies",
+        "text": "PR #2303 replaced UNK_RET/UNK_PARAMS declarations in gm_1832.h and mnname.h with concrete signatures when the corresponding bodies were implemented.",
+        "scope": [
+          "headers",
+          "decomp-matching",
+          "gm_1832",
+          "mnname"
+        ],
+        "evidence_refs": [
+          "raw_diff:src/melee/gm/gm_1832.h",
+          "raw_diff:src/melee/mn/mnname.h"
+        ]
+      },
+      {
+        "title": "Use natural loops for fixed-slot menu counting",
+        "text": "mnName_GetPageCount and mnName_GetColumnCount count valid entries across 0x78 name slots with for-loops and then compute page/column totals.",
+        "scope": [
+          "mnname",
+          "name-entry",
+          "natural-loops"
+        ],
+        "evidence_refs": [
+          "raw_diff:src/melee/mn/mnname.c"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Flag PAD_STACK when a function is not fully matched",
+        "text": "PR #2303 uses PAD_STACK(16) in mnName_GetColumnCount, but the bot report shows that function at 98.72% rather than 100%. Consider documenting that PAD_STACK in partially matched functions should be treated as provisional unless verifier evidence proves it is necessary.",
+        "source_path": null,
+        "scope": [
+          "matching tactics",
+          "PAD_STACK",
+          "verification"
+        ],
+        "evidence_refs": [
+          "raw_diff:src/melee/mn/mnname.c",
+          "text_corpus:bot_report",
+          "decomp_standards:matching-tactics-need-evidence"
+        ],
+        "reason": "The loaded evidence shows a stack-padding tactic without full-match confirmation for the affected function."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Reconcile author verification claims with bot reports during intake",
+        "text": "PR #2303 body claims all functions verified 100% via objdiff, while the bot report lists mnName_GetColumnCount as only 98.72%. Consider an intake note that contradictory verification evidence should be preserved rather than collapsed into a match claim.",
+        "source_path": null,
+        "scope": [
+          "verification",
+          "PR intake",
+          "objdiff"
+        ],
+        "evidence_refs": [
+          "human_pr_text",
+          "text_corpus:bot_report",
+          "decomp_standards:verification-and-regression-ledger"
+        ],
+        "reason": "This PR slice contains conflicting verification evidence that is useful for curator policy."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "mnname.c contains name-entry pagination and layout helpers",
+        "text": "In PR #2303, mnName_GetPageCount and mnName_GetColumnCount are described as supporting the Name Entry screen by calculating pagination for a 120-slot name list, and mnName_802388D4 is described as a layout callback for rendering the scrollable name grid.",
+        "source_path": "src/melee/mn/mnname.c",
+        "scope": [
+          "src/melee/mn/mnname.c",
+          "Name Entry",
+          "mnName_GetPageCount",
+          "mnName_GetColumnCount",
+          "mnName_802388D4"
+        ],
+        "evidence_refs": [
+          "human_pr_text",
+          "raw_diff:src/melee/mn/mnname.c"
+        ],
+        "reason": "The PR body provides file/function role descriptions, but curator should decide whether to promote them as path facts."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "mnruleplus.c contains Rules menu option animation lookup logic",
+        "text": "In PR #2303, mn_80232458 is described as handling logic in the Rules menu screen and the diff returns AnimLoopSettings pointers based on option, value, direction, and mn_803ED2E8 state.",
+        "source_path": "src/melee/mn/mnruleplus.c",
+        "scope": [
+          "src/melee/mn/mnruleplus.c",
+          "Rules menu",
+          "mn_80232458",
+          "AnimLoopSettings"
+        ],
+        "evidence_refs": [
+          "human_pr_text",
+          "raw_diff:src/melee/mn/mnruleplus.c"
+        ],
+        "reason": "The function role is stated in the PR body and reflected by the diff, but promotion to path facts is curator-owned."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote the PR body's blanket claim that all listed functions were 100% matched; bot evidence contradicts this for mnName_GetColumnCount.",
+      "Do not treat the added mnruleplus data arrays as proven canonical data ownership from this slice alone; only a .data improvement is shown.",
+      "Do not infer reviewer approval rationale or requested changes; no review comments were loaded.",
+      "Do not convert Claude-generated wording into independent technical proof without diff or bot-report support."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

@@ -1,0 +1,937 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2517",
+  "pr": {
+    "number": 2517,
+    "title": "Scene nomenclature cleanup",
+    "url": "https://github.com/doldecomp/melee/pull/2517",
+    "state": "MERGED",
+    "author": "sadkellz",
+    "created_at": "2026-05-20T20:13:26Z",
+    "merged_at": "2026-05-20T21:23:44Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Large nomenclature-only cleanup replacing ambiguous gm scene names using Major/Minor terminology with GameMode/GameScene naming across gm headers, gm source files, dependent menu/interface/library/toy files, symbols.txt, and table-typer tooling. Evidence shows matched/report output had no GALE01 changes and reviews were approving, while one reviewer noted the community had settled on the old Major/Minor terminology and future reconciliation may be needed.",
+  "change_classification": {
+    "primary_type": "naming_cleanup",
+    "categories": [
+      "cleanup",
+      "headers",
+      "symbols",
+      "tooling",
+      "nomenclature"
+    ],
+    "systems": [
+      "game-mode",
+      "melee-core",
+      "menu",
+      "interface",
+      "library",
+      "tooling",
+      "config"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "symbol renames for scene-related functions and scene tables, including gm_SetSceneMinor to gm_SetScene, gm_SetScenePendingMinor to gm_SetPendingScene, and *_MinorScenes to *_Scenes",
+      "evidence_refs": [
+        "diff:config/GALE01/symbols.txt",
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/forward.h",
+      "role": "central type and enum rename surface: MajorSceneKind to GameModeKind, MinorSceneKind to GameSceneKind, MJ_* to GM_*, MN_* to GS_*, and struct forward declarations renamed",
+      "evidence_refs": [
+        "diff:src/melee/gm/forward.h",
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/types.h",
+      "role": "game-mode/game-scene type definitions updated to new nomenclature",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmscdata.c",
+      "role": "large scene data/table rename surface following the new GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "diff:config/GALE01/symbols.txt"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1B03.c",
+      "role": "largest source update applying scene nomenclature changes across many call sites",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1B03.h",
+      "role": "header update for scene nomenclature",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1601.c",
+      "role": "example call-site update changing function parameters from MajorSceneKind to GameModeKind and switch labels from MJ_* to GM_*",
+      "evidence_refs": [
+        "diff:src/melee/gm/gm_1601.c",
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1601.h",
+      "role": "header update for scene nomenclature",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_16AE.c",
+      "role": "source call-site update for GameMode/GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_16F1.c",
+      "role": "source call-site update for GameMode/GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1832.c",
+      "role": "small source call-site update for scene nomenclature",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_18A5.c",
+      "role": "source call-site update for GameMode/GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_19EF.c",
+      "role": "source call-site update for GameMode/GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1A36.c",
+      "role": "small source call-site update for scene nomenclature",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1A3F.c",
+      "role": "source call-site update for GameMode/GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1A3F.h",
+      "role": "header update for scene nomenclature",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1A45.c",
+      "role": "source call-site update for GameMode/GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1A45.h",
+      "role": "header update for scene nomenclature",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1A45.static.h",
+      "role": "static header update for scene nomenclature",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1A4C.c",
+      "role": "source call-site update for GameMode/GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1BA8.c",
+      "role": "source call-site update for GameMode/GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1BA8.h",
+      "role": "header update for scene nomenclature",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1BF9.c",
+      "role": "source call-site update for GameMode/GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1BF9.h",
+      "role": "header update for scene nomenclature",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1BFA.c",
+      "role": "source call-site update for GameMode/GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1BFA.h",
+      "role": "header update for scene nomenclature",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmadventure.c",
+      "role": "Adventure mode source updated for GameMode/GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmadventure.h",
+      "role": "Adventure mode header updated for GameMode/GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmallstar.c",
+      "role": "All-Star mode source updated for GameMode/GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmallstar.h",
+      "role": "All-Star mode header updated for GameMode/GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmclassic.c",
+      "role": "Classic mode source updated for GameMode/GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmclassic.h",
+      "role": "Classic mode header updated for GameMode/GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmfixedcamera.c",
+      "role": "fixed-camera mode source updated for GameMode/GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmfixedcamera.h",
+      "role": "fixed-camera mode header updated for GameMode/GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmgiant.c",
+      "role": "giant mode source updated for GameMode/GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmgiant.h",
+      "role": "giant mode header updated for GameMode/GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmhomerun.c",
+      "role": "Home-Run Contest source updated for GameMode/GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmhomerun.h",
+      "role": "Home-Run Contest header updated for GameMode/GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmhowto.c",
+      "role": "How To scene source updated for scene nomenclature",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gminvisible.c",
+      "role": "invisible mode source updated for GameMode/GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gminvisible.h",
+      "role": "invisible mode header updated for GameMode/GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmlightning.c",
+      "role": "lightning mode source updated for GameMode/GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmlightning.h",
+      "role": "lightning mode header updated for GameMode/GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmmenu.c",
+      "role": "menu game-mode source updated for scene nomenclature",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmmovieend.c",
+      "role": "ending movie scene source updated for scene nomenclature",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmmovieend.h",
+      "role": "ending movie scene header updated for scene nomenclature",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmmultiman.c",
+      "role": "Multi-Man mode source updated for GameMode/GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmmultiman.h",
+      "role": "Multi-Man mode header updated for GameMode/GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmomake15.c",
+      "role": "special movie scene source updated for scene nomenclature",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmopening.c",
+      "role": "opening movie scene source updated for scene nomenclature",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmregclear.c",
+      "role": "regular clear source updated for GameMode/GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmregclear.h",
+      "role": "regular clear header updated for scene nomenclature",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmregtyfall.c",
+      "role": "trophy-fall source updated for GameMode/GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmscdata.h",
+      "role": "scene data header updated for scene nomenclature",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmsinglebutton.c",
+      "role": "single-button mode source updated for GameMode/GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmsinglebutton.h",
+      "role": "single-button mode header updated for GameMode/GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmslomo.c",
+      "role": "slomo mode source updated for GameMode/GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmslomo.h",
+      "role": "slomo mode header updated for GameMode/GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmstamina.c",
+      "role": "stamina mode source updated for GameMode/GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmstamina.h",
+      "role": "stamina mode header updated for GameMode/GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmsupersudden.c",
+      "role": "super-sudden-death mode source updated for GameMode/GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmsupersudden.h",
+      "role": "super-sudden-death mode header updated for GameMode/GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmtiny.c",
+      "role": "tiny mode source updated for GameMode/GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmtiny.h",
+      "role": "tiny mode header updated for GameMode/GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmtitle.c",
+      "role": "title scene source updated for scene nomenclature",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmtou.c",
+      "role": "tournament source updated for scene nomenclature",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmvsmelee.c",
+      "role": "VS mode source updated for GameMode/GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmvsmelee.h",
+      "role": "VS mode header updated for GameMode/GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/if/soundtest.c",
+      "role": "interface sound test call sites updated for scene nomenclature",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/if/textlib.c",
+      "role": "text library call sites updated for scene nomenclature",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lbdvd.c",
+      "role": "library DVD call sites updated for scene nomenclature",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lbdvd.static.h",
+      "role": "static library header update for scene nomenclature",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/lb/types.h",
+      "role": "library type references updated for scene nomenclature",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mncharsel.c",
+      "role": "character-select menu call site updated for scene nomenclature",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnmain.c",
+      "role": "main menu call sites updated for GameMode/GameScene naming",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnstagesel.c",
+      "role": "stage-select menu call site updated for scene nomenclature",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/ty/toy.c",
+      "role": "toy/trophy area call site updated for scene nomenclature",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "tools/table-typer/c.go",
+      "role": "tooling updated for renamed scene types/symbols",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "tools/table-typer/main.go",
+      "role": "tooling updated for renamed scene types/symbols",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Renamed the top-level scene enum/type concept from MajorSceneKind/MajorScene/MJ_* to GameModeKind/GameMode/GM_* in the central gm forward header and across many use sites.",
+      "evidence_refs": [
+        "diff:src/melee/gm/forward.h",
+        "diff:src/melee/gm/gm_1601.c"
+      ]
+    },
+    {
+      "text": "Renamed the lower-level scene enum/type concept from MinorSceneKind/MinorScene/MinorSceneHandler/MinorSceneInfo/MN_* to GameSceneKind/GameScene/GameSceneHandler/GameSceneInfo/GS_*.",
+      "evidence_refs": [
+        "diff:src/melee/gm/forward.h"
+      ]
+    },
+    {
+      "text": "Renamed scene setter symbols gm_SetSceneMinor and gm_SetScenePendingMinor to gm_SetScene and gm_SetPendingScene in symbols.txt.",
+      "evidence_refs": [
+        "diff:config/GALE01/symbols.txt"
+      ]
+    },
+    {
+      "text": "Renamed many global data symbols ending in _MinorScenes to _Scenes while preserving their addresses, sizes, scopes, and section metadata in symbols.txt.",
+      "evidence_refs": [
+        "diff:config/GALE01/symbols.txt"
+      ]
+    },
+    {
+      "text": "Applied the naming migration broadly across 79 changed files, mostly under src/melee/gm, with additional dependent updates in if, lb, mn, ty, and tools/table-typer.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "metadata_json.activity"
+      ]
+    },
+    {
+      "text": "Automated GALE01 report stated 'No changes' for base 0030f76 to head eb19533.",
+      "evidence_refs": [
+        "text_corpus.jsonl:decomp-dev[bot] issue_comment 2026-05-20T20:18:22Z"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "The cleanup changed names consistently at the central typedef/enum declarations, call sites, symbol metadata, and supporting tooling instead of only adding local aliases.",
+      "evidence_refs": [
+        "diff:src/melee/gm/forward.h",
+        "diff:config/GALE01/symbols.txt",
+        "changed_files.jsonl:tools/table-typer/c.go",
+        "changed_files.jsonl:tools/table-typer/main.go"
+      ]
+    },
+    {
+      "text": "The symbols.txt edits preserved addresses and metadata while renaming labels, reducing risk that a nomenclature cleanup would become a data/split ownership change.",
+      "evidence_refs": [
+        "diff:config/GALE01/symbols.txt"
+      ]
+    },
+    {
+      "text": "The author framed the PR as resolving ambiguity in 'Minor' and 'Major' terms, making the scope a naming cleanup rather than a behavioral rewrite.",
+      "evidence_refs": [
+        "human_pr_text.md:pr_body"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For broad decomp nomenclature cleanups, update the owning forward/types headers, all dependent source/header users, symbols metadata, and any code-generation/table tooling together so the repository has one coherent vocabulary.",
+      "scope": [
+        "gm scene naming",
+        "headers",
+        "symbols",
+        "tooling"
+      ],
+      "evidence_refs": [
+        "diff:src/melee/gm/forward.h",
+        "diff:config/GALE01/symbols.txt",
+        "changed_files.jsonl"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "When renaming data symbols as part of a cleanup, preserve section address, object size, scope, and data annotations unless the PR is explicitly doing ownership or split work.",
+      "scope": [
+        "symbols.txt",
+        "data symbols",
+        "naming cleanup"
+      ],
+      "evidence_refs": [
+        "diff:config/GALE01/symbols.txt"
+      ],
+      "confidence": 0.72
+    },
+    {
+      "lesson": "A nomenclature cleanup may be reviewable even when it conflicts with existing community shorthand, but the PR evidence should record that tension for later reconciliation.",
+      "scope": [
+        "naming conventions",
+        "review history"
+      ],
+      "evidence_refs": [
+        "human_pr_text.md:pr_body",
+        "text_corpus.jsonl:PsiLupan issue_comment 2026-05-20T21:23:25Z"
+      ],
+      "confidence": 0.63
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Use GameModeKind and GM_* for the former MajorSceneKind/MJ_* enum values.",
+      "evidence_refs": [
+        "diff:src/melee/gm/forward.h",
+        "diff:src/melee/gm/gm_1601.c"
+      ],
+      "confidence": 0.93
+    },
+    {
+      "convention": "Use GameSceneKind and GS_* for the former MinorSceneKind/MN_* enum values.",
+      "evidence_refs": [
+        "diff:src/melee/gm/forward.h"
+      ],
+      "confidence": 0.93
+    },
+    {
+      "convention": "Use GameMode, GameScene, GameSceneHandler, and GameSceneInfo for the former MajorScene, MinorScene, MinorSceneHandler, and MinorSceneInfo forward declarations.",
+      "evidence_refs": [
+        "diff:src/melee/gm/forward.h"
+      ],
+      "confidence": 0.92
+    },
+    {
+      "convention": "Scene table data symbols in this PR use *_Scenes rather than *_MinorScenes.",
+      "evidence_refs": [
+        "diff:config/GALE01/symbols.txt"
+      ],
+      "confidence": 0.89
+    },
+    {
+      "convention": "Scene setter functions in this PR use gm_SetScene and gm_SetPendingScene rather than gm_SetSceneMinor and gm_SetScenePendingMinor.",
+      "evidence_refs": [
+        "diff:config/GALE01/symbols.txt"
+      ],
+      "confidence": 0.89
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "No assembly reshaping tactic is evidenced. The available automated report says GALE01 had no changes, consistent with a source/symbol nomenclature cleanup that did not affect generated output.",
+      "evidence_refs": [
+        "text_corpus.jsonl:decomp-dev[bot] issue_comment 2026-05-20T20:18:22Z",
+        "diff_excerpt"
+      ],
+      "confidence": 0.74
+    }
+  ],
+  "review_feedback": [
+    {
+      "author": "decomp-dev[bot]",
+      "kind": "report",
+      "text": "GALE01 report for 0030f76 - eb19533: No changes.",
+      "evidence_refs": [
+        "text_corpus.jsonl:decomp-dev[bot] issue_comment 2026-05-20T20:18:22Z"
+      ]
+    },
+    {
+      "author": "ribbanya",
+      "kind": "review_approved",
+      "text": "Looks good to me but I'll defer to @r-burns or @PsiLupan.",
+      "evidence_refs": [
+        "text_corpus.jsonl:ribbanya review 2026-05-20T21:20:58Z"
+      ]
+    },
+    {
+      "author": "PsiLupan",
+      "kind": "issue_comment",
+      "text": "LGTM; noted that the community had settled on Major/Minor terminology and that this difference may need to be reconciled eventually.",
+      "evidence_refs": [
+        "text_corpus.jsonl:PsiLupan issue_comment 2026-05-20T21:23:25Z",
+        "human_pr_text.md:PsiLupan excerpt"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2517",
+    "Scene nomenclature cleanup",
+    "sadkellz",
+    "PsiLupan",
+    "ribbanya",
+    "MajorSceneKind",
+    "MinorSceneKind",
+    "GameModeKind",
+    "GameSceneKind",
+    "MajorScene",
+    "MinorScene",
+    "GameMode",
+    "GameScene",
+    "MinorSceneHandler",
+    "GameSceneHandler",
+    "MinorSceneInfo",
+    "GameSceneInfo",
+    "MJ_",
+    "MN_",
+    "GM_",
+    "GS_",
+    "gm_SetSceneMinor",
+    "gm_SetScene",
+    "gm_SetScenePendingMinor",
+    "gm_SetPendingScene",
+    "_MinorScenes",
+    "_Scenes",
+    "gm_803DD6A0_Scenes",
+    "gm_803DD6D0_Scenes",
+    "src/melee/gm/forward.h",
+    "src/melee/gm/types.h",
+    "src/melee/gm/gmscdata.c",
+    "config/GALE01/symbols.txt",
+    "tools/table-typer"
+  ],
+  "follow_up_queries": [
+    "GameModeKind GameSceneKind forward.h",
+    "MajorSceneKind MinorSceneKind PR 2517",
+    "gm_SetScene gm_SetPendingScene symbols.txt",
+    "_MinorScenes _Scenes gm scene tables",
+    "GS_CUTSCENE GM_CLASSIC_GOVER nomenclature",
+    "tools/table-typer GameScene",
+    "PsiLupan Major Minor community settled",
+    "scene nomenclature cleanup sadkellz"
+  ],
+  "evidence_quality": {
+    "status": "strong",
+    "evidence_refs": [
+      "metadata_json",
+      "human_pr_text.md",
+      "raw_diff excerpt",
+      "changed_files.jsonl",
+      "text_corpus.jsonl"
+    ],
+    "notes": [
+      "The loaded diff is truncated, so individual edits in every changed file were not inspected; changed-file metadata confirms the full file list and line counts.",
+      "No inline review comments are present in the loaded evidence; review feedback comes from one approved review, one LGTM issue comment, and one bot report.",
+      "The PR body explicitly describes ambiguity in 'Minor' and 'Major' definitions, but the Discord conversation linked from the body was not loaded; no claims from that conversation are included.",
+      "The bot report says 'No changes' for GALE01, but no local build/objdiff command output beyond that report is loaded.",
+      "Merged state and timestamps are present in metadata/raw PR JSON, but acceptance as a global naming standard is not inferred beyond this PR."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "naming_cleanup_lesson",
+        "title": "Broad nomenclature cleanups should update central declarations, use sites, symbols, and tooling together",
+        "text": "PR #2517 changed gm scene terminology coherently across forward declarations, enum constants, source/header call sites, symbols.txt, and tools/table-typer rather than introducing aliases or partial renames.",
+        "scope": [
+          "game-mode",
+          "headers",
+          "symbols",
+          "tooling",
+          "naming cleanup"
+        ],
+        "evidence_refs": [
+          "diff:src/melee/gm/forward.h",
+          "diff:config/GALE01/symbols.txt",
+          "changed_files.jsonl"
+        ],
+        "confidence": 0.78
+      },
+      {
+        "record_type": "naming_cleanup_lesson",
+        "title": "Preserve symbol metadata when a PR is only renaming scene/data labels",
+        "text": "The symbols.txt excerpt renames many scene-related labels while leaving addresses, sizes, scopes, and data annotations unchanged, keeping the cleanup focused on nomenclature rather than data ownership.",
+        "scope": [
+          "symbols.txt",
+          "data symbols",
+          "section metadata"
+        ],
+        "evidence_refs": [
+          "diff:config/GALE01/symbols.txt"
+        ],
+        "confidence": 0.72
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "gm scene nomenclature after PR #2517",
+        "text": "In the loaded PR #2517 evidence, src/melee/gm/forward.h renames MajorSceneKind/MJ_* to GameModeKind/GM_* and MinorSceneKind/MN_* to GameSceneKind/GS_*. Related forward declarations become GameMode, GameScene, GameSceneHandler, and GameSceneInfo.",
+        "source_path": "src/melee/gm/forward.h",
+        "scope": [
+          "src/melee/gm",
+          "scene naming",
+          "game mode naming"
+        ],
+        "evidence_refs": [
+          "diff:src/melee/gm/forward.h"
+        ],
+        "reason": "This is a path-scoped naming fact supported by the diff, but should be curated against current source before becoming a maintained path fact."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "Scene table symbol suffix cleanup in config/GALE01/symbols.txt",
+        "text": "PR #2517 renames many gm data symbols from *_MinorScenes to *_Scenes and gm_SetSceneMinor/gm_SetScenePendingMinor to gm_SetScene/gm_SetPendingScene while preserving address and metadata fields in the shown symbols.txt excerpt.",
+        "source_path": "config/GALE01/symbols.txt",
+        "scope": [
+          "config/GALE01/symbols.txt",
+          "gm scene symbols"
+        ],
+        "evidence_refs": [
+          "diff:config/GALE01/symbols.txt"
+        ],
+        "reason": "Useful as a source-owned symbol naming fact, but should be checked against current symbols.txt before promotion."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Record community-term tension during nomenclature cleanups",
+        "text": "When replacing established community shorthand with clearer repository nomenclature, record both the ambiguity being fixed and any review note that the old term is community-settled, so future contributors can reconcile naming history without guessing intent.",
+        "source_path": null,
+        "scope": [
+          "naming cleanup",
+          "review history",
+          "conservative naming"
+        ],
+        "evidence_refs": [
+          "human_pr_text.md:pr_body",
+          "text_corpus.jsonl:PsiLupan issue_comment 2026-05-20T21:23:25Z"
+        ],
+        "reason": "The PR provides a concrete example, but one PR is not enough to establish a global standard without curator review."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote 'GameMode/GameScene is globally preferred everywhere' as an accepted standard from this intake alone; the evidence is specific to this merged gm scene cleanup and current source should be checked.",
+      "Do not infer behavior changes, matching improvements, or objdiff verification beyond the loaded bot report's 'No changes'.",
+      "Do not use the unloaded Discord conversation as evidence for naming intent or consensus.",
+      "Do not infer that the reviewer opposed the PR; the loaded PsiLupan comment says LGTM while noting community terminology tension."
+    ]
+  },
+  "confidence": 0.86,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

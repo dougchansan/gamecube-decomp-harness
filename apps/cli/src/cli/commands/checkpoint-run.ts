@@ -1,4 +1,4 @@
-import { createRunCheckpoint } from "@decomp-orchestrator/core/handoff";
+import { createRunCheckpoint, shipsInPr } from "@decomp-orchestrator/core/handoff";
 import { getLatestRun, getRun, openState } from "@decomp-orchestrator/core/state";
 import { booleanArg, stringArg, type GlobalArgs } from "../args.js";
 
@@ -32,9 +32,18 @@ export async function checkpointRun(globals: GlobalArgs, args: Map<string, strin
     const run = getRun(store, runId);
     if (!run) throw new Error(`Run not found: ${runId}`);
     const artifactDir = stringArg(args, "--artifact-dir", "");
+    const reworkSymbols = stringArg(args, "--rework-symbols", "")
+      .split(",")
+      .map((symbol) => symbol.trim())
+      .filter(Boolean);
     const result = createRunCheckpoint(store, runId, {
       allowActiveLeases: booleanArg(args, "--allow-active-leases"),
       artifactDir: artifactDir || undefined,
+      improvementPromotion: {
+        minGainPoints: globals.project?.pr.improvementMinGainPoints,
+        minMatchedBytes: globals.project?.pr.improvementMinMatchedBytes,
+      },
+      reworkSymbols,
       title: stringArg(args, "--title", "Run checkpoint"),
     });
     console.log(
@@ -43,7 +52,8 @@ export async function checkpointRun(globals: GlobalArgs, args: Map<string, strin
           checkpoint: result.checkpoint,
           counts: result.counts,
           prCandidates: result.items.filter((item) => item.disposition === "pr_candidate").map(compactItem),
-          carryForwardCount: result.items.filter((item) => item.disposition !== "pr_candidate").length,
+          improvementCandidates: result.items.filter((item) => item.disposition === "improvement_candidate").map(compactItem),
+          carryForwardCount: result.items.filter((item) => !shipsInPr(item.disposition)).length,
         },
         null,
         2,

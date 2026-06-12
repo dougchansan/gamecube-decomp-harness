@@ -1,0 +1,17 @@
+{
+  "number": 666,
+  "title": "Delete `include` directory",
+  "state": "MERGED",
+  "createdAt": "2023-01-12T00:00:28Z",
+  "updatedAt": "2023-01-12T04:43:41Z",
+  "mergedAt": "2023-01-12T04:43:40Z",
+  "closedAt": "2023-01-12T04:43:40Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/666",
+  "counts": {
+    "issue_comments": 2,
+    "review_comments": 0,
+    "reviews": 1,
+    "diff_bytes": 22515
+  }
+}

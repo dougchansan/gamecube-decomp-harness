@@ -1,0 +1,17 @@
+{
+  "number": 2606,
+  "title": "Split and link `crowdsfx`",
+  "state": "MERGED",
+  "createdAt": "2026-06-07T12:29:38Z",
+  "updatedAt": "2026-06-07T12:33:36Z",
+  "mergedAt": "2026-06-07T12:33:35Z",
+  "closedAt": "2026-06-07T12:33:35Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/2606",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 9567
+  }
+}

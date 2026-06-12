@@ -1,0 +1,17 @@
+{
+  "number": 1862,
+  "title": "mncharsel matches",
+  "state": "MERGED",
+  "createdAt": "2025-08-22T06:58:55Z",
+  "updatedAt": "2025-08-22T07:02:38Z",
+  "mergedAt": "2025-08-22T07:02:35Z",
+  "closedAt": "2025-08-22T07:02:36Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1862",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 10202
+  }
+}

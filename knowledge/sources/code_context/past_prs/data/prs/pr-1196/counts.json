@@ -1,0 +1,17 @@
+{
+  "number": 1196,
+  "title": "Re-link `ftwalkcommon`",
+  "state": "MERGED",
+  "createdAt": "2024-02-07T07:29:16Z",
+  "updatedAt": "2024-02-07T07:30:25Z",
+  "mergedAt": "2024-02-07T07:30:24Z",
+  "closedAt": "2024-02-07T07:30:24Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1196",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 21869
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 1442,
+  "title": "Match mem_funcs from cam's work",
+  "state": "MERGED",
+  "createdAt": "2024-09-04T22:12:37Z",
+  "updatedAt": "2024-09-17T18:12:35Z",
+  "mergedAt": "2024-09-17T18:07:15Z",
+  "closedAt": "2024-09-17T18:07:15Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/1442",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 17024
+  }
+}

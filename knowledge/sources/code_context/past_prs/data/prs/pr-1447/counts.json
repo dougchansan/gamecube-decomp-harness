@@ -1,0 +1,17 @@
+{
+  "number": 1447,
+  "title": "Match itdkinoko",
+  "state": "MERGED",
+  "createdAt": "2024-09-09T17:07:51Z",
+  "updatedAt": "2024-09-09T17:16:00Z",
+  "mergedAt": "2024-09-09T17:15:57Z",
+  "closedAt": "2024-09-09T17:15:57Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/1447",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 19440
+  }
+}

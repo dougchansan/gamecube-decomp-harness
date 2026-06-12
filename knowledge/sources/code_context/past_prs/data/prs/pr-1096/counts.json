@@ -1,0 +1,17 @@
+{
+  "number": 1096,
+  "title": "Configure `asm-differ` for dtk",
+  "state": "MERGED",
+  "createdAt": "2024-01-23T17:42:47Z",
+  "updatedAt": "2024-01-23T17:52:38Z",
+  "mergedAt": "2024-01-23T17:52:37Z",
+  "closedAt": "2024-01-23T17:52:37Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1096",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 86090
+  }
+}

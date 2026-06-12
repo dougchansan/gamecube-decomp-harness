@@ -1,0 +1,391 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2611",
+  "pr": {
+    "number": 2611,
+    "title": "match and link itdosei.c",
+    "url": "https://github.com/doldecomp/melee/pull/2611",
+    "state": "MERGED",
+    "author": "lukechampine",
+    "created_at": "2026-06-08T03:59:13Z",
+    "merged_at": "2026-06-08T04:26:05Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Matched and linked the item translation unit src/melee/it/items/itdosei.c by changing configure.py from NonMatching to Matching and reshaping itdosei.c helpers, rotation calls, item access, local ordering, and one function order. Bot report records one new match for itDosei_UnkMotion4_Anim and linked-code/data progress.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "linking",
+      "item-tu"
+    ],
+    "systems": [
+      "item",
+      "build-configuration",
+      "baselib-jobj"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "configure.py",
+      "role": "Build configuration changed itdosei.c from NonMatching to Matching.",
+      "evidence_refs": [
+        "changed_files.jsonl: configure.py added 1 deleted 1",
+        "raw_diff: Object(NonMatching, \"melee/it/items/itdosei.c\") -> Object(Matching, \"melee/it/items/itdosei.c\")"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itdosei.c",
+      "role": "Main decomp source edited to match/link the Dosei item TU.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/it/items/itdosei.c added 104 deleted 103 hunks 19",
+        "raw_diff: helper rewrites, PAD_STACK removals, JObj rotation helper use, gobj->user_data substitutions, sdata2_ordering addition"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "configure.py now treats melee/it/items/itdosei.c as a Matching object instead of NonMatching.",
+      "evidence_refs": [
+        "raw_diff: configure.py MatchingFor individual items hunk"
+      ]
+    },
+    {
+      "text": "itdosei.c removed placeholder/platform and some unused includes, added it/itgroundcoll.h, and retained math and baselib/random includes.",
+      "evidence_refs": [
+        "raw_diff: itdosei.c include hunk"
+      ]
+    },
+    {
+      "text": "Added a static sdata2_ordering function using volatile float/double literals including 1.0f, 0.5f, 0.0f, M_PI_2, M_PI/4, M_PI, 4503601774854144.0, and 60.0f.",
+      "evidence_refs": [
+        "raw_diff: sdata2_ordering addition"
+      ]
+    },
+    {
+      "text": "Replaced raw expanded jobj rotation setter/assert bodies with calls to HSD_JObjSetRotationXWithMtxDirty, HSD_JObjSetRotationYWithMtxDirty, and HSD_JObjSetRotationZWithMtxDirty in new helper shapes.",
+      "evidence_refs": [
+        "raw_diff: removal of itDosei_SetRotX/Y/Z expanded assert helpers",
+        "raw_diff: HSD_JObjSetRotationZeroWithMtxDirty and itDosei_UnkMotion4_Anim_inline additions"
+      ]
+    },
+    {
+      "text": "Split facing-angle calculation into itDosei_FacingAngle returning an f32, with callers explicitly applying HSD_JObjSetRotationY or HSD_JObjSetRotationYWithMtxDirty.",
+      "evidence_refs": [
+        "raw_diff: itDosei_FacingAngle addition",
+        "raw_diff: repeated replacement of itDosei_SetFacingAngle calls"
+      ]
+    },
+    {
+      "text": "Removed several PAD_STACK calls from animation/collision/setup functions.",
+      "evidence_refs": [
+        "raw_diff: PAD_STACK removals in itDosei_UnkMotion0_Anim, it_802817A0, itDosei_UnkMotion2_Anim, itDosei_UnkMotion2_Coll, itDosei_UnkMotion4_Anim, it_80282DE4, itDosei_UnkMotion9_Coll"
+      ]
+    },
+    {
+      "text": "Changed some item pointer recovery from GET_ITEM(gobj) to gobj->user_data in picked-up, dropped, motion9 anim, and damage-received paths.",
+      "evidence_refs": [
+        "raw_diff: Item* ip = gobj->user_data substitutions"
+      ]
+    },
+    {
+      "text": "Moved itDosei_UnkMotion10_Phys and itDosei_UnkMotion10_Coll after itDosei_UnkMotion10_Anim without changing their bodies.",
+      "evidence_refs": [
+        "raw_diff: motion10 function reorder hunk"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Used configure.py linkage update only after source changes and bot report evidence showed linked-code progress for the item TU.",
+      "evidence_refs": [
+        "raw_diff: configure.py Matching change",
+        "text_corpus.jsonl: decomp-dev bot linked code +10624 bytes"
+      ]
+    },
+    {
+      "text": "Reduced expanded jobj setter/assert code into existing HSD_JObjSetRotation*WithMtxDirty helper calls where the diff shows the same rotation-axis intent.",
+      "evidence_refs": [
+        "raw_diff: expanded itDosei_SetRotX/Y/Z removals and WithMtxDirty call additions"
+      ]
+    },
+    {
+      "text": "Isolated facing-angle math into a small helper so call sites could vary between ordinary rotation setters and WithMtxDirty setters.",
+      "evidence_refs": [
+        "raw_diff: itDosei_FacingAngle helper and multiple caller replacements"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When expanded jobj rotation setters with jobj.h asserts appear in generated code, try replacing them with existing HSD_JObjSetRotation*WithMtxDirty helpers before preserving manual assert/set/dirty blocks.",
+      "scope": [
+        "baselib JObj rotation",
+        "item decomp matching"
+      ],
+      "evidence_refs": [
+        "raw_diff: removal of manual itDosei_SetRotX/Y/Z assert bodies",
+        "raw_diff: addition of HSD_JObjSetRotationZeroWithMtxDirty and WithMtxDirty axis calls"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "Separating a repeated computed angle from its side-effecting setter can make call sites easier to match when some callers require normal setters and others require mtx-dirty setter variants.",
+      "scope": [
+        "item rotation helpers",
+        "inline helper shaping"
+      ],
+      "evidence_refs": [
+        "raw_diff: itDosei_SetFacingAngle/itDosei_SetFacingAngleFC removed",
+        "raw_diff: itDosei_FacingAngle added and used with HSD_JObjSetRotationY and HSD_JObjSetRotationYWithMtxDirty"
+      ],
+      "confidence": 0.72
+    },
+    {
+      "lesson": "PAD_STACK removals can be part of final matching cleanup when helper shapes, declaration order, or call forms are improved enough to no longer need padding.",
+      "scope": [
+        "matching cleanup",
+        "stack-shape tactics"
+      ],
+      "evidence_refs": [
+        "raw_diff: multiple PAD_STACK removals",
+        "text_corpus.jsonl: bot reports itDosei_UnkMotion4_Anim 100.00% and configure linked progress"
+      ],
+      "confidence": 0.62
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "New local helpers keep the file prefix itDosei_ for Dosei-specific logic, e.g. itDosei_FacingAngle, itDosei_UnkMotion4_GetAnimSpeed, and itDosei_UnkMotion4_GetAttrs.",
+      "evidence_refs": [
+        "raw_diff: new static inline helper declarations"
+      ]
+    },
+    {
+      "text": "Short local item and jobj names such as ip, item, obj, and jobj remain in use where roles are clear.",
+      "evidence_refs": [
+        "raw_diff: Item* ip, HSD_JObj* jobj, Item* item, HSD_JObj* obj declarations"
+      ]
+    },
+    {
+      "text": "Unrecovered semantic fields remain address/unknown-style, such as xDD4_itemVar.dosei.xDE4, xDF0, unk0, unk8, and unkC.",
+      "evidence_refs": [
+        "raw_diff: unchanged field/member names in itdosei.c hunks"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Changed the object classification from NonMatching to Matching in configure.py to link the now-matching TU.",
+      "evidence_refs": [
+        "raw_diff: configure.py object classification change",
+        "text_corpus.jsonl: bot linked code +10624 bytes"
+      ]
+    },
+    {
+      "tactic": "Introduced volatile-literal sdata2_ordering to influence or preserve .sdata2 ordering.",
+      "evidence_refs": [
+        "raw_diff: static f32 sdata2_ordering with volatile literals",
+        "text_corpus.jsonl: bot reports .sdata2 87.50% -> 96.30%"
+      ],
+      "caution": "This is a data-ordering tactic; PR evidence shows it was used and improved .sdata2, but does not explain ownership or whether it should be generalized."
+    },
+    {
+      "tactic": "Used existing HSD_JObjSetRotation*WithMtxDirty helpers instead of manual inline assert/set/dirty code.",
+      "evidence_refs": [
+        "raw_diff: manual rotation helper removals and helper call additions"
+      ]
+    },
+    {
+      "tactic": "Added narrow inline wrappers for attr access and anim speed in itDosei_UnkMotion4_Anim.",
+      "evidence_refs": [
+        "raw_diff: itDosei_UnkMotion4_GetAnimSpeed and itDosei_UnkMotion4_GetAttrs additions",
+        "text_corpus.jsonl: bot reports itDosei_UnkMotion4_Anim reached 100.00%"
+      ]
+    },
+    {
+      "tactic": "Used a suspicious empty nested NULL-check block marked by the author comment 'permuterslop' in itDosei_UnkMotion4_Anim.",
+      "evidence_refs": [
+        "raw_diff: // permuterslop and nested if (jobj == NULL) blocks"
+      ],
+      "caution": "The diff supports this as a matching artifact, not as a reusable style."
+    },
+    {
+      "tactic": "Reordered motion10 Phys/Coll after motion10 Anim while keeping their bodies equivalent.",
+      "evidence_refs": [
+        "raw_diff: removal and re-addition of itDosei_UnkMotion10_Phys/Coll around itDosei_UnkMotion10_Anim"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "text": "No human review comments are present in the loaded slice.",
+      "evidence_refs": [
+        "metadata_json: review_comments 0, reviews 0"
+      ]
+    },
+    {
+      "text": "Automated report recorded matched code +572 bytes, linked code +10624 bytes, linked data +320 bytes, one new match for main/melee/it/items/itdosei::itDosei_UnkMotion4_Anim, and .sdata2 improvement from 87.50% to 96.30%.",
+      "evidence_refs": [
+        "text_corpus.jsonl: decomp-dev[bot] report for GALE01"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2611",
+    "itdosei.c",
+    "match and link itdosei.c",
+    "melee/it/items/itdosei",
+    "itDosei_UnkMotion4_Anim",
+    "sdata2_ordering",
+    "HSD_JObjSetRotationZeroWithMtxDirty",
+    "HSD_JObjSetRotationXWithMtxDirty",
+    "HSD_JObjSetRotationYWithMtxDirty",
+    "HSD_JObjSetRotationZWithMtxDirty",
+    "itDosei_FacingAngle",
+    "GET_JOBJ",
+    "GET_ITEM",
+    "gobj->user_data",
+    "PAD_STACK",
+    "permuterslop",
+    "ItemStateTable",
+    "it_803F55D0",
+    "it_804DC878",
+    "itDosei_UnkMotion10_Anim",
+    "itDosei_UnkMotion10_Coll"
+  ],
+  "follow_up_queries": [
+    "Find later PRs that remove or justify sdata2_ordering in item files",
+    "Search for 'permuterslop' to identify cleanup candidates or accepted matching artifacts",
+    "Search item TUs for HSD_JObjSetRotation*WithMtxDirty helper patterns",
+    "Search PRs where configure.py changes an item object from NonMatching to Matching",
+    "Search later changes to src/melee/it/items/itdosei.c for cleanup of gobj->user_data versus GET_ITEM"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR #2611 merged with 2 changed files",
+      "raw_diff: full diff loaded, not truncated",
+      "text_corpus.jsonl: PR body and bot report loaded",
+      "metadata_json: review_comments 0, reviews 0"
+    ],
+    "notes": [
+      "Strong evidence for changed files, configure.py linking change, code-shape changes, and bot-reported progress.",
+      "No human review feedback is available in the loaded slice.",
+      "No local build log or objdiff details beyond the decomp-dev bot report are loaded.",
+      "The volatile sdata2_ordering function and 'permuterslop' block are visible in the diff but lack explanatory review context, so they should not be promoted as accepted style."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "pr_lesson",
+        "title": "Use existing JObj rotation helpers instead of preserving expanded jobj.h assert/set/dirty blocks",
+        "text": "In PR #2611, manual expanded JObj rotation setter helpers with jobj.h asserts were replaced by HSD_JObjSetRotation*WithMtxDirty helper calls, contributing to a matched/linked itdosei.c update.",
+        "scope": [
+          "baselib JObj",
+          "item decomp"
+        ],
+        "evidence_refs": [
+          "raw_diff: itDosei_SetRotX/Y/Z removed",
+          "raw_diff: HSD_JObjSetRotationZeroWithMtxDirty and axis WithMtxDirty calls added",
+          "text_corpus.jsonl: bot reports one new match for itDosei_UnkMotion4_Anim"
+        ],
+        "confidence": 0.78
+      },
+      {
+        "record_type": "pr_lesson",
+        "title": "Split computation helpers from setter side effects when call sites need different helper variants",
+        "text": "PR #2611 replaced side-effecting facing-angle helpers with itDosei_FacingAngle returning the computed angle, then applied either HSD_JObjSetRotationY or HSD_JObjSetRotationYWithMtxDirty at call sites.",
+        "scope": [
+          "inline helper shaping",
+          "item rotation matching"
+        ],
+        "evidence_refs": [
+          "raw_diff: itDosei_FacingAngle addition",
+          "raw_diff: repeated call-site replacements"
+        ],
+        "confidence": 0.72
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "itdosei.c became a Matching item object in configure.py",
+        "text": "PR #2611 changed configure.py so melee/it/items/itdosei.c is built as Object(Matching, ...) instead of Object(NonMatching, ...).",
+        "source_path": "configure.py",
+        "scope": [
+          "melee/it/items/itdosei.c",
+          "item object matching status"
+        ],
+        "evidence_refs": [
+          "raw_diff: configure.py NonMatching -> Matching hunk"
+        ],
+        "reason": "This is a source/path status fact from the PR and may belong in path facts if current source confirms it remains true."
+      },
+      {
+        "target_source_id": "ssbm_data_sheet",
+        "update_kind": "source_update",
+        "title": "Remaining item decomp counts stated by PR author",
+        "text": "PR body states: Remaining item TUs: 18; Remaining item functions: 63.",
+        "source_path": null,
+        "scope": [
+          "item decomp progress",
+          "historical PR progress counts"
+        ],
+        "evidence_refs": [
+          "human_pr_text: Remaining item TUs: 18; Remaining item functions: 63"
+        ],
+        "reason": "Could be useful as a historical progress datum, but should not be treated as current status without curator validation."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Caution on volatile literal ordering helpers",
+        "text": "PR #2611 used a volatile sdata2_ordering helper and bot report showed .sdata2 improvement, but the slice does not explain ownership. Consider documenting that such helpers are data-order tactics requiring explicit evidence and cleanup review, not default style.",
+        "source_path": "src/melee/it/items/itdosei.c",
+        "scope": [
+          ".sdata2 matching",
+          "volatile literal ordering",
+          "data-order tactics"
+        ],
+        "evidence_refs": [
+          "raw_diff: sdata2_ordering addition",
+          "text_corpus.jsonl: .sdata2 87.50% -> 96.30%"
+        ],
+        "reason": "Existing standards already warn about data/literal ownership and matching tactics; this PR provides a concrete example but weak explanatory evidence."
+      }
+    ],
+    "rejection_notes": [
+      {
+        "text": "Do not promote the empty nested NULL-check block labeled 'permuterslop' as a reusable technique; evidence supports only that it appeared in this PR's matching source.",
+        "evidence_refs": [
+          "raw_diff: // permuterslop nested if (jobj == NULL)"
+        ]
+      },
+      {
+        "text": "Do not infer reviewer approval of specific tactics from merge alone; the loaded slice has no human review comments.",
+        "evidence_refs": [
+          "metadata_json: review_comments 0, reviews 0"
+        ]
+      },
+      {
+        "text": "Do not generalize gobj->user_data over GET_ITEM from this PR alone; the diff shows substitutions but no rationale.",
+        "evidence_refs": [
+          "raw_diff: GET_ITEM(gobj) -> gobj->user_data substitutions"
+        ]
+      }
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 980,
+  "title": "Upgrade Pygments to `2.15.0` to address vulnerability",
+  "state": "MERGED",
+  "createdAt": "2023-09-29T11:43:54Z",
+  "updatedAt": "2023-09-29T11:54:45Z",
+  "mergedAt": "2023-09-29T11:54:44Z",
+  "closedAt": "2023-09-29T11:54:44Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/980",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 311
+  }
+}

@@ -1,0 +1,404 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2411",
+  "pr": {
+    "number": 2411,
+    "title": "Jj/gm 16 f1",
+    "url": "https://github.com/doldecomp/melee/pull/2411",
+    "state": "MERGED",
+    "author": "jurrejelle",
+    "created_at": "2026-04-12T21:52:41Z",
+    "merged_at": "2026-04-16T22:21:14Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Large gm_16F1 decomp/matching PR that implemented multiple previously undecompiled result/decision helper functions, updated their public prototypes, refined related gm/pl struct layouts, and adjusted one gm_16AE call site after fn_80171DC4 became void(void). The only loaded discussion is an automated report showing 5 new matches, several partial-score improvements in gm_16F1, and one unrelated-looking gmresult regression.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "struct-layout",
+      "prototype-cleanup",
+      "matching-tactics"
+    ],
+    "systems": [
+      "game-mode",
+      "gm_16F1",
+      "gmregclear",
+      "player-types"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gm/gm_16F1.c",
+      "role": "Primary decompilation target; replaces placeholder comments with implementations and improves existing helpers in gm_16F1.",
+      "evidence_refs": [
+        "changed_files.jsonl: gm_16F1.c +1192/-42, 8 hunks",
+        "raw_diff: fn_8016F39C, fn_8016F548, fn_8016F740, fn_8016F9A8, fn_8016FAD4, fn_8016FFD4, fn_801701C0, fn_80171BA4, fn_80171DC4 implementations",
+        "text_corpus issue_comment: bot report lists gm_16F1 new matches and improvements"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_16F1.h",
+      "role": "Header prototype cleanup for recovered gm_16F1 signatures.",
+      "evidence_refs": [
+        "changed_files.jsonl: gm_16F1.h +9/-9",
+        "raw_diff: UNK_RET/UNK_PARAMS replaced for fn_8016F39C, fn_8016F548, fn_8016F740, fn_8016F9A8, fn_80171BA4; fn_80171DC4 changed to void(void)"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_16F1.static.h",
+      "role": "Adds local static data declarations/struct used by the new gm_16F1 implementations.",
+      "evidence_refs": [
+        "changed_files.jsonl: gm_16F1.static.h +30/-0",
+        "raw_diff: adds lbl_804DA2E8/lbl_804DA2F0 declarations and struct lbl_803B7A60_t with static initializer"
+      ]
+    },
+    {
+      "path": "src/melee/gm/types.h",
+      "role": "Refines game-mode result/rules struct layout used by gm_16F1 code.",
+      "evidence_refs": [
+        "changed_files.jsonl: gm/types.h +7/-2",
+        "raw_diff: adds x7, xA, x40, and padding changes in lbl_8046B6A0_24C_t nested layout"
+      ]
+    },
+    {
+      "path": "src/melee/pl/types.h",
+      "role": "Refines player struct layout with fields used by recovered player/result logic.",
+      "evidence_refs": [
+        "changed_files.jsonl: pl/types.h +3/-1",
+        "raw_diff: splits x138 padding and adds x13C/x140 unsigned int fields"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmregclear.c",
+      "role": "Small matching cleanup in fn_8017F1B8.",
+      "evidence_refs": [
+        "changed_files.jsonl: gmregclear.c +5/-2",
+        "raw_diff: introduces output local for fn_8016F180(i) result before mask check",
+        "text_corpus issue_comment: bot report says gmregclear fn_8017F1B8 reached 100%"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_16AE.c",
+      "role": "Call-site update for changed fn_80171DC4 signature.",
+      "evidence_refs": [
+        "changed_files.jsonl: gm_16AE.c +1/-1",
+        "raw_diff: fn_80171DC4(gobj) changed to fn_80171DC4()"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Implemented several gm_16F1 functions that were placeholders, including decision/result scanning helpers, scoring/ranking helpers, and result aggregation helpers.",
+    "Updated gm_16F1 prototypes from unknown or stale signatures to typed signatures, including fn_8016F1F0 returning s32 and fn_80171DC4 taking no parameters.",
+    "Added includes for gm_16AE, plbonuslib, pl/types, and player APIs needed by recovered gm_16F1 code.",
+    "Replaced some duplicated table-walk/goto flag extraction in existing gm_16F1 code with calls to fn_8016F180.",
+    "Recovered or exposed struct fields in gm/types.h and pl/types.h to support typed field accesses in the new code.",
+    "Added local static data declarations and a zero-table struct in gm_16F1.static.h used by the new implementations.",
+    "Adjusted gmregclear fn_8017F1B8 with an intermediate output local for the fn_8016F180 result.",
+    "Automated report recorded new 100% matches for gm_16F1 fn_80171DC4, fn_8016F548, fn_8016F740, fn_8016F9A8, and gmregclear fn_8017F1B8; it also recorded partial improvements for fn_801701C0, fn_8016FAD4, fn_80171BA4, fn_8016F39C, fn_8016FFD4, and .sdata2."
+  ],
+  "smart_moves": [
+    "Header signatures were updated alongside recovered bodies instead of leaving UNK_RET/UNK_PARAMS in gm_16F1.h.",
+    "The gm_16AE call site was kept consistent with the recovered fn_80171DC4 void(void) signature.",
+    "Struct layout refinements in gm/types.h and pl/types.h allowed code to use fields such as rules->x58, rules->x7, x58[i].xA, x58[i].x40, and pl x13C/x140 rather than only raw byte offsets.",
+    "Repeated decision flag lookup patterns were centralized through fn_8016F180 in multiple gm_16F1 paths."
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a recovered body proves a signature, update the owning header and direct callers in the same PR slice.",
+      "scope": [
+        "src/melee/gm/gm_16F1.h",
+        "src/melee/gm/gm_16AE.c"
+      ],
+      "evidence_refs": [
+        "raw_diff: fn_80171DC4 prototype changed from void fn_80171DC4(HSD_GObj*) to void fn_80171DC4(void)",
+        "raw_diff: gm_16AE call changed from fn_80171DC4(gobj) to fn_80171DC4()"
+      ],
+      "confidence": 0.86
+    },
+    {
+      "lesson": "Recovering local struct fields can make large result/stat functions reviewable by replacing anonymous padding with typed accesses, but the semantic names here remain mostly address/offset-style.",
+      "scope": [
+        "src/melee/gm/types.h",
+        "src/melee/pl/types.h",
+        "src/melee/gm/gm_16F1.c"
+      ],
+      "evidence_refs": [
+        "raw_diff: gm/types.h adds x7, xA, x40 and padding refinements",
+        "raw_diff: pl/types.h adds x13C and x140",
+        "raw_diff: gm_16F1.c uses rules->x58, rules->xC, x58[i].xA, x58[i].x20, x58[i].x40"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "For repeated table flag lookups, a small recovered helper can simplify generated-looking curr/goto blocks.",
+      "scope": [
+        "src/melee/gm/gm_16F1.c"
+      ],
+      "evidence_refs": [
+        "raw_diff: fn_8016F870 removes curr table-walk/goto blocks and uses fn_8016F180(i)",
+        "raw_diff: fn_80170110 replaces table-walk/goto flag extraction with fn_8016F180(kind)"
+      ],
+      "confidence": 0.74
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Address-style function names were retained for unrecovered semantics while local role names were used where clear.",
+      "examples": [
+        "fn_8016F548",
+        "fn_801701C0",
+        "rules",
+        "rankings",
+        "scores",
+        "player_id",
+        "item_id",
+        "player_kills",
+        "player_deaths",
+        "player_net"
+      ],
+      "evidence_refs": [
+        "raw_diff: new implementations keep fn_ address-style globals and use descriptive locals in several blocks"
+      ],
+      "confidence": 0.8
+    },
+    {
+      "convention": "Partially understood struct members keep offset-style names rather than speculative semantic names.",
+      "examples": [
+        "x58",
+        "xA",
+        "x20",
+        "x24",
+        "x40",
+        "x7",
+        "pad3F0",
+        "x13C",
+        "x140"
+      ],
+      "evidence_refs": [
+        "raw_diff: gm/types.h and pl/types.h field additions use offset-style names",
+        "raw_diff: gm_16F1.c accesses x58 and offset-style fields throughout scoring/ranking logic"
+      ],
+      "confidence": 0.82
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Narrow PAD_STACK use after returns in several recovered functions.",
+      "evidence_refs": [
+        "raw_diff: PAD_STACK(16) in fn_8016F39C",
+        "raw_diff: PAD_STACK(24) in fn_8016F548",
+        "raw_diff: PAD_STACK(8) in fn_8016F740/fn_8016F9A8/fn_8016FFD4",
+        "raw_diff: PAD_STACK(4) in fn_801701C0"
+      ],
+      "notes": "The automated report supports some matches/improvements, but the loaded evidence does not isolate which PAD_STACK uses were required."
+    },
+    {
+      "tactic": "Use exact integer widths and casts around masks, indices, and signed stat fields.",
+      "evidence_refs": [
+        "raw_diff: fn_8016F1F0 return type changed short to s32",
+        "raw_diff: repeated casts such as (u8) mask, (u32) i < 0x101U, (s16) lbl_803D5A4C[i].kind, and (s8) rules->xC"
+      ],
+      "notes": "Supported as an observed tactic, not as a proven general requirement."
+    },
+    {
+      "tactic": "Use switch-based reconstruction for the large bonus/condition dispatcher in fn_801701C0.",
+      "evidence_refs": [
+        "raw_diff: fn_801701C0 implemented with switch(arg2) cases 0xD7 and onward"
+      ],
+      "notes": "The bot report shows fn_801701C0 improved to 91.77%, not a full match."
+    },
+    {
+      "tactic": "Introduce temporary pointer variables for arrays and structs to shape loops over player/result slots.",
+      "evidence_refs": [
+        "raw_diff: fn_801701C0 uses x58_p, sc_p, rk_p, q, sq pointer walks",
+        "raw_diff: fn_80171BA4 uses player/team loops and Player_* accessors"
+      ],
+      "notes": "Observed in diff; no human review explains intent."
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "automated_report",
+      "author": "decomp-dev[bot]",
+      "summary": "Reported +0.05% matched code and +2080 bytes overall, with 5 new 100% matches and 6 unmatched-item improvements.",
+      "evidence_refs": [
+        "text_corpus issue_comment 2026-04-12T21:56:11Z"
+      ]
+    },
+    {
+      "kind": "automated_regression_notice",
+      "author": "decomp-dev[bot]",
+      "summary": "Reported one regression in unmatched item main/melee/gm/gmresult fn_80174468: -4 bytes, 89.84% to 89.49%. Loaded evidence does not explain cause or disposition.",
+      "evidence_refs": [
+        "text_corpus issue_comment: regression table"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2411",
+    "Jj/gm 16 f1",
+    "jurrejelle",
+    "gm_16F1",
+    "gm_16AE",
+    "gmregclear",
+    "fn_8016F39C",
+    "fn_8016F548",
+    "fn_8016F740",
+    "fn_8016F9A8",
+    "fn_8016FAD4",
+    "fn_8016FFD4",
+    "fn_801701C0",
+    "fn_80171BA4",
+    "fn_80171DC4",
+    "fn_8017F1B8",
+    "fn_8016F180",
+    "fn_80170110",
+    "lbl_803D5A4C",
+    "lbl_803B7A60",
+    "lbl_8046B6A0_24C_t",
+    "lbl_8046B6A0_24C_58_t",
+    "lbl_804D65A8",
+    "lbl_804DA2E8",
+    "lbl_804DA2F0",
+    "pad3F0",
+    "x58",
+    "rankings",
+    "scores",
+    "PAD_STACK",
+    "Player_GetKOsByPlayerIndex",
+    "Player_GetFalls",
+    "Player_GetTeam",
+    "pl_80039418",
+    "lbLang_IsSettingUS",
+    "HSD_SisLib_803A6368"
+  ],
+  "follow_up_queries": [
+    "gm_16F1 fn_801701C0 PAD_STACK",
+    "gm_16F1 fn_8016FAD4 rankings scores",
+    "fn_80171DC4 void signature gm_16AE",
+    "gm_16F1.h UNK_RET UNK_PARAMS fn_8016F39C fn_80171BA4",
+    "gm/types.h lbl_8046B6A0_24C_t x58 xA x40",
+    "pl/types.h x13C x140",
+    "gmregclear fn_8017F1B8 output fn_8016F180",
+    "gmresult fn_80174468 regression PR 2411",
+    "lbl_803B7A60 zero table gm_16F1.static.h"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR identity, state, changed files, counts",
+      "changed_files.jsonl: complete changed-file list",
+      "raw_diff: loaded but truncated; targeted grep captured relevant headers/types and many gm_16F1 hunks",
+      "text_corpus.jsonl: empty PR body and one automated report",
+      "metadata_json: review_comments=0, reviews=0"
+    ],
+    "notes": [
+      "No human review comments or PR body rationale are available in the loaded evidence.",
+      "The raw diff is truncated in loaded_files, so details of the full fn_801701C0 implementation are only partially visible.",
+      "Automated report supports match/improvement/regression status for named items, but no local build, objdiff command, or author explanation is loaded.",
+      "PAD_STACK and stack-shaping tactics are observed in the diff; the evidence does not prove each one was necessary."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson_candidate",
+        "title": "Recover signatures in headers and update call sites with the body",
+        "text": "In PR 2411, recovered gm_16F1 bodies were accompanied by gm_16F1.h prototype updates and a gm_16AE call-site adjustment for fn_80171DC4(void). This is a concrete instance of header truthfulness during decomp matching.",
+        "scope": [
+          "src/melee/gm/gm_16F1.h",
+          "src/melee/gm/gm_16AE.c",
+          "src/melee/gm/gm_16F1.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: gm_16F1.h prototype changes",
+          "raw_diff: gm_16AE fn_80171DC4 call-site change",
+          "text_corpus issue_comment: fn_80171DC4 reported as new 100% match"
+        ],
+        "confidence": 0.86
+      },
+      {
+        "record_type": "decomp_lesson_candidate",
+        "title": "Use helper recovery to collapse repeated table flag lookup blocks",
+        "text": "PR 2411 shows repeated gm_16F1 table scans/goto flag extraction being replaced with fn_8016F180 calls in existing and new functions, improving readability while preserving matching progress in nearby functions.",
+        "scope": [
+          "src/melee/gm/gm_16F1.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: fn_8016F870 and fn_80170110 use fn_8016F180 for flags",
+          "text_corpus issue_comment: gm_16F1 functions improved or matched"
+        ],
+        "confidence": 0.74
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "gm_16F1 matching touches game-mode result/ranking and player stat data",
+        "text": "PR 2411's gm_16F1.c changes implement result/ranking/bonus-condition style helpers using lbl_803D5A4C decision entries, rules->x58 player result slots, Player_* APIs, and pl_80039418 stat lookups. Future gm_16F1 work may need coordinated gm/types.h and pl/types.h struct layout updates.",
+        "source_path": "src/melee/gm/gm_16F1.c",
+        "scope": [
+          "src/melee/gm/gm_16F1.c",
+          "src/melee/gm/types.h",
+          "src/melee/pl/types.h"
+        ],
+        "evidence_refs": [
+          "raw_diff: gm_16F1.c uses rankings/scores, x58 slots, Player_* APIs, and pl_80039418",
+          "raw_diff: gm/types.h and pl/types.h field additions",
+          "changed_files.jsonl: gm_16F1.c, gm/types.h, pl/types.h all changed"
+        ],
+        "reason": "Path-scoped context may help future matching and struct recovery in the same subsystem."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Treat PAD_STACK in matched code as evidence-backed and narrow",
+        "text": "PR 2411 contains several PAD_STACK uses in gm_16F1 functions with an automated report showing some functions reached 100% and others improved. This aligns with the existing matching-tactics standard; curator may decide no new standard is needed, or may use it as another example.",
+        "source_path": null,
+        "scope": [
+          "src/melee/gm/gm_16F1.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: PAD_STACK(16/24/8/4) observed after returns",
+          "text_corpus issue_comment: named functions matched or improved"
+        ],
+        "reason": "Candidate example only; loaded evidence does not isolate which PAD_STACK instances caused matching gains."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "gm_16F1.h owns prototypes for recovered gm_16F1 functions",
+        "text": "PR 2411 updates gm_16F1.h prototypes for fn_8016F39C, fn_8016F548, fn_8016F740, fn_8016F9A8, fn_8016FAD4, fn_8016FFD4, fn_80171BA4, and fn_80171DC4 after adding or refining bodies in gm_16F1.c.",
+        "source_path": "src/melee/gm/gm_16F1.h",
+        "scope": [
+          "src/melee/gm/gm_16F1.h",
+          "src/melee/gm/gm_16F1.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: gm_16F1.h UNK_RET/UNK_PARAMS replacements",
+          "raw_diff: gm_16F1.c recovered function bodies"
+        ],
+        "reason": "Path fact for future prototype/header cleanup in this file."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer human reviewer approval rationale; no human reviews or review comments are loaded.",
+      "Do not promote fn_801701C0 as matched; bot report says it improved to 91.77%, not 100%.",
+      "Do not treat the gmresult fn_80174468 regression as explained or accepted; loaded evidence only reports it.",
+      "Do not generalize semantic meanings for offset-style fields x7, xA, x20, x40, x13C, or x140 beyond their observed use in this diff."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

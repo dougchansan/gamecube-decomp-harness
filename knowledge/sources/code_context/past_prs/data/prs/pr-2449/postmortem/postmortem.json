@@ -1,0 +1,365 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2449",
+  "pr": {
+    "number": 2449,
+    "title": "jj/mninfo",
+    "url": "https://github.com/doldecomp/melee/pull/2449",
+    "state": "MERGED",
+    "author": "jurrejelle",
+    "created_at": "2026-05-01T06:52:54Z",
+    "merged_at": "2026-05-08T19:53:26Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2449 decompiled and typed several mninfo menu functions, added local data declarations and includes, and updated mninfo.h prototypes from UNK_RET/UNK_PARAMS to recovered signatures. The only loaded feedback is an automated decomp report showing one new .bss match and score improvements for multiple mninfo functions; there are no loaded human review comments or PR body details.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "menu-code",
+      "partial-function-progress"
+    ],
+    "systems": [
+      "melee-core",
+      "mn",
+      "mninfo"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/mn/mninfo.c",
+      "role": "Primary decomp source file; replaces placeholders with implementations for mnInfo_80251AFC, mnInfo_80251D58, fn_80251FE4, fn_802523D8, fn_80252548, mnInfo_80252758, adjusts mnInfo_80251F04, adds includes, local cursor struct, and mnInfo data declarations.",
+      "evidence_refs": [
+        "changed_files: src/melee/mn/mninfo.c added 398 deleted 20 hunks 6",
+        "raw_diff: mninfo.c placeholder removals and function bodies",
+        "bot_report: improvements for fn_80251FE4, mnInfo_80251AFC, fn_80252548, mnInfo_80251D58, mnInfo_80252758, fn_802523D8, mnInfo_80251F04"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mninfo.h",
+      "role": "Header prototype cleanup; replaces UNK_RET/UNK_PARAMS for newly recovered mninfo functions with concrete return and argument types.",
+      "evidence_refs": [
+        "changed_files: src/melee/mn/mninfo.h added 6 deleted 6 hunks 1",
+        "raw_diff: mninfo.h prototypes for mnInfo_80251AFC, mnInfo_80251D58, fn_80251FE4, fn_802523D8, fn_80252548, mnInfo_80252758"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Added includes for gm_1601, gm/types, lbarchive, lbaudio_ax, mn/inlines, sc/types, baselib debug/gobjgxlink/gobjobject/gobjproc/memory to support recovered mninfo code.",
+    "Added a local MnInfoTextCursor struct with padded fields for left and right HSD_Text pointers, plus declarations for mnInfo_804A0958, mnInfo_804A0968, mnInfo_804D6C78, and extern mn_804D4B64.",
+    "Implemented mnInfo_80251AFC as two nested-loop passes over 0x42 entries to initialize and reorder mnInfo_804A0968 using mnInfo_80251A08 and gmMainLib_8015D804.",
+    "Implemented mnInfo_80251D58 to create/update left-column date/time text, including US versus non-US date formatting via lbLang_IsSavedLanguageUS.",
+    "Reworked mnInfo_80251F04 signature and body to use MenuInfo_GObj, right_column text slots, HSD_SisLib_803A5ACC, and un_802FE3F8 result text.",
+    "Implemented fn_80251FE4 input handling for back/up/down menu inputs, scroll index changes, text cleanup, and visible row regeneration.",
+    "Implemented fn_802523D8 and fn_80252548 process handlers for menu state transition cleanup, arrow visibility, animation, initial row generation, JObj setup, and process switching.",
+    "Implemented mnInfo_80252758 to enter menu kind 0x1D, load MenMainConSs assets, allocate/init MnInfoData, create GObjs/procs, create description text, and start input handling.",
+    "Updated mninfo.h prototypes for recovered functions, replacing unknown return/params with s32 or void and typed parameters."
+  ],
+  "smart_moves": [
+    {
+      "text": "Header prototypes were updated alongside function recovery instead of leaving UNK_RET/UNK_PARAMS after bodies revealed signatures.",
+      "evidence_refs": [
+        "raw_diff: mninfo.h prototype replacements",
+        "decomp_standard: truthful-headers-and-includes"
+      ]
+    },
+    {
+      "text": "Repeated row cleanup and row population are expressed as bounded loops over four visible entries, rather than leaving fully duplicated row-specific blocks.",
+      "evidence_refs": [
+        "raw_diff: fn_80251FE4 cleanup do-while i < 4 and for i < 4 population",
+        "raw_diff: fn_802523D8 and fn_80252548 cleanup loops",
+        "decomp_standard: natural-loops"
+      ]
+    },
+    {
+      "text": "Text object slots are accessed through MnInfoData fields and a small temporary cursor struct instead of opaque raw offsets everywhere.",
+      "evidence_refs": [
+        "raw_diff: MnInfoTextCursor definition",
+        "raw_diff: data->left_column, data->right_column, data->description uses",
+        "decomp_standard: typed-fields-over-pointer-math"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When recovering a menu file, update the owning header as soon as function bodies prove signatures; this PR changed multiple mninfo prototypes from unknown placeholders to typed declarations in the same slice.",
+      "scope": [
+        "src/melee/mn/mninfo.c",
+        "src/melee/mn/mninfo.h"
+      ],
+      "evidence_refs": [
+        "raw_diff: mninfo.h UNK_RET/UNK_PARAMS replacements",
+        "decomp_standard: truthful-headers-and-includes"
+      ]
+    },
+    {
+      "lesson": "For menu rows stored as adjacent text slots, a temporary internal cursor struct can make repeated slot cleanup readable while preserving unusual stride behavior; keep the evidence narrow because this PR still uses explicit byte-stride casts.",
+      "scope": [
+        "src/melee/mn/mninfo.c",
+        "MnInfoTextCursor",
+        "fn_80251FE4",
+        "fn_802523D8",
+        "fn_80252548"
+      ],
+      "evidence_refs": [
+        "raw_diff: MnInfoTextCursor left/right fields",
+        "raw_diff: left = (MnInfoTextCursor*) ((u8*) left + 4)",
+        "raw_diff: cleanup loops over i < 4"
+      ]
+    },
+    {
+      "lesson": "Automated progress comments may report partial function improvements rather than full matches; record exact reported percentages and do not convert them into completed-match claims.",
+      "scope": [
+        "PR intake",
+        "mninfo"
+      ],
+      "evidence_refs": [
+        "text_corpus: bot report lists 9 improvements in unmatched items with percentages",
+        "decomp_standard: verification-and-regression-ledger"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "mnInfo_80251AFC, mnInfo_80251D58, mnInfo_80251F04, mnInfo_80252758",
+      "kind": "address-style function names retained",
+      "lesson": "The PR keeps address-style names for recovered mninfo functions where semantic names are not evidenced in the slice.",
+      "evidence_refs": [
+        "raw_diff: function definitions and header prototypes",
+        "decomp_standard: conservative-naming"
+      ]
+    },
+    {
+      "name": "fn_80251FE4, fn_802523D8, fn_80252548",
+      "kind": "fn_address-style names retained",
+      "lesson": "Unclear process callbacks remain fn_ address-style names rather than invented semantic names.",
+      "evidence_refs": [
+        "raw_diff: function definitions and header prototypes",
+        "decomp_standard: conservative-naming"
+      ]
+    },
+    {
+      "name": "MnInfoTextCursor",
+      "kind": "local helper struct",
+      "lesson": "A small semantic helper type was introduced for left/right HSD_Text cursor access, with padding fields preserving observed offsets.",
+      "evidence_refs": [
+        "raw_diff: typedef struct MnInfoTextCursor"
+      ]
+    },
+    {
+      "name": "temp_r3, temp_r31, var_r26, var_r27",
+      "kind": "temporary register-style locals",
+      "lesson": "Some generated-style temporary names remain in the recovered source, indicating the slice prioritizes matching/progress over full local-name cleanup.",
+      "evidence_refs": [
+        "raw_diff: mnInfo_80251F04 locals",
+        "raw_diff: fn_802523D8 locals",
+        "raw_diff: mnInfo_80252758 locals"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "#pragma dont_inline scoped with #pragma push/pop",
+      "details": "The PR adds or preserves scoped dont_inline blocks around mnInfo_80251A08, mnInfo_80251D58, mnInfo_80251F04, and mnInfo_80252720.",
+      "evidence_refs": [
+        "raw_diff: #pragma push / #pragma dont_inline on around listed functions",
+        "decomp_standard: avoid-pragmas-register-asm"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "tactic": "PAD_STACK(16)",
+      "details": "fn_802523D8 includes PAD_STACK(16), a narrow stack-shaping tactic. The loaded evidence does not include objdiff proof beyond the bot score report.",
+      "evidence_refs": [
+        "raw_diff: fn_802523D8 PAD_STACK(16)",
+        "text_corpus: bot report fn_802523D8 improved to 94.18%",
+        "decomp_standard: matching-tactics-need-evidence"
+      ],
+      "confidence": 0.72
+    },
+    {
+      "tactic": "Natural loops for sort/count/visible-row iteration",
+      "details": "The PR uses nested for loops for 0x42 trophy ordering/counting and four-entry for/do-while loops for visible menu rows and cleanup.",
+      "evidence_refs": [
+        "raw_diff: mnInfo_80251AFC nested loops",
+        "raw_diff: fn_80251FE4 count loop and four-entry population loops",
+        "raw_diff: fn_802523D8/fn_80252548 cleanup do-while loops",
+        "decomp_standard: natural-loops"
+      ],
+      "confidence": 0.88
+    },
+    {
+      "tactic": "Inline asset-name strings passed to lbArchive_LoadSections",
+      "details": "mnInfo_80252758 keeps MenMainConSs asset names inline when loading sections, consistent with the standard to avoid unnecessary string-literal symbol promotion.",
+      "evidence_refs": [
+        "raw_diff: lbArchive_LoadSections with \"MenMainConSs_Top_joint\" and related strings",
+        "decomp_standard: no-string-literal-symbol-regression"
+      ],
+      "confidence": 0.8
+    }
+  ],
+  "review_feedback": [
+    {
+      "source": "decomp-dev[bot]",
+      "kind": "automated_report",
+      "text": "Report for GALE01 shows matched data 38.73% (+0.01%, +88 bytes), one new .bss match for main/melee/mn/mninfo, and nine improvements in unmatched items including fn_80251FE4, mnInfo_80251AFC, fn_80252548, mnInfo_80251D58, mnInfo_80252758, fn_802523D8, .sdata2, .sbss, and mnInfo_80251F04.",
+      "evidence_refs": [
+        "text_corpus: issue_comment by decomp-dev[bot] 2026-05-01T06:56:35Z"
+      ]
+    },
+    {
+      "source": "loaded PR slice",
+      "kind": "missing_human_review",
+      "text": "No human review comments or review records are loaded for this slice.",
+      "evidence_refs": [
+        "metadata_json: review_comments 0, reviews 0",
+        "text_corpus: only PR body and decomp-dev bot issue comment present"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2449",
+    "jj/mninfo",
+    "jurrejelle",
+    "src/melee/mn/mninfo.c",
+    "src/melee/mn/mninfo.h",
+    "mnInfo_80251AFC",
+    "mnInfo_80251D58",
+    "mnInfo_80251F04",
+    "fn_80251FE4",
+    "fn_802523D8",
+    "fn_80252548",
+    "mnInfo_80252758",
+    "MnInfoTextCursor",
+    "MnInfoData",
+    "MenuInfo_GObj",
+    "mnInfo_804A0958",
+    "mnInfo_804A0968",
+    "mnInfo_804D6C78",
+    "HSD_SisLib_803A5CC4",
+    "HSD_SisLib_803A5ACC",
+    "HSD_SisLib_803A6754",
+    "HSD_SisLib_803A6B98",
+    "HSD_ASSERTREPORT",
+    "PAD_STACK(16)",
+    "pragma dont_inline",
+    "MenMainConSs_Top_joint",
+    "MenuInput_Up",
+    "MenuInput_Down",
+    "MenuInput_Back"
+  ],
+  "follow_up_queries": [
+    "mninfo PAD_STACK fn_802523D8",
+    "MnInfoTextCursor left right_column cleanup stride 4",
+    "mnInfo_80251AFC trophy sorting gmMainLib_8015D804",
+    "mninfo HSD_ASSERTREPORT Can't get user_data",
+    "mninfo MenMainConSs_Top_joint lbArchive_LoadSections",
+    "PR 2449 fn_80251FE4 83.01",
+    "mninfo.h UNK_RET UNK_PARAMS mnInfo_80252758"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR number/title/state/author/merged_at and changed file counts",
+      "raw_diff: complete diff excerpt for two changed files",
+      "changed_files.jsonl: changed file metadata",
+      "text_corpus.jsonl: empty PR body and one decomp-dev bot report",
+      "metadata_json: review_comments 0, reviews 0"
+    ],
+    "notes": [
+      "Strong evidence for changed files, symbols edited, prototypes changed, and exact code tactics present in the diff.",
+      "Automated report provides score/progress evidence but does not prove full text matches for the newly implemented functions; it explicitly lists many as improvements in unmatched items.",
+      "No PR body explanation and no human review comments are loaded, so reviewer intent, author rationale, and validation beyond the bot report are not inferred.",
+      "The PR is marked merged in metadata, but acceptance reasoning is not available in the loaded slice."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "pr_lesson",
+        "title": "Header cleanup should accompany recovered mninfo bodies",
+        "text": "PR 2449 recovered several src/melee/mn/mninfo.c bodies and updated src/melee/mn/mninfo.h prototypes from UNK_RET/UNK_PARAMS to concrete signatures in the same change. This is a grounded example of truthful header maintenance during decomp progress.",
+        "scope": [
+          "src/melee/mn/mninfo.c",
+          "src/melee/mn/mninfo.h",
+          "truthful-headers-and-includes"
+        ],
+        "evidence_refs": [
+          "raw_diff: mninfo.h prototype changes",
+          "raw_diff: corresponding function definitions"
+        ]
+      },
+      {
+        "record_type": "pr_lesson",
+        "title": "Do not overstate bot-reported partial improvements as matches",
+        "text": "The PR's bot report lists one new .bss match but describes nine function/section changes as improvements in unmatched items with percentages. Curated records should preserve that distinction.",
+        "scope": [
+          "PR intake",
+          "verification-and-regression-ledger"
+        ],
+        "evidence_refs": [
+          "text_corpus: decomp-dev bot report"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "mninfo source/header own Data Special info menu setup and scrolling functions",
+        "text": "PR 2449 evidence suggests src/melee/mn/mninfo.c and src/melee/mn/mninfo.h contain Data Special/info menu routines for loading MenMainConSs assets, creating MnInfoData, rendering description/date/right-column text, and handling back/up/down scroll input. Curator should verify against current source before promoting as a path fact.",
+        "source_path": "src/melee/mn/mninfo.c",
+        "scope": [
+          "src/melee/mn/mninfo.c",
+          "src/melee/mn/mninfo.h",
+          "MENU_KIND_DATA_SPECIAL",
+          "MenMainConSs_Top_joint",
+          "MenuInput_Up",
+          "MenuInput_Down",
+          "MenuInput_Back"
+        ],
+        "evidence_refs": [
+          "raw_diff: mnInfo_80252758 menu setup and asset loading",
+          "raw_diff: fn_80251FE4 input handling",
+          "raw_diff: fn_802523D8 arrow visibility and menu-state checks",
+          "raw_diff: fn_80252548 initial row generation"
+        ],
+        "reason": "Useful searchable path fact, but the PR slice alone may not establish the full subsystem ownership or final current-source state."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Temporary cursor structs for strided overlay access need narrow evidence",
+        "text": "PR 2449 uses MnInfoTextCursor with padding and casts that advance by 4 bytes to clean up left/right HSD_Text slots across four menu rows. This may be a reusable pattern for expressing overlapped/strided struct access, but it should remain evidence-gated and not become a broad recommendation without more examples.",
+        "source_path": null,
+        "scope": [
+          "MnInfoTextCursor",
+          "typed-fields-over-pointer-math",
+          "matching-tactics-need-evidence"
+        ],
+        "evidence_refs": [
+          "raw_diff: MnInfoTextCursor definition",
+          "raw_diff: left/right pointer cleanup loops with ((u8*) cursor + 4)"
+        ],
+        "reason": "Potential standard nuance for temporary internal structs, but current evidence is one PR and includes unusual pointer-stride casts."
+      }
+    ],
+    "rejection_notes": [
+      "Do not record full function matches for mnInfo_80251AFC, mnInfo_80251D58, fn_80251FE4, fn_802523D8, fn_80252548, mnInfo_80252758, or mnInfo_80251F04; the loaded bot report only says these unmatched items improved.",
+      "Do not infer human reviewer approval or requested changes; no human review comments are loaded.",
+      "Do not promote PAD_STACK(16) or dont_inline pragmas as generally accepted style from this PR alone; standards require narrow verifier evidence, and only score-report evidence is loaded.",
+      "Do not infer semantic renames for fn_ address-style callbacks; the PR retained address-style names."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

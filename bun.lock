@@ -9,6 +9,7 @@
         "lucide-react": "^1.17.0",
         "react": "^19.2.7",
         "react-dom": "^19.2.7",
+        "tokenizr": "^2.2.1",
       },
       "devDependencies": {
         "@tailwindcss/vite": "^4.3.0",
@@ -17,6 +18,28 @@
         "@types/react-dom": "^19.2.3",
         "@vitejs/plugin-react": "^6.0.2",
         "bun-types": "latest",
+        "tailwindcss": "^4.3.0",
+        "typescript": "latest",
+        "vite": "^8.0.16",
+      },
+    },
+    "apps/agent-viewer": {
+      "name": "@decomp-orchestrator/agent-viewer",
+      "dependencies": {
+        "@decomp-orchestrator/agents": "workspace:*",
+        "@decomp-orchestrator/core": "workspace:*",
+        "@decomp-orchestrator/knowledge": "workspace:*",
+        "@decomp-orchestrator/ui-contract": "workspace:*",
+        "lucide-react": "^1.17.0",
+        "react": "^19.2.7",
+        "react-dom": "^19.2.7",
+        "tokenizr": "^2.2.1",
+      },
+      "devDependencies": {
+        "@tailwindcss/vite": "^4.3.0",
+        "@types/react": "^19.2.17",
+        "@types/react-dom": "^19.2.3",
+        "@vitejs/plugin-react": "^6.0.2",
         "tailwindcss": "^4.3.0",
         "typescript": "latest",
         "vite": "^8.0.16",
@@ -131,6 +154,8 @@
     "@aws/lambda-invoke-store": ["@aws/lambda-invoke-store@0.2.4", "", {}, "sha512-iY8yvjE0y651BixKNPgmv1WrQc+GZ142sb0z4gYnChDDY2YqI4P/jsSopBWrKfAt7LOJAkOXt7rC/hms+WclQQ=="],
 
     "@babel/runtime": ["@babel/runtime@7.29.7", "", {}, "sha512-Nq8OhGWiZIZGV6hLHoyAKLLcJihP/xFeBMGJoUrxTX2psI8dCifzLhZISFb+VWS3wFMRDmCGw5R+dOySCqPLhw=="],
+
+    "@decomp-orchestrator/agent-viewer": ["@decomp-orchestrator/agent-viewer@workspace:apps/agent-viewer"],
 
     "@decomp-orchestrator/agents": ["@decomp-orchestrator/agents@workspace:packages/agents"],
 
@@ -495,6 +520,8 @@
     "tapable": ["tapable@2.3.3", "", {}, "sha512-uxc/zpqFg6x7C8vOE7lh6Lbda8eEL9zmVm/PLeTPBRhh1xCgdWaQ+J1CUieGpIfm2HdtsUpRv+HshiasBMcc6A=="],
 
     "tinyglobby": ["tinyglobby@0.2.17", "", { "dependencies": { "fdir": "^6.5.0", "picomatch": "^4.0.4" } }, "sha512-wXR/dYpcqKmfWpEdZjiKJOwCNFndD0DMnrW/cYjVGttEkBfVgcLFHoNrlj47mjOVic9yyNu65alsgF4NQyTa2g=="],
+
+    "tokenizr": ["tokenizr@2.2.1", "", {}, "sha512-+159QZqH4Ij4p0P791Wu/THwWf7ZRk4CrlC5MNtDfnY0ptnKenjWo5eM8vncwgDrQ0WNC+a97iaHQhOIjomJtQ=="],
 
     "ts-algebra": ["ts-algebra@2.0.0", "", {}, "sha512-FPAhNPFMrkwz76P7cdjdmiShwMynZYN6SgOujD1urY4oNm80Ou9oMdmbR45LotcKOXoy7wSmHkRFE6Mxbrhefw=="],
 

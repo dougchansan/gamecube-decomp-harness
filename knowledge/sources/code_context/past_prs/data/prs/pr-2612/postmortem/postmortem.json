@@ -1,0 +1,343 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2612",
+  "pr": {
+    "number": 2612,
+    "title": "itdosei: Remove unnecessary stack pad, remove unnecessary const, cleanup function names and add GET_* usage",
+    "url": "https://github.com/doldecomp/melee/pull/2612",
+    "state": "MERGED",
+    "author": "PsiLupan",
+    "created_at": "2026-06-08T05:22:19Z",
+    "merged_at": "2026-06-08T05:28:43Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Cleanup-only itDosei PR that renamed Dosei item functions from generic it_3F14/fn/address-style names to itDosei-prefixed names across symbols, header declarations, implementation, and item logic table callsites. The implementation also removed one const zero float in favor of inline 0.0f literals, removed an unnecessary PAD_STACK in spawned logic, simplified a temporary boolean/block shape, and replaced some direct gobj->user_data or gobj->hsd_obj accesses with GET_ITEM/GET_JOBJ macros. Bot output reports one new .sdata2 data match for main/melee/it/items/itdosei.",
+  "change_classification": {
+    "primary_type": "cleanup",
+    "categories": [
+      "cleanup",
+      "decomp-matching",
+      "headers",
+      "naming",
+      "data-literal-cleanup",
+      "macro-use"
+    ],
+    "systems": [
+      "item",
+      "itdosei",
+      "config/symbols"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/it/items/itdosei.c",
+      "role": "Main implementation cleanup: function renames, removed const zero float, one PAD_STACK removal, GET_ITEM/GET_JOBJ use, and small source-shape simplifications.",
+      "evidence_refs": [
+        "diff:src/melee/it/items/itdosei.c removes `const f32 it_804DC878 = 0.0f;` and replaces calls with `0.0f`",
+        "diff:src/melee/it/items/itdosei.c renames `it_3F14_Logic7_Spawned` to `itDosei_Logic7_Spawned` and similar Dosei functions",
+        "diff:src/melee/it/items/itdosei.c changes `Item* ip = gobj->user_data` to `GET_ITEM(gobj)` in several functions",
+        "diff:src/melee/it/items/itdosei.c changes `gobj->hsd_obj` to `GET_JOBJ(gobj)` in selected places",
+        "diff:src/melee/it/items/itdosei.c removes `PAD_STACK(8)` from spawned logic"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itdosei.h",
+      "role": "Header prototypes updated to match itDosei-prefixed renamed functions.",
+      "evidence_refs": [
+        "diff:src/melee/it/items/itdosei.h changes prototypes such as `it_3F14_Logic7_Spawned` to `itDosei_Logic7_Spawned` and `fn_80281390` to `itDosei_80281390`"
+      ]
+    },
+    {
+      "path": "src/melee/it/it_3F14.c",
+      "role": "Item logic table callsites updated for renamed Dosei logic callbacks.",
+      "evidence_refs": [
+        "diff:src/melee/it/it_3F14.c Dosei table changes callbacks from `it_3F14_Logic7_*` to `itDosei_Logic7_*`"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Symbol names updated for renamed Dosei functions at existing text addresses and sizes.",
+      "evidence_refs": [
+        "diff:config/GALE01/symbols.txt renames symbols at 0x80281164, 0x80281390, 0x80281734, 0x802817A0, 0x80281C6C, 0x80282074, 0x8028218C, 0x802826F8, 0x802829FC, 0x80282B14, 0x80282BFC, 0x80282CD4, 0x80282DE4, 0x80283588, 0x802839BC"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Renamed Dosei logic callbacks from `it_3F14_Logic7_*` to `itDosei_Logic7_*` in symbols, header, implementation, and the Dosei entry in `it_803F14C4`.",
+    "Renamed generic/address-style Dosei helpers such as `fn_80281390`, `fn_80281734`, `it_802817A0`, `it_80281C6C`, `it_80282074`, `it_80282BFC`, `fn_80282CD4`, and `it_80282DE4` to `itDosei_802...` names.",
+    "Removed `const f32 it_804DC878 = 0.0f;` and replaced uses with inline `0.0f` in `itDosei_FacingAngle` calls.",
+    "Removed an unnecessary `PAD_STACK(8)` from `itDosei_Logic7_Spawned`; other `PAD_STACK(8)` uses remain in collision functions shown by the diff.",
+    "Introduced or expanded GET macro usage in selected places, including `GET_ITEM(gobj)` and `GET_JOBJ(gobj)`.",
+    "Simplified a generated-looking local boolean/block in picked-up logic from an inner `not_msid_4` variable to `if (ip->msid != 4)`.",
+    "Bot report indicates `.sdata2` for `main/melee/it/items/itdosei` improved from 96.30% to 100.00%, with +3 matched bytes and no overall matched-data percentage change."
+  ],
+  "smart_moves": [
+    {
+      "text": "Kept renames synchronized across symbols, owning header, implementation, and item logic table callsites, reducing risk of stale prototypes or mismatched callback names.",
+      "evidence_refs": [
+        "diff:config/GALE01/symbols.txt",
+        "diff:src/melee/it/items/itdosei.h",
+        "diff:src/melee/it/items/itdosei.c",
+        "diff:src/melee/it/it_3F14.c"
+      ]
+    },
+    {
+      "text": "Removed a named zero-float constant and used inline `0.0f`, which is consistent with avoiding unnecessary named literal storage when the diff provides no independent data-ownership evidence for the symbol.",
+      "evidence_refs": [
+        "diff:src/melee/it/items/itdosei.c removes `const f32 it_804DC878 = 0.0f;`",
+        "decomp_standard:literals-and-data-ownership",
+        "decomp_standard:no-string-literal-symbol-regression"
+      ]
+    },
+    {
+      "text": "Applied GET macros only in some local-access sites rather than rewriting every access pattern in the file, keeping the cleanup narrow.",
+      "evidence_refs": [
+        "diff:src/melee/it/items/itdosei.c selected changes to `GET_ITEM(gobj)` and `GET_JOBJ(gobj)` while some `gobj->user_data` and `gobj->hsd_obj` uses remain"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For focused cleanup PRs, address-style or table-prefix item functions can be renamed to item-prefixed names when all visible references are updated together: symbols, header prototypes, implementation definitions, and logic table callsites.",
+      "scope": [
+        "item callbacks",
+        "itdosei",
+        "symbols/header synchronization"
+      ],
+      "evidence_refs": [
+        "diff:config/GALE01/symbols.txt",
+        "diff:src/melee/it/items/itdosei.h",
+        "diff:src/melee/it/items/itdosei.c",
+        "diff:src/melee/it/it_3F14.c"
+      ],
+      "confidence": 0.86
+    },
+    {
+      "lesson": "Do not keep a named float constant solely to stand in for zero; this PR removed `it_804DC878` and inlined `0.0f` at repeated callsites, with bot output reporting `.sdata2` completion for the itdosei unit.",
+      "scope": [
+        "literal cleanup",
+        ".sdata2",
+        "item implementation"
+      ],
+      "evidence_refs": [
+        "diff:src/melee/it/items/itdosei.c",
+        "issue_comment:decomp-dev[bot] reports `.sdata2` 96.30% -> 100.00% for `main/melee/it/items/itdosei`",
+        "decomp_standard:literals-and-data-ownership"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "When an access role is clear, using local project access macros like `GET_ITEM(gobj)` and `GET_JOBJ(gobj)` can make decompiled item code more idiomatic than repeated direct `gobj->user_data` or `gobj->hsd_obj` access.",
+      "scope": [
+        "item implementation",
+        "macro cleanup"
+      ],
+      "evidence_refs": [
+        "diff:src/melee/it/items/itdosei.c changes selected `gobj->user_data` and `gobj->hsd_obj` accesses to GET macros",
+        "decomp_standard:typed-fields-over-pointer-math",
+        "decomp_standard:header-inlines"
+      ],
+      "confidence": 0.68
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Dosei item logic callbacks use `itDosei_Logic7_*` rather than the broader table prefix `it_3F14_Logic7_*` once the item identity is known.",
+      "examples": [
+        "`it_3F14_Logic7_Spawned` -> `itDosei_Logic7_Spawned`",
+        "`it_3F14_Logic7_PickedUp` -> `itDosei_Logic7_PickedUp`",
+        "`it_3F14_Logic7_DmgReceived` -> `itDosei_Logic7_DmgReceived`",
+        "`it_3F14_Logic7_DmgDealt` -> `itDosei_Logic7_DmgDealt`"
+      ],
+      "evidence_refs": [
+        "diff:config/GALE01/symbols.txt",
+        "diff:src/melee/it/items/itdosei.h",
+        "diff:src/melee/it/it_3F14.c"
+      ]
+    },
+    {
+      "convention": "Unknown Dosei-local helpers may still keep address suffixes, but with an item prefix: `itDosei_802...` instead of bare `fn_802...` or `it_802...`.",
+      "examples": [
+        "`fn_80281390` -> `itDosei_80281390`",
+        "`fn_80281734` -> `itDosei_80281734`",
+        "`it_802817A0` -> `itDosei_802817A0`",
+        "`fn_80282CD4` -> `itDosei_80282CD4`"
+      ],
+      "evidence_refs": [
+        "diff:config/GALE01/symbols.txt",
+        "diff:src/melee/it/items/itdosei.c",
+        "decomp_standard:conservative-naming"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Remove narrow stack padding when it is no longer necessary for the cleaned source shape.",
+      "evidence_refs": [
+        "PR title: `Remove unnecessary stack pad`",
+        "diff:src/melee/it/items/itdosei.c removes `PAD_STACK(8)` from spawned logic"
+      ],
+      "notes": "The slice does not include objdiff text for this exact stack-pad removal; bot report only reports data matching."
+    },
+    {
+      "tactic": "Inline a zero float literal instead of preserving a named const in `.sdata2` when the diff supports that the named constant is unnecessary.",
+      "evidence_refs": [
+        "diff:src/melee/it/items/itdosei.c removes `it_804DC878` and replaces calls with `0.0f`",
+        "issue_comment:decomp-dev[bot] `.sdata2` +3 bytes, 96.30% -> 100.00%"
+      ],
+      "notes": "Supported as a local tactic for this PR, not a broad claim that every float constant should be inlined."
+    },
+    {
+      "tactic": "Simplify generated-looking block/temporary boolean source forms when a direct condition expresses the same local logic.",
+      "evidence_refs": [
+        "diff:src/melee/it/items/itdosei.c changes inner `int not_msid_4 = ip->msid != 4; if (not_msid_4)` to `if (ip->msid != 4)`"
+      ],
+      "notes": "No explicit verification output is attached to this individual cleanup in the slice."
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "automation",
+      "author": "decomp-dev[bot]",
+      "feedback": "Report for GALE01 showed matched data unchanged overall at 41.53%, with one new match: `main/melee/it/items/itdosei` `.sdata2` +3 bytes, 96.30% before to 100.00% after.",
+      "evidence_refs": [
+        "text_corpus.jsonl issue_comment by decomp-dev[bot] at 2026-06-08T05:25:51Z"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2612",
+    "PsiLupan",
+    "itdosei-cleanup",
+    "itDosei",
+    "itdosei.c",
+    "itdosei.h",
+    "it_3F14.c",
+    "symbols.txt",
+    "GET_ITEM",
+    "GET_JOBJ",
+    "PAD_STACK",
+    "it_804DC878",
+    ".sdata2",
+    "itDosei_Logic7_Spawned",
+    "itDosei_Logic7_PickedUp",
+    "itDosei_Logic7_Dropped",
+    "itDosei_Logic7_Thrown",
+    "itDosei_Logic7_DmgReceived",
+    "itDosei_Logic7_DmgDealt",
+    "itDosei_80281390",
+    "itDosei_80282DE4"
+  ],
+  "follow_up_queries": [
+    "Find later PRs touching `itDosei_80281390` or remaining `itDosei_802...` helpers to see if address-suffix names gained semantic names.",
+    "Search for other item files that removed named zero float constants in favor of inline `0.0f` and compare `.sdata2` report effects.",
+    "Search for remaining `PAD_STACK(8)` in `src/melee/it/items/itdosei.c` to determine whether later cleanup removed them with verifier evidence.",
+    "Search for GET_ITEM/GET_JOBJ adoption in item cleanup PRs to identify local macro-use conventions."
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json for PR identity, state, author, timestamps, changed files, and counts",
+      "diff_excerpt/raw_diff for code, header, symbol, and table changes",
+      "text_corpus.jsonl for empty PR body and bot report",
+      "decomp_standards for accepted global standards used as supporting context"
+    ],
+    "notes": [
+      "PR body is empty and there are no human review comments in the loaded slice.",
+      "Diff evidence is strong for what changed, especially renames and local cleanup patterns.",
+      "Automation evidence reports a `.sdata2` data match, but the slice does not include narrow build, objdiff, or per-function text-match logs for each cleanup.",
+      "GET_* intent is partly from PR title and diff; do not infer a universal GET macro standard from this single PR.",
+      "The diff excerpt for `itdosei.h` is truncated, but metadata and visible hunks are enough to identify header rename synchronization at a high level."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson",
+        "title": "Synchronize item function renames across symbols, headers, implementation, and logic tables",
+        "text": "PR 2612 shows a cleanup rename of Dosei item callbacks and helpers where `config/GALE01/symbols.txt`, `src/melee/it/items/itdosei.h`, `src/melee/it/items/itdosei.c`, and `src/melee/it/it_3F14.c` were updated together. This is a good candidate pattern for safe item-function naming cleanup when item identity is known.",
+        "scope": [
+          "item",
+          "naming",
+          "headers",
+          "symbols"
+        ],
+        "evidence_refs": [
+          "diff:config/GALE01/symbols.txt",
+          "diff:src/melee/it/items/itdosei.h",
+          "diff:src/melee/it/items/itdosei.c",
+          "diff:src/melee/it/it_3F14.c"
+        ],
+        "confidence": 0.86
+      },
+      {
+        "record_type": "decomp_lesson",
+        "title": "Inline zero float instead of preserving unnecessary named const when data ownership is unsupported",
+        "text": "PR 2612 removed `const f32 it_804DC878 = 0.0f;` from `itdosei.c` and replaced repeated `itDosei_FacingAngle(..., it_804DC878)` arguments with `0.0f`. The bot report then showed `main/melee/it/items/itdosei` `.sdata2` at 100.00%. Candidate lesson: if a named data symbol only represents a zero literal and no ownership evidence supports it, inline the literal rather than preserving fake storage.",
+        "scope": [
+          "item",
+          "literal cleanup",
+          ".sdata2"
+        ],
+        "evidence_refs": [
+          "diff:src/melee/it/items/itdosei.c",
+          "issue_comment:decomp-dev[bot] report"
+        ],
+        "confidence": 0.78
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "itdosei item implementation and symbols touched by PR 2612 cleanup",
+        "text": "PR 2612 touched `src/melee/it/items/itdosei.c`, `src/melee/it/items/itdosei.h`, `src/melee/it/it_3F14.c`, and `config/GALE01/symbols.txt` for Dosei item cleanup and synchronized function renames.",
+        "source_path": null,
+        "scope": [
+          "src/melee/it/items/itdosei.c",
+          "src/melee/it/items/itdosei.h",
+          "src/melee/it/it_3F14.c",
+          "config/GALE01/symbols.txt"
+        ],
+        "evidence_refs": [
+          "changed_files.jsonl",
+          "diff_excerpt"
+        ],
+        "reason": "Could help future source/path lookup for Dosei item function naming and logic table wiring."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Consider documenting macro access cleanup as local idiom, not mandatory rewrite",
+        "text": "PR 2612 title and diff show selected replacement of `gobj->user_data`/`gobj->hsd_obj` with `GET_ITEM(gobj)`/`GET_JOBJ(gobj)` in `itdosei.c`, while some direct accesses remain. Candidate guidance: use GET macros when they express the local object access idiom and help readability, but do not require broad churn unless verified.",
+        "source_path": null,
+        "scope": [
+          "item code",
+          "GET_ITEM",
+          "GET_JOBJ",
+          "cleanup PRs"
+        ],
+        "evidence_refs": [
+          "PR title",
+          "diff:src/melee/it/items/itdosei.c"
+        ],
+        "reason": "This may refine existing typed-field/header-inline guidance, but one PR is insufficient to make it a universal standard without curator review."
+      }
+    ],
+    "rejection_notes": [
+      "Do not treat this PR as proof that all `gobj->user_data` or `gobj->hsd_obj` accesses should be replaced with GET macros; the diff applies the change selectively.",
+      "Do not claim full text-section matching for touched functions from this slice; the available automation report only mentions matched data and one `.sdata2` item.",
+      "Do not infer semantic behavior for `itDosei_802...` helpers beyond the item prefix; the PR keeps address suffixes for unknown helper roles."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

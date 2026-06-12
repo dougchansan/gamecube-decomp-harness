@@ -1,0 +1,10 @@
+{
+  "pr": 981,
+  "title": "Fix issue with building `python_Levenshtein` on Windows",
+  "url": "https://github.com/doldecomp/melee/pull/981",
+  "text_records_with_body": 0,
+  "review_comments": 0,
+  "changed_files": 3,
+  "added_lines": 4,
+  "deleted_lines": 3
+}

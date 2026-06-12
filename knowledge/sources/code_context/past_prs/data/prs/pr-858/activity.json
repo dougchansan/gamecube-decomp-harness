@@ -1,0 +1,10 @@
+{
+  "pr": 858,
+  "title": "Partially match `ftCo_DamageFall`",
+  "url": "https://github.com/doldecomp/melee/pull/858",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 19,
+  "added_lines": 335,
+  "deleted_lines": 406
+}

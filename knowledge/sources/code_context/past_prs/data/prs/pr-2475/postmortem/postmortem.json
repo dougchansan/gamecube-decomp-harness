@@ -1,0 +1,312 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2475",
+  "pr": {
+    "number": 2475,
+    "title": "split & link ft_081B, ft_084E",
+    "url": "https://github.com/doldecomp/melee/pull/2475",
+    "state": "MERGED",
+    "author": "r-burns",
+    "created_at": "2026-05-10T03:17:12Z",
+    "merged_at": "2026-05-10T03:27:51Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2475 split the tail range of melee/ft/ft_081B.c into a new matching translation unit melee/ft/ft_084E.c, moved the corresponding prototypes into a new ft_084E.h, updated splits and .sdata2 local symbols, and linked both ft_081B and ft_084E as Matching objects. The bot report shows 16 new matches in main/melee/ft/ft_084E and .sdata2, while the same functions appear as broken in ft_081B because ownership moved to the new unit.",
+  "change_classification": {
+    "primary_type": "translation-unit split and matching enablement",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "splits",
+      "symbols",
+      "build-config"
+    ],
+    "systems": [
+      "fighter",
+      "config/GALE01",
+      "configure.py"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/ft/ft_084E.c",
+      "role": "New source file containing functions moved from ft_081B.c for range 0x80084E1C-0x8008521C.",
+      "evidence_refs": [
+        "raw_diff: new file src/melee/ft/ft_084E.c with functions ft_80084E1C through ft_80085204",
+        "text_corpus: bot report lists main/melee/ft/ft_084E function matches"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ft_081B.c",
+      "role": "Original source file shortened; removed the moved function block after ft_80084DB0.",
+      "evidence_refs": [
+        "raw_diff: src/melee/ft/ft_081B.c deletes 153 lines from ft_80084E1C through ft_80085204"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ft_084E.h",
+      "role": "New header owning prototypes for the moved ft_084E range functions.",
+      "evidence_refs": [
+        "raw_diff: new file src/melee/ft/ft_084E.h with prototypes ft_80084E1C through ft_80085204"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ft_081B.h",
+      "role": "Removed moved prototypes and temporarily includes ft_084E.h transitively.",
+      "evidence_refs": [
+        "raw_diff: ft_081B.h deletes ft_80084E1C-through-ft_80085204 prototypes",
+        "raw_diff: ft_081B.h adds comment 'TODO transitive include hack, should be included directly by dependers' and includes <melee/ft/ft_084E.h>"
+      ]
+    },
+    {
+      "path": "config/GALE01/splits.txt",
+      "role": "Split ft_081B text and .sdata2 ranges and added ft_084E ranges.",
+      "evidence_refs": [
+        "raw_diff: ft_081B.c text end changes 0x8008521C to 0x80084E1C; ft_084E.c text added 0x80084E1C-0x8008521C",
+        "raw_diff: ft_081B.c .sdata2 end changes 0x804D83C0 to 0x804D83B8; ft_084E.c .sdata2 added 0x804D83B8-0x804D83C0"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Renamed local .sdata2 float symbols at 0x804D83A8-0x804D83B8 from ft_ address-style names to local @ labels.",
+      "evidence_refs": [
+        "raw_diff: symbols.txt changes ft_804D83A8..ft_804D83B8 to @195, @333, @1111, @1153, @204"
+      ]
+    },
+    {
+      "path": "configure.py",
+      "role": "Changed ft_081B from NonMatching to Matching and added ft_084E as Matching.",
+      "evidence_refs": [
+        "raw_diff: configure.py replaces Object(NonMatching, \"melee/ft/ft_081B.c\") with Object(Matching, \"melee/ft/ft_081B.c\") and Object(Matching, \"melee/ft/ft_084E.c\")"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Created src/melee/ft/ft_084E.c and moved 14 functions, ft_80084E1C through ft_80085204, out of src/melee/ft/ft_081B.c.",
+    "Created src/melee/ft/ft_084E.h and moved the corresponding prototypes out of ft_081B.h.",
+    "Added a temporary transitive include from ft_081B.h to ft_084E.h, explicitly marked by the diff comment as a TODO hack for dependers.",
+    "Updated config/GALE01/splits.txt so ft_081B ends at 0x80084E1C and new ft_084E owns text 0x80084E1C-0x8008521C plus .sdata2 0x804D83B8-0x804D83C0.",
+    "Updated config/GALE01/symbols.txt local .sdata2 labels in the split region.",
+    "Updated configure.py so both melee/ft/ft_081B.c and melee/ft/ft_084E.c are Matching objects.",
+    "Bot report recorded linked code improvement of +14052 bytes and 16 new matches, including all moved ft_084E functions and .sdata2."
+  ],
+  "smart_moves": [
+    {
+      "text": "The source move was paired with split metadata, symbol metadata, header ownership, and configure.py object-status updates, avoiding a code-only split that would leave build/config ownership inconsistent.",
+      "evidence_refs": [
+        "raw_diff: splits.txt ft_081B/ft_084E range changes",
+        "raw_diff: symbols.txt .sdata2 label changes",
+        "raw_diff: ft_084E.h new prototypes",
+        "raw_diff: configure.py Matching entries"
+      ]
+    },
+    {
+      "text": "The bot report's broken matches in ft_081B mirror the new matches in ft_084E, indicating the apparent ft_081B regressions are ownership movement rather than lost function matches.",
+      "evidence_refs": [
+        "text_corpus: bot report lists 14 broken ft_081B function matches and corresponding new ft_084E matches"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When carving a matched tail range into a new translation unit, update all ownership surfaces together: source file, header prototypes, splits text/data ranges, symbol labels, and configure.py object classification.",
+      "scope": [
+        "translation-unit splits",
+        "fighter source files",
+        "matching object enablement"
+      ],
+      "evidence_refs": [
+        "raw_diff: src/melee/ft/ft_084E.c new file and ft_081B.c deletions",
+        "raw_diff: ft_084E.h new header and ft_081B.h prototype removals",
+        "raw_diff: splits.txt and symbols.txt updates",
+        "raw_diff: configure.py Matching updates"
+      ]
+    },
+    {
+      "lesson": "A split can make report output show old-unit broken matches and new-unit new matches for the same functions; classify this as ownership movement only when the function names and sizes line up in the report.",
+      "scope": [
+        "report interpretation",
+        "TU split review"
+      ],
+      "evidence_refs": [
+        "text_corpus: ft_80084E1C, ft_80084F3C, ft_80085154 and other functions are new under ft_084E and broken under ft_081B"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "The new file and header use address-range naming consistent with the first function address: ft_084E.c and ft_084E.h contain functions beginning at ft_80084E1C.",
+      "evidence_refs": [
+        "raw_diff: new src/melee/ft/ft_084E.c begins with ft_80084E1C",
+        "raw_diff: new src/melee/ft/ft_084E.h declares ft_80084E1C first"
+      ]
+    },
+    {
+      "convention": "Local .sdata2 float labels in this split region were represented as local @ labels rather than ft_ address-style global-looking names.",
+      "evidence_refs": [
+        "raw_diff: symbols.txt changes ft_804D83A8..ft_804D83B8 to @195, @333, @1111, @1153, @204"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Use split metadata to isolate an already matching function range into its own Matching object, rather than leaving the larger source file NonMatching.",
+      "evidence_refs": [
+        "raw_diff: splits.txt adds melee/ft/ft_084E.c range",
+        "raw_diff: configure.py marks ft_081B.c and ft_084E.c as Matching",
+        "text_corpus: bot report lists ft_084E functions at 100.00%"
+      ]
+    },
+    {
+      "tactic": "Preserve the matching source bodies during file movement; the diff shows the function bodies removed from ft_081B.c and added unchanged in ft_084E.c within the provided excerpt.",
+      "evidence_refs": [
+        "raw_diff: ft_081B.c deletions and ft_084E.c additions for ft_80084E1C through ft_80085204"
+      ]
+    },
+    {
+      "tactic": "PAD_STACK(8) appears in ft_80084F3C after the move; the PR evidence shows it as existing source in the moved function but does not include a separate justification beyond the bot-reported match.",
+      "evidence_refs": [
+        "raw_diff: ft_80084F3C contains PAD_STACK(8)",
+        "text_corpus: bot report lists ft_80084F3C as 100.00% in ft_084E"
+      ]
+    }
+  ],
+  "review_feedback": [],
+  "searchable_terms": [
+    "PR2475",
+    "split & link ft_081B ft_084E",
+    "ft_084E.c",
+    "ft_084E.h",
+    "ft_081B.c",
+    "ft_081B.h",
+    "ft_80084E1C",
+    "ft_80084EEC",
+    "ft_80084F3C",
+    "ft_80084FA8",
+    "ft_80085030",
+    "ft_800850E0",
+    "ft_80085154",
+    "splits.txt 0x80084E1C",
+    "symbols.txt 0x804D83B8",
+    "Object(Matching, melee/ft/ft_084E.c)",
+    "transitive include hack",
+    "PAD_STACK(8)"
+  ],
+  "follow_up_queries": [
+    "Find later PRs that remove the ft_081B.h transitive include hack for ft_084E.h.",
+    "Search dependers of ft_081B.h that call ft_80084E1C through ft_80085204 and should include ft_084E.h directly.",
+    "Search similar PRs that split address-range fighter files and mark both old and new objects Matching.",
+    "Check whether local @ .sdata2 labels around 0x804D83A8-0x804D83C0 were adjusted again after PR 2475."
+  ],
+  "evidence_quality": {
+    "status": "strong",
+    "evidence_refs": [
+      "metadata_json: PR number/title/author/state/merge timestamps and changed-file counts",
+      "raw_diff: complete diff excerpt for all changed files",
+      "changed_files: seven changed files with add/delete counts",
+      "text_corpus: decomp-dev bot report with match deltas"
+    ],
+    "notes": [
+      "PR body is empty and there are no human review comments in the loaded slice.",
+      "The bot report provides matching evidence, but no local build command, objdiff invocation, or author-written validation details are present.",
+      "The include hack is explicitly labeled TODO in the diff, but the slice does not identify which dependers require direct includes.",
+      "PAD_STACK(8) is visible in moved code; the slice does not prove whether it was newly introduced before this PR or required for the split."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "type": "lesson",
+        "title": "TU split intake should account for ownership-shift report noise",
+        "text": "For translation-unit split PRs, apparent broken matches in the old unit can be expected ownership movement when the same symbols and sizes appear as new matches in the new unit. Review the old/new unit pair together before treating the report as a regression.",
+        "scope": [
+          "TU splits",
+          "decomp report interpretation"
+        ],
+        "evidence_refs": [
+          "text_corpus: bot report lists matching ft_084E new matches and ft_081B broken matches for the same functions"
+        ]
+      },
+      {
+        "type": "lesson",
+        "title": "A matching source split requires synchronized config and header ownership",
+        "text": "This PR demonstrates a focused split where moved source bodies, new header prototypes, split ranges, local data symbols, and configure.py Matching entries were changed in one patch.",
+        "scope": [
+          "fighter source",
+          "splits",
+          "symbols",
+          "headers",
+          "configure.py"
+        ],
+        "evidence_refs": [
+          "raw_diff: ft_084E.c/ft_084E.h added, ft_081B.c/ft_081B.h shortened, splits.txt/symbols.txt/configure.py updated"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "ft_084E split ownership range from PR 2475",
+        "text": "PR 2475 introduced melee/ft/ft_084E.c with .text range 0x80084E1C-0x8008521C and .sdata2 range 0x804D83B8-0x804D83C0, while ft_081B.c was shortened to end at 0x80084E1C and .sdata2 0x804D83B8.",
+        "source_path": "config/GALE01/splits.txt",
+        "scope": [
+          "melee/ft/ft_081B.c",
+          "melee/ft/ft_084E.c",
+          "GALE01 splits"
+        ],
+        "evidence_refs": [
+          "raw_diff: config/GALE01/splits.txt hunk"
+        ],
+        "reason": "This is a concrete path/range ownership change, but it belongs in path facts only after curator review."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Avoid leaving transitive include hacks after header splits",
+        "text": "When moving prototypes to a new header during a split, direct dependers should eventually include the new header rather than relying on the old header as a transitive include bridge.",
+        "source_path": "src/melee/ft/ft_081B.h",
+        "scope": [
+          "headers",
+          "translation-unit splits",
+          "include hygiene"
+        ],
+        "evidence_refs": [
+          "raw_diff: ft_081B.h adds comment 'TODO transitive include hack, should be included directly by dependers' before including <melee/ft/ft_084E.h>"
+        ],
+        "reason": "The PR itself labels the include as a temporary hack, but the slice does not include a review discussion or follow-up confirming the general policy."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "ft_084E linked as Matching in configure.py",
+        "text": "PR 2475 added Object(Matching, \"melee/ft/ft_084E.c\") and changed Object(NonMatching, \"melee/ft/ft_081B.c\") to Object(Matching, \"melee/ft/ft_081B.c\").",
+        "source_path": "configure.py",
+        "scope": [
+          "melee/ft/ft_081B.c",
+          "melee/ft/ft_084E.c",
+          "MatchingFor"
+        ],
+        "evidence_refs": [
+          "raw_diff: configure.py hunk"
+        ],
+        "reason": "This is a concrete build classification change suitable for curator-confirmed path facts."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer new semantic names for ft_80084E1C-through-ft_80085204; the PR preserves address-style function names.",
+      "Do not treat the ft_081B broken matches in the bot report as true regressions without accounting for the matching ft_084E ownership move.",
+      "Do not promote PAD_STACK(8) as a recommended tactic from this PR alone; the slice only shows it present in a matched moved function."
+    ]
+  },
+  "confidence": 0.88,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

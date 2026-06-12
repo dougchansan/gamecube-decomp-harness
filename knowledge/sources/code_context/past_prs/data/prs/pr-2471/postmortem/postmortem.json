@@ -1,0 +1,365 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2471",
+  "pr": {
+    "number": 2471,
+    "title": "Jj/sobjlib",
+    "url": "https://github.com/doldecomp/melee/pull/2471",
+    "state": "CLOSED",
+    "author": "jurrejelle",
+    "created_at": "2026-05-09T18:09:45Z",
+    "merged_at": null
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Draft closed PR for sysdolphin baselib sobjlib work. The slice decompiled HSD_SObjLib_803A477C, partially implemented HSD_SObjLib_803A4A68, changed HSD_SObj color bytes into GXColor fields, updated a sobjlib prototype priority parameter to u8, and adjusted one gmregtyfall caller to use GXColor channels. Bot output reported one new function match and one broken match/regressions; the PR was later marked superseded by PR #2485.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "type-recovery",
+      "regression"
+    ],
+    "systems": [
+      "sysdolphin/baselib",
+      "melee/gm"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/sysdolphin/baselib/sobjlib.c",
+      "role": "Primary decompilation work: added includes, local structs, data/static declarations, HSD_SObjLib_803A477C implementation, and large HSD_SObjLib_803A4A68 implementation using GX/HSD state calls.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/sysdolphin/baselib/sobjlib.c +373/-21",
+        "raw_diff: sobjlib.c hunks replacing /// #HSD_SObjLib_803A477C and /// #HSD_SObjLib_803A4A68",
+        "text_corpus: bot report lists HSD_SObjLib_803A477C 0.00% -> 100.00% and HSD_SObjLib_803A4A68 0.00% -> 97.28%"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/sobjlib.h",
+      "role": "Header type/prototype update: replaced individual color bytes x38-x3F with GXColor x38 and x3C, and changed HSD_SObjLib_803A477C priority parameter from int to u8.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/sysdolphin/baselib/sobjlib.h +3/-10",
+        "raw_diff: HSD_SObj fields x38..x3F replaced with GXColor x38 and GXColor x3C",
+        "raw_diff: HSD_SObjLib_803A477C prototype fifth parameter changed to u8"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmregtyfall.c",
+      "role": "Caller adaptation to recovered HSD_SObj color layout, changing raw byte assignments to GXColor channel assignments.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gm/gmregtyfall.c +6/-6",
+        "raw_diff: temp_r3->x3F changed to temp_r3->x3C.a",
+        "raw_diff: temp_r3_2->x3C/x3D/x3E/x3F changed to x3C.r/g/b/a"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Implemented HSD_SObjLib_803A477C in C, including HSD_ObjAlloc, HSD_ASSERT, GXInitTlutObj/GXInitTexObjCI/GXInitTexObj setup, default SObj field initialization, optional secondary texture setup, texture coordinate scale setup, and insertion via HSD_SObjLib_803A44D4.",
+      "evidence_refs": [
+        "raw_diff: HSD_SObjLib_803A477C body added",
+        "text_corpus: bot report new match HSD_SObjLib_803A477C +612, 100.00%"
+      ]
+    },
+    {
+      "text": "Added a large C implementation of HSD_SObjLib_803A4A68 covering GX state setup, TEV configuration branches, texture/TLUT loading, quad vertex writes to 0xCC008000, and HSD state cleanup.",
+      "evidence_refs": [
+        "raw_diff: HSD_SObjLib_803A4A68 body added",
+        "text_corpus: bot report HSD_SObjLib_803A4A68 improved 0.00% -> 97.28%"
+      ]
+    },
+    {
+      "text": "Recovered HSD_SObj color storage as two GXColor fields at offsets 0x38 and 0x3C instead of eight individual u8 byte fields.",
+      "evidence_refs": [
+        "raw_diff: sobjlib.h HSD_SObj x38..x3F replaced by GXColor x38 and x3C",
+        "raw_diff: sobjlib.c uses sobj->x38 and sobj->x3C with GXSetTevColor",
+        "raw_diff: gmregtyfall.c channel assignments to x3C.r/g/b/a"
+      ]
+    },
+    {
+      "text": "Changed HSD_SObjLib_803A477C's priority argument in the header and implementation from int to u8.",
+      "evidence_refs": [
+        "raw_diff: sobjlib.h prototype fifth parameter changed to u8",
+        "raw_diff: sobjlib.c implementation signature uses u8 priority"
+      ]
+    },
+    {
+      "text": "The bot report recorded text progress but also a broken match in HSD_SObjLib_803A54EC and data-section regressions in .data and .sbss.",
+      "evidence_refs": [
+        "text_corpus: bot report broken match HSD_SObjLib_803A54EC 100.00% -> 99.95%",
+        "text_corpus: bot report regressions .data 48.07% -> 41.20% and .sbss 50.00% -> 0.00%"
+      ]
+    },
+    {
+      "text": "The author commented that regression would be fixed when linking; a later comment states the PR was superseded by PR #2485.",
+      "evidence_refs": [
+        "human_pr_text: 'regression will be fixed when linking'",
+        "human_pr_text: 'Superseded by https://github.com/doldecomp/melee/pull/2485'"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Updating the public HSD_SObj layout to GXColor allowed callers and rendering code to use channel names and GX APIs directly rather than treating color fields as unrelated byte offsets.",
+      "evidence_refs": [
+        "raw_diff: sobjlib.h GXColor x38/x3C",
+        "raw_diff: gmregtyfall.c x3C.r/g/b/a",
+        "raw_diff: sobjlib.c GXSetTevColor(..., sobj->x38/x3C)"
+      ]
+    },
+    {
+      "text": "The HSD_SObjLib_803A477C prototype was tightened to use u8 for priority, matching its use when passed to HSD_SObjLib_803A44D4.",
+      "evidence_refs": [
+        "raw_diff: HSD_SObjLib_803A477C signature uses u8 priority",
+        "raw_diff: HSD_SObjLib_803A44D4(gobj, sobj, priority)"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When byte fields form a color passed to GX APIs, recovering the aggregate GXColor type can simplify both the owning struct and downstream callers.",
+      "evidence_refs": [
+        "raw_diff: HSD_SObj x38..x3F changed to GXColor x38/x3C",
+        "raw_diff: GXSetTevColor calls take sobj->x38 and sobj->x3C",
+        "raw_diff: gmregtyfall.c uses x3C.r/g/b/a"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "Code-match progress that introduces or exposes data-section movement should be treated cautiously; this PR's bot report shows a function match alongside .data/.sbss regressions and a broken adjacent match.",
+      "evidence_refs": [
+        "text_corpus: HSD_SObjLib_803A477C 100.00%",
+        "text_corpus: HSD_SObjLib_803A54EC broken match",
+        "text_corpus: .data and .sbss regressions"
+      ],
+      "confidence": 0.72
+    },
+    {
+      "lesson": "A PR superseded by a later PR is useful intake evidence but should not by itself be treated as accepted final source style.",
+      "evidence_refs": [
+        "human_pr_text: Superseded by PR #2485",
+        "metadata_json: merged_at null and state CLOSED"
+      ],
+      "confidence": 0.83
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "The PR used address-style names for unresolved functions and labels, such as HSD_SObjLib_803A477C, HSD_SObjLib_803A4A68, and lbl_804DEA80..lbl_804DEA90, while adding short local role names such as image, tlut, image2, sobj, desc, wrap_s, wrap_t, and priority.",
+      "evidence_refs": [
+        "raw_diff: HSD_SObjLib_803A477C implementation",
+        "raw_diff: static s32 lbl_804DEA80..lbl_804DEA90"
+      ]
+    },
+    {
+      "text": "Recovered struct fields retained offset-style names in local helper structs, including SObjLibData x4_funcs/x10_filename/x1C_errmsg and SObjLibSObjDesc x0/x4/x8.",
+      "evidence_refs": [
+        "raw_diff: typedef struct SObjLibData",
+        "raw_diff: typedef struct SObjLibSObjDesc"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "text": "Used a narrow PAD_STACK(0x10) in HSD_SObjLib_803A4A68.",
+      "evidence_refs": [
+        "raw_diff: HSD_SObjLib_803A4A68 local declarations include PAD_STACK(0x10)"
+      ],
+      "caution": "No human explanation or objdiff excerpt specifically justifies the PAD_STACK; only the bot score improvement is present."
+    },
+    {
+      "text": "Used explicit volatile stores to 0xCC008000 for GX FIFO vertex emission.",
+      "evidence_refs": [
+        "raw_diff: repeated *(volatile f32*) 0xCC008000 assignments inside HSD_SObjLib_803A4A68"
+      ]
+    },
+    {
+      "text": "Used grouped switch cases on the texture object format for similar TEV setup paths.",
+      "evidence_refs": [
+        "raw_diff: switch (temp_r29) cases 0/1, 2/3, 5/6/8/9/10/14"
+      ]
+    },
+    {
+      "text": "Used local stack copies and casts to pass static color constants to GXSetTevColorS10 and GXSetTevKColor.",
+      "evidence_refs": [
+        "raw_diff: sp68/sp6C/sp70/sp74 with GXSetTevColorS10",
+        "raw_diff: sp60/sp64, sp58/sp5C, sp50/sp54 with GXSetTevKColor"
+      ],
+      "caution": "The PR evidence does not prove these static data names or stack-copy shapes are accepted final style."
+    },
+    {
+      "text": "Replaced raw assert expansion with HSD_ASSERT in HSD_SObjLib_803A477C.",
+      "evidence_refs": [
+        "raw_diff: HSD_ASSERT(0x11F, sobj)"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "text": "No review comments or reviews are present in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata_json: counts review_comments 0, reviews 0"
+      ]
+    },
+    {
+      "text": "Bot report noted one new match and several improvements, but also one broken match and data-section regressions.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev[bot] report"
+      ]
+    },
+    {
+      "text": "Author stated the regression would be fixed when linking.",
+      "evidence_refs": [
+        "human_pr_text: regression will be fixed when linking"
+      ]
+    },
+    {
+      "text": "A later issue comment states the PR was superseded by PR #2485.",
+      "evidence_refs": [
+        "human_pr_text: Superseded by https://github.com/doldecomp/melee/pull/2485"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2471",
+    "Jj/sobjlib",
+    "jurrejelle",
+    "jellejurre",
+    "sobjlib",
+    "src/sysdolphin/baselib/sobjlib.c",
+    "src/sysdolphin/baselib/sobjlib.h",
+    "src/melee/gm/gmregtyfall.c",
+    "HSD_SObj",
+    "GXColor",
+    "x38",
+    "x3C",
+    "x3C.r",
+    "x3C.g",
+    "x3C.b",
+    "x3C.a",
+    "HSD_SObjLib_803A477C",
+    "HSD_SObjLib_803A4A68",
+    "HSD_SObjLib_803A54EC",
+    "HSD_SObjLib_803A44D4",
+    "HSD_ObjAlloc",
+    "HSD_ASSERT",
+    "GXInitTlutObj",
+    "GXInitTexObjCI",
+    "GXInitTexObj",
+    "GXSetTevColor",
+    "GXSetTevKColor",
+    "GXSetTevColorS10",
+    "GXBegin",
+    "0xCC008000",
+    "PAD_STACK",
+    "sinf",
+    "cosf",
+    "Superseded by PR 2485"
+  ],
+  "follow_up_queries": [
+    "PR #2485 sobjlib superseding PR #2471",
+    "HSD_SObj GXColor x38 x3C",
+    "HSD_SObjLib_803A477C final merged implementation",
+    "HSD_SObjLib_803A4A68 PAD_STACK 0x10",
+    "HSD_SObjLib_803A54EC regression linking",
+    "sobjlib .data .sbss regression lbl_804DEA80"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR #2471 closed, merged_at null, draft true",
+      "raw_diff: full diff loaded",
+      "changed_files.jsonl: three changed files",
+      "text_corpus: bot report loaded",
+      "human_pr_text: author/regression and superseded comments",
+      "metadata_json: no review comments or reviews"
+    ],
+    "notes": [
+      "The diff and bot report give strong evidence for what changed and the reported match/regression state.",
+      "There is no PR body, no human review discussion, and no merge.",
+      "The final comment says the PR was superseded by PR #2485, so lessons should be treated as historical evidence and not proof of accepted final project style.",
+      "No local build logs, objdiff screenshots, or reviewer rationale are included beyond the bot report."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson_candidate",
+        "title": "Recover aggregate GXColor fields when color bytes feed GX APIs",
+        "text": "In this PR, HSD_SObj byte fields x38..x3F were replaced by GXColor x38 and GXColor x3C, enabling direct GXSetTevColor usage and channel-named caller assignments. Curator should compare with final/superseding PR before accepting globally.",
+        "scope": [
+          "src/sysdolphin/baselib/sobjlib.h",
+          "src/sysdolphin/baselib/sobjlib.c",
+          "src/melee/gm/gmregtyfall.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: HSD_SObj layout change",
+          "raw_diff: GXSetTevColor uses sobj->x38/x3C",
+          "raw_diff: gmregtyfall.c x3C.r/g/b/a"
+        ]
+      },
+      {
+        "record_type": "matching_risk_candidate",
+        "title": "Function progress can coexist with adjacent/data regressions",
+        "text": "The bot report for this sobjlib PR lists HSD_SObjLib_803A477C as a new 100% match and HSD_SObjLib_803A4A68 as a large improvement, but also reports HSD_SObjLib_803A54EC broken and .data/.sbss regressions.",
+        "scope": [
+          "main/sysdolphin/baselib/sobjlib"
+        ],
+        "evidence_refs": [
+          "text_corpus: decomp-dev[bot] report"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Type recovered byte color groups as GXColor when supported by GX usage",
+        "text": "Possible standard addition: when adjacent bytes are passed as GXColor values or accessed as r/g/b/a channels, prefer recovering a GXColor field over separate u8 fields. Verify with final merged source or superseding PR before adopting.",
+        "source_path": null,
+        "scope": [
+          "sysdolphin/baselib",
+          "GX rendering structs"
+        ],
+        "evidence_refs": [
+          "raw_diff: HSD_SObj x38..x3F to GXColor x38/x3C",
+          "raw_diff: GXSetTevColor and channel access sites"
+        ],
+        "reason": "This is consistent with typed-fields-over-pointer-math, but the PR was superseded and unmerged, so curator review against PR #2485/final source is required."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "sobjlib owns HSD_SObj rendering and texture setup functions",
+        "text": "Candidate path fact: src/sysdolphin/baselib/sobjlib.c contains HSD_SObj allocation/setup and draw/state code around HSD_SObjLib_803A477C and HSD_SObjLib_803A4A68.",
+        "source_path": "src/sysdolphin/baselib/sobjlib.c",
+        "scope": [
+          "src/sysdolphin/baselib/sobjlib.c",
+          "HSD_SObjLib_803A477C",
+          "HSD_SObjLib_803A4A68"
+        ],
+        "evidence_refs": [
+          "raw_diff: sobjlib.c implementations",
+          "text_corpus: bot report unit main/sysdolphin/baselib/sobjlib"
+        ],
+        "reason": "Useful for search/routing, but should be checked against current source because this PR was superseded."
+      }
+    ],
+    "rejection_notes": [
+      "Do not treat PAD_STACK(0x10) in HSD_SObjLib_803A4A68 as a generally accepted tactic from this PR alone; the slice lacks explicit objdiff justification beyond overall bot improvement.",
+      "Do not promote the static lbl_804DEA80..lbl_804DEA90 data declarations as accepted data ownership facts; the bot report shows .data and .sbss regressions and the PR was superseded.",
+      "Do not infer reviewer approval or merge acceptance; loaded metadata shows no reviews/review comments and merged_at is null."
+    ]
+  },
+  "confidence": 0.74,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

@@ -1,0 +1,323 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2223",
+  "pr": {
+    "number": 2223,
+    "title": "Fix gmtitle to match, mark as matching, ninja apply",
+    "url": "https://github.com/doldecomp/melee/pull/2223",
+    "state": "MERGED",
+    "author": "PsiLupan",
+    "created_at": "2026-03-05T20:28:50Z",
+    "merged_at": "2026-03-05T20:32:27Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2223 made focused gmtitle matching changes: it refactored one title-screen condition into a small helper, changed gmtitle.c from Equivalent to Matching in configure.py, and adjusted GALE01 symbol metadata for gmtitle-related local strings, floats, and BSS ranges. The bot report recorded linked-code and data improvements plus two new matches for main/melee/gm/gmtitle .bss and .sdata2.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "symbol-metadata",
+      "configuration-status-change",
+      "small-code-refactor"
+    ],
+    "systems": [
+      "game-mode",
+      "gmtitle",
+      "config",
+      "symbols"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gm/gmtitle.c",
+      "role": "Code matching refactor for title-screen animated background setup; adds isActiveTitle() helper and changes fn_801A1498_inline from static inline to static.",
+      "evidence_refs": [
+        "raw_diff: src/melee/gm/gmtitle.c hunk around gmTitle_801A146C/fn_801A1498_inline"
+      ]
+    },
+    {
+      "path": "configure.py",
+      "role": "Marks melee/gm/gmtitle.c as Matching instead of Equivalent.",
+      "evidence_refs": [
+        "raw_diff: configure.py hunk at MatchingFor object list"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Updates gmtitle-related symbol metadata: converts many address-style/global string and float entries to local @ labels, adds local labels, and splits gmTitle_80479B28 BSS into smaller symbols.",
+      "evidence_refs": [
+        "raw_diff: config/GALE01/symbols.txt hunks at .rodata 0x803B7D50, .data 0x803DA4F0-0x803DA618, .bss 0x80479B28, .sdata 0x804D4230, .sdata2 0x804DA998"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Added static inline bool isActiveTitle() encapsulating the previous condition involving gm_801A4310(), MJ_TITLE, MJ_OPENING_MV, gm_801A42C4(), and MN_VS.",
+      "evidence_refs": [
+        "raw_diff: src/melee/gm/gmtitle.c added isActiveTitle()"
+      ]
+    },
+    {
+      "text": "Replaced the local var_r0 boolean assignment ladder in fn_801A1498_inline with if (isActiveTitle() != 0).",
+      "evidence_refs": [
+        "raw_diff: src/melee/gm/gmtitle.c removed var_r0 conditional block and added helper call"
+      ]
+    },
+    {
+      "text": "Changed fn_801A1498_inline declaration from static inline void to static void.",
+      "evidence_refs": [
+        "raw_diff: src/melee/gm/gmtitle.c function declaration change"
+      ]
+    },
+    {
+      "text": "Changed configure.py classification for Object(\"melee/gm/gmtitle.c\") from Equivalent to Matching.",
+      "evidence_refs": [
+        "raw_diff: configure.py MatchingFor hunk"
+      ]
+    },
+    {
+      "text": "Converted several gmtitle-associated data symbols from global/address-style names to local @ labels across .rodata, .data, .sdata, and .sdata2, and added local labels such as ...data.0 and ...bss.0.",
+      "evidence_refs": [
+        "raw_diff: config/GALE01/symbols.txt symbol hunks"
+      ]
+    },
+    {
+      "text": "Split gmTitle_80479B28 BSS metadata from a single 0xA0 global object into a 0x10 global object plus local 0x10 and 0x80 symbols at gmTitle_80479B38 and gmTitle_80479B48.",
+      "evidence_refs": [
+        "raw_diff: config/GALE01/symbols.txt .bss hunk at 0x80479B28"
+      ]
+    },
+    {
+      "text": "Bot report recorded linked code +3936 bytes, matched data +192 bytes, linked data +584 bytes, and two new matches for main/melee/gm/gmtitle .bss and .sdata2.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev[bot] issue comment 2026-03-05T20:32:29Z"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Separated a repeated mode-check condition into a named helper instead of keeping the decompiler-shaped temporary boolean block.",
+      "evidence_refs": [
+        "raw_diff: src/melee/gm/gmtitle.c isActiveTitle() and var_r0 removal"
+      ]
+    },
+    {
+      "text": "Updated configure.py status only after the PR title and bot report indicate matching progress for gmtitle.",
+      "evidence_refs": [
+        "raw_diff: configure.py Equivalent to Matching",
+        "text_corpus: bot report new gmtitle matches"
+      ]
+    },
+    {
+      "text": "Used symbol metadata changes rather than C-side dummy storage to account for local labels and split BSS ownership.",
+      "evidence_refs": [
+        "raw_diff: config/GALE01/symbols.txt local @ labels and BSS split"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For small matching fixes, a helper that names a condition can replace a generated temporary-boolean ladder when the resulting source still matches.",
+      "scope": [
+        "src/melee/gm/gmtitle.c",
+        "conditional cleanup"
+      ],
+      "evidence_refs": [
+        "raw_diff: isActiveTitle() added and var_r0 block removed",
+        "text_corpus: bot report records progress"
+      ],
+      "confidence": 0.72
+    },
+    {
+      "lesson": "When data ownership is the issue, symbol metadata edits such as local @ labels, local labels, and BSS splits may be part of a matching PR rather than adding fake source-level globals.",
+      "scope": [
+        "config/GALE01/symbols.txt",
+        "gmtitle data metadata"
+      ],
+      "evidence_refs": [
+        "raw_diff: symbols.txt local label and BSS split hunks",
+        "text_corpus: bot report records .bss and .sdata2 new matches"
+      ],
+      "confidence": 0.78
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "isActiveTitle",
+      "kind": "local helper",
+      "lesson": "The helper name describes the local title-state predicate introduced by the PR; no broader naming convention is proven.",
+      "evidence_refs": [
+        "raw_diff: src/melee/gm/gmtitle.c added static inline bool isActiveTitle()"
+      ],
+      "confidence": 0.64
+    },
+    {
+      "name": "@156, @157, @173, @193, @195, @218, @239, @240, @245-@256, @335-@338",
+      "kind": "local symbol labels",
+      "lesson": "The PR converts multiple gmtitle-related strings/floats from address-style or gmTitle_* global symbols to local @ labels in symbols.txt.",
+      "evidence_refs": [
+        "raw_diff: config/GALE01/symbols.txt local @ label changes"
+      ],
+      "confidence": 0.86
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Inline-helper extraction plus non-inline caller adjustment",
+      "description": "The PR introduced static inline bool isActiveTitle() and changed fn_801A1498_inline from static inline to static, replacing a local boolean branch shape with a helper call condition.",
+      "evidence_refs": [
+        "raw_diff: src/melee/gm/gmtitle.c hunk"
+      ],
+      "caveat": "The PR slice does not include objdiff output for the exact function; support comes from the title, configure.py marking, and bot progress report."
+    },
+    {
+      "tactic": "Symbols metadata localization",
+      "description": "The PR localized several string and float symbols and added local section labels to improve data matching for gmtitle.",
+      "evidence_refs": [
+        "raw_diff: config/GALE01/symbols.txt hunks",
+        "text_corpus: bot report .bss and .sdata2 new matches"
+      ],
+      "caveat": "The slice does not explain each individual symbol's ownership beyond the metadata diff."
+    },
+    {
+      "tactic": "BSS range split",
+      "description": "The PR split gmTitle_80479B28 from a 0xA0 global BSS object into smaller global/local ranges, with bot evidence that gmtitle .bss reached 100%.",
+      "evidence_refs": [
+        "raw_diff: symbols.txt .bss hunk at 0x80479B28",
+        "text_corpus: bot report main/melee/gm/gmtitle .bss 50.00% to 100.00%"
+      ],
+      "caveat": "No source comment or reviewer explanation is present for the semantic meaning of the split ranges."
+    }
+  ],
+  "review_feedback": [],
+  "searchable_terms": [
+    "pr-2223",
+    "PsiLupan",
+    "gmtitle",
+    "gmTitle_801A146C",
+    "fn_801A1498_inline",
+    "isActiveTitle",
+    "gm_801A4310",
+    "gm_801A42C4",
+    "MJ_TITLE",
+    "MJ_OPENING_MV",
+    "MN_VS",
+    "gmTitle_80479B28",
+    "gmTitle_80479B38",
+    "gmTitle_80479B48",
+    "gmTitle_803DA4F0",
+    "gmTitle_803DA4FC",
+    "config/GALE01/symbols.txt",
+    "configure.py",
+    "Equivalent to Matching",
+    "local @ labels",
+    "BSS split",
+    ".sdata2 match",
+    "ninja apply"
+  ],
+  "follow_up_queries": [
+    "gmtitle isActiveTitle fn_801A1498_inline",
+    "gmTitle_80479B28 gmTitle_80479B38 gmTitle_80479B48 BSS split",
+    "symbols.txt gmTitle local @ labels .sdata2",
+    "configure.py Object(Matching, \"melee/gm/gmtitle.c\")",
+    "main/melee/gm/gmtitle .bss 100.00 .sdata2 100.00"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR metadata and changed file counts",
+      "raw_diff: complete diff for 3 changed files",
+      "text_corpus: empty PR body and decomp-dev[bot] report",
+      "changed_files: changed_files.jsonl"
+    ],
+    "notes": [
+      "The raw diff is complete and clearly identifies all changed files and edits.",
+      "The PR body is empty and there are no human review comments in the loaded slice.",
+      "The bot report supports progress and two new data matches, but the slice does not include narrow objdiff output for the changed C function.",
+      "No reviewer intent or detailed rationale for individual symbol metadata changes is available."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "type": "postmortem_lesson",
+        "title": "Small predicate helper can replace generated boolean ladder for matching",
+        "text": "In PR 2223, gmtitle matching introduced isActiveTitle() for a mode predicate and replaced a local var_r0 boolean ladder with if (isActiveTitle() != 0), alongside a configure.py move from Equivalent to Matching and bot-reported progress.",
+        "scope": [
+          "src/melee/gm/gmtitle.c",
+          "conditional cleanup"
+        ],
+        "evidence_refs": [
+          "raw_diff: src/melee/gm/gmtitle.c hunk",
+          "raw_diff: configure.py Equivalent to Matching",
+          "text_corpus: bot report"
+        ]
+      },
+      {
+        "type": "postmortem_lesson",
+        "title": "Use symbol metadata for local data ownership during matching",
+        "text": "PR 2223 improved gmtitle matching partly by converting many gmtitle-related data symbols to local @ labels and splitting a BSS range in symbols.txt, with bot evidence that gmtitle .bss and .sdata2 reached 100%.",
+        "scope": [
+          "config/GALE01/symbols.txt",
+          "gmtitle"
+        ],
+        "evidence_refs": [
+          "raw_diff: config/GALE01/symbols.txt hunks",
+          "text_corpus: bot report new matches"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "gmtitle.c marked Matching in PR 2223",
+        "text": "PR 2223 changed configure.py so Object(\"melee/gm/gmtitle.c\") moved from Equivalent to Matching.",
+        "source_path": "configure.py",
+        "scope": [
+          "melee/gm/gmtitle.c",
+          "MatchingFor"
+        ],
+        "evidence_refs": [
+          "raw_diff: configure.py hunk"
+        ],
+        "reason": "This is a path/status fact candidate, not a decomp lesson; curator should verify against current source before updating path facts."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "gmtitle symbol metadata localized and BSS split",
+        "text": "PR 2223 changed config/GALE01/symbols.txt for gmtitle-related data: several strings/floats became local @ labels, local labels were added, and gmTitle_80479B28 was split into smaller global/local BSS ranges.",
+        "source_path": "config/GALE01/symbols.txt",
+        "scope": [
+          "main/melee/gm/gmtitle",
+          ".rodata",
+          ".data",
+          ".bss",
+          ".sdata",
+          ".sdata2"
+        ],
+        "evidence_refs": [
+          "raw_diff: symbols.txt hunks"
+        ],
+        "reason": "Potential source/path metadata record; individual ownership should be verified against current symbols and map data before promotion."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that every gmtitle address-style symbol should be renamed to a local @ label; the PR only shows specific addresses.",
+      "Do not treat the helper name isActiveTitle as a global naming standard; it is only evidenced as a local helper in this PR.",
+      "Do not claim human review approval rationale; no human review comments are present in the loaded slice.",
+      "Do not claim exact function-level objdiff success from the slice; only configure.py status and bot progress report are loaded."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

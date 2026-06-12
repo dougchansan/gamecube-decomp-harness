@@ -1,0 +1,17 @@
+{
+  "number": 1108,
+  "title": "match mndeflicker.c",
+  "state": "MERGED",
+  "createdAt": "2024-01-24T16:28:55Z",
+  "updatedAt": "2024-01-27T05:45:39Z",
+  "mergedAt": "2024-01-24T17:52:37Z",
+  "closedAt": "2024-01-24T17:52:37Z",
+  "author": "BR-",
+  "url": "https://github.com/doldecomp/melee/pull/1108",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 41636
+  }
+}

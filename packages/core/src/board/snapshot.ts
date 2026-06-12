@@ -39,7 +39,6 @@ export interface BoardRankFeature {
   connected_incomplete_function_count: number;
   connected_matched_reference_count: number;
   resource_evidence_count: number;
-  tool_finding_count: number;
   path_fact_count: number;
   historical_lesson_count: number;
   curated_signal_count: number;

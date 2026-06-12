@@ -12,7 +12,7 @@
     "Source-symbol rows remain supplemental lookup evidence and should be refreshed with tool indexes after report/code-graph changes."
   ],
   "commands": {
-    "status": "python3 tools/research/ghidra/api/status.py --json",
+    "status": "python3 tools/research/ghidra/api/status.py --repo-root <repo_root> --json",
     "lookup": "python3 tools/research/ghidra/api/lookup.py --query <query> --json",
     "runner": "python3 tools/research/ghidra/runners/run_headless_probe.py --repo-root <repo_root>"
   },

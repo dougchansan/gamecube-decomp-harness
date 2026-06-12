@@ -11,6 +11,21 @@ knowledge/sources/past_prs/data/prs/runs/
 knowledge/sources/tool_outputs/indexes/tool_findings.jsonl
 knowledge/sources/external_mirrors/indexes/external_file_mentions.jsonl
 knowledge/sources/ssbm_data_sheet/indexes/cells.jsonl
+
+# code_context (moved knowledge sources): keep small metadata/postmortems
+# tracked, ignore bulk corpora (raw diffs, extracted text, aggregates, runs).
+knowledge/sources/code_context/past_prs/data/current/
+knowledge/sources/code_context/past_prs/data/aggregate/
+knowledge/sources/code_context/past_prs/data/runs/
+knowledge/sources/code_context/past_prs/data/prs/runs/
+knowledge/sources/code_context/past_prs/data/prs/*/raw/
+knowledge/sources/code_context/past_prs/data/prs/*/extracted/
+knowledge/sources/code_context/external_mirrors/indexes/external_file_mentions.jsonl
+knowledge/sources/code_context/ssbm_data_sheet/indexes/cells.jsonl
+
+# Vendored debug toolchains (zig etc.) — hundreds of MB, fetched on demand.
+tools/_impl/melee/mwcc_debug/tools/
+
 knowledge/tools/opseq/indexes/function_shapes.jsonl
 knowledge/tools/ghidra/indexes/symbol_lookup.jsonl
 .DS_Store
@@ -33,6 +48,9 @@ projects/*/local.project.json
 .decomp-orchestrator-state/guardian/
 .decomp-orchestrator-state/ui-processes/
 .decomp-orchestrator-state/ui-server.log
+.decomp-orchestrator-state/agent_state-shared.db
+.decomp-orchestrator-state/*.sqlite-shm
+.decomp-orchestrator-state/*.sqlite-wal
 
 # Smoke fixtures intentionally mirror repo artifact names that the root
 # .gitignore excludes for real generated outputs.

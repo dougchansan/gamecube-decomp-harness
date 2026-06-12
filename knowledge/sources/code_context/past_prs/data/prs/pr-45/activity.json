@@ -1,0 +1,10 @@
+{
+  "pr": 45,
+  "title": "Split text_3 and work on making large fighter file splits",
+  "url": "https://github.com/doldecomp/melee/pull/45",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 18,
+  "added_lines": 491461,
+  "deleted_lines": 491336
+}

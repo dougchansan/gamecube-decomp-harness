@@ -1,0 +1,17 @@
+{
+  "number": 105,
+  "title": "Fix up Pichu, Dr. Mario, and Falco pointers, plus some ASCII",
+  "state": "MERGED",
+  "createdAt": "2021-11-16T20:24:31Z",
+  "updatedAt": "2021-11-16T20:24:38Z",
+  "mergedAt": "2021-11-16T20:24:36Z",
+  "closedAt": "2021-11-16T20:24:37Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/105",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 20197
+  }
+}

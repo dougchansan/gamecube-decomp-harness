@@ -42,18 +42,19 @@
     "kg:tool-runner:opseq": "python3 tools/research/opseq/runners/extract_opcode_sequences.py",
     "kg:tool-runner:mismatch-db": "python3 tools/research/mismatch_db/runners/analyze_objdiff_mismatches.py",
     "kg:tool-runner:mwcc-debug": "python3 tools/compiler/mwcc_debug/runners/probe_mwcc_compiler.py",
-    "pr:refresh": "python3 knowledge/sources/past_prs/commands/fetch_recent_pr_dump.py",
-    "pr:refresh:all": "python3 knowledge/sources/past_prs/commands/fetch_recent_pr_dump.py --all-prs --fetch-jobs 16 --postmortem-mode pi --postmortem-jobs 16 --postmortem-scope all",
-    "pr:refresh:dry": "python3 knowledge/sources/past_prs/commands/fetch_recent_pr_dump.py --dry-run",
-    "pr:postmortems": "python3 knowledge/sources/past_prs/commands/build_pr_postmortems.py",
-    "pr:sync": "python3 knowledge/sources/past_prs/commands/sync_repo_and_pr_library.py",
-    "pr:sync:all": "python3 knowledge/sources/past_prs/commands/sync_repo_and_pr_library.py --all-prs --fetch-jobs 16 --postmortem-jobs 16"
+    "pr:refresh": "python3 knowledge/sources/code_context/past_prs/commands/fetch_recent_pr_dump.py",
+    "pr:refresh:all": "python3 knowledge/sources/code_context/past_prs/commands/fetch_recent_pr_dump.py --all-prs --fetch-jobs 16 --postmortem-mode pi --postmortem-jobs 16 --postmortem-scope all",
+    "pr:refresh:dry": "python3 knowledge/sources/code_context/past_prs/commands/fetch_recent_pr_dump.py --dry-run",
+    "pr:postmortems": "python3 knowledge/sources/code_context/past_prs/commands/build_pr_postmortems.py",
+    "pr:sync": "python3 knowledge/sources/code_context/past_prs/commands/sync_repo_and_pr_library.py",
+    "pr:sync:all": "python3 knowledge/sources/code_context/past_prs/commands/sync_repo_and_pr_library.py --all-prs --fetch-jobs 16 --postmortem-jobs 16"
   },
   "dependencies": {
     "@earendil-works/pi-coding-agent": "latest",
     "lucide-react": "^1.17.0",
     "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "react-dom": "^19.2.7",
+    "tokenizr": "^2.2.1"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.0",

@@ -1,0 +1,10 @@
+{
+  "pr": 1170,
+  "title": "Fix LObj match being broken by someone's bugfix",
+  "url": "https://github.com/doldecomp/melee/pull/1170",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 3,
+  "added_lines": 5,
+  "deleted_lines": 8
+}

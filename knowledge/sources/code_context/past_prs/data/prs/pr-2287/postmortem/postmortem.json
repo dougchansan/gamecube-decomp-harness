@@ -1,0 +1,267 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2287",
+  "pr": {
+    "number": 2287,
+    "title": "Remove fake function in texpdag",
+    "url": "https://github.com/doldecomp/melee/pull/2287",
+    "state": "MERGED",
+    "author": "PsiLupan",
+    "created_at": "2026-03-14T21:37:55Z",
+    "merged_at": "2026-03-14T21:43:29Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Removed the empty fake function fn_80386230 from src/sysdolphin/baselib/texpdag.c and folded its 4-byte symbol range into make_full_dependancy_mtx by increasing that symbol size from 0x130 to 0x134 in config/GALE01/symbols.txt. Bot output reported total functions decreased by one, fn_80386230 became a broken match, and make_full_dependancy_mtx improved from 97.50% to 98.83%.",
+  "change_classification": {
+    "primary_type": "symbol-boundary-cleanup",
+    "categories": [
+      "decomp-matching",
+      "metadata-cleanup",
+      "fake-function-removal"
+    ],
+    "systems": [
+      "config/GALE01",
+      "sysdolphin/baselib/texpdag"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Adjusted text symbol metadata by removing fn_80386230 and extending make_full_dependancy_mtx size from 0x130 to 0x134.",
+      "evidence_refs": [
+        "raw_diff: config/GALE01/symbols.txt hunk",
+        "changed_files: config/GALE01/symbols.txt"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/texpdag.c",
+      "role": "Removed empty fake function definition void fn_80386230(void) {} between make_full_dependancy_mtx and pad data.",
+      "evidence_refs": [
+        "raw_diff: src/sysdolphin/baselib/texpdag.c hunk",
+        "changed_files: src/sysdolphin/baselib/texpdag.c"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Deleted the empty function body `void fn_80386230(void) {}` from texpdag.c.",
+      "evidence_refs": [
+        "raw_diff: src/sysdolphin/baselib/texpdag.c hunk"
+      ]
+    },
+    {
+      "text": "Removed the `fn_80386230 = .text:0x80386230; // type:function size:0x4` symbol entry.",
+      "evidence_refs": [
+        "raw_diff: config/GALE01/symbols.txt hunk"
+      ]
+    },
+    {
+      "text": "Changed `make_full_dependancy_mtx` symbol size at .text:0x80386100 from 0x130 to 0x134.",
+      "evidence_refs": [
+        "raw_diff: config/GALE01/symbols.txt hunk"
+      ]
+    },
+    {
+      "text": "The bot report recorded one fewer total function, a broken match for the removed `fn_80386230`, and an unmatched-item improvement for `make_full_dependancy_mtx`.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev[bot] issue_comment 2026-03-14T21:41:16Z"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Handled a suspected fake 4-byte function by correcting the symbol boundary instead of preserving an empty source stub.",
+      "evidence_refs": [
+        "PR title: Remove fake function in texpdag",
+        "raw_diff: symbols.txt and texpdag.c hunks"
+      ]
+    },
+    {
+      "text": "Kept the edit narrowly scoped to one source file and the corresponding symbols metadata.",
+      "evidence_refs": [
+        "changed_files: two files, one hunk each"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "text": "If an address-style 4-byte empty function sits immediately after a partially matched function, check whether it is a bad symbol split before keeping the empty function in source.",
+      "scope": [
+        "symbol boundary cleanup",
+        "fake empty functions",
+        "text symbol metadata"
+      ],
+      "evidence_refs": [
+        "raw_diff: removal of fn_80386230 and make_full_dependancy_mtx size increase",
+        "text_corpus: bot report showing fn_80386230 removed as a function and make_full_dependancy_mtx improved"
+      ]
+    },
+    {
+      "text": "A removed fake function may intentionally show as a broken match in automated reporting while the neighboring real function improves; treat this as a signal to inspect symbol ownership rather than as standalone evidence of a source regression.",
+      "scope": [
+        "reviewing bot reports",
+        "symbol ownership",
+        "decomp progress interpretation"
+      ],
+      "evidence_refs": [
+        "text_corpus: decomp-dev[bot] report with one broken match for fn_80386230 and one improvement for make_full_dependancy_mtx"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "Address-style `fn_80386230` was removed rather than renamed; the PR does not provide semantic naming evidence for that address.",
+      "evidence_refs": [
+        "raw_diff: symbols.txt removal",
+        "raw_diff: texpdag.c removal"
+      ]
+    },
+    {
+      "text": "The existing spelling `make_full_dependancy_mtx` was preserved while only its symbol size changed.",
+      "evidence_refs": [
+        "raw_diff: config/GALE01/symbols.txt hunk"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "text": "Resolved a tiny apparent function by extending the preceding function's symbol size by 4 bytes instead of keeping a fake no-op C function.",
+      "evidence_refs": [
+        "raw_diff: symbols.txt hunk",
+        "raw_diff: texpdag.c hunk"
+      ]
+    },
+    {
+      "text": "Used symbols metadata as the matching lever; no source control-flow rewrite, pragma, inline assembly, or padding tactic is shown by the diff.",
+      "evidence_refs": [
+        "raw_diff: full PR diff"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "text": "No human review comments were present in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata_json: counts.review_comments=0 and reviews=0"
+      ]
+    },
+    {
+      "text": "Automated bot feedback reported: Total functions 19830 (-1), matched code 57.57% (-4 bytes), one broken match for `fn_80386230`, and one improvement for `make_full_dependancy_mtx`.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev[bot] issue_comment 2026-03-14T21:41:16Z"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2287",
+    "Remove fake function in texpdag",
+    "PsiLupan",
+    "texpdag",
+    "src/sysdolphin/baselib/texpdag.c",
+    "config/GALE01/symbols.txt",
+    "fn_80386230",
+    "make_full_dependancy_mtx",
+    "HSD_TExpSchedule",
+    "fake function",
+    "empty function",
+    "symbol size 0x130 0x134",
+    ".text:0x80386230",
+    ".text:0x80386100",
+    "broken match",
+    "unmatched item improvement"
+  ],
+  "follow_up_queries": [
+    "fn_80386230 fake function",
+    "make_full_dependancy_mtx symbol size 0x134",
+    "texpdag empty function removal",
+    "symbols.txt adjacent function size boundary",
+    "decomp-dev bot broken match removed function",
+    "HSD_TExpMakeDag make_full_dependancy_mtx HSD_TExpSchedule"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json",
+      "raw_diff",
+      "changed_files",
+      "text_corpus"
+    ],
+    "notes": [
+      "The diff directly proves the file edits and symbol-size change.",
+      "The PR title supports the interpretation that fn_80386230 was considered fake.",
+      "There is no PR body and no human review discussion explaining author rationale.",
+      "The bot report is available, but it reports progress/regression symptoms rather than proving the historical matching intent."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "kind": "decomp_lesson_candidate",
+        "title": "Remove fake empty functions by correcting adjacent symbol boundaries when evidence supports it",
+        "text": "A tiny address-style empty function adjacent to a partially matched real function can be a bad symbol split. In this PR, `fn_80386230` was removed and `make_full_dependancy_mtx` was extended by 4 bytes in symbols metadata, with the bot reporting the fake function as removed and the neighboring function as improved.",
+        "scope": [
+          "symbol metadata",
+          "fake function cleanup",
+          "sysdolphin/baselib/texpdag"
+        ],
+        "evidence_refs": [
+          "raw_diff: symbols.txt hunk",
+          "raw_diff: texpdag.c hunk",
+          "text_corpus: decomp-dev[bot] issue_comment"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "texpdag symbol-boundary cleanup for fn_80386230",
+        "text": "PR 2287 removed `fn_80386230` from `src/sysdolphin/baselib/texpdag.c` and `config/GALE01/symbols.txt`, folding its 4-byte range into `make_full_dependancy_mtx` by changing that function's size from 0x130 to 0x134.",
+        "source_path": "src/sysdolphin/baselib/texpdag.c",
+        "scope": [
+          "main/sysdolphin/baselib/texpdag",
+          "fn_80386230",
+          "make_full_dependancy_mtx"
+        ],
+        "evidence_refs": [
+          "raw_diff: config/GALE01/symbols.txt hunk",
+          "raw_diff: src/sysdolphin/baselib/texpdag.c hunk"
+        ],
+        "reason": "This is a concrete path-specific historical cleanup that may help future searches around fake functions and symbol boundaries."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Symbol-boundary check before preserving tiny fake functions",
+        "text": "Consider adding or cross-linking guidance that tiny empty `fn_` functions adjacent to a real function should prompt a symbols/split boundary check before being preserved in C source.",
+        "source_path": null,
+        "scope": [
+          "symbol metadata",
+          "fake functions",
+          "text-before-data-matching",
+          "data-sections-and-tu-splits"
+        ],
+        "evidence_refs": [
+          "PR title: Remove fake function in texpdag",
+          "raw_diff: removal of fn_80386230 and size increase for make_full_dependancy_mtx"
+        ],
+        "reason": "The existing standards cover metadata and fake storage broadly; this PR supplies a concise example for fake function boundary cleanup, but curator should decide whether it warrants global-standard text."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that `make_full_dependancy_mtx` fully matched after this PR; the bot report only shows improvement from 97.50% to 98.83%.",
+      "Do not infer why the final 4 bytes belong to `make_full_dependancy_mtx` beyond the PR title, diff, and bot report; no author explanation or objdiff details are present.",
+      "Do not promote `fn_80386230` as a semantic symbol or rename candidate; the PR removed it as fake."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

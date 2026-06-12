@@ -1,0 +1,17 @@
+{
+  "number": 1956,
+  "title": "Match itfire",
+  "state": "MERGED",
+  "createdAt": "2025-10-01T21:49:14Z",
+  "updatedAt": "2025-10-03T13:00:24Z",
+  "mergedAt": "2025-10-03T13:00:24Z",
+  "closedAt": "2025-10-03T13:00:24Z",
+  "author": "AlexanderHarrison",
+  "url": "https://github.com/doldecomp/melee/pull/1956",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 4911
+  }
+}

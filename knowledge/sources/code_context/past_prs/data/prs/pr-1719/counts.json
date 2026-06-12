@@ -1,0 +1,17 @@
+{
+  "number": 1719,
+  "title": "Run `ninja apply`",
+  "state": "MERGED",
+  "createdAt": "2025-07-22T04:04:23Z",
+  "updatedAt": "2025-07-22T04:07:32Z",
+  "mergedAt": "2025-07-22T04:07:31Z",
+  "closedAt": "2025-07-22T04:07:32Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1719",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 62032
+  }
+}

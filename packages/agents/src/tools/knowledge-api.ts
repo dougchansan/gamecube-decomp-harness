@@ -12,7 +12,6 @@ import { runCommand } from "@decomp-orchestrator/core/shell";
 import {
   fileGraphCard,
   graphDbExists,
-  knowledgeSourcesRoot,
   openKnowledgeGraph,
   packageRoot,
   readSourceRegistry,
@@ -20,6 +19,7 @@ import {
   resolveToolRoot,
   resourceGraphDbPath,
   searchKnowledgeGraph,
+  sourceRoot,
 } from "@decomp-orchestrator/knowledge";
 import type { AgentToolRuntimeContext } from "./types.js";
 import { commandToolPayload } from "./util.js";
@@ -49,7 +49,7 @@ export async function runSourceApi(sourceId: string, scriptName: string, args: s
     };
   }
   const cwd = packageRoot();
-  const scriptPath = resolve(knowledgeSourcesRoot(), sourceId, "api", scriptName);
+  const scriptPath = resolve(sourceRoot(sourceId), "api", scriptName);
   if (!existsSync(scriptPath)) {
     return {
       status: "missing_api_script",

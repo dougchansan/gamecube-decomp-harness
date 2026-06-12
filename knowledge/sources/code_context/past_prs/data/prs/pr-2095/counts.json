@@ -1,0 +1,17 @@
+{
+  "number": 2095,
+  "title": "Fixup of vi changes",
+  "state": "MERGED",
+  "createdAt": "2026-01-16T03:49:57Z",
+  "updatedAt": "2026-01-16T03:57:47Z",
+  "mergedAt": "2026-01-16T03:57:42Z",
+  "closedAt": "2026-01-16T03:57:42Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/2095",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 48787
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 996,
+  "title": "Match `ftGw_SpecialN_CreateSausage`",
+  "state": "MERGED",
+  "createdAt": "2023-10-23T05:40:14Z",
+  "updatedAt": "2023-10-23T05:58:02Z",
+  "mergedAt": "2023-10-23T05:58:01Z",
+  "closedAt": "2023-10-23T05:58:01Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/996",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 11526
+  }
+}

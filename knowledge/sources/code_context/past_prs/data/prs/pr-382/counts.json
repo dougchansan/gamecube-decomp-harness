@@ -1,0 +1,17 @@
+{
+  "number": 382,
+  "title": "Finish matching ftNess_6.c",
+  "state": "MERGED",
+  "createdAt": "2022-05-21T13:37:46Z",
+  "updatedAt": "2022-05-22T00:28:58Z",
+  "mergedAt": "2022-05-22T00:28:58Z",
+  "closedAt": "2022-05-22T00:28:58Z",
+  "author": "VetriTheRetri",
+  "url": "https://github.com/doldecomp/melee/pull/382",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 105664
+  }
+}

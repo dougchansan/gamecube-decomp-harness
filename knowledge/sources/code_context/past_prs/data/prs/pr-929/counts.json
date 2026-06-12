@@ -1,0 +1,17 @@
+{
+  "number": 929,
+  "title": "Partially match HSD cobj",
+  "state": "MERGED",
+  "createdAt": "2023-06-15T06:11:51Z",
+  "updatedAt": "2023-06-15T06:25:58Z",
+  "mergedAt": "2023-06-15T06:25:51Z",
+  "closedAt": "2023-06-15T06:25:51Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/929",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 307165
+  }
+}

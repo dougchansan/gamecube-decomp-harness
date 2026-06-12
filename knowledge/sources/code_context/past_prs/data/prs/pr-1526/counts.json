@@ -1,0 +1,17 @@
+{
+  "number": 1526,
+  "title": "Partially match some initializers",
+  "state": "MERGED",
+  "createdAt": "2025-05-26T21:31:01Z",
+  "updatedAt": "2025-05-26T21:33:24Z",
+  "mergedAt": "2025-05-26T21:33:23Z",
+  "closedAt": "2025-05-26T21:33:23Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1526",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 10235
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "pr": 1799,
+  "title": " Remove unused unions in lb/types.h and it/types.h",
+  "url": "https://github.com/doldecomp/melee/pull/1799",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 6,
+  "added_lines": 62,
+  "deleted_lines": 90
+}

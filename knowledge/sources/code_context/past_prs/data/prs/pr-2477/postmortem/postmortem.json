@@ -1,0 +1,374 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2477",
+  "pr": {
+    "number": 2477,
+    "title": "fixup sobjlib data",
+    "url": "https://github.com/doldecomp/melee/pull/2477",
+    "state": "MERGED",
+    "author": "r-burns",
+    "created_at": "2026-05-10T05:15:42Z",
+    "merged_at": "2026-05-10T05:50:10Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2477 adjusted sysdolphin baselib sobjlib data ownership and declarations: symbols.txt split one 0x78 data object into two HSD_Chan-sized objects plus a string, sobjlib.c replaced a synthetic aggregate SObjLibData extern with explicit GObjFuncs/GObjFunc data, local channel initializers, inline OSReport strings, u16 dimensions for HSD_SObjLib_803A55DC, and sobjlib.h gained the gobj include plus the corrected prototype. The bot report records +444 matched-code bytes, +24 matched-data bytes, two new matches including sobjlib .rodata and HSD_SObjLib_803A55DC reaching 100%, and improvements to sobjlib .data and .sbss.",
+  "change_classification": {
+    "primary_type": "decomp-matching-data-fixup",
+    "categories": [
+      "decomp-matching",
+      "data-symbol-metadata",
+      "headers",
+      "prototype-fix",
+      "rodata-data-cleanup"
+    ],
+    "systems": [
+      "config/GALE01",
+      "src/sysdolphin/baselib",
+      "sobjlib"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/sysdolphin/baselib/sobjlib.c",
+      "role": "Main source changes: removed SObjLibData aggregate extern, defined explicit sobjlib data objects, restored inline report strings, added HSD_Chan initializers, changed HSD_SObjLib_803A55DC dimensions to u16, and used inline Vec3 initializers.",
+      "evidence_refs": [
+        "raw_diff:sobjlib.c hunks",
+        "text_corpus:decomp-dev bot report"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/sobjlib.h",
+      "role": "Header surface update: included gobj.h and changed HSD_SObjLib_803A55DC prototype from int width/height to u16 width/height.",
+      "evidence_refs": [
+        "raw_diff:sobjlib.h hunks"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Symbol metadata update: split lbl_8040C418 from size 0x78 into size 0x30, added lbl_8040C448 size 0x30, and added lbl_8040C478 as a 0x16 data:string symbol.",
+      "evidence_refs": [
+        "raw_diff:symbols.txt hunk"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "The prior synthetic SObjLibData struct and extern HSD_SObjLib_8040C3A0 aggregate were removed from sobjlib.c.",
+      "evidence_refs": [
+        "raw_diff:sobjlib.c lines removing typedef struct SObjLibData and extern SObjLibData HSD_SObjLib_8040C3A0"
+      ]
+    },
+    {
+      "text": "Explicit data definitions were introduced for HSD_SObjLib_8040C3A0 as a GObjFunc array and HSD_SObjLib_8040C3A4 as a GObjFuncs initializer.",
+      "evidence_refs": [
+        "raw_diff:sobjlib.c added GObjFunc HSD_SObjLib_8040C3A0[] and GObjFuncs HSD_SObjLib_8040C3A4"
+      ]
+    },
+    {
+      "text": "OSReport calls that previously referenced fields or extern string symbols were changed to inline strings: \"BadOBJ for SOBJ-displayfunc\\n\" and \"Out CameraDisp Range\\n\".",
+      "evidence_refs": [
+        "raw_diff:sobjlib.c HSD_SObjLib_803A49E0 and HSD_SObjLib_803A54EC hunks"
+      ]
+    },
+    {
+      "text": "Two static HSD_Chan initializers, lbl_8040C418 and lbl_8040C448, replaced accesses through data->x78_chan0 and data->xA8_chan1.",
+      "evidence_refs": [
+        "raw_diff:sobjlib.c added static HSD_Chan lbl_8040C418/lbl_8040C448 and HSD_SetupChannel call changes"
+      ]
+    },
+    {
+      "text": "HSD_SObjLib_803A55DC changed width and height parameter types from int to u16 in both the definition and header declaration, simplifying casts for bottom and right.",
+      "evidence_refs": [
+        "raw_diff:sobjlib.c HSD_SObjLib_803A55DC signature and body hunk",
+        "raw_diff:sobjlib.h prototype hunk"
+      ]
+    },
+    {
+      "text": "symbols.txt split a single lbl_8040C418 data object of size 0x78 into two 0x30 objects plus a 0x16 string symbol.",
+      "evidence_refs": [
+        "raw_diff:symbols.txt hunk"
+      ]
+    },
+    {
+      "text": "The bot report recorded sobjlib .rodata reaching 100%, HSD_SObjLib_803A55DC reaching 100%, and improvements to sobjlib .data and .sbss.",
+      "evidence_refs": [
+        "text_corpus:issue_comment by decomp-dev[bot] at 2026-05-10T05:18:31Z"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Updated symbol metadata and C declarations together rather than compensating for a bad data layout through a large synthetic C aggregate.",
+      "evidence_refs": [
+        "raw_diff:symbols.txt split lbl_8040C418",
+        "raw_diff:sobjlib.c removal of SObjLibData and addition of explicit data objects"
+      ]
+    },
+    {
+      "text": "Changed the public prototype when the function body used 16-bit width and height semantics, keeping header and source consistent.",
+      "evidence_refs": [
+        "raw_diff:sobjlib.c HSD_SObjLib_803A55DC u16 signature",
+        "raw_diff:sobjlib.h HSD_SObjLib_803A55DC u16 prototype"
+      ]
+    },
+    {
+      "text": "Kept ordinary report strings inline in OSReport calls while still updating data symbols for the underlying split.",
+      "evidence_refs": [
+        "raw_diff:sobjlib.c OSReport string changes",
+        "raw_diff:symbols.txt lbl_8040C478 data:string addition"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a recovered aggregate appears to combine unrelated function tables, strings, jump tables, and channel structs, verify symbol boundaries before keeping the aggregate as source structure.",
+      "scope": [
+        "sobjlib",
+        "baselib data recovery",
+        "symbol metadata"
+      ],
+      "evidence_refs": [
+        "raw_diff:sobjlib.c removed SObjLibData fields x0 through xD8_errmsg2",
+        "raw_diff:symbols.txt split lbl_8040C418 and added lbl_8040C448/lbl_8040C478"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "A signature change from int to u16 can remove cast scaffolding and close a near-match when callers and header surface can support the narrower type.",
+      "scope": [
+        "function prototype recovery",
+        "HSD_SObjLib_803A55DC"
+      ],
+      "evidence_refs": [
+        "raw_diff:sobjlib.c changed HSD_SObjLib_803A55DC signature and removed explicit u16 casts",
+        "raw_diff:sobjlib.h matching prototype update",
+        "text_corpus:bot report HSD_SObjLib_803A55DC +1 to 100.00%"
+      ],
+      "confidence": 0.83
+    },
+    {
+      "lesson": "Inline literal Vec3 initializers can be preferable to separate extern Vec3 data when the data objects are not needed after correcting section ownership.",
+      "scope": [
+        "sobjlib",
+        "literal/data ownership",
+        "Vec3 constants"
+      ],
+      "evidence_refs": [
+        "raw_diff:sobjlib.c removed extern Vec3 HSD_SObjLib_803B9664/HSD_SObjLib_803B9658",
+        "raw_diff:sobjlib.c added Vec3 eye = { 0, 0, 1 } and interest = { 0, 0, 0 }"
+      ],
+      "confidence": 0.68
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "Address-style labels lbl_8040C418 and lbl_8040C448 were retained for static HSD_Chan objects; the PR does not provide semantic names for them.",
+      "evidence_refs": [
+        "raw_diff:sobjlib.c static HSD_Chan lbl_8040C418/lbl_8040C448",
+        "raw_diff:symbols.txt lbl_8040C418/lbl_8040C448 entries"
+      ]
+    },
+    {
+      "text": "A file-local string variable was named filename for \"sobjlib.c\", but the diff excerpt does not show its use.",
+      "evidence_refs": [
+        "raw_diff:sobjlib.c added static char filename[] = \"sobjlib.c\""
+      ]
+    },
+    {
+      "text": "The PR used descriptive local names eye, interest, viewport, scissor, roll, near_val, far_val, top, bottom, left, and right in HSD_SObjLib_803A55DC; only the width/height type change is newly evidenced here.",
+      "evidence_refs": [
+        "raw_diff:sobjlib.c HSD_SObjLib_803A55DC hunk"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Correct data symbol sizes and split labels in symbols.txt before shaping C around a false aggregate.",
+      "evidence_refs": [
+        "raw_diff:symbols.txt lbl_8040C418 size 0x78 changed to 0x30 and lbl_8040C448/lbl_8040C478 added",
+        "text_corpus:bot report .data +115 improvement"
+      ],
+      "risk_notes": "Supported by the PR's symbol diff and bot report, but no manual objdiff details are included."
+    },
+    {
+      "tactic": "Use explicit typed static HSD_Chan initializers and pass their addresses directly to HSD_SetupChannel instead of accessing channels through an artificial packed data struct.",
+      "evidence_refs": [
+        "raw_diff:sobjlib.c added static HSD_Chan initializers",
+        "raw_diff:sobjlib.c HSD_SetupChannel(&lbl_8040C418) and HSD_SetupChannel(&lbl_8040C448)"
+      ],
+      "risk_notes": "The initializer shape is directly shown; broader validation is limited to the bot summary."
+    },
+    {
+      "tactic": "Recover narrow unsigned parameter types when casts in a near-matched function indicate 16-bit width/height values.",
+      "evidence_refs": [
+        "raw_diff:sobjlib.c int width,height changed to u16 width,height",
+        "raw_diff:sobjlib.c bottom/right cast simplification",
+        "text_corpus:bot report HSD_SObjLib_803A55DC reached 100.00%"
+      ],
+      "risk_notes": "Header was updated, but no callsite audit is present in the PR slice."
+    },
+    {
+      "tactic": "Introduce a zeroed data_pad_jumptable[0x3C] to preserve data layout around a local jump table region.",
+      "evidence_refs": [
+        "raw_diff:sobjlib.c added static u8 data_pad_jumptable[0x3C] = { 0 }",
+        "raw_diff:symbols.txt jumptable_8040C3DC remains size 0x3C scope:local"
+      ],
+      "risk_notes": "This is a padding/data-layout tactic; the slice does not include a detailed explanation beyond the data diff and bot improvements."
+    }
+  ],
+  "review_feedback": [
+    {
+      "source": "decomp-dev[bot]",
+      "text": "Automated report for GALE01 recorded matched code 66.47% (+0.01%, +444 bytes), matched data 38.80% (+0.00%, +24 bytes), two new matches, and two unmatched-item improvements.",
+      "evidence_refs": [
+        "text_corpus:issue_comment by decomp-dev[bot]"
+      ]
+    },
+    {
+      "source": "human_review",
+      "text": "No human review comments or reviews are present in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata_json counts: review_comments 0, reviews 0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2477",
+    "fixup sobjlib data",
+    "r-burns",
+    "sobjlib",
+    "src/sysdolphin/baselib/sobjlib.c",
+    "src/sysdolphin/baselib/sobjlib.h",
+    "config/GALE01/symbols.txt",
+    "HSD_SObjLib_803A55DC",
+    "HSD_SObjLib_803A54EC",
+    "HSD_SObjLib_803A49E0",
+    "HSD_SObjLib_8040C3A0",
+    "HSD_SObjLib_8040C3A4",
+    "HSD_SObjLib_804D7960",
+    "SObjLibData",
+    "lbl_8040C418",
+    "lbl_8040C448",
+    "lbl_8040C478",
+    "jumptable_8040C3DC",
+    "data_pad_jumptable",
+    "HSD_Chan",
+    "GObjFuncs",
+    "GObjFunc",
+    "OSReport BadOBJ for SOBJ-displayfunc",
+    "Out CameraDisp Range",
+    "u16 width height",
+    "sobjlib rodata 100",
+    "sobjlib data symbol split"
+  ],
+  "follow_up_queries": [
+    "Find other PRs where synthetic aggregate structs were removed after symbols.txt data boundary fixes.",
+    "Search sobjlib history for SObjLibData, lbl_8040C418, lbl_8040C448, and data_pad_jumptable to see whether later cleanup renamed or removed padding.",
+    "Search for HSD_SObjLib_803A55DC callers to verify u16 width and height became stable across headers and callsites.",
+    "Search for PRs that convert OSReport string externs back to inline literals while also updating data symbols.",
+    "Search for baselib data fixups involving HSD_Chan initializers and GX_COLOR0/GX_ALPHA0 channel defaults."
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json PR identity and changed_files",
+      "raw_diff full diff for three files",
+      "text_corpus decomp-dev bot report",
+      "metadata_json counts review_comments 0"
+    ],
+    "notes": [
+      "The loaded diff is complete and enough to identify changed files and concrete source edits.",
+      "The PR body is empty and there are no human review comments, so author rationale and reviewer intent are not available.",
+      "The bot report provides automated match/regression summary, but the slice does not include local build logs, objdiff output, or detailed verifier commands.",
+      "The data_pad_jumptable addition appears to be a matching/data-layout tactic, but the PR slice does not explain why padding rather than metadata alone was required."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "kind": "decomp_lesson_candidate",
+        "title": "Check symbol boundaries before preserving a generated aggregate data struct",
+        "text": "PR 2477 replaced a synthetic SObjLibData aggregate spanning function data, strings, jump-table space, and HSD_Chan data with explicit symbols and typed objects after symbols.txt split lbl_8040C418 into smaller data items.",
+        "scope": [
+          "baselib",
+          "sobjlib",
+          "data-symbol recovery"
+        ],
+        "evidence_refs": [
+          "raw_diff:sobjlib.c removal of SObjLibData",
+          "raw_diff:symbols.txt lbl_8040C418/lbl_8040C448/lbl_8040C478 split"
+        ],
+        "confidence": 0.78
+      },
+      {
+        "kind": "matching_tactic_candidate",
+        "title": "Prototype narrowing can close a near-match when reflected in the owning header",
+        "text": "PR 2477 changed HSD_SObjLib_803A55DC width and height from int to u16 in source and header, simplified casts, and the bot report says the function moved from 99.84% to 100.00%.",
+        "scope": [
+          "prototype recovery",
+          "headers",
+          "HSD_SObjLib_803A55DC"
+        ],
+        "evidence_refs": [
+          "raw_diff:sobjlib.c HSD_SObjLib_803A55DC signature/body",
+          "raw_diff:sobjlib.h HSD_SObjLib_803A55DC prototype",
+          "text_corpus:bot report"
+        ],
+        "confidence": 0.83
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "sobjlib data symbols were split around lbl_8040C418 in PR 2477",
+        "text": "For src/sysdolphin/baselib/sobjlib.c and config/GALE01/symbols.txt, PR 2477 changed lbl_8040C418 from a single 0x78 object into lbl_8040C418 size 0x30, lbl_8040C448 size 0x30, and lbl_8040C478 size 0x16 data:string; the source then used lbl_8040C418 and lbl_8040C448 as static HSD_Chan initializers.",
+        "source_path": "src/sysdolphin/baselib/sobjlib.c",
+        "scope": [
+          "sobjlib",
+          "symbols.txt",
+          "HSD_Chan",
+          "data split"
+        ],
+        "evidence_refs": [
+          "raw_diff:symbols.txt hunk",
+          "raw_diff:sobjlib.c static HSD_Chan initializers"
+        ],
+        "reason": "This is a path-specific data layout fact that may help future sobjlib curation, but should be verified against current symbols/source before promotion."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Do not keep generated aggregate structs when symbol metadata proves separate adjacent data objects",
+        "text": "Possible standard reinforcement: if a generated aggregate combines adjacent strings, jump tables, function tables, and typed objects, inspect and fix symbol boundaries instead of preserving the aggregate as authored structure.",
+        "source_path": null,
+        "scope": [
+          "data-sections-and-tu-splits",
+          "typed-fields-over-pointer-math",
+          "infer-authored-source-style"
+        ],
+        "evidence_refs": [
+          "raw_diff:sobjlib.c removal of SObjLibData",
+          "raw_diff:symbols.txt split data objects"
+        ],
+        "reason": "The idea aligns with existing standards, but one PR is only reinforcement rather than a new accepted global rule."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that all sobjlib address-style labels are semantically understood; the PR kept lbl_8040C418/lbl_8040C448 names.",
+      "Do not promote data_pad_jumptable as a general accepted tactic without stronger verifier evidence; the slice shows the edit but not a detailed justification.",
+      "Do not claim human review approval details; no human review comments are present.",
+      "Do not claim full TU data matching; the bot report says sobjlib .data improved to 48.07%, not 100%."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

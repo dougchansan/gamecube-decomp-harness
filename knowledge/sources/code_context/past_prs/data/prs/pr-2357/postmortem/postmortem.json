@@ -1,0 +1,376 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2357",
+  "pr": {
+    "number": 2357,
+    "title": "Jj/grcastle",
+    "url": "https://github.com/doldecomp/melee/pull/2357",
+    "state": "MERGED",
+    "author": "jurrejelle",
+    "created_at": "2026-03-26T17:34:05Z",
+    "merged_at": "2026-03-28T17:22:10Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Large grcastle decompilation PR for the Ground/stage subsystem. It added many grCastle function bodies, expanded castle-specific structs and union fields, adjusted grcastle prototypes, and made small lb_00F9 signature/source updates. The bot report recorded 16 new matched grcastle items and 9 unmatched-item improvements. Human discussion focused on an inline asm rlwimi use guarded by MWERKS_GEKKO, which ribbanya said was not concerning at that time.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "typed-struct-recovery",
+      "stage-ground-code"
+    ],
+    "systems": [
+      "stage",
+      "ground",
+      "library"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gr/grcastle.c",
+      "role": "Primary decomp target; added grCastle function bodies, local structs/tables, includes, fielded access, matching tactics, and inline asm guarded by MWERKS_GEKKO.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gr/grcastle.c added 1447 deleted 55 hunks 21",
+        "raw_diff: grcastle.c includes and grCastleParams/grCastle_* struct additions",
+        "raw_diff: placeholders replaced for grCastle_801CD658, grCastle_801CDA0C, grCastle_801CDC44, grCastle_801CE054, grCastle_801CE19C, grCastle_801CE260, grCastle_801CE3AC, grCastle_801CE578",
+        "text_corpus: decomp-dev bot report lists grcastle matched-code progress"
+      ]
+    },
+    {
+      "path": "src/melee/gr/types.h",
+      "role": "Ground/stage type surface expanded for castle-specific fields and structs.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gr/types.h added 109 deleted 0 hunks 3",
+        "raw_diff: grcastle.c accesses gp->gv.castle8, castle9, castle11, castle3, castle4, castle5 typed fields"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grcastle.h",
+      "role": "Header prototypes adjusted for grcastle function signatures.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gr/grcastle.h added 9 deleted 9 hunks 3",
+        "raw_diff: grCastle_801CF868 call changed from no-arg to gobj argument"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lb_00F9.c",
+      "role": "Small library source signature/body adjustment supporting the grcastle work.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/lb/lb_00F9.c added 1 deleted 1 hunks 1"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lb_00F9.h",
+      "role": "Small library header signature adjustment paired with lb_00F9.c.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/lb/lb_00F9.h added 1 deleted 1 hunks 1"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Replaced multiple grcastle placeholders with C bodies, including functions reported as 100% matched by the bot such as grCastle_801CEACC, grCastle_801CE578, grCastle_801D0D84, grCastle_801D02B8, grCastle_801CDA0C, grCastle_801CF0F4, grCastle_801CEF04, grCastle_801D0BBC, grCastle_801CE054, grCastle_801CE260, grCastle_801CE8E8, grCastle_801D09B8, grCastle_801CE9E8, grCastle_801CE19C, grCastle_801D0B0C, and grCastle_801CD8A8.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev bot report, 16 new matches"
+      ]
+    },
+    {
+      "text": "Improved additional unmatched grcastle items, including grCastle_801CFBD4, grCastle_801CF308, grCastle_801CDC44, grCastle_801CF868, grCastle_801CD658, grCastle_801CE3AC, plus .rodata/.sdata2/.sdata progress.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev bot report, 9 improvements in unmatched items"
+      ]
+    },
+    {
+      "text": "Expanded grCastleParams from coarse padding/unknown array into many explicit scalar fields, a fixed x12C array, and a grCastleParams_Entry array containing a Vec3 rot.",
+      "evidence_refs": [
+        "raw_diff: grCastleParams_Entry and grCastleParams struct diff"
+      ]
+    },
+    {
+      "text": "Introduced grcastle-local table wrapper structs and static data for quaternion, blink table, dynamic entries, y offsets, weights, target entries, and a Vec3 position.",
+      "evidence_refs": [
+        "raw_diff: grCastle_BlinkTable, grCastle_DynEntries, grCastle_YOffsets, grCastle_WeightTable, grCastle_TargetTable, grCs_803B7EB8, grCs_803B7E9C additions"
+      ]
+    },
+    {
+      "text": "Converted some raw Ground byte/halfword offset accesses into typed gv.castle* fields, for example gp->gv.castle9.xDE and xD4/xD6/xD8/xDA/xDC in grCastle_801CDFD8.",
+      "evidence_refs": [
+        "raw_diff: grCastle_801CDFD8 replaces ((u8*) gp)[0xDE] and *(s16*)((u8*)gp+offset) with gp->gv.castle9 fields"
+      ]
+    },
+    {
+      "text": "Added guarded inline asm rlwimi sequences for castle flag bit updates.",
+      "evidence_refs": [
+        "raw_diff: grCastle_801CDFD8 and grCastle_801CE19C use asm { rlwimi ... } under #ifdef MWERKS_GEKKO",
+        "human_pr_text: PsiLupan and ribbanya comments about inline asm for rlwimi"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Recovered typed Ground union accesses instead of leaving byte-offset writes in at least part of the grcastle code.",
+      "evidence_refs": [
+        "raw_diff: grCastle_801CDFD8 field replacements"
+      ]
+    },
+    {
+      "text": "Used small local data wrapper structs for repeated table shapes, making arrays such as dynamics entries and target pairs more reviewable than anonymous scalar blobs.",
+      "evidence_refs": [
+        "raw_diff: grCastle_DynEntry/grCastle_DynEntries and grCastle_TargetEntry/grCastle_TargetTable additions"
+      ]
+    },
+    {
+      "text": "Kept the inline asm narrow and guarded by MWERKS_GEKKO rather than unconditional for all builds.",
+      "evidence_refs": [
+        "raw_diff: #ifdef MWERKS_GEKKO around rlwimi asm",
+        "human_pr_text: ribbanya comment says the inline asm is surrounded in #ifdef MWERKS_GEKKO"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a Ground union layout is recovered enough, replacing raw offsets with the correct gv.castle* fields can land alongside function matching and makes later stage work easier to review.",
+      "scope": [
+        "src/melee/gr/grcastle.c",
+        "src/melee/gr/types.h"
+      ],
+      "evidence_refs": [
+        "raw_diff: raw gp offset writes replaced by gp->gv.castle9 fields",
+        "changed_files.jsonl: types.h expanded by 109 lines"
+      ]
+    },
+    {
+      "lesson": "Stage parameter blobs can often be refined incrementally into offset-annotated structs with fixed arrays and nested entries as functions reveal access patterns.",
+      "scope": [
+        "src/melee/gr/grcastle.c"
+      ],
+      "evidence_refs": [
+        "raw_diff: grCastleParams changed from mostly padding and flexible x12C[] TODO to explicit fields, entries[9], and x12C[4]"
+      ]
+    },
+    {
+      "lesson": "Bot match reports are useful intake evidence for which functions became exact matches, but the PR slice does not include local build commands or objdiff details beyond the report.",
+      "scope": [
+        "PR #2357"
+      ],
+      "evidence_refs": [
+        "text_corpus: decomp-dev bot report for GALE01 with 16 new matches and 9 improvements"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "New local grcastle helper/data types use the grCastle_ prefix with descriptive suffixes for table shape or role, such as grCastleParams_Entry, grCastle_DynEntry, grCastle_DynEntries, grCastle_YOffsets, grCastle_WeightTable, grCastle_TargetEntry, and grCastle_TargetTable.",
+      "evidence_refs": [
+        "raw_diff: typedef additions in grcastle.c"
+      ]
+    },
+    {
+      "text": "Unknown global/static symbols retained address-style grCs_ names rather than speculative semantic names.",
+      "evidence_refs": [
+        "raw_diff: grCs_803B7EB8, grCs_803B7EC8, grCs_803B7E9C, grCs_803B7EA8, grCs_803B7F50, grCs_803B7EF0, grCs_803B7EFC additions"
+      ]
+    },
+    {
+      "text": "Locals often use short role names where clear, such as gp, gobj, jobj, archive, flag3/flag4/flag6, pos, and subject; some generated-looking locals remain in the excerpt, such as new_var/new_var2/new_var3/new_var4.",
+      "evidence_refs": [
+        "raw_diff: grCastle_801CD658, grCastle_801CE260, grCastle_801CE578 excerpts"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Guarded inline asm for rlwimi bit insertion on a castle flag byte.",
+      "evidence_refs": [
+        "raw_diff: asm { rlwimi byte, one, 7, 24, 24 } in grCastle_801CDFD8",
+        "raw_diff: asm { rlwimi byte, zero, 7, 24, 24 } in grCastle_801CE19C",
+        "human_pr_text: inline asm was explicitly discussed"
+      ],
+      "caution": "Current standards treat inline assembly as exceptional; the PR evidence shows reviewer tolerance for this instance because of the MWERKS_GEKKO guard, not a global endorsement."
+    },
+    {
+      "tactic": "Used #pragma push / #pragma dont_inline on / #pragma pop around grCastle_801CDF54 and added a grCastle_801CE3AC_dontinline wrapper.",
+      "evidence_refs": [
+        "raw_diff: pragma block around grCastle_801CDF54",
+        "raw_diff: grCastle_801CE3AC_dontinline definition"
+      ],
+      "caution": "The slice does not include reviewer discussion or verifier rationale for these pragmas/wrappers."
+    },
+    {
+      "tactic": "Used PAD_STACK in several recovered functions and an explicit dummy stack-allocation-looking loop in grCastle_801CE578.",
+      "evidence_refs": [
+        "raw_diff: PAD_STACK(8) in grCastle_801CE19C and grCastle_801CE260",
+        "raw_diff: PAD_STACK(4) in grCastle_801CE3AC",
+        "raw_diff: grCastle_801CE578 contains unsigned char _[44] in a do-while block"
+      ],
+      "caution": "The PR slice shows these tactics in code, but does not provide separate objdiff justification beyond the bot progress report."
+    },
+    {
+      "tactic": "Used header-style JObj operations such as HSD_JObjSetTranslateY, HSD_JObjSetTranslate, and HSD_JObjSetRotation, but also introduced a fake_HSD_JObjSetTranslate inline that manually asserts jobj.h line numbers.",
+      "evidence_refs": [
+        "raw_diff: HSD_JObjSetTranslateY calls in grCastle_801CDA0C and grCastle_801CDC44",
+        "raw_diff: fake_HSD_JObjSetTranslate inline with HSD_ASSERT(916/917) and #define __FILE__ \"jobj.h\""
+      ],
+      "caution": "The fake inline is evidence of a matching tactic, not an accepted style recommendation."
+    }
+  ],
+  "review_feedback": [
+    {
+      "author": "PsiLupan",
+      "text": "Noted that there was inline asm for an rlwimi call in one function and that they could not comment directly on it.",
+      "evidence_refs": [
+        "human_pr_text: PsiLupan issue comment 2026-03-28T17:14:37Z"
+      ]
+    },
+    {
+      "author": "ribbanya",
+      "text": "Replied that the inline asm was surrounded by #ifdef MWERKS_GEKKO, so they were not worried about it at that moment.",
+      "evidence_refs": [
+        "human_pr_text: ribbanya issue comment 2026-03-28T17:22:42Z"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2357",
+    "Jj/grcastle",
+    "jurrejelle",
+    "grcastle",
+    "grCastle_801CD658",
+    "grCastle_801CDA0C",
+    "grCastle_801CDC44",
+    "grCastle_801CDFD8",
+    "grCastle_801CE054",
+    "grCastle_801CE19C",
+    "grCastle_801CE260",
+    "grCastle_801CE3AC",
+    "grCastle_801CE578",
+    "grCastle_801CEACC",
+    "grCastle_801CFBD4",
+    "grCastle_801CF308",
+    "grCastle_801CF868",
+    "grCastle_801D0D84",
+    "grCastleParams",
+    "grCastleParams_Entry",
+    "grCastle_DynEntries",
+    "grCastle_TargetTable",
+    "Ground gv castle9",
+    "dynamicsdata_flag3",
+    "dynamicsdata_flag4",
+    "dynamicsdata_flag6",
+    "rlwimi",
+    "MWERKS_GEKKO",
+    "PAD_STACK",
+    "dont_inline",
+    "fake_HSD_JObjSetTranslate",
+    "HSD_JObjSetTranslateY",
+    "lb_00F9"
+  ],
+  "follow_up_queries": [
+    "grcastle rlwimi MWERKS_GEKKO inline asm",
+    "fake_HSD_JObjSetTranslate jobj.h HSD_ASSERT 916 917",
+    "grCastle_801CE578 unsigned char _[44] PAD_STACK",
+    "grCastle_801CDF54 pragma dont_inline",
+    "grCastleParams entries rot x12C",
+    "gp->gv.castle9 xDE xD4 xD6 xD8 xDA xDC"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR identity, state, author, dates, changed files",
+      "changed_files.jsonl: exact changed-file list and line counts",
+      "raw_diff: diff excerpt for grcastle.c only, truncated",
+      "text_corpus: bot report and issue comments",
+      "human_pr_text: PR body and two human comments"
+    ],
+    "notes": [
+      "Evidence is strong for PR identity, changed files, broad grcastle scope, bot-reported match progress, and the inline asm discussion.",
+      "The loaded diff is truncated, so not every changed hunk or header/library edit is visible in full.",
+      "No formal review comments or approvals are present in the slice; only issue comments are loaded.",
+      "The bot report provides match percentages and matched-item names, but the slice does not include raw build commands, objdiff screenshots, or regression logs.",
+      "Several matching tactics are visible in the diff, but their individual necessity is not documented in the loaded PR text."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "kind": "decomp_lesson_candidate",
+        "title": "Recover stage Ground union fields as functions expose offsets",
+        "text": "PR #2357 shows grcastle matching work replacing raw Ground offset accesses with typed gv.castle* fields after expanding the Ground/type surface. This supports a local lesson: when stage behavior reveals a Ground union layout, prefer typed castle fields over raw byte/halfword pointer math.",
+        "scope": [
+          "src/melee/gr/grcastle.c",
+          "src/melee/gr/types.h"
+        ],
+        "evidence_refs": [
+          "raw_diff: grCastle_801CDFD8 offset accesses converted to gp->gv.castle9 fields",
+          "changed_files.jsonl: gr/types.h added 109 lines"
+        ]
+      },
+      {
+        "kind": "decomp_lesson_candidate",
+        "title": "Keep exceptional inline asm narrow and compiler-guarded",
+        "text": "PR #2357 included rlwimi inline asm under MWERKS_GEKKO guards. The only human discussion says the guard made the reviewer not worried at the time. This is a candidate historical example of narrowly scoped inline asm tolerance, not a general style rule.",
+        "scope": [
+          "src/melee/gr/grcastle.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: MWERKS_GEKKO-guarded rlwimi asm",
+          "human_pr_text: PsiLupan and ribbanya comments"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "grcastle PR #2357 touched stage code and related Ground/lb headers",
+        "text": "PR #2357 primarily modified src/melee/gr/grcastle.c, with related updates in src/melee/gr/types.h, src/melee/gr/grcastle.h, src/melee/lb/lb_00F9.c, and src/melee/lb/lb_00F9.h.",
+        "source_path": "src/melee/gr/grcastle.c",
+        "scope": [
+          "src/melee/gr/grcastle.c",
+          "src/melee/gr/types.h",
+          "src/melee/gr/grcastle.h",
+          "src/melee/lb/lb_00F9.c",
+          "src/melee/lb/lb_00F9.h"
+        ],
+        "evidence_refs": [
+          "changed_files.jsonl"
+        ],
+        "reason": "May help future path-scoped searches for grcastle stage decomp work and related type/header edits."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Clarify historical handling of guarded inline asm in matching PRs",
+        "text": "PR #2357 contains MWERKS_GEKKO-guarded rlwimi inline asm and a reviewer comment that this guard made it acceptable at the time. Curator should decide whether this belongs as a cautionary historical example under avoid-pragmas-register-asm rather than as a new permissive rule.",
+        "source_path": null,
+        "scope": [
+          "inline asm",
+          "MWERKS_GEKKO",
+          "rlwimi",
+          "matching tactics"
+        ],
+        "evidence_refs": [
+          "raw_diff: guarded rlwimi asm",
+          "human_pr_text: ribbanya response"
+        ],
+        "reason": "The current standards already discourage inline asm except as a tightly scoped exception; this PR provides concrete review evidence for one guarded exception."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote fake_HSD_JObjSetTranslate, manual jobj.h assert expansion, PAD_STACK, dummy stack arrays, or dont_inline wrappers as accepted global style from this PR alone; the slice lacks individual verifier rationale.",
+      "Do not infer reviewer approval of all matching tactics from merge status or the single inline-asm discussion.",
+      "Do not claim complete grcastle text/data matching; the bot report shows some exact matches and several partial improvements, including incomplete .rodata/.sdata2/.sdata progress."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

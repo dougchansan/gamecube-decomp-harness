@@ -1,0 +1,17 @@
+{
+  "number": 1427,
+  "title": "Decomp work on itfoxblaster.s",
+  "state": "MERGED",
+  "createdAt": "2024-08-12T21:33:22Z",
+  "updatedAt": "2024-08-12T21:57:54Z",
+  "mergedAt": "2024-08-12T21:57:54Z",
+  "closedAt": "2024-08-12T21:57:54Z",
+  "author": "AaronB-Hub",
+  "url": "https://github.com/doldecomp/melee/pull/1427",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 37810
+  }
+}

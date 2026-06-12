@@ -1,0 +1,17 @@
+{
+  "number": 1714,
+  "title": "Misc gm_19EF, mn_2295, and gmtitle matches",
+  "state": "MERGED",
+  "createdAt": "2025-07-20T22:08:58Z",
+  "updatedAt": "2025-07-20T22:14:42Z",
+  "mergedAt": "2025-07-20T22:14:39Z",
+  "closedAt": "2025-07-20T22:14:39Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1714",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 35495
+  }
+}

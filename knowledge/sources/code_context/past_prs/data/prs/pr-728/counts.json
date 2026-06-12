@@ -1,0 +1,17 @@
+{
+  "number": 728,
+  "title": "Deploy `ctx.html` whenever `master` is updated",
+  "state": "MERGED",
+  "createdAt": "2023-01-28T10:42:40Z",
+  "updatedAt": "2023-01-28T22:24:48Z",
+  "mergedAt": "2023-01-28T22:24:47Z",
+  "closedAt": "2023-01-28T22:24:47Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/728",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 1,
+    "diff_bytes": 2804
+  }
+}

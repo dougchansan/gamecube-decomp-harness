@@ -1,0 +1,17 @@
+{
+  "number": 315,
+  "title": "Match `HSD_TObj`",
+  "state": "MERGED",
+  "createdAt": "2022-02-26T00:13:40Z",
+  "updatedAt": "2022-09-14T13:36:03Z",
+  "mergedAt": "2022-08-22T15:36:01Z",
+  "closedAt": "2022-08-22T15:36:01Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/315",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 1,
+    "diff_bytes": 94863
+  }
+}

@@ -1,0 +1,426 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2393",
+  "pr": {
+    "number": 2393,
+    "title": "Jj/lb 00 f9",
+    "url": "https://github.com/doldecomp/melee/pull/2393",
+    "state": "MERGED",
+    "author": "jurrejelle",
+    "created_at": "2026-04-08T05:32:23Z",
+    "merged_at": "2026-04-08T14:33:00Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Large lb_00F9 decomp/matching PR with supporting type and prototype recovery. The PR primarily adds implementations and partial implementations in src/melee/lb/lb_00F9.c, refines lb/types.h dynamics-related layouts, updates lbvector's Euler-matrix parameter type, and changes fighter/stage call sites from the removed ft_unk union arm to lb_unk0. Bot report records 7 new lb_00F9 matches and 11 unmatched-item improvements.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "type-recovery",
+      "prototype-recovery"
+    ],
+    "systems": [
+      "library",
+      "fighter",
+      "stage"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/lb/lb_00F9.c",
+      "role": "Primary decomp/matching work; adds many includes, local lb_Collider and lb_803B7280 data, implements lb_8000FA94, lb_8000FD48, lb_8001044C excerpt, and many additional lb_00F9 functions in truncated diff.",
+      "evidence_refs": [
+        "changed_files: src/melee/lb/lb_00F9.c +1509/-276",
+        "diff: lb_00F9.c include additions and lb_Collider/lb_803B7280",
+        "diff: lb_8000FA94 body",
+        "diff: lb_8000FD48 body with PAD_STACK(0x20)",
+        "diff: lb_8001044C body excerpt",
+        "bot_report: lb_00F9 new matches and improvements"
+      ]
+    },
+    {
+      "path": "src/melee/lb/types.h",
+      "role": "Recovered/refined structs and union arms used by lb_00F9 dynamics data, including lb_00F9_UnkDesc0, lb_00F9_UnkDesc1Inner, DynamicsData, lb_804D63A0_t, and lb_804D63A8_t.",
+      "evidence_refs": [
+        "changed_files: src/melee/lb/types.h +33/-42",
+        "diff: lb_00F9_UnkDesc0 changed from raw scalar fields to HSD_JObj, Quaternion, Vec3, and f32 fields",
+        "diff: ftDynamics_UnkDesc removed from PolymorphicDesc",
+        "diff: DynamicsData size changed 0x94 to 0x98 with unk_94",
+        "diff: lb_804D63A0_t and lb_804D63A8_t entries arrays"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lb_00F9.h",
+      "role": "Header prototype cleanup for recovered lb_00F9 functions.",
+      "evidence_refs": [
+        "changed_files: src/melee/lb/lb_00F9.h +3/-2",
+        "diff: lb_800122F0 UNK_RET/UNK_PARAMS replaced with void lb_800122F0(HSD_ImageDesc*, GXTexObj*, f32)",
+        "diff: lb_800138EC UNK_RET/UNK_PARAMS replaced with typed render/projection parameters"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lb_00F9.static.h",
+      "role": "Static declaration updates for lb_00F9 data symbols.",
+      "evidence_refs": [
+        "changed_files: src/melee/lb/lb_00F9.static.h +3/-0",
+        "diff: added static GXColor lb_804D3768 and lb_804D376C",
+        "diff: added static u8 lb_804D63B8"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftdynamics.c",
+      "role": "Adjusted fighter dynamics call sites to use PolymorphicDesc.lb_unk0 instead of removed ft_unk.",
+      "evidence_refs": [
+        "changed_files: src/melee/ft/ftdynamics.c +2/-2",
+        "diff: ftCo_8009DD94 desc.ft_unk.jobj to desc.lb_unk0.jobj",
+        "diff: ftCo_8009E318 desc.ft_unk.jobj to desc.lb_unk0.jobj"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grcastle.c",
+      "role": "Adjusted ground/castle call site to use PolymorphicDesc.lb_unk0 instead of removed ft_unk.",
+      "evidence_refs": [
+        "changed_files: src/melee/gr/grcastle.c +1/-1",
+        "diff: grCastle_801CD8A8 desc.ft_unk.jobj->parent to desc.lb_unk0.jobj->parent"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lbvector.c",
+      "role": "Changed lbVector_CreateEulerMatrix implementation parameter type from Vec3* to Quaternion*.",
+      "evidence_refs": [
+        "changed_files: src/melee/lb/lbvector.c +1/-1",
+        "diff: lbVector_CreateEulerMatrix(Mtx m, Vec3* angles) to Quaternion* angles"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lbvector.h",
+      "role": "Updated public prototype for lbVector_CreateEulerMatrix to match implementation type change.",
+      "evidence_refs": [
+        "changed_files: src/melee/lb/lbvector.h +1/-1",
+        "diff: lbVector_CreateEulerMatrix prototype changed from Vec3* to Quaternion*"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Replaced placeholder markers with C bodies for lb_8000FA94 and lb_8000FD48 in the loaded diff, and added a large lb_8001044C implementation excerpt involving dynamics chains, matrices, vector normalization, gravity/force effects, collision checks, and floor checks.",
+    "Added lb_00F9 dependencies for math_ppc, stdarg, MSL trig functions, GX subsystem headers, lb collision/command headers, baselib GObj helpers, quatlib, state, TEV, and mplib.",
+    "Introduced a local lb_Collider struct with radius and position fields and a const lb_803B7280 vector table initialized with downward vectors.",
+    "Recovered dynamics data layouts in lb/types.h: lb_00F9_UnkDesc0 now uses HSD_JObj*, Quaternion, Vec3, and f32/s32 fields; DynamicsData gained unk_94 and size 0x98; pool wrapper structs now expose entries arrays.",
+    "Removed the ftDynamics_UnkDesc union arm and updated observed users in ftdynamics.c and grcastle.c to access desc.lb_unk0.jobj.",
+    "Updated lb_00F9.h prototypes for lb_800122F0 and lb_800138EC from unknown signatures to typed declarations.",
+    "Changed lbVector_CreateEulerMatrix to accept Quaternion* in both lbvector.c and lbvector.h.",
+    "Bot report recorded +3012 matched-code bytes, 7 new matches in main/melee/lb/lb_00F9, and 11 improvements including lb_8001044C to 81.26%, lb_80012994 to 99.57%, lb_8000FD48 to 93.66%, and lb_8000FA94 to 95.75%."
+  ],
+  "smart_moves": [
+    {
+      "text": "The PR updates external fighter and ground users immediately after removing the ft_unk union arm, avoiding stale typed access paths.",
+      "evidence_refs": [
+        "diff: PolymorphicDesc removed ft_unk",
+        "diff: ftdynamics.c desc.ft_unk.jobj to desc.lb_unk0.jobj",
+        "diff: grcastle.c desc.ft_unk.jobj to desc.lb_unk0.jobj"
+      ]
+    },
+    {
+      "text": "Prototype and implementation surfaces were kept synchronized for lbVector_CreateEulerMatrix by changing both lbvector.c and lbvector.h to Quaternion*.",
+      "evidence_refs": [
+        "diff: lbvector.c signature change",
+        "diff: lbvector.h prototype change"
+      ]
+    },
+    {
+      "text": "The PR replaced broad padding in pool structs with entries arrays, making lb_8000FA94 free-list initialization expressible with typed fields.",
+      "evidence_refs": [
+        "diff: lb_804D63A0_t entries[0x140]",
+        "diff: lb_804D63A8_t entries[8]",
+        "diff: lb_8000FA94 initializes entries[i].next"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a recovered union arm is library-owned rather than subsystem-specific, update all observed call sites to the shared lb-prefixed arm instead of keeping a misleading subsystem arm.",
+      "scope": [
+        "src/melee/lb/types.h",
+        "src/melee/ft/ftdynamics.c",
+        "src/melee/gr/grcastle.c"
+      ],
+      "evidence_refs": [
+        "diff: ftDynamics_UnkDesc removed from PolymorphicDesc",
+        "diff: PolymorphicDesc retains lb_00F9_UnkDesc0 lb_unk0",
+        "diff: fighter and ground call sites changed to desc.lb_unk0.jobj"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "lesson": "Typed pool wrapper structs can clarify allocator/free-list setup: lb_804D63A0_t and lb_804D63A8_t changed from raw padding to entries arrays, and lb_8000FA94 then initializes entries and next pointers directly.",
+      "scope": [
+        "src/melee/lb/types.h",
+        "src/melee/lb/lb_00F9.c"
+      ],
+      "evidence_refs": [
+        "diff: lb_804D63A0_t entries[0x140]",
+        "diff: lb_804D63A8_t entries[8]",
+        "diff: lb_8000FA94 loops over entries and sets next pointers"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "When a recovered body proves a function signature, update the owning header rather than leaving UNK_RET/UNK_PARAMS.",
+      "scope": [
+        "src/melee/lb/lb_00F9.h"
+      ],
+      "evidence_refs": [
+        "diff: lb_800122F0 typed prototype",
+        "diff: lb_800138EC typed prototype",
+        "standard: truthful-headers-and-includes"
+      ],
+      "confidence": 0.86
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "lb_unk0",
+      "kind": "union_arm",
+      "convention": "Use an lb-prefixed union arm for recovered lb_00F9 dynamics descriptor data rather than the removed ft_unk arm.",
+      "evidence_refs": [
+        "diff: union PolymorphicDesc has struct lb_00F9_UnkDesc0 lb_unk0",
+        "diff: ftDynamics_UnkDesc ft_unk removed",
+        "diff: ftdynamics.c and grcastle.c use desc.lb_unk0"
+      ],
+      "confidence": 0.84
+    },
+    {
+      "name": "unk_<offset>",
+      "kind": "field_names",
+      "convention": "Recovered struct fields retain offset-style unknown names where semantics are not proven, while types are improved to HSD_JObj, Quaternion, Vec3, f32, or s32.",
+      "evidence_refs": [
+        "diff: lb_00F9_UnkDesc0 fields unk_2C, unk_38, unk_58, unk_68, unk_6C, unk_78, unk_88, unk_8C",
+        "standard: conservative-naming"
+      ],
+      "confidence": 0.8
+    },
+    {
+      "name": "fn_80013614",
+      "kind": "address_style_symbol",
+      "convention": "Address-style function naming remains in use for a symbol reported by the bot where no semantic name is supplied by PR evidence.",
+      "evidence_refs": [
+        "bot_report: fn_80013614 improved from 0.00% to 99.07%",
+        "standard: conservative-naming"
+      ],
+      "confidence": 0.66
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "PAD_STACK was used narrowly in recovered lb_00F9 code, including PAD_STACK(0x20) in lb_8000FD48 and PAD_STACK(8) near a GX drawing return in the loaded diff.",
+      "evidence_refs": [
+        "diff: lb_8000FD48 contains PAD_STACK(0x20)",
+        "diff: later lb_00F9 excerpt contains PAD_STACK(8)",
+        "bot_report: lb_8000FD48 improved to 93.66%, not fully matched"
+      ],
+      "caution": "The loaded evidence does not explain why PAD_STACK was necessary; standards require verifier evidence before treating stack padding as reviewable style."
+    },
+    {
+      "tactic": "The lb_8001044C excerpt uses explicit s32 casts around Fighter_Part/count comparisons and a skip-by-8 traversal before a remainder loop, suggesting shape-sensitive control flow for matching.",
+      "evidence_refs": [
+        "diff: lb_8001044C casts part to s32 and checks part > 0xFF",
+        "diff: lb_8001044C skip_count/rem8/n loop advances cur by eight next links",
+        "bot_report: lb_8001044C improved from 0.00% to 81.26%"
+      ],
+      "caution": "Because lb_8001044C remains an improvement rather than a reported new match, do not generalize the unrolled skip-by-8 shape as accepted source style without further evidence."
+    },
+    {
+      "tactic": "Type recovery was used as a matching aid: raw/padded data descriptions were replaced with Quaternion, Vec3, HSD_JObj, entries arrays, and typed prototypes.",
+      "evidence_refs": [
+        "diff: lb_00F9_UnkDesc0 typed fields",
+        "diff: lbVector_CreateEulerMatrix changed to Quaternion*",
+        "diff: lb_800122F0 and lb_800138EC typed prototypes",
+        "standard: typed-fields-over-pointer-math"
+      ],
+      "caution": "Field semantics mostly remain unknown; the evidence supports type/shape recovery more strongly than semantic naming."
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "automation_report",
+      "author": "decomp-dev[bot]",
+      "text": "Bot report for GALE01 recorded matched code 62.41% (+0.08%, +3012 bytes), 7 new matches, and 11 improvements in unmatched items for main/melee/lb/lb_00F9.",
+      "evidence_refs": [
+        "text_corpus: issue_comment by decomp-dev[bot] at 2026-04-08T05:36:40Z"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2393",
+    "Jj/lb 00 f9",
+    "jurrejelle",
+    "lb_00F9",
+    "main/melee/lb/lb_00F9",
+    "DynamicsData",
+    "DynamicsDesc",
+    "PolymorphicDesc",
+    "lb_00F9_UnkDesc0",
+    "lb_00F9_UnkDesc1Inner",
+    "ftDynamics_UnkDesc",
+    "lb_unk0",
+    "ft_unk",
+    "lb_8000FA94",
+    "lb_8000FD48",
+    "lb_8001044C",
+    "lb_800122F0",
+    "lb_800138EC",
+    "lb_80014770",
+    "lb_80014258",
+    "lb_800138EC",
+    "lb_8001204C",
+    "lb_80011710",
+    "lb_8001271C",
+    "lb_800100B0",
+    "lbVector_CreateEulerMatrix",
+    "Quaternion",
+    "Vec3",
+    "HSD_JObj",
+    "PAD_STACK",
+    "lb_Collider",
+    "lb_803B7280",
+    "ftCo_8009DD94",
+    "ftCo_8009E318",
+    "grCastle_801CD8A8"
+  ],
+  "follow_up_queries": [
+    "PR2393 lb_00F9 PAD_STACK lb_8000FD48",
+    "lb_00F9 DynamicsData lb_unk0 ft_unk PolymorphicDesc",
+    "lbVector_CreateEulerMatrix Quaternion Vec3 signature change",
+    "lb_8001044C dynamics collision floor_check first_active",
+    "lb_804D63A0 entries DynamicsData free list",
+    "lb_800122F0 lb_800138EC UNK_RET UNK_PARAMS prototype recovery"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR identity, merged state, changed files, counts",
+      "human_pr_text: Tracking PR as usual",
+      "changed_files.jsonl: 8 changed files and line counts",
+      "raw_diff: loaded/truncated diff excerpt plus targeted local diff reads for headers/types",
+      "text_corpus: decomp-dev bot report"
+    ],
+    "notes": [
+      "PR body contains no technical explanation beyond 'Tracking PR as usual'.",
+      "There are no loaded human review comments and no review records in metadata.",
+      "The raw diff is truncated in the loaded packet; targeted local reads were used only for exact header/type changes.",
+      "Bot report supports progress and new-match claims, but not author intent or the necessity of specific matching tactics such as PAD_STACK.",
+      "Several functions and additional lb_00F9 hunks are only represented through bot report summaries or truncated diff context, so lessons are limited to directly visible changes."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson",
+        "title": "Replace misleading subsystem union arms with recovered shared library union arms",
+        "text": "PR #2393 removed PolymorphicDesc.ft_unk and updated ftdynamics.c and grcastle.c users to desc.lb_unk0.jobj, indicating the recovered dynamics descriptor data belongs under the lb_00F9/lb union arm rather than a fighter-specific arm.",
+        "scope": [
+          "src/melee/lb/types.h",
+          "src/melee/ft/ftdynamics.c",
+          "src/melee/gr/grcastle.c"
+        ],
+        "evidence_refs": [
+          "diff: ftDynamics_UnkDesc removed",
+          "diff: PolymorphicDesc lb_unk0 retained",
+          "diff: ftdynamics.c and grcastle.c access desc.lb_unk0.jobj"
+        ],
+        "confidence": 0.82
+      },
+      {
+        "record_type": "decomp_lesson",
+        "title": "Typed pool arrays clarify lb_00F9 free-list initialization",
+        "text": "PR #2393 changed lb_804D63A0_t and lb_804D63A8_t from opaque padding to entries arrays, and lb_8000FA94 then initializes each entry and next pointer directly. This is a concrete example of type recovery replacing raw storage in allocator/free-list setup.",
+        "scope": [
+          "src/melee/lb/types.h",
+          "src/melee/lb/lb_00F9.c"
+        ],
+        "evidence_refs": [
+          "diff: lb_804D63A0_t entries[0x140]",
+          "diff: lb_804D63A8_t entries[8]",
+          "diff: lb_8000FA94 initializes entries and next links"
+        ],
+        "confidence": 0.78
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "src/melee/lb/lb_00F9.c owns recovered lb dynamics descriptor/free-list implementation",
+        "text": "PR #2393 evidence ties lb_00F9.c to DynamicsData/DynamicsDesc initialization and update logic, including lb_8000FA94 free-list setup, lb_8000FD48 dynamics chain construction, and lb_8001044C dynamics update/collision logic excerpt.",
+        "source_path": "src/melee/lb/lb_00F9.c",
+        "scope": [
+          "lb_00F9",
+          "DynamicsData",
+          "DynamicsDesc",
+          "lb_8000FA94",
+          "lb_8000FD48",
+          "lb_8001044C"
+        ],
+        "evidence_refs": [
+          "diff: lb_8000FA94 body",
+          "diff: lb_8000FD48 body",
+          "diff: lb_8001044C excerpt",
+          "bot_report: lb_00F9 match/improvement list"
+        ],
+        "reason": "Potentially useful path ownership/search fact, but should be curated against current source before promotion."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "lbVector_CreateEulerMatrix parameter typed as Quaternion pointer in this PR",
+        "text": "PR #2393 changes lbVector_CreateEulerMatrix(Mtx m, Vec3* angles) to lbVector_CreateEulerMatrix(Mtx m, Quaternion* angles) in both src/melee/lb/lbvector.c and src/melee/lb/lbvector.h.",
+        "source_path": "src/melee/lb/lbvector.h",
+        "scope": [
+          "lbVector_CreateEulerMatrix",
+          "Quaternion",
+          "lbvector"
+        ],
+        "evidence_refs": [
+          "diff: lbvector.c signature change",
+          "diff: lbvector.h prototype change"
+        ],
+        "reason": "Candidate path/API fact; verify against current source before adding to source-owned facts."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Caution: PAD_STACK in partially matched functions should not become style by precedent",
+        "text": "PR #2393 contains PAD_STACK in lb_8000FD48 while the bot report lists lb_8000FD48 as an improvement to 93.66%, not a new full match. This supports reinforcing that stack-padding tactics need narrow verifier evidence and should not be generalized from partial improvements.",
+        "source_path": null,
+        "scope": [
+          "PAD_STACK",
+          "matching tactics",
+          "lb_8000FD48"
+        ],
+        "evidence_refs": [
+          "diff: lb_8000FD48 contains PAD_STACK(0x20)",
+          "bot_report: lb_8000FD48 0.00% to 93.66%",
+          "standard: matching-tactics-need-evidence"
+        ],
+        "reason": "Possible supporting example for existing standard; not a new accepted standard from this PR alone."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer human reviewer approval rationale; no human review comments were loaded.",
+      "Do not claim all added lb_00F9 functions fully matched; bot report distinguishes 7 new matches from 11 partial improvements.",
+      "Do not promote PAD_STACK or skip-by-8 traversal as accepted style from this PR alone; loaded evidence lacks explicit tactic justification.",
+      "Do not infer semantic meanings for unk_2C, unk_38, unk_58, unk_88, or similar fields; PR evidence keeps offset-style names."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

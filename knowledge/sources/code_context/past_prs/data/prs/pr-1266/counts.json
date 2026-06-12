@@ -1,0 +1,17 @@
+{
+  "number": 1266,
+  "title": "Match itpippi",
+  "state": "MERGED",
+  "createdAt": "2024-02-20T09:54:10Z",
+  "updatedAt": "2024-02-20T09:55:53Z",
+  "mergedAt": "2024-02-20T09:55:48Z",
+  "closedAt": "2024-02-20T09:55:48Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/1266",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 29091
+  }
+}

@@ -1,0 +1,643 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2335",
+  "pr": {
+    "number": 2335,
+    "title": "Match progress",
+    "url": "https://github.com/doldecomp/melee/pull/2335",
+    "state": "CLOSED",
+    "author": "johnwinston",
+    "created_at": "2026-03-20T14:54:25Z",
+    "merged_at": null
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Draft match-progress PR touching 39 files across fighter, stage, item, game-mode, library, menu/player, and toy code. The PR body claimed 32 functions at 100%, 11 failed attempts, and 1 pending function; a later issue comment says the work was split into themed PRs #2341, #2342, #2343, and #2344, with fn_80200460 excluded as a 98.2% match.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "cleanup",
+      "decomp-matching",
+      "headers",
+      "naming",
+      "types-structs",
+      "matching-tactics"
+    ],
+    "systems": [
+      "fighter",
+      "stage",
+      "item",
+      "game-mode",
+      "library",
+      "menu",
+      "player",
+      "toy"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_Attack100.c",
+      "role": "Implemented fn_800DA1D8 grab-hold/catch-wait transition body; uses Fighter_GObj/Fighter fields, callbacks, effect spawn, and PAD_STACK.",
+      "evidence_refs": [
+        "changed_files.jsonl: ftCo_Attack100.c added 18 deleted 1",
+        "raw_diff: fn_800DA1D8 body",
+        "human_pr_text: matched fn_800DA1D8 ✓ 100%; grab hold state description"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_Attack100.h",
+      "role": "Updated fn_800DA1D8 prototype from UNK_RET/UNK_PARAMS to void fn_800DA1D8(Fighter_GObj*).",
+      "evidence_refs": [
+        "raw_diff: ftCo_Attack100.h prototype change"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCrazyHand/ftCh_Init.c",
+      "role": "Implemented ftCh_Damage2_Anim and added mp/mplib.h include for mpFloorGetRight.",
+      "evidence_refs": [
+        "changed_files.jsonl: ftCh_Init.c added 24 deleted 1",
+        "raw_diff: ftCh_Damage2_Anim body",
+        "human_pr_text: matched ftCh_Damage2_Anim ✓ 100%"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_Init.c",
+      "role": "Implemented ftKb_SpecialN_800EF35C for Kirby copy hat material animation traversal; added ftanim include.",
+      "evidence_refs": [
+        "changed_files.jsonl: ftKb_Init.c added 28 deleted 1",
+        "raw_diff: ftKb_SpecialN_800EF35C body",
+        "human_pr_text: matched ftKb_SpecialN_800EF35C ✓ 100%"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_Init.h",
+      "role": "Updated ftKb_SpecialN_800EF35C return type to void.",
+      "evidence_refs": [
+        "raw_diff: ftKb_Init.h prototype change"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_SpecialN.c",
+      "role": "Implemented Kirby neutral-special drink/eat animation callbacks and added required throw/thrown/ftanim includes.",
+      "evidence_refs": [
+        "changed_files.jsonl: ftKb_SpecialN.c added 56 deleted 3",
+        "raw_diff: ftKb_SpecialNDrink0_Anim, ftKb_SpecialNDrink1_Anim, ftKb_SpecialAirNDrink_Anim bodies",
+        "human_pr_text: matched three ftKb_SpecialN drink functions ✓ 100%"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_SpecialNNs.c",
+      "role": "Implemented ftKb_PrSpecialAirNStart_Anim for copied Jigglypuff Rollout air startup transition.",
+      "evidence_refs": [
+        "changed_files.jsonl: ftKb_SpecialNNs.c added 23 deleted 1",
+        "raw_diff: ftKb_PrSpecialAirNStart_Anim body",
+        "human_pr_text: matched ftKb_PrSpecialAirNStart_Anim ✓ 100%"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_SpecialNZd.c",
+      "role": "Implemented Kirby copied Sheik IASA loop handlers and copied Mewtwo neutral-special start transition helper/body; added forward declarations.",
+      "evidence_refs": [
+        "changed_files.jsonl: ftKb_SpecialNZd.c added 74 deleted 3",
+        "raw_diff: ftKb_SkSpecialNLoop_IASA, ftKb_SkSpecialAirNLoop_IASA, ftKb_SpecialNMt_80107568",
+        "human_pr_text: matched three ftKb_SpecialNZd functions ✓ 100%"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftPopo/ftPp_SpecialS.c",
+      "role": "Implemented Ice Climbers aerial Belay throw animation callback.",
+      "evidence_refs": [
+        "changed_files.jsonl: ftPp_SpecialS.c added 40 deleted 1",
+        "raw_diff: ftPp_SpecialAirHiThrow_0_Anim body",
+        "human_pr_text: matched ftPp_SpecialAirHiThrow_0_Anim ✓ 100%"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftcolanim.c",
+      "role": "Implemented ftCo_800C0134 fighter color overlay reset/reapply logic under scoped pragmas.",
+      "evidence_refs": [
+        "changed_files.jsonl: ftcolanim.c added 25 deleted 1",
+        "raw_diff: ftCo_800C0134 body with pragma push/pop, auto_inline off, global_optimizer off",
+        "human_pr_text: matched ftCo_800C0134 ✓ 100%"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_16AE.h",
+      "role": "Adjusted fn_8016F160 prototype return type from void to int.",
+      "evidence_refs": [
+        "raw_diff: gm_16AE.h prototype change"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_16F1.h",
+      "role": "Adjusted fn_8016F1F0 and fn_8016FFD4 prototypes.",
+      "evidence_refs": [
+        "raw_diff: gm_16F1.h prototype changes"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmregclear.c",
+      "role": "Implemented fn_8017F1B8 bonus/award clear loop over 256 bonus kinds.",
+      "evidence_refs": [
+        "changed_files.jsonl: gmregclear.c added 26 deleted 1",
+        "raw_diff: fn_8017F1B8 body",
+        "human_pr_text: matched fn_8017F1B8 ✓ 100%"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmregclear.h",
+      "role": "Updated fn_8017F1B8 prototype to void fn_8017F1B8(void).",
+      "evidence_refs": [
+        "raw_diff: gmregclear.h prototype change"
+      ]
+    },
+    {
+      "path": "src/melee/gr/granime.c",
+      "role": "Implemented grAnime_801C83D0 flag check and added baselib/aobj.h include.",
+      "evidence_refs": [
+        "changed_files.jsonl: granime.c added 9 deleted 1",
+        "raw_diff: grAnime_801C83D0 body",
+        "human_pr_text: matched grAnime_801C83D0 ✓ 100%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grcorneria.c",
+      "role": "Implemented grCorneria_801DDDA8 Corneria world-space point calculation; diff excerpt shows temporary local structs/externs.",
+      "evidence_refs": [
+        "changed_files.jsonl: grcorneria.c added 53 deleted 14",
+        "raw_diff excerpt: grCorneria_801DDDA8 start",
+        "human_pr_text: matched grCorneria_801DDDA8 ✓ 100%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grcorneria.h",
+      "role": "Header touched for Corneria function surface.",
+      "evidence_refs": [
+        "changed_files.jsonl: grcorneria.h added 1 deleted 1"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grhomerun.c",
+      "role": "Implemented Home Run Contest distance meter scaling function.",
+      "evidence_refs": [
+        "changed_files.jsonl: grhomerun.c added 30 deleted 1",
+        "human_pr_text: matched grHomeRun_8021EDD4 ✓ 100%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grkongo.c",
+      "role": "Implemented Kongo Jungle bridge/plank and barrel-position functions.",
+      "evidence_refs": [
+        "changed_files.jsonl: grkongo.c added 64 deleted 2",
+        "human_pr_text: matched fn_801D7700 and grKongo_801D7F78 ✓ 100%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grkongo.h",
+      "role": "Header touched for Kongo function surface.",
+      "evidence_refs": [
+        "changed_files.jsonl: grkongo.h added 1 deleted 1"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grkongo.static.h",
+      "role": "Added Kongo static declarations or local surface entries.",
+      "evidence_refs": [
+        "changed_files.jsonl: grkongo.static.h added 3 deleted 0"
+      ]
+    },
+    {
+      "path": "src/melee/gr/groldpupupu.c",
+      "role": "Implemented Dream Land wind animation variant selection function.",
+      "evidence_refs": [
+        "changed_files.jsonl: groldpupupu.c added 29 deleted 1",
+        "human_pr_text: matched grOldPupupu_80210A24 ✓ 100%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grrcruise.c",
+      "role": "Implemented Rainbow Cruise initialization/callback functions; later issue comment says fn_80200460 was excluded as 98.2% match.",
+      "evidence_refs": [
+        "changed_files.jsonl: grrcruise.c added 54 deleted 2",
+        "human_pr_text: initially listed grRCruise_80200074 and fn_80200460 as matched",
+        "issue_comment: excluded fn_80200460 (98.2% match)"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grrcruise.h",
+      "role": "Header touched for Rainbow Cruise function surface.",
+      "evidence_refs": [
+        "changed_files.jsonl: grrcruise.h added 1 deleted 1"
+      ]
+    },
+    {
+      "path": "src/melee/gr/types.h",
+      "role": "Ground/stage type definitions updated.",
+      "evidence_refs": [
+        "changed_files.jsonl: gr/types.h added 19 deleted 1"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itkamex.c",
+      "role": "Implemented Blastoise/Kamex attack animation timer callback.",
+      "evidence_refs": [
+        "changed_files.jsonl: itkamex.c added 31 deleted 1",
+        "human_pr_text: matched itKamex_UnkMotion1_Anim ✓ 100%"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itkirbycutterbeam.c",
+      "role": "Implemented Kirby Final Cutter beam projectile spawn/ground shockwave function.",
+      "evidence_refs": [
+        "changed_files.jsonl: itkirbycutterbeam.c added 28 deleted 4",
+        "human_pr_text: matched it_8029BAB8 ✓ 100%"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itkirbycutterbeam.h",
+      "role": "Header touched for Kirby cutter beam function surface.",
+      "evidence_refs": [
+        "changed_files.jsonl: itkirbycutterbeam.h added 1 deleted 1"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itlugia.c",
+      "role": "Implemented Lugia projectile sub-item spawn/velocity function.",
+      "evidence_refs": [
+        "changed_files.jsonl: itlugia.c added 17 deleted 1",
+        "human_pr_text: matched it_802D1E8C ✓ 100%"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itlugia.h",
+      "role": "Header touched for Lugia function surface.",
+      "evidence_refs": [
+        "changed_files.jsonl: itlugia.h added 2 deleted 2"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itoldkuri.c",
+      "role": "Implemented Oldkuri walking physics/wall-turn/slope alignment function.",
+      "evidence_refs": [
+        "changed_files.jsonl: itoldkuri.c added 22 deleted 1",
+        "human_pr_text: matched itOldkuri_UnkMotion2_Phys ✓ 100%"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itpikachuthunder.c",
+      "role": "Implemented Pikachu Thunder projectile collision/target-position callback.",
+      "evidence_refs": [
+        "changed_files.jsonl: itpikachuthunder.c added 34 deleted 1",
+        "human_pr_text: matched itPikachuthunder_UnkMotion1_Coll ✓ 100%"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lbmthp.c",
+      "role": "Implemented two THP playback/movie-player functions.",
+      "evidence_refs": [
+        "changed_files.jsonl: lbmthp.c added 34 deleted 1",
+        "human_pr_text: matched fn_8001F06C and fn_8001EB14 ✓ 100%"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lbmthp.h",
+      "role": "Header touched for THP playback function signatures.",
+      "evidence_refs": [
+        "changed_files.jsonl: lbmthp.h added 6 deleted 3"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnname.c",
+      "role": "Implemented name-entry selection highlight animation update function.",
+      "evidence_refs": [
+        "changed_files.jsonl: mnname.c added 31 deleted 1",
+        "human_pr_text: matched mnName_80238A04 ✓ 100%"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnname.h",
+      "role": "Header touched for name-entry function surface.",
+      "evidence_refs": [
+        "changed_files.jsonl: mnname.h added 1 deleted 1"
+      ]
+    },
+    {
+      "path": "src/melee/pl/pltrick.c",
+      "role": "Implemented player attack-statistics tracking function.",
+      "evidence_refs": [
+        "changed_files.jsonl: pltrick.c added 24 deleted 1",
+        "human_pr_text: matched pl_80037DF4 ✓ 100%"
+      ]
+    },
+    {
+      "path": "src/melee/ty/toy.c",
+      "role": "Implemented trophy viewer camera interest/zoom reset function.",
+      "evidence_refs": [
+        "changed_files.jsonl: toy.c added 33 deleted 1",
+        "human_pr_text: matched un_80307828 ✓ 100%"
+      ]
+    },
+    {
+      "path": "src/melee/ty/toy.h",
+      "role": "Header touched for toy/trophy function surface.",
+      "evidence_refs": [
+        "changed_files.jsonl: toy.h added 1 deleted 1"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Replaced numerous decomp placeholder comments with C function bodies across fighter, stage, item, game-mode, library, menu/player, and toy subsystems.",
+    "Updated several headers from UNK_RET/UNK_PARAMS or incorrect return types to concrete signatures where bodies or callsites in the PR required them.",
+    "Added includes needed by recovered bodies, including ftanim, ftCo_Throw, ftCo_ThrownKirby, mp/mplib, and baselib/aobj.h in shown excerpts.",
+    "Used matching tactics in some bodies, including PAD_STACK and a scoped pragma block around ftCo_800C0134.",
+    "The PR was closed unmerged and split into themed follow-up PRs: stages #2341, items #2342, Kirby #2343, and misc #2344; fn_80200460 was specifically excluded as 98.2% rather than accepted as a full match."
+  ],
+  "smart_moves": [
+    {
+      "text": "Kept function signatures synchronized with recovered bodies by updating touched headers, e.g. fn_800DA1D8(Fighter_GObj*), ftKb_SpecialN_800EF35C(...), and fn_8017F1B8(void).",
+      "evidence_refs": [
+        "raw_diff: ftCo_Attack100.h, ftKb_Init.h, gmregclear.h"
+      ]
+    },
+    {
+      "text": "Large mixed match set was later split into themed PRs, reducing review scope by subsystem.",
+      "evidence_refs": [
+        "human_pr_text issue comment: Split into themed PRs #2341, #2342, #2343, #2344"
+      ]
+    },
+    {
+      "text": "The later comment corrected the earlier PR-body claim for fn_80200460 by excluding it as only a 98.2% match.",
+      "evidence_refs": [
+        "human_pr_text matched table listed fn_80200460 ✓ 100%",
+        "issue_comment: Excluded fn_80200460 (98.2% match)"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a placeholder function is recovered, update the owning header prototype in the same change instead of leaving UNK_RET/UNK_PARAMS.",
+      "scope": [
+        "function body recovery",
+        "headers"
+      ],
+      "evidence_refs": [
+        "raw_diff: fn_800DA1D8 body plus ftCo_Attack100.h prototype update",
+        "raw_diff: fn_8017F1B8 body plus gmregclear.h prototype update"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "lesson": "Treat broad multi-subsystem match dumps as candidates for themed split PRs when review scope becomes too wide.",
+      "scope": [
+        "review process",
+        "PR organization"
+      ],
+      "evidence_refs": [
+        "changed_files.jsonl: 39 changed files across many subsystems",
+        "issue_comment: Split into themed PRs #2341 stages, #2342 items, #2343 Kirby, #2344 misc"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "lesson": "Do not rely only on an initial matched table when later PR discussion revises a match claim; preserve the correction in intake.",
+      "scope": [
+        "historical PR intake",
+        "match evidence"
+      ],
+      "evidence_refs": [
+        "human_pr_text: fn_80200460 initially listed as ✓ 100%",
+        "issue_comment: Excluded fn_80200460 (98.2% match)"
+      ],
+      "confidence": 0.93
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Address-style fn_ names were retained for functions without proven semantic names, e.g. fn_800DA1D8, fn_8017F1B8, fn_8001F06C, and fn_80200460.",
+      "evidence_refs": [
+        "human_pr_text matched table",
+        "raw_diff: fn_800DA1D8 and fn_8017F1B8"
+      ]
+    },
+    {
+      "convention": "Subsystem-prefixed semantic names were used where already present, such as ftKb_*, grCorneria_*, grKongo_*, itKamex_*, and mnName_*.",
+      "evidence_refs": [
+        "human_pr_text matched table",
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "convention": "Common local role names appear in excerpts, including gobj, fp, jobj, attrs, da, and item_gobj.",
+      "evidence_refs": [
+        "raw_diff: ftCo_Attack100.c, ftCh_Init.c, ftKb_SpecialN.c, ftPp_SpecialS.c"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "PAD_STACK was used narrowly in several recovered functions to influence stack/codegen shape.",
+      "evidence_refs": [
+        "raw_diff: PAD_STACK(8) in fn_800DA1D8",
+        "raw_diff: PAD_STACK(32) in ftKb_SpecialAirNDrink_Anim",
+        "raw_diff: PAD_STACK(40) in ftPp_SpecialAirHiThrow_0_Anim"
+      ],
+      "caution": "Loaded standards require explicit verifier evidence for PAD_STACK; the PR body claims 100% matches but no objdiff/build transcript is included in this slice."
+    },
+    {
+      "tactic": "Scoped pragmas were used around ftCo_800C0134: pragma push, auto_inline off, global_optimizer off, then pop.",
+      "evidence_refs": [
+        "raw_diff: ftcolanim.c pragma block"
+      ],
+      "caution": "Loaded standards treat pragmas/global_optimizer off as exceptional and evidence-requiring; no adjacent-function verification is included in this slice."
+    },
+    {
+      "tactic": "Some bodies use small temporary local structs or casts to model data layout, e.g. Kirby costume_data in ftKb_SpecialN_800EF35C and Corneria grCn_Data/grCn_Entry excerpt.",
+      "evidence_refs": [
+        "raw_diff: ftKb_SpecialN_800EF35C local costume_data struct",
+        "raw_diff excerpt: grCorneria_801DDDA8 local typedefs/externs"
+      ],
+      "caution": "These are evidence of tactics used in the PR, not proof that the temporary type shapes were accepted upstream."
+    },
+    {
+      "tactic": "Natural loops appear in recovered code where the operation iterates fixed ranges or data trees, e.g. gmregclear loops over 256 entries and Kirby hat material animation walks matanimjoint until NULL.",
+      "evidence_refs": [
+        "raw_diff: for (i = 0; i < 256; i++) in fn_8017F1B8",
+        "raw_diff: while (matanimjoint != NULL) in ftKb_SpecialN_800EF35C"
+      ],
+      "caution": "The slice supports that loops were used, but does not include comparative failed unrolled attempts."
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "issue_comment",
+      "author": "johnwinston",
+      "text": "Split into themed PRs: #2341 (stages), #2342 (items), #2343 (Kirby), #2344 (misc). Excluded fn_80200460 (98.2% match).",
+      "evidence_refs": [
+        "text_corpus.jsonl issue_comment 2026-03-21T15:02:29Z"
+      ]
+    },
+    {
+      "kind": "bot_report",
+      "author": "decomp-dev[bot]",
+      "text": "Report for GALE01 (cc79fe5 - 0a31557): No changes.",
+      "evidence_refs": [
+        "text_corpus.jsonl issue_comment 2026-03-20T15:00:28Z"
+      ],
+      "notes": "Meaning of 'No changes' is not explained in the slice and is not treated as validation."
+    }
+  ],
+  "searchable_terms": [
+    "PR 2335",
+    "Match progress",
+    "johnwinston",
+    "wip/pending-matches",
+    "ftKb_SpecialNDrink0_Anim",
+    "ftKb_SpecialNDrink1_Anim",
+    "ftKb_SpecialAirNDrink_Anim",
+    "ftCo_800C0134",
+    "fn_8001F06C",
+    "fn_8001EB14",
+    "itOldkuri_UnkMotion2_Phys",
+    "ftKb_SpecialNMt_80107568",
+    "ftCh_Damage2_Anim",
+    "grAnime_801C83D0",
+    "ftPp_SpecialAirHiThrow_0_Anim",
+    "pl_80037DF4",
+    "grRCruise_80200074",
+    "fn_80200460",
+    "itKamex_UnkMotion1_Anim",
+    "itPikachuthunder_UnkMotion1_Coll",
+    "it_802D1E8C",
+    "it_8029BAB8",
+    "ftKb_SpecialN_800F10D4",
+    "fn_800DA1D8",
+    "grOldPupupu_80210A24",
+    "mnName_80238A04",
+    "fn_8017F1B8",
+    "ftKb_SpecialN_800EF35C",
+    "ftKb_SkSpecialNLoop_IASA",
+    "ftKb_SkSpecialAirNLoop_IASA",
+    "ftKb_PrSpecialAirNStart_Anim",
+    "fn_801D7700",
+    "grKongo_801D7F78",
+    "grHomeRun_8021EDD4",
+    "grCorneria_801DDDA8",
+    "PAD_STACK",
+    "global_optimizer off",
+    "UNK_RET",
+    "UNK_PARAMS",
+    "themed PR split"
+  ],
+  "follow_up_queries": [
+    "PR #2341 stages split from PR #2335 grcorneria grkongo grrcruise grhomerun groldpupupu granime",
+    "PR #2342 items split from PR #2335 itkamex itkirbycutterbeam itlugia itoldkuri itpikachuthunder",
+    "PR #2343 Kirby split from PR #2335 ftKb_SpecialN ftKb_SpecialNZd ftKb_Init ftKb_SpecialNNs",
+    "PR #2344 misc split from PR #2335 ftCo_Attack100 ftcolanim gmregclear lbmthp mnname pltrick toy",
+    "fn_80200460 excluded 98.2 match grrcruise",
+    "ftCo_800C0134 pragma global_optimizer off PAD_STACK evidence",
+    "grShrineRoute_8020AC44 pending from PR #2335",
+    "grPura_80212FC0 failed 3x",
+    "grOnett_801E5194 best 78.1",
+    "InitNameEntryUIState best 37.3",
+    "mn_80230198 best 28.1"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR 2335 closed, merged_at null, 39 files, 849 added, 64 deleted",
+      "human_pr_text: PR body with matched/failed/pending tables and function descriptions",
+      "raw_diff: truncated 46523-byte diff excerpt with many implemented bodies",
+      "changed_files.jsonl: full changed-file list",
+      "text_corpus.jsonl: issue comments including split/exclusion note"
+    ],
+    "notes": [
+      "The PR body claims 32 matched at 100%, but the slice does not include objdiff/checkdiff/build logs for each claim.",
+      "The raw diff is truncated in loaded_files, so some changed files are represented by metadata and PR body descriptions rather than exact diff bodies.",
+      "The PR was a draft, closed, and not merged in this slice; do not treat these changes as accepted upstream facts.",
+      "A later issue comment conflicts with the initial matched table for fn_80200460, stating it was excluded as a 98.2% match.",
+      "No review comments or formal reviewer approvals are present."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "kind": "process_lesson",
+        "title": "Split broad match-progress dumps into themed subsystem PRs",
+        "text": "PR #2335 touched 39 files across many systems and was later split into themed PRs: #2341 stages, #2342 items, #2343 Kirby, and #2344 misc.",
+        "scope": [
+          "PR organization",
+          "reviewability"
+        ],
+        "evidence_refs": [
+          "changed_files.jsonl: 39 changed files",
+          "text_corpus.jsonl issue_comment: split into themed PRs"
+        ],
+        "confidence": 0.9
+      },
+      {
+        "kind": "intake_lesson",
+        "title": "Later PR comments can supersede initial match tables",
+        "text": "The initial PR body listed fn_80200460 as 100%, but the later issue comment says fn_80200460 was excluded as a 98.2% match.",
+        "scope": [
+          "historical PR evidence",
+          "match-status intake"
+        ],
+        "evidence_refs": [
+          "human_pr_text matched table",
+          "text_corpus.jsonl issue_comment 2026-03-21T15:02:29Z"
+        ],
+        "confidence": 0.93
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Consider a review-scope/process note for large multi-subsystem match PRs",
+        "text": "When a match-progress PR spans many subsystems, prefer splitting into themed PRs for review. PR #2335 was closed and split into #2341 stages, #2342 items, #2343 Kirby, and #2344 misc.",
+        "source_path": null,
+        "scope": [
+          "review process",
+          "PR organization"
+        ],
+        "evidence_refs": [
+          "changed_files.jsonl: 39 changed files",
+          "text_corpus.jsonl issue_comment: split into themed PRs"
+        ],
+        "reason": "The PR provides concrete historical evidence for a process convention, but this is not currently one of the loaded global decomp standards and should be curated before promotion."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Record match-status corrections when later comments revise generated PR summaries",
+        "text": "Do not preserve an initial generated match table as authoritative when a later author comment corrects it; in PR #2335 fn_80200460 was initially listed as 100% but later excluded as 98.2%.",
+        "source_path": null,
+        "scope": [
+          "PR intake",
+          "evidence handling"
+        ],
+        "evidence_refs": [
+          "human_pr_text matched table",
+          "text_corpus.jsonl issue_comment: Excluded fn_80200460 (98.2% match)"
+        ],
+        "reason": "Useful curation/intake rule supported by this PR, but it belongs in source-owned guidance only after curator review."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote the PR body's 32 matched claims as validated accepted matches without per-function objdiff/checkdiff/build evidence.",
+      "Do not treat fn_80200460 as matched; the later issue comment says it was excluded at 98.2%.",
+      "Do not infer reviewer intent or acceptance status; no review comments or approvals are present.",
+      "Do not turn the PAD_STACK or pragma usage in this PR into a general style recommendation; loaded standards require explicit verification evidence and this slice lacks that transcript.",
+      "Do not promote temporary structs or local extern patterns from truncated excerpts as accepted data-layout facts."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

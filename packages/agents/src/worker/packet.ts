@@ -38,7 +38,7 @@ export function workerPacket(params: {
     },
     target: params.target,
     baseline: {
-      measures: params.baselineMeasures,
+      current_scores: params.baselineMeasures,
       fuzzy_match_percent: params.target.fuzzy_match_percent,
     },
     knowledge_context: params.knowledgeContext ?? {
@@ -51,7 +51,7 @@ export function workerPacket(params: {
     report_contract: {
       report_types: ["progress", "stalled_no_useful_guess", "needs_fact", "score_candidate", "tool_error"],
       durable_paths: ["summary_path", "facts_path", "blocker_path", "patch_path"],
-      wake_event: "worker_finished, worker_stalled, worker_error, needs_fact, or score_candidate",
+      wake_event: "worker_finished, worker_stalled, worker_needs_rework, worker_error, needs_fact, or score_candidate",
     },
   };
 }

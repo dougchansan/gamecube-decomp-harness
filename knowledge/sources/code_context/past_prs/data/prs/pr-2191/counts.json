@@ -1,0 +1,17 @@
+{
+  "number": 2191,
+  "title": "Separate out ftNess vars",
+  "state": "MERGED",
+  "createdAt": "2026-02-28T08:25:14Z",
+  "updatedAt": "2026-02-28T10:05:19Z",
+  "mergedAt": "2026-02-28T10:05:19Z",
+  "closedAt": "2026-02-28T10:05:19Z",
+  "author": "jurrejelle",
+  "url": "https://github.com/doldecomp/melee/pull/2191",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 1699
+  }
+}

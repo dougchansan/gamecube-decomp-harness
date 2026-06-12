@@ -3,9 +3,9 @@
   "title": "Assembly struct layout inference",
   "trust_tier": "tool_evidence",
   "description": "Infer candidate struct fields by tracing a pointer register through generated assembly.",
-  "operation_mode": "harness_bridge_v1",
-  "runner_status": "on_demand_bridge",
-  "status_message": "Harness bridge v1: APIs delegate to reference/melee-harness-master/tools/infer_struct.py.",
+  "operation_mode": "tool_local_impl",
+  "runner_status": "on_demand",
+  "status_message": "Tool-local implementation: APIs invoke tools/_impl/melee/tools/infer_struct.py.",
   "limitations": [
     "Requires generated assembly under build/GALE01/asm.",
     "Field names are placeholders; inferred offsets and access sizes need source/header confirmation.",

@@ -1,0 +1,422 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2209",
+  "pr": {
+    "number": 2209,
+    "title": "itchicorita match, remove itchicoritaleaf",
+    "url": "https://github.com/doldecomp/melee/pull/2209",
+    "state": "MERGED",
+    "author": "PsiLupan",
+    "created_at": "2026-03-04T19:07:24Z",
+    "merged_at": "2026-03-04T19:15:05Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2209 merged the former itchicoritaleaf translation unit into itchicorita, marked itchicorita as Matching, updated splits/symbol metadata, moved leaf declarations into itchicorita.h, removed the leaf include, and factored duplicated Chicorita physics into a static inline helper. The bot report shows 13 new matches under main/melee/it/items/itchicorita and corresponding broken matches under the removed itchicoritaleaf unit.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "translation-unit-merge",
+      "headers",
+      "split-metadata",
+      "symbol-metadata",
+      "cleanup"
+    ],
+    "systems": [
+      "item",
+      "pokemon-items",
+      "config",
+      "repo-root"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/it/items/itchicorita.c",
+      "role": "Primary source file; absorbs itchicoritaleaf code, adds leaf ItemStateTable/functions, marks duplicated physics through static inline itChicorita_Phys, and changes Chicorita motion physics wrappers.",
+      "evidence_refs": [
+        "raw_diff: src/melee/it/items/itchicorita.c hunks",
+        "changed_files.jsonl: src/melee/it/items/itchicorita.c +105/-63"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itchicoritaleaf.c",
+      "role": "Deleted source file; its functions and data are moved into itchicorita.c.",
+      "evidence_refs": [
+        "raw_diff: deleted file src/melee/it/items/itchicoritaleaf.c",
+        "changed_files.jsonl: src/melee/it/items/itchicoritaleaf.c +0/-95"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itchicoritaleaf.h",
+      "role": "Deleted header; declarations are moved into itchicorita.h.",
+      "evidence_refs": [
+        "raw_diff: deleted file src/melee/it/items/itchicoritaleaf.h",
+        "changed_files.jsonl: src/melee/it/items/itchicoritaleaf.h +0/-22"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itchicorita.h",
+      "role": "Header now declares both Chicorita and Chicorita Leaf functions and ItemStateTable symbols.",
+      "evidence_refs": [
+        "raw_diff: src/melee/it/items/itchicorita.h adds 2C9B20-2C9D20 declarations and it_803F7AC8",
+        "changed_files.jsonl: src/melee/it/items/itchicorita.h +10/-0"
+      ]
+    },
+    {
+      "path": "config/GALE01/splits.txt",
+      "role": "Split metadata merges itchicorita and itchicoritaleaf ranges into one itchicorita.c text/data range.",
+      "evidence_refs": [
+        "raw_diff: config/GALE01/splits.txt itchicorita.c text 0x802C9588-0x802C9D40 data 0x803F7A98-0x803F7AD8"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Symbol metadata changes two sdata2 floats at 0x804DD330 and 0x804DD334 from global names to local labels.",
+      "evidence_refs": [
+        "raw_diff: config/GALE01/symbols.txt it_804DD330/it_804DD334 to @153/@274"
+      ]
+    },
+    {
+      "path": "configure.py",
+      "role": "Build configuration marks itchicorita.c as Matching and removes separate itchicoritaleaf object entry.",
+      "evidence_refs": [
+        "raw_diff: configure.py Pokémon item object list"
+      ]
+    },
+    {
+      "path": "src/melee/it/it_2725.c",
+      "role": "Include cleanup removes itchicoritaleaf.h include after leaf declarations move into itchicorita.h.",
+      "evidence_refs": [
+        "raw_diff: src/melee/it/it_2725.c include removal"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Merged the separate itchicoritaleaf translation unit into itchicorita by extending itchicorita split ranges from text 0x802C9588-0x802C9D40 and data 0x803F7A98-0x803F7AD8, deleting the standalone itchicoritaleaf.c split.",
+      "evidence_refs": [
+        "raw_diff: config/GALE01/splits.txt",
+        "raw_diff: deleted src/melee/it/items/itchicoritaleaf.c"
+      ]
+    },
+    {
+      "text": "Updated configure.py to replace NonMatching itchicorita.c plus NonMatching itchicoritaleaf.c entries with one Matching itchicorita.c object.",
+      "evidence_refs": [
+        "raw_diff: configure.py",
+        "text_corpus.jsonl: bot report matched code +368 bytes and 13 new matches"
+      ]
+    },
+    {
+      "text": "Moved leaf function prototypes and it_803F7AC8 declaration from itchicoritaleaf.h into itchicorita.h, then deleted itchicoritaleaf.h.",
+      "evidence_refs": [
+        "raw_diff: src/melee/it/items/itchicorita.h",
+        "raw_diff: deleted src/melee/it/items/itchicoritaleaf.h"
+      ]
+    },
+    {
+      "text": "Factored duplicated Chicorita motion physics logic into static inline itChicorita_Phys and made both itChicorita_UnkMotion0_Phys and itChicorita_UnkMotion1_Phys call it.",
+      "evidence_refs": [
+        "raw_diff: src/melee/it/items/itchicorita.c physics hunks"
+      ]
+    },
+    {
+      "text": "Changed sdata2 symbols it_804DD330 and it_804DD334 into local labels @153 and @274.",
+      "evidence_refs": [
+        "raw_diff: config/GALE01/symbols.txt"
+      ]
+    },
+    {
+      "text": "Bot report recorded new matches in main/melee/it/items/itchicorita for leaf functions/data/sdata2 and small improvements for itChicorita_UnkMotion0_Phys and itChicorita_UnkMotion1_Phys.",
+      "evidence_refs": [
+        "text_corpus.jsonl: issue_comment by decomp-dev[bot]"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Removed a redundant leaf header/source split after moving leaf declarations and definitions into the parent Chicorita file, reducing include surface and aligning configure/splits with a single matching object.",
+      "evidence_refs": [
+        "raw_diff: configure.py",
+        "raw_diff: splits.txt",
+        "raw_diff: itchicorita.h and deleted itchicoritaleaf.h"
+      ]
+    },
+    {
+      "text": "Extracted shared duplicated physics code into a static inline helper rather than retaining two nearly identical function bodies.",
+      "evidence_refs": [
+        "raw_diff: src/melee/it/items/itchicorita.c itChicorita_Phys"
+      ]
+    },
+    {
+      "text": "Kept existing item fields and typed item/article access paths such as xCC_item_attr, xDD4_itemVar.chicorita, xC4_article_data, and GET_ITEM instead of introducing raw pointer arithmetic.",
+      "evidence_refs": [
+        "raw_diff: src/melee/it/items/itchicorita.c"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When two closely related item translation units are contiguous in text/data and one is a sub-article of the other, matching may require checking whether the split should be one parent item TU rather than separate parent/child TUs.",
+      "scope": [
+        "item",
+        "pokemon-items",
+        "split-metadata"
+      ],
+      "evidence_refs": [
+        "raw_diff: splits.txt merges itchicorita.c and itchicoritaleaf.c ranges",
+        "raw_diff: configure.py one Matching itchicorita.c entry",
+        "raw_diff: deleted itchicoritaleaf.c moved into itchicorita.c"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "Duplicated item physics bodies that differ only by motion-state wrapper can sometimes match as a shared static inline helper called by each state-specific Phys function.",
+      "scope": [
+        "item",
+        "matching",
+        "control-flow-cleanup"
+      ],
+      "evidence_refs": [
+        "raw_diff: itChicorita_Phys extraction",
+        "text_corpus.jsonl: bot report itChicorita_UnkMotion0_Phys and itChicorita_UnkMotion1_Phys reach 100%"
+      ],
+      "confidence": 0.76
+    },
+    {
+      "lesson": "Local-label sdata2 ownership can accompany a TU merge; in this PR two formerly global float symbols became local labels under the merged itchicorita object.",
+      "scope": [
+        "symbol-metadata",
+        "sdata2",
+        "translation-unit-merge"
+      ],
+      "evidence_refs": [
+        "raw_diff: symbols.txt it_804DD330/it_804DD334 to @153/@274",
+        "raw_diff: splits.txt merged .sdata2 remains under itchicorita range"
+      ],
+      "confidence": 0.68
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "Leaf callbacks use mixed existing naming styles: Logic30 functions use itChicoritaLeaf with capital Leaf, while motion callbacks retain itChicoritaleaf spelling.",
+      "evidence_refs": [
+        "raw_diff: itchicorita.h added prototypes",
+        "raw_diff: itchicorita.c added function definitions"
+      ]
+    },
+    {
+      "text": "The helper name itChicorita_Phys is semantic and local-static-inline scoped, while unresolved address-style functions such as it_802C9B20 and it_802C9CC0 remain address-style.",
+      "evidence_refs": [
+        "raw_diff: src/melee/it/items/itchicorita.c",
+        "raw_diff: src/melee/it/items/itchicorita.h"
+      ]
+    },
+    {
+      "text": "Local variables in the spawn function use role names such as spawn, chicorita, attr, and chicorita_gobj, consistent with conservative semantic naming where roles are visible in the code.",
+      "evidence_refs": [
+        "raw_diff: it_802C9B20 added to itchicorita.c"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Used a static inline helper to share physics implementation while preserving separately exported motion-state physics functions.",
+      "evidence_refs": [
+        "raw_diff: itChicorita_Phys plus wrappers",
+        "text_corpus.jsonl: bot report 100% after for both physics functions"
+      ],
+      "risk_note": "The diff shows the helper and bot match result, but does not include manual objdiff command output or author rationale."
+    },
+    {
+      "tactic": "Kept a goto label block_11 inside the helper to preserve control-flow shape for the fall-speed update.",
+      "evidence_refs": [
+        "raw_diff: itChicorita_Phys block_11"
+      ],
+      "risk_note": "This is generated-looking control flow; the PR evidence supports it as part of a matched result but does not document alternatives tried."
+    },
+    {
+      "tactic": "Used PAD_STACK(12) in itChicoritaLeaf_Logic30_Spawned after moving the function into itchicorita.c.",
+      "evidence_refs": [
+        "raw_diff: itChicoritaLeaf_Logic30_Spawned",
+        "text_corpus.jsonl: bot report function 100%"
+      ],
+      "risk_note": "PAD_STACK use has match-report support but no explicit narrow build/objdiff rationale in the PR text."
+    },
+    {
+      "tactic": "Adjusted split and configure metadata so the moved functions are matched under main/melee/it/items/itchicorita rather than the removed itchicoritaleaf unit.",
+      "evidence_refs": [
+        "raw_diff: splits.txt",
+        "raw_diff: configure.py",
+        "text_corpus.jsonl: bot report new matches under itchicorita and broken matches under itchicoritaleaf"
+      ],
+      "risk_note": "The bot report's broken matches are expected from the removed unit, but the PR body provides no written explanation."
+    }
+  ],
+  "review_feedback": [
+    {
+      "source": "decomp-dev[bot]",
+      "text": "Automated report for GALE01 showed matched code +0.01% (+368 bytes), linked code +0.05% (+1976 bytes), linked data +0.01% (+72 bytes), with 13 new matches under main/melee/it/items/itchicorita and 11 broken matches under the removed itchicoritaleaf unit.",
+      "evidence_refs": [
+        "text_corpus.jsonl: issue_comment decomp-dev[bot] 2026-03-04T19:10:15Z"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2209",
+    "itchicorita",
+    "itchicoritaleaf",
+    "itChicorita_Phys",
+    "it_802C9B20",
+    "it_802C9CC0",
+    "itChicoritaLeaf_Logic30_Spawned",
+    "itChicoritaLeaf_Logic30_HitShield",
+    "itChicoritaLeaf_Logic30_EvtUnk",
+    "itChicoritaLeaf_Logic30_Reflected",
+    "itChicoritaleaf_UnkMotion0_Anim",
+    "itChicoritaleaf_UnkMotion0_Phys",
+    "itChicoritaleaf_UnkMotion0_Coll",
+    "it_803F7AC8",
+    "Pokemon_Chicorita_Leaf",
+    "PAD_STACK(12)",
+    "block_11",
+    "sdata2",
+    "@153",
+    "@274",
+    "it_804DD330",
+    "it_804DD334",
+    "translation unit merge",
+    "configure.py Matching",
+    "splits.txt"
+  ],
+  "follow_up_queries": [
+    "itchicoritaleaf split merged itchicorita",
+    "Pokemon_Chicorita_Leaf ItemStateTable it_803F7AC8",
+    "PAD_STACK(12) itChicoritaLeaf_Logic30_Spawned",
+    "itChicorita_Phys static inline duplicated physics",
+    "sdata2 @153 @274 it_804DD330 it_804DD334",
+    "main/melee/it/items/itchicorita 13 new matches",
+    "itChicorita_UnkMotion0_Phys itChicorita_UnkMotion1_Phys 100%"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR 2209 title/state/author/changed_files",
+      "raw_diff: complete diff, 14395 chars, not truncated",
+      "changed_files.jsonl: 8 changed files",
+      "text_corpus.jsonl: empty PR body and bot report",
+      "raw_pr_json: truncated but metadata present"
+    ],
+    "notes": [
+      "Strong evidence for file changes, split/config/header movement, and bot-reported match outcomes.",
+      "PR body is empty and there are no human review comments, so author intent and reviewer rationale are not evidenced.",
+      "No manual build, objdiff, checkdiff, or adjacent regression output is included beyond the decomp-dev bot report.",
+      "The bot report lists broken matches for itchicoritaleaf; based on the diff these correspond to deleting/moving that unit, but the PR text does not explicitly explain them.",
+      "PAD_STACK and goto-shaped control flow are present, but the slice does not document alternative attempts or why these tactics were necessary."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson_candidate",
+        "title": "Contiguous parent/child item TUs may need split consolidation",
+        "text": "In PR 2209, itchicoritaleaf.c was removed as a separate object and its text/data ranges were folded into itchicorita.c; configure.py then marked the combined itchicorita.c object Matching, and the bot report showed leaf functions newly matched under itchicorita.",
+        "scope": [
+          "item",
+          "pokemon-items",
+          "split-metadata",
+          "matching"
+        ],
+        "evidence_refs": [
+          "raw_diff: splits.txt",
+          "raw_diff: configure.py",
+          "raw_diff: deleted itchicoritaleaf.c and added functions to itchicorita.c",
+          "text_corpus.jsonl: bot report"
+        ]
+      },
+      {
+        "record_type": "matching_tactic_candidate",
+        "title": "Static inline helper for duplicated item physics wrappers",
+        "text": "PR 2209 replaced duplicated bodies of itChicorita_UnkMotion0_Phys and itChicorita_UnkMotion1_Phys with a shared static inline itChicorita_Phys helper; the bot report shows both wrappers moved from 98.37% to 100%.",
+        "scope": [
+          "item",
+          "matching",
+          "static-inline"
+        ],
+        "evidence_refs": [
+          "raw_diff: itChicorita_Phys helper extraction",
+          "text_corpus.jsonl: bot report physics functions"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "itchicoritaleaf removed as separate source/header in PR 2209",
+        "text": "PR 2209 deleted src/melee/it/items/itchicoritaleaf.c and src/melee/it/items/itchicoritaleaf.h, moving leaf definitions and declarations into src/melee/it/items/itchicorita.c and src/melee/it/items/itchicorita.h.",
+        "source_path": "src/melee/it/items/itchicoritaleaf.c",
+        "scope": [
+          "item",
+          "pokemon-items",
+          "translation-unit-merge"
+        ],
+        "evidence_refs": [
+          "raw_diff: deleted itchicoritaleaf.c",
+          "raw_diff: deleted itchicoritaleaf.h",
+          "raw_diff: itchicorita.c additions",
+          "raw_diff: itchicorita.h additions"
+        ],
+        "reason": "Useful path ownership fact for future lookups; requires curator review before adding to source-owned path facts."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "itchicorita split range expanded in PR 2209",
+        "text": "config/GALE01/splits.txt changed itchicorita.c to own text 0x802C9588-0x802C9D40 and data 0x803F7A98-0x803F7AD8 after absorbing the prior itchicoritaleaf ranges.",
+        "source_path": "config/GALE01/splits.txt",
+        "scope": [
+          "config",
+          "splits",
+          "item"
+        ],
+        "evidence_refs": [
+          "raw_diff: config/GALE01/splits.txt"
+        ],
+        "reason": "This is source/path metadata rather than a general decomp lesson."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Document evidence expectations for PAD_STACK in matched moved functions",
+        "text": "PR 2209 includes PAD_STACK(12) in itChicoritaLeaf_Logic30_Spawned and the bot report shows the function matched, but the PR has no manual rationale. Consider whether standards should remind authors to note why PAD_STACK remains when moving already-matched functions across TUs.",
+        "source_path": null,
+        "scope": [
+          "matching-tactics",
+          "PAD_STACK",
+          "translation-unit-merge"
+        ],
+        "evidence_refs": [
+          "raw_diff: itChicoritaLeaf_Logic30_Spawned",
+          "text_corpus.jsonl: bot report function 100%"
+        ],
+        "reason": "Potential clarification only; existing matching-tactics standard already covers explicit evidence, so curator may reject as redundant."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer a broad rule that all item leaf/projectile files should be merged into parent item files; PR evidence only supports Chicorita/Chicorita Leaf.",
+      "Do not treat the broken itchicoritaleaf bot entries as regressions without context; the diff deletes that object and moves the code, but the slice does not include a human explanation.",
+      "Do not promote PAD_STACK(12) as generally acceptable style from this PR alone; the evidence is only a bot match report and the existing standards require narrow justification.",
+      "Do not claim human reviewer approval rationale; there were no review comments in the loaded slice."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

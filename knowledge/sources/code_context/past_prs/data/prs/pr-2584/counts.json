@@ -1,0 +1,17 @@
+{
+  "number": 2584,
+  "title": "Group the wiki TU list into progress sections",
+  "state": "MERGED",
+  "createdAt": "2026-06-06T01:14:12Z",
+  "updatedAt": "2026-06-06T10:03:50Z",
+  "mergedAt": "2026-06-06T10:02:10Z",
+  "closedAt": "2026-06-06T10:02:10Z",
+  "author": "itsgrimetime",
+  "url": "https://github.com/doldecomp/melee/pull/2584",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 2,
+    "diff_bytes": 5951
+  }
+}

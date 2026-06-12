@@ -1,0 +1,379 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2375",
+  "pr": {
+    "number": 2375,
+    "title": "Jj/mnruleplus",
+    "url": "https://github.com/doldecomp/melee/pull/2375",
+    "state": "MERGED",
+    "author": "jurrejelle",
+    "created_at": "2026-04-02T15:14:19Z",
+    "merged_at": "2026-04-02T17:30:48Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2375 decompiled and improved Rules Plus menu code in src/melee/mn/mnruleplus.c, with matching report evidence for three new function matches and several partial improvements. It also updated mnruleplus.h types to expose a RulePlus option enum, indexed rule values, and array-shaped animation settings.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "menu-code",
+      "type-recovery"
+    ],
+    "systems": [
+      "melee-core",
+      "mn",
+      "mnruleplus"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/mn/mnruleplus.c",
+      "role": "Main Rules Plus menu decompilation work: added includes, data/table reshaping, helper inlines, and implementations for input handling, option display/update, animation callbacks, and menu object creation.",
+      "evidence_refs": [
+        "metadata_json.changed_files: src/melee/mn/mnruleplus.c added 899 deleted 361 hunks 3",
+        "raw_diff: added mnRulePlus_SaveRules, mnRulePlus_IsOptionVisible, fn_8023201C, mn_802324E4, mn_80232660, mn_802327A4, mn_80232D4C, fn_80232F44, mn_80233218",
+        "text_corpus issue_comment: decomp bot reports new matches for fn_8023201C, fn_80232F44, mn_80232660 and improvements for mn_80233218, mn_802327A4, mn_80232D4C, mn_802324E4, .data, .sdata2, .sbss"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnruleplus.h",
+      "role": "Type/header support for Rules Plus data: added RulePlusOption enum, rule_values union with named fields plus values array, and reshaped mn_803ED1D0_t animation settings arrays.",
+      "evidence_refs": [
+        "metadata_json.changed_files: src/melee/mn/mnruleplus.h added 23 deleted 12 hunks 2",
+        "raw_diff mnruleplus.h: added enum RulePlusOption with RULEPLUS_TIME_LIMIT through RULEPLUS_COUNT",
+        "raw_diff mnruleplus.h: rule_values changed from plain struct to union containing named fields and u8 values[5]",
+        "raw_diff mnruleplus.h: x64 and x7C changed to AnimLoopSettings arrays with comments for selected/unselected states"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Replaced placeholder/decompiler-commented Rules Plus functions with C implementations for fn_8023201C, mn_802324E4, mn_80232660, mn_802327A4, mn_80232D4C, fn_80232F44, and mn_80233218.",
+      "evidence_refs": [
+        "raw_diff: removed commented-out decompiler block and added concrete function bodies",
+        "text_corpus issue_comment: 3 new matches and 7 improvements in main/melee/mn/mnruleplus"
+      ]
+    },
+    {
+      "text": "Added small source-level helpers for copying menu rule values to global game rules and deciding whether a Rules Plus option is visible for the current game mode.",
+      "evidence_refs": [
+        "raw_diff: static inline void mnRulePlus_SaveRules(void)",
+        "raw_diff: static inline s32 mnRulePlus_IsOptionVisible(u8 sel)"
+      ]
+    },
+    {
+      "text": "Recovered a more typed representation of rule values by adding a header union with named fields and an indexed values array, enabling code to update selected rule values by hovered_selection.",
+      "evidence_refs": [
+        "raw_diff mnruleplus.h: union containing time_limit, friendly_fire, pause, score, sd_penalty and u8 values[5]",
+        "raw_diff fn_8023201C: data->rule_values.values[mn_804A04F0.hovered_selection]"
+      ]
+    },
+    {
+      "text": "Reshaped animation/static data for Rules Plus, including populated AnimLoopSettings tables and JObjIndices unions for packed joint indices.",
+      "evidence_refs": [
+        "raw_diff: mn_803ED270 and mn_803ED294 changed from zero-filled entries to frame ranges",
+        "raw_diff: typedef union JObjIndices { s32 packed; u8 idx[4]; }",
+        "raw_diff: static JObjIndices mn_804DBE40 and mn_804DBE48"
+      ]
+    },
+    {
+      "text": "The automated report recorded text-section progress: +2132 matched bytes overall, with fn_8023201C, fn_80232F44, and mn_80232660 reaching 100%.",
+      "evidence_refs": [
+        "text_corpus issue_comment decomp-dev[bot]: Matched code 61.50% (+0.05%, +2132 bytes)",
+        "text_corpus issue_comment decomp-dev[bot]: 3 new matches table"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Factored repeated rule-save behavior into mnRulePlus_SaveRules, reducing duplicated assignments to gmMainLib_8015CC34() fields in input paths.",
+      "evidence_refs": [
+        "raw_diff: mnRulePlus_SaveRules writes stock_time_limit, friendly_fire, pause, score_display, unk_xc",
+        "raw_diff fn_8023201C: calls mnRulePlus_SaveRules in A/Start/B paths"
+      ]
+    },
+    {
+      "text": "Factored option visibility checks into mnRulePlus_IsOptionVisible and reused the same predicate in selection wraparound logic.",
+      "evidence_refs": [
+        "raw_diff: mnRulePlus_IsOptionVisible checks gm_801A4310, gmMainLib_8015EE0C, gmMainLib_8015EE44",
+        "raw_diff fn_8023201C: do-while loops skip hidden hovered_selection values"
+      ]
+    },
+    {
+      "text": "Used a union for rule_values so both semantic field access and indexed option access are available without raw byte pointer arithmetic.",
+      "evidence_refs": [
+        "raw_diff mnruleplus.h: rule_values union with named struct and values[5]",
+        "raw_diff fn_8023201C: indexed values access for confirmed_selection"
+      ]
+    },
+    {
+      "text": "Used a JObjIndices union to represent packed s32 joint-index data as byte indices when iterating over JObjs.",
+      "evidence_refs": [
+        "raw_diff: typedef union JObjIndices",
+        "raw_diff mn_802324E4: local_indices = mn_804DBE40; jobjs[local_indices.idx[i]]"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When menu state has both named rule fields and selection-indexed behavior, a union of named fields plus a small values array can express both access patterns cleanly and avoid raw offset code.",
+      "scope": [
+        "src/melee/mn/mnruleplus.h",
+        "src/melee/mn/mnruleplus.c",
+        "menu rule data structs"
+      ],
+      "evidence_refs": [
+        "raw_diff mnruleplus.h: rule_values union",
+        "raw_diff fn_8023201C: data->rule_values.values[mn_804A04F0.hovered_selection]"
+      ],
+      "related_standards": [
+        "typed-fields-over-pointer-math"
+      ]
+    },
+    {
+      "lesson": "Packed integer data used as multiple joint indices can be represented with a local union exposing byte lanes, making loops over JObj indices clearer than treating the packed value as an opaque s32.",
+      "scope": [
+        "src/melee/mn/mnruleplus.c",
+        "JObj index tables"
+      ],
+      "evidence_refs": [
+        "raw_diff: typedef union JObjIndices",
+        "raw_diff mn_802324E4: for loop over local_indices.idx[i]"
+      ],
+      "related_standards": [
+        "typed-fields-over-pointer-math",
+        "infer-authored-source-style"
+      ]
+    },
+    {
+      "lesson": "Repeated visibility conditions in both input navigation and object update code are good candidates for a helper predicate when the same game-mode gates recur.",
+      "scope": [
+        "Rules Plus option visibility",
+        "menu input handling"
+      ],
+      "evidence_refs": [
+        "raw_diff: mnRulePlus_IsOptionVisible",
+        "raw_diff fn_8023201C: wraparound navigation calls mnRulePlus_IsOptionVisible"
+      ],
+      "related_standards": [
+        "canonical-control-flow-and-macros"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "mnRulePlus_SaveRules",
+      "kind": "static inline helper",
+      "convention": "Semantic helper name with subsystem prefix and verb phrase for copying current menu rule values to global game rules.",
+      "evidence_refs": [
+        "raw_diff: static inline void mnRulePlus_SaveRules(void)",
+        "raw_diff: helper body writes gmMainLib_8015CC34() fields from MenuRulesPlusData"
+      ]
+    },
+    {
+      "name": "mnRulePlus_IsOptionVisible",
+      "kind": "static inline helper",
+      "convention": "Boolean/predicate helper uses Is* naming and subsystem prefix for a menu option visibility decision.",
+      "evidence_refs": [
+        "raw_diff: static inline s32 mnRulePlus_IsOptionVisible(u8 sel)"
+      ]
+    },
+    {
+      "name": "RulePlusOption",
+      "kind": "enum",
+      "convention": "Enum constants use RULEPLUS_* names for menu options, ending with RULEPLUS_COUNT.",
+      "evidence_refs": [
+        "raw_diff mnruleplus.h: enum RulePlusOption with RULEPLUS_TIME_LIMIT, RULEPLUS_FRIENDLY_FIRE, RULEPLUS_PAUSE, RULEPLUS_SCORE, RULEPLUS_SD_PENALTY, RULEPLUS_STAGE_SELECT, RULEPLUS_COUNT"
+      ]
+    },
+    {
+      "name": "JObjIndices",
+      "kind": "local typedef union",
+      "convention": "Type name describes packed JObj index storage; fields are named packed and idx.",
+      "evidence_refs": [
+        "raw_diff: typedef union { s32 packed; u8 idx[4]; } JObjIndices"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Narrow PAD_STACK use was kept in matched functions.",
+      "evidence_refs": [
+        "raw_diff fn_8023201C: PAD_STACK(0x30)",
+        "raw_diff mn_80232660: PAD_STACK(8)",
+        "text_corpus issue_comment: fn_8023201C and mn_80232660 reported as 100.00% new matches"
+      ],
+      "caution": "PAD_STACK is a matching tactic that should remain tied to local objdiff/build evidence; the PR evidence has bot match output but no human explanation."
+    },
+    {
+      "tactic": "Used natural loops for repeated joint-index and option traversal work rather than leaving copied decompiler blocks.",
+      "evidence_refs": [
+        "raw_diff mn_802324E4: for (i = 0; i < 4; i++) over local_indices.idx",
+        "raw_diff mn_802327A4: while loops over num_options and previous visible options"
+      ],
+      "caution": "The diff shows loop forms and bot improvement/match output, but not detailed objdiff per loop."
+    },
+    {
+      "tactic": "Converted decompiler switch/branch shapes into source-level switch and structured if/else input handling.",
+      "evidence_refs": [
+        "raw_diff fn_8023201C: if/else chain for buttons and switch (gm_801A4310())",
+        "raw_diff mn_80232660: switch (option) with cases 1-4, 0, 5"
+      ],
+      "caution": "Only the bot report verifies final symbol matching for some functions; the PR has no review discussion explaining alternate shapes."
+    }
+  ],
+  "review_feedback": [],
+  "searchable_terms": [
+    "pr-2375",
+    "Jj/mnruleplus",
+    "jurrejelle",
+    "src/melee/mn/mnruleplus.c",
+    "src/melee/mn/mnruleplus.h",
+    "mnruleplus",
+    "fn_8023201C",
+    "fn_80232F44",
+    "mn_80232660",
+    "mn_802327A4",
+    "mn_80232D4C",
+    "mn_802324E4",
+    "mn_80233218",
+    "MenuRulesPlusData",
+    "RulePlusOption",
+    "JObjIndices",
+    "AnimLoopSettings",
+    "mnRulePlus_SaveRules",
+    "mnRulePlus_IsOptionVisible",
+    "PAD_STACK",
+    "gmMainLib_8015CC34",
+    "mn_804A04F0",
+    "MenMainCursorRl_Top",
+    "MenMainNmRl_Top"
+  ],
+  "follow_up_queries": [
+    "mnruleplus PAD_STACK fn_8023201C mn_80232660",
+    "MenuRulesPlusData rule_values union values array",
+    "JObjIndices packed idx mn_804DBE40 mn_804DBE48",
+    "RulePlusOption RULEPLUS_STAGE_SELECT",
+    "mnRulePlus_IsOptionVisible gm_801A4310 gmMainLib_8015EE0C gmMainLib_8015EE44",
+    "mn_80233218 mnruleplus partial match 76.29",
+    "mnruleplus .data .sdata2 .sbss improvements"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR identity, state, author, timestamps, changed files, counts",
+      "human_pr_text: body only says Tracking PR as usual",
+      "text_corpus issue_comment: decomp-dev[bot] report with match percentages",
+      "raw_diff: truncated in loaded_files, supplemented by targeted local reads for function and header excerpts"
+    ],
+    "notes": [
+      "There are no human review comments in the slice and no explicit reviewer feedback.",
+      "The PR body gives no technical rationale beyond tracking.",
+      "Automated bot output supports match/progress claims for named functions and sections, but detailed objdiff/build logs are not included.",
+      "The raw diff in loaded_files was truncated; targeted local reads were used only to inspect exact header and function excerpts."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "type": "decomp_lesson",
+        "title": "Use a named-field plus indexed-array union for small menu option value groups",
+        "text": "In mnruleplus, MenuRulesPlusData.rule_values was changed to a union containing named fields and u8 values[5], allowing semantic writes such as time_limit/friendly_fire while also supporting hovered_selection-indexed updates.",
+        "scope": [
+          "menu option data",
+          "src/melee/mn/mnruleplus.h",
+          "src/melee/mn/mnruleplus.c"
+        ],
+        "evidence_refs": [
+          "raw_diff mnruleplus.h: rule_values union",
+          "raw_diff fn_8023201C: indexed values access"
+        ],
+        "confidence": 0.82
+      },
+      {
+        "type": "matching_tactic",
+        "title": "PAD_STACK in Rules Plus matched functions",
+        "text": "fn_8023201C uses PAD_STACK(0x30) and mn_80232660 uses PAD_STACK(8); the bot report lists both as new 100.00% matches. Keep this as a tactic example, not a general style rule.",
+        "scope": [
+          "src/melee/mn/mnruleplus.c",
+          "fn_8023201C",
+          "mn_80232660"
+        ],
+        "evidence_refs": [
+          "raw_diff fn_8023201C: PAD_STACK(0x30)",
+          "raw_diff mn_80232660: PAD_STACK(8)",
+          "text_corpus issue_comment: 100.00% new matches for fn_8023201C and mn_80232660"
+        ],
+        "confidence": 0.78
+      },
+      {
+        "type": "decomp_lesson",
+        "title": "Represent packed JObj index constants with a byte-index union when byte lanes are iterated",
+        "text": "mnruleplus changed a packed s32 joint-index value into JObjIndices with packed and idx views, then iterated idx[i] to hide/show child JObjs.",
+        "scope": [
+          "src/melee/mn/mnruleplus.c",
+          "JObj index data"
+        ],
+        "evidence_refs": [
+          "raw_diff: typedef union JObjIndices",
+          "raw_diff mn_802324E4: loop over local_indices.idx[i]"
+        ],
+        "confidence": 0.76
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "mnruleplus.c owns Rules Plus menu behavior and matching work",
+        "text": "src/melee/mn/mnruleplus.c contains Rules Plus menu logic including rule saving, option visibility, input handling, JObj animation updates, and menu object creation. PR #2375 matched fn_8023201C, fn_80232F44, and mn_80232660 and improved several related functions.",
+        "source_path": "src/melee/mn/mnruleplus.c",
+        "scope": [
+          "mn",
+          "Rules Plus menu",
+          "main/melee/mn/mnruleplus"
+        ],
+        "evidence_refs": [
+          "metadata_json.changed_files",
+          "raw_diff added function bodies",
+          "text_corpus issue_comment decomp bot report"
+        ],
+        "reason": "Useful path-level context for future mnruleplus decomp searches; should be curator-reviewed before adding to path facts."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "mnruleplus.h defines Rules Plus menu state types",
+        "text": "src/melee/mn/mnruleplus.h defines MenuRulesPlusData and was updated in PR #2375 with RulePlusOption plus a rule_values union that supports both named rule fields and indexed option values.",
+        "source_path": "src/melee/mn/mnruleplus.h",
+        "scope": [
+          "mn",
+          "Rules Plus menu",
+          "MenuRulesPlusData",
+          "RulePlusOption"
+        ],
+        "evidence_refs": [
+          "raw_diff mnruleplus.h enum RulePlusOption",
+          "raw_diff mnruleplus.h rule_values union"
+        ],
+        "reason": "Header ownership/type-recovery fact may help future decomp work in this subsystem."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote PAD_STACK use from this PR into a global style rule; the loaded standards already require narrow evidence for matching tactics.",
+      "Do not infer reviewer approval rationale or human intent from the merge; no review comments are present.",
+      "Do not claim all changed functions fully matched; the bot report lists only fn_8023201C, fn_80232F44, and mn_80232660 as new 100% matches, while other functions are partial improvements."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

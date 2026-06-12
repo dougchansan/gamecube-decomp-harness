@@ -1,0 +1,17 @@
+{
+  "number": 1775,
+  "title": "Port over most remaining dolphin code from SMS / oot-gc",
+  "state": "MERGED",
+  "createdAt": "2025-07-31T01:03:00Z",
+  "updatedAt": "2025-07-31T01:08:55Z",
+  "mergedAt": "2025-07-31T01:08:51Z",
+  "closedAt": "2025-07-31T01:08:51Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1775",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 70604
+  }
+}

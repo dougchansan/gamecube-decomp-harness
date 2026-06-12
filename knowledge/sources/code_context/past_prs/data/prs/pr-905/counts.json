@@ -1,0 +1,17 @@
+{
+  "number": 905,
+  "title": "Partially match `ftCo_BarrelWait`",
+  "state": "MERGED",
+  "createdAt": "2023-05-30T15:45:49Z",
+  "updatedAt": "2023-05-30T15:53:57Z",
+  "mergedAt": "2023-05-30T15:53:56Z",
+  "closedAt": "2023-05-30T15:53:56Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/905",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 383415
+  }
+}

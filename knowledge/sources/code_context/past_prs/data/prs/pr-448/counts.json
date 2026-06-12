@@ -1,0 +1,17 @@
+{
+  "number": 448,
+  "title": "Match `baselib`, ongoing",
+  "state": "MERGED",
+  "createdAt": "2022-08-09T22:29:34Z",
+  "updatedAt": "2022-08-13T05:47:45Z",
+  "mergedAt": "2022-08-11T21:37:45Z",
+  "closedAt": "2022-08-11T21:37:45Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/448",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 0
+  }
+}

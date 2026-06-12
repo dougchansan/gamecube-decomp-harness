@@ -1,0 +1,10 @@
+{
+  "pr": 1838,
+  "title": "allow for specific ifdef preservation in ctx",
+  "url": "https://github.com/doldecomp/melee/pull/1838",
+  "text_records_with_body": 2,
+  "review_comments": 0,
+  "changed_files": 9,
+  "added_lines": 104,
+  "deleted_lines": 44
+}

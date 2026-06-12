@@ -1,0 +1,207 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2417",
+  "pr": {
+    "number": 2417,
+    "title": "Fix build from macOS",
+    "url": "https://github.com/doldecomp/melee/pull/2417",
+    "state": "CLOSED",
+    "author": "macabeus",
+    "created_at": "2026-04-14T20:53:55Z",
+    "merged_at": null
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2417 is a small tooling fix for macOS builds. It changes tools/project.py so use_wibo only returns true on Linux, removing darwin from the automatic wibo path. The PR body says macOS builds were trying to execute build/tools/wibo instead of using wine, causing '/bin/sh: build/tools/wibo: cannot execute binary file'; the after log shows the progress command completing.",
+  "change_classification": {
+    "primary_type": "tooling_fix",
+    "categories": [
+      "fix",
+      "tooling",
+      "build"
+    ],
+    "systems": [
+      "tools/project.py",
+      "build wrapper selection",
+      "macOS build"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "tools/project.py",
+      "role": "Adjusted compiler wrapper selection by restricting use_wibo platform detection to Linux only.",
+      "evidence_refs": [
+        "changed_files: tools/project.py added 1 deleted 1 hunk",
+        "raw_diff: def use_wibo changed from sys.platform == \"linux\" or sys.platform == \"darwin\" to sys.platform == \"linux\"",
+        "pr_body: macOS build tried to use wibo in place of wine"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "In tools/project.py, use_wibo no longer treats sys.platform == \"darwin\" as eligible for wibo; it now requires sys.platform == \"linux\" while keeping the existing wibo_tag, machine architecture, and wrapper checks.",
+      "evidence_refs": [
+        "raw_diff"
+      ]
+    },
+    {
+      "text": "The PR body documents the observed failure on macOS: the build command invoked build/tools/wibo and failed with 'cannot execute binary file'.",
+      "evidence_refs": [
+        "human_pr_text",
+        "text_corpus"
+      ]
+    },
+    {
+      "text": "The PR body includes an after log showing a completed PROGRESS step, but the slice does not include CI output, reviews, or independent validation beyond that pasted log.",
+      "evidence_refs": [
+        "human_pr_text"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "The fix is narrow: it changes only the platform predicate for wibo selection and leaves architecture filtering and explicit wrapper override behavior intact.",
+      "evidence_refs": [
+        "raw_diff"
+      ]
+    },
+    {
+      "text": "The PR demonstrates the failure with the exact command line and shell error, making the platform-wrapper mismatch easy to diagnose.",
+      "evidence_refs": [
+        "human_pr_text"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "text": "Tooling changes can directly affect decomp workflow even when no source-matching code changes are involved; wrapper auto-detection should be treated as build-critical infrastructure.",
+      "scope": [
+        "tooling",
+        "build"
+      ],
+      "evidence_refs": [
+        "pr_title",
+        "human_pr_text",
+        "raw_diff"
+      ]
+    }
+  ],
+  "naming_conventions": [],
+  "assembly_or_matching_tactics": [],
+  "review_feedback": [],
+  "searchable_terms": [
+    "PR2417",
+    "Fix build from macOS",
+    "macabeus",
+    "tools/project.py",
+    "compiler_wrapper",
+    "use_wibo",
+    "wibo_tag",
+    "sys.platform",
+    "darwin",
+    "linux",
+    "macOS",
+    "wine",
+    "wibo",
+    "build/tools/wibo",
+    "cannot execute binary file",
+    "sjiswrap.exe",
+    "mwcceppc.exe",
+    "ninja build stopped"
+  ],
+  "follow_up_queries": [
+    "tools/project.py use_wibo sys.platform darwin linux",
+    "macOS build wibo wine cannot execute binary file",
+    "compiler_wrapper wibo_tag wrapper None platform.machine",
+    "PR 2417 Fix build from macOS"
+  ],
+  "evidence_quality": {
+    "status": "strong",
+    "evidence_refs": [
+      "metadata_json",
+      "human_pr_text",
+      "raw_diff",
+      "changed_files",
+      "text_corpus"
+    ],
+    "notes": [
+      "The changed file and exact one-line diff are fully present.",
+      "The PR body provides before and after command output, including the macOS failure mode and a successful progress output.",
+      "There are no review comments, issue comments, or reviews in the slice.",
+      "merged_at is null and the PR state is closed, so this intake does not claim the PR was merged or accepted.",
+      "The after log is author-provided PR evidence, not independent CI or regression verification."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "type": "tooling_lesson",
+        "title": "Keep wrapper auto-detection platform-specific",
+        "text": "PR #2417 fixed a macOS build failure by removing darwin from use_wibo auto-selection in tools/project.py; automatic wibo use was restricted to Linux so macOS would not try to execute build/tools/wibo.",
+        "scope": [
+          "tools/project.py",
+          "build tooling",
+          "macOS"
+        ],
+        "evidence_refs": [
+          "raw_diff",
+          "human_pr_text"
+        ],
+        "confidence": 0.88
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "tools/project.py controls wibo wrapper auto-selection",
+        "text": "tools/project.py contains use_wibo logic for compiler wrapper selection. In PR #2417, wibo auto-use was restricted to Linux after macOS attempted to run build/tools/wibo and failed with 'cannot execute binary file'.",
+        "source_path": "tools/project.py",
+        "scope": [
+          "tooling",
+          "build",
+          "compiler_wrapper",
+          "macOS",
+          "Linux"
+        ],
+        "evidence_refs": [
+          "raw_diff",
+          "human_pr_text",
+          "changed_files"
+        ],
+        "reason": "May be useful as a path fact for future build-tooling PR triage, but should be curated against current source before promotion."
+      },
+      {
+        "target_source_id": "other",
+        "update_kind": "source_update",
+        "title": "Build troubleshooting note for macOS wibo/wine confusion",
+        "text": "Historical PR evidence shows macOS builds failed when auto-selecting build/tools/wibo instead of the intended wrapper path; the observed shell error was '/bin/sh: build/tools/wibo: cannot execute binary file'.",
+        "source_path": null,
+        "scope": [
+          "developer setup",
+          "macOS build",
+          "wine",
+          "wibo"
+        ],
+        "evidence_refs": [
+          "human_pr_text"
+        ],
+        "reason": "Could inform developer setup or troubleshooting documentation if current tooling still has comparable wrapper-selection behavior."
+      }
+    ],
+    "rejection_notes": [
+      "No decomp matching tactic, assembly lesson, naming convention, or source-code style standard is promoted from this PR because the change is limited to build tooling.",
+      "Do not infer merge acceptance from the PR being closed; metadata shows merged_at is null.",
+      "Do not treat the pasted after log as full regression validation beyond the author-provided evidence."
+    ]
+  },
+  "confidence": 0.88,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

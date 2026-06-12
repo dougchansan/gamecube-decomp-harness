@@ -1,0 +1,17 @@
+{
+  "number": 1092,
+  "title": "Generate and tweak `splits.todo.txt`",
+  "state": "MERGED",
+  "createdAt": "2024-01-23T10:36:49Z",
+  "updatedAt": "2024-01-23T10:44:08Z",
+  "mergedAt": "2024-01-23T10:44:08Z",
+  "closedAt": "2024-01-23T10:44:08Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1092",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 115750
+  }
+}

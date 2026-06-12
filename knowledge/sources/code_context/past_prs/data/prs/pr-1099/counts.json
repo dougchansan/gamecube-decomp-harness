@@ -1,0 +1,17 @@
+{
+  "number": 1099,
+  "title": "Unlink non-matching files in `configure.py`",
+  "state": "MERGED",
+  "createdAt": "2024-01-24T09:57:30Z",
+  "updatedAt": "2024-01-24T10:11:15Z",
+  "mergedAt": "2024-01-24T10:11:15Z",
+  "closedAt": "2024-01-24T10:11:15Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1099",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 57812
+  }
+}

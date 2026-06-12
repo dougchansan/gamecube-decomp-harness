@@ -1,0 +1,10 @@
+{
+  "pr": 1171,
+  "title": "Re-enable LObj in obj_files.mk",
+  "url": "https://github.com/doldecomp/melee/pull/1171",
+  "text_records_with_body": 0,
+  "review_comments": 0,
+  "changed_files": 1,
+  "added_lines": 1,
+  "deleted_lines": 1
+}

@@ -1,0 +1,17 @@
+{
+  "number": 2637,
+  "title": "link gmopening.c",
+  "state": "MERGED",
+  "createdAt": "2026-06-09T03:40:32Z",
+  "updatedAt": "2026-06-09T04:01:22Z",
+  "mergedAt": "2026-06-09T04:01:22Z",
+  "closedAt": "2026-06-09T04:01:22Z",
+  "author": "lukechampine",
+  "url": "https://github.com/doldecomp/melee/pull/2637",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 10115
+  }
+}

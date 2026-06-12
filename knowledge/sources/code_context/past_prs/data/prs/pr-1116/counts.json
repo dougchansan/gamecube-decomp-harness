@@ -1,0 +1,17 @@
+{
+  "number": 1116,
+  "title": "Re-link `dolphin/gx`",
+  "state": "MERGED",
+  "createdAt": "2024-01-25T15:50:49Z",
+  "updatedAt": "2024-01-25T15:52:03Z",
+  "mergedAt": "2024-01-25T15:52:02Z",
+  "closedAt": "2024-01-25T15:52:02Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1116",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 993
+  }
+}

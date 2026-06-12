@@ -3,9 +3,9 @@
   "title": "Clang expression type oracle",
   "trust_tier": "tool_evidence",
   "description": "Build a libclang expression-span type map for a source file and look up expression types needed for safe temporary extraction.",
-  "operation_mode": "harness_bridge_v1",
-  "runner_status": "on_demand_bridge",
-  "status_message": "Harness bridge v1: APIs delegate to reference/melee-harness-master/tools/type_oracle.py and compile_commands.json.",
+  "operation_mode": "tool_local_impl",
+  "runner_status": "on_demand",
+  "status_message": "Tool-local implementation: APIs import tools/_impl/melee/tools/type_oracle.py and read compile_commands.json.",
   "limitations": [
     "Requires libclang Python bindings and a compile_commands.json entry for the target source file.",
     "Type spans are byte offsets in the current source text; after edits, rebuild the oracle.",

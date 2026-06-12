@@ -1,0 +1,17 @@
+{
+  "number": 240,
+  "title": "renamed, documented and slightly refactored lbvector functions",
+  "state": "MERGED",
+  "createdAt": "2022-01-08T17:51:06Z",
+  "updatedAt": "2022-01-13T02:49:53Z",
+  "mergedAt": "2022-01-13T02:49:53Z",
+  "closedAt": "2022-01-13T02:49:53Z",
+  "author": "Ka-lua",
+  "url": "https://github.com/doldecomp/melee/pull/240",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 3,
+    "reviews": 1,
+    "diff_bytes": 238917
+  }
+}

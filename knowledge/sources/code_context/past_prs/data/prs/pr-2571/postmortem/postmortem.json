@@ -1,0 +1,254 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2571",
+  "pr": {
+    "number": 2571,
+    "title": "Matched HSD_SynthSFXGroupDataReaddress by rewriting the loop and pulling allocations out of the loop",
+    "url": "https://github.com/doldecomp/melee/pull/2571",
+    "state": "MERGED",
+    "author": "DavidWeaverAudio",
+    "created_at": "2026-06-02T15:38:10Z",
+    "merged_at": "2026-06-02T16:49:21Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2571 matched HSD_SynthSFXGroupDataReaddress in src/sysdolphin/baselib/synth.c by changing the inner readdressing loop from a count-mutating do-while guarded by if(count > 0) into an indexed for loop, moving count and j declarations to the function scope, and changing one pointer advance expression to uintptr_t-based addition. The bot report records one new match for main/sysdolphin/baselib/synth/HSD_SynthSFXGroupDataReaddress, from 96.56% to 100.00%.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "matched-function",
+      "loop-rewrite",
+      "local-lifetime-adjustment",
+      "pointer-arithmetic-shape"
+    ],
+    "systems": [
+      "src/sysdolphin/baselib",
+      "synth"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/sysdolphin/baselib/synth.c",
+      "role": "Only changed source file; contains HSD_SynthSFXGroupDataReaddress loop and pointer arithmetic rewrite.",
+      "evidence_refs": [
+        "changed_files: src/sysdolphin/baselib/synth.c added 11 deleted 11 hunks 2",
+        "raw_diff: HSD_SynthSFXGroupDataReaddress hunk at lines around 355-383"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Added function-scope locals int count and int j in HSD_SynthSFXGroupDataReaddress.",
+      "evidence_refs": [
+        "raw_diff: added `int count;` and `int j;` near existing locals"
+      ]
+    },
+    {
+      "text": "Changed `int count = *(int*) (p + 8);` inside the outer while loop to assignment into the predeclared `count` local.",
+      "evidence_refs": [
+        "raw_diff: replaced block-local count declaration with `count = *(int*) (p + 8);`"
+      ]
+    },
+    {
+      "text": "Replaced `if (count > 0) { do { ... } while (--count != 0); }` with `for (j = 0; j < count; j++) { ... }`, preserving the same q-field updates and q += 0x40 stride inside the loop.",
+      "evidence_refs": [
+        "raw_diff: inner loop rewrite in HSD_SynthSFXGroupDataReaddress"
+      ]
+    },
+    {
+      "text": "Changed pointer advancement from `p += (count << 6);` to `p = (u8*) ((count << 6) + (uintptr_t) p);` before the following `p += 0x10;`.",
+      "evidence_refs": [
+        "raw_diff: pointer advance expression rewrite after inner loop"
+      ]
+    },
+    {
+      "text": "The automated report recorded one new match: `main/sysdolphin/baselib/synth` item `HSD_SynthSFXGroupDataReaddress`, +9 bytes, 96.56% before and 100.00% after.",
+      "evidence_refs": [
+        "text_corpus issue_comment by decomp-dev[bot] at 2026-06-02T15:42:05Z"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Kept the repeated q-offset updates readable inside a natural indexed loop rather than a count-mutating do-while shape.",
+      "evidence_refs": [
+        "raw_diff: replacement of guarded do-while with `for (j = 0; j < count; j++)`"
+      ]
+    },
+    {
+      "text": "Preserved the original `count` value for the post-loop `p` stride calculation by no longer decrementing `count` in the loop condition.",
+      "evidence_refs": [
+        "raw_diff: `while (--count != 0)` removed; `p` advancement still uses `count << 6`"
+      ]
+    },
+    {
+      "text": "Used a uintptr_t cast in the `p` advancement expression, apparently to influence the matched arithmetic/codegen shape without changing the visible stride.",
+      "evidence_refs": [
+        "raw_diff: `p = (u8*) ((count << 6) + (uintptr_t) p);`",
+        "text_corpus bot report: HSD_SynthSFXGroupDataReaddress reached 100.00%"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When an inner loop decrements a count that is also needed after the loop for a stride calculation, try an indexed `for` loop with a separate counter so the original count remains available for later codegen.",
+      "scope": [
+        "loop rewrites",
+        "matching functions with post-loop stride arithmetic"
+      ],
+      "evidence_refs": [
+        "raw_diff: changed `do ... while (--count != 0)` to `for (j = 0; j < count; j++)`",
+        "raw_diff: post-loop `p` advancement still depends on `count << 6`",
+        "text_corpus bot report: function reached 100.00%"
+      ],
+      "confidence": 0.86
+    },
+    {
+      "lesson": "For pointer stride expressions in matching work, expression shape can matter: a cast through uintptr_t for address arithmetic may be worth testing when semantically equivalent pointer addition does not match.",
+      "scope": [
+        "pointer arithmetic",
+        "codegen-sensitive expression shaping"
+      ],
+      "evidence_refs": [
+        "raw_diff: `p += (count << 6);` changed to `p = (u8*) ((count << 6) + (uintptr_t) p);`",
+        "text_corpus bot report: function reached 100.00%"
+      ],
+      "confidence": 0.74
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "j",
+      "kind": "local loop counter",
+      "convention": "Short integer loop-counter names were used for the recovered indexed loop.",
+      "evidence_refs": [
+        "raw_diff: added `int j;` and used `for (j = 0; j < count; j++)`"
+      ]
+    },
+    {
+      "name": "count",
+      "kind": "local count value",
+      "convention": "A short semantic local name `count` was retained for the value loaded from `p + 8` and used for both loop bound and stride calculation.",
+      "evidence_refs": [
+        "raw_diff: `count = *(int*) (p + 8);` and `j < count` and `count << 6`"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Rewrite guarded do-while decrement loop into indexed for loop.",
+      "evidence_refs": [
+        "raw_diff: removed `if (count > 0)` plus `do ... while (--count != 0)`",
+        "raw_diff: added `for (j = 0; j < count; j++)`"
+      ],
+      "result_evidence": [
+        "text_corpus bot report: 1 new match; HSD_SynthSFXGroupDataReaddress 96.56% to 100.00%"
+      ]
+    },
+    {
+      "tactic": "Move loop-bound and loop-index locals to function scope to alter local lifetime/declaration shape.",
+      "evidence_refs": [
+        "raw_diff: added function-scope `int count;` and `int j;`",
+        "raw_diff: removed block-local `int count = ...`"
+      ],
+      "result_evidence": [
+        "text_corpus bot report: 1 new match; HSD_SynthSFXGroupDataReaddress 96.56% to 100.00%"
+      ]
+    },
+    {
+      "tactic": "Use uintptr_t in pointer-add expression for p stride update.",
+      "evidence_refs": [
+        "raw_diff: `p = (u8*) ((count << 6) + (uintptr_t) p);`"
+      ],
+      "result_evidence": [
+        "text_corpus bot report: 1 new match; HSD_SynthSFXGroupDataReaddress 96.56% to 100.00%"
+      ]
+    }
+  ],
+  "review_feedback": [],
+  "searchable_terms": [
+    "pr-2571",
+    "HSD_SynthSFXGroupDataReaddress",
+    "src/sysdolphin/baselib/synth.c",
+    "main/sysdolphin/baselib/synth",
+    "AXVPB",
+    "sfxGroupDataReaddressCounter",
+    "loop rewrite",
+    "for j count",
+    "do while --count",
+    "uintptr_t pointer arithmetic",
+    "count << 6",
+    "q += 0x40",
+    "matched code 69.85",
+    "96.56 to 100.00"
+  ],
+  "follow_up_queries": [
+    "HSD_SynthSFXGroupDataReaddress uintptr_t",
+    "\"do\" \"while (--count != 0)\" \"count << 6\"",
+    "\"for (j = 0; j < count; j++)\" \"q += 0x40\"",
+    "src/sysdolphin/baselib/synth.c AXVPB callback delta",
+    "sfxGroupDataReaddressCounter"
+  ],
+  "evidence_quality": {
+    "status": "strong",
+    "evidence_refs": [
+      "metadata_json: PR number, title, author, state, timestamps, changed file counts",
+      "raw_diff: complete 1406-byte diff for the single changed file",
+      "changed_files: one changed file, src/sysdolphin/baselib/synth.c",
+      "text_corpus: decomp-dev[bot] report with one new match and before/after percentages"
+    ],
+    "notes": [
+      "PR body is empty and there are no review comments, so there is no human review rationale beyond the title and diff.",
+      "The PR title says 'pulling allocations out of the loop', but the diff evidence shows local declarations moved to function scope; this intake does not infer heap allocation behavior.",
+      "The bot report supports the claimed match for HSD_SynthSFXGroupDataReaddress, but no local build command, objdiff output, or adjacent-function regression evidence is included in the slice."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "kind": "decomp_lesson",
+        "title": "Preserve count values with indexed loops when post-loop stride arithmetic depends on count",
+        "text": "In HSD_SynthSFXGroupDataReaddress, replacing a decrementing `do ... while (--count != 0)` loop with `for (j = 0; j < count; j++)` preserved `count` for the subsequent `count << 6` pointer stride and coincided with a reported 100% match.",
+        "scope": [
+          "src/sysdolphin/baselib/synth.c",
+          "HSD_SynthSFXGroupDataReaddress",
+          "loop matching"
+        ],
+        "evidence_refs": [
+          "raw_diff: loop rewrite and post-loop count use",
+          "text_corpus bot report: HSD_SynthSFXGroupDataReaddress 96.56% to 100.00%"
+        ],
+        "confidence": 0.86
+      },
+      {
+        "kind": "matching_tactic",
+        "title": "uintptr_t pointer-add expression shape may affect match",
+        "text": "The PR changed `p += (count << 6)` to `p = (u8*) ((count << 6) + (uintptr_t) p)` in a function that the bot report marked as newly matched. Treat this as a narrow tactic to test, not a general style rule.",
+        "scope": [
+          "pointer arithmetic",
+          "codegen-sensitive C expression shape"
+        ],
+        "evidence_refs": [
+          "raw_diff: uintptr_t pointer arithmetic change",
+          "text_corpus bot report: one new match"
+        ],
+        "confidence": 0.74
+      }
+    ],
+    "source_update_candidates": [],
+    "rejection_notes": [
+      "Do not promote the title phrase 'pulling allocations out of the loop' as a verified allocation lesson; the diff only shows local declarations moved and loop structure changed.",
+      "Do not infer reviewer intent or review standards; the slice contains no review comments.",
+      "Do not promote a global rule that uintptr_t pointer arithmetic should be preferred generally; this PR only supports it as a narrow matching tactic in one function."
+    ]
+  },
+  "confidence": 0.86,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

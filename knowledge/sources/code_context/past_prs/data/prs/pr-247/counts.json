@@ -1,0 +1,17 @@
+{
+  "number": 247,
+  "title": "Matching player c  - WIP and non matching.",
+  "state": "CLOSED",
+  "createdAt": "2022-01-30T02:31:34Z",
+  "updatedAt": "2022-02-10T03:36:14Z",
+  "mergedAt": null,
+  "closedAt": "2022-02-10T03:36:14Z",
+  "author": "snuffysasa",
+  "url": "https://github.com/doldecomp/melee/pull/247",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 1247105
+  }
+}

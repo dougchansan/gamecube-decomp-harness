@@ -17,6 +17,10 @@ export interface AgentToolRuntimeContext {
   packet?: Record<string, unknown>;
   initialBoardPath?: string;
   workerLogDir?: string;
+  /** Authoritative DB lease id; stamped into tool telemetry, never model-authored. */
+  leaseId?: string;
+  /** Worker repair-loop attempt index for tool telemetry. */
+  attemptIndex?: number;
 }
 
 export interface PiToolTextContent {

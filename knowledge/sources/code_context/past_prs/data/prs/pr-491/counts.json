@@ -1,0 +1,17 @@
+{
+  "number": 491,
+  "title": "Create `gen.sh`",
+  "state": "MERGED",
+  "createdAt": "2022-08-25T03:47:10Z",
+  "updatedAt": "2022-08-25T14:06:39Z",
+  "mergedAt": "2022-08-25T14:06:35Z",
+  "closedAt": "2022-08-25T14:06:35Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/491",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 5294
+  }
+}

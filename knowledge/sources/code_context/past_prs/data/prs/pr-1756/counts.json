@@ -1,0 +1,17 @@
+{
+  "number": 1756,
+  "title": "ftCo_0A01 fixups",
+  "state": "MERGED",
+  "createdAt": "2025-07-28T20:36:49Z",
+  "updatedAt": "2025-07-28T20:41:42Z",
+  "mergedAt": "2025-07-28T20:41:39Z",
+  "closedAt": "2025-07-28T20:41:40Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/1756",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 2661
+  }
+}

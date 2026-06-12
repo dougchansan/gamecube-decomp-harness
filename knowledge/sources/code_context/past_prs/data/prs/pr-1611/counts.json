@@ -1,0 +1,17 @@
+{
+  "number": 1611,
+  "title": "Fix pokemon stadium nonmatching build",
+  "state": "MERGED",
+  "createdAt": "2025-06-19T23:56:29Z",
+  "updatedAt": "2025-06-20T00:04:22Z",
+  "mergedAt": "2025-06-20T00:04:18Z",
+  "closedAt": "2025-06-20T00:04:19Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1611",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 7875
+  }
+}

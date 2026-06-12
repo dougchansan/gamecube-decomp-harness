@@ -1,0 +1,17 @@
+{
+  "number": 1159,
+  "title": "Update README",
+  "state": "MERGED",
+  "createdAt": "2024-01-31T19:31:13Z",
+  "updatedAt": "2024-01-31T19:32:13Z",
+  "mergedAt": "2024-01-31T19:32:12Z",
+  "closedAt": "2024-01-31T19:32:12Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1159",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 12315
+  }
+}

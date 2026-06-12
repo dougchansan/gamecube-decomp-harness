@@ -1,0 +1,335 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2637",
+  "pr": {
+    "number": 2637,
+    "title": "link gmopening.c",
+    "url": "https://github.com/doldecomp/melee/pull/2637",
+    "state": "MERGED",
+    "author": "lukechampine",
+    "created_at": "2026-06-09T03:40:32Z",
+    "merged_at": "2026-06-09T04:01:22Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Marked melee/gm/gmopening.c as Matching and adjusted small-data/BSS symbol layout metadata and gmopening .sbss declarations to resolve a full-link SDA offset mismatch involving gm_804D67EC.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "matching-status",
+      "data-layout",
+      "symbol-metadata",
+      "small-data-layout",
+      "link-fix"
+    ],
+    "systems": [
+      "game-mode",
+      "gmopening",
+      "config",
+      "symbols"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "configure.py",
+      "role": "Changed gmopening.c from NonMatching to Matching in the GALE01 matching object list.",
+      "evidence_refs": [
+        "raw_diff: configure.py hunk around MatchingFor, Object(NonMatching, \"melee/gm/gmopening.c\") -> Object(Matching, \"melee/gm/gmopening.c\")"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmopening.c",
+      "role": "Reordered/changed .sbss declarations for gm_804D67EC, gm_804D67F0, and gm_804D67F4; gm_804D67F4 changed from static to non-static.",
+      "evidence_refs": [
+        "raw_diff: src/melee/gm/gmopening.c hunk near comments 4D67EC/4D67F0/4D67F4",
+        "pr_body: gm_804D67F4 needed to be non-static for compiler/linker layout"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Adjusted symbol metadata across .data, .bss, .sdata, and .sdata2, including local-label/scope/name changes and added BSS/data labels.",
+      "evidence_refs": [
+        "raw_diff: config/GALE01/symbols.txt seven hunks",
+        "changed_files: config/GALE01/symbols.txt added 28 deleted 26"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "gmopening.c was linked by changing its configure.py object entry from NonMatching to Matching.",
+      "evidence_refs": [
+        "raw_diff: configure.py gmopening.c MatchingFor hunk"
+      ]
+    },
+    {
+      "text": "The gmopening .sbss declarations were rearranged so gm_804D67EC is declared after gm_804D67F0 and gm_804D67F4 in source order while retaining address comments, and gm_804D67F4 became non-static.",
+      "evidence_refs": [
+        "raw_diff: src/melee/gm/gmopening.c hunk",
+        "pr_body: gm_804D67EC now lands at expected offset; gm_804D67F0 and gm_804D67F4 follow in right order; gm_804D67F4 needed non-static"
+      ]
+    },
+    {
+      "text": "symbols.txt changed several previously global address-style symbols to local @NNN labels and added local section labels such as ...data.0 and ...bss.0.",
+      "evidence_refs": [
+        "raw_diff: symbols.txt .data/.bss/.sdata/.sdata2 hunks"
+      ]
+    },
+    {
+      "text": "The PR body attributes the issue to an external SDA reference from fn_801A1498 to gm_804D67EC resolving to the right symbol name but wrong final small-data offset after gmopening was marked matching.",
+      "evidence_refs": [
+        "human_pr_text: full-link mismatch explanation"
+      ]
+    },
+    {
+      "text": "The bot report showed linked code +2164 bytes and linked data +744 bytes for GALE01, with no listed changes beyond the report summary.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev[bot] issue_comment 2026-06-09T03:44:17Z"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "The fix targeted the owning translation unit's small-data layout rather than compensating at the external reference site.",
+      "evidence_refs": [
+        "pr_body: gm_804D67EC is owned by gmopening.c; fix was to make gmopening’s .sbss layout match the target"
+      ]
+    },
+    {
+      "text": "The PR paired the matching-status flip with symbol metadata changes, acknowledging that full-link matching depends on section layout and symbol scope, not only function text.",
+      "evidence_refs": [
+        "raw_diff: configure.py matching flip",
+        "raw_diff: config/GALE01/symbols.txt metadata updates",
+        "pr_body: data symbol size/final padding and .sbss layout discussion"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "Before marking a translation unit Matching, check final link layout for SDA-owned symbols that are referenced from other objects; the object can be text-matching while still shifting a small-data offset used elsewhere.",
+      "scope": [
+        "full-link matching",
+        "small data",
+        "cross-object references"
+      ],
+      "evidence_refs": [
+        "pr_body: external SDA reference to gm_804D67EC from fn_801A1498 loaded right symbol name at wrong final offset",
+        "raw_diff: gmopening.c marked Matching in configure.py"
+      ]
+    },
+    {
+      "lesson": "For small-data layout fixes, source declaration order and storage class can be layout-affecting; in this PR gm_804D67F4 had to be non-static and ordered with gm_804D67EC/gm_804D67F0 for the linker layout to line up.",
+      "scope": [
+        "gmopening.c",
+        ".sbss",
+        "storage class",
+        "declaration order"
+      ],
+      "evidence_refs": [
+        "raw_diff: src/melee/gm/gmopening.c declaration order/static change",
+        "pr_body: gm_804D67F4 needed to be non-static"
+      ]
+    },
+    {
+      "lesson": "Symbol metadata scope/name corrections can be part of matching a linked object; local @NNN labels and section labels may better represent compiler-owned literals or section starts than global address-style symbols.",
+      "scope": [
+        "symbols.txt",
+        "data layout",
+        "metadata"
+      ],
+      "evidence_refs": [
+        "raw_diff: symbols.txt changes from gm_/it_/ftKb_Init global names to local @NNN labels and ...data.0/...bss.0 labels"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "gm_804D67EC, gm_804D67F0, gm_804D67F4",
+      "convention": "Address-style names were retained for gmopening .sbss variables where semantic names were not provided by evidence.",
+      "evidence_refs": [
+        "raw_diff: src/melee/gm/gmopening.c hunk"
+      ]
+    },
+    {
+      "name": "@191, @192, @201, @357, @355, @356, @223, @224, @233, @234, @303, @304, @174, @175, @179, @180, @182, @184, @267, @268, @197, @214, @254, @454, @455",
+      "convention": "Several literals/constants were represented as local compiler-style @NNN labels rather than global address-style names.",
+      "evidence_refs": [
+        "raw_diff: config/GALE01/symbols.txt hunks"
+      ]
+    },
+    {
+      "name": "unused_floats",
+      "convention": "A local float block at .data:0x803DBF78 was renamed from address-style gm_803DBF78 to a descriptive local name.",
+      "evidence_refs": [
+        "raw_diff: symbols.txt .data hunk"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Use full-link/SDA offset symptoms to identify data-layout mismatches in the owning translation unit.",
+      "evidence_refs": [
+        "pr_body: external SDA reference to gm_804D67EC and wrong final small-data offset"
+      ]
+    },
+    {
+      "tactic": "Adjust .sbss declaration order and static/global visibility to match target small-data placement.",
+      "evidence_refs": [
+        "raw_diff: gmopening.c reordered gm_804D67F4/gm_804D67F0/gm_804D67EC and removed static from gm_804D67F4",
+        "pr_body: gm_804D67F4 needed non-static for compiler/linker layout"
+      ]
+    },
+    {
+      "tactic": "Update symbols.txt section metadata, scope, and labels to reflect expected data/sdata/sdata2/bss ownership and alignment.",
+      "evidence_refs": [
+        "raw_diff: symbols.txt hunks across .data, .bss, .sdata, .sdata2"
+      ]
+    }
+  ],
+  "review_feedback": [],
+  "searchable_terms": [
+    "PR2637",
+    "link gmopening.c",
+    "gmopening",
+    "gm_804D67EC",
+    "gm_804D67F0",
+    "gm_804D67F4",
+    "fn_801A1498",
+    "external SDA reference",
+    "small-data offset",
+    ".sbss layout",
+    "MatchingFor",
+    "Object(Matching)",
+    "symbols.txt",
+    "gm_803DBFCC",
+    "MvOpen.mth",
+    "unused_floats",
+    "...data.0",
+    "...bss.0",
+    "local @NNN labels",
+    "full-link mismatch"
+  ],
+  "follow_up_queries": [
+    "gm_804D67EC fn_801A1498 SDA",
+    "gmopening.c .sbss gm_804D67F4 static",
+    "gmopening MatchingFor configure.py",
+    "symbols.txt gm_803DBFCC MvOpen.mth",
+    "full-link mismatch small-data offset",
+    "local @ labels symbols.txt sdata2"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR number/title/state/author/timestamps and changed files",
+      "human_pr_text: author explanation of full-link mismatch and intended fix",
+      "raw_diff: exact file changes",
+      "text_corpus: bot report with linked code/data deltas and no review comments"
+    ],
+    "notes": [
+      "There were no review comments and no human review approvals in the loaded slice.",
+      "The loaded evidence includes a bot report but no explicit build command, objdiff output, or full-link log.",
+      "The PR body says a named data symbol gm_803DBFCC[] = \"MvOpen.mth\" was added, but the loaded diff excerpt for symbols.txt shows gm_803DBFCC changed to local @201 and the loaded source diff does not show the string declaration; this intake records the claim as PR-body evidence but does not promote it as independently verified source content.",
+      "Because raw_pr_json is truncated, this intake relies on the untruncated human_pr_text, raw_diff, changed_files, and text_corpus loaded files for exact evidence."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson",
+        "title": "Full-link small-data offsets can fail after marking a TU matching",
+        "text": "When promoting a translation unit to Matching, verify externally referenced SDA symbols owned by that TU still land at the target final small-data offsets; a cross-object reference may resolve the expected symbol name but use a wrong offset if the owning TU's .sbss/.sdata layout shifts.",
+        "scope": [
+          "full-link matching",
+          "SDA",
+          "small-data layout"
+        ],
+        "evidence_refs": [
+          "pr_body: fn_801A1498 external SDA reference to gm_804D67EC had right symbol name but wrong final small-data offset",
+          "raw_diff: configure.py changed gmopening.c to Matching"
+        ]
+      },
+      {
+        "record_type": "matching_tactic",
+        "title": "Use declaration order and storage class to repair .sbss layout",
+        "text": "For gmopening.c, matching the target .sbss layout required ordering gm_804D67EC, gm_804D67F0, and gm_804D67F4 correctly and making gm_804D67F4 non-static.",
+        "scope": [
+          "src/melee/gm/gmopening.c",
+          ".sbss"
+        ],
+        "evidence_refs": [
+          "raw_diff: src/melee/gm/gmopening.c hunk",
+          "pr_body: gm_804D67F4 needed to be non-static"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "gmopening.c owns gm_804D67EC small-data symbol",
+        "text": "PR #2637 states that gm_804D67EC is owned by gmopening.c and that an external SDA reference from fn_801A1498 exposed a final small-data offset mismatch when gmopening.c was marked Matching.",
+        "source_path": "src/melee/gm/gmopening.c",
+        "scope": [
+          "gmopening.c",
+          "gm_804D67EC",
+          "fn_801A1498",
+          ".sbss",
+          "SDA"
+        ],
+        "evidence_refs": [
+          "human_pr_text: full-link mismatch explanation"
+        ],
+        "reason": "Useful path-level fact for future full-link and small-data layout investigations; should be curated against current source/symbol ownership before acceptance."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Check cross-object SDA references before linking a matching object",
+        "text": "Consider adding guidance that Matching promotions should include narrow full-link or equivalent checks for externally referenced SDA symbols owned by the promoted object, because source declaration order and static/global visibility can affect final small-data offsets.",
+        "source_path": null,
+        "scope": [
+          "matching-status promotions",
+          "small-data sections",
+          "cross-object references"
+        ],
+        "evidence_refs": [
+          "pr_body: external SDA reference to gm_804D67EC caused full-link mismatch",
+          "raw_diff: configure.py gmopening.c Matching flip",
+          "raw_diff: gmopening.c .sbss storage/order changes"
+        ],
+        "reason": "The case is concrete and aligns with existing data-sections-and-tu-splits and verification-ledger standards, but curator should decide whether it warrants a new note or remains covered by existing standards."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "gmopening.c Matching promotion in PR #2637 depended on .sbss layout order",
+        "text": "PR #2637 changed src/melee/gm/gmopening.c declarations so gm_804D67F4, gm_804D67F0, and gm_804D67EC layout matched target offsets, and changed gm_804D67F4 from static to non-static.",
+        "source_path": "src/melee/gm/gmopening.c",
+        "scope": [
+          "gm_804D67F4",
+          "gm_804D67F0",
+          "gm_804D67EC",
+          ".sbss"
+        ],
+        "evidence_refs": [
+          "raw_diff: src/melee/gm/gmopening.c hunk",
+          "human_pr_text: .sbss layout fix description"
+        ],
+        "reason": "Potentially useful local history for future edits around these declarations; should not be treated as a global rule without additional evidence."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer from this PR alone that string literals should generally be promoted to named data symbols; the loaded diff does not clearly support the PR-body claim about adding gm_803DBFCC[] = \"MvOpen.mth\", and current standards caution against unsupported literal symbol promotion.",
+      "Do not infer reviewer intent or review consensus; the slice has zero review comments and zero reviews.",
+      "Do not claim an objdiff/checkdiff/build command was run; only the bot linked-code/data report is loaded."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

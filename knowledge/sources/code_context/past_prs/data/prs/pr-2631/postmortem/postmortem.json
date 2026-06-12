@@ -1,0 +1,343 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2631",
+  "pr": {
+    "number": 2631,
+    "title": "Improvements to split up: SysDolphin",
+    "url": "https://github.com/doldecomp/melee/pull/2631",
+    "state": "CLOSED",
+    "author": "fjooord",
+    "created_at": "2026-06-08T14:31:01Z",
+    "merged_at": null
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Draft SysDolphin baselib matching-improvement slice split from #2617, touching cobj, hsd_3B34, particle, sislib, and synth. The diff mostly adjusts stack/local ordering, data/string relocation references, report/panic string arguments, and small expression forms. The PR was closed unmerged and explicitly superseded by combined Dolphin support split PR #2632.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "draft-split",
+      "data-relocation-sensitive cleanup"
+    ],
+    "systems": [
+      "src/sysdolphin/baselib",
+      "SysDolphin",
+      "baselib"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/sysdolphin/baselib/particle.c",
+      "role": "Primary changed file; replaces many inline OSReport strings with lbl_ data-label offsets, adds a static MCC error string blob, adjusts exception reporting string references, and simplifies an OSContext pointer access.",
+      "evidence_refs": [
+        "changed_files.jsonl: particle.c added 130 deleted 77 hunks 8",
+        "raw_diff: particle.c fn_80392CD8 adds lbl_8040A540 and changes MCC messages to lbl_8040A540 offsets",
+        "raw_diff: particle.c hsd_803931A4 uses extern lbl_8040A8E0/lbl_8040A904 for OSReport",
+        "raw_diff: particle.c Exception_ReportStackTrace and Exception_ReportCodeline use lbl_8040AB00 offsets",
+        "raw_diff: particle.c hsd_80395D88 removes ctx_ptr and uses sp->xD4 directly"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/cobj.c",
+      "role": "Adds a narrow stack-padding tactic in HSD_CObjSetUpVector.",
+      "evidence_refs": [
+        "changed_files.jsonl: cobj.c added 1 deleted 0 hunks 1",
+        "raw_diff: cobj.c HSD_CObjSetUpVector adds PAD_STACK(4)"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/hsd_3B34.c",
+      "role": "Reorders local assignments in hsd_803B46D4.",
+      "evidence_refs": [
+        "changed_files.jsonl: hsd_3B34.c added 2 deleted 2 hunks 1",
+        "raw_diff: hsd_3B34.c moves jmp_buf/temp_r4 assignments after sp8/spC initialization"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/sislib.c",
+      "role": "Changes OSPanic empty-string arguments to a known HSD_SisLib data symbol cast.",
+      "evidence_refs": [
+        "changed_files.jsonl: sislib.c added 3 deleted 3 hunks 3",
+        "raw_diff: sislib.c HSD_SisLib_803A5798 replaces OSPanic empty literal with (char*) HSD_SisLib_804D6390 at three panic sites"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/synth.c",
+      "role": "Simplifies a signed comparison expression in HSD_Synth_8038ADD0.",
+      "evidence_refs": [
+        "changed_files.jsonl: synth.c added 1 deleted 1 hunks 1",
+        "raw_diff: synth.c changes (u32)(x8 + 0x10000) == -1U to x8 == -0x10001"
+      ]
+    }
+  ],
+  "what_changed": [
+    "PR body says this was split from #2617 by directory/subsystem for easier review, scoped to src/sysdolphin/baselib.",
+    "The changed files are cobj.c, hsd_3B34.c, particle.c, sislib.c, and synth.c.",
+    "particle.c received the largest diff, including a static lbl_8040A540 character blob for MCC error/report strings and many OSReport calls changed from inline literals to label-plus-offset references.",
+    "particle.c also introduces extern labels lbl_8040A8E0, lbl_8040A904, and lbl_8040AB00 for report strings used by EXI initialization and exception reporting.",
+    "particle.c changes hsd_80395D88 to use sp->xD4 directly instead of an intermediate OSContext** ctx_ptr.",
+    "cobj.c adds PAD_STACK(4) inside HSD_CObjSetUpVector.",
+    "hsd_3B34.c reorders assignment statements in hsd_803B46D4.",
+    "sislib.c changes three OSPanic calls from an inline empty string argument to (char*) HSD_SisLib_804D6390.",
+    "synth.c rewrites an arithmetic unsigned comparison as a direct signed equality check against -0x10001.",
+    "The PR was closed with an issue comment saying it was superseded by PR #2632, which kept Dolphin support changes together for review and CI."
+  ],
+  "smart_moves": [
+    {
+      "text": "The PR body explicitly scoped the slice to src/sysdolphin/baselib and listed all touched files, making review boundaries searchable.",
+      "evidence_refs": [
+        "human_pr_text: Scope and Files sections"
+      ]
+    },
+    {
+      "text": "The body separated preliminary full-branch metrics from authoritative per-PR CI/decomp-dev reporting, reducing overclaiming for the split slice.",
+      "evidence_refs": [
+        "human_pr_text: Preliminary Report says per-PR CI/decomp-dev reporting is authoritative once complete"
+      ]
+    },
+    {
+      "text": "A local whitespace/syntax hygiene check was reported for the isolated path slice.",
+      "evidence_refs": [
+        "human_pr_text: Local Checks says git diff --check origin/master...HEAD passed"
+      ]
+    },
+    {
+      "text": "The follow-up comment redirected review to a combined Dolphin support split when the initial directory split was not the chosen review shape.",
+      "evidence_refs": [
+        "text_corpus.jsonl issue_comment: superseded by #2632"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For split PRs, keep full-branch progress metrics clearly labeled as preliminary and avoid treating them as slice validation until per-PR CI/decomp-dev results exist.",
+      "evidence_refs": [
+        "human_pr_text: Preliminary Report",
+        "human_pr_text: Per-PR CI/decomp-dev reporting on this draft is authoritative once complete"
+      ],
+      "confidence": 0.86
+    },
+    {
+      "lesson": "Subsystem path slices can improve reviewability, but tightly related Dolphin support changes may still need to be reviewed together if the split creates awkward CI/review boundaries.",
+      "evidence_refs": [
+        "human_pr_text: Split from #2617 by directory/subsystem so matching improvements are easier to review",
+        "text_corpus.jsonl issue_comment: Superseded by combined Dolphin support split PR #2632"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "String-relocation cleanup in partially matched functions is evidence-sensitive: this PR used lbl_ data labels and offsets where comments mention relocation-only mismatches, but the slice does not provide enough evidence to promote those replacements as general style.",
+      "evidence_refs": [
+        "raw_diff: particle.c comments 'Currently 99.94% match - minor relocation difference'",
+        "raw_diff: particle.c comments 'instructions match, string relocations differ'",
+        "raw_diff: particle.c replaces many inline strings with msg + offsets"
+      ],
+      "confidence": 0.72
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Address-style names were retained for uncertain functions and labels, including fn_80392CD8, hsd_803931A4, lbl_8040A540, lbl_8040A8E0, lbl_8040A904, and lbl_8040AB00.",
+      "evidence_refs": [
+        "raw_diff: particle.c symbol names in changed hunks"
+      ],
+      "confidence": 0.84
+    },
+    {
+      "convention": "Temporary/local register-derived names such as temp_r4 remain in hsd_3B34.c where the diff does not prove stronger semantics.",
+      "evidence_refs": [
+        "raw_diff: hsd_3B34.c hsd_803B46D4 local variables and assignment reorder"
+      ],
+      "confidence": 0.73
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "PAD_STACK(4) added in HSD_CObjSetUpVector to influence stack layout.",
+      "evidence_refs": [
+        "raw_diff: cobj.c adds PAD_STACK(4)"
+      ],
+      "caution": "Loaded standards require explicit build/objdiff/regression evidence for PAD_STACK; this PR body does not provide narrow objdiff evidence for this specific function."
+    },
+    {
+      "tactic": "Declaration/assignment ordering changed in hsd_803B46D4, moving jmp_buf and temp_r4 initialization after sp8/spC loads.",
+      "evidence_refs": [
+        "raw_diff: hsd_3B34.c hsd_803B46D4"
+      ],
+      "caution": "No function-specific verifier output is included in the slice."
+    },
+    {
+      "tactic": "String literals and report format strings in particle.c were replaced by address-style data labels and explicit offsets to alter relocation behavior.",
+      "evidence_refs": [
+        "raw_diff: particle.c lbl_8040A540 blob and OSReport offset changes",
+        "raw_diff: particle.c lbl_8040AB00 offset changes"
+      ],
+      "caution": "This conflicts with current loaded standards unless data ownership/section evidence justifies it; the PR is closed unmerged and superseded."
+    },
+    {
+      "tactic": "An intermediate pointer-to-field local was removed in favor of direct sp->xD4 field access in hsd_80395D88.",
+      "evidence_refs": [
+        "raw_diff: particle.c hsd_80395D88 removes ctx_ptr and uses sp->xD4"
+      ]
+    },
+    {
+      "tactic": "A mathematically equivalent comparison was rewritten from an unsigned add-and-compare form to a direct signed equality.",
+      "evidence_refs": [
+        "raw_diff: synth.c HSD_Synth_8038ADD0 comparison rewrite"
+      ]
+    },
+    {
+      "tactic": "OSpanic empty-string arguments in sislib.c were redirected to a data symbol cast, likely affecting relocation/data reference shape.",
+      "evidence_refs": [
+        "raw_diff: sislib.c OSPanic calls use (char*) HSD_SisLib_804D6390"
+      ],
+      "caution": "The slice does not include data ownership evidence for HSD_SisLib_804D6390."
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "issue_comment",
+      "author": "fjooord",
+      "text": "Superseded by the combined Dolphin support split PR #2632, which keeps the support changes together for review and CI.",
+      "evidence_refs": [
+        "text_corpus.jsonl issue_comment created_at 2026-06-08T14:32:58Z"
+      ]
+    },
+    {
+      "kind": "absence",
+      "text": "No review comments or formal reviews are present in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata_json counts: review_comments 0, reviews 0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2631",
+    "SysDolphin",
+    "baselib",
+    "src/sysdolphin/baselib",
+    "split from #2617",
+    "superseded by #2632",
+    "cobj.c",
+    "HSD_CObjSetUpVector",
+    "PAD_STACK(4)",
+    "hsd_3B34.c",
+    "hsd_803B46D4",
+    "particle.c",
+    "fn_80392CD8",
+    "lbl_8040A540",
+    "MCC Error",
+    "MCCGetLastError",
+    "hsd_803931A4",
+    "lbl_8040A8E0",
+    "lbl_8040A904",
+    "Exception_ReportStackTrace",
+    "Exception_ReportCodeline",
+    "lbl_8040AB00",
+    "hsd_80395D88",
+    "sp->xD4",
+    "sislib.c",
+    "HSD_SisLib_803A5798",
+    "HSD_SisLib_804D6390",
+    "OSPanic",
+    "synth.c",
+    "HSD_Synth_8038ADD0",
+    "-0x10001",
+    "string relocation difference",
+    "BSS relocation encoding difference"
+  ],
+  "follow_up_queries": [
+    "PR #2632 combined Dolphin support split SysDolphin baselib",
+    "src/sysdolphin/baselib particle.c lbl_8040A540",
+    "Exception_ReportCodeline string relocations lbl_8040AB00",
+    "HSD_CObjSetUpVector PAD_STACK(4)",
+    "HSD_SisLib_804D6390 OSPanic empty string",
+    "hsd_803931A4 BSS relocation encoding difference",
+    "HSD_Synth_8038ADD0 -0x10001"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR number/title/state/author/changed files/counts",
+      "human_pr_text: body, local checks, preliminary report, superseding comment",
+      "raw_diff: complete diff for five changed files",
+      "changed_files.jsonl: file-level added/deleted/hunk counts",
+      "text_corpus.jsonl: PR body and issue comment"
+    ],
+    "notes": [
+      "The diff and PR metadata are complete enough to identify changed files and tactics.",
+      "The PR is closed with merged_at null and was superseded by #2632, so no acceptance or merge status should be inferred.",
+      "The PR body reports preliminary full unsplit branch metrics and explicitly says per-PR CI/decomp-dev reporting is authoritative once complete; no per-PR CI result is loaded.",
+      "There are no loaded review comments or formal reviews.",
+      "Several changes touch strings/data labels and relocation-sensitive code, but the slice does not include section ownership, symbol metadata, objdiff, or checkdiff evidence for individual edits."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "title": "Split PR validation wording",
+        "text": "When a PR is a path/subsystem slice from a larger matching branch, record whether progress metrics belong to the full unsplit branch or to the actual PR slice; treat per-PR CI/decomp-dev output as authoritative when available.",
+        "scope": [
+          "PR intake",
+          "decomp matching split review"
+        ],
+        "evidence_refs": [
+          "human_pr_text: Preliminary Report",
+          "human_pr_text: Per-PR CI/decomp-dev reporting on this draft is the authoritative slice score once it completes"
+        ],
+        "confidence": 0.86
+      },
+      {
+        "title": "Superseded split shape",
+        "text": "A directory/subsystem split can be superseded by a combined support split when related Dolphin support changes are better kept together for review and CI.",
+        "scope": [
+          "PR organization",
+          "Dolphin support changes"
+        ],
+        "evidence_refs": [
+          "human_pr_text: split by directory/subsystem for easier review",
+          "text_corpus.jsonl issue_comment: superseded by #2632"
+        ],
+        "confidence": 0.78
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Relocation-only string fixes need explicit evidence",
+        "text": "Consider adding an example note that replacing inline OSReport or panic strings with lbl_ address labels and offsets is a data/relocation tactic, not ordinary cleanup, and should be kept only with section ownership, symbol metadata, or narrow objdiff/checkdiff evidence.",
+        "source_path": null,
+        "scope": [
+          "string relocations",
+          "OSReport",
+          "OSPanic",
+          "data labels",
+          "matching tactics"
+        ],
+        "evidence_refs": [
+          "raw_diff: particle.c comments identify minor/string relocation differences",
+          "raw_diff: particle.c replaces inline strings with lbl_8040A540/lbl_8040AB00 offsets",
+          "raw_diff: sislib.c replaces empty panic string with HSD_SisLib_804D6390"
+        ],
+        "reason": "The loaded global standards already warn against string-literal symbol regression and require evidence for matching tactics; this PR provides a concrete cautionary example but is closed unmerged and lacks verifier evidence."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote the PR's full-branch matched-code/data percentages as slice results; the body labels per-PR CI/decomp-dev as authoritative and no such output is loaded.",
+      "Do not treat lbl_8040A540, lbl_8040A8E0, lbl_8040A904, lbl_8040AB00, or HSD_SisLib_804D6390 string substitutions as accepted style based on this PR alone.",
+      "Do not infer reviewer approval or merge acceptance; the PR has no reviews, no review comments, merged_at null, and was superseded.",
+      "Do not claim PAD_STACK(4) was verified for HSD_CObjSetUpVector; no narrow objdiff/build evidence is present in the slice."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

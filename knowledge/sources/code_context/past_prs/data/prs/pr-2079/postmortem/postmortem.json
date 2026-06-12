@@ -1,0 +1,379 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2079",
+  "pr": {
+    "number": 2079,
+    "title": "Pr/mn name",
+    "url": "https://github.com/doldecomp/melee/pull/2079",
+    "state": "CLOSED",
+    "author": "itsgrimetime",
+    "created_at": "2026-01-10T02:36:18Z",
+    "merged_at": null
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Draft, closed-unmerged PR for mnName decomp work. It adds multiple implementations in src/melee/mn/mnname.c, updates mnname and related prototypes, and adds includes needed by the new code. Bot evidence reports 3 newly matched mnname functions and 9 unmatched-function score improvements.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "naming"
+    ],
+    "systems": [
+      "game-mode",
+      "melee-core",
+      "menu-name-entry"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/mn/mnname.c",
+      "role": "Primary decomp work: replaces placeholders with implementations for mnName_8023749C, CreateNameAtIndex, fn_80238540, page/column counting, JObj helpers, cleanup helpers, and IsNameNotAllowed; also changes GetNameText and IsNameValid to use typed persistent name fields.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mnname.c +349/-16",
+        "raw_diff: src/melee/mn/mnname.c hunks",
+        "text_corpus: bot report lists mnname matches and improvements"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnname.h",
+      "role": "Header prototype cleanup: replaces many UNK_RET/UNK_PARAMS declarations with typed signatures matching or supporting mnname work.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mnname.h +30/-30",
+        "raw_diff: src/melee/mn/mnname.h prototype changes"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmmain_lib.h",
+      "role": "Updates InitializePersistentNameData prototype from unknown to void InitializePersistentNameData(u8 slot).",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gm/gmmain_lib.h +1/-1",
+        "raw_diff: gmmain_lib.h InitializePersistentNameData signature"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mndiagram.c",
+      "role": "Adds include of mnname.h, presumably needed after prototype/header changes.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mndiagram.c +2/-0",
+        "raw_diff: mndiagram.c include mnname.h"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnnamenew.h",
+      "role": "Updates mnNameNew_MainInput prototype to void mnNameNew_MainInput(void).",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mnnamenew.h +1/-1",
+        "raw_diff: mnnamenew.h mnNameNew_MainInput signature"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Implemented three functions that the bot reported as new 100% matches: IsNameNotAllowed, CreateNameAtIndex, and mnName_8023A058.",
+    "Added partial or near-matching implementations for nine mnname functions, including mnName_80238A04, mnName_GetPageCount, mnName_GetColumnCount, mnName_8023749C, mnName_80239EBC, mnName_80239F5C, mnName_802388D4, fn_80238540, and mnName_80239FFC.",
+    "Replaced raw offset access to persistent name data in GetNameText and IsNameValid with struct gmm_x2FF8_inner field access through namedata.",
+    "Added local temporary structs MnName88D4Data and MnNameData to describe JObj/data offsets used by mnname helper functions.",
+    "Expanded mnname.h prototypes from unknown declarations to typed return values and parameters for many functions.",
+    "Added includes for mnmain.h, mnnamenew.h, jobj.h, gm/types.h, and lblanguage.h to support the new mnname.c implementations."
+  ],
+  "smart_moves": [
+    {
+      "text": "Converted GetNameText and IsNameValid from raw pointer arithmetic at offset 0x198 to GetPersistentNameData(...)->namedata, aligning with typed-field cleanup.",
+      "evidence_refs": [
+        "raw_diff: GetNameText returns GetPersistentNameData((u8) slot)->namedata",
+        "raw_diff: IsNameValid uses struct gmm_x2FF8_inner and data->namedata[0]"
+      ]
+    },
+    {
+      "text": "Updated headers alongside recovered bodies and call signatures rather than leaving source-local unknown declarations.",
+      "evidence_refs": [
+        "raw_diff: mnname.h prototype replacements",
+        "raw_diff: gmmain_lib.h InitializePersistentNameData prototype",
+        "raw_diff: mnnamenew.h mnNameNew_MainInput prototype"
+      ]
+    },
+    {
+      "text": "Used natural loops for fixed-range name slot counting and not-allowed-name list scanning.",
+      "evidence_refs": [
+        "raw_diff: mnName_GetPageCount for loop over i < 0x78",
+        "raw_diff: mnName_GetColumnCount for loop over i < 0x78",
+        "raw_diff: IsNameNotAllowed loops through NotAllowedNamesList until null-character sentinel"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a recovered game-mode struct field is known, replacing byte-offset access with the typed field can improve reviewability while preserving the same source operation.",
+      "scope": [
+        "src/melee/mn/mnname.c",
+        "persistent name data",
+        "GetPersistentNameData"
+      ],
+      "evidence_refs": [
+        "raw_diff: GetNameText offset 0x198 changed to ->namedata",
+        "raw_diff: IsNameValid char* + 0x198 changed to struct gmm_x2FF8_inner->namedata[0]",
+        "decomp_standards: typed-fields-over-pointer-math"
+      ],
+      "confidence": 0.86
+    },
+    {
+      "lesson": "Prototype recovery should be propagated to the owning headers when new function bodies or callsites establish return and parameter types.",
+      "scope": [
+        "src/melee/mn/mnname.h",
+        "src/melee/gm/gmmain_lib.h",
+        "src/melee/mn/mnnamenew.h"
+      ],
+      "evidence_refs": [
+        "raw_diff: multiple UNK_RET/UNK_PARAMS replacements in mnname.h",
+        "raw_diff: InitializePersistentNameData(u8 slot)",
+        "raw_diff: mnNameNew_MainInput(void)",
+        "decomp_standards: truthful-headers-and-includes"
+      ],
+      "confidence": 0.8
+    },
+    {
+      "lesson": "Bot score reports can distinguish fully matched functions from near-matches; only the reported 100% functions should be treated as matched evidence from this PR slice.",
+      "scope": [
+        "PR intake",
+        "bot regression reports"
+      ],
+      "evidence_refs": [
+        "text_corpus: bot report says 3 new matches",
+        "text_corpus: bot report separately lists 9 improvements in unmatched functions"
+      ],
+      "confidence": 0.92
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "The PR keeps address-style function names where semantics are not established, such as mnName_8023749C and mnName_802388D4, while using semantic names already present for known operations such as GetNameText, CreateNameAtIndex, and IsNameNotAllowed.",
+      "evidence_refs": [
+        "raw_diff: mnname.c function names",
+        "raw_diff: mnname.h declarations"
+      ]
+    },
+    {
+      "text": "Local role names include data, jobj, obj, table, first_char, nullChar, and firstChar; temporary structs use MnName-prefixed names with offset-like fields where full semantics are not recovered.",
+      "evidence_refs": [
+        "raw_diff: MnName88D4Data fields x14/x18/x1C/x24/x30",
+        "raw_diff: MnNameData fields x30/x3C",
+        "raw_diff: local variables in IsNameValid and IsNameNotAllowed"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "text": "Introduces temporary internal structs to express known object offsets used by JObj traversal and cleanup without fully naming every field.",
+      "evidence_refs": [
+        "raw_diff: typedef struct MnName88D4Data",
+        "raw_diff: typedef struct MnNameData"
+      ]
+    },
+    {
+      "text": "Uses switch dispatch for fn_80238540 based on mn_804A04F0.x10 to call the active input handler.",
+      "evidence_refs": [
+        "raw_diff: fn_80238540 switch cases 0, 1, 2",
+        "decomp_standards: canonical-control-flow-and-macros"
+      ]
+    },
+    {
+      "text": "Uses explicit loops over persistent name slots to count valid entries and compute page/column counts with remainder handling.",
+      "evidence_refs": [
+        "raw_diff: mnName_GetPageCount count % 24",
+        "raw_diff: mnName_GetColumnCount count % 6"
+      ]
+    },
+    {
+      "text": "Some near-match functions still contain generated-looking artifacts such as gotos, redundant NULL checks, raw __assert calls, and s32 casts of JObj pointers; these are evidence of incomplete cleanup rather than accepted style.",
+      "evidence_refs": [
+        "raw_diff: mnName_8023749C goto loop_cond/loop_body",
+        "raw_diff: mnName_80239EBC and mnName_80239F5C raw __assert and repeated jobj NULL checks",
+        "text_corpus: bot report lists these as improvements, not 100% matches"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "type": "bot_report",
+      "author": "decomp-dev[bot]",
+      "text": "Report for GALE01 showed matched code increased by +0.01% and +316 bytes, with 3 new matches and 9 improvements in unmatched functions.",
+      "evidence_refs": [
+        "text_corpus: issue_comment by decomp-dev[bot] at 2026-01-10T02:39:44Z"
+      ]
+    },
+    {
+      "type": "missing_human_review",
+      "author": null,
+      "text": "No human review comments or review records were present in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata_json: counts.review_comments=0",
+        "metadata_json: counts.reviews=0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2079",
+    "Pr/mn name",
+    "itsgrimetime",
+    "src/melee/mn/mnname.c",
+    "src/melee/mn/mnname.h",
+    "InitializePersistentNameData",
+    "GetPersistentNameData",
+    "gmm_x2FF8_inner",
+    "namedata",
+    "IsNameNotAllowed",
+    "CreateNameAtIndex",
+    "mnName_8023A058",
+    "mnName_GetPageCount",
+    "mnName_GetColumnCount",
+    "mnName_8023749C",
+    "mnName_802388D4",
+    "mnName_80238A04",
+    "mnName_80239EBC",
+    "mnName_80239F5C",
+    "mnName_80239FFC",
+    "mnNameNew_MainInput",
+    "NotAllowedNamesList",
+    "mnName_StringTerminator",
+    "HSD_JObj",
+    "HSD_JObjRemoveAll",
+    "HSD_SisLib_803A5CC4"
+  ],
+  "follow_up_queries": [
+    "mnname.c raw __assert HSD_JObjSetTranslate cleanup",
+    "mnName_80239EBC mnName_80239F5C jobj.h inline",
+    "mnName_GetPageCount GetColumnCount natural loop count valid names",
+    "GetPersistentNameData namedata x1A1 gmm_x2FF8_inner",
+    "IsNameNotAllowed NotAllowedNamesList mnNameNew_NullCharacter",
+    "PR 2079 closed unmerged mnname matches"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR state CLOSED, merged_at null, draft true in raw_pr_json",
+      "changed_files.jsonl: 5 changed files",
+      "raw_diff: full diff loaded",
+      "text_corpus: one bot report, no PR body text",
+      "metadata_json: review_comments=0, reviews=0"
+    ],
+    "notes": [
+      "Strong file-change evidence and full diff are available.",
+      "The only validation evidence is the bot report; no human reviewer feedback is present.",
+      "The PR was closed without merge according to metadata, so lessons should not be treated as accepted project changes.",
+      "Several functions are only bot-reported score improvements in unmatched functions, not full matches.",
+      "No build logs, objdiff details, author explanation, or review rationale are included beyond the bot summary."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "kind": "decomp_lesson_candidate",
+        "title": "Use typed persistent-name fields instead of raw offsets when struct evidence is available",
+        "text": "In mnname.c, GetNameText and IsNameValid were changed from byte-offset access into GetPersistentNameData(...)->namedata field access. This is a graph-safe candidate reinforcing typed-field cleanup, but this PR itself was closed unmerged.",
+        "scope": [
+          "src/melee/mn/mnname.c",
+          "GetPersistentNameData",
+          "persistent name data"
+        ],
+        "evidence_refs": [
+          "raw_diff: GetNameText",
+          "raw_diff: IsNameValid",
+          "decomp_standards: typed-fields-over-pointer-math"
+        ],
+        "confidence": 0.78
+      },
+      {
+        "kind": "verification_lesson_candidate",
+        "title": "Separate matched functions from score-only improvements in bot reports",
+        "text": "The bot report explicitly separates 3 new 100% matches from 9 improvements in unmatched functions. Intake and curation should not describe the improved functions as matched.",
+        "scope": [
+          "PR reports",
+          "decomp matching evidence"
+        ],
+        "evidence_refs": [
+          "text_corpus: 3 new matches section",
+          "text_corpus: 9 improvements in unmatched functions section"
+        ],
+        "confidence": 0.92
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Header prototype cleanup can be part of decomp matching when bodies prove signatures",
+        "text": "PR 2079 shows broad replacement of UNK_RET/UNK_PARAMS in mnname.h and related headers alongside recovered mnname bodies. This may be useful as an example under truthful-headers-and-includes, but the PR was closed unmerged and lacks human review.",
+        "source_path": null,
+        "scope": [
+          "headers",
+          "prototype recovery",
+          "mnname.h",
+          "gmmain_lib.h",
+          "mnnamenew.h"
+        ],
+        "evidence_refs": [
+          "raw_diff: mnname.h prototype updates",
+          "raw_diff: gmmain_lib.h InitializePersistentNameData",
+          "raw_diff: mnnamenew.h mnNameNew_MainInput",
+          "decomp_standards: truthful-headers-and-includes"
+        ],
+        "reason": "Possible illustrative example only; not suitable as a new accepted rule because the existing standard already covers this and the PR was not merged."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Raw jobj assert expansions in near-matches should be revisited before final cleanup",
+        "text": "mnName_80239EBC and mnName_80239F5C contain raw __assert calls and repeated NULL checks while bot evidence reports only about 85% scores. Curator may consider linking this PR as a cautionary example for header-inlines/assert cleanup, not as accepted style.",
+        "source_path": null,
+        "scope": [
+          "HSD_JObj",
+          "jobj.h",
+          "assert cleanup",
+          "near-match functions"
+        ],
+        "evidence_refs": [
+          "raw_diff: mnName_80239EBC raw __assert lines 947 and 564",
+          "raw_diff: mnName_80239F5C raw __assert lines 932 and 564",
+          "text_corpus: bot report lists both as improvements, not matches",
+          "decomp_standards: header-inlines",
+          "decomp_standards: assert-report-macros"
+        ],
+        "reason": "Evidence supports a cleanup concern, but not the exact intended inline or final source form."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "mnname.c owns menu name-list helpers and persistent-name display/count logic",
+        "text": "The PR slice places name text lookup, validity checks, name creation, list-full/count/page/column logic, name deletion confirmation input dispatch, not-allowed-name checking, and several JObj/UI helpers in src/melee/mn/mnname.c.",
+        "source_path": "src/melee/mn/mnname.c",
+        "scope": [
+          "menu name entry",
+          "persistent names",
+          "mnname"
+        ],
+        "evidence_refs": [
+          "raw_diff: mnname.c implemented functions",
+          "changed_files.jsonl: mnname.c primary file"
+        ],
+        "reason": "Useful path-scope candidate, but should be verified against current source before promotion because this historical PR was closed unmerged."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote the PR as merged or accepted; metadata says state CLOSED and merged_at null.",
+      "Do not claim all implemented functions matched; bot evidence says only IsNameNotAllowed, CreateNameAtIndex, and mnName_8023A058 reached 100%.",
+      "Do not infer reviewer intent; no human review comments or reviews are loaded.",
+      "Do not treat raw __assert expansions, gotos, redundant NULL checks, or pointer-to-s32 casts as endorsed style; several surrounding functions remained unmatched score improvements.",
+      "Do not infer exact data ownership for extern strings/tables such as mnName_804D4BF4, mnName_804D4BFC, mnName_803ED538, or mnNameNew_803EE724 from this PR alone."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

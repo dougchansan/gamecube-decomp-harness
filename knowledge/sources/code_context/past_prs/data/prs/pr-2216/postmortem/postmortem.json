@@ -1,0 +1,338 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2216",
+  "pr": {
+    "number": 2216,
+    "title": "Match ittarucann and link",
+    "url": "https://github.com/doldecomp/melee/pull/2216",
+    "state": "MERGED",
+    "author": "PsiLupan",
+    "created_at": "2026-03-05T06:00:31Z",
+    "merged_at": "2026-03-05T06:25:17Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Matched and linked the Taru Cannon item translation unit by adding owned item data/state-table definitions, tightening several symbol scopes to local labels, changing ittarucann.c from NonMatching to Matching in configure.py, and making small source-shape changes that completed two remaining functions according to the bot report.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "item matching",
+      "data symbol metadata",
+      "build configuration"
+    ],
+    "systems": [
+      "item",
+      "config",
+      "repo-root"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/it/items/ittarucann.c",
+      "role": "Main item source matched; adds const collision/vector data, ItemStateTable contents, includes needed for types/forward declarations, fake constant-return helpers, a float temporary assignment shape, and a ternary absolute-value expression.",
+      "evidence_refs": [
+        "raw_diff: src/melee/it/items/ittarucann.c include additions",
+        "raw_diff: src/melee/it/items/ittarucann.c extern lbColl_80008D30_arg1/Vec3 replaced by const definitions",
+        "raw_diff: src/melee/it/items/ittarucann.c ItemStateTable it_803F63C0[] added",
+        "raw_diff: src/melee/it/items/ittarucann.c fake1/fake2 added",
+        "raw_diff: src/melee/it/items/ittarucann.c it_3F14_Logic5_Spawned temp_var assignment",
+        "raw_diff: src/melee/it/items/ittarucann.c it_802962E0 ternary absolute value"
+      ]
+    },
+    {
+      "path": "configure.py",
+      "role": "Links the translation unit as Matching instead of NonMatching.",
+      "evidence_refs": [
+        "raw_diff: configure.py Object(NonMatching, \"melee/it/items/ittarucann.c\") changed to Object(Matching, \"melee/it/items/ittarucann.c\")"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Adjusts symbol metadata for ittarucann-related strings, floats, and doubles from global address-style names to local labels.",
+      "evidence_refs": [
+        "raw_diff: config/GALE01/symbols.txt it_803F6460 changed to @314 local string",
+        "raw_diff: config/GALE01/symbols.txt it_804D52F0/it_804D52F8 changed to @312/@313 local strings",
+        "raw_diff: config/GALE01/symbols.txt it_804DCB78 through it_804DCBBC changed to local @ labels"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "The item source now defines previously extern data for it_803B8610 and it_803B8634 as const objects in ittarucann.c.",
+      "evidence_refs": [
+        "raw_diff: src/melee/it/items/ittarucann.c extern declarations replaced by const definitions"
+      ]
+    },
+    {
+      "text": "The item state table it_803F63C0 was added with motion callbacks for UnkMotion0, 1, 2, 6, 7, 8, and 9, including HSD_GObjEvent casts on UnkMotion7_Phys entries.",
+      "evidence_refs": [
+        "raw_diff: src/melee/it/items/ittarucann.c ItemStateTable it_803F63C0[]"
+      ]
+    },
+    {
+      "text": "configure.py now marks melee/it/items/ittarucann.c as Matching.",
+      "evidence_refs": [
+        "raw_diff: configure.py MatchingFor object status change"
+      ]
+    },
+    {
+      "text": "symbols.txt changed several ittarucann-adjacent string/float/double symbols from global address-style names to local @ labels.",
+      "evidence_refs": [
+        "raw_diff: config/GALE01/symbols.txt hunks at .data 0x803F6460, .sdata 0x804D52F0/0x804D52F8, .sdata2 0x804DCB78-0x804DCBBC"
+      ]
+    },
+    {
+      "text": "Bot report records 5 new matches: ittarucann .data, .rodata, .sdata2, it_3F14_Logic5_Spawned, and it_802962E0.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev[bot] issue comment 2026-03-05T06:04:20Z"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "The PR paired source data ownership with symbol-scope metadata changes, allowing the unit's .data/.rodata/.sdata2 to report as newly matched.",
+      "evidence_refs": [
+        "raw_diff: src/melee/it/items/ittarucann.c data and ItemStateTable additions",
+        "raw_diff: config/GALE01/symbols.txt local label changes",
+        "text_corpus: bot report new data/rodata/sdata2 matches"
+      ]
+    },
+    {
+      "text": "A simple branch-based absolute-value pattern in it_802962E0 was rewritten as a ternary expression and the bot report shows that function reached 100%.",
+      "evidence_refs": [
+        "raw_diff: src/melee/it/items/ittarucann.c it_802962E0 branch replaced with ternary",
+        "text_corpus: bot report it_802962E0 99.65% to 100.00%"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a translation unit owns item data and its state table, moving declarations from externs into real typed const/table definitions can be part of closing both text and data matches.",
+      "scope": [
+        "src/melee/it/items/ittarucann.c",
+        "item translation units"
+      ],
+      "evidence_refs": [
+        "raw_diff: src/melee/it/items/ittarucann.c const lbColl_80008D30_arg1 and Vec3 definitions",
+        "raw_diff: src/melee/it/items/ittarucann.c ItemStateTable it_803F63C0[]",
+        "text_corpus: bot report ittarucann .data/.rodata new matches"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "For local literals/constants exposed as global address-style symbols, matching may require correcting symbols.txt scope/name metadata to local @ labels rather than preserving global names.",
+      "scope": [
+        "config/GALE01/symbols.txt",
+        "ittarucann local data symbols"
+      ],
+      "evidence_refs": [
+        "raw_diff: config/GALE01/symbols.txt it_803F6460 to @314",
+        "raw_diff: config/GALE01/symbols.txt it_804D52F0/it_804D52F8 to @312/@313",
+        "raw_diff: config/GALE01/symbols.txt it_804DCB78-0x804DCBBC to local @ labels"
+      ],
+      "confidence": 0.72
+    },
+    {
+      "lesson": "A ternary form can be the matching source shape for a manual absolute-value operation on an item variable.",
+      "scope": [
+        "src/melee/it/items/ittarucann.c",
+        "it_802962E0"
+      ],
+      "evidence_refs": [
+        "raw_diff: src/melee/it/items/ittarucann.c var_f1 ternary expression",
+        "text_corpus: bot report it_802962E0 100.00%"
+      ],
+      "confidence": 0.67
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "This PR retained address-style names for data symbols such as it_803B8610, it_803B8634, and it_803F63C0 where semantic names were not provided in PR evidence.",
+      "evidence_refs": [
+        "raw_diff: src/melee/it/items/ittarucann.c data definitions"
+      ]
+    },
+    {
+      "text": "Local data symbols in symbols.txt use @number labels when scope is local, replacing global it_address names for several strings and constants.",
+      "evidence_refs": [
+        "raw_diff: config/GALE01/symbols.txt local @ label replacements"
+      ]
+    },
+    {
+      "text": "Local item pointer naming uses ip, consistent with clear item-role shorthand in the edited functions.",
+      "evidence_refs": [
+        "raw_diff: src/melee/it/items/ittarucann.c it_3F14_Logic5_Spawned and it_802962E0 snippets"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Use a temporary assignment inside an expression to influence float evaluation/register order: ip->xDD4_itemVar.tarucann.x8 = (temp_var = 1.3089969f) + temp.",
+      "evidence_refs": [
+        "raw_diff: src/melee/it/items/ittarucann.c temp_var added and used in it_3F14_Logic5_Spawned",
+        "text_corpus: bot report it_3F14_Logic5_Spawned 99.40% to 100.00%"
+      ],
+      "caveat": "The source contains an existing todo noting a float regswap, but no reviewer discussion explains whether this tactic is preferred style."
+    },
+    {
+      "tactic": "Change a branch-based absolute-value sequence into a ternary select expression.",
+      "evidence_refs": [
+        "raw_diff: src/melee/it/items/ittarucann.c it_802962E0 ternary",
+        "text_corpus: bot report it_802962E0 100.00%"
+      ],
+      "caveat": "The PR evidence supports that it matched here; it does not prove a general rule beyond trying ordinary select-like C forms."
+    },
+    {
+      "tactic": "Add small static constant-return helper functions fake1 and fake2, apparently as a matching/data-order tactic.",
+      "evidence_refs": [
+        "raw_diff: src/melee/it/items/ittarucann.c fake1/fake2 added"
+      ],
+      "caveat": "The PR evidence does not show callsites, reviewer rationale, or why these helpers were needed; treat as weak evidence and review against matching-tactics standards before reuse."
+    },
+    {
+      "tactic": "Correct symbol metadata from global address-style names to local @ labels for strings and floating constants.",
+      "evidence_refs": [
+        "raw_diff: config/GALE01/symbols.txt local label replacements",
+        "text_corpus: bot report data/rodata/sdata2 new matches"
+      ],
+      "caveat": "The bot report supports improved matching, but the slice does not include map/split analysis explaining each individual symbol."
+    }
+  ],
+  "review_feedback": [],
+  "searchable_terms": [
+    "pr-2216",
+    "Match ittarucann and link",
+    "PsiLupan",
+    "ittarucann.c",
+    "itTarucann",
+    "it_3F14_Logic5_Spawned",
+    "it_802962E0",
+    "it_803B8610",
+    "it_803B8634",
+    "it_803F63C0",
+    "ItemStateTable",
+    "HSD_GObjEvent",
+    "temp_var",
+    "float regswap",
+    "fake1",
+    "fake2",
+    "symbols.txt local labels",
+    "configure.py Matching",
+    "it_804DCB78",
+    "it_804DCBBC"
+  ],
+  "follow_up_queries": [
+    "ittarucann fake1 fake2",
+    "float regswap temp_var 1.3089969f",
+    "it_3F14_Logic5_Spawned temp_var",
+    "it_802962E0 ternary absolute value",
+    "it_803F63C0 ItemStateTable HSD_GObjEvent",
+    "symbols.txt it_804DCB78 @188 local",
+    "ittarucann Matching configure.py"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR metadata and changed_files",
+      "raw_diff: full diff for three changed files",
+      "text_corpus: decomp-dev[bot] match report"
+    ],
+    "notes": [
+      "PR body is empty and there are no review comments, so author intent and reviewer reasoning are mostly unavailable.",
+      "Bot report provides useful match evidence for the unit and two functions, but no local build logs, objdiff command output, or reviewer validation are included beyond the automated summary.",
+      "The fake1/fake2 helper additions are visible in the diff but not explained by comments or review, so any lesson about them is weak and should not be promoted as accepted style.",
+      "The PR was merged according to metadata, but intake does not infer broader acceptance of every tactic as a global standard."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "type": "decomp_lesson_candidate",
+        "title": "Typed owned data plus symbol metadata can close item TU data matches",
+        "text": "In PR 2216, ittarucann.c moved item collision/vector data and the ItemStateTable into typed source definitions while symbols.txt changed associated literals/constants to local labels; the bot report then showed ittarucann .data, .rodata, and .sdata2 as newly matched.",
+        "scope": [
+          "item translation units",
+          "ittarucann.c",
+          "symbols.txt metadata"
+        ],
+        "evidence_refs": [
+          "raw_diff: src/melee/it/items/ittarucann.c data definitions and ItemStateTable",
+          "raw_diff: config/GALE01/symbols.txt local label changes",
+          "text_corpus: bot report 5 new matches"
+        ],
+        "confidence": 0.76
+      },
+      {
+        "type": "matching_tactic_candidate",
+        "title": "Ternary select for absolute-value shape",
+        "text": "In it_802962E0, replacing a manual if-negate absolute-value sequence with a ternary expression coincided with the function reaching 100% in the bot report.",
+        "scope": [
+          "src/melee/it/items/ittarucann.c",
+          "it_802962E0"
+        ],
+        "evidence_refs": [
+          "raw_diff: it_802962E0 ternary absolute value",
+          "text_corpus: bot report it_802962E0 100.00%"
+        ],
+        "confidence": 0.67
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "ittarucann.c became a Matching item translation unit in PR 2216",
+        "text": "PR 2216 changed configure.py so Object(NonMatching, \"melee/it/items/ittarucann.c\") became Object(Matching, \"melee/it/items/ittarucann.c\").",
+        "source_path": "configure.py",
+        "scope": [
+          "src/melee/it/items/ittarucann.c",
+          "configure.py"
+        ],
+        "evidence_refs": [
+          "raw_diff: configure.py MatchingFor ittarucann status change",
+          "metadata_json: PR state MERGED"
+        ],
+        "reason": "This is a source/path status fact rather than a decomp lesson; curator should decide whether to record it as path metadata."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "ittarucann local data symbol labels adjusted in PR 2216",
+        "text": "PR 2216 changed several GALE01 symbols around ittarucann data from global it_address names to local @number labels, including .data 0x803F6460, .sdata 0x804D52F0/0x804D52F8, and .sdata2 0x804DCB78 through 0x804DCBBC.",
+        "source_path": "config/GALE01/symbols.txt",
+        "scope": [
+          "config/GALE01/symbols.txt",
+          "ittarucann data symbols"
+        ],
+        "evidence_refs": [
+          "raw_diff: config/GALE01/symbols.txt all three hunks"
+        ],
+        "reason": "The exact symbol-scope changes are source-owned metadata and should be curated as path/symbol facts only if useful."
+      }
+    ],
+    "rejection_notes": [
+      {
+        "text": "Do not promote fake1/fake2 as an accepted matching standard from this PR alone; the diff shows them but gives no rationale or review explanation.",
+        "evidence_refs": [
+          "raw_diff: src/melee/it/items/ittarucann.c fake1/fake2 added"
+        ]
+      },
+      {
+        "text": "Do not infer broad reviewer approval of all tactics; there are no review comments in the loaded PR slice.",
+        "evidence_refs": [
+          "metadata_json: review_comments 0, reviews 0",
+          "text_corpus: only bot issue comment present"
+        ]
+      }
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

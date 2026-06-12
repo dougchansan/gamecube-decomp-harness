@@ -1,0 +1,403 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2246",
+  "pr": {
+    "number": 2246,
+    "title": "Rename grstadium to grpstadium for asserts and clean them up, permuter match a function",
+    "url": "https://github.com/doldecomp/melee/pull/2246",
+    "state": "MERGED",
+    "author": "PsiLupan",
+    "created_at": "2026-03-09T18:27:10Z",
+    "merged_at": "2026-03-09T19:01:02Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Renamed the Pokémon Stadium ground translation unit from grstadium to grpstadium in splits/config/includes so assert filenames can use the real source file name, then cleaned several raw __assert blocks into HSD_ASSERT and renamed TextWrapper fields from offsets to role names. The bot report shows the unit rename as many grstadium broken matches paired with grpstadium new matches, plus a small net matched-code increase and several grpstadium function improvements.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "naming",
+      "assert-cleanup",
+      "translation-unit-rename",
+      "decomp-matching"
+    ],
+    "systems": [
+      "stage",
+      "ground",
+      "config",
+      "fighter",
+      "game-mode"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gr/grpstadium.c",
+      "role": "Renamed main source file from src/melee/gr/grstadium.c and carried most functional cleanup: include rename, __FILE__ use in OSReport, HSD_ASSERT conversions, TextWrapper field renames, and matching-oriented edits.",
+      "evidence_refs": [
+        "changed_files: src/melee/gr/grpstadium.c added 133 deleted 174 hunks 26",
+        "diff: rename from src/melee/gr/grstadium.c to src/melee/gr/grpstadium.c",
+        "diff: removed todo saying file needs to be named grpstadium.c for asserts",
+        "diff: #include \"grstadium.h\" changed to #include \"grpstadium.h\""
+      ]
+    },
+    {
+      "path": "config/GALE01/splits.txt",
+      "role": "Updated split entry from melee/gr/grstadium.c to melee/gr/grpstadium.c while preserving section ranges.",
+      "evidence_refs": [
+        "diff: splits.txt melee/gr/grstadium.c changed to melee/gr/grpstadium.c"
+      ]
+    },
+    {
+      "path": "configure.py",
+      "role": "Updated build object path from melee/gr/grstadium.c to melee/gr/grpstadium.c.",
+      "evidence_refs": [
+        "diff: Object(NonMatching, \"melee/gr/grstadium.c\") changed to Object(NonMatching, \"melee/gr/grpstadium.c\")"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftPurin/ftPr_SpecialHi.c",
+      "role": "Updated include dependency from gr/grstadium.h to gr/grpstadium.h.",
+      "evidence_refs": [
+        "diff: #include \"gr/grstadium.h\" changed to #include \"gr/grpstadium.h\""
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_16AE.c",
+      "role": "Updated include dependency from melee/gr/grstadium.h to melee/gr/grpstadium.h.",
+      "evidence_refs": [
+        "diff: #include <melee/gr/grstadium.h> changed to #include <melee/gr/grpstadium.h>"
+      ]
+    },
+    {
+      "path": "src/melee/gr/ground.c",
+      "role": "Updated local ground include from grstadium.h to grpstadium.h.",
+      "evidence_refs": [
+        "diff: #include \"grstadium.h\" changed to #include \"grpstadium.h\""
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Renamed the stadium ground source path and corresponding build/split references from grstadium to grpstadium.",
+      "evidence_refs": [
+        "diff: rename from src/melee/gr/grstadium.c to src/melee/gr/grpstadium.c",
+        "diff: splits.txt and configure.py path changes"
+      ]
+    },
+    {
+      "text": "Updated dependent includes in ftPr_SpecialHi.c, gm_16AE.c, and ground.c to include grpstadium.h instead of grstadium.h.",
+      "evidence_refs": [
+        "diff: include changes in ftPr_SpecialHi.c, gm_16AE.c, ground.c"
+      ]
+    },
+    {
+      "text": "Converted multiple raw __assert(\"grpstadium.c\", line, expr) blocks into HSD_ASSERT(line, expr).",
+      "evidence_refs": [
+        "diff: fn_801D2ED0 HSD_ASSERT(0x6D2, vision_gobj) and HSD_ASSERT(0x6D3, gp2)",
+        "diff: fn_801D2FD0 HSD_ASSERT(0x6EA, vision_gobj) and HSD_ASSERT(0x6EB, gp2)",
+        "diff: grStadium_801D3460 HSD_ASSERT(0x780, gp2->win_static_p) and HSD_ASSERT(0x781, gp2->win_dynamic_p)"
+      ]
+    },
+    {
+      "text": "Changed one OSReport call to pass __FILE__ instead of a hardcoded \"grpstadium.c\" string.",
+      "evidence_refs": [
+        "diff: OSReport format retained, \"grpstadium.c\" replaced by __FILE__ in grStadium_801D10F8"
+      ]
+    },
+    {
+      "text": "Renamed TextWrapper fields x18 and x1C to win_static_p and win_dynamic_p and updated many callsites.",
+      "evidence_refs": [
+        "diff: typedef struct TextWrapper fields x18/x1C renamed to win_static_p/win_dynamic_p",
+        "diff: HSD_SisLib_803A5ACC assigned to win_static_p and HSD_SisLib_803A6754 assigned to win_dynamic_p"
+      ]
+    },
+    {
+      "text": "Bot report recorded +0.01% matched code, +408 bytes, 74 new matches under main/melee/gr/grpstadium, and corresponding grstadium broken matches from the unit rename.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev[bot] Report for GALE01 matched code 55.56% (+0.01%, +408 bytes)",
+        "text_corpus: 74 new matches under main/melee/gr/grpstadium",
+        "text_corpus: 73 broken matches under main/melee/gr/grstadium"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "The PR handled the file rename across split metadata, build configuration, and dependent includes in one change, reducing stale path references.",
+      "evidence_refs": [
+        "diff: splits.txt, configure.py, ftPr_SpecialHi.c, gm_16AE.c, ground.c all changed from grstadium to grpstadium"
+      ]
+    },
+    {
+      "text": "After aligning the source filename with the assert filename, the diff could replace raw assert expansions with HSD_ASSERT without keeping hardcoded file strings.",
+      "evidence_refs": [
+        "diff: removed todo about needing grpstadium.c for asserts",
+        "diff: repeated __assert(\"grpstadium.c\", ...) blocks replaced with HSD_ASSERT(...)"
+      ]
+    },
+    {
+      "text": "The TextWrapper field names document callsite roles: win_static_p is used for HSD_SisLib_803A6368 static/window setup, while win_dynamic_p is cleared, positioned, colored, and receives formatted text.",
+      "evidence_refs": [
+        "diff: TextWrapper field rename",
+        "diff: win_static_p assigned HSD_SisLib_803A5ACC and passed to HSD_SisLib_803A6368",
+        "diff: win_dynamic_p assigned HSD_SisLib_803A6754 and used for pos_z, text_color, default_kerning, HSD_SisLib_803A6B98"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When raw assert expansions embed the intended source filename, first check whether the translation unit path/name is wrong; fixing the TU name can make HSD_ASSERT cleanup natural instead of preserving hardcoded filename strings.",
+      "evidence_refs": [
+        "diff: removed todo saying grstadium.c needs to be named grpstadium.c for asserts",
+        "diff: rename to src/melee/gr/grpstadium.c",
+        "diff: raw __assert(\"grpstadium.c\", line, expr) blocks converted to HSD_ASSERT(line, expr)"
+      ],
+      "confidence": 0.86
+    },
+    {
+      "lesson": "Semantic local struct field names are justified when repeated assignments and callsites show stable roles; here x18/x1C became win_static_p/win_dynamic_p based on distinct SIS library creation and use patterns.",
+      "evidence_refs": [
+        "diff: HSD_SisLib_803A5ACC assigned to win_static_p",
+        "diff: HSD_SisLib_803A6754 assigned to win_dynamic_p",
+        "diff: many x18/x1C callsites updated to win_static_p/win_dynamic_p"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "A TU rename can make progress reports look like many broken matches in the old unit and many new matches in the new unit; compare unit names before interpreting broken/new match counts as real regressions.",
+      "evidence_refs": [
+        "text_corpus: 74 new matches under main/melee/gr/grpstadium",
+        "text_corpus: 73 broken matches under main/melee/gr/grstadium",
+        "text_corpus: net matched code +0.01%, +408 bytes"
+      ],
+      "confidence": 0.82
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "grpstadium",
+      "kind": "source/header path stem",
+      "text": "The PR changed ground stadium file/header references from grstadium to grpstadium, apparently to match the filename expected by asserts.",
+      "evidence_refs": [
+        "pr title: Rename grstadium to grpstadium for asserts",
+        "diff: grstadium.c renamed to grpstadium.c",
+        "diff: includes changed to grpstadium.h"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "name": "win_static_p",
+      "kind": "TextWrapper field",
+      "text": "Renamed from x18; initialized from HSD_SisLib_803A5ACC and passed to HSD_SisLib_803A6368.",
+      "evidence_refs": [
+        "diff: TextWrapper x18 renamed win_static_p",
+        "diff: text->win_static_p = HSD_SisLib_803A5ACC(...)"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "name": "win_dynamic_p",
+      "kind": "TextWrapper field",
+      "text": "Renamed from x1C; initialized from HSD_SisLib_803A6754 and used for dynamic text state such as pos_z, default_kerning, text_color, fitting, and formatted writes.",
+      "evidence_refs": [
+        "diff: TextWrapper x1C renamed win_dynamic_p",
+        "diff: text->win_dynamic_p = HSD_SisLib_803A6754(1, 0)",
+        "diff: win_dynamic_p used with HSD_SisLib_803A6B98 and HSD_SisLib_803A7664"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "name": "gp2",
+      "kind": "local variable",
+      "text": "Several local temporaries holding TextWrapper or Ground pointers were renamed to gp2 in edited functions, but the exact convention is only locally evidenced.",
+      "evidence_refs": [
+        "diff: TextWrapper* temp_r30 changed to TextWrapper* gp2 in grStadium_801D3A0C",
+        "diff: TextWrapper* temp_r31 changed to TextWrapper* gp2 in grStadium_801D3BBC"
+      ],
+      "confidence": 0.55
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Use a real source filename and __FILE__ to match assert/report filename behavior instead of hardcoded string literals.",
+      "evidence_refs": [
+        "diff: OSReport hardcoded \"grpstadium.c\" replaced by __FILE__",
+        "diff: __assert(\"grpstadium.c\", ...) replaced by HSD_ASSERT after file rename"
+      ],
+      "confidence": 0.74
+    },
+    {
+      "tactic": "Declaration order changes may have been used for matching in grStadium_801D3138.",
+      "evidence_refs": [
+        "diff: HSD_DObj* dobj moved after HSD_JObj* jobj in grStadium_801D3138"
+      ],
+      "confidence": 0.48
+    },
+    {
+      "tactic": "An empty conditional on jobj->flags was inserted in grStadium_801D3138, likely as a narrow matching artifact, but the loaded evidence does not explain or validate the tactic beyond the bot improvement/match report.",
+      "evidence_refs": [
+        "diff: inserted if ((jobj->flags && jobj->flags)) { } in grStadium_801D3138",
+        "text_corpus: bot report lists grStadium_801D3138 as a new 100% match under grpstadium"
+      ],
+      "confidence": 0.45
+    },
+    {
+      "tactic": "PAD_STACK remained in at least some edited functions, but the PR evidence does not show whether this PR introduced, retained, or validated those stack pads.",
+      "evidence_refs": [
+        "diff excerpt: PAD_STACK(0x10) in grStadium_801D3A0C",
+        "diff excerpt: PAD_STACK(8) in grStadium_801D3F40"
+      ],
+      "confidence": 0.34
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "author": "decomp-dev[bot]",
+      "text": "GALE01 report showed matched code 55.56% (+0.01%, +408 bytes), 74 new matches under main/melee/gr/grpstadium, 73 broken matches under main/melee/gr/grstadium, 10 improvements in unmatched items, and 11 regressions in unmatched items largely corresponding to the old unit name.",
+      "evidence_refs": [
+        "text_corpus: issue_comment by decomp-dev[bot] created 2026-03-09T18:30:49Z"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2246",
+    "PsiLupan",
+    "grstadium",
+    "grpstadium",
+    "grpstadium.c",
+    "grpstadium.h",
+    "HSD_ASSERT",
+    "__assert",
+    "__FILE__",
+    "OSReport",
+    "TextWrapper",
+    "win_static_p",
+    "win_dynamic_p",
+    "HSD_SisLib_803A5ACC",
+    "HSD_SisLib_803A6754",
+    "HSD_SisLib_803A6368",
+    "HSD_SisLib_803A7664",
+    "HSD_SisLib_803A6B98",
+    "grStadium_801D3138",
+    "grStadium_801D2528",
+    "grStadium_801D3460",
+    "fn_801D2ED0",
+    "fn_801D2FD0",
+    "fn_801D3084",
+    "permuter match",
+    "translation unit rename",
+    "assert filename"
+  ],
+  "follow_up_queries": [
+    "grpstadium HSD_ASSERT __assert \"grpstadium.c\"",
+    "grstadium grpstadium rename asserts",
+    "TextWrapper win_static_p win_dynamic_p",
+    "grStadium_801D3138 jobj->flags empty if",
+    "PAD_STACK grpstadium",
+    "main/melee/gr/grpstadium bot report broken matches grstadium",
+    "SIS_GrPStadiumData HSD_SisLib_803A5ACC HSD_SisLib_803A6754"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR number/title/author/state/created_at/merged_at",
+      "changed_files.jsonl: six changed files with line/hunk counts",
+      "raw_diff/diff_excerpt: rename, include updates, assert cleanup, TextWrapper field renames, selected matching edits",
+      "text_corpus: decomp-dev[bot] GALE01 report"
+    ],
+    "notes": [
+      "PR body is empty and there are no human review comments in the loaded slice.",
+      "The raw diff is truncated, so only visible edits are described in detail.",
+      "The bot report provides validation-like progress numbers, but many broken/new entries are explained by the unit rename and should not be interpreted as independent function regressions without further objdiff context.",
+      "The title says 'permuter match a function', and the diff shows matching-oriented artifacts, but the loaded evidence does not identify which source edits came from the permuter or why each tactic was necessary."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "type": "lesson",
+        "title": "Assert filename cleanup may require TU path alignment first",
+        "text": "In PR 2246, a TODO said grstadium.c needed to be named grpstadium.c for asserts; the PR renamed the file/config/includes and then converted raw __assert(\"grpstadium.c\", line, expr) blocks to HSD_ASSERT(line, expr).",
+        "scope": [
+          "assert cleanup",
+          "translation unit naming",
+          "stage/ground source"
+        ],
+        "evidence_refs": [
+          "diff: removed todo about needing grpstadium.c for asserts",
+          "diff: rename from grstadium.c to grpstadium.c",
+          "diff: __assert blocks converted to HSD_ASSERT"
+        ],
+        "confidence": 0.86
+      },
+      {
+        "type": "lesson",
+        "title": "Interpret match reports around TU renames by comparing old and new unit names",
+        "text": "The GALE01 bot report for PR 2246 lists many broken matches under main/melee/gr/grstadium and corresponding new matches under main/melee/gr/grpstadium, with a small net matched-code increase.",
+        "scope": [
+          "reviewing bot reports",
+          "translation unit rename"
+        ],
+        "evidence_refs": [
+          "text_corpus: 74 new matches under main/melee/gr/grpstadium",
+          "text_corpus: 73 broken matches under main/melee/gr/grstadium",
+          "text_corpus: matched code +0.01%, +408 bytes"
+        ],
+        "confidence": 0.82
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "grstadium source path renamed to grpstadium",
+        "text": "PR 2246 renamed the Pokémon Stadium ground source entry from src/melee/gr/grstadium.c to src/melee/gr/grpstadium.c and updated split/build/include references from grstadium to grpstadium.",
+        "source_path": "src/melee/gr/grpstadium.c",
+        "scope": [
+          "src/melee/gr",
+          "config/GALE01/splits.txt",
+          "configure.py"
+        ],
+        "evidence_refs": [
+          "diff: rename from src/melee/gr/grstadium.c to src/melee/gr/grpstadium.c",
+          "diff: splits.txt changed melee/gr/grstadium.c to melee/gr/grpstadium.c",
+          "diff: configure.py changed Object path to melee/gr/grpstadium.c",
+          "diff: includes changed to grpstadium.h"
+        ],
+        "reason": "Path fact candidate because the PR is explicitly a source/build path rename and downstream includes were updated."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Check TU filename before assert macro cleanup",
+        "text": "Possible refinement to assert cleanup guidance: when raw assert expansions use a filename that differs from the current translation-unit path, inspect whether the source file should be renamed or split metadata corrected before replacing raw asserts with HSD_ASSERT/HSD_ASSERTMSG.",
+        "source_path": null,
+        "scope": [
+          "assert-report-macros",
+          "data-sections-and-tu-splits",
+          "translation unit naming"
+        ],
+        "evidence_refs": [
+          "diff: todo says file needs to be named grpstadium.c for asserts",
+          "diff: PR renames file and then uses HSD_ASSERT",
+          "diff: OSReport uses __FILE__ after rename"
+        ],
+        "reason": "The current standards cover assert macro cleanup and TU split evidence separately; this PR provides a concrete example linking assert filename evidence to source path correction."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote the empty if ((jobj->flags && jobj->flags)) pattern as an accepted tactic from this slice alone; it is visible in the diff but not explained by comments or validation details.",
+      "Do not claim all 73 broken matches are harmless solely from this slice; the report suggests rename-related churn, but detailed adjacent objdiff evidence is not loaded.",
+      "Do not infer human reviewer approval rationale; no human reviews or review comments are present."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

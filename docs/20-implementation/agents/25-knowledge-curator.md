@@ -41,8 +41,9 @@ agent uses the shared defaults unless overridden: provider `codex-lb`, model
 
 Workers and PR agents contribute evidence. The curator decides whether that
 evidence becomes an accepted graph lesson or a proposal-only source update.
-Data-sheet/tool-output changes stay proposals until source-specific validation
-applies them.
+Data-sheet and source-corpus changes stay proposals until source-specific
+validation applies them. Tool cache or index refresh decisions stay with the
+owning tool suite.
 
 ## Related
 

@@ -1,0 +1,421 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2473",
+  "pr": {
+    "number": 2473,
+    "title": "misc gm matches",
+    "url": "https://github.com/doldecomp/melee/pull/2473",
+    "state": "MERGED",
+    "author": "r-burns",
+    "created_at": "2026-05-10T00:49:43Z",
+    "merged_at": "2026-05-10T00:54:32Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Small game-mode matching PR touching gm_1601, gm_16AE, gm_16F1, and gmmain_lib. It tightened function signatures and headers, introduced a local getSpawnPoint inline to deduplicate repeated spawn-point Stage_80224E64 call patterns, rewrote a compound exclusion condition into explicit continue guards, initialized a rankings stack array directly instead of loading removed static data symbols, and changed gmMainLib_8015DADC to return bool. Bot report records +668 matched-code bytes, 2 new matches, 6 unmatched-item improvements, and 1 unmatched-item regression.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "signature-cleanup",
+      "control-flow-cleanup",
+      "data-symbol-removal"
+    ],
+    "systems": [
+      "game-mode",
+      "gm"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gm/gm_1601.c",
+      "role": "Adjusted argument types for fn_801695BC and fn_8016989C from s32-style parameters to u8 and removed an unnecessary cast at a callsite.",
+      "evidence_refs": [
+        "raw_diff: gm_1601.c hunks for gm_801674C4, fn_801695BC, fn_8016989C",
+        "changed_files.jsonl: src/melee/gm/gm_1601.c added 3 deleted 3",
+        "text_corpus: bot report lists fn_8016989C as a new 100.00% match and fn_801695BC as a small regression"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1601.h",
+      "role": "Updated public prototypes for fn_801695BC and fn_8016989C to match recovered u8 parameter types.",
+      "evidence_refs": [
+        "raw_diff: gm_1601.h prototype changes",
+        "changed_files.jsonl: src/melee/gm/gm_1601.h added 2 deleted 2"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_16AE.c",
+      "role": "Matched and improved several game-mode routines by changing post-increment shape and extracting repeated spawn-point lookup code into static inline getSpawnPoint.",
+      "evidence_refs": [
+        "raw_diff: gm_16AE.c fn_8016D634 increment change",
+        "raw_diff: gm_16AE.c added static inline getSpawnPoint and replaced repeated Stage_80224E64 blocks",
+        "text_corpus: bot report lists fn_8016DEEC as a new 100.00% match and improvements for fn_8016E2BC, gm_8016EDDC, fn_8016D634"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_16F1.c",
+      "role": "Changed fn_8016FAD4 kind parameter type, zero-initialized rankings directly, removed static-data loads, and rewrote gm_80173EEC_inline filtering into explicit continue guards.",
+      "evidence_refs": [
+        "raw_diff: gm_16F1.c fn_8016FAD4 signature and rankings initialization",
+        "raw_diff: gm_16F1.c gm_80173EEC_inline conditional rewrite",
+        "text_corpus: bot report lists fn_8016FAD4 improvement and .sdata2 improvement"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_16F1.h",
+      "role": "Updated fn_8016FAD4 prototype from u32 kind to int kind.",
+      "evidence_refs": [
+        "raw_diff: gm_16F1.h prototype change",
+        "changed_files.jsonl: src/melee/gm/gm_16F1.h added 1 deleted 1"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_16F1.static.h",
+      "role": "Removed three static data declarations lbl_804DA2E8, lbl_804DA2EC, and lbl_804DA2EE after rankings became a zero-initialized local array.",
+      "evidence_refs": [
+        "raw_diff: gm_16F1.static.h removed static s32/s16/s8 declarations",
+        "changed_files.jsonl: src/melee/gm/gm_16F1.static.h added 0 deleted 4"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmmain_lib.c",
+      "role": "Changed gmMainLib_8015DADC return type from s32 to bool while keeping bit-test return expression.",
+      "evidence_refs": [
+        "raw_diff: gmmain_lib.c gmMainLib_8015DADC return type change",
+        "changed_files.jsonl: src/melee/gm/gmmain_lib.c added 1 deleted 1"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmmain_lib.h",
+      "role": "Updated gmMainLib_8015DADC prototype to bool.",
+      "evidence_refs": [
+        "raw_diff: gmmain_lib.h prototype change",
+        "changed_files.jsonl: src/melee/gm/gmmain_lib.h added 1 deleted 1"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Recovered narrower u8 parameter types for fn_801695BC and fn_8016989C and synchronized gm_1601.h prototypes.",
+      "evidence_refs": [
+        "raw_diff: gm_1601.c and gm_1601.h signature changes"
+      ]
+    },
+    {
+      "text": "Changed fn_8016D634 from pre-increment compare to post-increment compare on lbl_8046B6A0.unk_30.",
+      "evidence_refs": [
+        "raw_diff: gm_16AE.c fn_8016D634 hunk"
+      ]
+    },
+    {
+      "text": "Added static inline getSpawnPoint(int i, Vec3* v) and replaced four repeated spawn-point conditional blocks in gm_16AE.c.",
+      "evidence_refs": [
+        "raw_diff: gm_16AE.c getSpawnPoint addition and replacements in fn_8016DEEC, fn_8016E2BC, gm_8016EDDC"
+      ]
+    },
+    {
+      "text": "Changed fn_8016FAD4 kind parameter from u32 to int in source and header.",
+      "evidence_refs": [
+        "raw_diff: gm_16F1.c and gm_16F1.h fn_8016FAD4 signature changes"
+      ]
+    },
+    {
+      "text": "Replaced manual stack-array initialization from three static data symbols with u8 rankings[7] = { 0 } and removed the now-unused static declarations.",
+      "evidence_refs": [
+        "raw_diff: gm_16F1.c rankings initialization hunk",
+        "raw_diff: gm_16F1.static.h removed lbl_804DA2E8/lbl_804DA2EC/lbl_804DA2EE"
+      ]
+    },
+    {
+      "text": "Rewrote gm_80173EEC_inline's combined exclusion condition into sequential early-continue checks before calling gmMainLib_8015DADC.",
+      "evidence_refs": [
+        "raw_diff: gm_16F1.c gm_80173EEC_inline hunk"
+      ]
+    },
+    {
+      "text": "Changed gmMainLib_8015DADC return type from s32 to bool and updated its header declaration.",
+      "evidence_refs": [
+        "raw_diff: gmmain_lib.c and gmmain_lib.h gmMainLib_8015DADC changes"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Kept recovered signatures truthful across C and header files instead of leaving mismatched prototypes.",
+      "evidence_refs": [
+        "raw_diff: gm_1601.c/gm_1601.h and gm_16F1.c/gm_16F1.h matching signature edits",
+        "decomp_standards: truthful-headers-and-includes"
+      ]
+    },
+    {
+      "text": "Factored a repeated spawn-point fallback idiom into a static inline helper, reducing duplicate generated-looking blocks while preserving call behavior in multiple local sites.",
+      "evidence_refs": [
+        "raw_diff: gm_16AE.c getSpawnPoint addition and replacements",
+        "decomp_standards: infer-authored-source-style"
+      ]
+    },
+    {
+      "text": "Converted a bit-test helper's return type to bool and used it with !gmMainLib_8015DADC(i), improving source-level expression of predicate semantics.",
+      "evidence_refs": [
+        "raw_diff: gm_16F1.c gm_80173EEC_inline",
+        "raw_diff: gmmain_lib.c/gmmain_lib.h gmMainLib_8015DADC bool return"
+      ]
+    },
+    {
+      "text": "Removed local static data declarations when a zero-initialized local rankings array was sufficient for the changed source shape.",
+      "evidence_refs": [
+        "raw_diff: gm_16F1.c rankings[7] = { 0 }",
+        "raw_diff: gm_16F1.static.h removed lbl_804DA2E8/lbl_804DA2EC/lbl_804DA2EE",
+        "decomp_standards: literals-and-data-ownership"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "text": "When a repeated local conditional dispatch pattern appears across nearby game-mode functions, a small static inline helper can be a matching-friendly way to express likely authored source while reducing duplicated decompiler-shaped blocks.",
+      "scope": [
+        "src/melee/gm/gm_16AE.c",
+        "spawn-point lookup",
+        "Stage_80224E64 fallback patterns"
+      ],
+      "evidence_refs": [
+        "raw_diff: gm_16AE.c getSpawnPoint addition",
+        "text_corpus: bot report new match for fn_8016DEEC and improvements for fn_8016E2BC/gm_8016EDDC"
+      ]
+    },
+    {
+      "text": "Narrowing parameter and return types to match observed use can affect matching and should be propagated to headers in the same PR.",
+      "scope": [
+        "src/melee/gm/gm_1601.c",
+        "src/melee/gm/gm_1601.h",
+        "src/melee/gm/gm_16F1.c",
+        "src/melee/gm/gm_16F1.h",
+        "src/melee/gm/gmmain_lib.c",
+        "src/melee/gm/gmmain_lib.h"
+      ],
+      "evidence_refs": [
+        "raw_diff: u8 parameter changes for fn_801695BC/fn_8016989C",
+        "raw_diff: int kind change for fn_8016FAD4",
+        "raw_diff: bool return change for gmMainLib_8015DADC"
+      ]
+    },
+    {
+      "text": "A cleaner source form can still carry a localized regression; here fn_801695BC's signature change is associated with a -4 byte unmatched-item regression in the bot report, so postmortems should preserve both gains and losses.",
+      "scope": [
+        "src/melee/gm/gm_1601.c",
+        "fn_801695BC"
+      ],
+      "evidence_refs": [
+        "raw_diff: fn_801695BC signature changed from s32 parameters to u8 parameters",
+        "text_corpus: bot report lists fn_801695BC regression from 70.85% to 70.22%"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "The new helper name getSpawnPoint is a direct role name for the local operation of resolving a fighter spawn_point fallback and writing a Vec3.",
+      "evidence_refs": [
+        "raw_diff: static inline void getSpawnPoint(int i, Vec3* v)"
+      ]
+    },
+    {
+      "text": "No broad global naming convention is established by this PR; most address-style function and data names remain unchanged.",
+      "evidence_refs": [
+        "raw_diff: functions such as fn_8016DEEC, fn_8016FAD4, gmMainLib_8015DADC remain address-style"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "text": "Used a static inline helper rather than a normal out-of-line function for repeated spawn-point logic, consistent with preserving callsite code shape for matching.",
+      "evidence_refs": [
+        "raw_diff: gm_16AE.c static inline getSpawnPoint and callsite replacements"
+      ]
+    },
+    {
+      "text": "Changed increment timing from ++x compare to x++ compare in fn_8016D634, a small expression-shape tactic that improved the unmatched item according to bot output.",
+      "evidence_refs": [
+        "raw_diff: gm_16AE.c fn_8016D634 hunk",
+        "text_corpus: bot report fn_8016D634 improved from 98.04% to 98.91%"
+      ]
+    },
+    {
+      "text": "Replaced a dense combined condition with explicit continue guards for excluded IDs before a bool predicate call in gm_80173EEC_inline.",
+      "evidence_refs": [
+        "raw_diff: gm_16F1.c gm_80173EEC_inline hunk"
+      ]
+    },
+    {
+      "text": "Used zero-initialized stack array syntax to avoid explicit static-data loads for rankings.",
+      "evidence_refs": [
+        "raw_diff: gm_16F1.c rankings[7] = { 0 }",
+        "raw_diff: gm_16F1.static.h removed three static data declarations",
+        "text_corpus: bot report .sdata2 improvement from 50.00% to 80.00%"
+      ]
+    },
+    {
+      "text": "Existing PAD_STACK calls remain in touched functions, but the PR evidence does not show new PAD_STACK additions.",
+      "evidence_refs": [
+        "raw_diff: gm_16AE.c and gm_16F1.c context contains PAD_STACK lines but no added PAD_STACK hunks"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "text": "No human review comments were present in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata_json: review_comments 0, reviews 0",
+        "text_corpus: only PR body and decomp-dev bot issue comment loaded"
+      ]
+    },
+    {
+      "text": "Automation reported +0.02% matched code, +668 bytes, 2 new matches, 6 improvements, and 1 regression.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev[bot] report for GALE01"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2473",
+    "misc gm matches",
+    "r-burns",
+    "game-mode",
+    "src/melee/gm/gm_1601.c",
+    "src/melee/gm/gm_16AE.c",
+    "src/melee/gm/gm_16F1.c",
+    "src/melee/gm/gmmain_lib.c",
+    "fn_8016989C",
+    "fn_801695BC",
+    "fn_8016DEEC",
+    "fn_8016E2BC",
+    "gm_8016EDDC",
+    "fn_8016D634",
+    "fn_8016FAD4",
+    "gm_80173EEC_inline",
+    "gmMainLib_8015DADC",
+    "getSpawnPoint",
+    "Stage_80224E64",
+    "FighterMatchInfo",
+    "spawn_point",
+    "rankings[7]",
+    "lbl_804DA2E8",
+    "lbl_804DA2EC",
+    "lbl_804DA2EE",
+    "bool return",
+    "u8 parameter",
+    "static inline helper",
+    "PAD_STACK"
+  ],
+  "follow_up_queries": [
+    "PR 2473 fn_801695BC regression signature u8 s32",
+    "gm_16AE getSpawnPoint Stage_80224E64 spawn_point static inline",
+    "gm_16F1 rankings zero initialized lbl_804DA2E8 removal",
+    "gmMainLib_8015DADC bool return predicate",
+    "gm_80173EEC_inline continue guards gmMainLib_8015DADC",
+    "fn_8016D634 post increment lbl_8046B6A0 unk_30"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR identity, state, author, changed files, counts",
+      "raw_diff: complete diff marked truncated=false",
+      "changed_files.jsonl: 8 changed files",
+      "text_corpus: empty PR body and bot report",
+      "metadata_json: review_comments 0, reviews 0"
+    ],
+    "notes": [
+      "The diff and bot report provide strong evidence for changed files, code edits, and reported matching outcomes.",
+      "The PR body is empty and there are no human review comments, so author intent and reviewer rationale are not available.",
+      "The bot report supports claimed new matches and improvements, but no local build, objdiff logs, or detailed per-function assembly evidence are included beyond the automated summary.",
+      "One regression is explicitly reported for fn_801695BC and should not be hidden by the overall positive match result."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "matching_lesson",
+        "title": "Static inline helper for repeated spawn-point fallback in gm_16AE",
+        "text": "In gm_16AE, repeated blocks that choose between player index and FighterMatchInfo[i].spawn_point before calling Stage_80224E64 were replaced with static inline getSpawnPoint(int i, Vec3* v). The bot report recorded fn_8016DEEC reaching 100% and improvements in related functions, making this a supported local example of helper extraction for repeated matching patterns.",
+        "scope": [
+          "src/melee/gm/gm_16AE.c",
+          "fn_8016DEEC",
+          "fn_8016E2BC",
+          "gm_8016EDDC"
+        ],
+        "evidence_refs": [
+          "raw_diff: gm_16AE.c getSpawnPoint addition and replacements",
+          "text_corpus: bot report fn_8016DEEC new match and fn_8016E2BC/gm_8016EDDC improvements"
+        ]
+      },
+      {
+        "record_type": "matching_lesson",
+        "title": "Preserve regressions in match-ledger summaries",
+        "text": "PR 2473 improved overall matched code and added two matches, but the bot report also listed fn_801695BC as a -4 byte regression after its parameter type change. Intake records should retain such local regressions for future cleanup searches.",
+        "scope": [
+          "src/melee/gm/gm_1601.c",
+          "fn_801695BC"
+        ],
+        "evidence_refs": [
+          "raw_diff: fn_801695BC parameter type change",
+          "text_corpus: bot report regression row for fn_801695BC"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "Game-mode matching activity in src/melee/gm",
+        "text": "PR 2473 is a merged game-mode matching PR that touched gm_1601, gm_16AE, gm_16F1, and gmmain_lib under src/melee/gm.",
+        "source_path": "src/melee/gm",
+        "scope": [
+          "src/melee/gm/gm_1601.c",
+          "src/melee/gm/gm_16AE.c",
+          "src/melee/gm/gm_16F1.c",
+          "src/melee/gm/gmmain_lib.c"
+        ],
+        "evidence_refs": [
+          "metadata_json: initial_classification systems game-mode",
+          "changed_files.jsonl: all changed paths under src/melee/gm"
+        ],
+        "reason": "May help path-scoped retrieval for future gm matching PRs; should be curated as a path fact rather than accepted from intake alone."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "No new global standard proposed; example supports existing helper/type/header standards",
+        "text": "This PR supplies examples for existing standards on inferred authored source style and truthful headers, but the evidence is not broad enough to create a new global rule.",
+        "source_path": null,
+        "scope": [
+          "static inline helper extraction",
+          "header prototype synchronization",
+          "predicate return type cleanup"
+        ],
+        "evidence_refs": [
+          "raw_diff: getSpawnPoint helper",
+          "raw_diff: synchronized header/source signature changes",
+          "decomp_standards: infer-authored-source-style",
+          "decomp_standards: truthful-headers-and-includes"
+        ],
+        "reason": "Route as a curator note only; existing standards already cover the observed patterns."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that all repeated conditionals should become static inline helpers; this PR only supports the local spawn-point pattern in gm_16AE.",
+      "Do not claim fn_801695BC matched or improved; the bot report explicitly lists it as a regression.",
+      "Do not treat removed lbl_804DA2E8/lbl_804DA2EC/lbl_804DA2EE as a general data-ownership rule without additional section/symbol evidence.",
+      "Do not infer human reviewer approval rationale; no human review comments were loaded."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

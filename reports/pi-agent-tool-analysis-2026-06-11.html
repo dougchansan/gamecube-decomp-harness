@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pi Worker Agent Analysis — What the Successful Agents Do</title><style>
+:root { color-scheme: light; }
+* { box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  margin: 0; background: #f1f5f9; color: #0f172a; line-height: 1.5; }
+.wrap { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+header.page { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 28px 24px; }
+header.page h1 { margin: 0 0 4px; font-size: 22px; font-weight: 650; color: #0f172a; }
+header.page .sub { color: #64748b; font-size: 13.5px; }
+h2 { font-size: 16px; font-weight: 650; color: #334155; margin: 36px 0 12px; padding-bottom: 6px; border-bottom: 1px solid #e2e8f0; }
+h3 { font-size: 13.5px; font-weight: 600; color: #475569; margin: 20px 0 8px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin: 16px 0; }
+.card { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 16px; }
+.card .v { font-size: 24px; font-weight: 650; }
+.card .v.pos { color: #16a34a; }
+.card .v.neg { color: #dc2626; }
+.card .l { font-size: 12px; color: #64748b; margin-top: 2px; }
+table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; font-size: 13px; }
+th { text-align: left; font-weight: 600; color: #475569; background: #f8fafc; padding: 8px 10px; border-bottom: 1px solid #e2e8f0; white-space: nowrap; }
+td { padding: 7px 10px; border-bottom: 1px solid #f1f5f9; vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
+.bar { position: relative; background: #f1f5f9; border-radius: 3px; height: 16px; min-width: 90px; }
+.bar-fill { height: 100%; border-radius: 3px; }
+.bar span { position: absolute; right: 5px; top: 0; font-size: 11px; line-height: 16px; color: #334155; font-variant-numeric: tabular-nums; }
+.pill { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 600; }
+.pill.ok { background: #dcfce7; color: #166534; }
+.pill.warn { background: #fef9c3; color: #854d0e; }
+.pill.bad { background: #fee2e2; color: #991b1b; }
+.pill.neutral { background: #e2e8f0; color: #475569; }
+.note { background: #fff; border: 1px solid #e2e8f0; border-left: 3px solid #94a3b8; border-radius: 6px; padding: 12px 16px; font-size: 13px; color: #475569; margin: 14px 0; }
+.note.action { border-left-color: #16a34a; }
+ul.tight { margin: 8px 0; padding-left: 20px; } ul.tight li { margin: 4px 0; }
+.flow { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 10px 0; }
+.flow .step { background: #fff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 5px 10px; font-size: 12px; font-family: ui-monospace, Menlo, monospace; }
+.flow .arr { color: #94a3b8; font-size: 13px; }
+.muted { color: #64748b; }
+.small { font-size: 12px; }
+</style></head><body>
+<header class="page"><div class="wrap" style="padding:0 24px">
+<h1>Pi Worker Agents — Tool Usage &amp; Success Analysis</h1>
+<div class="sub">Run <code>302fb981</code> · Jun 10–11, 2026 · codex-lb / gpt-5.5 · 393 worker sessions (234 did real work, 159 aborted empty) · outcomes from the attempts table + runner-validation gates</div>
+</div></header>
+<div class="wrap">
+
+<h2>Headline numbers</h2>
+<div class="cards">
+<div class="card"><div class="v pos">14</div><div class="l">fully confirmed exact matches (runner + lint gates passed)</div></div>
+<div class="card"><div class="v">19</div><div class="l">leases that scored 100% locally (5 later rejected by gates)</div></div>
+<div class="card"><div class="v">72</div><div class="l">sessions with accepted score improvements</div></div>
+<div class="card"><div class="v neg">159</div><div class="l">aborted sessions (model returned nothing — 158 of them xhigh)</div></div>
+</div>
+
+<h2>1 · Outcome funnel (sessions that did real work)</h2>
+<table><tr><th>Outcome</th><th class="num">Sessions</th><th class="num">xhigh / medium</th><th class="num">Median start score</th><th class="num">Median size (B)</th><th class="num">Median duration</th><th class="num">Median tool calls</th><th class="num">Median checkdiff iterations</th><th class="num">Mean edits</th></tr>
+<tr><td><span class="pill ok">exact</span></td><td class="num">24</td><td class="num">17 / 7</td><td class="num">99.2%</td><td class="num">380.0</td><td class="num">6.5 min</td><td class="num">32.0</td><td class="num">5.0</td><td class="num">5.3</td></tr>
+<tr><td><span class="pill ok" style="background:#ccfbf1;color:#115e59">improved</span></td><td class="num">72</td><td class="num">46 / 26</td><td class="num">95.8%</td><td class="num">756.0</td><td class="num">15.5 min</td><td class="num">71.5</td><td class="num">12.0</td><td class="num">14.1</td></tr>
+<tr><td><span class="pill neutral">no change</span></td><td class="num">130</td><td class="num">60 / 70</td><td class="num">99.8%</td><td class="num">652.0</td><td class="num">7.3 min</td><td class="num">37.0</td><td class="num">7.0</td><td class="num">8.6</td></tr>
+<tr><td><span class="pill bad">regressed</span></td><td class="num">8</td><td class="num">0 / 8</td><td class="num">96.0%</td><td class="num">606.0</td><td class="num">6.4 min</td><td class="num">43.5</td><td class="num">7.0</td><td class="num">9.9</td></tr>
+<tr><td><span class="pill bad" style="background:#f1f5f9;color:#64748b">aborted</span></td><td class="num">159</td><td class="num">158 / 1</td><td class="num">–</td><td class="num">772</td><td class="num">18.4 min</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+</table>
+<div class="note">The <b>no-change cohort sits at a 99.8% median start score</b> — these are finish candidates where the last fraction of a percent didn't yield. They worked normally (median 37 tool calls, 7 checkdiff iterations) but reported <code>stalled_no_useful_guess</code>. Exact wins came disproportionately from targets with a <i>bigger</i> gap (median 99.2%, several at 89–97%) and <b>smaller functions</b> (median 380 B vs 652 B).</div>
+
+<h2>2 · xhigh vs medium (real work sessions only)</h2>
+<table><tr><th>Thinking level</th><th class="num">Sessions</th><th class="num">Exact</th><th class="num">Improved</th><th class="num">Regressed</th><th>Exact rate</th><th>Exact + improved rate</th><th class="num">Mean session duration</th></tr>
+<tr><td><code>xhigh</code></td><td class="num">123</td><td class="num">17</td><td class="num">46</td><td class="num">0</td><td><div class="bar"><div class="bar-fill" style="width:13.8%;background:#16a34a"></div><span>13.8%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:51.2%;background:#16a34a"></div><span>51.2%</span></div></td><td class="num">31.2 min</td></tr>
+<tr><td><code>medium</code></td><td class="num">111</td><td class="num">7</td><td class="num">26</td><td class="num">8</td><td><div class="bar"><div class="bar-fill" style="width:6.3%;background:#16a34a"></div><span>6.3%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:29.7%;background:#16a34a"></div><span>29.7%</span></div></td><td class="num">6.1 min</td></tr>
+</table>
+<div class="note"><b>xhigh roughly doubles both the exact rate (13.8% vs 6.3%) and the overall success rate (51% vs 30%), and produced zero regressions vs medium's 8</b> — at ~5× the wall-clock per session (31 vs 6 min). The caveat: all 159 aborted sessions were also xhigh runs, so xhigh's <i>effective</i> throughput is dragged down by provider failures, not by the model's work quality.</div>
+
+<h2>3 · The winning playbook</h2>
+<p class="small muted">22 of 24 exact sessions opened with the identical move sequence; the rest of the loop below is the dominant pattern in their transcripts.</p>
+<div class="flow">
+<span class="step">checkdiff_run (baseline diff)</span><span class="arr">→</span>
+<span class="step">path_facts_resolve + past_prs_search</span><span class="arr">→</span>
+<span class="step">m2c_decompile / ghidra_lookup (as needed)</span><span class="arr">→</span>
+<span class="step">edit</span><span class="arr">→</span>
+<span class="step">checkdiff_run loop (~5×)</span><span class="arr">→</span>
+<span class="step">direct_compile_tu on build errors</span><span class="arr">→</span>
+<span class="step">checkdiff_summary (self + neighbors)</span><span class="arr">→</span>
+<span class="step">review_lint_scan</span><span class="arr">→</span>
+<span class="step">report</span>
+</div>
+
+<h3>Practice adoption rate by outcome (% of sessions using the tool family at least once)</h3>
+<table><tr><th>Practice</th><th>exact</th><th>improved</th><th>no change</th></tr><tr><td>Knowledge / research lookups</td>
+    <td><div class="bar"><div class="bar-fill" style="width:100.0%;background:#16a34a"></div><span>100.0%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:100.0%;background:#0d9488"></div><span>100.0%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:94.6%;background:#94a3b8"></div><span>94.6%</span></div></td></tr><tr><td>MWCC compiler diagnostics</td>
+    <td><div class="bar"><div class="bar-fill" style="width:45.8%;background:#16a34a"></div><span>45.8%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:91.7%;background:#0d9488"></div><span>91.7%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:75.4%;background:#94a3b8"></div><span>75.4%</span></div></td></tr><tr><td>Source permuter family</td>
+    <td><div class="bar"><div class="bar-fill" style="width:33.3%;background:#16a34a"></div><span>33.3%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:87.5%;background:#0d9488"></div><span>87.5%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:70.0%;background:#94a3b8"></div><span>70.0%</span></div></td></tr><tr><td>m2c scaffold</td>
+    <td><div class="bar"><div class="bar-fill" style="width:50.0%;background:#16a34a"></div><span>50.0%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:93.1%;background:#0d9488"></div><span>93.1%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:80.0%;background:#94a3b8"></div><span>80.0%</span></div></td></tr><tr><td>review_lint_scan before reporting</td>
+    <td><div class="bar"><div class="bar-fill" style="width:79.2%;background:#16a34a"></div><span>79.2%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:97.2%;background:#0d9488"></div><span>97.2%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:33.1%;background:#94a3b8"></div><span>33.1%</span></div></td></tr><tr><td>direct_compile_tu</td>
+    <td><div class="bar"><div class="bar-fill" style="width:66.7%;background:#16a34a"></div><span>66.7%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:93.1%;background:#0d9488"></div><span>93.1%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:66.2%;background:#94a3b8"></div><span>66.2%</span></div></td></tr><tr><td>checkdiff_summary gate</td>
+    <td><div class="bar"><div class="bar-fill" style="width:95.8%;background:#16a34a"></div><span>95.8%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:98.6%;background:#0d9488"></div><span>98.6%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:34.6%;background:#94a3b8"></div><span>34.6%</span></div></td></tr><tr><td>type_oracle_lookup</td>
+    <td><div class="bar"><div class="bar-fill" style="width:8.3%;background:#16a34a"></div><span>8.3%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:2.8%;background:#0d9488"></div><span>2.8%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:3.1%;background:#94a3b8"></div><span>3.1%</span></div></td></tr></table>
+<div class="note action"><b>The two strongest separators between sessions that ship and sessions that stall are the closing-discipline tools:</b> <code>checkdiff_summary</code> (96% of exact vs 16% of no-change) and <code>review_lint_scan</code> (79% vs 15%). Knowledge lookups (<code>path_facts_resolve</code>, <code>past_prs_search</code>, <code>ghidra_lookup</code>, <code>mismatch_db_search</code>) appear in <b>100% of every successful session</b> vs 43% of no-change ones. Heavy MWCC diagnostics and the permuter are <i>grind</i> tools — near-universal in long "improved" sessions (92% / 88%) but only ~45% / 33% in exact wins, which tend to be solved by reading the diff plus one prior-PR precedent.</div>
+
+<h2>4 · Tool leaderboard (tools with ≥10 total calls)</h2>
+<table><tr><th>Tool</th><th>% of exact sessions</th><th>% of improved</th><th>% of no-change</th><th class="num">mean calls (exact)</th><th class="num">mean calls (improved)</th><th class="num">total calls</th></tr><tr><td class="mono">bash</td>
+    <td><div class="bar"><div class="bar-fill" style="width:100.0%;background:#16a34a"></div><span>100.0%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:100.0%;background:#0d9488"></div><span>100.0%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:96.2%;background:#94a3b8"></div><span>96.2%</span></div></td>
+    <td class="num">14.2</td><td class="num">20.7</td><td class="num">3516</td></tr><tr><td class="mono">checkdiff_run</td>
+    <td><div class="bar"><div class="bar-fill" style="width:100.0%;background:#16a34a"></div><span>100.0%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:100.0%;background:#0d9488"></div><span>100.0%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:100.0%;background:#94a3b8"></div><span>100.0%</span></div></td>
+    <td class="num">7.4</td><td class="num">16.4</td><td class="num">2556</td></tr><tr><td class="mono">edit</td>
+    <td><div class="bar"><div class="bar-fill" style="width:75.0%;background:#16a34a"></div><span>75.0%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:97.2%;background:#0d9488"></div><span>97.2%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:85.4%;background:#94a3b8"></div><span>85.4%</span></div></td>
+    <td class="num">7.1</td><td class="num">14.5</td><td class="num">2341</td></tr><tr><td class="mono">read</td>
+    <td><div class="bar"><div class="bar-fill" style="width:75.0%;background:#16a34a"></div><span>75.0%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:75.0%;background:#0d9488"></div><span>75.0%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:63.1%;background:#94a3b8"></div><span>63.1%</span></div></td>
+    <td class="num">4.6</td><td class="num">4.6</td><td class="num">631</td></tr><tr><td class="mono">direct_compile_tu</td>
+    <td><div class="bar"><div class="bar-fill" style="width:66.7%;background:#16a34a"></div><span>66.7%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:93.1%;background:#0d9488"></div><span>93.1%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:66.2%;background:#94a3b8"></div><span>66.2%</span></div></td>
+    <td class="num">4.3</td><td class="num">4.5</td><td class="num">610</td></tr><tr><td class="mono">m2c_decompile</td>
+    <td><div class="bar"><div class="bar-fill" style="width:50.0%;background:#16a34a"></div><span>50.0%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:93.1%;background:#0d9488"></div><span>93.1%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:80.0%;background:#94a3b8"></div><span>80.0%</span></div></td>
+    <td class="num">1.8</td><td class="num">1.9</td><td class="num">352</td></tr><tr><td class="mono">past_prs_search</td>
+    <td><div class="bar"><div class="bar-fill" style="width:95.8%;background:#16a34a"></div><span>95.8%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:93.1%;background:#0d9488"></div><span>93.1%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:91.5%;background:#94a3b8"></div><span>91.5%</span></div></td>
+    <td class="num">1.5</td><td class="num">1.4</td><td class="num">279</td></tr><tr><td class="mono">checkdiff_summary</td>
+    <td><div class="bar"><div class="bar-fill" style="width:95.8%;background:#16a34a"></div><span>95.8%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:98.6%;background:#0d9488"></div><span>98.6%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:34.6%;background:#94a3b8"></div><span>34.6%</span></div></td>
+    <td class="num">1.7</td><td class="num">1.7</td><td class="num">246</td></tr><tr><td class="mono">source_permuter_run</td>
+    <td><div class="bar"><div class="bar-fill" style="width:33.3%;background:#16a34a"></div><span>33.3%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:87.5%;background:#0d9488"></div><span>87.5%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:70.0%;background:#94a3b8"></div><span>70.0%</span></div></td>
+    <td class="num">1.5</td><td class="num">1.8</td><td class="num">233</td></tr><tr><td class="mono">path_facts_resolve</td>
+    <td><div class="bar"><div class="bar-fill" style="width:95.8%;background:#16a34a"></div><span>95.8%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:93.1%;background:#0d9488"></div><span>93.1%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:89.2%;background:#94a3b8"></div><span>89.2%</span></div></td>
+    <td class="num">1</td><td class="num">1</td><td class="num">214</td></tr><tr><td class="mono">review_lint_scan</td>
+    <td><div class="bar"><div class="bar-fill" style="width:79.2%;background:#16a34a"></div><span>79.2%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:97.2%;background:#0d9488"></div><span>97.2%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:33.1%;background:#94a3b8"></div><span>33.1%</span></div></td>
+    <td class="num">1.6</td><td class="num">1.3</td><td class="num">177</td></tr><tr><td class="mono">mwcc_debug_diagnose_regflow</td>
+    <td><div class="bar"><div class="bar-fill" style="width:41.7%;background:#16a34a"></div><span>41.7%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:80.6%;background:#0d9488"></div><span>80.6%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:63.1%;background:#94a3b8"></div><span>63.1%</span></div></td>
+    <td class="num">1</td><td class="num">1.1</td><td class="num">164</td></tr><tr><td class="mono">mismatch_db_search</td>
+    <td><div class="bar"><div class="bar-fill" style="width:50.0%;background:#16a34a"></div><span>50.0%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:54.2%;background:#0d9488"></div><span>54.2%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:46.9%;background:#94a3b8"></div><span>46.9%</span></div></td>
+    <td class="num">1.3</td><td class="num">1.4</td><td class="num">151</td></tr><tr><td class="mono">ghidra_lookup</td>
+    <td><div class="bar"><div class="bar-fill" style="width:66.7%;background:#16a34a"></div><span>66.7%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:75.0%;background:#0d9488"></div><span>75.0%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:52.3%;background:#94a3b8"></div><span>52.3%</span></div></td>
+    <td class="num">1</td><td class="num">1.1</td><td class="num">148</td></tr><tr><td class="mono">opseq_similar_functions</td>
+    <td><div class="bar"><div class="bar-fill" style="width:37.5%;background:#16a34a"></div><span>37.5%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:55.6%;background:#0d9488"></div><span>55.6%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:39.2%;background:#94a3b8"></div><span>39.2%</span></div></td>
+    <td class="num">1.2</td><td class="num">1.0</td><td class="num">105</td></tr><tr><td class="mono">code_graph_search</td>
+    <td><div class="bar"><div class="bar-fill" style="width:54.2%;background:#16a34a"></div><span>54.2%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:38.9%;background:#0d9488"></div><span>38.9%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:30.8%;background:#94a3b8"></div><span>30.8%</span></div></td>
+    <td class="num">1.4</td><td class="num">1.2</td><td class="num">98</td></tr><tr><td class="mono">mwcc_debug_diagnose_stack</td>
+    <td><div class="bar"><div class="bar-fill" style="width:16.7%;background:#16a34a"></div><span>16.7%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:48.6%;background:#0d9488"></div><span>48.6%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:24.6%;background:#94a3b8"></div><span>24.6%</span></div></td>
+    <td class="num">1</td><td class="num">1.0</td><td class="num">75</td></tr><tr><td class="mono">discord_knowledge_search</td>
+    <td><div class="bar"><div class="bar-fill" style="width:29.2%;background:#16a34a"></div><span>29.2%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:33.3%;background:#0d9488"></div><span>33.3%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:20.0%;background:#94a3b8"></div><span>20.0%</span></div></td>
+    <td class="num">1.6</td><td class="num">1.1</td><td class="num">74</td></tr><tr><td class="mono">mwcc_debug_lookup</td>
+    <td><div class="bar"><div class="bar-fill" style="width:16.7%;background:#16a34a"></div><span>16.7%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:33.3%;background:#0d9488"></div><span>33.3%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:19.2%;background:#94a3b8"></div><span>19.2%</span></div></td>
+    <td class="num">1.2</td><td class="num">1.0</td><td class="num">58</td></tr><tr><td class="mono">external_symbol_lookup</td>
+    <td><div class="bar"><div class="bar-fill" style="width:16.7%;background:#16a34a"></div><span>16.7%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:25.0%;background:#0d9488"></div><span>25.0%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:23.8%;background:#94a3b8"></div><span>23.8%</span></div></td>
+    <td class="num">1</td><td class="num">1</td><td class="num">53</td></tr><tr><td class="mono">objdiff_score_candidate</td>
+    <td><div class="bar"><div class="bar-fill" style="width:4.2%;background:#16a34a"></div><span>4.2%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:9.7%;background:#0d9488"></div><span>9.7%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:6.9%;background:#94a3b8"></div><span>6.9%</span></div></td>
+    <td class="num">1</td><td class="num">2</td><td class="num">52</td></tr><tr><td class="mono">mwcc_debug_dump_function</td>
+    <td><div class="bar"><div class="bar-fill" style="width:20.8%;background:#16a34a"></div><span>20.8%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:20.8%;background:#0d9488"></div><span>20.8%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:17.7%;background:#94a3b8"></div><span>17.7%</span></div></td>
+    <td class="num">1.2</td><td class="num">1.1</td><td class="num">46</td></tr><tr><td class="mono">code_graph_file_card</td>
+    <td><div class="bar"><div class="bar-fill" style="width:16.7%;background:#16a34a"></div><span>16.7%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:25.0%;background:#0d9488"></div><span>25.0%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:16.9%;background:#94a3b8"></div><span>16.9%</span></div></td>
+    <td class="num">1</td><td class="num">1</td><td class="num">44</td></tr><tr><td class="mono">source_mutation_preview</td>
+    <td><div class="bar"><div class="bar-fill" style="width:12.5%;background:#16a34a"></div><span>12.5%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:23.6%;background:#0d9488"></div><span>23.6%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:17.7%;background:#94a3b8"></div><span>17.7%</span></div></td>
+    <td class="num">1</td><td class="num">1</td><td class="num">44</td></tr><tr><td class="mono">external_mirrors_search</td>
+    <td><div class="bar"><div class="bar-fill" style="width:16.7%;background:#16a34a"></div><span>16.7%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:15.3%;background:#0d9488"></div><span>15.3%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:13.8%;background:#94a3b8"></div><span>13.8%</span></div></td>
+    <td class="num">1</td><td class="num">1.1</td><td class="num">36</td></tr><tr><td class="mono">source_permuter_replay</td>
+    <td><div class="bar"><div class="bar-fill" style="width:4.2%;background:#16a34a"></div><span>4.2%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:16.7%;background:#0d9488"></div><span>16.7%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:0.8%;background:#94a3b8"></div><span>0.8%</span></div></td>
+    <td class="num">4</td><td class="num">1.6</td><td class="num">24</td></tr><tr><td class="mono">mwcc_debug_diagnose_inlines</td>
+    <td><div class="bar"><div class="bar-fill" style="width:4.2%;background:#16a34a"></div><span>4.2%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:8.3%;background:#0d9488"></div><span>8.3%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:5.4%;background:#94a3b8"></div><span>5.4%</span></div></td>
+    <td class="num">1</td><td class="num">1</td><td class="num">15</td></tr><tr><td class="mono">type_oracle_lookup</td>
+    <td><div class="bar"><div class="bar-fill" style="width:8.3%;background:#16a34a"></div><span>8.3%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:2.8%;background:#0d9488"></div><span>2.8%</span></div></td><td><div class="bar"><div class="bar-fill" style="width:3.1%;background:#94a3b8"></div><span>3.1%</span></div></td>
+    <td class="num">1.5</td><td class="num">1.5</td><td class="num">10</td></tr></table>
+
+<h2>5 · Shelfware — available but unused tools</h2>
+<div class="cards">
+<div class="card"><div class="v">6</div><div class="l">advertised tools never called once across 234 working sessions</div></div>
+<div class="card"><div class="v">4</div><div class="l">tools used in ≤5 sessions</div></div>
+</div>
+<h3>Never called</h3><ul class="tight"><li><code>discord_knowledge_topics_for_terms</code></li><li><code>ssbm_data_sheet_search</code></li><li><code>ssbm_data_sheet_lookup_offset</code></li><li><code>powerpc_docs_search</code></li><li><code>powerpc_instruction_lookup</code></li><li><code>struct_infer_from_asm</code></li></ul>
+<h3>Nearly never called</h3><ul class="tight"><li><code>include_fixer_preview</code> — 3 calls across 1 session</li><li><code>item_state_table_preview</code> — 1 calls across 1 session</li><li><code>ssbm_data_sheet_lookup_address</code> — 3 calls across 3 sessions</li><li><code>mwcc_debug_raw_dump</code> — 3 calls across 3 sessions</li><li><code>type_oracle_lookup</code> — 10 calls across 8 sessions</li></ul>
+<div class="note">The PowerPC reference docs, SSBM data sheets, and <code>struct_infer_from_asm</code> are dead weight in their current form — agents resolve the same questions through <code>checkdiff_run</code> output and <code>ghidra_lookup</code> instead. Either the use_when prompts don't trigger, or the tools duplicate what the diff already shows. Candidates for removal, or for re-pitching in the prompt if you believe they'd help the 99.8% stall cohort.</div>
+
+<h2>6 · Every exact-scoring lease (19) and what actually closed it</h2>
+<table><tr><th>Symbol</th><th class="num">Size</th><th class="num">Start</th><th>Thinking</th><th>Gate result</th><th>Winning tactic (agent's own summary)</th><th>Capabilities used</th></tr><tr>
+    <td class="mono">mnDiagram_OnFrame<div class="muted small">melee/mn/mndiagram</div></td>
+    <td class="num">640</td><td class="num">99.7%</td>
+    <td>medium</td>
+    <td><span class="pill ok">confirmed</span></td>
+    <td class="small">Matched mnDiagram_OnFrame exactly by expanding the scroll-arrow visibility update at the end of the opening animation path. The prior helper call compiled to the same logic but allocated the inlined user_data pointer in …</td>
+    <td class="small mono">checkdiff_run, checkdiff_summary, direct_compile_tu, m2c_decompile, past_prs_search, path_facts_resolve, source_permuter_run</td></tr><tr>
+    <td class="mono">mpLib_DrawSpecialPoints<div class="muted small">melee/mp/mplib</div></td>
+    <td class="num">188</td><td class="num">99.6%</td>
+    <td>xhigh</td>
+    <td><span class="pill ok">confirmed</span></td>
+    <td class="small">mpLib_DrawSpecialPoints is locally verified exact. The fix reconstructed the original data layout used by this debug-draw routine: the item/enemy/trophy/exit point IDs are now one contiguous table with the original inter…</td>
+    <td class="small mono">checkdiff_run, checkdiff_summary, direct_compile_tu, path_facts_resolve, past_prs_search, mismatch_db_search, discord_knowledge_search</td></tr><tr>
+    <td class="mono">gm_8016A164<div class="muted small">melee/gm/gm_1601</div></td>
+    <td class="num">128</td><td class="num">99.5%</td>
+    <td>medium</td>
+    <td><span class="pill ok">confirmed</span></td>
+    <td class="small">Closed gm_8016A164 to 100%. The mismatch was the known lbl_8046B378/lbl_8046B488 adjacent-static base selection issue: current direct accesses compiled as lbl_8046B378-relative +0x110 offsets, while the target uses lbl_8…</td>
+    <td class="small mono">checkdiff_run, checkdiff_summary, m2c_decompile, past_prs_search, mismatch_db_search, discord_knowledge_search, source_permuter_run</td></tr><tr>
+    <td class="mono">gm_80164910<div class="muted small">melee/gm/gm_1601</div></td>
+    <td class="num">252</td><td class="num">99.4%</td>
+    <td>medium</td>
+    <td><span class="pill ok">confirmed</span></td>
+    <td class="small">Matched gm_80164910 exactly by narrowing the local internal_id temporary from s32 to u8, which preserves the byte-valued character mapping result and fixes MWCC register allocation in the inlined unlock lookup.…</td>
+    <td class="small mono">checkdiff_run, checkdiff_summary, path_facts_resolve, past_prs_search, ghidra_lookup, opseq_similar_functions, mwcc_debug_diagnose_regflow</td></tr><tr>
+    <td class="mono">fn_801A94BC<div class="muted small">melee/gm/gm_1A4C</div></td>
+    <td class="num">372</td><td class="num">99.4%</td>
+    <td>xhigh</td>
+    <td><span class="pill ok">confirmed</span></td>
+    <td class="small">Matched fn_801A94BC exactly by reusing the existing inlined count helpers used by the analogous fog callback and removing the now-unneeded explicit stack pad/local loop counter.…</td>
+    <td class="small mono">code_graph_search, path_facts_resolve, checkdiff_run, direct_compile_tu, checkdiff_summary, review_lint_scan, bash/git diff</td></tr><tr>
+    <td class="mono">fn_80186EFC<div class="muted small">melee/gm/gm_1832</div></td>
+    <td class="num">112</td><td class="num">99.3%</td>
+    <td>xhigh</td>
+    <td><span class="pill ok">confirmed</span></td>
+    <td class="small">Matched fn_80186EFC exactly. The retained change names the lbl_804736B0 state struct, uses a typed local pointer to force the intended lbl_804736B0 relocation base, preserves the direct lbl_804736B0.x4++ increment shape,…</td>
+    <td class="small mono">injected code_graph_file_card, git status/diff via bash, path_facts_resolve, past_prs_search, code_graph_search, mismatch_db_search, m2c_decompile</td></tr><tr>
+    <td class="mono">fn_80174284<div class="muted small">melee/gm/gmresult</div></td>
+    <td class="num">180</td><td class="num">99.1%</td>
+    <td>xhigh</td>
+    <td><span class="pill ok">confirmed</span></td>
+    <td class="small">Matched fn_80174284 exactly by reordering only its local declarations so MWCC assigns the saved registers as in the reference: i -&gt; r30, count -&gt; r29, do_call -&gt; r28. Pre-existing dirty edits later in gmresult.c were pre…</td>
+    <td class="small mono">git status/diff via bash, path_facts_resolve, past_prs_search, checkdiff_run, checkdiff_summary, mwcc_debug_diagnose_regflow, direct_compile_tu</td></tr><tr>
+    <td class="mono">ftColl_8007925C<div class="muted small">melee/ft/ftcoll</div></td>
+    <td class="num">2132</td><td class="num">97.7%</td>
+    <td>xhigh</td>
+    <td><span class="pill ok">confirmed</span></td>
+    <td class="small">Completed ftColl_8007925C to a locally verified exact match. Retained edits are confined to src/melee/ft/ftcoll.c and reshape local declaration order, pointer temporaries, ItemHitbox access, and sdata2 constant reference…</td>
+    <td class="small mono">checkdiff_run, checkdiff_summary, direct_compile_tu, objdiff-cli strict JSON inspection, source_permuter_run, source_permuter_replay, m2c_decompile</td></tr><tr>
+    <td class="mono">ftColl_80077970<div class="muted small">melee/ft/ftcoll</div></td>
+    <td class="num">752</td><td class="num">96.8%</td>
+    <td>xhigh</td>
+    <td><span class="pill ok">confirmed</span></td>
+    <td class="small">Matched ftColl_80077970 exactly. The retained edit moves the ftcoll .sdata2 constant definitions below ftColl_80077970 while leaving extern declarations at the original top-of-file location, which fixes the target&#x27;s rema…</td>
+    <td class="small mono">code_graph_search, path_facts_resolve, past_prs_search, mismatch_db_search, discord_knowledge_search, mwcc_debug_lookup, source_permuter_run</td></tr><tr>
+    <td class="mono">fn_8016719C<div class="muted small">melee/gm/gm_1601</div></td>
+    <td class="num">388</td><td class="num">96.3%</td>
+    <td>xhigh</td>
+    <td><span class="pill ok">confirmed</span></td>
+    <td class="small">Matched fn_8016719C exactly. The retained edit replaces generated-looking flag arithmetic with typed bitfield access, removes stack-shaping scalar temporaries, narrows the stage-info flag test to stage_info.unk8C.b5, and…</td>
+    <td class="small mono">git diff/status inspection, path_facts_resolve, past_prs_search, ghidra_lookup, opseq_similar_functions, mismatch_db_search, type_oracle_lookup</td></tr><tr>
+    <td class="mono">fn_80175D34<div class="muted small">melee/gm/gmresult</div></td>
+    <td class="num">148</td><td class="num">94.1%</td>
+    <td>medium</td>
+    <td><span class="pill ok">confirmed</span></td>
+    <td class="small">Matched fn_80175D34 exactly by introducing a ResultsData* local and assigning it in the lb_8000B1CC argument expression so MWCC materializes lbl_8046DBE8 into a temporary register before the call and moves it into r30 at…</td>
+    <td class="small mono">checkdiff_run, checkdiff_summary, path_facts_resolve, past_prs_search, m2c_decompile, direct_compile_tu, review_lint_scan</td></tr><tr>
+    <td class="mono">AXDriver_8038E498<div class="muted small">sysdolphin/baselib/axdriver</div></td>
+    <td class="num">316</td><td class="num">93.5%</td>
+    <td>xhigh</td>
+    <td><span class="pill ok">confirmed</span></td>
+    <td class="small">Matched AXDriver_8038E498 exactly by rewriting the initialization loop to use direct AXDriver_804C45A0[i] array expressions instead of carrying a separate HSD_SM* loop pointer. This preserves the natural loop while produ…</td>
+    <td class="small mono">code_graph_file_card, path_facts_resolve, past_prs_search, checkdiff_run, checkdiff_summary, direct_compile_tu, m2c_decompile</td></tr><tr>
+    <td class="mono">un_803148E4<div class="muted small">melee/ty/tylist</div></td>
+    <td class="num">452</td><td class="num">92.1%</td>
+    <td>xhigh</td>
+    <td><span class="pill ok">confirmed</span></td>
+    <td class="small">Matched un_803148E4 exactly. The retained edit reshapes only the target function: it uses the existing TyListGobjEntry view for the state tail, keeps the gobj_2C4 pointer and archive lifetimes/registers in the expected o…</td>
+    <td class="small mono">git status via bash, path_facts_resolve, past_prs_search, ghidra_lookup, opseq_similar_functions, m2c_decompile, direct_compile_tu</td></tr><tr>
+    <td class="mono">grCastle_801CD658<div class="muted small">melee/gr/grcastle</div></td>
+    <td class="num">584</td><td class="num">89.2%</td>
+    <td>xhigh</td>
+    <td><span class="pill ok">confirmed</span></td>
+    <td class="small">Matched grCastle_801CD658 exactly by replacing generated-looking manual DynamicsDesc zeroing with the natural single loop shape and preserving the compiler-required compare direction/cast for loop lowering.…</td>
+    <td class="small mono">code_graph_file_card, path_facts_resolve, past_prs_search, checkdiff_run, checkdiff_summary, direct_compile_tu, m2c_decompile</td></tr><tr>
+    <td class="mono">mnDiagram_OnFrame<div class="muted small">melee/mn/mndiagram</div></td>
+    <td class="num">640</td><td class="num">100.0%</td>
+    <td>medium</td>
+    <td><span class="pill bad">rejected: did not reproduce in runner validation</span></td>
+    <td class="small">Runner validation failed: target mnDiagram_OnFrame did not reach exact in runner-owned same-unit validation…</td>
+    <td class="small mono">checkdiff_run, past_prs_search, path_facts_resolve</td></tr><tr>
+    <td class="mono">fn_80393C14<div class="muted small">sysdolphin/baselib/particle</div></td>
+    <td class="num">280</td><td class="num">99.6%</td>
+    <td>xhigh</td>
+    <td><span class="pill warn">needs_rework: string-literal lint gate</span></td>
+    <td class="small">Worker exhausted 2 repair attempt(s); latest return still failed the post-return gate: review lint: no-string-literal-symbol-regression: Keep string literal &quot;MCC is no initialize&quot; inline instead of replacing it with lbl_…</td>
+    <td class="small mono">checkdiff_run, checkdiff_summary, path_facts_resolve, past_prs_search, ghidra_lookup, code_graph_search</td></tr><tr>
+    <td class="mono">un_8031B1FC<div class="muted small">melee/ty/tydisplay</div></td>
+    <td class="num">300</td><td class="num">99.5%</td>
+    <td>medium</td>
+    <td><span class="pill bad">rejected: 10 same-unit regressions</span></td>
+    <td class="small">Runner validation failed: 10 same-unit score regression(s) detected…</td>
+    <td class="small mono">checkdiff_run, checkdiff_summary, path_facts_resolve, past_prs_search, review_lint_scan</td></tr><tr>
+    <td class="mono">grKongo_801D7BBC<div class="muted small">melee/gr/grkongo</div></td>
+    <td class="num">676</td><td class="num">97.0%</td>
+    <td>xhigh</td>
+    <td><span class="pill warn">needs_rework: string-literal lint gate</span></td>
+    <td class="small">Worker exhausted 2 repair attempt(s); latest return still failed the post-return gate: review lint: no-string-literal-symbol-regression: Keep string literal &quot;gp-&gt;u.taru.keep&quot; inline instead of replacing it with grKg_803E…</td>
+    <td class="small mono">checkdiff_run, checkdiff_summary, direct_compile_tu, path_facts_resolve, past_prs_search, review_lint_scan, ghidra_lookup</td></tr><tr>
+    <td class="mono">mnCount_Create<div class="muted small">melee/mn/mncount</div></td>
+    <td class="num">412</td><td class="num">89.3%</td>
+    <td>xhigh</td>
+    <td><span class="pill warn">needs_rework: string-literal lint gate</span></td>
+    <td class="small">Worker exhausted 2 repair attempt(s); latest return still failed the post-return gate: review lint: no-string-literal-symbol-regression: Keep string literal &quot;MenMainConCo_Top_animjoint&quot; inline instead of replacing it wit…</td>
+    <td class="small mono">code_graph_file_card, path_facts_resolve, past_prs_search, mismatch_db_search, ghidra_lookup, external_mirrors_search, checkdiff_run</td></tr></table>
+
+<h2>7 · Winning-tactic taxonomy</h2>
+<p class="small">The 16 gate-passing exact summaries cluster into six recurring MWCC-shaped moves:</p>
+<ul class="tight">
+<li><b>Register-allocation steering via locals</b> (5 wins) — introduce, reorder, or remove pointer/scalar temporaries so MWCC assigns r28–r30 as the target expects (<code>fn_80175D34</code>, <code>fn_80174284</code>, <code>mnDiagram_OnFrame</code>, <code>ftColl_8007925C</code>, <code>un_803148E4</code>).</li>
+<li><b>Static-data layout reconstruction</b> (4 wins) — adjacent-static base selection, contiguous data tables with original padding, moving <code>.sdata2</code> constant definitions (<code>gm_8016A164</code>, <code>mpLib_DrawSpecialPoints</code>, <code>ftColl_80077970</code>, <code>fn_80186EFC</code>).</li>
+<li><b>Type narrowing / bitfield typing</b> (2 wins) — s32→u8 temporary, typed bitfield access instead of flag arithmetic (<code>gm_80164910</code>, <code>fn_8016719C</code>).</li>
+<li><b>Natural-shape restoration</b> (2 wins) — replace generated-looking unrolled/manual code with the obvious loop or array expression (<code>grCastle_801CD658</code>, <code>AXDriver_8038E498</code>).</li>
+<li><b>Inline-helper reuse from analogous functions</b> (1 win) — reuse existing inlined count helpers from the sibling fog callback (<code>fn_801A94BC</code>).</li>
+<li><b>Declaration-order-only reshuffles</b> (1 win) — pure decl reorder, zero logic change (<code>fn_80174284</code>).</li>
+</ul>
+
+<h2>8 · Where confirmations are being lost</h2>
+<ul class="tight">
+<li><b>3 exact matches died at the lint gate</b> for the same violation: <code>no-string-literal-symbol-regression</code> — the agent replaced an inline string literal with a data-label reference (<code>fn_80393C14</code>, <code>mnCount_Create</code>, <code>grKongo_801D7BBC</code>). One sentence in the worker prompt ("never replace string literals with data labels") likely converts these directly into confirmations.</li>
+<li><b>2 lost at runner validation</b> — one caused 10 same-unit regressions, one didn't reproduce outside the worktree. Both medium-thinking sessions; <code>checkdiff_summary</code> on neighbors before reporting catches the first class, and 96% of exact winners already run it.</li>
+<li><b>159 aborted xhigh sessions</b> (~22 min mean each ≈ 60 worker-hours) burned on empty model returns — consistent with the known LB-outage failure mode. Retry-on-empty-return would recover the single biggest throughput loss in this run.</li>
+<li><b>All 8 regressions came from medium-thinking sessions.</b> If medium stays in the mix for cost reasons, gate its returns harder; xhigh produced zero.</li>
+</ul>
+
+<div class="note"><b>Method &amp; caveats.</b> Sessions: <code>pi_sessions</code> ⨝ <code>attempts</code> ⨝ <code>targets</code> in <code>projects/melee/state/orchestrator.sqlite</code>, attempt-mapped via each lease's <code>activity.jsonl</code>; tool calls parsed from the 393 pi session JSONL transcripts in <code>.pi-sessions/worker/</code>. "Exact" = attempt scored 100%; "confirmed" additionally passed runner validation and lint gates. Tool-usage differences are correlational — sessions that progress run longer and naturally touch more tools; the adoption-rate comparisons (section 3) are the more causal-looking signal since they hold at first-use, not call volume.</div>
+
+</div></body></html>

@@ -1,0 +1,17 @@
+{
+  "number": 1726,
+  "title": "fix outstanding cror comparisons",
+  "state": "MERGED",
+  "createdAt": "2025-07-23T03:33:51Z",
+  "updatedAt": "2025-07-23T03:41:50Z",
+  "mergedAt": "2025-07-23T03:41:50Z",
+  "closedAt": "2025-07-23T03:41:50Z",
+  "author": "lukechampine",
+  "url": "https://github.com/doldecomp/melee/pull/1726",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 6801
+  }
+}

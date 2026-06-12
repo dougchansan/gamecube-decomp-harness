@@ -1,0 +1,17 @@
+{
+  "number": 126,
+  "title": "Various sysdolphin function labels",
+  "state": "MERGED",
+  "createdAt": "2021-11-22T23:48:04Z",
+  "updatedAt": "2021-11-22T23:48:12Z",
+  "mergedAt": "2021-11-22T23:48:09Z",
+  "closedAt": "2021-11-22T23:48:09Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/126",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 19081
+  }
+}

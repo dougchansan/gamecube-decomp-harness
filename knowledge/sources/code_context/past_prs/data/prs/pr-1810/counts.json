@@ -1,0 +1,17 @@
+{
+  "number": 1810,
+  "title": "Improve all ItemStateTable function names",
+  "state": "MERGED",
+  "createdAt": "2025-08-08T02:58:03Z",
+  "updatedAt": "2025-08-11T22:28:38Z",
+  "mergedAt": "2025-08-11T13:14:30Z",
+  "closedAt": "2025-08-11T13:14:30Z",
+  "author": "lukechampine",
+  "url": "https://github.com/doldecomp/melee/pull/1810",
+  "counts": {
+    "issue_comments": 9,
+    "review_comments": 6,
+    "reviews": 6,
+    "diff_bytes": 0
+  }
+}

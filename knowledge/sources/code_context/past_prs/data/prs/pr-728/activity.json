@@ -1,0 +1,10 @@
+{
+  "pr": 728,
+  "title": "Deploy `ctx.html` whenever `master` is updated",
+  "url": "https://github.com/doldecomp/melee/pull/728",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 3,
+  "added_lines": 39,
+  "deleted_lines": 0
+}

@@ -1,0 +1,17 @@
+{
+  "number": 1576,
+  "title": "Cut down on auto splits",
+  "state": "MERGED",
+  "createdAt": "2025-06-07T02:13:50Z",
+  "updatedAt": "2025-06-07T02:19:43Z",
+  "mergedAt": "2025-06-07T02:19:38Z",
+  "closedAt": "2025-06-07T02:19:38Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1576",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 3681
+  }
+}

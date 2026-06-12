@@ -1,0 +1,17 @@
+{
+  "number": 409,
+  "title": "Ft load_special_attrs",
+  "state": "MERGED",
+  "createdAt": "2022-07-10T02:04:16Z",
+  "updatedAt": "2022-07-10T02:05:32Z",
+  "mergedAt": "2022-07-10T02:05:29Z",
+  "closedAt": "2022-07-10T02:05:29Z",
+  "author": "snuffysasa",
+  "url": "https://github.com/doldecomp/melee/pull/409",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 1,
+    "diff_bytes": 578476
+  }
+}

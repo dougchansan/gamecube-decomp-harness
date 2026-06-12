@@ -1,0 +1,437 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2129",
+  "pr": {
+    "number": 2129,
+    "title": "mndiagram, mndiagram2 matches & naming",
+    "url": "https://github.com/doldecomp/melee/pull/2129",
+    "state": "MERGED",
+    "author": "itsgrimetime",
+    "created_at": "2026-01-25T03:20:39Z",
+    "merged_at": "2026-01-27T02:26:27Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2129 matched and named a large set of VS Records mndiagram2 functions, added Diagram2-related types/headers/statics, renamed mndiagram2 symbols from address-style names to semantic names, and applied matching lessons back to mndiagram formatting, ranking, KO/fall total, and index-navigation helpers. The PR body says mndiagram2 functions and structs were documented/named based on Dolphin debugger validation; the bot report records 21 new matches and 19 improvements, including complete matches in both mndiagram2 and mndiagram.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "cleanup",
+      "decomp-matching",
+      "headers",
+      "naming",
+      "types-structs"
+    ],
+    "systems": [
+      "menus",
+      "VS Records",
+      "mndiagram",
+      "mndiagram2",
+      "game-mode headers",
+      "symbols"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/mn/mndiagram2.c",
+      "role": "Large implementation and documentation pass for mndiagram2; introduced includes, helper macros/inlines, local structs/unions, stat classification helpers, UI row/header/input/ranking/detail-view functions, and many named functions.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mndiagram2.c added 1391 deleted 5",
+        "review_comments.md: hunk shows expansion from address-named mnDiagram2_80243A3C to documented functions such as mnDiagram2_IsTimeStat, mnDiagram2_ClearStatRows, mnDiagram2_UpdateHeader, mnDiagram2_HandleInput",
+        "text_corpus.jsonl: bot report lists new matches and improvements in main/melee/mn/mndiagram2"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mndiagram.c",
+      "role": "Applied matching improvements learned from mndiagram2 back to existing mndiagram code, including formatting loops, total KO/fall helpers, ranked-fighter logic, name/fighter navigation, and added static data.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mndiagram.c added 212 deleted 211",
+        "diff.diff: mndiagram.c rewrites mnDiagram_FormatDecimalNumber, mnDiagram_FormatTime, mnDiagram_IntToStr, mnDiagram_GetPrev/NextNameIndex, mnDiagram_GetPrev/NextFighterIndex and splits sum helpers behind PAD_STACK wrappers",
+        "text_corpus.jsonl: bot report lists mndiagram matches for mnDiagram_FormatTime, mnDiagram_GetRankedFighterForName, mnDiagram_GetNameTotalFalls, mnDiagram_FormatDecimalNumber, mnDiagram_GetFighterTotalKOs/Falls, name/fighter index helpers, and mnDiagram_IntToStr"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Renamed mndiagram2 text symbols from address-style or fn_ names to semantic function names.",
+      "evidence_refs": [
+        "changed_files.jsonl: config/GALE01/symbols.txt added 21 deleted 21",
+        "diff.diff: mnDiagram2_80243A3C..mnDiagram2_80245AE4 and fn_80243D40/fn_80244D20/fn_80244F68/fn_80245028 renamed to mnDiagram2_IsTimeStat, mnDiagram2_HandleInput, mnDiagram2_OnAnimComplete, mnDiagram2_Think, mnDiagram2_FreeUserData, etc."
+      ]
+    },
+    {
+      "path": "src/melee/mn/types.h",
+      "role": "Added Diagram2-related type definitions used by the mndiagram2 implementation.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/types.h added 81 deleted 0",
+        "review_comments.md: hunk comment says Diagram2 struct is defined in mn/types.h"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mndiagram2.h",
+      "role": "Updated public declarations for mndiagram2 functions/types.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mndiagram2.h added 28 deleted 1"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mndiagram2.static.h",
+      "role": "Added static declarations for mndiagram2 globals referenced by mndiagram2.c and mndiagram.c.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mndiagram2.static.h added 36 deleted 0",
+        "review_comments.md: hunk includes mndiagram2.static.h and comments that mnDiagram_ArchiveData, mnDiagram2_804D6C18, and mnDiagram_804A0834 are defined there"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mndiagram.h",
+      "role": "Adjusted mndiagram declarations to reflect changed signatures or recovered signatures.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mndiagram.h added 5 deleted 5",
+        "diff.diff: mndiagram.c changes several functions from u8 idx parameters to s32 idx and mnDiagram_FormatTime seconds from u32 to s32"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1601.h",
+      "role": "Recovered a concrete prototype for gm_80160C90.",
+      "evidence_refs": [
+        "diff.diff: gm_80160C90 changed from UNK_RET gm_80160C90(UNK_PARAMS) to void gm_80160C90(HSD_Text* text, u8 fighter_id, s32 arg2)"
+      ]
+    },
+    {
+      "path": "src/melee/mn/forward.h",
+      "role": "Added forward declaration for Diagram2.",
+      "evidence_refs": [
+        "diff.diff: added typedef struct Diagram2 Diagram2"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mndiagram.static.h",
+      "role": "Removed one static declaration, likely moved or superseded by mndiagram2.static.h context.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mndiagram.static.h added 0 deleted 1"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Implemented or substantially filled out mndiagram2.c, replacing a tiny address-named stub surface with documented functions for stat type classification, row clearing, header updates, input handling, stat value lookup, row creation/population, animation callbacks, scroll arrows, user data lifecycle, creation/init, ranked fighter/name computation, aggregated rank, and detail-view cleanup.",
+      "evidence_refs": [
+        "review_comments.md: large hunk starts with int mnDiagram2_80243A3C(u8 arg0) becoming bool mnDiagram2_IsTimeStat(u8 stat_type) and subsequent functions",
+        "diff.diff: symbols.txt lists semantic names for 21 mndiagram2 functions"
+      ]
+    },
+    {
+      "text": "Renamed 21 mndiagram2 symbols in symbols.txt from address-style/fn_ names to semantic mnDiagram2_* names.",
+      "evidence_refs": [
+        "diff.diff: config/GALE01/symbols.txt replacement block at mndiagram2 addresses 0x80243A3C through 0x80245AE4"
+      ]
+    },
+    {
+      "text": "Recovered or adjusted headers and forward declarations, including Diagram2 forward declaration and a concrete gm_80160C90 signature.",
+      "evidence_refs": [
+        "diff.diff: src/melee/mn/forward.h adds typedef struct Diagram2 Diagram2",
+        "diff.diff: src/melee/gm/gm_1601.h changes gm_80160C90 to void gm_80160C90(HSD_Text* text, u8 fighter_id, s32 arg2)"
+      ]
+    },
+    {
+      "text": "Reworked mndiagram.c functions toward cleaner indexed loops and helper extraction, including replacing pointer-walk formatting code with array-index loops and splitting sum helpers into static inline bodies wrapped by public PAD_STACK functions where needed.",
+      "evidence_refs": [
+        "diff.diff: mnDiagram_FormatDecimalNumber, mnDiagram_FormatTime, mnDiagram_IntToStr rewrites",
+        "diff.diff: mnDiagram_SumNameFalls and mnDiagram_SumFighterFalls introduced with public wrappers preserving PAD_STACK"
+      ]
+    },
+    {
+      "text": "PR report recorded measurable matching progress: +0.09% matched code, +3424 bytes, 21 new matches, and 19 improvements in unmatched functions.",
+      "evidence_refs": [
+        "text_corpus.jsonl: decomp-dev[bot] report for GALE01 says matched code 50.85% (+0.09%, +3424 bytes), 21 new matches, 19 improvements"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "The author used mndiagram2 work to refine related mndiagram functions instead of treating the files independently, consistent with the PR body's claim that mndiagram2 learnings were applied back to mndiagram.",
+      "evidence_refs": [
+        "human_pr_text.md: 'apply some learnings from these back to mndiagram as well to improve some of those matches'",
+        "text_corpus.jsonl: bot report lists new mndiagram matches alongside mndiagram2 matches"
+      ]
+    },
+    {
+      "text": "Address-style function names were promoted to descriptive names only where the PR also added bodies/documentation and symbol-table updates, keeping symbol naming and source names aligned.",
+      "evidence_refs": [
+        "diff.diff: symbols.txt renames address-style functions to semantic mnDiagram2 names",
+        "review_comments.md: mndiagram2.c hunk shows matching semantic function names and doc comments"
+      ]
+    },
+    {
+      "text": "Recovered header prototypes and forwards instead of relying only on source-local declarations for newly understood interfaces.",
+      "evidence_refs": [
+        "diff.diff: gm_1601.h gm_80160C90 signature recovery",
+        "diff.diff: forward.h Diagram2 forward declaration",
+        "changed_files.jsonl: mndiagram2.h and mndiagram.h changed"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When related menu pages share stat/ranking/formatting behavior, progress in one file can expose source shapes that improve matches in its sibling file.",
+      "scope": [
+        "src/melee/mn/mndiagram.c",
+        "src/melee/mn/mndiagram2.c"
+      ],
+      "evidence_refs": [
+        "human_pr_text.md: follow-up and applying mndiagram2 learnings back to mndiagram",
+        "text_corpus.jsonl: mndiagram2 and mndiagram both gained new matches/improvements in the same PR"
+      ]
+    },
+    {
+      "lesson": "Small formatting helpers may match better as direct indexed for-loops over buffers rather than pointer-increment loops, when the surrounding codegen supports that form.",
+      "scope": [
+        "src/melee/mn/mndiagram.c"
+      ],
+      "evidence_refs": [
+        "diff.diff: mnDiagram_FormatDecimalNumber and mnDiagram_IntToStr switch from ptr++ forms to buf[i] assignments",
+        "text_corpus.jsonl: bot report shows mnDiagram_FormatDecimalNumber and mnDiagram_IntToStr reached 100%"
+      ]
+    },
+    {
+      "lesson": "A public wrapper can preserve required stack shape while delegating logic to a static inline helper, as seen in mndiagram fall-total functions.",
+      "scope": [
+        "src/melee/mn/mndiagram.c"
+      ],
+      "evidence_refs": [
+        "diff.diff: mnDiagram_GetNameTotalFalls and mnDiagram_GetFighterTotalFalls become wrappers with PAD_STACK(16) returning static inline helper results",
+        "text_corpus.jsonl: bot report shows both fall-total functions reached 100%"
+      ]
+    },
+    {
+      "lesson": "Reviewer feedback favors enum case labels over raw numeric case values when an enum exists for stat categories.",
+      "scope": [
+        "src/melee/mn/mndiagram2.c"
+      ],
+      "evidence_refs": [
+        "review_comments.md: ribbanya asks 'Why not just use the enum values in the case?'",
+        "review_comments.md: hunk shows cases such as VSSTAT_PLAY_TIME, VSSTAT_WALK_DISTANCE, VSSTAT_HIT_PERCENTAGE, VSSTAT_MOST_PLAYED"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "mndiagram2 semantic function names use the mnDiagram2_ prefix followed by an action or predicate in UpperCamelCase, e.g. mnDiagram2_IsTimeStat, mnDiagram2_ClearStatRows, mnDiagram2_UpdateHeader, mnDiagram2_HandleInput.",
+      "evidence_refs": [
+        "diff.diff: symbols.txt mndiagram2 rename block",
+        "review_comments.md: function definitions in mndiagram2.c hunk"
+      ]
+    },
+    {
+      "convention": "Boolean classifier helpers are named with Is*Stat and take a stat_type argument, with enum case labels documenting the supported VSSTAT_* categories.",
+      "evidence_refs": [
+        "review_comments.md: mnDiagram2_IsTimeStat, mnDiagram2_IsDistanceStat, mnDiagram2_IsPercentageStat, mnDiagram2_IsIconOnlyStat definitions"
+      ]
+    },
+    {
+      "convention": "Recovered menu data structs are named around the owning page and UI role when evidence supports it, e.g. Diagram2, Diagram2DetailView, mnDiagram2_SortEntry; uncertain temporary types keep comments/todos rather than overclaiming exact ownership.",
+      "evidence_refs": [
+        "review_comments.md: defines mnDiagram2_SortEntry, JObjContainer with @todo, Diagram2DetailView, and notes Diagram2 is in mn/types.h"
+      ]
+    },
+    {
+      "convention": "Recovered signatures should be reflected in owning headers, replacing UNK_RET/UNK_PARAMS when the body evidence supports parameter and return types.",
+      "evidence_refs": [
+        "diff.diff: gm_80160C90 prototype changed from UNK_RET/UNK_PARAMS to void gm_80160C90(HSD_Text* text, u8 fighter_id, s32 arg2)"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Use PAD_STACK narrowly in wrappers or functions where stack shape appears to matter, while keeping the main logic in a cleaner helper when possible.",
+      "evidence_refs": [
+        "diff.diff: mnDiagram_GetNameTotalFalls and mnDiagram_GetFighterTotalFalls wrappers retain PAD_STACK(16) and call static inline helpers",
+        "review_comments.md: mnDiagram2_UpdateHeader contains PAD_STACK(8)"
+      ]
+    },
+    {
+      "tactic": "Try local static inline helpers for repeated or mode-dependent logic, such as selecting entity index or refreshing stat rows.",
+      "evidence_refs": [
+        "review_comments.md: static inline mnDiagram_GetEntityByIndex selects name vs fighter",
+        "review_comments.md: static inline mnDiagram2_RefreshStatRows clears and repopulates stat rows"
+      ]
+    },
+    {
+      "tactic": "Represent 64-bit sorting/data reinterpretation explicitly with a union when the function needs alternate f64/u64/field views.",
+      "evidence_refs": [
+        "review_comments.md: mnDiagram2_SortEntry union contains named field view, f64 view, and u64 value view"
+      ]
+    },
+    {
+      "tactic": "Use enum constants in switch cases for stat-type classifiers rather than retaining raw numeric case labels.",
+      "evidence_refs": [
+        "review_comments.md: reviewer asks why not use enum values in case",
+        "review_comments.md: classifier helpers show VSSTAT_* case labels"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "author": "ribbanya",
+      "path": "src/melee/mn/mndiagram2.c",
+      "comment": "Why not just use the enum values in the `case`?",
+      "interpretation": "The review comment directly recommends using available enum values in switch cases instead of numeric constants for mndiagram2 stat-type checks.",
+      "evidence_refs": [
+        "review_comments.md: discussion_r2727682121"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2129",
+    "mndiagram",
+    "mndiagram2",
+    "VS Records",
+    "mnDiagram2_IsTimeStat",
+    "mnDiagram2_IsDistanceStat",
+    "mnDiagram2_IsPercentageStat",
+    "mnDiagram2_IsIconOnlyStat",
+    "mnDiagram2_ClearStatRows",
+    "mnDiagram2_UpdateHeader",
+    "mnDiagram2_HandleInput",
+    "mnDiagram2_GetStatValue",
+    "mnDiagram2_CreateStatRow",
+    "mnDiagram2_PopulateStatRows",
+    "mnDiagram2_UpdateScrollArrows",
+    "mnDiagram2_GetRankedFighter",
+    "mnDiagram2_GetRankedName",
+    "mnDiagram2_GetAggregatedFighterRank",
+    "mnDiagram2_ClearDetailView",
+    "Diagram2",
+    "Diagram2DetailView",
+    "mnDiagram2_SortEntry",
+    "VSSTAT_PLAY_TIME",
+    "VSSTAT_WALK_DISTANCE",
+    "VSSTAT_RUN_DISTANCE",
+    "VSSTAT_FALL_DISTANCE",
+    "VSSTAT_PEAK_HEIGHT",
+    "VSSTAT_HIT_PERCENTAGE",
+    "VSSTAT_PLAY_PERCENTAGE",
+    "VSSTAT_AVG_PLAYERS",
+    "VSSTAT_MOST_PLAYED",
+    "PAD_STACK",
+    "Dolphin debugger validation",
+    "gm_80160C90",
+    "GetPersistentNameData",
+    "GetPersistentFighterData"
+  ],
+  "follow_up_queries": [
+    "mndiagram2 enum values case VSSTAT reviewer",
+    "mnDiagram2_SortEntry union f64 u64 sorting operations",
+    "mndiagram PAD_STACK wrapper static inline helper falls",
+    "mndiagram2 Dolphin debugger validation structs Diagram2",
+    "gm_80160C90 HSD_Text fighter_id arg2 prototype",
+    "mnDiagram_FormatDecimalNumber indexed loop match",
+    "mnDiagram_GetRankedFighterForName CheckAllZeroPlayTime CountTiedFighters",
+    "mndiagram2 ClearStatRows UpdateHeader HandleInput matching"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR metadata, changed files, merged state, counts",
+      "human_pr_text.md: author intent and Dolphin debugger validation claim",
+      "review_comments.md: one review comment plus mndiagram2.c hunk",
+      "raw_diff.diff: diff excerpt for symbols, headers, and mndiagram.c changes",
+      "text_corpus.jsonl: bot report with match counts and function-level match/improvement lists"
+    ],
+    "notes": [
+      "Strong evidence for changed files, symbol renames, header changes, review feedback, and bot-reported match/improvement results.",
+      "The loaded raw diff and review comments are truncated, so not every changed hunk in mndiagram2.c, types.h, or headers is visible.",
+      "The PR body claims Dolphin debugger validation for naming/documentation, but the slice does not include the debugger notes themselves; treat validation as an author-stated basis, not independently verified evidence.",
+      "No local build, objdiff command output, or final review resolution is included beyond the decomp-dev bot report and merged metadata."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "lesson",
+        "title": "Sibling menu pages can cross-inform matching shapes",
+        "text": "In PR #2129, matching mndiagram2 functions also improved existing mndiagram functions; when menu pages share stat/ranking/formatting behavior, inspect sibling files for loop, helper, signature, and data-shape clues.",
+        "scope": [
+          "src/melee/mn/mndiagram.c",
+          "src/melee/mn/mndiagram2.c"
+        ],
+        "evidence_refs": [
+          "human_pr_text.md: applying mndiagram2 learnings back to mndiagram",
+          "text_corpus.jsonl: bot report shows matches/improvements in both units"
+        ]
+      },
+      {
+        "record_type": "lesson",
+        "title": "Enum labels are preferred in recovered switch cases when available",
+        "text": "PR #2129 review feedback asked why stat classifier switch cases did not simply use enum values; recovered switch cases over known stat types should use VSSTAT_* labels rather than raw numeric constants when the enum is known.",
+        "scope": [
+          "src/melee/mn/mndiagram2.c"
+        ],
+        "evidence_refs": [
+          "review_comments.md: ribbanya review comment",
+          "review_comments.md: classifier helpers with VSSTAT_* case labels"
+        ]
+      },
+      {
+        "record_type": "matching_tactic",
+        "title": "Use narrow PAD_STACK wrappers around cleaner helper logic",
+        "text": "PR #2129 shows mndiagram fall-total functions preserving PAD_STACK in public wrappers while moving summation logic into static inline helpers, resulting in reported 100% matches for the affected functions.",
+        "scope": [
+          "src/melee/mn/mndiagram.c"
+        ],
+        "evidence_refs": [
+          "diff.diff: mnDiagram_SumNameFalls and mnDiagram_SumFighterFalls plus PAD_STACK wrappers",
+          "text_corpus.jsonl: bot report for mnDiagram_GetNameTotalFalls and mnDiagram_GetFighterTotalFalls"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Prefer enum constants over raw case values in recovered switches",
+        "text": "When a recovered switch dispatches over a known enum, use the enum constants in case labels instead of raw numeric literals, provided the enum mapping is established by headers/source evidence.",
+        "source_path": null,
+        "scope": [
+          "switch cleanup",
+          "enum-backed stat classifiers",
+          "review readability"
+        ],
+        "evidence_refs": [
+          "review_comments.md: 'Why not just use the enum values in the case?'",
+          "review_comments.md: VSSTAT_* cases in mnDiagram2 stat classifier helpers"
+        ],
+        "reason": "This is a reviewer-supported readability/naming convention not explicitly called out as a global standard in the loaded standards."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "mndiagram and mndiagram2 share VS Records stat/ranking behavior",
+        "text": "PR #2129 indicates mndiagram2 matching exposed learnings that improved mndiagram matches, especially around VS Records stat/ranking/formatting helpers.",
+        "source_path": "src/melee/mn",
+        "scope": [
+          "src/melee/mn/mndiagram.c",
+          "src/melee/mn/mndiagram2.c"
+        ],
+        "evidence_refs": [
+          "human_pr_text.md: author says mndiagram2 learnings were applied back to mndiagram",
+          "text_corpus.jsonl: bot report lists mndiagram and mndiagram2 matches/improvements"
+        ],
+        "reason": "Useful path-level relationship for future matching searches; should be curator-reviewed before becoming a path fact."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote the Dolphin debugger validation claim into a verified naming standard without the underlying validation notes or screenshots.",
+      "Do not infer that all mndiagram2 names are permanently canonical solely from this slice; the diff shows names accepted in a merged PR, but broader naming authority should come from current source/symbols.",
+      "Do not generalize PAD_STACK usage as preferred style; in this PR it appears as a narrow matching tactic with reported match benefit, consistent with standards requiring evidence."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

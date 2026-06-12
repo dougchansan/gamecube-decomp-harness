@@ -1,0 +1,404 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2331",
+  "pr": {
+    "number": 2331,
+    "title": "Match ftCo_FlyReflect",
+    "url": "https://github.com/doldecomp/melee/pull/2331",
+    "state": "MERGED",
+    "author": "jellejurre",
+    "created_at": "2026-03-19T23:15:42Z",
+    "merged_at": "2026-03-20T00:36:15Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2331 matched ftCo_FlyReflect by marking the object Matching, adjusting ftCo_FlyReflect.c code shape around fly-reflect wall/ceiling collision helpers, replacing sqrtf with a local fake_sqrtf using __frsqrte, adding stack/local padding and a narrow dont_inline pragma, and renaming several ftCo_FlyReflect .sdata2 symbols to local @ labels. Bot output reported 4 new matches including ftCo_800C17CC, ftCo_800C18A8, ftCo_FlyReflect_Coll, and .sdata2.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "matching",
+      "fighter-common",
+      "collision",
+      "stack-shape",
+      "sdata2-symbol-metadata"
+    ],
+    "systems": [
+      "fighter",
+      "ftCommon",
+      "config",
+      "build-config"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_FlyReflect.c",
+      "role": "Primary decomp source updated for ftCo_FlyReflect matching; changed includes, stack padding locals, helper inlining shape, fake_sqrtf, control-flow expansion, and dont_inline scoping.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/ft/chara/ftCommon/ftCo_FlyReflect.c added 107 deleted 26 hunks 8",
+        "raw_diff: ftCo_FlyReflect.c diff hunks",
+        "text_corpus: bot report lists ftCo_800C17CC, ftCo_800C18A8, ftCo_FlyReflect_Coll as new 100% matches"
+      ]
+    },
+    {
+      "path": "configure.py",
+      "role": "Build configuration changed ftCo_FlyReflect.c from NonMatching to Matching.",
+      "evidence_refs": [
+        "raw_diff: Object(NonMatching, \"melee/ft/chara/ftCommon/ftCo_FlyReflect.c\") changed to Object(Matching, ...)",
+        "changed_files.jsonl: configure.py added 1 deleted 1"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Adjusted .sdata2 symbol names for ftCo_FlyReflect literals from address-style ftCo_804D8C40..58 labels to @221/@259/@260/@261/@262.",
+      "evidence_refs": [
+        "raw_diff: symbols.txt .sdata2 entries at 0x804D8C40 through 0x804D8C58 renamed",
+        "text_corpus: bot report lists ftCo_FlyReflect .sdata2 as new 100% match"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Moved ftCo_FlyReflect.c to Matching in configure.py.",
+      "evidence_refs": [
+        "raw_diff: configure.py hunk"
+      ]
+    },
+    {
+      "text": "Reworked ftCo_800C15F4 and ftCo_800C1718 local padding from byte arrays to u32 pad locals; ftCo_800C1718 was wrapped in #pragma push / #pragma dont_inline on / #pragma pop and used gobj->user_data instead of GET_FIGHTER.",
+      "evidence_refs": [
+        "raw_diff: ftCo_800C15F4 and ftCo_800C1718 hunks"
+      ]
+    },
+    {
+      "text": "Added ftCo_800C1718_inline with duplicated ceiling-reflect logic and used it in ftCo_FlyReflect_Coll where RETURN_IF(ftCo_800C1718(gobj)) had been used.",
+      "evidence_refs": [
+        "raw_diff: added ftCo_800C1718_inline and ftCo_FlyReflect_Coll hunk"
+      ]
+    },
+    {
+      "text": "Expanded ftCo_800C17CC from two helper calls into explicit collision/reflection logic with PAD_STACK(0x10), local declarations, and explicit ret handling.",
+      "evidence_refs": [
+        "raw_diff: ftCo_800C17CC hunk",
+        "human_pr_text: author mentions uncertainty about stack pad at beginning of the function"
+      ]
+    },
+    {
+      "text": "Added fake_sqrtf using __frsqrte Newton-Raphson refinement and volatile float storage; ftCo_800C18A8 now calls fake_sqrtf instead of sqrtf.",
+      "evidence_refs": [
+        "raw_diff: fake_sqrtf addition and ftCo_800C18A8 sqrtf replacement"
+      ]
+    },
+    {
+      "text": "Expanded ftCo_FlyReflect_Coll helper-return logic into an explicit tmp variable and nested calls to ftCo_800C15F4 / ftCo_800C1718.",
+      "evidence_refs": [
+        "raw_diff: ftCo_FlyReflect_Coll hunk"
+      ]
+    },
+    {
+      "text": "Renamed five .sdata2 symbols at 0x804D8C40, 0x804D8C44, 0x804D8C48, 0x804D8C50, and 0x804D8C58 to @ local labels.",
+      "evidence_refs": [
+        "raw_diff: config/GALE01/symbols.txt hunk"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "The PR kept the object-level promotion explicit by changing configure.py only after the source and symbols changes produced bot-reported new matches.",
+      "evidence_refs": [
+        "raw_diff: configure.py Matching change",
+        "text_corpus: decomp-dev bot report with 4 new matches"
+      ]
+    },
+    {
+      "text": "The author called out uncertainty about the stack pad approach in the PR body instead of presenting the tactic as a settled convention.",
+      "evidence_refs": [
+        "human_pr_text: author says they were unsure how to do the stack pad without creating rodata"
+      ]
+    },
+    {
+      "text": "The dont_inline pragma was narrowly scoped with push/pop around ftCo_800C1718 rather than left as a broad file-level setting.",
+      "evidence_refs": [
+        "raw_diff: #pragma push, #pragma dont_inline on before ftCo_800C1718, #pragma pop after it"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a matching change needs stack padding or local lifetime steering, preserve the uncertainty and verifier evidence; this PR used PAD_STACK, explicit pad locals, and local declaration reshaping to close small remaining gaps.",
+      "scope": [
+        "matching tactics",
+        "stack shape",
+        "ftCommon source"
+      ],
+      "evidence_refs": [
+        "human_pr_text: author notes uncertainty about stack pad",
+        "raw_diff: PAD_STACK(0x10), u32 pad locals, local declaration reshaping",
+        "text_corpus: bot report shows ftCo_800C17CC, ftCo_800C18A8, and ftCo_FlyReflect_Coll reached 100%"
+      ],
+      "confidence": 0.72
+    },
+    {
+      "lesson": "Small percent gaps in a nearly matched function can be due to helper call shape, inlining, local declaration order, or math intrinsic expansion rather than high-level behavior changes.",
+      "scope": [
+        "function matching",
+        "inline shape",
+        "math helper shape"
+      ],
+      "evidence_refs": [
+        "raw_diff: ftCo_800C1718_inline addition and callsite change",
+        "raw_diff: fake_sqrtf replacing sqrtf",
+        "text_corpus: bot report lists +1 byte improvements to three functions reaching 100%"
+      ],
+      "confidence": 0.68
+    },
+    {
+      "lesson": "Literal/sdata2 metadata may be adjusted alongside a code match when the report shows the same translation unit's data section reaching 100%, but the PR evidence does not explain the data-ownership rationale.",
+      "scope": [
+        "sdata2",
+        "symbols.txt",
+        "data matching"
+      ],
+      "evidence_refs": [
+        "raw_diff: symbols.txt renamed five ftCo_804D8Cxx labels to @ labels",
+        "text_corpus: bot report lists ftCo_FlyReflect .sdata2 as 58.33% to 100.00%"
+      ],
+      "confidence": 0.55
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "The PR changed anonymous/local .sdata2 float and double labels from ftCo_804D8C40-style address names to compiler-like @221/@259/@260/@261/@262 labels.",
+      "scope": [
+        "config/GALE01/symbols.txt",
+        ".sdata2"
+      ],
+      "evidence_refs": [
+        "raw_diff: symbols.txt hunk"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "text": "Local temporary names used for matching include pad, pad1..pad4, normal, ret, and tmp; evidence supports these as local code-shape names, not as broader naming standards.",
+      "scope": [
+        "ftCo_FlyReflect.c locals"
+      ],
+      "evidence_refs": [
+        "raw_diff: ftCo_800C1718_inline, ftCo_800C17CC, fake_sqrtf, ftCo_FlyReflect_Coll"
+      ],
+      "confidence": 0.76
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Use explicit stack padding via PAD_STACK and zero-initialized u32 pad locals when byte-array padding creates unwanted rodata or wrong code shape.",
+      "evidence_refs": [
+        "human_pr_text: stack pad uncertainty without creating rodata",
+        "raw_diff: u8 arrays changed to u32 pad locals; PAD_STACK(0x10)"
+      ],
+      "risk_or_note": "Existing standards require explicit verifier evidence for PAD_STACK and padding tactics; the bot report supports final matching, but the PR slice does not include objdiff details or reviewer discussion validating this as preferred style.",
+      "confidence": 0.66
+    },
+    {
+      "tactic": "Scope #pragma dont_inline tightly with push/pop around a single helper when call/inlining shape matters.",
+      "evidence_refs": [
+        "raw_diff: #pragma push / #pragma dont_inline on around ftCo_800C1718 / #pragma pop"
+      ],
+      "risk_or_note": "Pragmas are exceptions under loaded standards; this PR evidence shows narrow scope but not adjacent-function validation.",
+      "confidence": 0.7
+    },
+    {
+      "tactic": "Create a separate inline version of a helper to satisfy one callsite while preserving a non-inlined function body elsewhere.",
+      "evidence_refs": [
+        "raw_diff: added ftCo_800C1718_inline and changed one RETURN_IF call to use it",
+        "raw_diff: ftCo_800C17CC still calls/duplicates ftCo_800C1718 behavior separately"
+      ],
+      "risk_or_note": "Potentially generated-looking duplication; should be reviewed against authored-source style and verifier output before treating as a reusable pattern.",
+      "confidence": 0.62
+    },
+    {
+      "tactic": "Replace standard sqrtf with a local fake_sqrtf using __frsqrte refinement and volatile float storage to match expected PPC codegen.",
+      "evidence_refs": [
+        "raw_diff: fake_sqrtf implementation",
+        "raw_diff: ftCo_800C18A8 uses fake_sqrtf",
+        "text_corpus: bot report says ftCo_800C18A8 reached 100%"
+      ],
+      "risk_or_note": "The helper name itself indicates a match tactic; do not generalize without checking local math idioms and objdiff evidence.",
+      "confidence": 0.66
+    },
+    {
+      "tactic": "Expand RETURN_IF/helper-call control flow into explicit tmp/ret variables when boolean return code shape needs exact branching.",
+      "evidence_refs": [
+        "raw_diff: ftCo_800C17CC explicit ret handling",
+        "raw_diff: ftCo_FlyReflect_Coll explicit tmp handling"
+      ],
+      "risk_or_note": "This may reduce readability and should not outrank normal control-flow forms unless verifier evidence requires it.",
+      "confidence": 0.64
+    }
+  ],
+  "review_feedback": [
+    {
+      "type": "author_note",
+      "text": "Author stated this was their first match PR and asked for guidance, specifically noting uncertainty about stack padding without creating rodata.",
+      "author": "jellejurre",
+      "evidence_refs": [
+        "human_pr_text",
+        "text_corpus: pr_body"
+      ]
+    },
+    {
+      "type": "bot_report",
+      "text": "decomp-dev bot reported matched code +1268 bytes, linked code +1860 bytes, matched data +32 bytes, linked data +32 bytes, and 4 new matches for ftCo_FlyReflect.",
+      "author": "decomp-dev[bot]",
+      "evidence_refs": [
+        "text_corpus: issue_comment by decomp-dev[bot]"
+      ]
+    },
+    {
+      "type": "missing_review",
+      "text": "No human review comments or review records are present in the loaded PR slice.",
+      "author": null,
+      "evidence_refs": [
+        "metadata_json: counts.review_comments 0, counts.reviews 0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2331",
+    "Match ftCo_FlyReflect",
+    "jellejurre",
+    "ftCo_FlyReflect.c",
+    "ftCo_800C15F4",
+    "ftCo_800C1718",
+    "ftCo_800C1718_inline",
+    "ftCo_800C17CC",
+    "ftCo_800C18A8",
+    "ftCo_FlyReflect_Coll",
+    "fake_sqrtf",
+    "__frsqrte",
+    "PAD_STACK",
+    "pragma dont_inline",
+    "ftCo_MS_FlyReflectCeil",
+    "ftCo_MS_FlyReflectWall",
+    "Collide_CeilingHug",
+    "Collide_RightWallHug",
+    "sdata2",
+    "@221",
+    "@259",
+    "@260",
+    "@261",
+    "@262"
+  ],
+  "follow_up_queries": [
+    "ftCo_800C1718_inline PAD_STACK fake_sqrtf",
+    "fake_sqrtf __frsqrte volatile float matching",
+    "pragma dont_inline ftCommon matching",
+    "ftCo_FlyReflect .sdata2 @221 @259 @260",
+    "stack pad without creating rodata PAD_STACK",
+    "ftCo_800C17CC ret tmp matching"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR #2331 merged, changed files and counts",
+      "human_pr_text: author body",
+      "raw_diff: complete 8390-byte diff",
+      "text_corpus: bot report",
+      "metadata_json: review_comments 0 and reviews 0"
+    ],
+    "notes": [
+      "Strong evidence for changed files, exact code edits, configure.py Matching promotion, and bot-reported match improvements.",
+      "Weak or missing evidence for reviewer intent because no human reviews or review comments are loaded.",
+      "The PR body admits uncertainty about stack padding, so padding/pragmas/fake_sqrtf should be treated as tactics used in this PR, not accepted global style.",
+      "The bot report supports new matches but does not provide detailed objdiff, adjacent-function, or build logs in the loaded slice.",
+      "The symbols.txt rename rationale is not explained beyond the diff and bot-reported .sdata2 improvement."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "type": "pr_postmortem_lesson",
+        "title": "ftCo_FlyReflect match used stack padding, inline-shape, and math intrinsic tactics",
+        "text": "PR #2331 matched ftCo_FlyReflect by combining narrow stack/local-shape edits, a scoped dont_inline pragma, an inline helper variant, explicit boolean control flow, fake_sqrtf using __frsqrte, and .sdata2 symbol metadata changes. Bot output reported four new matches, but the PR slice lacks human review and detailed objdiff logs.",
+        "scope": [
+          "src/melee/ft/chara/ftCommon/ftCo_FlyReflect.c",
+          "configure.py",
+          "config/GALE01/symbols.txt"
+        ],
+        "evidence_refs": [
+          "raw_diff",
+          "text_corpus: decomp-dev bot report",
+          "human_pr_text"
+        ],
+        "confidence": 0.74
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Document that stack padding and pragma/inlining tactics need narrow verifier evidence",
+        "text": "PR #2331 is a useful example of stack padding, scoped dont_inline, local declaration reshaping, and inline-helper duplication used to complete a match, while the author explicitly noted uncertainty. Consider cross-linking this PR as an example under existing matching-tactics and pragma standards, with a warning that the slice lacks human review and detailed objdiff logs.",
+        "source_path": null,
+        "scope": [
+          "matching-tactics-need-evidence",
+          "avoid-pragmas-register-asm",
+          "verification-and-regression-ledger"
+        ],
+        "evidence_refs": [
+          "human_pr_text: author uncertainty about stack pad",
+          "raw_diff: PAD_STACK, pad locals, scoped dont_inline",
+          "text_corpus: bot report with 4 new matches"
+        ],
+        "reason": "The PR gives concrete evidence of tactics in use, but should not be promoted as broad accepted style without curator review."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "ftCo_FlyReflect.c became Matching in PR #2331",
+        "text": "PR #2331 changed Object(NonMatching, \"melee/ft/chara/ftCommon/ftCo_FlyReflect.c\") to Object(Matching, \"melee/ft/chara/ftCommon/ftCo_FlyReflect.c\") in configure.py.",
+        "source_path": "configure.py",
+        "scope": [
+          "melee/ft/chara/ftCommon/ftCo_FlyReflect.c",
+          "configure.py"
+        ],
+        "evidence_refs": [
+          "raw_diff: configure.py hunk",
+          "metadata_json: PR merged_at 2026-03-20T00:36:15Z"
+        ],
+        "reason": "This is a path-scoped historical fact supported by the diff and merge metadata; curator should decide whether to add it to path facts."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "ftCo_FlyReflect .sdata2 labels changed to @ labels in PR #2331",
+        "text": "PR #2331 renamed five ftCo_FlyReflect .sdata2 symbols at 0x804D8C40 through 0x804D8C58 from ftCo_804D8Cxx labels to @221/@259/@260/@261/@262, and the bot report showed the unit's .sdata2 moving from 58.33% to 100.00%.",
+        "source_path": "config/GALE01/symbols.txt",
+        "scope": [
+          "config/GALE01/symbols.txt",
+          "main/melee/ft/chara/ftCommon/ftCo_FlyReflect",
+          ".sdata2"
+        ],
+        "evidence_refs": [
+          "raw_diff: symbols.txt hunk",
+          "text_corpus: bot report .sdata2 +14 to 100.00%"
+        ],
+        "reason": "Potential path fact for data-symbol history; rationale is not explained in review, so curator should keep it factual and narrow."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that fake_sqrtf is a general project standard; this PR only shows it used locally to match ftCo_800C18A8.",
+      "Do not infer human reviewer approval of padding, pragmas, or .sdata2 renames; no human review comments are present.",
+      "Do not treat duplicated ftCo_800C1718 logic as preferred authored style without comparing local source and objdiff evidence.",
+      "Do not claim adjacent-function regression checks were run; the loaded slice only includes the bot summary report."
+    ]
+  },
+  "confidence": 0.76,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 284,
+  "title": "Match Ness func_80114968",
+  "state": "MERGED",
+  "createdAt": "2022-02-19T20:12:00Z",
+  "updatedAt": "2022-02-19T20:43:16Z",
+  "mergedAt": "2022-02-19T20:41:54Z",
+  "closedAt": "2022-02-19T20:41:54Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/284",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 4814
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 587,
+  "title": "Match `ftPurin`, pass 1",
+  "state": "MERGED",
+  "createdAt": "2022-11-03T18:40:10Z",
+  "updatedAt": "2022-11-03T18:43:28Z",
+  "mergedAt": "2022-11-03T18:43:27Z",
+  "closedAt": "2022-11-03T18:43:27Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/587",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 846135
+  }
+}

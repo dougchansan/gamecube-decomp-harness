@@ -1,0 +1,17 @@
+{
+  "number": 1138,
+  "title": "Run `ninja diff` and `ninja all_source` by default",
+  "state": "CLOSED",
+  "createdAt": "2024-01-27T18:59:58Z",
+  "updatedAt": "2024-01-29T04:47:03Z",
+  "mergedAt": null,
+  "closedAt": "2024-01-27T19:15:55Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1138",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 419
+  }
+}

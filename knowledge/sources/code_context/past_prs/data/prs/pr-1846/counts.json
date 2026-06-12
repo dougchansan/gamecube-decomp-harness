@@ -1,0 +1,17 @@
+{
+  "number": 1846,
+  "title": "Identify remaining functions in lbl tables",
+  "state": "MERGED",
+  "createdAt": "2025-08-16T15:44:18Z",
+  "updatedAt": "2025-08-16T23:51:32Z",
+  "mergedAt": "2025-08-16T21:56:30Z",
+  "closedAt": "2025-08-16T21:56:30Z",
+  "author": "lukechampine",
+  "url": "https://github.com/doldecomp/melee/pull/1846",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 5,
+    "reviews": 6,
+    "diff_bytes": 32567
+  }
+}

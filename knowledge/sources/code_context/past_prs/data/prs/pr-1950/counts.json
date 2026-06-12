@@ -1,0 +1,17 @@
+{
+  "number": 1950,
+  "title": "Match & link ftdata",
+  "state": "MERGED",
+  "createdAt": "2025-09-28T01:54:45Z",
+  "updatedAt": "2025-09-28T02:01:22Z",
+  "mergedAt": "2025-09-28T02:01:16Z",
+  "closedAt": "2025-09-28T02:01:16Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1950",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 256623
+  }
+}

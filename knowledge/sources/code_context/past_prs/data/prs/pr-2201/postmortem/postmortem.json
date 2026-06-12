@@ -1,0 +1,249 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2201",
+  "pr": {
+    "number": 2201,
+    "title": "Mark itheart as matching",
+    "url": "https://github.com/doldecomp/melee/pull/2201",
+    "state": "MERGED",
+    "author": "PsiLupan",
+    "created_at": "2026-03-04T16:22:26Z",
+    "merged_at": "2026-03-04T16:31:18Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2201 marked melee/it/items/itheart.c as Matching in configure.py and adjusted several GALE01 symbol metadata entries from it_* globals to local @ labels for data, sdata, and sdata2 addresses. The bot report recorded linked code and linked data increases. No PR body, review comments, or code-source changes were present in the loaded slice.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "matching-status-update",
+      "symbol-metadata",
+      "configuration"
+    ],
+    "systems": [
+      "items",
+      "itheart",
+      "config/GALE01",
+      "repo-root"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "configure.py",
+      "role": "Changed itheart.c from Object(NonMatching, ...) to Object(Matching, ...) in MatchingFor.",
+      "evidence_refs": [
+        "raw_diff: configure.py hunk near line 1110",
+        "changed_files.jsonl: configure.py added 1 deleted 1"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Changed seven symbol entries at .data, .sdata, and .sdata2 addresses from it_* names to local @ labels, with some scope changes from global to local.",
+      "evidence_refs": [
+        "raw_diff: symbols.txt hunks at 0x803F5718, 0x804D5210, 0x804D5218, 0x804DC8A8, 0x804DC8AC, 0x804DD970, 0x804DD974",
+        "changed_files.jsonl: config/GALE01/symbols.txt added 7 deleted 7"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "melee/it/items/itheart.c was marked as Matching in configure.py.",
+      "evidence_refs": [
+        "raw_diff: -Object(NonMatching, \"melee/it/items/itheart.c\") +Object(Matching, \"melee/it/items/itheart.c\")"
+      ]
+    },
+    {
+      "text": "One .data string at 0x803F5718 changed from global it_803F5718 to local @234.",
+      "evidence_refs": [
+        "raw_diff: symbols.txt hunk near line 23548"
+      ]
+    },
+    {
+      "text": "Two .sdata strings at 0x804D5210 and 0x804D5218 changed from global it_* names to local @188 and @189.",
+      "evidence_refs": [
+        "raw_diff: symbols.txt hunk near line 26986"
+      ]
+    },
+    {
+      "text": "Two local .sdata2 floats at 0x804DC8A8 and 0x804DC8AC changed from it_* names to local @156 and @157.",
+      "evidence_refs": [
+        "raw_diff: symbols.txt hunk near line 32782"
+      ]
+    },
+    {
+      "text": "Two .sdata2 floats at 0x804DD970 and 0x804DD974 changed from global it_* names to local @162 and @163.",
+      "evidence_refs": [
+        "raw_diff: symbols.txt hunk near line 33551"
+      ]
+    },
+    {
+      "text": "decomp-dev bot reported GALE01 linked code +0.04% (+1744 bytes) and linked data +0.01% (+144 bytes).",
+      "evidence_refs": [
+        "text_corpus.jsonl: issue_comment by decomp-dev[bot] at 2026-03-04T16:30:49Z"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "The matching-status change was paired with symbol metadata cleanup instead of source-code churn in the loaded diff.",
+      "evidence_refs": [
+        "raw_diff: only configure.py and config/GALE01/symbols.txt changed",
+        "changed_files.jsonl: two changed files"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "text": "For a matching-status PR, symbol metadata can be part of the required closure: this slice adjusted local/global scope and local label names in symbols.txt before marking itheart.c as Matching.",
+      "evidence_refs": [
+        "raw_diff: symbols.txt local label edits",
+        "raw_diff: configure.py Matching edit"
+      ],
+      "confidence": 0.78
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "Local unnamed data labels in symbols.txt used @number form, such as @234, @188, @189, @156, @157, @162, and @163, replacing address-style it_* names where the PR marked entries local.",
+      "evidence_refs": [
+        "raw_diff: symbols.txt replacements"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "text": "Used configuration and symbol-table metadata changes, rather than C source edits in the loaded diff, to mark the itheart object matching.",
+      "evidence_refs": [
+        "raw_diff: configure.py",
+        "raw_diff: config/GALE01/symbols.txt"
+      ]
+    },
+    {
+      "text": "Adjusted symbol scope/name metadata across .data, .sdata, and .sdata2 entries, consistent with data-section metadata being part of matching work.",
+      "evidence_refs": [
+        "raw_diff: symbols.txt hunks for .data, .sdata, .sdata2"
+      ]
+    }
+  ],
+  "review_feedback": [],
+  "searchable_terms": [
+    "PR 2201",
+    "Mark itheart as matching",
+    "PsiLupan",
+    "itheart",
+    "melee/it/items/itheart.c",
+    "configure.py",
+    "Object(Matching)",
+    "Object(NonMatching)",
+    "config/GALE01/symbols.txt",
+    "it_803F5718",
+    "@234",
+    "it_804D5210",
+    "@188",
+    "it_804D5218",
+    "@189",
+    "it_804DC8A8",
+    "@156",
+    "it_804DC8AC",
+    "@157",
+    "it_804DD970",
+    "@162",
+    "it_804DD974",
+    "@163",
+    "linked code +1744 bytes",
+    "linked data +144 bytes"
+  ],
+  "follow_up_queries": [
+    "itheart symbols.txt local labels @156 @157 @162 @163",
+    "itheart configure.py Object(Matching)",
+    "0x803F5718 itheart local string symbol",
+    "0x804D5210 0x804D5218 itheart sdata string",
+    "0x804DC8A8 0x804DC8AC itheart sdata2 float",
+    "0x804DD970 0x804DD974 itheart sdata2 float"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR number, title, author, merged_at, changed files",
+      "raw_diff: complete diff, 4388 chars, not truncated",
+      "changed_files.jsonl: changed-file counts",
+      "text_corpus.jsonl: empty PR body and one bot report",
+      "raw_pr_json: truncated"
+    ],
+    "notes": [
+      "Strong evidence for changed files, exact symbol metadata edits, and the configure.py matching-status change.",
+      "No review comments were present in the loaded slice.",
+      "The PR body was empty, so author rationale is not available.",
+      "No source file for melee/it/items/itheart.c was changed in the loaded diff, so no function-level decomp tactics can be inferred.",
+      "The bot report supports linked code/data movement, but the slice does not include detailed objdiff output or per-symbol validation."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "title": "Marking itheart matching required symbol metadata changes",
+        "text": "PR 2201 marked melee/it/items/itheart.c as Matching in configure.py while changing seven GALE01 symbols.txt entries to local @ labels across .data, .sdata, and .sdata2.",
+        "scope": [
+          "PR 2201",
+          "itheart",
+          "config/GALE01/symbols.txt",
+          "configure.py"
+        ],
+        "evidence_refs": [
+          "raw_diff: configure.py Matching edit",
+          "raw_diff: symbols.txt seven local label edits"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "itheart matching status changed in PR 2201",
+        "text": "PR 2201 changed configure.py so melee/it/items/itheart.c is listed as Object(Matching, ...) instead of Object(NonMatching, ...).",
+        "source_path": "configure.py",
+        "scope": [
+          "melee/it/items/itheart.c",
+          "configure.py",
+          "MatchingFor"
+        ],
+        "evidence_refs": [
+          "raw_diff: configure.py hunk near line 1110"
+        ],
+        "reason": "Useful path fact for future searches about when itheart became marked matching."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "GALE01 itheart-related local symbol metadata from PR 2201",
+        "text": "PR 2201 changed symbols at 0x803F5718, 0x804D5210, 0x804D5218, 0x804DC8A8, 0x804DC8AC, 0x804DD970, and 0x804DD974 to local @ labels in config/GALE01/symbols.txt.",
+        "source_path": "config/GALE01/symbols.txt",
+        "scope": [
+          "config/GALE01/symbols.txt",
+          ".data",
+          ".sdata",
+          ".sdata2",
+          "itheart"
+        ],
+        "evidence_refs": [
+          "raw_diff: symbols.txt hunks"
+        ],
+        "reason": "Could help future matching/data-section work distinguish intentional local labels from address-style global symbol names."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer source-level itheart function tactics; no C source diff is included.",
+      "Do not infer reviewer intent or requested changes; no reviews or review comments are present.",
+      "Do not treat the bot report as a complete objdiff ledger; it only shows linked code/data summary in the loaded slice."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

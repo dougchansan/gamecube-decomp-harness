@@ -1,0 +1,17 @@
+{
+  "number": 1610,
+  "title": "Misc tooling updates",
+  "state": "MERGED",
+  "createdAt": "2025-06-19T22:11:21Z",
+  "updatedAt": "2025-06-19T22:32:32Z",
+  "mergedAt": "2025-06-19T22:32:26Z",
+  "closedAt": "2025-06-19T22:32:26Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1610",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 6504
+  }
+}

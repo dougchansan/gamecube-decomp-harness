@@ -5,6 +5,7 @@
  * can choose the specific tool whose evidence type matches the question instead
  * of searching through a generic command list.
  */
+import { existsSync, readdirSync } from "node:fs";
 import { isAbsolute, resolve } from "node:path";
 import { runKnowledgeToolApi } from "./knowledge-api.js";
 import type { AgentToolRegistration, AgentToolRuntimeContext } from "./types.js";
@@ -201,7 +202,7 @@ export const checkdiffRunToolRegistration = knowledgeApiTool({
   scriptName: "run.py",
   label: "Checkdiff Run",
   purpose: "Run focused checkdiff/objdiff output for one function.",
-  description: "Compile the owning translation unit through the harness and return focused checkdiff output for one function.",
+  description: "Compile the owning translation unit through the tool-local helper and return focused checkdiff output for one function.",
   guidance: "Use checkdiff_run after a concrete source edit or mismatch hypothesis needs verifier evidence; preserve stdout/stderr and command provenance in the report.",
   parameters: {
     type: "object",
@@ -246,7 +247,7 @@ export const directCompileTuToolRegistration = knowledgeApiTool({
   scriptName: "direct_compile.py",
   label: "Direct Compile TU",
   purpose: "Compile one function's translation unit through the exact MWCC build rule.",
-  description: "Run the harness direct-compile path for a function or unit without running objdiff.",
+  description: "Run the tool-local direct-compile path for a function or unit without running objdiff.",
   guidance: "Use direct_compile_tu to separate compiler/build failures from objdiff mismatches before deeper diagnosis.",
   parameters: {
     type: "object",
@@ -309,6 +310,30 @@ export const objdiffScoreCandidateToolRegistration = knowledgeApiTool({
   },
 });
 
+// Live dump/diagnose calls need the instrumented mwcceppc_debug.exe built per
+// tools/_impl/melee/mwcc_debug/README.md. Gate them on provisioning so an
+// unprovisioned checkout returns structured guidance instead of a script crash
+// that the runner would classify as a tool error.
+function mwccDebugCompilerProvisioned(repoRoot: string): boolean {
+  const compilersRoot = resolve(repoRoot, "build/compilers");
+  if (!existsSync(compilersRoot)) return false;
+  for (const family of readdirSync(compilersRoot, { withFileTypes: true })) {
+    if (!family.isDirectory()) continue;
+    for (const version of readdirSync(resolve(compilersRoot, family.name), { withFileTypes: true })) {
+      if (version.isDirectory() && existsSync(resolve(compilersRoot, family.name, version.name, "mwcceppc_debug.exe"))) return true;
+    }
+  }
+  return false;
+}
+
+function mwccDebugUnavailablePayload(): Record<string, unknown> {
+  return {
+    status: "debug_compiler_not_provisioned",
+    guidance:
+      "The instrumented mwcceppc_debug.exe is not installed in this checkout, so live dump/diagnose evidence is unavailable. Do not retry or report this as a tool error; continue with checkdiff/objdiff, cached mwcc_debug_lookup notes, and source evidence.",
+  };
+}
+
 /** Tool for live mwcc_debug function pcdump output. */
 export const mwccDebugDumpFunctionToolRegistration = knowledgeApiTool({
   id: "mwcc_debug_dump_function",
@@ -331,6 +356,7 @@ export const mwccDebugDumpFunctionToolRegistration = knowledgeApiTool({
   args(params, context) {
     const fn = stringParam(params, "function");
     if (!fn) return { status: "missing_function" };
+    if (!mwccDebugCompilerProvisioned(context.repoRoot)) return mwccDebugUnavailablePayload();
     return [
       "--repo-root",
       context.repoRoot,
@@ -368,6 +394,7 @@ function mwccDiagnoseTool(id: string, label: string, mode: "stack" | "regflow" |
     args(params, context) {
       const fn = stringParam(params, "function");
       if (!fn) return { status: "missing_function" };
+      if (!mwccDebugCompilerProvisioned(context.repoRoot)) return mwccDebugUnavailablePayload();
       const args = [
         "--repo-root",
         context.repoRoot,
@@ -623,7 +650,7 @@ export const m2cDecompileToolRegistration = knowledgeApiTool({
   scriptName: "decompile.py",
   label: "m2c Decompile",
   purpose: "Generate an m2c scaffold for a function or translation unit.",
-  description: "Run the harness-vendored m2c wrapper with --no-copy and return scaffold output.",
+  description: "Run the tool-local m2c wrapper with --no-copy and return scaffold output.",
   guidance: "Use m2c_decompile as a reading aid only; do not paste m2c output into reviewable source without natural rewriting and verification.",
   parameters: {
     type: "object",

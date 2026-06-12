@@ -1,0 +1,346 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2259",
+  "pr": {
+    "number": 2259,
+    "title": "grdisplay cleanup and near match of grDisplay_801C5DB0",
+    "url": "https://github.com/doldecomp/melee/pull/2259",
+    "state": "MERGED",
+    "author": "PsiLupan",
+    "created_at": "2026-03-10T17:41:20Z",
+    "merged_at": "2026-03-10T17:48:54Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2259 cleaned up grdisplay code and introduced a near match for grDisplay_801C5DB0. The main diff reworked grDisplay_801C5B90 with typed matrix, flag, shadow, and JObj traversal logic, added grDisplay_801C5DB0 control flow for ground display/camera/fog handling, tightened Ground_801C1E84 from void* to HSD_GObj*, and replaced a local HSD_CObjGetViewMtx inline in jobj.c with HSD_CObjGetViewingMtxPtrDirect. The automated report says grDisplay_801C5DB0 improved from 0.00% to 99.58% and grDisplay_801C5B90 from 99.08% to 99.85%.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "cleanup",
+      "near-match",
+      "headers",
+      "typed-accessors",
+      "control-flow-recovery"
+    ],
+    "systems": [
+      "src/melee/gr",
+      "src/sysdolphin/baselib"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gr/grdisplay.c",
+      "role": "Primary decomp cleanup and near-match work for grDisplay_801C5B90 and grDisplay_801C5DB0.",
+      "evidence_refs": [
+        "changed_files:src/melee/gr/grdisplay.c added 112 deleted 40",
+        "diff:src/melee/gr/grdisplay.c",
+        "bot_report:grDisplay_801C5DB0 0.00% to 99.58%; grDisplay_801C5B90 99.08% to 99.85%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/ground.c",
+      "role": "Implementation return type for Ground_801C1E84 changed from void* to HSD_GObj*.",
+      "evidence_refs": [
+        "changed_files:src/melee/gr/ground.c added 1 deleted 1",
+        "diff:src/melee/gr/ground.c"
+      ]
+    },
+    {
+      "path": "src/melee/gr/ground.h",
+      "role": "Header prototype for Ground_801C1E84 updated to HSD_GObj*.",
+      "evidence_refs": [
+        "changed_files:src/melee/gr/ground.h added 1 deleted 1",
+        "diff:src/melee/gr/ground.h"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/jobj.c",
+      "role": "Removed local HSD_CObjGetViewMtx inline and used HSD_CObjGetViewingMtxPtrDirect in HSD_JObjDispAll.",
+      "evidence_refs": [
+        "changed_files:src/sysdolphin/baselib/jobj.c added 1 deleted 6",
+        "diff:src/sysdolphin/baselib/jobj.c"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Added grdisplay.h, inlines.h, lb/forward.h, baselib/fog.h, and baselib/state.h includes to grdisplay.c to support typed macros and display/fog/state calls.",
+    "Changed grDisplay_801C5B90 signature from generic void*/arg names to HSD_JObj*, Mtx vmtx, u32 flags, and u32 rendermode, and replaced raw flag constants with JOBJ_INSTANCE and JOBJ_HIDDEN.",
+    "Reworked grDisplay_801C5B90 into explicit JObj instance handling, matrix setup, recursive child display traversal, fighter shadow updates, lbShadow_8000EFEC, and HSD_JObjDisp calls.",
+    "Added grDisplay_801C5DB0 as a near match with Ground, camera, fog, shadow, HSD_StateInvalidate, HSD_GObj_JObjCallback, and grDisplay_801C5B90 paths.",
+    "Changed Ground_801C1E84 return type in both ground.c and ground.h from void* to HSD_GObj* so callers can use gobj fields directly.",
+    "Removed a source-local inline HSD_CObjGetViewMtx from jobj.c and replaced its use with HSD_CObjGetViewingMtxPtrDirect(cobj)."
+  ],
+  "smart_moves": [
+    {
+      "text": "Updated both the function definition and header prototype for Ground_801C1E84 when the grdisplay caller treated the return value as an HSD_GObj.",
+      "evidence_refs": [
+        "diff:src/melee/gr/ground.c",
+        "diff:src/melee/gr/ground.h",
+        "diff:src/melee/gr/grdisplay.c"
+      ]
+    },
+    {
+      "text": "Replaced raw JObj flag constants in grDisplay_801C5B90 with named JOBJ_INSTANCE and JOBJ_HIDDEN flags, improving reviewability without changing the address-style function name.",
+      "evidence_refs": [
+        "diff:src/melee/gr/grdisplay.c"
+      ]
+    },
+    {
+      "text": "Used existing accessor/helper forms such as GET_GROUND, GET_COBJ, GET_JOBJ, GET_FOG, HSD_CObjGetViewingMtxPtrDirect, and HSD_ASSERT instead of leaving raw pointer or assert shapes in the shown code.",
+      "evidence_refs": [
+        "diff:src/melee/gr/grdisplay.c",
+        "diff:src/sysdolphin/baselib/jobj.c"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a recovered caller proves a more specific return type, update the owning header and implementation together rather than casting at the call site.",
+      "scope": [
+        "ground callbacks",
+        "typed header cleanup"
+      ],
+      "evidence_refs": [
+        "diff:Ground_801C1E84 void* to HSD_GObj* in ground.c and ground.h",
+        "diff:grDisplay_801C5DB0 uses foggobj->hsd_obj after Ground_801C1E84()"
+      ],
+      "standard_alignment": [
+        "truthful-headers-and-includes",
+        "typed-fields-over-pointer-math"
+      ]
+    },
+    {
+      "lesson": "For display/JObj matching, prefer existing matrix and object helpers over local one-off inlines when an established helper expresses the operation.",
+      "scope": [
+        "baselib JObj display",
+        "CObj view matrix access"
+      ],
+      "evidence_refs": [
+        "diff:jobj.c removes HSD_CObjGetViewMtx inline",
+        "diff:jobj.c uses HSD_CObjGetViewingMtxPtrDirect(cobj)",
+        "diff:grdisplay.c uses HSD_CObjGetViewingMtxPtrDirect(cobj)"
+      ],
+      "standard_alignment": [
+        "header-inlines",
+        "typed-fields-over-pointer-math"
+      ]
+    },
+    {
+      "lesson": "Cleanup of a near match can include replacing decompiler-style temps and raw args with local role names like gp, camgobj, foggobj, fighter, shadow, vec, flags, and rendermode when the roles are directly visible in the recovered code.",
+      "scope": [
+        "grdisplay local variable naming"
+      ],
+      "evidence_refs": [
+        "diff:src/melee/gr/grdisplay.c"
+      ],
+      "standard_alignment": [
+        "conservative-naming"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "gp",
+      "meaning": "Ground* local from GET_GROUND(gobj)",
+      "evidence_refs": [
+        "diff:grDisplay_801C5DB0"
+      ]
+    },
+    {
+      "name": "camgobj",
+      "meaning": "camera HSD_GObj returned by Camera_80030A50",
+      "evidence_refs": [
+        "diff:grDisplay_801C5DB0"
+      ]
+    },
+    {
+      "name": "foggobj",
+      "meaning": "fog HSD_GObj returned by Ground_801C1E84",
+      "evidence_refs": [
+        "diff:grDisplay_801C5DB0"
+      ]
+    },
+    {
+      "name": "shadow",
+      "meaning": "LbShadow* returned by ftLib_800872B0 for fighter shadow work",
+      "evidence_refs": [
+        "diff:grDisplay_801C5B90",
+        "diff:grDisplay_801C5DB0"
+      ]
+    },
+    {
+      "name": "flags and rendermode",
+      "meaning": "grDisplay_801C5B90 parameters replacing arg2 and arg3",
+      "evidence_refs": [
+        "diff:grDisplay_801C5B90 signature"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Use structured recursive traversal for JObj children while preserving matrix setup and display calls.",
+      "evidence_refs": [
+        "diff:grDisplay_801C5B90 recursive calls on jobj->child and jobj->next"
+      ]
+    },
+    {
+      "tactic": "Use a goto label only for the shared display path in grDisplay_801C5DB0 where several checks converge on the same skip block.",
+      "evidence_refs": [
+        "diff:grDisplay_801C5DB0 goto skip"
+      ],
+      "notes": "The PR evidence shows the goto shape but does not include discussion proving it was required for matching."
+    },
+    {
+      "tactic": "Retain narrow unused local padding/locals in grdisplay.c, including unused[6] in grDisplay_801C5B90 and unused fog/i locals in grDisplay_801C5DB0.",
+      "evidence_refs": [
+        "diff:src/melee/gr/grdisplay.c"
+      ],
+      "notes": "The bot report supports near-match progress, but the slice does not include objdiff details explaining which locals are required."
+    },
+    {
+      "tactic": "Switch from a local CObj view-matrix inline to HSD_CObjGetViewingMtxPtrDirect, aligning grdisplay.c and jobj.c on the same accessor.",
+      "evidence_refs": [
+        "diff:src/melee/gr/grdisplay.c",
+        "diff:src/sysdolphin/baselib/jobj.c"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "automated_report",
+      "author": "decomp-dev[bot]",
+      "created_at": "2026-03-10T17:45:02Z",
+      "text": "Report for GALE01 showed matched code +0.15% (+5868 bytes), matched data +0.07% (+832 bytes), grDisplay_801C5DB0 improved from 0.00% to 99.58%, grDisplay_801C5B90 improved from 99.08% to 99.85%, and grdisplay .data reached 100.00%.",
+      "evidence_refs": [
+        "text_corpus:issue_comment decomp-dev[bot]"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2259",
+    "grdisplay",
+    "grDisplay_801C5DB0",
+    "grDisplay_801C5B90",
+    "Ground_801C1E84",
+    "HSD_CObjGetViewingMtxPtrDirect",
+    "HSD_CObjGetViewMtx",
+    "GET_GROUND",
+    "GET_COBJ",
+    "GET_JOBJ",
+    "GET_FOG",
+    "JOBJ_INSTANCE",
+    "JOBJ_HIDDEN",
+    "HSD_StateInvalidate",
+    "HSD_FogSet",
+    "HSD_GObj_JObjCallback",
+    "lbShadow_8000EFEC",
+    "lbShadow_8000EEE0",
+    "Camera_80030A50",
+    "Camera_8003108C",
+    "HSD_GObj_80390EB8"
+  ],
+  "follow_up_queries": [
+    "grDisplay_801C5DB0 goto skip",
+    "grDisplay_801C5DB0 unused fog i locals",
+    "Ground_801C1E84 HSD_GObj return type",
+    "HSD_CObjGetViewingMtxPtrDirect jobj grdisplay",
+    "grDisplay_801C5B90 JOBJ_INSTANCE JOBJ_HIDDEN",
+    "grdisplay near match 99.58"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json",
+      "changed_files.jsonl",
+      "raw_diff.diff",
+      "text_corpus.jsonl"
+    ],
+    "notes": [
+      "Diff and changed-file evidence are strong for files and code edits.",
+      "PR body is empty and there are no human review comments in the loaded slice.",
+      "The automated report supports near-match/improvement claims, but no narrow objdiff, build log, or author explanation is included.",
+      "The bot report lists many grzebes matches/improvements even though the changed-file list only contains grdisplay, ground, ground.h, and jobj.c; this intake does not infer why those report entries appeared.",
+      "The title says near match, and the bot report shows grDisplay_801C5DB0 at 99.58%, so this record does not claim a full function match for grDisplay_801C5DB0."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson",
+        "title": "Update owning prototypes when a caller proves a concrete object type",
+        "text": "PR 2259 changed Ground_801C1E84 from void* to HSD_GObj* in both ground.c and ground.h because grDisplay_801C5DB0 uses the returned value as an HSD_GObj, including checking foggobj->hsd_obj.",
+        "scope": [
+          "src/melee/gr/ground.c",
+          "src/melee/gr/ground.h",
+          "src/melee/gr/grdisplay.c"
+        ],
+        "evidence_refs": [
+          "diff:Ground_801C1E84 return type",
+          "diff:grDisplay_801C5DB0 foggobj usage"
+        ]
+      },
+      {
+        "record_type": "decomp_lesson",
+        "title": "Prefer established CObj view matrix accessors over one-off local inlines",
+        "text": "PR 2259 removed a local HSD_CObjGetViewMtx inline in jobj.c and used HSD_CObjGetViewingMtxPtrDirect in both jobj.c and grdisplay.c for CObj view-matrix access.",
+        "scope": [
+          "src/sysdolphin/baselib/jobj.c",
+          "src/melee/gr/grdisplay.c"
+        ],
+        "evidence_refs": [
+          "diff:jobj.c inline removal",
+          "diff:HSD_CObjGetViewingMtxPtrDirect uses"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "Ground_801C1E84 returns the stage_info.x12C HSD_GObj pointer",
+        "text": "In PR 2259, Ground_801C1E84 was typed as HSD_GObj* and returns stage_info.x12C; grDisplay_801C5DB0 uses the result as an HSD_GObj for fog object handling.",
+        "source_path": "src/melee/gr/ground.c",
+        "scope": [
+          "src/melee/gr/ground.c",
+          "src/melee/gr/ground.h",
+          "src/melee/gr/grdisplay.c"
+        ],
+        "evidence_refs": [
+          "diff:src/melee/gr/ground.c",
+          "diff:src/melee/gr/ground.h",
+          "diff:src/melee/gr/grdisplay.c"
+        ],
+        "reason": "Potential path fact for future ground/fog display work; should be verified against current source before promotion."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Avoid creating source-local accessors when an established baselib accessor exists",
+        "text": "PR 2259 removed HSD_CObjGetViewMtx, a local inline returning cobj->view_mtx, and replaced its use with HSD_CObjGetViewingMtxPtrDirect. This may be an example for the existing helper/header-inline standards rather than a new standalone rule.",
+        "source_path": "src/sysdolphin/baselib/jobj.c",
+        "scope": [
+          "baselib CObj/JObj display code"
+        ],
+        "evidence_refs": [
+          "diff:src/sysdolphin/baselib/jobj.c"
+        ],
+        "reason": "Candidate clarification only; current standards already cover preferring existing helpers and typed accessors."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote the goto skip shape in grDisplay_801C5DB0 as a general tactic; the slice lacks objdiff or reviewer evidence that the goto was required.",
+      "Do not promote unused local arrays or unused fog/i locals as accepted matching style; the slice shows them but does not justify them.",
+      "Do not infer human reviewer approval or rationale; no human review comments are present.",
+      "Do not claim grDisplay_801C5DB0 fully matched; loaded evidence says near match and the bot reports 99.58%."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

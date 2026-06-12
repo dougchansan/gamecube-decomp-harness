@@ -132,6 +132,32 @@ export function getRun(store: StateStore, runId: string): RunRecord | null {
   return row ? runFromRow(row) : null;
 }
 
+export function setRunDesiredWorkers(store: StateStore, runId: string, desiredWorkers: number, producer = "operator"): RunRecord {
+  const run = getRun(store, runId);
+  if (!run) throw new Error(`Run not found: ${runId}`);
+  const next = Math.max(1, Math.trunc(desiredWorkers));
+  if (run.desiredWorkers === next) return run;
+  immediateTransaction(store.db, () => {
+    const changedAt = now();
+    store.db.query("UPDATE runs SET desired_workers = ? WHERE id = ?").run(next, runId);
+    store.db
+      .query("INSERT INTO events (id, run_id, event_type, producer, payload_json, handled_at, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)")
+      .run(
+        randomUUID(),
+        runId,
+        "run_desired_workers_changed",
+        producer,
+        JSON.stringify({
+          previous_desired_workers: run.desiredWorkers,
+          desired_workers: next,
+        }),
+        changedAt,
+        changedAt,
+      );
+  });
+  return { ...run, desiredWorkers: next };
+}
+
 export function updateRunStatus(store: StateStore, runId: string, status: RunStatus, producer = "operator"): RunRecord {
   const run = getRun(store, runId);
   if (!run) throw new Error(`Run not found: ${runId}`);

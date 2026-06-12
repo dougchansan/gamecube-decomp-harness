@@ -1,0 +1,17 @@
+{
+  "number": 2122,
+  "title": "Match and link itmball",
+  "state": "MERGED",
+  "createdAt": "2026-01-22T19:11:01Z",
+  "updatedAt": "2026-01-22T19:19:00Z",
+  "mergedAt": "2026-01-22T19:18:57Z",
+  "closedAt": "2026-01-22T19:18:57Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/2122",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 24682
+  }
+}

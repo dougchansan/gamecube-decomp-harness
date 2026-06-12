@@ -15,6 +15,7 @@ import {
   loadKnowledgeBoardSnapshot,
   openKnowledgeGraph,
   readSourceRegistry,
+  readSourceRegistryEntries,
   readToolRegistry,
   rebuildKnowledgeGraph,
   resolveToolRoot,
@@ -40,6 +41,7 @@ export async function kgSources(): Promise<void> {
     JSON.stringify(
       {
         sources: readSourceRegistry(),
+        source_registry: readSourceRegistryEntries(),
         tools: readToolRegistry(),
       },
       null,
@@ -63,7 +65,13 @@ export async function kgStatus(globals: GlobalArgs, args: Map<string, string | t
       : null,
     graph_db: dbPath,
     graph_db_exists: exists,
-    sources: readSourceRegistry().map((source) => ({ id: source.id, kind: source.kind, title: source.title })),
+    sources: readSourceRegistry().map((source) => ({
+      id: source.id,
+      kind: source.kind,
+      section: source.section,
+      access_modes: source.access_modes ?? [],
+      title: source.title,
+    })),
     tools: readToolRegistry().map((tool) => ({ id: tool.id, title: tool.title, category: tool.category, path: tool.path })),
   };
   if (exists) {
@@ -86,19 +94,23 @@ export async function kgSmoke(globals: GlobalArgs, args: Map<string, string | tr
     return {
       id: source.id,
       title: source.title,
+      section: source.section,
+      access_modes: source.access_modes ?? [],
       versions: versionCount,
       search_chunks: chunkCount,
       ready: versionCount > 0 && chunkCount > 0,
     };
   });
   store.db.close();
-  const tools = await Promise.all(readToolRegistry().map((tool) => toolStatus(tool.id)));
+  const tools = (
+    await Promise.all(readToolRegistry().map((tool) => toolStatus(tool, knowledgeRepoRoot(globals))))
+  ).map((tool) => ({ ...tool, ready: toolLiveReady(tool) }));
   const payload = {
     graph_db: dbPath,
     generated_at: new Date().toISOString(),
     sources,
     tools,
-    ready: sources.every((source) => source.ready) && tools.every((tool) => toolLiveReady(tool)),
+    ready: sources.every((source) => source.ready) && tools.every((tool) => tool.ready),
   };
   if (booleanArg(args, "--strict") && !payload.ready) {
     throw new Error(`Knowledge smoke failed:\n${JSON.stringify(payload, null, 2)}`);
@@ -108,9 +120,28 @@ export async function kgSmoke(globals: GlobalArgs, args: Map<string, string | tr
 
 function toolLiveReady(tool: Record<string, unknown>): boolean {
   const mode = String(tool.operation_mode ?? tool.status ?? "");
+  if (mode === "tool_local_impl") return toolLocalImplReady(tool);
+  if (mode === "native_api_v1") return String(tool.status) === "ok";
   const incompleteMode =
     mode.includes("fallback") || mode.includes("index_backed") || mode.includes("scaffold") || mode.includes("dependency");
   return Boolean(tool.available) && Boolean(tool.runner_available) && Boolean(tool.runner_smoke_passed) && !incompleteMode;
+}
+
+function toolLocalImplReady(tool: Record<string, unknown>): boolean {
+  return (
+    String(tool.status) === "ok" &&
+    Boolean(tool.repo_root_exists) &&
+    Boolean(tool.looks_like_melee_root) &&
+    Boolean(tool.tool_impl_root_exists) &&
+    pathStatusListReady(tool.scripts) &&
+    pathStatusListReady(tool.required_paths) &&
+    (tool.libclang_available === undefined || Boolean(tool.libclang_available))
+  );
+}
+
+function pathStatusListReady(value: unknown): boolean {
+  if (!Array.isArray(value)) return true;
+  return value.every((item) => Boolean((item as Record<string, unknown>).exists));
 }
 
 export async function kgRebuildGraph(globals: GlobalArgs, args: Map<string, string | true>): Promise<void> {
@@ -303,9 +334,9 @@ function knowledgeRepoRoot(globals: GlobalArgs): string {
 }
 
 async function runPrPostmortemIndex(globals: GlobalArgs, args: Map<string, string | true>): Promise<SpawnSummary> {
-  const script = resolve(packageRoot(), "knowledge/sources/past_prs/commands/build_pr_postmortems.py");
-  const dumpRoot = stringArg(args, "--dump-root", resolve(packageRoot(), "knowledge/sources/past_prs/data/current"));
-  const libraryRoot = stringArg(args, "--library-root", resolve(packageRoot(), "knowledge/sources/past_prs/data/prs"));
+  const script = resolve(packageRoot(), "knowledge/sources/code_context/past_prs/commands/build_pr_postmortems.py");
+  const dumpRoot = stringArg(args, "--dump-root", resolve(packageRoot(), "knowledge/sources/code_context/past_prs/data"));
+  const libraryRoot = stringArg(args, "--library-root", resolve(packageRoot(), "knowledge/sources/code_context/past_prs/data/library"));
   if (!existsSync(resolve(dumpRoot, "prs.json"))) {
     return {
       command: ["python3", script],
@@ -367,6 +398,9 @@ async function maybeRunCuratorAgent(globals: GlobalArgs, args: Map<string, strin
       role: "knowledge-curator",
       cwd: globals.repoRoot,
       prompt: knowledgeCuratorPrompt({
+        repoRoot: globals.repoRoot,
+        stateDir: globals.stateDir,
+        project: globals.project,
         curatorContext: {
           enrichment_path: enrichmentPath,
           deterministic_record_count: deterministicRecordCount,
@@ -381,6 +415,11 @@ async function maybeRunCuratorAgent(globals: GlobalArgs, args: Map<string, strin
       model: globals.model,
       thinkingLevel: globals.thinkingLevel,
       timeoutMs: globals.agentTimeoutSeconds ? globals.agentTimeoutSeconds * 1000 : undefined,
+      toolContext: {
+        repoRoot: globals.repoRoot,
+        stateDir: globals.stateDir,
+        project: globals.project,
+      },
     });
     const parsed =
       result.dryRun || result.failed ? { object: null, error: result.error ?? (result.dryRun ? "dry-run" : "agent failed") } : parseJsonObject(result.rawText);
@@ -538,8 +577,10 @@ function countRows(store: ReturnType<typeof openKnowledgeGraph>, sql: string, ..
   return Number(row.count ?? 0);
 }
 
-async function toolStatus(toolId: string): Promise<Record<string, unknown>> {
-  const command = ["python3", resolve(resolveToolRoot(toolId), "api/status.py"), "--json"];
+async function toolStatus(tool: { id: string; commands?: Record<string, string> }, repoRoot: string): Promise<Record<string, unknown>> {
+  const command = ["python3", resolve(resolveToolRoot(tool.id), "api/status.py")];
+  if (tool.commands?.status?.includes("--repo-root")) command.push("--repo-root", repoRoot);
+  command.push("--json");
   const proc = Bun.spawn(command, {
     cwd: packageRoot(),
     stdout: "pipe",
@@ -547,12 +588,12 @@ async function toolStatus(toolId: string): Promise<Record<string, unknown>> {
   });
   const [stdout, stderr, exitCode] = await Promise.all([new Response(proc.stdout).text(), new Response(proc.stderr).text(), proc.exited]);
   if (exitCode !== 0) {
-    return { id: toolId, available: false, status: "failed", error: stderr || stdout };
+    return { id: tool.id, available: false, status: "failed", error: stderr || stdout };
   }
   try {
     const parsed = JSON.parse(stdout) as Record<string, unknown>;
-    return { id: toolId, ...parsed };
+    return { id: tool.id, ...parsed };
   } catch {
-    return { id: toolId, available: false, status: "unparseable", stdout };
+    return { id: tool.id, available: false, status: "unparseable", stdout };
   }
 }

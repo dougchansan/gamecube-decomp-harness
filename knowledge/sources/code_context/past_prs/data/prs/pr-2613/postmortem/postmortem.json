@@ -1,0 +1,403 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2613",
+  "pr": {
+    "number": 2613,
+    "title": "Split and link `ftkirbyspecialpeach` and `ftkirbyspecialgamewatch`",
+    "url": "https://github.com/doldecomp/melee/pull/2613",
+    "state": "MERGED",
+    "author": "ribbanya",
+    "created_at": "2026-06-08T10:00:16Z",
+    "merged_at": "2026-06-08T10:04:46Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2613 split Kirby copied-special code out of `ftkirbyyoshiegg` into separate `ftkirbyspecialmars`, `ftkirbyspecialpeach`, and `ftkirbyspecialgamewatch` translation units, linked Peach and GameWatch as Matching objects, added headers/includes, and adjusted split/symbol metadata including local data labels.",
+  "change_classification": {
+    "primary_type": "split_and_link_decomp_translation_units",
+    "categories": [
+      "headers",
+      "splits",
+      "symbols",
+      "configure",
+      "fighter_source",
+      "item_metadata_touchups"
+    ],
+    "systems": [
+      "fighter",
+      "ftKirby",
+      "item",
+      "config",
+      "repo-root"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "config/GALE01/splits.txt",
+      "role": "split ranges for shortened `ftkirbyyoshiegg.c` and new Kirby special TUs; also adjusted an item data range",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:splits.txt"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "symbol metadata updates, including converting several address-style globals to local labels or local data symbols",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:symbols.txt"
+      ]
+    },
+    {
+      "path": "configure.py",
+      "role": "build object registration: `ftkirbyspecialmars.c` as NonMatching, `ftkirbyspecialpeach.c` and `ftkirbyspecialgamewatch.c` as Matching",
+      "evidence_refs": [
+        "raw_diff:configure.py"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftkirby.c",
+      "role": "include surface updated from `ftkirbyyoshiegg.h` to the new split special headers",
+      "evidence_refs": [
+        "raw_diff:ftkirby.c"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftkirbyspecialgamewatch.c",
+      "role": "new Kirby/GameWatch special source file",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:ftkirbyspecialgamewatch.c excerpt"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftkirbyspecialgamewatch.h",
+      "role": "new Kirby/GameWatch special header",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftkirbyspecialmars.c",
+      "role": "new Kirby/Marth special source file",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "human_pr_text"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftkirbyspecialmars.h",
+      "role": "new Kirby/Marth special header",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftkirbyspecialpeach.c",
+      "role": "new Kirby/Peach special source file",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "pr_title"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftkirbyspecialpeach.h",
+      "role": "new Kirby/Peach special header",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftkirbyyoshiegg.c",
+      "role": "original monolithic source reduced after split-out",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:splits.txt"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftkirbyyoshiegg.h",
+      "role": "old header removed",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itkirbygamewatchchefpan.c",
+      "role": "item source touched alongside Kirby/GameWatch split",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:symbols.txt item symbol region"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itpeachtoad.c",
+      "role": "item source touched alongside Kirby/Peach split",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    }
+  ],
+  "what_changed": [
+    "`ftkirbyyoshiegg.c` was shortened from the broad text range `0x8010AA64..0x8010D740` to `0x8010AA64..0x8010B1F4`, with new split entries for `ftkirbyspecialmars.c`, `ftkirbyspecialpeach.c`, and `ftkirbyspecialgamewatch.c`.",
+    "`configure.py` added three Kirby special objects: Marth as NonMatching, Peach as Matching, and GameWatch as Matching.",
+    "`ftkirby.c` stopped including `ftkirbyyoshiegg.h` and added includes for the split Marth, Peach, and GameWatch headers.",
+    "New source/header pairs were added for Kirby copied specials: Marth, Peach, and GameWatch.",
+    "`ftkirbyyoshiegg.h` was removed.",
+    "`symbols.txt` changed several data and sdata2 entries from global address-style symbols to local labels or local `@NNN` symbols around item, Kirby, and MSL math regions.",
+    "`splits.txt` also narrowed `itmewtwoshadowball.c` data from `0x803F7760..0x803F7898` to `0x803F7880..0x803F7898`."
+  ],
+  "smart_moves": [
+    {
+      "text": "The PR paired source splitting with split-range metadata and configure object registration, so the new translation units are linked instead of only moving code in source.",
+      "evidence_refs": [
+        "raw_diff:splits.txt",
+        "raw_diff:configure.py"
+      ]
+    },
+    {
+      "text": "The split kept the not-yet-matching Marth file explicitly marked NonMatching while marking Peach and GameWatch Matching in `configure.py`, avoiding a blanket status assumption for all split files.",
+      "evidence_refs": [
+        "raw_diff:configure.py"
+      ]
+    },
+    {
+      "text": "Header include updates in `ftkirby.c` track the new per-special ownership rather than retaining the old `ftkirbyyoshiegg.h` include.",
+      "evidence_refs": [
+        "raw_diff:ftkirby.c"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a monolithic recovered file is split into real translation units, update the split ranges, configure object list, and include surface in the same reviewable change.",
+      "scope": [
+        "ftKirby translation-unit splitting",
+        "split/link PRs"
+      ],
+      "evidence_refs": [
+        "raw_diff:splits.txt",
+        "raw_diff:configure.py",
+        "raw_diff:ftkirby.c"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "lesson": "Do not infer that all split-out files are matching just because some are linked as Matching; this PR explicitly leaves `ftkirbyspecialmars.c` NonMatching while linking Peach and GameWatch as Matching.",
+      "scope": [
+        "configure.py Matching/NonMatching classification"
+      ],
+      "evidence_refs": [
+        "raw_diff:configure.py",
+        "human_pr_text"
+      ],
+      "confidence": 0.86
+    },
+    {
+      "lesson": "Split ownership can require symbol metadata cleanup from broad global address-style data symbols to local labels or local numbered data symbols, but such changes should be tied to split/symbol evidence rather than treated as a naming convention by itself.",
+      "scope": [
+        "symbols.txt",
+        "data ownership metadata"
+      ],
+      "evidence_refs": [
+        "raw_diff:symbols.txt"
+      ],
+      "confidence": 0.66
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "New Kirby copied-special files follow `ftkirbyspecial<source_character>.c/.h` lowercase path naming, shown by `ftkirbyspecialmars`, `ftkirbyspecialpeach`, and `ftkirbyspecialgamewatch`.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:splits.txt",
+        "raw_diff:configure.py"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "convention": "GameWatch functions in the excerpt use the existing `ftKb_...Gw...` prefix style for public Kirby/GameWatch special routines, while unknown internal helpers remain address-style `fn_8010...` names.",
+      "evidence_refs": [
+        "raw_diff:ftkirbyspecialgamewatch.c excerpt"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "convention": "Local data symbols in `symbols.txt` use numbered `@NNN` names when metadata marks them local, instead of keeping address-style global names.",
+      "evidence_refs": [
+        "raw_diff:symbols.txt"
+      ],
+      "confidence": 0.74
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Use split text and small-data ranges to carve one old Kirby source range into separate translation units: YoshiEgg, Marth, Peach, and GameWatch.",
+      "evidence_refs": [
+        "raw_diff:splits.txt"
+      ],
+      "confidence": 0.88
+    },
+    {
+      "tactic": "Register each split file independently in `configure.py`, allowing mixed Matching and NonMatching status across split-out files.",
+      "evidence_refs": [
+        "raw_diff:configure.py"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "tactic": "The GameWatch source excerpt contains narrow `PAD_STACK` uses and inline helper extraction (`setGwVars`, `inline1`), but the PR slice does not include objdiff/build evidence explaining each stack tactic.",
+      "evidence_refs": [
+        "raw_diff:ftkirbyspecialgamewatch.c excerpt"
+      ],
+      "confidence": 0.55
+    },
+    {
+      "tactic": "Symbol metadata was adjusted to local labels/local `@NNN` data symbols near affected data regions, consistent with split/data ownership work shown in `splits.txt` and `symbols.txt`.",
+      "evidence_refs": [
+        "raw_diff:symbols.txt",
+        "raw_diff:splits.txt"
+      ],
+      "confidence": 0.72
+    }
+  ],
+  "review_feedback": [],
+  "searchable_terms": [
+    "PR2613",
+    "ribbanya",
+    "ftkirbyspecialpeach",
+    "ftkirbyspecialgamewatch",
+    "ftkirbyspecialmars",
+    "ftkirbyyoshiegg",
+    "ftKirby split",
+    "Kirby copied special",
+    "configure.py Matching",
+    "configure.py NonMatching",
+    "splits.txt 8010B1F4",
+    "splits.txt 8010C288",
+    "splits.txt 8010CE5C",
+    "ftKb_SpecialNGw",
+    "itkirbygamewatchchefpan",
+    "itpeachtoad",
+    "symbols local @237 @247",
+    "PAD_STACK",
+    "local data labels"
+  ],
+  "follow_up_queries": [
+    "Find later PRs touching `src/melee/ft/chara/ftKirby/ftkirbyspecialmars.c` to see when it moved from NonMatching to Matching.",
+    "Search for later cleanup of `PAD_STACK` in `ftkirbyspecialgamewatch.c` and whether objdiff evidence was recorded.",
+    "Search for follow-up symbol metadata changes around `0x804D9580..0x804D95B0` after the Kirby split.",
+    "Search for later edits to `itpeachtoad.c` and `itkirbygamewatchchefpan.c` associated with this split's local symbol changes."
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json",
+      "human_pr_text",
+      "changed_files.jsonl",
+      "raw_diff excerpt",
+      "raw_pr_json"
+    ],
+    "notes": [
+      "The PR identity, author, merge timestamp, changed-file list, and major split/configure/symbol changes are directly evidenced.",
+      "The raw diff is truncated in the loaded file, so source-level details for Peach, Marth, headers, and item edits are only partially visible through metadata and excerpts.",
+      "There are no loaded review comments or reviews; `review_feedback` is therefore empty.",
+      "No build logs, objdiff reports, or regression outputs are loaded; Matching/NonMatching status is reported only as configured in `configure.py`, not independently verified.",
+      "Observed `PAD_STACK` and inline-helper tactics in the GameWatch excerpt are not promoted as globally accepted tactics because the slice lacks verifier rationale."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson",
+        "title": "Split/link PRs should update source ownership, split metadata, configure objects, and includes together",
+        "text": "PR #2613 demonstrates a coherent split/link pattern: carve new text/sdata/sdata2 ranges in `splits.txt`, add new source/header pairs, register each object in `configure.py`, and update dependents such as `ftkirby.c` includes.",
+        "scope": [
+          "split/link PRs",
+          "ftKirby"
+        ],
+        "evidence_refs": [
+          "raw_diff:splits.txt",
+          "raw_diff:configure.py",
+          "raw_diff:ftkirby.c",
+          "changed_files.jsonl"
+        ]
+      },
+      {
+        "record_type": "decomp_lesson",
+        "title": "Mixed Matching status is valid after splitting a monolithic file",
+        "text": "In PR #2613, `ftkirbyspecialpeach.c` and `ftkirbyspecialgamewatch.c` were added as Matching objects while `ftkirbyspecialmars.c` was added as NonMatching, so status should be tracked per split file.",
+        "scope": [
+          "configure.py",
+          "MatchingFor object lists"
+        ],
+        "evidence_refs": [
+          "raw_diff:configure.py"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "PR #2613 split Kirby YoshiEgg range into Marth, Peach, and GameWatch special files",
+        "text": "`ftkirbyyoshiegg.c` was reduced to text `0x8010AA64..0x8010B1F4`; new split files were added for `ftkirbyspecialmars.c` (`0x8010B1F4..0x8010C288`), `ftkirbyspecialpeach.c` (`0x8010C288..0x8010CE5C`), and `ftkirbyspecialgamewatch.c` (`0x8010CE5C..0x8010D740`).",
+        "source_path": "config/GALE01/splits.txt",
+        "scope": [
+          "src/melee/ft/chara/ftKirby"
+        ],
+        "evidence_refs": [
+          "raw_diff:splits.txt"
+        ],
+        "reason": "This is concrete path/split ownership metadata from the PR diff and may be useful for path-fact curation."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "Configure status for split Kirby special files in PR #2613",
+        "text": "`configure.py` added `ftkirbyspecialmars.c` as `Object(NonMatching, ...)` and `ftkirbyspecialpeach.c` plus `ftkirbyspecialgamewatch.c` as `Object(Matching, ...)`.",
+        "source_path": "configure.py",
+        "scope": [
+          "src/melee/ft/chara/ftKirby/ftkirbyspecialmars.c",
+          "src/melee/ft/chara/ftKirby/ftkirbyspecialpeach.c",
+          "src/melee/ft/chara/ftKirby/ftkirbyspecialgamewatch.c"
+        ],
+        "evidence_refs": [
+          "raw_diff:configure.py"
+        ],
+        "reason": "Useful as a historical path/status fact, but should remain a source-owned fact rather than an independently validated match claim."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Treat stack-padding tactics in split-out files as evidence-requiring",
+        "text": "The GameWatch split excerpt contains `PAD_STACK` uses while the loaded PR slice has no verifier rationale. This supports reinforcing the existing standard that stack-padding tactics need explicit objdiff/build evidence, not creating a new accepted exception.",
+        "source_path": "src/melee/ft/chara/ftKirby/ftkirbyspecialgamewatch.c",
+        "scope": [
+          "matching tactics",
+          "PAD_STACK"
+        ],
+        "evidence_refs": [
+          "raw_diff:ftkirbyspecialgamewatch.c excerpt",
+          "decomp_standards:matching-tactics-need-evidence"
+        ],
+        "reason": "Candidate note for standards curation: this PR is an example of why PAD_STACK observations should be annotated with verification evidence before being treated as reviewable style."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote the PR's merged state or configure `Object(Matching, ...)` entries as independent objdiff validation; no build/objdiff logs are loaded.",
+      "Do not infer reviewer intent or accepted review rationale; there are no loaded reviews or review comments.",
+      "Do not generalize the observed `PAD_STACK` uses in `ftkirbyspecialgamewatch.c` into a preferred style; evidence only shows their presence.",
+      "Do not treat all symbol global-to-local changes as a universal naming rule; the evidence is specific to this split/symbol metadata diff."
+    ]
+  },
+  "confidence": 0.76,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

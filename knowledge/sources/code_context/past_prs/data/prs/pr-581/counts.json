@@ -1,0 +1,17 @@
+{
+  "number": 581,
+  "title": "Create a Getting Started guide for new contributors",
+  "state": "MERGED",
+  "createdAt": "2022-10-27T21:45:54Z",
+  "updatedAt": "2022-11-02T22:39:40Z",
+  "mergedAt": "2022-10-30T01:10:15Z",
+  "closedAt": "2022-10-30T01:10:15Z",
+  "author": "stephenjayakar",
+  "url": "https://github.com/doldecomp/melee/pull/581",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 28,
+    "reviews": 19,
+    "diff_bytes": 11818
+  }
+}

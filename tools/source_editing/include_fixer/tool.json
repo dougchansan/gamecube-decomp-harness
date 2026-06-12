@@ -3,9 +3,9 @@
   "title": "Missing include proposal preview",
   "trust_tier": "tool_evidence",
   "description": "Preview missing include proposals by running clang syntax diagnostics and searching project headers.",
-  "operation_mode": "harness_bridge_v1",
-  "runner_status": "on_demand_bridge",
-  "status_message": "Harness bridge v1: APIs reuse reference/melee-harness-master/tools/fix_includes.py logic without writing source.",
+  "operation_mode": "tool_local_impl",
+  "runner_status": "on_demand",
+  "status_message": "Tool-local implementation: APIs import tools/_impl/melee/tools/fix_includes.py logic without writing source.",
   "limitations": [
     "Requires compile_commands.json and clang-compatible syntax diagnostics for the target file.",
     "Preview proposals are best-effort function declaration matches and need source/header review before applying.",

@@ -1,0 +1,17 @@
+{
+  "number": 1503,
+  "title": "Bring over libc matches from OoT-GC",
+  "state": "MERGED",
+  "createdAt": "2025-05-22T05:01:05Z",
+  "updatedAt": "2025-05-22T05:26:29Z",
+  "mergedAt": "2025-05-22T05:26:25Z",
+  "closedAt": "2025-05-22T05:26:25Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/1503",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 98576
+  }
+}

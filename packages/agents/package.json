@@ -16,6 +16,8 @@
     "./knowledge-curator/*": "./src/knowledge-curator/*.ts",
     "./pr-review": "./src/pr-review/index.ts",
     "./pr-review/*": "./src/pr-review/*.ts",
+    "./reconcile": "./src/reconcile/index.ts",
+    "./reconcile/*": "./src/reconcile/*.ts",
     "./registry": "./src/registry.ts",
     "./runtime": "./src/runtime/index.ts",
     "./runtime/*": "./src/runtime/*.ts",

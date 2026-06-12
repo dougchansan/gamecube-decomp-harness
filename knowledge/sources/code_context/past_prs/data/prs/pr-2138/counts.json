@@ -1,0 +1,17 @@
+{
+  "number": 2138,
+  "title": "Kirby Copy Abilities matches",
+  "state": "MERGED",
+  "createdAt": "2026-01-27T11:52:07Z",
+  "updatedAt": "2026-01-30T12:40:07Z",
+  "mergedAt": "2026-01-30T12:31:35Z",
+  "closedAt": "2026-01-30T12:31:36Z",
+  "author": "malvarezcastillo",
+  "url": "https://github.com/doldecomp/melee/pull/2138",
+  "counts": {
+    "issue_comments": 23,
+    "review_comments": 11,
+    "reviews": 7,
+    "diff_bytes": 409433
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 1556,
+  "title": "Match pl_80037B2C",
+  "state": "MERGED",
+  "createdAt": "2025-06-02T04:41:00Z",
+  "updatedAt": "2025-06-02T04:56:28Z",
+  "mergedAt": "2025-06-02T04:56:22Z",
+  "closedAt": "2025-06-02T04:56:22Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1556",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 3906
+  }
+}

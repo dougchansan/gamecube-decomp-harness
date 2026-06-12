@@ -62,8 +62,14 @@ def symbol_match_percent(diff_json: str, function: str) -> float | None:
     return None
 
 
-def percent_diff(objdiff_cli: str, target: Path, candidate: Path, function: str, repo_root: Path, timeout: int) -> dict[str, Any]:
-    """Run objdiff JSON output as supplemental match-percent evidence."""
+def percent_diff(objdiff_cli: str, target: Path, candidate: Path, function: str, repo_root: Path, timeout: int, strict: bool = False) -> dict[str, Any]:
+    """Run objdiff JSON output as supplemental match-percent evidence.
+
+    Strict mode scores like the official runner/report pipeline. The relaxed
+    mode ignores data-relocation symbol diffs and can report 100% while the
+    official score is still below exact, so the canonical score must come from
+    the strict run.
+    """
 
     command = [
         objdiff_cli,
@@ -72,8 +78,10 @@ def percent_diff(objdiff_cli: str, target: Path, candidate: Path, function: str,
         "json",
         "--output",
         "-",
-        "-c",
-        "functionRelocDiffs=data_value",
+    ]
+    if not strict:
+        command += ["-c", "functionRelocDiffs=data_value"]
+    command += [
         "-1",
         str(target),
         "-2",
@@ -90,15 +98,22 @@ def percent_diff(objdiff_cli: str, target: Path, candidate: Path, function: str,
     }
 
 
-def score_from_percent(match_percent: float | None) -> dict[str, Any]:
+def score_from_percent(match_percent: float | None, relaxed_percent: float | None = None) -> dict[str, Any]:
     if match_percent is None:
         return {"status": "missing_match_percent"}
-    return {
+    payload: dict[str, Any] = {
         "status": "ok",
         "match_percent": match_percent,
         "raw_score": max(0, int(round((100.0 - match_percent) * 1_000_000))),
-        "breakdown": "derived_from_objdiff_json_match_percent",
+        "breakdown": "derived_from_strict_objdiff_json_match_percent",
     }
+    if relaxed_percent is not None and relaxed_percent >= 99.99999 > match_percent:
+        payload["note"] = (
+            "Instructions match under relaxed data-reloc scoring, but relocation/data "
+            "references still differ; the official score is the strict match_percent."
+        )
+        payload["relaxed_match_percent"] = relaxed_percent
+    return payload
 
 
 def main() -> None:
@@ -141,16 +156,18 @@ def main() -> None:
             print_json(payload)
             return
         cli = objdiff_path.objdiff_cli()
+        strict_diff = percent_diff(cli, target, candidate, args.function, repo_root, timeout, strict=True)
         diff = percent_diff(cli, target, candidate, args.function, repo_root, timeout)
-        score = score_from_percent(diff.get("match_percent"))
+        score = score_from_percent(strict_diff.get("match_percent"), diff.get("match_percent"))
         payload.update(
             {
-                "status": "ok" if diff["exit_code"] == 0 and score["status"] == "ok" else "diff_failed",
+                "status": "ok" if strict_diff["exit_code"] == 0 and score["status"] == "ok" else "diff_failed",
                 "unit": unit,
                 "target_object": str(target),
-                "command": diff["command"],
+                "command": strict_diff["command"],
                 "score": score,
                 "percent_diff": diff,
+                "strict_percent_diff": {key: strict_diff[key] for key in ("command", "exit_code", "match_percent")},
             }
         )
     except subprocess.TimeoutExpired as error:

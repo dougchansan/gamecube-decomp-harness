@@ -1,0 +1,17 @@
+{
+  "number": 249,
+  "title": "Match HSD_CObjRemoveAnim",
+  "state": "MERGED",
+  "createdAt": "2022-02-02T19:30:13Z",
+  "updatedAt": "2022-02-02T19:30:25Z",
+  "mergedAt": "2022-02-02T19:30:23Z",
+  "closedAt": "2022-02-02T19:30:23Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/249",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 6449
+  }
+}

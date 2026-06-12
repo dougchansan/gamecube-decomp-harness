@@ -1,0 +1,17 @@
+{
+  "number": 1517,
+  "title": "partially match db_2253.c",
+  "state": "MERGED",
+  "createdAt": "2025-05-24T18:35:36Z",
+  "updatedAt": "2025-05-24T20:06:24Z",
+  "mergedAt": "2025-05-24T20:06:24Z",
+  "closedAt": "2025-05-24T20:06:24Z",
+  "author": "BR-",
+  "url": "https://github.com/doldecomp/melee/pull/1517",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 67793
+  }
+}

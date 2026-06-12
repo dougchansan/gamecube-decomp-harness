@@ -1,0 +1,17 @@
+{
+  "number": 894,
+  "title": "Match `ftCo_CargoWalk`",
+  "state": "MERGED",
+  "createdAt": "2023-05-29T05:17:52Z",
+  "updatedAt": "2023-05-29T05:26:31Z",
+  "mergedAt": "2023-05-29T05:26:29Z",
+  "closedAt": "2023-05-29T05:26:29Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/894",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 0
+  }
+}

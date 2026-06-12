@@ -1,0 +1,452 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2321",
+  "pr": {
+    "number": 2321,
+    "title": "Match progress",
+    "url": "https://github.com/doldecomp/melee/pull/2321",
+    "state": "CLOSED",
+    "author": "johnwinston",
+    "created_at": "2026-03-18T12:44:46Z",
+    "merged_at": null
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Draft matching-progress PR touching Kirby fighter code, game-mode/menu code, stage code, and toy/menu helpers. The PR body claimed 34 matched functions and 7 failed candidates, but the loaded diff only shows 14 changed files and a subset of those matches. A bot report recorded 8 new matches but also a matched-code regression and many broken matches. An issue comment says the PR was replaced by #2322, #2323, #2324, and #2325.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "naming",
+      "types-structs",
+      "matching-tactics",
+      "regression-risk"
+    ],
+    "systems": [
+      "fighter",
+      "game-mode",
+      "menu",
+      "stage",
+      "toy"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_SpecialN.c",
+      "role": "Implemented several Kirby Neutral-B/Up-B functions, added includes, used GET_FIGHTER, motion-state transitions, effect spawn callbacks, item/fighter inhale distance checks, and a dont_inline pragma.",
+      "evidence_refs": [
+        "changed_files: ftKb_SpecialN.c +90/-4",
+        "diff: ftKb_SpecialHi_Enter, ftKb_SpecialAirHi_Enter, ftKb_SpecialN_800F5DE8, ftKb_SpecialN_800F5EA8",
+        "pr_body: Kirby function descriptions and MWCC register allocation note"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_SpecialNNs.c",
+      "role": "Implemented copied Jigglypuff Rollout collision transitions and turnaround helper; added extern ftCollisionBox.",
+      "evidence_refs": [
+        "changed_files: ftKb_SpecialNNs.c +59/-3",
+        "diff: ftKb_PrSpecialAirNStart_Coll, ftKb_PrSpecialN_Coll, fn_80105978",
+        "pr_body: ftKb_SpecialNNs rollout description"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_16F1.c",
+      "role": "Implemented bonus decision lookup and award routing for fn_80170110.",
+      "evidence_refs": [
+        "changed_files: gm_16F1.c +24/-1",
+        "diff: fn_80170110",
+        "pr_body: gm_16F1 bonus decision description"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_16F1.h",
+      "role": "Updated prototypes for fn_80170110 and fn_801701C0 from unknown forms to typed signatures.",
+      "evidence_refs": [
+        "changed_files: gm_16F1.h +2/-2",
+        "diff: header prototype changes"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1BA8.c",
+      "role": "Implemented VS mode match-type cycling and configuration copyback.",
+      "evidence_refs": [
+        "changed_files: gm_1BA8.c +17/-1",
+        "diff: gm_801BEDA8",
+        "pr_body: VS Mode character select description"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmregclear.c",
+      "role": "Implemented regular match clear time-based bonus calculation.",
+      "evidence_refs": [
+        "changed_files: gmregclear.c +26/-1",
+        "diff: fn_8017F09C",
+        "pr_body: gmregclear bonus description"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmregclear.h",
+      "role": "Updated fn_8017F09C prototype to s32 fn_8017F09C(void).",
+      "evidence_refs": [
+        "changed_files: gmregclear.h +1/-1",
+        "diff: header prototype change"
+      ]
+    },
+    {
+      "path": "src/melee/gr/gricemt.c",
+      "role": "Renamed/implemented Icicle Mountain helper grIceMt_801F91EC and changed grAnime_801C7A04 arguments from -20 to 0 in that implementation.",
+      "evidence_refs": [
+        "changed_files: gricemt.c +9/-10",
+        "diff: FUN_801f91ec to grIceMt_801F91EC",
+        "pr_body: Icicle Mountain joint animation/callback description"
+      ]
+    },
+    {
+      "path": "src/melee/gr/gricemt.h",
+      "role": "Updated grIceMt_801F91EC prototype with full argument list.",
+      "evidence_refs": [
+        "changed_files: gricemt.h +2/-1",
+        "diff: header prototype change"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grkongo.c",
+      "role": "Implemented barrel cannon proximity search over item entities and added it_26B1 include.",
+      "evidence_refs": [
+        "changed_files: grkongo.c +32/-1",
+        "diff: grKongo_801D8078",
+        "pr_body: Kongo Jungle barrel cannon description"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnname.c",
+      "role": "Implemented name uniqueness check using valid persistent name entries and CompareNameStrings.",
+      "evidence_refs": [
+        "changed_files: mnname.c +17/-1",
+        "diff: IsNameUnique",
+        "pr_body: name tag uniqueness description"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnname.h",
+      "role": "Updated IsNameUnique prototype to bool IsNameUnique(s32 slot).",
+      "evidence_refs": [
+        "changed_files: mnname.h +1/-1",
+        "diff: header prototype change"
+      ]
+    },
+    {
+      "path": "src/melee/ty/toy.c",
+      "role": "Implemented controller stick-X reader loop for un_80305D00.",
+      "evidence_refs": [
+        "changed_files: toy.c +19/-1",
+        "diff: un_80305D00",
+        "pr_body: toy controller input reader description"
+      ]
+    },
+    {
+      "path": "src/melee/ty/toy.h",
+      "role": "Updated un_80305D00 prototype to float un_80305D00(void).",
+      "evidence_refs": [
+        "changed_files: toy.h +1/-1",
+        "diff: header prototype change"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Replaced decomp placeholder comments with C implementations in 9 loaded source files: ftKb_SpecialN.c, ftKb_SpecialNNs.c, gm_16F1.c, gm_1BA8.c, gmregclear.c, gricemt.c, grkongo.c, mnname.c, and toy.c.",
+    "Updated 5 headers to replace UNK_RET/UNK_PARAMS or incomplete declarations with more specific signatures.",
+    "Renamed an Icicle Mountain helper from FUN_801f91ec to grIceMt_801F91EC in the loaded diff and header.",
+    "Added includes needed by new implementations: ft/ftanim.h, ftCommon/ftCo_CaptureWaitKirby.h, and it/it_26B1.h.",
+    "PR body claimed 34 100% matches and 7 failed candidates; loaded bot report showed only 8 new matches in its visible section and also reported 62 broken matches plus a -0.17% matched-code change."
+  ],
+  "smart_moves": [
+    "Header prototypes were updated alongside recovered bodies, keeping declarations closer to the implementation evidence.",
+    "Several implementations used typed object access through Fighter, Ground, CSSData, VsModeData, Vec3, and callback types instead of leaving raw decompiler placeholders.",
+    "Distance comparisons in Kirby inhale and Kongo barrel search use squared distances against squared thresholds, avoiding unnecessary square roots and matching common game-code style.",
+    "The PR body explicitly documented failed match candidates and a Kirby MWCC register-allocation issue instead of presenting only successes."
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When replacing a placeholder with a recovered body, update the owning header prototype in the same scope when the body proves return and argument types.",
+      "evidence_refs": [
+        "diff: gm_16F1.h fn_80170110(void*, int, int, u8)",
+        "diff: gmregclear.h s32 fn_8017F09C(void)",
+        "diff: mnname.h bool IsNameUnique(s32 slot)",
+        "diff: toy.h float un_80305D00(void)",
+        "decomp_standards: truthful-headers-and-includes"
+      ],
+      "confidence": 0.86
+    },
+    {
+      "lesson": "For simple repeated input/entity scans, natural for/while loops can express the recovered source shape: pad index loop in toy.c, persistent name slot loop in mnname.c, and item entity traversal in grkongo.c.",
+      "evidence_refs": [
+        "diff: un_80305D00 for i < 4",
+        "diff: IsNameUnique for i < 0x78",
+        "diff: grKongo_801D8078 for cur = HSD_GObj_Entities->items; cur != NULL; cur = cur->next",
+        "decomp_standards: natural-loops"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "A source-level match can still have broad blast radius; inspect bot/checkdiff output for neighbor regressions before treating a match-progress PR as clean.",
+      "evidence_refs": [
+        "text_corpus: bot report says Matched code 58.80% (-0.17%, -6740 bytes)",
+        "text_corpus: bot report lists 62 broken matches",
+        "decomp_standards: verification-and-regression-ledger"
+      ],
+      "confidence": 0.9
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Use subsystem-prefixed semantic names when supported by path and PR evidence, as with grIceMt_801F91EC for an Icicle Mountain stage helper.",
+      "evidence_refs": [
+        "diff: FUN_801f91ec renamed to grIceMt_801F91EC",
+        "pr_body: gricemt.c described as Icicle Mountain stage helper",
+        "decomp_standards: conservative-naming"
+      ],
+      "confidence": 0.73
+    },
+    {
+      "convention": "Keep address-style fn_/un_ names where loaded evidence does not prove a stronger semantic name, as with fn_80170110, fn_8017F09C, fn_80105978, and un_80305D00.",
+      "evidence_refs": [
+        "diff: retained fn_ and un_ names",
+        "decomp_standards: conservative-naming"
+      ],
+      "confidence": 0.82
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "A narrow #pragma dont_inline was placed before ftKb_SpecialN_800F5DE8, but the loaded evidence does not show an adjacent-function safety check; curate as a risky matching tactic rather than normal style.",
+      "evidence_refs": [
+        "diff: #pragma dont_inline on before ftKb_SpecialN_800F5DE8",
+        "pr_body: ftKb_SpecialNDrink_Anim and ftKb_SpecialAirNDrink_Anim MWCC register allocation issue",
+        "decomp_standards: matching-tactics-need-evidence",
+        "decomp_standards: avoid-pragmas-register-asm"
+      ],
+      "confidence": 0.76
+    },
+    {
+      "tactic": "Re-fetching Fighter with GET_FIGHTER after Fighter_ChangeMotionState/ftAnim appears in Kirby Up-B entry functions, likely to keep the post-state-change object access shape explicit.",
+      "evidence_refs": [
+        "diff: ftKb_SpecialHi_Enter reassigns fp = GET_FIGHTER(gobj) after ftAnim_8006EBA4",
+        "diff: ftKb_SpecialAirHi_Enter reassigns fp = GET_FIGHTER(gobj) after ftAnim_8006EBA4"
+      ],
+      "confidence": 0.64
+    },
+    {
+      "tactic": "For match-type cycling, modulo arithmetic and explicit wraparound branch both appear in the same function depending on direction.",
+      "evidence_refs": [
+        "diff: gm_801BEDA8 decrements with wrap to 0x17, increments with (match_type + 1) % 24"
+      ],
+      "confidence": 0.81
+    },
+    {
+      "tactic": "A goto label was used in fn_80170110 to share a flag-check tail after table search failure or success.",
+      "evidence_refs": [
+        "diff: fn_80170110 uses goto check and check label"
+      ],
+      "confidence": 0.8
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "text": "decomp-dev bot reported 8 new matches in the visible report section, but also reported matched code 58.80% (-0.17%, -6740 bytes) and 62 broken matches.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev[bot] report for GALE01"
+      ]
+    },
+    {
+      "kind": "issue_comment",
+      "text": "The PR was closed unmerged and an issue comment says it was replaced by #2322, #2323, #2324, and #2325.",
+      "evidence_refs": [
+        "human_pr_text: Replaced by #2322, #2323, #2324, #2325",
+        "metadata: merged_at null, state CLOSED"
+      ]
+    },
+    {
+      "kind": "absence",
+      "text": "No loaded human review comments were available; metadata reports review_comments: 0 and reviews: 0.",
+      "evidence_refs": [
+        "metadata_json: counts.review_comments 0",
+        "metadata_json: counts.reviews 0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2321",
+    "johnwinston",
+    "Match progress",
+    "replaced by #2322 #2323 #2324 #2325",
+    "ftKb_SpecialN.c",
+    "ftKb_SpecialNNs.c",
+    "ftKb_SpecialHi_Enter",
+    "ftKb_SpecialAirHi_Enter",
+    "ftKb_SpecialN_800F5DE8",
+    "ftKb_SpecialN_800F5EA8",
+    "ftKb_PrSpecialAirNStart_Coll",
+    "ftKb_PrSpecialN_Coll",
+    "fn_80105978",
+    "MWCC register allocation",
+    "GET_FIGHTER",
+    "dont_inline",
+    "gm_16F1",
+    "fn_80170110",
+    "gm_1BA8",
+    "gm_801BEDA8",
+    "gmregclear",
+    "fn_8017F09C",
+    "gricemt",
+    "grIceMt_801F91EC",
+    "FUN_801f91ec",
+    "grkongo",
+    "grKongo_801D8078",
+    "mnname",
+    "IsNameUnique",
+    "toy",
+    "un_80305D00",
+    "truthful headers",
+    "broken matches"
+  ],
+  "follow_up_queries": [
+    "PR 2322 2323 2324 2325 johnwinston Match progress replacement",
+    "ftKb_SpecialN_800F5DE8 dont_inline MWCC register allocation GET_FIGHTER",
+    "ftKb_SpecialNDrink_Anim ftKb_SpecialAirNDrink_Anim victim_gobj callee-saved r28 r31",
+    "grIceMt_801F91EC grAnime_801C7A04 -20 0",
+    "decomp-dev bot 62 broken matches pr 2321",
+    "fn_80170110 fn_801701C0 gm_16F1 header prototype",
+    "IsNameUnique CompareNameStrings GetPersistentNameData",
+    "grKongo_801D8078 barrel cannon item kind 0xDA"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR identity, closed state, merged_at null, changed files",
+      "human_pr_text: PR body with match table, failed table, function descriptions, replacement comment",
+      "raw_diff: complete loaded diff for 14 changed files",
+      "text_corpus: bot report excerpt"
+    ],
+    "notes": [
+      "PR body claims 34 matched functions, but the loaded changed-file list and diff only include 14 files and a subset of the claimed matched functions.",
+      "The bot report excerpt conflicts with the PR body's broad success framing: it shows new matches but also many broken matches and an overall matched-code decrease.",
+      "No human review comments are loaded, so reviewer intent cannot be inferred.",
+      "The PR was closed unmerged and marked replaced by later PRs; do not treat its changes as accepted without checking replacement PRs or current source.",
+      "The raw PR JSON and text_corpus files are truncated, but the loaded diff is untruncated."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "type": "lesson_candidate",
+        "title": "Header prototypes should follow recovered bodies",
+        "text": "This PR repeatedly updated owning headers when replacing decomp placeholders with typed bodies, aligning with the existing truthful-headers standard.",
+        "scope": [
+          "headers",
+          "decomp-matching"
+        ],
+        "evidence_refs": [
+          "diff: gm_16F1.h",
+          "diff: gmregclear.h",
+          "diff: mnname.h",
+          "diff: toy.h",
+          "decomp_standards: truthful-headers-and-includes"
+        ]
+      },
+      {
+        "type": "warning_candidate",
+        "title": "Match claims need regression ledger",
+        "text": "The PR body lists many 100% matches, while the bot report records broad broken-match fallout. Curators should prefer narrow bot/checkdiff evidence over aggregate PR-body match lists.",
+        "scope": [
+          "verification",
+          "regression-risk"
+        ],
+        "evidence_refs": [
+          "pr_body: 34 matched, 7 failed",
+          "text_corpus: Matched code 58.80% (-0.17%, -6740 bytes)",
+          "text_corpus: 62 broken matches",
+          "decomp_standards: verification-and-regression-ledger"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Require extra scrutiny for pragma dont_inline in match-progress PRs",
+        "text": "PR #2321 includes #pragma dont_inline before ftKb_SpecialN_800F5DE8 and the PR body mentions MWCC register-allocation issues in nearby Kirby functions. This supports reinforcing that dont_inline/register-allocation tactics should be documented with exact objdiff and adjacent-regression evidence, not treated as normal cleanup.",
+        "source_path": null,
+        "scope": [
+          "matching tactics",
+          "pragmas",
+          "fighter/Kirby"
+        ],
+        "evidence_refs": [
+          "diff: #pragma dont_inline on before ftKb_SpecialN_800F5DE8",
+          "pr_body: MWCC register allocation issue note",
+          "text_corpus: bot report shows broken matches"
+        ],
+        "reason": "Existing standards already cover matching tactics and pragmas; this PR is a concrete example candidate, but it should not become an accepted standard without curator review."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "ftKb_SpecialN.c contains Kirby Neutral-B inhale and Up-B startup logic",
+        "text": "The PR body describes ftKb_SpecialN.c as Kirby Neutral-B/Inhale logic plus Up-B/Final Cutter startup, and the diff implements ftKb_SpecialHi_Enter, ftKb_SpecialAirHi_Enter, item inhale distance, and fighter inhale distance helpers.",
+        "source_path": "src/melee/ft/chara/ftKirby/ftKb_SpecialN.c",
+        "scope": [
+          "fighter",
+          "Kirby",
+          "Neutral-B",
+          "Up-B"
+        ],
+        "evidence_refs": [
+          "pr_body: ftKb_SpecialN.c descriptions",
+          "diff: ftKb_SpecialHi_Enter",
+          "diff: ftKb_SpecialAirHi_Enter",
+          "diff: ftKb_SpecialN_800F5DE8",
+          "diff: ftKb_SpecialN_800F5EA8"
+        ],
+        "reason": "Useful path-scope fact, but the PR was replaced and closed unmerged, so current source should be checked before promotion."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "ftKb_SpecialNNs.c includes copied Jigglypuff Rollout collision and turnaround logic",
+        "text": "The PR body describes ftKb_SpecialNNs.c as Kirby's copied Jigglypuff Rollout handling collision transitions and a turnaround helper; the diff implements ftKb_PrSpecialAirNStart_Coll, ftKb_PrSpecialN_Coll, and fn_80105978.",
+        "source_path": "src/melee/ft/chara/ftKirby/ftKb_SpecialNNs.c",
+        "scope": [
+          "fighter",
+          "Kirby",
+          "copied special",
+          "Jigglypuff Rollout"
+        ],
+        "evidence_refs": [
+          "pr_body: ftKb_SpecialNNs.c description",
+          "diff: ftKb_PrSpecialAirNStart_Coll",
+          "diff: ftKb_PrSpecialN_Coll",
+          "diff: fn_80105978"
+        ],
+        "reason": "Potential path fact for subsystem navigation; verify against replacement PRs/current source before accepting."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote the PR body's 34 matched count as an accepted validation result because the bot report shows regressions and the PR was replaced.",
+      "Do not infer human reviewer approval; no loaded human review comments exist.",
+      "Do not treat #pragma dont_inline as accepted style from this PR; loaded evidence shows use and a rationale note, but not a complete adjacent-regression ledger.",
+      "Do not promote function descriptions for files listed only in the PR body but absent from the loaded diff as changed-file facts for this slice."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

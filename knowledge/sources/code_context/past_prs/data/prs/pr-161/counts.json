@@ -1,0 +1,17 @@
+{
+  "number": 161,
+  "title": "Add HSD_AObjAlloc match as NON_MATCHING",
+  "state": "MERGED",
+  "createdAt": "2021-12-10T18:54:03Z",
+  "updatedAt": "2021-12-10T18:54:12Z",
+  "mergedAt": "2021-12-10T18:54:09Z",
+  "closedAt": "2021-12-10T18:54:09Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/161",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 2584
+  }
+}

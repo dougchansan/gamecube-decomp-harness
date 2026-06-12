@@ -1,0 +1,10 @@
+{
+  "pr": 1891,
+  "title": "Split and link `ftCo_AppealS`, `ft_0DF0`, `ft_0DF1`",
+  "url": "https://github.com/doldecomp/melee/pull/1891",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 25,
+  "added_lines": 580,
+  "deleted_lines": 397
+}

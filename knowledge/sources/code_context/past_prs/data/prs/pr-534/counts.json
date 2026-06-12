@@ -1,0 +1,17 @@
+{
+  "number": 534,
+  "title": "Fix SetScaleHack by making HSD_JObjSetMtxDirty a macro.",
+  "state": "MERGED",
+  "createdAt": "2022-09-03T15:44:41Z",
+  "updatedAt": "2022-09-03T15:59:16Z",
+  "mergedAt": "2022-09-03T15:59:16Z",
+  "closedAt": "2022-09-03T15:59:16Z",
+  "author": "RevoSucks",
+  "url": "https://github.com/doldecomp/melee/pull/534",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 2,
+    "diff_bytes": 2847
+  }
+}

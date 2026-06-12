@@ -1,0 +1,127 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2514",
+  "pr": {
+    "number": 2514,
+    "title": "Remove PR template",
+    "url": "https://github.com/doldecomp/melee/pull/2514",
+    "state": "MERGED",
+    "author": "ribbanya",
+    "created_at": "2026-05-19T19:31:33Z",
+    "merged_at": "2026-05-19T19:35:06Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2514 deleted the repository pull request template file `.github/pull_request_template.md`, removing its single line that directed contributors to read `./CONTRIBUTING.md` before submitting a pull request. No PR body, issue comments, review comments, or decompilation-source changes were present in the loaded slice.",
+  "change_classification": {
+    "primary_type": "repository_docs_cleanup",
+    "categories": [
+      "documentation",
+      "github-workflow",
+      "file-removal"
+    ],
+    "systems": [
+      "docs",
+      "github"
+    ]
+  },
+  "key_files": [
+    {
+      "path": ".github/pull_request_template.md",
+      "role": "Deleted GitHub pull request template; previously contained a one-line reminder linking to contributing guidelines.",
+      "evidence_refs": [
+        "changed_files:.github/pull_request_template.md added=0 deleted=1 hunks=1",
+        "raw_diff:deleted file mode 100644 for .github/pull_request_template.md",
+        "raw_diff:removed line 'Before submitting a pull request, please read our [contributing guidelines](./CONTRIBUTING.md).'"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Deleted `.github/pull_request_template.md`.",
+      "evidence_refs": [
+        "raw_diff:deleted file mode 100644",
+        "changed_files:.github/pull_request_template.md"
+      ]
+    },
+    {
+      "text": "Removed the template text instructing contributors to read the contributing guidelines before submitting a pull request.",
+      "evidence_refs": [
+        "raw_diff:removed single line linking to ./CONTRIBUTING.md"
+      ]
+    }
+  ],
+  "smart_moves": [],
+  "decomp_lessons": [],
+  "naming_conventions": [],
+  "assembly_or_matching_tactics": [],
+  "review_feedback": [],
+  "searchable_terms": [
+    "pr-2514",
+    "Remove PR template",
+    "ribbanya",
+    ".github/pull_request_template.md",
+    "pull_request_template",
+    "CONTRIBUTING.md",
+    "contributing guidelines",
+    "documentation",
+    "github workflow",
+    "template removal"
+  ],
+  "follow_up_queries": [
+    "PRs or commits touching .github/pull_request_template.md",
+    "PRs or issues discussing pull request template removal",
+    "PRs or commits touching CONTRIBUTING.md around May 2026",
+    "repository workflow documentation changes by ribbanya"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json:PR number/title/author/state/timestamps",
+      "changed_files.jsonl:one changed file with one deletion",
+      "raw_diff:complete 299-byte diff excerpt",
+      "text_corpus.jsonl:empty PR body",
+      "metadata_json:0 issue comments, 0 review comments, 0 reviews"
+    ],
+    "notes": [
+      "Changed file and exact deletion are strongly evidenced by metadata and complete diff.",
+      "No PR body or comments are available, so rationale beyond the title 'Remove PR template' is not evidenced.",
+      "No decompilation code, matching tactics, naming conventions, or review feedback are present in this slice."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "PR 2514 removed .github/pull_request_template.md",
+        "text": "Historical PR evidence shows `.github/pull_request_template.md` was deleted in PR 2514. The deleted file contained one line telling contributors to read `./CONTRIBUTING.md` before submitting a pull request.",
+        "source_path": ".github/pull_request_template.md",
+        "scope": [
+          "github workflow",
+          "repository documentation"
+        ],
+        "evidence_refs": [
+          "pr-2514 raw_diff:deleted file mode 100644",
+          "pr-2514 changed_files:.github/pull_request_template.md added=0 deleted=1",
+          "pr-2514 raw_diff:removed contributing-guidelines reminder"
+        ],
+        "reason": "If the curator maintains historical path facts for repository workflow files, this PR provides direct evidence that the pull request template path was removed."
+      }
+    ],
+    "rejection_notes": [
+      "Do not derive decompilation standards, matching lessons, or reviewer preferences from this PR; it only removes a GitHub documentation/template file.",
+      "Do not infer why the project no longer wanted a PR template; no rationale or discussion is present in the loaded evidence."
+    ]
+  },
+  "confidence": 0.86,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

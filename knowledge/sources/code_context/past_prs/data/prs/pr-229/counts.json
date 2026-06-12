@@ -1,0 +1,17 @@
+{
+  "number": 229,
+  "title": "Match GObj_SetupGXLink",
+  "state": "MERGED",
+  "createdAt": "2021-12-27T19:45:11Z",
+  "updatedAt": "2021-12-27T19:45:18Z",
+  "mergedAt": "2021-12-27T19:45:15Z",
+  "closedAt": "2021-12-27T19:45:15Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/229",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 178803
+  }
+}

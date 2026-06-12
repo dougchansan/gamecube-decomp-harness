@@ -1,0 +1,17 @@
+{
+  "number": 789,
+  "title": "Clean up `ftCaptain`",
+  "state": "MERGED",
+  "createdAt": "2023-04-21T15:58:23Z",
+  "updatedAt": "2023-04-21T16:41:03Z",
+  "mergedAt": "2023-04-21T16:41:02Z",
+  "closedAt": "2023-04-21T16:41:02Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/789",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 41204
+  }
+}

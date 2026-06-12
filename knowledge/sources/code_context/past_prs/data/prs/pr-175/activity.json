@@ -1,0 +1,10 @@
+{
+  "pr": 175,
+  "title": "Remove bss completely, fix a fakematch on id.c from a mistake in logic",
+  "url": "https://github.com/doldecomp/melee/pull/175",
+  "text_records_with_body": 0,
+  "review_comments": 0,
+  "changed_files": 94,
+  "added_lines": 1682,
+  "deleted_lines": 1411
+}

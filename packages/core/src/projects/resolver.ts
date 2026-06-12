@@ -22,6 +22,8 @@ export interface ProjectPrDefaults {
   titlePrefix?: string;
   branchPrefix?: string;
   maxFilesPerPr?: number;
+  improvementMinGainPoints?: number;
+  improvementMinMatchedBytes?: number;
 }
 
 export interface ProjectKnowledgeConfig {
@@ -131,20 +133,20 @@ const defaultPr: Required<ProjectPrDefaults> = {
   titlePrefix: "Melee decomp",
   branchPrefix: "pr-split",
   maxFilesPerPr: 30,
+  improvementMinGainPoints: 2,
+  improvementMinMatchedBytes: 64,
 };
 
 const defaultKnowledge: Required<ProjectKnowledgeConfig> = {
   globalSources: [
     "past_prs",
     "decomp_standards",
-    "resource_guides",
     "ssbm_data_sheet",
     "powerpc_docs",
     "external_mirrors",
-    "reference_docs",
     "path_facts",
   ],
-  projectSources: ["code_graph", "tool_outputs"],
+  projectSources: ["code_graph"],
 };
 
 function repoRootFromModule(): string {
@@ -214,6 +216,8 @@ function prFromObject(value: unknown): ProjectPrDefaults | undefined {
     titlePrefix: stringField(value.titlePrefix),
     branchPrefix: stringField(value.branchPrefix),
     maxFilesPerPr: numberField(value.maxFilesPerPr),
+    improvementMinGainPoints: numberField(value.improvementMinGainPoints),
+    improvementMinMatchedBytes: numberField(value.improvementMinMatchedBytes),
   };
 }
 

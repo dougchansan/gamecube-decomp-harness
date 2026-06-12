@@ -1,0 +1,486 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2344",
+  "pr": {
+    "number": 2344,
+    "title": "Decompile 9 fighter, library, game, and menu functions",
+    "url": "https://github.com/doldecomp/melee/pull/2344",
+    "state": "MERGED",
+    "author": "johnwinston",
+    "created_at": "2026-03-21T15:02:23Z",
+    "merged_at": "2026-03-22T16:16:29Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2344 replaced several placeholder decomp stubs with C implementations across fighter, game, library, menu, and player-stat code, and updated related headers/prototypes and one THP struct layout. Review evidence centered on scoping a `#pragma dont_inline` change in `mnname.c` with `#pragma push`/`#pragma pop` so the pragma did not affect the whole file. Evidence is mixed because the PR body claims 9 functions and 100% match by overnight script, while the loaded changed files omit `toy.c`/`un_80307828` and the bot report shows 4 new matches plus 4 near-match improvements.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "types-structs",
+      "pragmas",
+      "fighter",
+      "game-mode",
+      "library",
+      "menu",
+      "player-stats"
+    ],
+    "systems": [
+      "fighter",
+      "game-mode",
+      "library",
+      "menu",
+      "player"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_Attack100.c",
+      "role": "Decompiled `fn_800DA1D8`, initializing CatchWait grab setup, callbacks, captured joint storage, grab effect spawn, and victim handling.",
+      "evidence_refs": [
+        "raw_diff: ftCo_Attack100.c hunk",
+        "human_pr_text: Grab setup",
+        "text_corpus: bot report new match `fn_800DA1D8` 100.00%"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_Attack100.h",
+      "role": "Updated `fn_800DA1D8` prototype from `UNK_RET/UNK_PARAMS` to `void fn_800DA1D8(Fighter_GObj* gobj)`.",
+      "evidence_refs": [
+        "raw_diff: ftCo_Attack100.h hunk"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCrazyHand/ftCh_Init.c",
+      "role": "Added `mp/mplib.h` include and decompiled `ftCh_Damage2_Anim` for Crazy Hand damage recovery behavior.",
+      "evidence_refs": [
+        "raw_diff: ftCh_Init.c hunks",
+        "human_pr_text: Crazy Hand damage recovery",
+        "text_corpus: bot report improvement `ftCh_Damage2_Anim` 99.98%"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftPopo/ftPp_SpecialS.c",
+      "role": "Decompiled `ftPp_SpecialAirHiThrow_0_Anim`, including aerial throw completion, Nana availability check, and partner follow-up path.",
+      "evidence_refs": [
+        "raw_diff: ftPp_SpecialS.c hunk",
+        "human_pr_text: Ice Climbers aerial throw",
+        "text_corpus: bot report improvement `ftPp_SpecialAirHiThrow_0_Anim` 99.87%"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftcolanim.c",
+      "role": "Decompiled `ftCo_800C0134` with scoped pragmas, collision animation reset, character callback, and table-driven `lb_800144C8` calls.",
+      "evidence_refs": [
+        "raw_diff: ftcolanim.c hunk",
+        "human_pr_text: Fighter animation reset",
+        "text_corpus: bot report new match `ftCo_800C0134` 100.00%"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_16AE.c",
+      "role": "Changed `fn_8016F160` from void wrapper to returning the result of `pl_80039418`.",
+      "evidence_refs": [
+        "raw_diff: gm_16AE.c hunk"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_16AE.h",
+      "role": "Updated `fn_8016F160` prototype to return `int`.",
+      "evidence_refs": [
+        "raw_diff: gm_16AE.h hunk"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_16F1.h",
+      "role": "Updated `fn_8016FFD4` prototype from unknown to `void fn_8016FFD4(struct lbl_8046B6A0_24C_t*, int, int)`.",
+      "evidence_refs": [
+        "raw_diff: gm_16F1.h hunk"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmregclear.c",
+      "role": "Decompiled `fn_8017F1B8`, iterating 256 game event slots, checking masks, dispatching handlers, and calling `fn_8016FFD4`.",
+      "evidence_refs": [
+        "raw_diff: gmregclear.c hunk",
+        "human_pr_text: Game event dispatch",
+        "text_corpus: bot report improvement `fn_8017F1B8` 97.73%"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmregclear.h",
+      "role": "Updated `fn_8017F1B8` prototype to `void fn_8017F1B8(void)`.",
+      "evidence_refs": [
+        "raw_diff: gmregclear.h hunk"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lbmthp.c",
+      "role": "Decompiled `fn_8001F06C`, an interrupt-protected THP decoder state/frame counter update routine.",
+      "evidence_refs": [
+        "raw_diff: lbmthp.c hunk",
+        "human_pr_text: THP video decoder",
+        "text_corpus: bot report new match `fn_8001F06C` 100.00%"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lbmthp.h",
+      "role": "Expanded `THPDecComp` fields at offsets 0x68, 0x6C, 0x108, and 0x10C and updated `fn_8001F06C` prototype.",
+      "evidence_refs": [
+        "raw_diff: lbmthp.h hunks"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnname.c",
+      "role": "Decompiled `mnName_80238A04`, including a loop over name-entry JObjs and scoped `#pragma dont_inline`; this file received review feedback about pragma scoping.",
+      "evidence_refs": [
+        "raw_diff: mnname.c hunk",
+        "human_pr_text: Name entry menu animation",
+        "review_comments: discussion_r2970215570",
+        "review_comments: discussion_r2971624959",
+        "text_corpus: bot report improvement `mnName_80238A04` 99.18%"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnname.h",
+      "role": "Updated `mnName_80238A04` prototype to `void mnName_80238A04(HSD_GObj* gobj, u8 target, u8 flag)`.",
+      "evidence_refs": [
+        "raw_diff: mnname.h hunk"
+      ]
+    },
+    {
+      "path": "src/melee/pl/pltrick.c",
+      "role": "Decompiled `pl_80037DF4`, updating player attack counters from event flags.",
+      "evidence_refs": [
+        "raw_diff: pltrick.c hunk",
+        "human_pr_text: Attack stat tracking",
+        "text_corpus: bot report new match `pl_80037DF4` 100.00%"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Replaced decomp placeholders with C bodies for `fn_800DA1D8`, `ftCh_Damage2_Anim`, `ftPp_SpecialAirHiThrow_0_Anim`, `ftCo_800C0134`, `fn_8017F1B8`, `fn_8001F06C`, `mnName_80238A04`, and `pl_80037DF4` in the loaded diff.",
+    "Updated headers to replace several `UNK_RET`/`UNK_PARAMS` declarations with typed prototypes for newly decompiled or newly understood functions.",
+    "Adjusted `THPDecComp` in `lbmthp.h` to expose fields used by `fn_8001F06C`, including signed fields at 0x68, 0x6C, 0x108, and 0x10C.",
+    "Changed `fn_8016F160` to return the result of `pl_80039418`, supporting its use as a nonzero condition in `fn_8017F1B8`.",
+    "Scoped `#pragma dont_inline` in `mnname.c` with `#pragma push` and `#pragma pop` after review noted the unscoped pragma affected all following functions."
+  ],
+  "smart_moves": [
+    {
+      "text": "Updated owning headers alongside recovered bodies, reducing unknown prototypes rather than keeping local or stale declarations.",
+      "evidence_refs": [
+        "raw_diff: ftCo_Attack100.h",
+        "raw_diff: gmregclear.h",
+        "raw_diff: lbmthp.h",
+        "raw_diff: mnname.h"
+      ]
+    },
+    {
+      "text": "Recovered struct fields in `THPDecComp` where the decompiled THP routine needs typed accesses, avoiding opaque padding for actively used offsets.",
+      "evidence_refs": [
+        "raw_diff: lbmthp.c",
+        "raw_diff: lbmthp.h"
+      ]
+    },
+    {
+      "text": "Used a natural `for (i = 0; i < 256; i++)` loop for game event slot dispatch and `for (i = 0x18; i < 0x1B; i++)` for repeated menu JObj animation updates.",
+      "evidence_refs": [
+        "raw_diff: gmregclear.c",
+        "raw_diff: mnname.c",
+        "decomp_standards:natural-loops"
+      ]
+    },
+    {
+      "text": "Accepted review feedback by scoping a function-specific pragma with push/pop so the compiler setting did not leak to the rest of the translation unit.",
+      "evidence_refs": [
+        "review_comments: PsiLupan comment",
+        "review_comments: johnwinston fixed comment",
+        "raw_diff: mnname.c"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a recovered body proves a function signature, update the owning header from `UNK_RET`/`UNK_PARAMS` to the real return and argument types in the same change.",
+      "scope": [
+        "headers",
+        "function prototypes",
+        "decomp body recovery"
+      ],
+      "evidence_refs": [
+        "raw_diff: ftCo_Attack100.h",
+        "raw_diff: gmregclear.h",
+        "raw_diff: lbmthp.h",
+        "raw_diff: mnname.h",
+        "decomp_standards:truthful-headers-and-includes"
+      ]
+    },
+    {
+      "lesson": "If a matching function requires a pragma, scope it tightly around the function with `#pragma push`/`#pragma pop`; otherwise it can unintentionally affect later functions in the file.",
+      "scope": [
+        "compiler pragmas",
+        "matching tactics",
+        "review hygiene"
+      ],
+      "evidence_refs": [
+        "review_comments: discussion_r2970215570",
+        "review_comments: discussion_r2971624959",
+        "raw_diff: mnname.c",
+        "decomp_standards:avoid-pragmas-register-asm"
+      ]
+    },
+    {
+      "lesson": "Expose real struct fields when a decompiled routine repeatedly uses those offsets, as shown by `THPDecComp` fields added for `fn_8001F06C`.",
+      "scope": [
+        "types",
+        "struct recovery",
+        "library THP decoder"
+      ],
+      "evidence_refs": [
+        "raw_diff: lbmthp.c",
+        "raw_diff: lbmthp.h",
+        "decomp_standards:typed-fields-over-pointer-math"
+      ]
+    },
+    {
+      "lesson": "Use ordinary source loops for repeated indexed behavior when the diff supports it, such as event slot iteration and repeated menu JObj animation calls.",
+      "scope": [
+        "loops",
+        "control flow",
+        "menu",
+        "game event dispatch"
+      ],
+      "evidence_refs": [
+        "raw_diff: gmregclear.c",
+        "raw_diff: mnname.c",
+        "decomp_standards:natural-loops"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "The PR retained existing address-style names such as `fn_800DA1D8`, `fn_8017F1B8`, `fn_8001F06C`, and `mnName_80238A04` rather than inventing new semantic names.",
+      "evidence_refs": [
+        "raw_diff",
+        "human_pr_text",
+        "decomp_standards:conservative-naming"
+      ]
+    },
+    {
+      "convention": "Short local role names were used where roles are clear, including `fp` for `Fighter*`, `gobj` for game object parameters, `jobj` for `HSD_JObj*`, and `attrs`/`da` for attribute pointers.",
+      "evidence_refs": [
+        "raw_diff: ftCo_Attack100.c",
+        "raw_diff: ftCh_Init.c",
+        "raw_diff: ftPp_SpecialS.c",
+        "raw_diff: mnname.c"
+      ]
+    },
+    {
+      "convention": "Unknown struct or move-state fields remained conservatively named, such as `unk_108`, `unk_10C`, `mv.ch.unk0.xC`, and `mv.pp.unk_80123954.x0`, where the PR evidence did not prove richer names.",
+      "evidence_refs": [
+        "raw_diff: lbmthp.h",
+        "raw_diff: ftCh_Init.c",
+        "raw_diff: ftPp_SpecialS.c",
+        "decomp_standards:conservative-naming"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "`PAD_STACK` was used narrowly in `fn_800DA1D8` and `ftPp_SpecialAirHiThrow_0_Anim`.",
+      "evidence_refs": [
+        "raw_diff: ftCo_Attack100.c",
+        "raw_diff: ftPp_SpecialS.c",
+        "decomp_standards:matching-tactics-need-evidence"
+      ],
+      "notes": "The diff shows the tactic, but no inline explanation or narrow objdiff evidence beyond the bot/PR reports is loaded."
+    },
+    {
+      "tactic": "Function-scoped pragmas were used for matching-sensitive functions: `ftCo_800C0134` uses `auto_inline off` and `global_optimizer off`; `mnName_80238A04` uses `dont_inline on` wrapped in push/pop.",
+      "evidence_refs": [
+        "raw_diff: ftcolanim.c",
+        "raw_diff: mnname.c",
+        "review_comments: discussion_r2970215570"
+      ],
+      "notes": "Review explicitly confirmed pragma leakage risk for `mnname.c`; no separate review comment explains the `ftcolanim.c` pragma need."
+    },
+    {
+      "tactic": "`fn_8001F06C` uses a labeled `goto end` to share interrupt restoration before returning.",
+      "evidence_refs": [
+        "raw_diff: lbmthp.c"
+      ],
+      "notes": "The shape is present in the recovered C; the PR evidence does not explain alternatives tried."
+    },
+    {
+      "tactic": "Explicit casts such as `(u8)` and `(u32)` appear in `fn_8017F1B8` and `mnName_80238A04`, likely preserving comparison/mask code shape.",
+      "evidence_refs": [
+        "raw_diff: gmregclear.c",
+        "raw_diff: mnname.c"
+      ],
+      "notes": "The exact assembly reason is not documented in comments."
+    }
+  ],
+  "review_feedback": [
+    {
+      "path": "src/melee/mn/mnname.c",
+      "reviewer": "PsiLupan",
+      "feedback": "`#pragma dont_inline on` lacked a `#pragma push` before it and `#pragma pop` after the function, so it incorrectly affected all following functions in the file.",
+      "resolution": "Author replied that `#pragma push` / `#pragma pop` wrapping was added; the loaded diff shows `mnName_80238A04` wrapped by push/pop.",
+      "evidence_refs": [
+        "review_comments: discussion_r2970215570",
+        "review_comments: discussion_r2971624959",
+        "raw_diff: mnname.c"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2344",
+    "johnwinston",
+    "ftCo_800C0134",
+    "fn_800DA1D8",
+    "ftCh_Damage2_Anim",
+    "ftPp_SpecialAirHiThrow_0_Anim",
+    "pl_80037DF4",
+    "fn_8017F1B8",
+    "mnName_80238A04",
+    "fn_8001F06C",
+    "THPDecComp",
+    "lbmthp",
+    "gmregclear",
+    "mnname",
+    "ftcolanim",
+    "ftCo_Attack100",
+    "ftPp_SpecialS",
+    "ftCh_Init",
+    "pltrick",
+    "pragma push pop",
+    "dont_inline",
+    "global_optimizer off",
+    "PAD_STACK",
+    "UNK_RET",
+    "UNK_PARAMS",
+    "typed prototype",
+    "struct recovery",
+    "CatchWait",
+    "THP decoder",
+    "game event dispatch",
+    "name entry menu"
+  ],
+  "follow_up_queries": [
+    "PR2344 toy.c un_80307828 changed file missing from loaded diff",
+    "mnName_80238A04 pragma dont_inline push pop review",
+    "ftCo_800C0134 global_optimizer off auto_inline off rationale",
+    "fn_8017F1B8 fn_8016F160 return type pl_80039418",
+    "lbmthp THPDecComp unk_108 unk_10C fn_8001F06C",
+    "ftPp_SpecialAirHiThrow_0_Anim PAD_STACK 40",
+    "fn_800DA1D8 PAD_STACK 8 grab setup efAsync_Spawn",
+    "decomp PR pragma leakage affects following functions"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json",
+      "human_pr_text",
+      "review_comments",
+      "raw_diff",
+      "changed_files",
+      "text_corpus"
+    ],
+    "notes": [
+      "Changed-file metadata and raw diff are complete for 15 loaded files and support the file-level changes summarized here.",
+      "PR body claims 9 functions and includes `un_80307828` in `toy.c`, but loaded changed files and raw diff do not include `toy.c`; this intake does not treat the trophy viewer function as evidenced by the diff.",
+      "PR body says all 9 functions 100% match by overnight script, while the bot report in loaded text corpus shows 4 new 100% matches and 4 improvements below 100%; verification claims are therefore recorded cautiously.",
+      "Review evidence is strong for the `mnname.c` pragma scoping issue and fix.",
+      "Some matching tactics such as `PAD_STACK`, `global_optimizer off`, and casts are visible in diff but not justified by detailed objdiff notes in the loaded PR evidence."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "type": "decomp_lesson",
+        "title": "Scope matching pragmas with push/pop",
+        "text": "PR #2344 review shows that a `#pragma dont_inline on` added for one menu function needed `#pragma push` before it and `#pragma pop` after it; otherwise the pragma affected the rest of the file.",
+        "scope": [
+          "compiler pragmas",
+          "matching tactics",
+          "review feedback"
+        ],
+        "evidence_refs": [
+          "review_comments: discussion_r2970215570",
+          "review_comments: discussion_r2971624959",
+          "raw_diff: src/melee/mn/mnname.c"
+        ]
+      },
+      {
+        "type": "decomp_lesson",
+        "title": "Recover headers with recovered bodies",
+        "text": "PR #2344 updated headers from unknown signatures to typed prototypes for functions whose bodies were recovered, including `fn_800DA1D8`, `fn_8017F1B8`, `fn_8001F06C`, and `mnName_80238A04`.",
+        "scope": [
+          "headers",
+          "prototypes",
+          "UNK_RET",
+          "UNK_PARAMS"
+        ],
+        "evidence_refs": [
+          "raw_diff: ftCo_Attack100.h",
+          "raw_diff: gmregclear.h",
+          "raw_diff: lbmthp.h",
+          "raw_diff: mnname.h"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Emphasize push/pop scoping for single-function pragmas",
+        "text": "When using `#pragma dont_inline`, `#pragma auto_inline off`, `#pragma global_optimizer off`, or similar matching pragmas for one function, wrap the affected region with `#pragma push` and `#pragma pop`; unscoped pragmas can silently affect later functions in the same file.",
+        "source_path": null,
+        "scope": [
+          "avoid-pragmas-register-asm",
+          "matching-tactics-need-evidence"
+        ],
+        "evidence_refs": [
+          "review_comments: PsiLupan on src/melee/mn/mnname.c",
+          "review_comments: johnwinston fixed reply",
+          "raw_diff: src/melee/mn/mnname.c"
+        ],
+        "reason": "The existing standards already discourage broad pragma use, but this PR provides concise review evidence for the specific push/pop failure mode."
+      },
+      {
+        "target_source_id": "other",
+        "update_kind": "source_update",
+        "title": "Flag PR body versus bot-report verification mismatches during intake",
+        "text": "For PR postmortems, distinguish author-stated verification from bot-reported match percentages when they conflict. In PR #2344, the body claims all 9 functions 100% match, while the loaded bot report lists 4 new 100% matches and 4 near-match improvements below 100%, and the loaded diff omits the claimed `toy.c` function.",
+        "source_path": null,
+        "scope": [
+          "PR intake",
+          "verification evidence",
+          "postmortem evidence quality"
+        ],
+        "evidence_refs": [
+          "human_pr_text: Verification",
+          "text_corpus: decomp-dev bot report",
+          "changed_files.jsonl"
+        ],
+        "reason": "Useful for curator workflow; not a decomp standard unless promoted separately."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote `un_80307828` or `toy.c` as a changed-file fact from this slice because it appears only in the PR body and not in the loaded changed files or raw diff.",
+      "Do not promote the PR body's 'All 9 functions 100% match' as an accepted validation result without reconciling it with the bot report showing partial improvements.",
+      "Do not infer reviewer intent beyond the explicit pragma scoping comment in `mnname.c`.",
+      "Do not turn visible `PAD_STACK` or pragma use into general style guidance without stronger verifier evidence."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

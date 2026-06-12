@@ -1,0 +1,17 @@
+{
+  "number": 963,
+  "title": "itHammer matching",
+  "state": "MERGED",
+  "createdAt": "2023-09-13T21:28:35Z",
+  "updatedAt": "2023-09-13T21:48:23Z",
+  "mergedAt": "2023-09-13T21:48:18Z",
+  "closedAt": "2023-09-13T21:48:18Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/963",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 2,
+    "reviews": 2,
+    "diff_bytes": 28957
+  }
+}

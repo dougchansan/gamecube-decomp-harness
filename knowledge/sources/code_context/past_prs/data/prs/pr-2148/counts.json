@@ -1,0 +1,17 @@
+{
+  "number": 2148,
+  "title": "More Claude dups",
+  "state": "MERGED",
+  "createdAt": "2026-01-29T19:43:47Z",
+  "updatedAt": "2026-01-31T06:07:29Z",
+  "mergedAt": "2026-01-31T04:55:29Z",
+  "closedAt": "2026-01-31T04:55:29Z",
+  "author": "lukechampine",
+  "url": "https://github.com/doldecomp/melee/pull/2148",
+  "counts": {
+    "issue_comments": 2,
+    "review_comments": 4,
+    "reviews": 3,
+    "diff_bytes": 139906
+  }
+}

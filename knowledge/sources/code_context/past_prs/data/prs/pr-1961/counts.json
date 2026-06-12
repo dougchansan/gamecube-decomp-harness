@@ -1,0 +1,17 @@
+{
+  "number": 1961,
+  "title": "match some grBigBlue functions",
+  "state": "MERGED",
+  "createdAt": "2025-10-05T23:24:35Z",
+  "updatedAt": "2025-10-14T18:56:05Z",
+  "mergedAt": "2025-10-14T18:56:05Z",
+  "closedAt": "2025-10-14T18:56:05Z",
+  "author": "x-dcs-x",
+  "url": "https://github.com/doldecomp/melee/pull/1961",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 5945
+  }
+}

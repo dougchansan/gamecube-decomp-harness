@@ -1,0 +1,17 @@
+{
+  "number": 2608,
+  "title": "match and link math.c",
+  "state": "MERGED",
+  "createdAt": "2026-06-07T16:43:08Z",
+  "updatedAt": "2026-06-07T17:13:53Z",
+  "mergedAt": "2026-06-07T17:13:53Z",
+  "closedAt": "2026-06-07T17:13:53Z",
+  "author": "lukechampine",
+  "url": "https://github.com/doldecomp/melee/pull/2608",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 5917
+  }
+}

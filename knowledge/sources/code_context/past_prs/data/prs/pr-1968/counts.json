@@ -1,0 +1,17 @@
+{
+  "number": 1968,
+  "title": "`mplib` matches, mostly",
+  "state": "MERGED",
+  "createdAt": "2025-10-20T16:55:36Z",
+  "updatedAt": "2025-10-22T19:52:38Z",
+  "mergedAt": "2025-10-22T19:52:37Z",
+  "closedAt": "2025-10-22T19:52:38Z",
+  "author": "Giga-Bowser",
+  "url": "https://github.com/doldecomp/melee/pull/1968",
+  "counts": {
+    "issue_comments": 4,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 505568
+  }
+}

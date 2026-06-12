@@ -1,0 +1,17 @@
+{
+  "number": 1539,
+  "title": "Add progress image to README",
+  "state": "MERGED",
+  "createdAt": "2025-05-29T02:51:52Z",
+  "updatedAt": "2025-05-29T02:54:01Z",
+  "mergedAt": "2025-05-29T02:54:00Z",
+  "closedAt": "2025-05-29T02:54:01Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1539",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 596
+  }
+}

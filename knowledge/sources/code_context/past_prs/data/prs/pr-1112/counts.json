@@ -1,0 +1,17 @@
+{
+  "number": 1112,
+  "title": "Re-link `dolphin/db`",
+  "state": "MERGED",
+  "createdAt": "2024-01-25T15:00:44Z",
+  "updatedAt": "2024-01-25T15:01:56Z",
+  "mergedAt": "2024-01-25T15:01:55Z",
+  "closedAt": "2024-01-25T15:01:55Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1112",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 1249
+  }
+}

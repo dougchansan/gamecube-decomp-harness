@@ -1,0 +1,428 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2442",
+  "pr": {
+    "number": 2442,
+    "title": "Link various item TUs",
+    "url": "https://github.com/doldecomp/melee/pull/2442",
+    "state": "MERGED",
+    "author": "lukechampine",
+    "created_at": "2026-04-30T03:20:10Z",
+    "merged_at": "2026-04-30T09:10:38Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2442 linked several item translation units by moving six item source files from NonMatching to Matching, adjusting item source/header code, and updating GALE01 symbol metadata for local functions, local literals, section labels, and data object sizes. Bot report evidence shows +21216 linked-code bytes, +5984 matched-code bytes, 19 new matches, and 5 unmatched-item improvements.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "symbol-metadata",
+      "item-tu-linking"
+    ],
+    "systems": [
+      "item",
+      "config",
+      "repo-root"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "configure.py",
+      "role": "Changed ittaru, itfoxblaster, ityoshieggthrow, itclimbersstring, itclinkmilk, and itkirby_2F23 from NonMatching to Matching.",
+      "evidence_refs": [
+        "raw/diff.diff configure.py hunks",
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Updated function/data symbol metadata, including local scope changes, local @NNN literal symbols, section labels, and data object sizes.",
+      "evidence_refs": [
+        "diff_excerpt symbols.txt",
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/it/itCharItems.h",
+      "role": "Reworked Fox blaster item vars from repeated scalar groups into arrays for xDE4, xDFC, xE14, and angle.",
+      "evidence_refs": [
+        "raw/diff.diff itCharItems.h hunk",
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itfoxblaster.c",
+      "role": "Updated Fox blaster code to use array fields and a reverse shift loop instead of manually repeated scalar assignments.",
+      "evidence_refs": [
+        "raw/diff.diff itfoxblaster.c hunks",
+        "text_corpus bot report"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itclimbersstring.c",
+      "role": "Largest item source rewrite in the slice; includes include cleanup, inline helper movement/addition, PAD_STACK adjustments, and matched item function/data progress.",
+      "evidence_refs": [
+        "raw/diff.diff itclimbersstring.c hunks",
+        "text_corpus bot report",
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/ittaru.c",
+      "role": "Item source linked as Matching; bot report lists .data and .sdata2 reaching 100% and two functions reaching 100%.",
+      "evidence_refs": [
+        "configure.py diff hunk",
+        "text_corpus bot report",
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itclinkmilk.c",
+      "role": "Item source linked as Matching; includes PAD_STACK adjustment and bot-reported .data/function matches.",
+      "evidence_refs": [
+        "raw/diff.diff itclinkmilk.c hunks",
+        "text_corpus bot report",
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itkirby_2F23.c",
+      "role": "Item source linked as Matching; bot report lists .data plus function matches.",
+      "evidence_refs": [
+        "configure.py diff hunk",
+        "text_corpus bot report",
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/ityoshieggthrow.c",
+      "role": "Item source linked as Matching; bot report lists two functions reaching 100%.",
+      "evidence_refs": [
+        "configure.py diff hunk",
+        "text_corpus bot report",
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itwstar.c",
+      "role": "Item source improved; bot report lists one function and .sdata2 reaching 100%, plus one unmatched-item improvement.",
+      "evidence_refs": [
+        "text_corpus bot report",
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itkusudama.c",
+      "role": "Item source improved but not linked; bot report lists it_80289BE8 improvement.",
+      "evidence_refs": [
+        "text_corpus bot report",
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itkyasarin.c",
+      "role": "Item source improved but not linked; bot report lists two unmatched-item improvements and PAD_STACK adjustment in diff.",
+      "evidence_refs": [
+        "raw/diff.diff itkyasarin.c hunks",
+        "text_corpus bot report",
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itpikachuthunder.c",
+      "role": "Item source improved but not linked; bot report lists one new match and one unmatched-item improvement, with PAD_STACK adjustment in diff.",
+      "evidence_refs": [
+        "raw/diff.diff itpikachuthunder.c hunks",
+        "text_corpus bot report",
+        "changed_files.jsonl"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Six item TUs were switched to Matching in configure.py: ittaru.c, itfoxblaster.c, ityoshieggthrow.c, itclimbersstring.c, itclinkmilk.c, and itkirby_2F23.c.",
+    "The Fox blaster item variable layout in itCharItems.h changed repeated scalar fields into arrays: xDE4[6], xDFC[6], xE14[6], and angle[6].",
+    "itfoxblaster.c replaced a repeated manual scalar shift block with a for loop over those arrays and removed a comment describing the earlier non-loop form as likely fake improvement.",
+    "symbols.txt changed many item data/string/float symbols from global address-style names to local @NNN symbols and added local data labels such as ...data.0; several object sizes/scopes were also adjusted.",
+    "Bot report recorded 19 new matches, including complete data matches for ittaru, itclinkmilk, itkirby_2F23, and several individual function matches across item TUs.",
+    "Bot report recorded 5 improvements in still-unmatched items: itkusudama, itkyasarin, itpikachuthunder, and itwstar."
+  ],
+  "smart_moves": [
+    {
+      "text": "Turning the Fox blaster repeated field groups into arrays enabled ordinary indexed code and a reverse shift loop, aligning with the natural-loops standard instead of preserving manually repeated generated-looking assignments.",
+      "evidence_refs": [
+        "raw/diff.diff itCharItems.h hunk",
+        "raw/diff.diff itfoxblaster.c hunk",
+        "decomp_standards:natural-loops",
+        "decomp_standards:typed-fields-over-pointer-math"
+      ]
+    },
+    {
+      "text": "The PR paired source changes with symbol metadata changes, including localizing TU-owned functions/literals and splitting data objects, rather than compensating only in C source.",
+      "evidence_refs": [
+        "diff_excerpt symbols.txt",
+        "decomp_standards:data-sections-and-tu-splits"
+      ]
+    },
+    {
+      "text": "The configure.py linking change was backed by an automated report showing linked-code and matched-code gains plus specific new matches.",
+      "evidence_refs": [
+        "raw/diff.diff configure.py hunks",
+        "text_corpus bot report"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When several adjacent item fields form parallel repeated groups, consider whether the recovered struct should use arrays; once typed as arrays, shift/update code can often become a natural loop.",
+      "scope": [
+        "item vars",
+        "Fox/Falco blaster",
+        "parallel scalar field groups"
+      ],
+      "evidence_refs": [
+        "raw/diff.diff itCharItems.h hunk",
+        "raw/diff.diff itfoxblaster.c hunk"
+      ]
+    },
+    {
+      "lesson": "A TU-linking PR may require symbol metadata cleanup for local strings, floats, rodata, sdata, sdata2, and object sizes in addition to C source edits.",
+      "scope": [
+        "item TU linking",
+        "config/GALE01/symbols.txt"
+      ],
+      "evidence_refs": [
+        "diff_excerpt symbols.txt"
+      ]
+    },
+    {
+      "lesson": "PAD_STACK changes appeared as narrow matching tactics in multiple item files; the PR evidence supports treating them as per-function codegen tactics, not as broad style.",
+      "scope": [
+        "item matching",
+        "stack shape"
+      ],
+      "evidence_refs": [
+        "raw/diff.diff grep hits for PAD_STACK in itclimbersstring.c, itclinkmilk.c, itkyasarin.c, itpikachuthunder.c"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Recovered array fields kept the existing offset-style names with array syntax, e.g. xDE4[6], xDFC[6], xE14[6], and angle[6], rather than inventing new semantic names for every slot.",
+      "evidence_refs": [
+        "raw/diff.diff itCharItems.h hunk"
+      ]
+    },
+    {
+      "convention": "Local TU-owned literals in symbols.txt were represented as local @NNN labels instead of global it_80xxxxxx names where this PR adjusted ownership/scope.",
+      "evidence_refs": [
+        "diff_excerpt symbols.txt"
+      ]
+    },
+    {
+      "convention": "Unproven functions largely retained address-style or existing names such as it_802ADF10 and it_802C248C; the evidence does not show broad semantic renaming.",
+      "evidence_refs": [
+        "raw/diff.diff itfoxblaster.c hunks",
+        "raw/diff.diff itclimbersstring.c hunks"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Use array field recovery plus a reverse for loop to match repeated state-history shifting in itfoxblaster.c.",
+      "evidence_refs": [
+        "raw/diff.diff itfoxblaster.c hunk"
+      ]
+    },
+    {
+      "tactic": "Adjust PAD_STACK amounts narrowly in affected functions, including observed changes such as 16 to 12 in itclinkmilk.c, 40 to 32 in itkyasarin.c, and 4 to 12 in itpikachuthunder.c.",
+      "evidence_refs": [
+        "raw/diff.diff grep hits for PAD_STACK"
+      ]
+    },
+    {
+      "tactic": "Move or introduce static inline helpers in item source files to control codegen and readability, visible in itclimbersstring.c and other changed item files.",
+      "evidence_refs": [
+        "raw/diff.diff itclimbersstring.c grep hits",
+        "raw/diff.diff grep hits for static inline"
+      ]
+    },
+    {
+      "tactic": "Update symbol scope and sizes for local data/literals as part of TU linking rather than relying only on C source changes.",
+      "evidence_refs": [
+        "diff_excerpt symbols.txt"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "author": "decomp-dev[bot]",
+      "text": "Automated GALE01 report showed matched code 65.40% (+0.15%, +5984 bytes), linked code 37.87% (+0.55%, +21216 bytes), matched data 38.67% (+0.07%, +864 bytes), linked data 32.98% (+0.09%, +1120 bytes), 19 new matches, and 5 unmatched-item improvements.",
+      "evidence_refs": [
+        "text_corpus issue_comment 2026-04-30T03:24:12Z"
+      ]
+    },
+    {
+      "kind": "absence",
+      "author": null,
+      "text": "No human review comments or review records were included in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata_json counts.review_comments=0",
+        "metadata_json counts.reviews=0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR 2442",
+    "Link various item TUs",
+    "lukechampine",
+    "item TU linking",
+    "configure.py Matching item TUs",
+    "itCharItems.h foxblaster arrays",
+    "itfoxblaster xDE4 xDFC xE14 angle arrays",
+    "itfoxblaster reverse shift loop",
+    "it_802ADF10",
+    "itclimbersstring",
+    "itclinkmilk",
+    "itkirby_2F23",
+    "ittaru",
+    "ityoshieggthrow",
+    "itkusudama",
+    "itkyasarin",
+    "itpikachuthunder",
+    "itwstar",
+    "PAD_STACK item matching",
+    "symbols.txt local @ labels",
+    "sdata2 local floats",
+    "data-sections-and-tu-splits"
+  ],
+  "follow_up_queries": [
+    "PR 2442 itfoxblaster xDE4 xDFC xE14 angle array loop",
+    "PR 2442 configure.py ittaru itfoxblaster ityoshieggthrow itclimbersstring itclinkmilk itkirby_2F23 Matching",
+    "PR 2442 symbols.txt @149 @150 @151 @632 sdata2 item locals",
+    "itfoxblaster it_802ADF10 reverse loop xDE4 xDFC xE14 angle",
+    "itclimbersstring PAD_STACK it_802C248C it_802C2DB0",
+    "item TU linking local literal symbols @NNN"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json",
+      "human_pr_text.md",
+      "changed_files.jsonl",
+      "text_corpus.jsonl",
+      "raw/diff.diff truncated but targeted hunks inspected"
+    ],
+    "notes": [
+      "Strong evidence for PR identity, changed files, configure.py Matching changes, bot-reported progress, and selected code/symbol tactics.",
+      "The raw diff loaded in the prompt was truncated; targeted local slice reads were used for configure.py, itCharItems.h, and itfoxblaster.c details.",
+      "No human review feedback was present, so reviewer intent and acceptance rationale beyond merge state and bot report are not inferred.",
+      "The PR body is brief and does not explain author intent beyond remaining item TU/function counts."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "type": "decomp_lesson_candidate",
+        "title": "Parallel scalar item fields may indicate array fields and natural loops",
+        "text": "In PR #2442, Fox blaster item vars changed from repeated scalar groups to arrays and the source replaced a manual repeated shift block with a reverse for loop. This is a good graph candidate for item-var recovery cases where adjacent fields form repeated parallel slots.",
+        "scope": [
+          "item vars",
+          "Fox/Falco blaster",
+          "natural loops",
+          "typed fields"
+        ],
+        "evidence_refs": [
+          "raw/diff.diff itCharItems.h hunk",
+          "raw/diff.diff itfoxblaster.c hunk"
+        ]
+      },
+      {
+        "type": "matching_tactic_candidate",
+        "title": "TU linking can require symbol metadata ownership cleanup",
+        "text": "PR #2442 linked several item TUs while also changing symbols.txt scopes, @NNN local literals, local section labels, and data object sizes. This supports a narrow candidate that item TU linking may require section/symbol metadata work when the source match exposes local ownership.",
+        "scope": [
+          "item TU linking",
+          "symbols.txt",
+          "data sections"
+        ],
+        "evidence_refs": [
+          "diff_excerpt symbols.txt",
+          "raw/diff.diff configure.py hunks",
+          "text_corpus bot report"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "PR #2442 linked six item source files as Matching",
+        "text": "configure.py changed ittaru.c, itfoxblaster.c, ityoshieggthrow.c, itclimbersstring.c, itclinkmilk.c, and itkirby_2F23.c from NonMatching to Matching.",
+        "source_path": "configure.py",
+        "scope": [
+          "melee/it/items/ittaru.c",
+          "melee/it/items/itfoxblaster.c",
+          "melee/it/items/ityoshieggthrow.c",
+          "melee/it/items/itclimbersstring.c",
+          "melee/it/items/itclinkmilk.c",
+          "melee/it/items/itkirby_2F23.c"
+        ],
+        "evidence_refs": [
+          "raw/diff.diff configure.py hunks"
+        ],
+        "reason": "This is a path/configuration fact from the PR diff, but should be curated against current source before promotion."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "Fox blaster item vars use arrays after PR #2442",
+        "text": "itCharItems.h changed Fox blaster variable groups to xDE4[6], xDFC[6], xE14[6], and angle[6].",
+        "source_path": "src/melee/it/itCharItems.h",
+        "scope": [
+          "foxblaster item vars",
+          "itfoxblaster.c"
+        ],
+        "evidence_refs": [
+          "raw/diff.diff itCharItems.h hunk"
+        ],
+        "reason": "Useful recovered-layout fact, but source-owned header facts must be verified against current source before promotion."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "PR #2442 localized many item literals and floats in symbols.txt",
+        "text": "symbols.txt changed numerous item string/float/data symbols from global it_80xxxxxx names to local @NNN labels and adjusted local section labels/object sizes.",
+        "source_path": "config/GALE01/symbols.txt",
+        "scope": [
+          ".data",
+          ".rodata",
+          ".sdata",
+          ".sdata2",
+          "item symbols"
+        ],
+        "evidence_refs": [
+          "diff_excerpt symbols.txt"
+        ],
+        "reason": "Symbol metadata changes are source-owned path facts; the PR evidence supports a candidate but not promotion without current-symbol verification."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that every PAD_STACK use in these files is desirable style; the PR only supports narrow matching-tactic use in specific functions.",
+      "Do not infer human reviewer rationale; no human review comments were included.",
+      "Do not promote the bot report as proof of current repository state; it is historical PR evidence.",
+      "Do not generalize local @NNN symbols as a naming preference for all literals; in this PR they are metadata changes tied to TU/data ownership."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

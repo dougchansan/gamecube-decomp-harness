@@ -1,0 +1,17 @@
+{
+  "number": 2158,
+  "title": "[AI Agent Test] Decompile 10 stub functions across ft, gm, gr, it modules",
+  "state": "MERGED",
+  "createdAt": "2026-02-08T01:32:41Z",
+  "updatedAt": "2026-02-08T04:36:23Z",
+  "mergedAt": "2026-02-08T04:36:23Z",
+  "closedAt": "2026-02-08T04:36:23Z",
+  "author": "stephenjayakar",
+  "url": "https://github.com/doldecomp/melee/pull/2158",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 18873
+  }
+}

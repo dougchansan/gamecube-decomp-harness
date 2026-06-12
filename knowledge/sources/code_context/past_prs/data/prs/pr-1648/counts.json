@@ -1,0 +1,17 @@
+{
+  "number": 1648,
+  "title": "lbcardgame matches",
+  "state": "MERGED",
+  "createdAt": "2025-06-27T19:40:32Z",
+  "updatedAt": "2025-06-27T19:46:01Z",
+  "mergedAt": "2025-06-27T19:45:54Z",
+  "closedAt": "2025-06-27T19:45:54Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1648",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 5072
+  }
+}

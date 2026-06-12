@@ -1,0 +1,10 @@
+{
+  "pr": 614,
+  "title": "Fix Fighter user_data accesses using `GET_FIGHTER` macro",
+  "url": "https://github.com/doldecomp/melee/pull/614",
+  "text_records_with_body": 6,
+  "review_comments": 4,
+  "changed_files": 10,
+  "added_lines": 134,
+  "deleted_lines": 129
+}

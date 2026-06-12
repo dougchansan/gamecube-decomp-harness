@@ -1,0 +1,17 @@
+{
+  "number": 1472,
+  "title": "camera/develop camera work",
+  "state": "MERGED",
+  "createdAt": "2024-09-27T00:46:06Z",
+  "updatedAt": "2024-09-27T00:51:38Z",
+  "mergedAt": "2024-09-27T00:51:38Z",
+  "closedAt": "2024-09-27T00:51:38Z",
+  "author": "sadkellz",
+  "url": "https://github.com/doldecomp/melee/pull/1472",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 11329
+  }
+}

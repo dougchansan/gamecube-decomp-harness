@@ -1,0 +1,242 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2202",
+  "pr": {
+    "number": 2202,
+    "title": "Fix incorrect static in ittomato and mark as matching",
+    "url": "https://github.com/doldecomp/melee/pull/2202",
+    "state": "MERGED",
+    "author": "PsiLupan",
+    "created_at": "2026-03-04T16:27:51Z",
+    "merged_at": "2026-03-04T16:44:06Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2202 fixed two ittomato functions that had been declared static in the C file by moving their prototypes to ittomato.h, then changed configure.py to mark melee/it/items/ittomato.c as Matching. The slice contains no PR body text or review comments; bot output reports small linked code and data improvements.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "fix",
+      "headers",
+      "matching-status"
+    ],
+    "systems": [
+      "item",
+      "tomato item",
+      "build configuration"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "configure.py",
+      "role": "Build/decomp status configuration changed Object(NonMatching, \"melee/it/items/ittomato.c\") to Object(Matching, \"melee/it/items/ittomato.c\").",
+      "evidence_refs": [
+        "raw_diff: configure.py hunk at MatchingFor(*versions)",
+        "changed_files.jsonl: configure.py added 1 deleted 1"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/ittomato.c",
+      "role": "Removed source-local static prototypes for it_802841B4 and it_8028428C.",
+      "evidence_refs": [
+        "raw_diff: src/melee/it/items/ittomato.c hunk removing static Item_GObj* it_802841B4(...) and static void it_8028428C(...)",
+        "changed_files.jsonl: src/melee/it/items/ittomato.c added 0 deleted 3"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/ittomato.h",
+      "role": "Added non-static header prototypes for it_802841B4 and it_8028428C.",
+      "evidence_refs": [
+        "raw_diff: src/melee/it/items/ittomato.h hunk adding prototypes",
+        "changed_files.jsonl: src/melee/it/items/ittomato.h added 2 deleted 0"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "ittomato.c was promoted from NonMatching to Matching in configure.py.",
+      "evidence_refs": [
+        "raw_diff: Object(NonMatching, \"melee/it/items/ittomato.c\") changed to Object(Matching, \"melee/it/items/ittomato.c\")"
+      ]
+    },
+    {
+      "text": "The prototypes for it_802841B4 and it_8028428C were removed as static declarations from ittomato.c.",
+      "evidence_refs": [
+        "raw_diff: ittomato.c removed static prototypes at offsets 2841B4 and 28428C"
+      ]
+    },
+    {
+      "text": "The same two functions were declared in ittomato.h as externally visible prototypes.",
+      "evidence_refs": [
+        "raw_diff: ittomato.h added Item_GObj* it_802841B4(Item_GObj* gobj, Vec3* arg1, s32 arg2)",
+        "raw_diff: ittomato.h added void it_8028428C(Item_GObj* gobj)"
+      ]
+    },
+    {
+      "text": "The decomp-dev bot reported linked code +0.03% (+1168 bytes) and linked data +0.01% (+104 bytes), with body text saying 'No changes'.",
+      "evidence_refs": [
+        "text_corpus.jsonl: decomp-dev[bot] issue_comment created_at 2026-03-04T16:31:28Z"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Before marking the item object as Matching, the PR corrected header ownership for functions that should not remain source-local static prototypes.",
+      "evidence_refs": [
+        "PR title: Fix incorrect static in ittomato and mark as matching",
+        "raw_diff: ittomato.c static prototypes removed and ittomato.h prototypes added",
+        "raw_diff: configure.py marks ittomato.c Matching"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "text": "A matching-status change can depend on fixing linkage/prototype surface, not only function body edits. If a function is incorrectly declared static in the C file, move the proven externally visible prototype to the owning header before marking the object matching.",
+      "evidence_refs": [
+        "PR title: Fix incorrect static in ittomato and mark as matching",
+        "raw_diff: ittomato.c removed static declarations for it_802841B4 and it_8028428C",
+        "raw_diff: ittomato.h added public prototypes for the same functions",
+        "raw_diff: configure.py changed ittomato.c to Matching"
+      ],
+      "related_standard_ids": [
+        "truthful-headers-and-includes"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "The PR preserved address-style function names it_802841B4 and it_8028428C rather than inventing semantic names while only changing their declaration scope.",
+      "evidence_refs": [
+        "raw_diff: prototypes use it_802841B4 and it_8028428C in both removed static declarations and added header declarations"
+      ],
+      "related_standard_ids": [
+        "conservative-naming"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "text": "Tactic used: correct function linkage by removing incorrect static declarations from the implementation file and adding header prototypes, then update configure.py from NonMatching to Matching for the object.",
+      "evidence_refs": [
+        "raw_diff: ittomato.c prototype removals",
+        "raw_diff: ittomato.h prototype additions",
+        "raw_diff: configure.py matching-status change"
+      ]
+    }
+  ],
+  "review_feedback": [],
+  "searchable_terms": [
+    "pr-2202",
+    "ittomato",
+    "Fix incorrect static in ittomato and mark as matching",
+    "src/melee/it/items/ittomato.c",
+    "src/melee/it/items/ittomato.h",
+    "configure.py",
+    "Object(Matching)",
+    "Object(NonMatching)",
+    "it_802841B4",
+    "it_8028428C",
+    "Item_GObj",
+    "Vec3",
+    "static prototype",
+    "header prototype",
+    "truthful headers",
+    "GALE01",
+    "linked code"
+  ],
+  "follow_up_queries": [
+    "it_802841B4 static ittomato",
+    "it_8028428C static ittomato",
+    "ittomato.c Matching configure.py",
+    "incorrect static header prototype item functions",
+    "src/melee/it/items/ittomato.h it_802841B4"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR 2202 metadata and changed_files",
+      "raw_diff: full diff for three changed files",
+      "text_corpus.jsonl: empty PR body and one bot issue comment",
+      "changed_files.jsonl: changed-file counts"
+    ],
+    "notes": [
+      "The diff is complete and directly supports the file changes.",
+      "There are no review comments and no substantive PR body explaining intent beyond the title.",
+      "The bot report provides linked code/data deltas, but this slice does not include objdiff, local build logs, or per-symbol verification details.",
+      "The PR was merged according to metadata, but merge status is not treated as proof of broader standards beyond the observed changes."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "kind": "decomp_lesson",
+        "title": "Fix declaration scope before marking an object matching",
+        "text": "When a decomp object is otherwise ready to be marked Matching, check whether functions are incorrectly source-local static. If their signatures are established and they need external visibility, move prototypes to the owning header rather than keeping static declarations in the C file.",
+        "scope": [
+          "decomp-matching",
+          "headers",
+          "item source files"
+        ],
+        "evidence_refs": [
+          "PR title: Fix incorrect static in ittomato and mark as matching",
+          "raw_diff: ittomato.c removed static prototypes",
+          "raw_diff: ittomato.h added corresponding prototypes",
+          "raw_diff: configure.py changed ittomato.c to Matching"
+        ],
+        "related_standard_ids": [
+          "truthful-headers-and-includes"
+        ],
+        "confidence": 0.82
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "ittomato.c marked Matching in PR 2202",
+        "text": "PR 2202 changed configure.py so melee/it/items/ittomato.c is listed as Object(Matching) instead of Object(NonMatching).",
+        "source_path": "src/melee/it/items/ittomato.c",
+        "scope": [
+          "configure.py",
+          "src/melee/it/items/ittomato.c",
+          "item objects"
+        ],
+        "evidence_refs": [
+          "raw_diff: configure.py hunk changing Object(NonMatching, \"melee/it/items/ittomato.c\") to Object(Matching, \"melee/it/items/ittomato.c\")"
+        ],
+        "reason": "This is a path/status fact from the PR diff and should be curated into path facts only if the curator wants historical matching-status entries."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "ittomato header owns prototypes for it_802841B4 and it_8028428C",
+        "text": "PR 2202 moved prototypes for it_802841B4 and it_8028428C from static declarations in src/melee/it/items/ittomato.c to non-static declarations in src/melee/it/items/ittomato.h.",
+        "source_path": "src/melee/it/items/ittomato.h",
+        "scope": [
+          "src/melee/it/items/ittomato.c",
+          "src/melee/it/items/ittomato.h",
+          "item headers"
+        ],
+        "evidence_refs": [
+          "raw_diff: ittomato.c removed static Item_GObj* it_802841B4(...) and static void it_8028428C(...)",
+          "raw_diff: ittomato.h added Item_GObj* it_802841B4(...) and void it_8028428C(...)"
+        ],
+        "reason": "Useful source-surface/path fact, but it should remain a candidate because the intake slice does not independently inspect current headers."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that all ittomato functions are matched individually; the slice only shows the object status changed and two prototypes moved.",
+      "Do not claim a specific objdiff or build command was run; only the bot linked code/data report is present.",
+      "Do not infer reviewer intent or review approval details; there are no review comments in the slice."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

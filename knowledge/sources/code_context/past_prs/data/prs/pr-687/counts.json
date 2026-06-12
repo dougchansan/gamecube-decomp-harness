@@ -1,0 +1,17 @@
+{
+  "number": 687,
+  "title": "Move __ppc_eabi_init function to correct TU",
+  "state": "MERGED",
+  "createdAt": "2023-01-15T23:42:29Z",
+  "updatedAt": "2023-01-16T01:09:12Z",
+  "mergedAt": "2023-01-16T01:09:09Z",
+  "closedAt": "2023-01-16T01:09:09Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/687",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 1,
+    "diff_bytes": 3552
+  }
+}

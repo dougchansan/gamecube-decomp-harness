@@ -1,0 +1,17 @@
+{
+  "number": 1559,
+  "title": "Move to using extern/dolphin",
+  "state": "MERGED",
+  "createdAt": "2025-06-02T21:04:46Z",
+  "updatedAt": "2025-06-03T18:03:32Z",
+  "mergedAt": "2025-06-03T18:03:18Z",
+  "closedAt": "2025-06-03T18:03:18Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/1559",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 1,
+    "diff_bytes": 0
+  }
+}

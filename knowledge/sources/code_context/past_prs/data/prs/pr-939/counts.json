@@ -1,0 +1,17 @@
+{
+  "number": 939,
+  "title": "Split out rest of character-specific items",
+  "state": "MERGED",
+  "createdAt": "2023-06-26T01:10:34Z",
+  "updatedAt": "2023-06-26T02:00:13Z",
+  "mergedAt": "2023-06-26T02:00:10Z",
+  "closedAt": "2023-06-26T02:00:11Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/939",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 199032
+  }
+}

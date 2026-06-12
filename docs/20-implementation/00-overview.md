@@ -59,8 +59,8 @@ decomp-orchestrator/
 - [Agents](agents/00-overview.md): centralized director, worker, PR-review,
   knowledge-curator, and runtime prompt/session code.
 - [CLI](cli/00-overview.md): operator command surface and command modules.
-- [Knowledge](knowledge/00-overview.md): source slices, CLI-first tools,
-  resource graph, agent context routing, and past PR library.
+- [Knowledge](knowledge/00-overview.md): sectioned knowledge sources,
+  CLI-first tools, resource graph, agent context routing, and past PR library.
 - [State](state/00-overview.md): SQLite schema, state helpers, leases, events,
   reports, runs, and status.
 - [UI](ui/00-overview.md): dashboard server, process controls, collapsible
@@ -73,3 +73,6 @@ decomp-orchestrator/
   phases, current status, and v1 defaults.
 - [Design coverage audit](99-appendix/40-design-coverage.md): traceability from
   every HTML design section to the markdown docs.
+- [Melee live run reporting issues](99-appendix/50-melee-live-run-reporting-issues.md):
+  worker report display problems, tool-error triage, and deterministic
+  validation logging requirements from the active Melee run.

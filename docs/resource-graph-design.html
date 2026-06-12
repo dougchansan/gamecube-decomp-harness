@@ -923,7 +923,7 @@ bun run kg:rank-features --report build/GALE01/report.json --limit 256</code></p
         </tr>
         <tr>
           <td>past_prs</td>
-          <td><code>knowledge/sources/past_prs/data/current</code> for fetched PR data and <code>knowledge/sources/past_prs/data/prs</code> for processed postmortems and indexes.</td>
+          <td><code>knowledge/sources/code_context/past_prs/data/prs/pr-NNNN/raw</code> for fetched PR data, <code>data/prs/pr-NNNN/postmortem</code> for processed postmortems, and <code>data/library</code> for search indexes.</td>
         </tr>
         <tr>
           <td>discord_knowledge</td>
@@ -1047,8 +1047,10 @@ bun run kg:rank-features --report build/GALE01/report.json --limit 256</code></p
     fixtures/
     smoke.sh</code></pre>
     <p class="small">
-      The fetched PR dump lives in <code>data/current</code>. The processed PR
-      postmortem library lives in <code>data/prs</code>. The source-local
+      The fetched PR dump lives in each <code>data/prs/pr-NNNN/raw</code>
+      folder. Processed postmortems live beside the raw evidence in
+      <code>data/prs/pr-NNNN/postmortem</code>, while search-facing indexes live
+      in <code>data/library</code>. The source-local
       commands refresh, synthesize, and emit graph records from those folders.
     </p>
 

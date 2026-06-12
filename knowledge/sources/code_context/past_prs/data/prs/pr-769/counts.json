@@ -1,0 +1,17 @@
+{
+  "number": 769,
+  "title": "Add `dadosod` as a git subtree",
+  "state": "MERGED",
+  "createdAt": "2023-03-22T17:56:17Z",
+  "updatedAt": "2023-03-22T18:26:45Z",
+  "mergedAt": "2023-03-22T18:26:44Z",
+  "closedAt": "2023-03-22T18:26:44Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/769",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 111256
+  }
+}

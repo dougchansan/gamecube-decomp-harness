@@ -1,0 +1,17 @@
+{
+  "number": 492,
+  "title": "Fix trailing newlines",
+  "state": "MERGED",
+  "createdAt": "2022-08-25T19:31:31Z",
+  "updatedAt": "2022-08-25T19:33:44Z",
+  "mergedAt": "2022-08-25T19:33:43Z",
+  "closedAt": "2022-08-25T19:33:44Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/492",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 54872
+  }
+}

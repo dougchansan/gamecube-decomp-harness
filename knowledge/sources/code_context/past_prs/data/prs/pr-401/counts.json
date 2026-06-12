@@ -1,0 +1,17 @@
+{
+  "number": 401,
+  "title": "Change github actions from wine to wibo",
+  "state": "MERGED",
+  "createdAt": "2022-07-04T15:56:02Z",
+  "updatedAt": "2022-08-12T19:40:33Z",
+  "mergedAt": "2022-07-15T18:45:39Z",
+  "closedAt": "2022-07-15T18:45:39Z",
+  "author": "BR-",
+  "url": "https://github.com/doldecomp/melee/pull/401",
+  "counts": {
+    "issue_comments": 8,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 2896
+  }
+}

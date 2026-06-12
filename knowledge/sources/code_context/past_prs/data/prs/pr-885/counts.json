@@ -1,0 +1,17 @@
+{
+  "number": 885,
+  "title": "Match `ftCo_Pass`",
+  "state": "MERGED",
+  "createdAt": "2023-05-28T11:49:13Z",
+  "updatedAt": "2023-05-28T11:57:47Z",
+  "mergedAt": "2023-05-28T11:57:45Z",
+  "closedAt": "2023-05-28T11:57:45Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/885",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 30604
+  }
+}

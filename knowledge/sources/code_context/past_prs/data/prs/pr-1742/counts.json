@@ -1,0 +1,17 @@
+{
+  "number": 1742,
+  "title": "gmcamera work + minor scene handler update",
+  "state": "MERGED",
+  "createdAt": "2025-07-26T01:38:40Z",
+  "updatedAt": "2025-07-26T02:03:28Z",
+  "mergedAt": "2025-07-26T01:48:42Z",
+  "closedAt": "2025-07-26T01:48:42Z",
+  "author": "sadkellz",
+  "url": "https://github.com/doldecomp/melee/pull/1742",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 1,
+    "reviews": 1,
+    "diff_bytes": 19294
+  }
+}

@@ -1,0 +1,384 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2372",
+  "pr": {
+    "number": 2372,
+    "title": "Jj/gmresultplayer",
+    "url": "https://github.com/doldecomp/melee/pull/2372",
+    "state": "MERGED",
+    "author": "jurrejelle",
+    "created_at": "2026-03-31T19:00:09Z",
+    "merged_at": "2026-04-02T13:49:05Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Large gmresultplayer decomp/matching PR that added substantial C for the results-player game-mode unit, adjusted local result data types and prototypes, and updated GALE01 symbol sizes/splits. Bot evidence reports 5 new matches, 14 unmatched-item improvements, and 1 unmatched regression; author review notes the regression was acceptable because pointer math was cleaned up and remaining differences were mostly register swaps.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "types",
+      "symbols",
+      "game-mode"
+    ],
+    "systems": [
+      "game-mode",
+      "results",
+      "config/GALE01"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gm/gmresultplayer.c",
+      "role": "Primary decomp source change; added many includes, local typed structs/externs, PAD_STACK uses, function bodies including fn_80178050 and fn_801785B0, and cleanup around fn_80177DD0.",
+      "evidence_refs": [
+        "changed_files: gmresultplayer.c +1299/-56 in 6 hunks",
+        "raw_diff: gmresultplayer.c include/type additions and replacement of /// #fn_80178050 with C body",
+        "text_corpus: bot report lists gmresultplayer new matches and improvements"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmresult.c",
+      "role": "Adjusted supporting result logic and types: fn_80174A60 return/count widened from u8 to s32; bitmask writes in fn_80174B4C changed to named bitfield assignments.",
+      "evidence_refs": [
+        "raw_diff: fn_80174A60 u8->s32 and count u8->s32",
+        "raw_diff: fn_80174B4C pdata->x0 bitmasks replaced by x0_1/x0_2/x0_3/x0_4 assignments"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmresult.h",
+      "role": "Header prototype updated to match fn_80174A60 signature change.",
+      "evidence_refs": [
+        "raw_diff: fn_80174A60 prototype changed from u8 to s32"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmresultplayer.h",
+      "role": "Header changed, but loaded diff excerpt does not show exact content.",
+      "evidence_refs": [
+        "changed_files: gmresultplayer.h +11/-11 in 2 hunks"
+      ]
+    },
+    {
+      "path": "src/melee/gm/types.h",
+      "role": "Game-mode type definitions changed, but loaded diff excerpt does not show exact content.",
+      "evidence_refs": [
+        "changed_files: types.h +8/-4 in 3 hunks"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Adjusted data/sdata symbol boundaries for result-player-related data, including splitting lbl_803D6A18/lbl_803D6A28 and consolidating lbl_804D3FD4 size.",
+      "evidence_refs": [
+        "raw_diff: lbl_803D6A18 size 0x600 -> 0x10 and new lbl_803D6A28 size 0x5F0",
+        "raw_diff: lbl_804D3FD4..lbl_804D3FF0 individual 0x4 entries collapsed into lbl_804D3FD4 size 0x20"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Added substantial decompiled implementation in gmresultplayer.c, replacing at least the fn_80178050 stub marker with C and adding bodies for result-player animation/input/display paths shown in the excerpt.",
+      "evidence_refs": [
+        "raw_diff: -/// #fn_80178050 +void fn_80178050(HSD_GObj* arg0)",
+        "raw_diff: fn_801785B0 body excerpt",
+        "changed_files: gmresultplayer.c +1299/-56"
+      ]
+    },
+    {
+      "text": "Introduced typed local representations for result-player data/config blobs, such as CharScaleEntry, ResultsRenderFuncs, ResultsPlayerConfig, CameraKindParams, CameraKindData, lbl_8046E3AC_t, and ResultsDisplayData.",
+      "evidence_refs": [
+        "raw_diff: typedef struct CharScaleEntry",
+        "raw_diff: typedef struct ResultsPlayerConfig",
+        "raw_diff: typedef struct CameraKindData",
+        "raw_diff: typedef struct ResultsDisplayData"
+      ]
+    },
+    {
+      "text": "Changed fn_80174A60 and its header prototype from u8 return/count to s32 return/count.",
+      "evidence_refs": [
+        "raw_diff: gmresult.c fn_80174A60 u8->s32",
+        "raw_diff: gmresult.h prototype u8->s32"
+      ]
+    },
+    {
+      "text": "Replaced some raw bitmask flag writes in ResultsPlayerData with named bitfield assignments x0_1 through x0_4.",
+      "evidence_refs": [
+        "raw_diff: pdata->x0 |= 0x10 replaced with pdata->x0_3 = 1",
+        "raw_diff: pdata->x0 &= ~0x08 replaced with pdata->x0_4 = 0",
+        "raw_diff: scroll flag bitmasks replaced with x0_1/x0_2 assignments"
+      ]
+    },
+    {
+      "text": "Added narrow matching tactics in gmresultplayer.c including PAD_STACK(8), PAD_STACK(16), ABS(raw), and a comment identifying an unsigned long long cast as permuter slop.",
+      "evidence_refs": [
+        "raw_diff: fn_80177B7C adds PAD_STACK(8)",
+        "raw_diff: fn_80178050 adds PAD_STACK(16)",
+        "raw_diff: comment 'The cast here is permuter slop.'",
+        "raw_diff: frame_val = ABS(raw)"
+      ]
+    },
+    {
+      "text": "Updated symbols.txt data boundaries for lbl_803D6A18/lbl_803D6A28 and lbl_804D3FD4.",
+      "evidence_refs": [
+        "raw_diff: symbols.txt .data split at lbl_803D6A18/lbl_803D6A28",
+        "raw_diff: symbols.txt .sdata lbl_804D3FD4 size 0x20"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Moved some result-player data access from raw bytes/pointer math toward typed structs and named fields, making offsets and arrays reviewable in source.",
+      "evidence_refs": [
+        "raw_diff: extern u8 lbl_8046E1B0[] replaced with ResultsDisplayData lbl_8046E1B0",
+        "raw_diff: lbl_8046E3AC_t expanded from pad-only struct to named arrays/fields",
+        "review: 'cleaned up a lot of pointer math'"
+      ]
+    },
+    {
+      "text": "Kept header signature aligned with the changed fn_80174A60 implementation.",
+      "evidence_refs": [
+        "raw_diff: gmresult.c fn_80174A60 return s32",
+        "raw_diff: gmresult.h fn_80174A60 prototype return s32"
+      ]
+    },
+    {
+      "text": "The PR recorded tool/report evidence for matching progress, including exact new-match functions and an explicit regression.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev bot report matched code +1772 bytes, 5 new matches, 14 improvements, 1 regression"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "Typed temporary structs can be a useful bridge when a results/game-mode blob is still address-named but offsets are understood enough to express arrays and fields.",
+      "scope": [
+        "src/melee/gm/gmresultplayer.c",
+        "game-mode result-player data"
+      ],
+      "evidence_refs": [
+        "raw_diff: ResultsDisplayData, CameraKindData, ResultsPlayerConfig, lbl_8046E3AC_t local structs",
+        "review: cleanup of pointer math"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "A cleanup that improves source structure can be accepted with a known unmatched regression when the regression is explicitly acknowledged and characterized in review evidence.",
+      "scope": [
+        "gmresultplayer unmatched functions"
+      ],
+      "evidence_refs": [
+        "text_corpus: bot report regression fn_8017A9B4 94.27% -> 57.18%",
+        "review: 'Regression is fine since it cleaned up a lot of pointer math and most of the remaining bits are regswaps.'"
+      ],
+      "confidence": 0.72
+    },
+    {
+      "lesson": "When a helper's return type is widened in the implementation for matching, update the owning header prototype in the same PR.",
+      "scope": [
+        "src/melee/gm/gmresult.c",
+        "src/melee/gm/gmresult.h"
+      ],
+      "evidence_refs": [
+        "raw_diff: fn_80174A60 implementation and prototype both changed to s32"
+      ],
+      "confidence": 0.86
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "Address-style names were retained for uncertain globals and functions, while temporary local struct/type names describe layout roles such as ResultsDisplayData, ResultsPlayerConfig, CameraKindData, and CharScaleEntry.",
+      "evidence_refs": [
+        "raw_diff: extern ResultsDisplayData lbl_8046E1B0",
+        "raw_diff: extern ResultsPlayerConfig lbl_803B7B68",
+        "raw_diff: functions remain fn_80178050/fn_801785B0"
+      ]
+    },
+    {
+      "text": "Recovered or clearer flag fields use x0_N names rather than raw bitmask operations, but remain conservative rather than fully semantic.",
+      "evidence_refs": [
+        "raw_diff: pdata->x0 bitmasks replaced by pdata->x0_1 through pdata->x0_4"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "PAD_STACK was used narrowly in functions with matching progress.",
+      "evidence_refs": [
+        "raw_diff: fn_80177B7C adds PAD_STACK(8)",
+        "raw_diff: fn_80178050 adds PAD_STACK(16)",
+        "text_corpus: bot report fn_80177B7C improved to 99.57%, fn_80178050 to 91.61%"
+      ]
+    },
+    {
+      "tactic": "A cast to unsigned long long was retained and explicitly labeled as permuter slop at a fn_801748EC callsite.",
+      "evidence_refs": [
+        "raw_diff: comment 'The cast here is permuter slop.' before fn_801748EC(..., (unsigned long long) slot)"
+      ]
+    },
+    {
+      "tactic": "Used ABS(raw) for frame calculation in fn_801785B0 rather than spelling out an absolute-value branch.",
+      "evidence_refs": [
+        "raw_diff: frame_val = ABS(raw)",
+        "loaded decomp standard canonical-control-flow-and-macros supports checking common macros such as ABS"
+      ]
+    },
+    {
+      "tactic": "Symbol size/split metadata was adjusted alongside source changes where typed data boundaries changed.",
+      "evidence_refs": [
+        "raw_diff: symbols.txt lbl_803D6A18 split and lbl_804D3FD4 size consolidation"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "author": "jurrejelle",
+      "kind": "review_comment",
+      "text": "Regression is fine since it cleaned up a lot of pointer math and most of the remaining bits are regswaps.",
+      "evidence_refs": [
+        "text_corpus: review by jurrejelle at 2026-04-02T13:48:58Z"
+      ]
+    },
+    {
+      "author": "decomp-dev[bot]",
+      "kind": "tool_report",
+      "text": "Matched code increased by 1772 bytes with 5 new matches and 14 unmatched-item improvements, but fn_8017A9B4 regressed from 94.27% to 57.18%.",
+      "evidence_refs": [
+        "text_corpus: issue_comment bot report for GALE01"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2372",
+    "Jj/gmresultplayer",
+    "jurrejelle",
+    "gmresultplayer",
+    "gmresult",
+    "fn_80178050",
+    "fn_801785B0",
+    "fn_80177DD0",
+    "fn_80177B7C",
+    "fn_80174A60",
+    "fn_80174B4C",
+    "fn_8017A9B4",
+    "ResultsDisplayData",
+    "ResultsPlayerConfig",
+    "CameraKindData",
+    "CameraKindParams",
+    "CharScaleEntry",
+    "ResultsRenderFuncs",
+    "lbl_8046E1B0",
+    "lbl_8046E3AC",
+    "lbl_803D6A18",
+    "lbl_803D6A28",
+    "lbl_804D3FD4",
+    "PAD_STACK",
+    "permuter slop",
+    "pointer math cleanup",
+    "regswaps",
+    "ABS(raw)"
+  ],
+  "follow_up_queries": [
+    "gmresultplayer PAD_STACK",
+    "gmresultplayer permuter slop unsigned long long slot",
+    "fn_8017A9B4 regression regswaps",
+    "ResultsDisplayData lbl_8046E1B0",
+    "CameraKindData lbl_803D6A08",
+    "gmresult fn_80174A60 s32",
+    "gmresultplayer symbols lbl_803D6A18 lbl_803D6A28",
+    "result player pointer math cleanup"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR identity, merge state, changed files",
+      "raw_diff: truncated but includes key gmresultplayer/gmresult/symbols excerpts",
+      "text_corpus: bot report and review note",
+      "changed_files: full changed file list"
+    ],
+    "notes": [
+      "The raw diff is truncated, so exact contents of gmresultplayer.h and types.h are not available in the loaded evidence beyond changed-file counts.",
+      "No inline review comments are present; the only human review feedback is a short author comment about accepting the regression.",
+      "The PR body only says 'Tracking PR as usual' and does not explain intent, validation commands, or authored-source rationale.",
+      "Bot report provides score evidence but not full objdiff/build logs."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "title": "Typed temporary structs for partially understood result-player data",
+        "text": "PR #2372 shows typed local structs replacing raw byte blobs/pointer math in gmresultplayer.c while retaining address-style names for uncertain globals. Candidate lesson: when offsets are clear but semantics remain partial, temporary structs with conservative field names can improve reviewability without over-naming.",
+        "scope": [
+          "src/melee/gm/gmresultplayer.c",
+          "game-mode data blobs"
+        ],
+        "evidence_refs": [
+          "raw_diff: ResultsDisplayData lbl_8046E1B0 replaces extern u8 lbl_8046E1B0[]",
+          "raw_diff: lbl_8046E3AC_t expanded with arrays/fields",
+          "review: pointer math cleanup"
+        ]
+      },
+      {
+        "title": "Document known score regressions when source cleanup is accepted",
+        "text": "PR #2372 includes a bot-reported unmatched regression in fn_8017A9B4 and a human note accepting it because pointer math was cleaned up and remaining differences were mostly register swaps. Candidate lesson: if a cleanup intentionally trades off fuzzy score on an unmatched function, keep the regression explicit and explain the cleanup reason.",
+        "scope": [
+          "decomp review",
+          "gmresultplayer matching"
+        ],
+        "evidence_refs": [
+          "text_corpus: bot report one regression fn_8017A9B4",
+          "text_corpus: review note accepting regression"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "gmresultplayer is result-player game-mode matching work",
+        "text": "PR #2372 changed src/melee/gm/gmresultplayer.c heavily and bot output reports new matches/improvements under unit main/melee/gm/gmresultplayer.",
+        "source_path": "src/melee/gm/gmresultplayer.c",
+        "scope": [
+          "game-mode",
+          "results",
+          "matching"
+        ],
+        "evidence_refs": [
+          "changed_files: gmresultplayer.c +1299/-56",
+          "text_corpus: bot report unit main/melee/gm/gmresultplayer"
+        ],
+        "reason": "Useful path classification for future PR intake/search, but should be curated as a path fact rather than inferred globally here."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Score regression may be acceptable when it removes pointer math, but must be explicit",
+        "text": "This PR provides an example where a bot-reported unmatched regression was accepted because the source cleaned up pointer math and remaining issues were described as register swaps. Consider whether standards should explicitly require that such tradeoffs name the affected function and rationale.",
+        "source_path": null,
+        "scope": [
+          "review workflow",
+          "verification ledger"
+        ],
+        "evidence_refs": [
+          "text_corpus: bot report regression fn_8017A9B4",
+          "text_corpus: review note 'Regression is fine...'"
+        ],
+        "reason": "Current loaded standards already require verification/regression ledgers; this PR may supply an example or wording refinement, but the intake evidence is one PR and should not be promoted directly."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that all PAD_STACK uses in this PR are ideal style; loaded standards require explicit verifier evidence and the PR evidence only shows bot score output, not full objdiff/build logs.",
+      "Do not promote semantic meanings for address-style globals such as lbl_8046E1B0, lbl_803D6A18, or lbl_804D3FD4 beyond the local struct roles visible in the diff.",
+      "Do not treat the unsigned long long cast as a recommended tactic; the source comment itself labels it permuter slop."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

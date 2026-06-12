@@ -1,0 +1,10 @@
+{
+  "pr": 1989,
+  "title": "!00% match HSD_TExpSetReg, cleanup of IsThrough functions",
+  "url": "https://github.com/doldecomp/melee/pull/1989",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 2,
+  "added_lines": 94,
+  "deleted_lines": 129
+}

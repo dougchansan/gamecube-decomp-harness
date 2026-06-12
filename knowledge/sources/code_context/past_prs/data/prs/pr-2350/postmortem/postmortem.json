@@ -1,0 +1,350 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2350",
+  "pr": {
+    "number": 2350,
+    "title": "ftKb_SpecialNZd.c matches",
+    "url": "https://github.com/doldecomp/melee/pull/2350",
+    "state": "MERGED",
+    "author": "lukechampine",
+    "created_at": "2026-03-25T00:33:07Z",
+    "merged_at": "2026-03-25T13:31:55Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Matched a large set of Kirby copied Neutral-B functions in src/melee/ft/chara/ftKirby/ftKb_SpecialNZd.c, especially Sheik needle and Mewtwo shadow-ball copy behavior. The bot report records 18 new function matches and one .sdata2 improvement for this unit.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "fighter-code",
+      "single-file-function-matching"
+    ],
+    "systems": [
+      "fighter",
+      "Kirby",
+      "copied-specials",
+      "items",
+      "effects",
+      "sfx"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_SpecialNZd.c",
+      "role": "Only changed source file; replaces multiple placeholder functions with matched C implementations and small cleanup/refactor edits.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/ft/chara/ftKirby/ftKb_SpecialNZd.c added 637 deleted 62 hunks 17",
+        "diff.diff: includes itseakneedlethrown.h, adds extern Vec3/float/u32 data declarations, implements ftKb_SpecialNSk_8010603C, fn_80106DB0, ftKb_SpecialNMt_801071FC, ftKb_SpecialNMt_80107410, ftKb_MtSpecialNStart_Anim, ftKb_MtSpecialNLoop_Anim, ftKb_MtSpecialAirNStart_Anim, ftKb_MtSpecialAirNLoop_Anim, and IASA functions",
+        "text_corpus.jsonl: bot report lists 18 new matches in main/melee/ft/chara/ftKirby/ftKb_SpecialNZd"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Added the thrown Sheik needle item include and external declarations for ftKb_Init_803B7570, ftKb_Init_803B757C, ftKb_Init_803CB770, and ftKb_Init_803CB828 used by newly matched functions.",
+    "Implemented Sheik-copy needle functions including ftKb_SpecialNSk_8010603C and fn_80106DB0, spawning needle items through it_802AFD8C/it_802AFEA8, applying ground/air graphic offsets, random y offsets via ftKb_Init_803CB770, effects, and SFX.",
+    "Added a shared inline ftKb_SpecialN_set_cbs to set death2_cb and take_dmg_cb, replacing repeated callback assignments in several action setup paths.",
+    "Implemented Mewtwo-copy charge/release behavior: ftKb_SpecialNMt_801071FC, ftKb_SpecialNMt_SetRecoil, ftKb_SpecialNMt_80107410, ground and air start/loop animation functions, and IASA-related functions.",
+    "Cleaned local generated-looking code in several small places, including using GET_FIGHTER instead of direct HSD_GObjGetUserData syntax, using NULL for pointer clears, replacing temporary variables with direct field checks or ternary timer assignment, and reducing duplicate callback assignment blocks.",
+    "Bot report recorded +6208 matched bytes, 18 new 100% function matches, and .sdata2 improvement from 37.50% to 79.07% for the same unit."
+  ],
+  "smart_moves": [
+    {
+      "title": "Factored repeated Kirby special callback setup",
+      "text": "The PR introduces ftKb_SpecialN_set_cbs and reuses it where multiple paths set death2_cb to ftKb_Init_800EE74C and take_dmg_cb to ftKb_Init_800EE7B8. This keeps repeated behavior localized while preserving the same assignments.",
+      "evidence_refs": [
+        "diff.diff: static inline void ftKb_SpecialN_set_cbs(Fighter_GObj* gobj)",
+        "diff.diff: repeated replacement of fp->death2_cb/fp->take_dmg_cb blocks with ftKb_SpecialN_set_cbs(gobj)"
+      ]
+    },
+    {
+      "title": "Shared held-shadow creation between ground and air Mewtwo loops",
+      "text": "The PR extracts ftKb_SpecialNMt_CreateHeldShadow, then calls it from both ftKb_MtSpecialNLoop_Anim and ftKb_MtSpecialAirNLoop_Anim, while leaving ground/air-specific full-charge vectors separate.",
+      "evidence_refs": [
+        "diff.diff: static inline void ftKb_SpecialNMt_CreateHeldShadow(Fighter_GObj* gobj, Vec3* pos1, Vec3* pos2)",
+        "diff.diff: ftKb_MtSpecialNLoop_Anim assigns sp34 = ftKb_Init_803B7570",
+        "diff.diff: ftKb_MtSpecialAirNLoop_Anim assigns sp34 = ftKb_Init_803B757C"
+      ]
+    },
+    {
+      "title": "Used bot report as narrow verification evidence",
+      "text": "The available PR evidence includes a bot report naming every newly matched function and the exact unit, giving concrete support for the claimed matching progress.",
+      "evidence_refs": [
+        "text_corpus.jsonl: Report for GALE01 shows Matched code 59.88% (+0.16%, +6208 bytes)",
+        "text_corpus.jsonl: 18 new matches table for main/melee/ft/chara/ftKirby/ftKb_SpecialNZd"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "Small inline helpers can be useful when several matched functions share identical setup blocks, but the PR evidence supports this only for repeated callback setup and held-shadow creation in this file.",
+      "scope": [
+        "src/melee/ft/chara/ftKirby/ftKb_SpecialNZd.c",
+        "Kirby copied-special setup"
+      ],
+      "evidence_refs": [
+        "diff.diff: ftKb_SpecialN_set_cbs reused across Sheik and Mewtwo copied-special setup functions",
+        "diff.diff: ftKb_SpecialNMt_CreateHeldShadow reused by ground and air Mewtwo loop animation functions"
+      ]
+    },
+    {
+      "lesson": "When matching fighter item-spawn functions, preserving the item_gobj across item launch can matter: ftKb_SpecialNMt_801071FC saves fp->item_gobj before it_802C53F0/ftKb_SpecialNMt_80107040 and restores it afterward.",
+      "scope": [
+        "Kirby Mewtwo-copy shadow-ball release",
+        "fighter item interactions"
+      ],
+      "evidence_refs": [
+        "diff.diff: ftKb_SpecialNMt_801071FC declares Item_GObj* saved_item, assigns saved_item = fp->item_gobj, calls it_802C53F0 and ftKb_SpecialNMt_80107040, then restores fp->item_gobj = saved_item"
+      ]
+    },
+    {
+      "lesson": "Ground and air variants may share most control flow while differing only in constants, motion states, or data vectors; this PR matched paired Mewtwo ground/air loop functions with parallel structure and distinct ftKb_Init_803B7570/ftKb_Init_803B757C vectors.",
+      "scope": [
+        "Kirby Mewtwo-copy ground/air animation loops"
+      ],
+      "evidence_refs": [
+        "diff.diff: ftKb_MtSpecialNLoop_Anim and ftKb_MtSpecialAirNLoop_Anim have parallel charge-loop/full-charge structure",
+        "diff.diff: ground loop uses ftKb_MS_MtSpecialNLoopFull and ftKb_Init_803B7570; air loop uses ftKb_MS_MtSpecialAirNLoopFull and ftKb_Init_803B757C"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "ftKb_SpecialN_set_cbs",
+      "kind": "local inline helper",
+      "convention": "Uses ftKb_SpecialN prefix and a concise action description for common Neutral-B callback setup.",
+      "evidence_refs": [
+        "diff.diff: static inline void ftKb_SpecialN_set_cbs(Fighter_GObj* gobj)"
+      ]
+    },
+    {
+      "name": "ftKb_SpecialNMt_SetRecoil",
+      "kind": "inline helper",
+      "convention": "Uses SpecialNMt to indicate Kirby Mewtwo-copy Neutral-B behavior and SetRecoil to describe recoil velocity assignment.",
+      "evidence_refs": [
+        "diff.diff: inline void ftKb_SpecialNMt_SetRecoil(Fighter_GObj* gobj)"
+      ]
+    },
+    {
+      "name": "ftKb_SpecialNMt_CreateHeldShadow",
+      "kind": "local inline helper",
+      "convention": "Uses SpecialNMt plus a verb phrase for creating the held Mewtwo shadow item.",
+      "evidence_refs": [
+        "diff.diff: static inline void ftKb_SpecialNMt_CreateHeldShadow(Fighter_GObj* gobj, Vec3* pos1, Vec3* pos2)"
+      ]
+    },
+    {
+      "name": "perm_randi",
+      "kind": "local inline helper",
+      "convention": "The PR itself labels this as a permuter-generated helper and likely fake; this is not evidence of an accepted naming convention.",
+      "evidence_refs": [
+        "diff.diff: comment '// permuter-generated helper, almost certainly fake' above static inline s32 perm_randi(int n)"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "PAD_STACK was used in several matched functions to shape stack layout.",
+      "evidence_refs": [
+        "diff.diff: PAD_STACK(4) in ftKb_SpecialNSk_8010603C and fn_80106DB0",
+        "diff.diff: PAD_STACK(0x10) in ftKb_SpecialNMt_801071FC",
+        "diff.diff: PAD_STACK(8) in ftKb_SpecialNMt_80107410 and ftKb_MtSpecialAirNEnd_Anim",
+        "diff.diff: PAD_STACK(24) in ftKb_MtSpecialNLoop_IASA"
+      ],
+      "notes": "Supported as a tactic used by this PR, not as a global style recommendation. The bot report supports function matches, but there is no reviewer discussion explaining each padding decision."
+    },
+    {
+      "tactic": "Introduced small inline wrappers/helpers to influence or preserve matching shape while avoiding repeated blocks.",
+      "evidence_refs": [
+        "diff.diff: ftKb_SpecialN_set_cbs",
+        "diff.diff: ftKb_SpecialNMt_SetRecoil",
+        "diff.diff: ftKb_SpecialNMt_CreateHeldShadow",
+        "diff.diff: perm_randi wraps HSD_Randi"
+      ],
+      "notes": "One helper is explicitly called 'permuter-generated' and 'almost certainly fake', so curator should not promote this pattern as accepted style without later evidence."
+    },
+    {
+      "tactic": "Used explicit local declarations and narrow scopes to steer codegen, including repeated GET_FIGHTER declarations inside switch case blocks and f64 padding locals.",
+      "evidence_refs": [
+        "diff.diff: ftKb_SkSpecialNLoop_Anim and ftKb_SkSpecialAirNLoop_Anim introduce a scoped Fighter* fp inside case 0 before ft_PlaySFX",
+        "diff.diff: ftKb_SpecialNMt_801071FC declares f64 _pad1 and f64 _pad2",
+        "diff.diff: ftKb_MtSpecialNStart_Anim declares u8 _[8]"
+      ],
+      "notes": "This is evidence of matching tactics in this PR only; loaded standards require explicit verifier evidence for such tactics before treating them as reviewable style."
+    },
+    {
+      "tactic": "Used ternary expressions for simple selected assignments when replacing generated-looking timer variables.",
+      "evidence_refs": [
+        "diff.diff: fp->mv.kb.specialhi.xC = (fp->fv.kb.x9C == 0) ? da->specialn_mt_frames_to_transition : 0 in ftKb_SpecialNMt_80107568 and ftKb_SpecialNMt_80107638"
+      ],
+      "notes": "Consistent with the loaded canonical-control-flow-and-macros standard's preference to try ordinary C forms for select-like assignments."
+    }
+  ],
+  "review_feedback": [],
+  "searchable_terms": [
+    "pr-2350",
+    "ftKb_SpecialNZd.c matches",
+    "src/melee/ft/chara/ftKirby/ftKb_SpecialNZd.c",
+    "Kirby",
+    "ftKirby",
+    "copied Neutral-B",
+    "Sheik needles",
+    "Mewtwo shadow ball",
+    "ftKb_SpecialNSk_8010603C",
+    "fn_80106DB0",
+    "ftKb_SpecialNMt_801071FC",
+    "ftKb_SpecialNMt_80107410",
+    "ftKb_SpecialNMt_80107568",
+    "ftKb_SpecialNMt_80107638",
+    "ftKb_MtSpecialNStart_Anim",
+    "ftKb_MtSpecialNLoop_Anim",
+    "ftKb_MtSpecialAirNStart_Anim",
+    "ftKb_MtSpecialAirNLoop_Anim",
+    "ftKb_MtSpecialNLoop_IASA",
+    "ftKb_MtSpecialNLoopFull_IASA",
+    "fn_801090D4",
+    "ftKb_SpecialNIc_80108E14",
+    "ftKb_SpecialN_set_cbs",
+    "ftKb_SpecialNMt_SetRecoil",
+    "ftKb_SpecialNMt_CreateHeldShadow",
+    "perm_randi",
+    "PAD_STACK",
+    "GET_FIGHTER",
+    "it_802AFD8C",
+    "it_802AFEA8",
+    "it_802C5000",
+    "it_802C53F0",
+    "it_802C573C",
+    "efSync_Spawn",
+    "ft_PlaySFX",
+    "ft_80088510",
+    "ftKb_Init_803B7570",
+    "ftKb_Init_803B757C",
+    "ftKb_Init_803CB770",
+    "ftKb_Init_803CB828"
+  ],
+  "follow_up_queries": [
+    "Search later PRs for removal or cleanup of perm_randi in ftKb_SpecialNZd.c.",
+    "Search later PRs touching ftKb_SpecialNMt_SetRecoil or ftKb_SpecialNMt_CreateHeldShadow for whether inline helper style was retained.",
+    "Search current source for ftKb_Init_803CB770 and ftKb_Init_803CB828 ownership or symbol metadata if curating path/data facts.",
+    "Search for other Kirby copied-special PRs that use ftKb_SpecialN_set_cbs or similar callback setup helpers.",
+    "Search for PAD_STACK uses in ftKb_SpecialNZd.c after PR 2350 to determine whether padding locals were later cleaned up."
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR 2350 title, author, state, URL, dates, changed-file counts",
+      "changed_files.jsonl: one changed file with 637 additions, 62 deletions, 17 hunks",
+      "diff.diff: truncated but contains many concrete changed hunks",
+      "text_corpus.jsonl: no PR body, one bot report comment, zero review comments",
+      "text_corpus.jsonl: bot report lists 18 new matches and .sdata2 improvement"
+    ],
+    "notes": [
+      "Evidence is strong for changed file, match counts, and many specific symbols because metadata, diff excerpt, and bot report agree.",
+      "Evidence is weak for author intent, review reasoning, and why particular stack/register tactics were necessary because the PR body is empty and there are no review comments.",
+      "The raw diff is marked truncated, so this intake does not claim exhaustive details for every changed hunk or all implemented functions beyond loaded evidence.",
+      "The PR contains an inline comment saying perm_randi is 'permuter-generated' and 'almost certainly fake'; this should be treated as cautionary evidence, not a reusable accepted tactic."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "kind": "pr_match_record",
+        "title": "PR 2350 matched Kirby ftKb_SpecialNZd functions",
+        "text": "PR 2350 modified only src/melee/ft/chara/ftKirby/ftKb_SpecialNZd.c and the bot report recorded 18 new matches in main/melee/ft/chara/ftKirby/ftKb_SpecialNZd, including ftKb_SpecialNMt_801071FC, ftKb_MtSpecialNLoop_Anim, ftKb_MtSpecialAirNLoop_Anim, ftKb_MtSpecialNLoop_IASA, fn_80106DB0, ftKb_SpecialNSk_8010603C, and several related Mewtwo/Sheik copied-special functions.",
+        "scope": [
+          "src/melee/ft/chara/ftKirby/ftKb_SpecialNZd.c",
+          "main/melee/ft/chara/ftKirby/ftKb_SpecialNZd"
+        ],
+        "evidence_refs": [
+          "changed_files.jsonl",
+          "text_corpus.jsonl: decomp-dev[bot] report"
+        ]
+      },
+      {
+        "kind": "local_lesson_candidate",
+        "title": "Shared helpers for repeated Kirby SpecialN setup",
+        "text": "In this PR, repeated callback setup and held-shadow creation were factored into local inline helpers while still producing matched functions according to the bot report.",
+        "scope": [
+          "Kirby SpecialN copied-special functions",
+          "ftKb_SpecialNZd.c"
+        ],
+        "evidence_refs": [
+          "diff.diff: ftKb_SpecialN_set_cbs and ftKb_SpecialNMt_CreateHeldShadow",
+          "text_corpus.jsonl: 18 new matches"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Caution against promoting permuter-generated helper wrappers",
+        "text": "PR 2350 includes a local inline helper named perm_randi with the source comment 'permuter-generated helper, almost certainly fake'. Consider documenting this as cautionary evidence that such wrappers may be temporary matching artifacts and should not be promoted without stronger local/style evidence.",
+        "source_path": null,
+        "scope": [
+          "matching tactics",
+          "inline helper wrappers",
+          "permuter artifacts"
+        ],
+        "evidence_refs": [
+          "diff.diff: comment above perm_randi"
+        ],
+        "reason": "The PR itself flags the helper as likely fake, aligning with standards that generated/permuter-shaped source should not be normalized without evidence."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "ftKb_SpecialNZd.c covers Kirby copied Sheik and Mewtwo Neutral-B behavior",
+        "text": "The loaded PR evidence shows src/melee/ft/chara/ftKirby/ftKb_SpecialNZd.c implementing Kirby copied Sheik needle and Mewtwo shadow-ball Neutral-B functions, with item includes/calls for Sheik needle and Mewtwo charge/held/thrown shadow item behavior.",
+        "source_path": "src/melee/ft/chara/ftKirby/ftKb_SpecialNZd.c",
+        "scope": [
+          "fighter",
+          "Kirby",
+          "copied special moves",
+          "Sheik SpecialN",
+          "Mewtwo SpecialN"
+        ],
+        "evidence_refs": [
+          "diff.diff: includes itseakneedlethrown.h and implements ftKb_SpecialNSk_8010603C/fn_80106DB0",
+          "diff.diff: implements ftKb_SpecialNMt_801071FC, ftKb_MtSpecialNStart_Anim, ftKb_MtSpecialNLoop_Anim, ftKb_MtSpecialAirNStart_Anim, ftKb_MtSpecialAirNLoop_Anim"
+        ],
+        "reason": "Useful path-scope fact for future searches, but should be curated against current source before promotion."
+      },
+      {
+        "target_source_id": "ssbm_data_sheet",
+        "update_kind": "source_update",
+        "title": "Investigate ftKb_Init_803B7570, ftKb_Init_803B757C, ftKb_Init_803CB770, and ftKb_Init_803CB828 ownership",
+        "text": "PR 2350 added extern declarations for vectors/float arrays/SFX table used by Kirby copied Mewtwo and Sheik behavior. The bot report also notes .sdata2 improvement. Curator may want to verify current symbol metadata and data ownership for these addresses before recording data facts.",
+        "source_path": "src/melee/ft/chara/ftKirby/ftKb_SpecialNZd.c",
+        "scope": [
+          "ftKb_Init_803B7570",
+          "ftKb_Init_803B757C",
+          "ftKb_Init_803CB770",
+          "ftKb_Init_803CB828",
+          ".sdata2"
+        ],
+        "evidence_refs": [
+          "diff.diff: extern declarations for ftKb_Init_803B7570, ftKb_Init_803B757C, ftKb_Init_803CB770, ftKb_Init_803CB828",
+          "text_corpus.jsonl: bot report .sdata2 37.50% to 79.07%"
+        ],
+        "reason": "The PR evidence shows usage and matching impact but not enough section-ownership detail to promote data facts directly."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer reviewer approval rationale or specific reviewer preferences; there were no review comments in the loaded evidence.",
+      "Do not promote PAD_STACK, f64 pad locals, u8 dummy arrays, or duplicate assignment forms as accepted style from this PR alone; loaded standards require explicit verifier evidence and cleanup reasoning.",
+      "Do not treat the name perm_randi as a good naming convention; the diff comment calls it permuter-generated and almost certainly fake.",
+      "Do not claim all functions in the raw diff were inspected exhaustively because the loaded diff is truncated."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

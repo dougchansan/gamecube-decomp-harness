@@ -1,0 +1,10 @@
+{
+  "pr": 1177,
+  "title": "Cleanup additional ASSERT macros in texp",
+  "url": "https://github.com/doldecomp/melee/pull/1177",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 1,
+  "added_lines": 51,
+  "deleted_lines": 62
+}

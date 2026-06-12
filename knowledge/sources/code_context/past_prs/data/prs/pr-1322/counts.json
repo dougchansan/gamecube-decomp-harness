@@ -1,0 +1,17 @@
+{
+  "number": 1322,
+  "title": "Match 61.89% of `ftYs_Guard` (3.3 KB)",
+  "state": "MERGED",
+  "createdAt": "2024-02-25T13:24:47Z",
+  "updatedAt": "2024-02-25T13:26:44Z",
+  "mergedAt": "2024-02-25T13:26:43Z",
+  "closedAt": "2024-02-25T13:26:43Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1322",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 11827
+  }
+}

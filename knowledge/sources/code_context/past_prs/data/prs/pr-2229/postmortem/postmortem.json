@@ -1,0 +1,347 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2229",
+  "pr": {
+    "number": 2229,
+    "title": "Match & link itevyoshiegg",
+    "url": "https://github.com/doldecomp/melee/pull/2229",
+    "state": "MERGED",
+    "author": "PsiLupan",
+    "created_at": "2026-03-06T23:33:05Z",
+    "merged_at": "2026-03-06T23:38:07Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2229 matched and linked the Event Yoshi Egg item translation unit by implementing several functions in src/melee/it/items/itevyoshiegg.c, adding item-specific attrs/vars types, updating item var union and prototypes, renaming two address-style symbols to itEvYoshiEgg names, changing the object from NonMatching to Matching, and adjusting local .sdata2 symbol labels. Bot report shows five new matches for the itevyoshiegg unit.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "symbols",
+      "configuration",
+      "item"
+    ],
+    "systems": [
+      "item",
+      "config",
+      "repo-root"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/it/items/itevyoshiegg.c",
+      "role": "Primary decomp source: added ItemStateTable, implemented itEvYoshiEgg_Spawn, itEvyoshiegg_UnkMotion5_Anim, static inline dmgReceived, and itEvYoshiEgg_Logic42_DmgReceived; replaced borrowed bombhei item var access with evyoshiegg item vars.",
+      "evidence_refs": [
+        "raw_diff: src/melee/it/items/itevyoshiegg.c hunks",
+        "text_corpus: decomp-dev bot report lists itEvYoshiEgg_Logic42_DmgReceived, itEvYoshiEgg_Spawn, .data, itEvyoshiegg_UnkMotion5_Anim, .sdata2 as new matches"
+      ]
+    },
+    {
+      "path": "src/melee/it/itCommonItems.h",
+      "role": "Added itEvYoshiEgg_DatAttrs and itEvYoshiEgg_ItemVars structs used by the matched item code.",
+      "evidence_refs": [
+        "raw_diff: src/melee/it/itCommonItems.h added itEvYoshiEgg_DatAttrs and itEvYoshiEgg_ItemVars"
+      ]
+    },
+    {
+      "path": "src/melee/it/types.h",
+      "role": "Added evyoshiegg arm to Item.xDD4_itemVar union.",
+      "evidence_refs": [
+        "raw_diff: src/melee/it/types.h added itEvYoshiEgg_ItemVars evyoshiegg"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itevyoshiegg.h",
+      "role": "Updated prototypes from unknown/address-style names to typed Event Yoshi Egg names.",
+      "evidence_refs": [
+        "raw_diff: itevyoshiegg.h changed it_8029B0C8 to void itEvYoshiEgg_Spawn(Vec3*) and it_3F14_Logic42_DmgReceived to itEvYoshiEgg_Logic42_DmgReceived"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Renamed function symbols for spawn and damage-received handlers and converted three .sdata2 float labels from global address-style names to local labels.",
+      "evidence_refs": [
+        "raw_diff: symbols.txt renames at .text:0x8029B0C8 and .text:0x8029B56C",
+        "raw_diff: symbols.txt changes .sdata2:0x804DCC88/8C/90 to @153/@154/@195 local labels"
+      ]
+    },
+    {
+      "path": "configure.py",
+      "role": "Changed melee/it/items/itevyoshiegg.c from NonMatching to Matching.",
+      "evidence_refs": [
+        "raw_diff: configure.py Object(NonMatching) to Object(Matching) for itevyoshiegg.c"
+      ]
+    },
+    {
+      "path": "src/melee/it/it_2725.c",
+      "role": "Updated item logic table reference to renamed damage-received handler.",
+      "evidence_refs": [
+        "raw_diff: it_2725.c it_3F14_Logic42_DmgReceived to itEvYoshiEgg_Logic42_DmgReceived"
+      ]
+    },
+    {
+      "path": "src/melee/it/it_3F14.c",
+      "role": "Updated commented logic table reference to renamed damage-received handler.",
+      "evidence_refs": [
+        "raw_diff: it_3F14.c comment changed it_3F14_Logic42_DmgReceived to itEvYoshiEgg_Logic42_DmgReceived"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Linked src/melee/it/items/itevyoshiegg.c as Matching in configure.py.",
+    "Implemented itEvYoshiEgg_Spawn with SpawnItem setup for It_Kind_EvYoshiEgg, item creation, initialization, and xDD4 state reset.",
+    "Implemented itEvyoshiegg_UnkMotion5_Anim as a countdown handler that calls gm_801BEB68(1) when xDD8 equals 40 and returns true when the timer reaches zero.",
+    "Implemented itEvYoshiEgg_Logic42_DmgReceived with guards on xDD4 and xC9C versus special attributes, two efSync_Spawn calls, Item_8026AE84, and a helper that hides the JObj, zeroes velocity, sets item vars, and changes state.",
+    "Added item-specific itEvYoshiEgg_DatAttrs and itEvYoshiEgg_ItemVars types and added evyoshiegg to the Item item-var union.",
+    "Replaced a previous borrowed bombhei item-var access in itEvYoshiEgg_Logic42_Spawned with the new evyoshiegg union arm.",
+    "Updated public prototypes and symbol names for itEvYoshiEgg_Spawn and itEvYoshiEgg_Logic42_DmgReceived.",
+    "Adjusted three .sdata2 float symbols from global address-style names to local labels."
+  ],
+  "smart_moves": [
+    "Recovered a dedicated evyoshiegg item-var union arm before using xDD4/xDD8 fields, avoiding the earlier comment-backed borrow of bombhei.xDD4.",
+    "Propagated renamed functions through symbols, header prototypes, item logic table references, and comments in the related it_3F14.c table excerpt.",
+    "Changed configure.py to Matching only alongside bot evidence showing the itevyoshiegg object gained new 100% matches."
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When matching item code that uses xDD4 item vars, add the correct item-specific ItemVars union arm instead of reusing an unrelated item arm.",
+      "scope": [
+        "src/melee/it/items",
+        "src/melee/it/types.h",
+        "src/melee/it/itCommonItems.h"
+      ],
+      "evidence_refs": [
+        "raw_diff: itCommonItems.h added itEvYoshiEgg_ItemVars",
+        "raw_diff: types.h added xDD4_itemVar.evyoshiegg",
+        "raw_diff: itevyoshiegg.c replaced xDD4_itemVar.bombhei.xDD4 with xDD4_itemVar.evyoshiegg.xDD4"
+      ],
+      "confidence": 0.88
+    },
+    {
+      "lesson": "For a newly matched item translation unit, keep the function naming, header prototypes, symbol table entries, and logic table references synchronized in the same PR.",
+      "scope": [
+        "src/melee/it/items/itevyoshiegg.c",
+        "src/melee/it/items/itevyoshiegg.h",
+        "config/GALE01/symbols.txt",
+        "src/melee/it/it_2725.c"
+      ],
+      "evidence_refs": [
+        "raw_diff: symbols.txt renamed it_8029B0C8 and it_3F14_Logic42_DmgReceived",
+        "raw_diff: itevyoshiegg.h updated prototypes",
+        "raw_diff: it_2725.c updated logic table reference"
+      ],
+      "confidence": 0.82
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Event Yoshi Egg item functions use the itEvYoshiEgg_ prefix for named logic/spawn handlers, while pre-existing motion functions in this slice retain itEvyoshiegg_UnkMotionN_* casing.",
+      "evidence_refs": [
+        "raw_diff: symbols.txt itEvYoshiEgg_Spawn and itEvYoshiEgg_Logic42_DmgReceived",
+        "raw_diff: itevyoshiegg.c ItemStateTable entries use itEvyoshiegg_UnkMotion0/3/2/4/5 names"
+      ],
+      "confidence": 0.72
+    },
+    {
+      "convention": "Use local short names ip/gobj for item and object parameters/locals when the role is clear.",
+      "evidence_refs": [
+        "raw_diff: itEvyoshiegg_UnkMotion5_Anim declares Item* ip = GET_ITEM(gobj)",
+        "raw_diff: itEvYoshiEgg_Logic42_DmgReceived declares Item* ip = GET_ITEM(gobj)"
+      ],
+      "confidence": 0.63
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "A small static inline helper, dmgReceived, factors the state-transition side effects used by the matched damage-received handler.",
+      "evidence_refs": [
+        "raw_diff: static inline void dmgReceived(Item_GObj* gobj)",
+        "raw_diff: itEvYoshiEgg_Logic42_DmgReceived calls dmgReceived(gobj)"
+      ],
+      "confidence": 0.7
+    },
+    {
+      "tactic": "Local .sdata2 labels were adjusted from global address-style names to local @ labels as part of making the itevyoshiegg unit's data match.",
+      "evidence_refs": [
+        "raw_diff: symbols.txt it_804DCC88/8C/90 changed to @153/@154/@195",
+        "text_corpus: bot report lists .sdata2 +4 from 80.00% to 100.00%"
+      ],
+      "confidence": 0.76
+    },
+    {
+      "tactic": "The PR used the project matching configuration switch from NonMatching to Matching after adding implementations and related symbols/types.",
+      "evidence_refs": [
+        "raw_diff: configure.py changed Object(NonMatching, \"melee/it/items/itevyoshiegg.c\") to Object(Matching, ...)",
+        "text_corpus: bot report lists matched and linked code/data gains"
+      ],
+      "confidence": 0.82
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "author": "decomp-dev[bot]",
+      "summary": "Report showed matched code +548 bytes, linked code +1584 bytes, matched data +112 bytes, linked data +112 bytes, and five new matches in main/melee/it/items/itevyoshiegg.",
+      "evidence_refs": [
+        "text_corpus: issue_comment by decomp-dev[bot] at 2026-03-06T23:37:01Z"
+      ]
+    },
+    {
+      "kind": "review_absent",
+      "author": null,
+      "summary": "No review comments or reviews are present in the loaded slice.",
+      "evidence_refs": [
+        "metadata_json: counts.review_comments=0 and reviews=0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2229",
+    "Match & link itevyoshiegg",
+    "PsiLupan",
+    "itevyoshiegg",
+    "itEvYoshiEgg_Spawn",
+    "itEvYoshiEgg_Logic42_DmgReceived",
+    "itEvyoshiegg_UnkMotion5_Anim",
+    "dmgReceived",
+    "itEvYoshiEgg_ItemVars",
+    "itEvYoshiEgg_DatAttrs",
+    "xDD4_itemVar.evyoshiegg",
+    "bombhei.xDD4",
+    "ItemStateTable it_803F6728",
+    "It_Kind_EvYoshiEgg",
+    "efSync_Spawn 1231",
+    "HSD_JObjSetFlagsAll",
+    "JOBJ_HIDDEN",
+    "Item_80268E5C",
+    "ITEM_ANIM_UPDATE",
+    "Object(Matching, melee/it/items/itevyoshiegg.c)",
+    "sdata2 @153 @154 @195"
+  ],
+  "follow_up_queries": [
+    "itevyoshiegg xDD4 xDD8 item vars",
+    "xDD4_itemVar borrowed bombhei replaced with item-specific union arm",
+    "itEvYoshiEgg_DatAttrs x0 x4 specialAttributes",
+    "HSD_JObjSetFlagsAll GET_JOBJ JOBJ_HIDDEN item damage received",
+    "efSync_Spawn 1231 item pos val 1.5",
+    "ItemStateTable it_803F6728 itevyoshiegg",
+    "configure.py itevyoshiegg Matching NonMatching",
+    "symbols.txt it_804DCC88 @153 sdata2 local float"
+  ],
+  "evidence_quality": {
+    "status": "strong",
+    "evidence_refs": [
+      "metadata_json: PR identity, changed files, merge state, counts",
+      "raw_diff: full diff for eight changed files",
+      "changed_files: file list and line counts",
+      "text_corpus: bot report with match/link deltas and new matches"
+    ],
+    "notes": [
+      "PR body is empty and no human review comments are present, so author intent and reviewer reasoning are not inferred.",
+      "The bot report supports match/link progress, but this intake did not independently run objdiff, builds, or regression checks.",
+      "The unused local `itEvYoshiEgg_ItemVars* attrs;` in itEvYoshiEgg_Spawn and `f32* unused;` in itEvYoshiEgg_Logic42_DmgReceived are observed in the diff, but no broader tactic is inferred without review/build context."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "type": "decomp_lesson",
+        "title": "Use item-specific xDD4 item-var union arms when matching item code",
+        "text": "PR 2229 replaced an unrelated bombhei item-var access with a newly added evyoshiegg union arm and added itEvYoshiEgg_ItemVars in itCommonItems.h, supporting the existing typed-fields-over-pointer-math principle for item variables.",
+        "scope": [
+          "item",
+          "xDD4_itemVar",
+          "src/melee/it/items"
+        ],
+        "evidence_refs": [
+          "raw_diff: itevyoshiegg.c bombhei.xDD4 to evyoshiegg.xDD4",
+          "raw_diff: itCommonItems.h added itEvYoshiEgg_ItemVars",
+          "raw_diff: types.h added evyoshiegg union arm"
+        ],
+        "confidence": 0.88
+      },
+      {
+        "type": "matching_tactic",
+        "title": "Synchronize renamed matched functions across symbols, headers, and logic tables",
+        "text": "PR 2229 renamed it_8029B0C8 to itEvYoshiEgg_Spawn and it_3F14_Logic42_DmgReceived to itEvYoshiEgg_Logic42_DmgReceived, then updated symbols.txt, itevyoshiegg.h, and logic table references.",
+        "scope": [
+          "symbols",
+          "headers",
+          "item logic tables"
+        ],
+        "evidence_refs": [
+          "raw_diff: symbols.txt function renames",
+          "raw_diff: itevyoshiegg.h prototype renames",
+          "raw_diff: it_2725.c logic table rename"
+        ],
+        "confidence": 0.82
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "itevyoshiegg item source path and matching status in PR 2229",
+        "text": "src/melee/it/items/itevyoshiegg.c is the Event Yoshi Egg item source touched by PR 2229 and was changed from NonMatching to Matching in configure.py in this PR.",
+        "source_path": "src/melee/it/items/itevyoshiegg.c",
+        "scope": [
+          "item",
+          "itevyoshiegg",
+          "configure.py"
+        ],
+        "evidence_refs": [
+          "raw_diff: configure.py changed itevyoshiegg.c from NonMatching to Matching",
+          "text_corpus: bot report lists new matches for main/melee/it/items/itevyoshiegg"
+        ],
+        "reason": "Potential source/path metadata update; curator should decide whether to record historical matching status from this PR."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "Event Yoshi Egg item variables",
+        "text": "PR 2229 added itEvYoshiEgg_ItemVars with xDD4 and xDD8 fields and added it as the evyoshiegg arm of Item.xDD4_itemVar.",
+        "source_path": "src/melee/it/itCommonItems.h",
+        "scope": [
+          "item vars",
+          "EvYoshiEgg",
+          "types"
+        ],
+        "evidence_refs": [
+          "raw_diff: itCommonItems.h added itEvYoshiEgg_ItemVars",
+          "raw_diff: types.h added itEvYoshiEgg_ItemVars evyoshiegg"
+        ],
+        "reason": "Possible path/type fact; field semantics remain mostly unnamed, so do not over-promote beyond observed xDD4/xDD8 structure."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "Event Yoshi Egg renamed symbols in PR 2229",
+        "text": "PR 2229 renamed .text:0x8029B0C8 from it_8029B0C8 to itEvYoshiEgg_Spawn and .text:0x8029B56C from it_3F14_Logic42_DmgReceived to itEvYoshiEgg_Logic42_DmgReceived.",
+        "source_path": "config/GALE01/symbols.txt",
+        "scope": [
+          "symbols",
+          "EvYoshiEgg"
+        ],
+        "evidence_refs": [
+          "raw_diff: symbols.txt renames at 0x8029B0C8 and 0x8029B56C"
+        ],
+        "reason": "Possible symbol/path fact for curator review."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that xDD4 or xDD8 have semantic names beyond the raw field names; the PR kept xDD4/xDD8.",
+      "Do not treat the local .sdata2 label changes as a general rule to localize floats; this slice only shows it was done for three symbols in this unit and matched according to the bot report.",
+      "Do not claim human reviewer approval or requested changes; the loaded slice has no human review comments."
+    ]
+  },
+  "confidence": 0.86,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

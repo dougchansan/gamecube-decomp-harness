@@ -1,0 +1,10 @@
+{
+  "pr": 1351,
+  "title": "Bump `dtk` to v0.7.3 and run `dol apply`",
+  "url": "https://github.com/doldecomp/melee/pull/1351",
+  "text_records_with_body": 0,
+  "review_comments": 0,
+  "changed_files": 2,
+  "added_lines": 482,
+  "deleted_lines": 482
+}

@@ -1,0 +1,228 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2459",
+  "pr": {
+    "number": 2459,
+    "title": "Match lbHeap report function",
+    "url": "https://github.com/doldecomp/melee/pull/2459",
+    "state": "MERGED",
+    "author": "dberweger2017",
+    "created_at": "2026-05-01T19:54:52Z",
+    "merged_at": "2026-05-04T14:57:31Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2459 matched `lbHeap_80015DF8` in `src/melee/lb/lbheap.c` by preserving an apparently unused extra `OSReport` vararg: the format string consumes `p->size / 1024`, while `p->size` is still passed to reproduce target codegen.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "cleanup",
+      "decomp-matching",
+      "OSReport vararg"
+    ],
+    "systems": [
+      "library",
+      "lb",
+      "lbheap"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/lb/lbheap.c",
+      "role": "Only changed source file; changed final `OSReport` call in `lbHeap_80015DF8` to pass `p->size` as an extra argument.",
+      "evidence_refs": [
+        "changed_files: src/melee/lb/lbheap.c added=1 deleted=1 hunks=1",
+        "raw_diff: `OSReport(\" / %5d KB\\n\", p->size / 1024)` -> `OSReport(\" / %5d KB\\n\", p->size / 1024, p->size)`",
+        "human_pr_text: Matches `lbHeap_80015DF8`"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Added `p->size` as a second vararg to an `OSReport(\" / %5d KB\\n\", ...)` call in `lbHeap_80015DF8`.",
+      "evidence_refs": [
+        "raw_diff"
+      ]
+    },
+    {
+      "text": "The PR body says the format string only consumes the divided KB value, but keeping the extra vararg matches target codegen.",
+      "evidence_refs": [
+        "human_pr_text"
+      ]
+    },
+    {
+      "text": "The PR claims `lbHeap_80015DF8` improved from 99.87654% to 100.0%, with function size remaining 324/324 bytes.",
+      "evidence_refs": [
+        "human_pr_text"
+      ]
+    },
+    {
+      "text": "A bot report recorded one new match for `main/melee/lb/lbheap` item `lbHeap_80015DF8`, with matched code +324 bytes.",
+      "evidence_refs": [
+        "text_corpus: issue_comment by decomp-dev[bot]"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Kept the change minimal: one argument added to one report call, no broad formatting, naming, data, or split churn.",
+      "evidence_refs": [
+        "changed_files",
+        "raw_diff"
+      ]
+    },
+    {
+      "text": "Documented the non-obvious reason for an apparently unused vararg so reviewers can distinguish it from accidental dead or mismatched formatting code.",
+      "evidence_refs": [
+        "human_pr_text"
+      ]
+    },
+    {
+      "text": "Provided narrow verification commands for the touched object, objdiff unit, and issue lint/report tool.",
+      "evidence_refs": [
+        "human_pr_text"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For variadic reporting calls such as `OSReport`, do not assume every source-level argument must be consumed by the format string; an extra vararg may be needed to match target codegen when verified by objdiff.",
+      "scope": [
+        "OSReport",
+        "variadic calls",
+        "matching"
+      ],
+      "evidence_refs": [
+        "human_pr_text: extra `p->size` vararg matches target codegen",
+        "raw_diff",
+        "human_pr_text: `lbHeap_80015DF8`: 99.87654% -> 100.0%"
+      ]
+    },
+    {
+      "lesson": "When a one-line vararg change closes a function, record the exact before/after score and object/unit verification because the source shape may look suspicious without that context.",
+      "scope": [
+        "decomp matching",
+        "review documentation"
+      ],
+      "evidence_refs": [
+        "human_pr_text: matching and verification sections"
+      ]
+    }
+  ],
+  "naming_conventions": [],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Preserve an extra unused-looking vararg in `OSReport` to reproduce the original call sequence/codegen.",
+      "evidence_refs": [
+        "human_pr_text",
+        "raw_diff"
+      ],
+      "caution": "This PR supports the tactic only for the specific `lbHeap_80015DF8` call with stated objdiff verification; it should not be generalized to arbitrary report calls without local evidence."
+    },
+    {
+      "tactic": "Use narrow touched-object and objdiff commands for a focused one-function match.",
+      "evidence_refs": [
+        "human_pr_text: `ninja build/GALE01/src/melee/lb/lbheap.o`",
+        "human_pr_text: `objdiff-cli diff -p . -u main/melee/lb/lbheap`"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "text": "decomp-dev bot reported 1 new match: `main/melee/lb/lbheap` / `lbHeap_80015DF8`, before 99.88%, after 100.00%, +324 bytes.",
+      "evidence_refs": [
+        "text_corpus: issue_comment by decomp-dev[bot]"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2459",
+    "lbHeap_80015DF8",
+    "lbheap.c",
+    "src/melee/lb/lbheap.c",
+    "main/melee/lb/lbheap",
+    "OSReport",
+    "extra vararg",
+    "p->size",
+    "format string only consumes",
+    "99.87654",
+    "100.0",
+    "324/324 bytes",
+    "melee-issues"
+  ],
+  "follow_up_queries": [
+    "OSReport extra vararg match target codegen",
+    "lbHeap_80015DF8 p->size OSReport",
+    "variadic report call unused argument decomp matching",
+    "src/melee/lb/lbheap.c OSReport p->size / 1024"
+  ],
+  "evidence_quality": {
+    "status": "strong",
+    "evidence_refs": [
+      "metadata_json",
+      "human_pr_text",
+      "raw_diff",
+      "changed_files",
+      "text_corpus"
+    ],
+    "notes": [
+      "The slice contains PR metadata, the complete small diff, changed-file metadata, PR body, and bot issue comment.",
+      "No human review comments are present in the loaded slice.",
+      "Verification results are taken from the PR author's stated commands and bot report; intake did not rerun builds or objdiff.",
+      "The PR body asserts original-code intent for the extra argument; intake records that assertion as PR evidence, not independently proven historical author intent."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson",
+        "title": "Verified unused-looking varargs can be required for variadic report-call matches",
+        "text": "In PR #2459, `lbHeap_80015DF8` reached 100% by passing `p->size` as an extra `OSReport` argument even though the format string only consumes `p->size / 1024`. Treat such shapes as acceptable only with narrow codegen/objdiff evidence.",
+        "scope": [
+          "OSReport",
+          "variadic calls",
+          "codegen matching"
+        ],
+        "evidence_refs": [
+          "PR #2459 human_pr_text",
+          "PR #2459 raw_diff",
+          "PR #2459 bot report"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Mention verified extra varargs for variadic report calls",
+        "text": "Consider adding a note under report/assert or matching tactics standards: for variadic calls like `OSReport`, an argument not consumed by the visible format string can still be original and match-critical, but should remain only when documented with narrow objdiff/build evidence.",
+        "source_path": null,
+        "scope": [
+          "OSReport",
+          "variadic calls",
+          "matching tactics"
+        ],
+        "evidence_refs": [
+          "PR #2459 human_pr_text",
+          "PR #2459 raw_diff"
+        ],
+        "reason": "The existing standards cover preserving real OSReport behavior and evidence-backed matching tactics, but this PR provides a concrete recurring-looking edge case for variadic report calls."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that all extra varargs on `OSReport` calls are acceptable; the PR only supports this specific call with stated verification.",
+      "Do not promote the PR author's phrase 'original code passes' into independently proven original-source intent beyond this PR's evidence.",
+      "No naming convention was extracted because the PR did not rename symbols or locals."
+    ]
+  },
+  "confidence": 0.91,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

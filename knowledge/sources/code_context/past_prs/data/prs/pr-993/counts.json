@@ -1,0 +1,17 @@
+{
+  "number": 993,
+  "title": "Fix CObjSetCurrent fakematch",
+  "state": "MERGED",
+  "createdAt": "2023-10-14T18:25:05Z",
+  "updatedAt": "2023-11-13T02:14:20Z",
+  "mergedAt": "2023-10-14T18:38:05Z",
+  "closedAt": "2023-10-14T18:38:05Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/993",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 4245
+  }
+}

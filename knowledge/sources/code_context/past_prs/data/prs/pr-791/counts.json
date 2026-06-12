@@ -1,0 +1,17 @@
+{
+  "number": 791,
+  "title": "Clean up `ftCLink` and `ftGanon` motion definitions",
+  "state": "MERGED",
+  "createdAt": "2023-04-21T22:59:47Z",
+  "updatedAt": "2023-04-21T23:16:51Z",
+  "mergedAt": "2023-04-21T23:16:50Z",
+  "closedAt": "2023-04-21T23:16:50Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/791",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 18020
+  }
+}

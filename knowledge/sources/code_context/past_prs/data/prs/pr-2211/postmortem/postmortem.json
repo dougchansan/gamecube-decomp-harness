@@ -1,0 +1,327 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2211",
+  "pr": {
+    "number": 2211,
+    "title": "itfushigibana match & link",
+    "url": "https://github.com/doldecomp/melee/pull/2211",
+    "state": "MERGED",
+    "author": "PsiLupan",
+    "created_at": "2026-03-04T19:29:43Z",
+    "merged_at": "2026-03-04T19:37:43Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2211 marks `melee/it/items/itfushigibana.c` as Matching, adjusts two `.sdata2` float symbols from global `it_804DD580/it_804DD584` names to local labels `@154/@155`, and changes the Fushigibana item state table's third state id from `2` to `-1`. It also moves two static helper functions earlier in the source file, likely affecting compile/link ordering for the matching object. Bot output reports linked-code and data progress plus two new data-section matches for the itfushigibana unit.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "item source matching",
+      "build configuration",
+      "symbol metadata",
+      "data-section metadata"
+    ],
+    "systems": [
+      "item",
+      "config",
+      "repo-root"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/it/items/itfushigibana.c",
+      "role": "Item source adjusted for matching/linking: state table value changed and two static helper definitions moved before their callers.",
+      "evidence_refs": [
+        "raw_diff: src/melee/it/items/itfushigibana.c hunk changes state table entry from 2 to -1",
+        "raw_diff: src/melee/it/items/itfushigibana.c moves itFushigibana_UnkMotion1_Anim_inline1 and inline2 from below it_802D718C to above itFushigibana_Logic29_Spawned",
+        "changed_files.jsonl: src/melee/it/items/itfushigibana.c added 21 deleted 21 hunks 2"
+      ]
+    },
+    {
+      "path": "configure.py",
+      "role": "Build configuration flips itfushigibana object from NonMatching to Matching.",
+      "evidence_refs": [
+        "raw_diff: configure.py changes Object(NonMatching, \"melee/it/items/itfushigibana.c\") to Object(Matching, \"melee/it/items/itfushigibana.c\")",
+        "changed_files.jsonl: configure.py added 1 deleted 1 hunks 1"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Symbol metadata changes two `.sdata2` floats at 0x804DD580 and 0x804DD584 from global symbols to local labels.",
+      "evidence_refs": [
+        "raw_diff: symbols.txt changes it_804DD580 to @154 at .sdata2:0x804DD580",
+        "raw_diff: symbols.txt changes it_804DD584 to @155 at .sdata2:0x804DD584",
+        "changed_files.jsonl: config/GALE01/symbols.txt added 2 deleted 2 hunks 1"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "`itfushigibana.c` item state table entry for `itFushigibana_UnkMotion2_*` changed its first field from `2` to `-1`.",
+      "evidence_refs": [
+        "raw_diff: src/melee/it/items/itfushigibana.c ItemStateTable hunk"
+      ]
+    },
+    {
+      "text": "Two static helpers, `itFushigibana_UnkMotion1_Anim_inline1` and `itFushigibana_UnkMotion1_Anim_inline2`, were moved earlier in the file without body changes in the shown diff.",
+      "evidence_refs": [
+        "raw_diff: helper bodies added above itFushigibana_Logic29_Spawned and removed below it_802D718C"
+      ]
+    },
+    {
+      "text": "`configure.py` now treats `melee/it/items/itfushigibana.c` as `Object(Matching, ...)` instead of `Object(NonMatching, ...)`.",
+      "evidence_refs": [
+        "raw_diff: configure.py MatchingFor object list"
+      ]
+    },
+    {
+      "text": "`config/GALE01/symbols.txt` makes two `.sdata2` floats local labels `@154` and `@155` instead of global `it_804DD580` and `it_804DD584` symbols.",
+      "evidence_refs": [
+        "raw_diff: symbols.txt .sdata2 entries at 0x804DD580 and 0x804DD584"
+      ]
+    },
+    {
+      "text": "Automation reported linked-code progress of +1024 bytes, matched-data progress of +56 bytes, linked-data progress of +56 bytes, and two new matches for the `main/melee/it/items/itfushigibana` unit: `.sdata2` +4 bytes to 100.00% and `.data` +3 bytes to 100.00%.",
+      "evidence_refs": [
+        "text_corpus.jsonl: decomp-dev[bot] issue_comment created 2026-03-04T19:33:17Z"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "The PR keeps the source edit narrow: a state-table constant, local helper ordering, object matching status, and two symbol-scope/name metadata changes.",
+      "evidence_refs": [
+        "changed_files.jsonl: three changed files, 24 additions and 24 deletions total",
+        "raw_diff: all hunks shown"
+      ]
+    },
+    {
+      "text": "The symbol changes use local labels for two floats instead of keeping global address-style names, aligning with the idea that section metadata can be part of matching when ownership/scope evidence supports it.",
+      "evidence_refs": [
+        "raw_diff: symbols.txt changes it_804DD580/it_804DD584 to @154/@155",
+        "decomp_standards:data-sections-and-tu-splits"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For item object matching, small source-order changes to static helper definitions can be part of matching/linking work; record these as ordering/codegen-sensitive changes rather than semantic rewrites unless body changes are shown.",
+      "scope": [
+        "src/melee/it/items/itfushigibana.c",
+        "item source matching"
+      ],
+      "evidence_refs": [
+        "raw_diff: helper definitions are moved earlier with identical visible bodies",
+        "raw_diff: configure.py flips the object to Matching"
+      ],
+      "confidence": 0.74
+    },
+    {
+      "lesson": "Item state table constants can be match-critical; here the `itFushigibana_UnkMotion2_*` entry used `-1` rather than `2` in the matching source.",
+      "scope": [
+        "ItemStateTable",
+        "itfushigibana"
+      ],
+      "evidence_refs": [
+        "raw_diff: ItemStateTable third row changes first value from 2 to -1"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "When matching a translation unit, verify float symbol scope/name metadata as well as C source; local `.sdata2` labels may be needed instead of global address-style symbols.",
+      "scope": [
+        "config/GALE01/symbols.txt",
+        ".sdata2",
+        "itfushigibana"
+      ],
+      "evidence_refs": [
+        "raw_diff: 0x804DD580 and 0x804DD584 changed from global `it_...` symbols to local `@154/@155` labels",
+        "text_corpus.jsonl: bot reports `.sdata2` match for main/melee/it/items/itfushigibana"
+      ],
+      "confidence": 0.8
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "For this PR's matched symbol metadata, two anonymous/local `.sdata2` floats are represented with local labels `@154` and `@155` rather than global `it_804DD580` and `it_804DD584` names.",
+      "scope": [
+        "config/GALE01/symbols.txt",
+        ".sdata2"
+      ],
+      "evidence_refs": [
+        "raw_diff: symbols.txt hunk at .sdata2:0x804DD580 and .sdata2:0x804DD584"
+      ],
+      "confidence": 0.84
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Flip the object to Matching only after the source and metadata changes needed for the unit are in place.",
+      "evidence_refs": [
+        "raw_diff: configure.py changes itfushigibana.c from NonMatching to Matching",
+        "text_corpus.jsonl: bot reports progress for GALE01 and two new matches"
+      ],
+      "confidence": 0.72
+    },
+    {
+      "tactic": "Use symbol metadata corrections for local float labels when `.sdata2` ownership/scope affects unit matching.",
+      "evidence_refs": [
+        "raw_diff: symbols.txt changes global names to local labels",
+        "text_corpus.jsonl: bot reports `main/melee/it/items/itfushigibana` `.sdata2` match from 50.00% to 100.00%"
+      ],
+      "confidence": 0.79
+    },
+    {
+      "tactic": "Move static helper definitions earlier in the file when source order influences compile/link output, while preserving helper bodies.",
+      "evidence_refs": [
+        "raw_diff: `itFushigibana_UnkMotion1_Anim_inline1` and `inline2` moved above `itFushigibana_Logic29_Spawned`"
+      ],
+      "confidence": 0.68
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "automation_report",
+      "author": "decomp-dev[bot]",
+      "text": "GALE01 report showed linked code +0.03% (+1024 bytes), matched data +56 bytes, linked data +56 bytes, and two new matches for the itfushigibana unit.",
+      "evidence_refs": [
+        "text_corpus.jsonl: issue_comment by decomp-dev[bot]"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2211",
+    "itfushigibana",
+    "itfushigibana match & link",
+    "PsiLupan",
+    "src/melee/it/items/itfushigibana.c",
+    "configure.py",
+    "config/GALE01/symbols.txt",
+    "Object(Matching)",
+    "Object(NonMatching)",
+    "ItemStateTable",
+    "it_803F82F0",
+    "itFushigibana_UnkMotion1_Anim_inline1",
+    "itFushigibana_UnkMotion1_Anim_inline2",
+    "itFushigibana_UnkMotion2_Anim",
+    "itFushigibana_UnkMotion2_Phys",
+    "itFushigibana_UnkMotion2_Coll",
+    "it_804DD580",
+    "it_804DD584",
+    "@154",
+    "@155",
+    ".sdata2",
+    ".data",
+    "linked code",
+    "matched data"
+  ],
+  "follow_up_queries": [
+    "Find other item PRs where `ItemStateTable` first-field values changed to `-1` for matching.",
+    "Search for PRs that moved static helper definitions without body changes to satisfy MWCC ordering or link matching.",
+    "Search `symbols.txt` history for `.sdata2` globals converted to local `@NNN` labels during object matching.",
+    "Find nearby item object flips from `Object(NonMatching, ...)` to `Object(Matching, ...)` paired with data symbol metadata changes."
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR 2211 title, author, state, timestamps, changed files",
+      "raw_diff: complete 3760-byte diff excerpt for three files",
+      "changed_files.jsonl: changed file counts",
+      "text_corpus.jsonl: empty PR body and one automation report",
+      "raw_pr_json: PR metadata, truncated but key identity fields present"
+    ],
+    "notes": [
+      "The diff is small and complete, and the automation report provides quantitative progress.",
+      "The PR body is empty and there are no review comments, so author intent and reviewer reasoning are not available.",
+      "No local build log, objdiff output, or full CI trace is loaded beyond the decomp-dev bot report; do not overstate exact text-section function matches.",
+      "The source-order move is visible, but the evidence does not explain why that ordering was required."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "type": "matching_lesson",
+        "title": "Item matching may require static helper ordering plus metadata fixes",
+        "text": "In PR 2211, `itfushigibana.c` became a Matching object after narrow edits: moving two static helper definitions earlier, changing one `ItemStateTable` value from `2` to `-1`, and adjusting two `.sdata2` symbols from globals to local labels.",
+        "scope": [
+          "item",
+          "itfushigibana",
+          "matching"
+        ],
+        "evidence_refs": [
+          "raw_diff: src/melee/it/items/itfushigibana.c helper move and ItemStateTable change",
+          "raw_diff: configure.py NonMatching to Matching",
+          "raw_diff: symbols.txt global-to-local label changes",
+          "text_corpus.jsonl: bot report for GALE01"
+        ],
+        "confidence": 0.77
+      },
+      {
+        "type": "symbol_metadata_lesson",
+        "title": "Local `.sdata2` labels can be part of unit matching",
+        "text": "PR 2211 changed `.sdata2` floats at `0x804DD580` and `0x804DD584` from global `it_804DD580/it_804DD584` symbols to local labels `@154/@155`, and the bot report listed a new `.sdata2` match for the itfushigibana unit.",
+        "scope": [
+          ".sdata2",
+          "symbols.txt",
+          "itfushigibana"
+        ],
+        "evidence_refs": [
+          "raw_diff: config/GALE01/symbols.txt hunk",
+          "text_corpus.jsonl: bot report `.sdata2` +4, 50.00% to 100.00%"
+        ],
+        "confidence": 0.8
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "`src/melee/it/items/itfushigibana.c` matched in PR 2211",
+        "text": "PR 2211 changed `configure.py` so `melee/it/items/itfushigibana.c` is listed as `Object(Matching, ...)` instead of `Object(NonMatching, ...)`; bot output reported linked-code and data progress for `main/melee/it/items/itfushigibana`.",
+        "source_path": "src/melee/it/items/itfushigibana.c",
+        "scope": [
+          "itfushigibana",
+          "item",
+          "matching status"
+        ],
+        "evidence_refs": [
+          "raw_diff: configure.py object status change",
+          "text_corpus.jsonl: decomp-dev[bot] GALE01 report"
+        ],
+        "reason": "Potential path fact about matching status should be reviewed against current source/config before promotion."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "`itfushigibana` `.sdata2` floats at 0x804DD580 and 0x804DD584 are local labels in this PR",
+        "text": "PR 2211 changed two `config/GALE01/symbols.txt` entries from global `it_804DD580/it_804DD584` to local labels `@154/@155` and automation reported a `.sdata2` match for the itfushigibana unit.",
+        "source_path": "config/GALE01/symbols.txt",
+        "scope": [
+          ".sdata2",
+          "symbol metadata",
+          "itfushigibana"
+        ],
+        "evidence_refs": [
+          "raw_diff: symbols.txt hunk",
+          "text_corpus.jsonl: bot report"
+        ],
+        "reason": "Possible symbol/path fact; curator should verify against current symbols and section ownership before adding."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that helper movement is a general style requirement; this PR only shows it was part of this matching change.",
+      "Do not claim exact function-level text matches from this slice; the loaded bot report names linked-code progress and data-section matches, not individual matched functions.",
+      "Do not infer reviewer approval rationale; no review comments or human issue comments are loaded.",
+      "Do not promote `-1` as a universal ItemStateTable convention; evidence only supports this itfushigibana entry."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

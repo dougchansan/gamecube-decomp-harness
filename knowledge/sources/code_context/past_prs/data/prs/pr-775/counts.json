@@ -1,0 +1,17 @@
+{
+  "number": 775,
+  "title": "Use `<platform.h>` instead of `<Runtime/platform.h>`",
+  "state": "MERGED",
+  "createdAt": "2023-04-13T19:10:13Z",
+  "updatedAt": "2023-04-13T19:30:08Z",
+  "mergedAt": "2023-04-13T19:30:07Z",
+  "closedAt": "2023-04-13T19:30:07Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/775",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 137553
+  }
+}

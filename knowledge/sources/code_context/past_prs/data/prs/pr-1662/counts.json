@@ -1,0 +1,17 @@
+{
+  "number": 1662,
+  "title": "Some more ftYs_SpecialN matches",
+  "state": "MERGED",
+  "createdAt": "2025-07-03T06:06:38Z",
+  "updatedAt": "2025-07-03T08:03:22Z",
+  "mergedAt": "2025-07-03T07:53:29Z",
+  "closedAt": "2025-07-03T07:53:29Z",
+  "author": "Gelatart",
+  "url": "https://github.com/doldecomp/melee/pull/1662",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 6213
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 652,
+  "title": " Fighter cleanup pass 4 by Altimor",
+  "state": "MERGED",
+  "createdAt": "2023-01-06T14:23:16Z",
+  "updatedAt": "2023-01-10T02:00:16Z",
+  "mergedAt": "2023-01-10T02:00:15Z",
+  "closedAt": "2023-01-10T02:00:15Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/652",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 1,
+    "diff_bytes": 322662
+  }
+}

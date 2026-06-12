@@ -1,0 +1,17 @@
+{
+  "number": 953,
+  "title": "Match itparasol",
+  "state": "MERGED",
+  "createdAt": "2023-07-02T07:45:50Z",
+  "updatedAt": "2023-07-02T09:16:04Z",
+  "mergedAt": "2023-07-02T09:16:01Z",
+  "closedAt": "2023-07-02T09:16:01Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/953",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 46500
+  }
+}

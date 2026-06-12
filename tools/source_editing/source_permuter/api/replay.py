@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Replay a saved harness source-permutation recipe without applying it by default."""
+"""Replay a saved tool-local source-permutation recipe without applying it by default."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from pathlib import Path
 import sys
 
 sys.path.append(str(Path(__file__).resolve().parents[3] / "_shared"))
-from harness import clamp_int, print_json, resolve_repo_root, run_harness_script
+from melee_tooling import clamp_int, print_json, resolve_repo_root, run_tool_script
 
 
 def main() -> None:
@@ -27,7 +27,7 @@ def main() -> None:
     command_args.extend(["--replay", args.replay, "--apply", args.apply])
 
     repo_root = resolve_repo_root(args.repo_root)
-    payload = run_harness_script(
+    payload = run_tool_script(
         "permute.py",
         command_args,
         repo_root=repo_root,

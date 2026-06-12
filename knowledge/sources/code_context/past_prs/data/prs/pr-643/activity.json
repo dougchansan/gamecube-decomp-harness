@@ -1,0 +1,10 @@
+{
+  "pr": 643,
+  "title": "Add editorconfig and github action check",
+  "url": "https://github.com/doldecomp/melee/pull/643",
+  "text_records_with_body": 11,
+  "review_comments": 6,
+  "changed_files": 3,
+  "added_lines": 75,
+  "deleted_lines": 12
+}

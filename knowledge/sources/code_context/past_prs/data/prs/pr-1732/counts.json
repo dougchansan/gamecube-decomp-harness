@@ -1,0 +1,17 @@
+{
+  "number": 1732,
+  "title": "Better error for unknown func/TU in decomp.py",
+  "state": "MERGED",
+  "createdAt": "2025-07-24T19:56:58Z",
+  "updatedAt": "2025-07-25T08:30:02Z",
+  "mergedAt": "2025-07-25T08:30:02Z",
+  "closedAt": "2025-07-25T08:30:02Z",
+  "author": "thefoxcam",
+  "url": "https://github.com/doldecomp/melee/pull/1732",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 582
+  }
+}

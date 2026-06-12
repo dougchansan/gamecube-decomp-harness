@@ -1,0 +1,17 @@
+{
+  "number": 1522,
+  "title": "Match several 24-byte functions",
+  "state": "MERGED",
+  "createdAt": "2025-05-25T19:38:18Z",
+  "updatedAt": "2025-05-25T19:41:15Z",
+  "mergedAt": "2025-05-25T19:41:15Z",
+  "closedAt": "2025-05-25T19:41:15Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1522",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 15877
+  }
+}

@@ -47,6 +47,11 @@ packages/agents/src/
 |   +-- prompt.ts
 |   +-- schema.json
 |   +-- templates/
++-- reconcile/
+|   +-- index.ts
+|   +-- prompt.ts
+|   +-- schema.json
+|   +-- templates/
 +-- runtime/
     +-- artifacts.ts
     +-- index.ts
@@ -78,3 +83,15 @@ packages/agents/src/
 - [PR-review agent](20-pr-review.md)
 - [Knowledge-curator agent](25-knowledge-curator.md)
 - [Agent runtime](30-runtime.md)
+
+## Reconcile Agent
+
+`packages/agents/src/reconcile/` defines the operator-triggered reconcile agent
+with two modes. `ship-validate` consumes the latest `regression-check` summary
+and fixes broken matches, fuzzy regressions, and metric regressions until the
+QA gate is clean or its attempt budget escalates. `sync-merge` runs after an
+upstream pull/intake: it resolves merge conflicts, prefers upstream for
+duplicate matches (recording the local attempt as a carry-forward lesson), and
+fixes build errors against the new baseline. The CLI exposes it as the
+`reconcile` command; the dashboard exposes it via `POST /api/pr/reconcile`.
+Both refuse to run while the run status is `active`.

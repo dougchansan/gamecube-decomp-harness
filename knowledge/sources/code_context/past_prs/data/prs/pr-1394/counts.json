@@ -1,0 +1,17 @@
+{
+  "number": 1394,
+  "title": "Fix `publish-packages` CI",
+  "state": "MERGED",
+  "createdAt": "2024-07-08T23:05:33Z",
+  "updatedAt": "2024-07-08T23:11:43Z",
+  "mergedAt": "2024-07-08T23:11:41Z",
+  "closedAt": "2024-07-08T23:11:42Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1394",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 1072
+  }
+}

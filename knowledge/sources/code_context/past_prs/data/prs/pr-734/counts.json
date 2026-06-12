@@ -1,0 +1,17 @@
+{
+  "number": 734,
+  "title": "Match `func_80221288`",
+  "state": "MERGED",
+  "createdAt": "2023-01-29T22:38:23Z",
+  "updatedAt": "2023-01-30T09:41:49Z",
+  "mergedAt": "2023-01-30T09:41:48Z",
+  "closedAt": "2023-01-30T09:41:48Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/734",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 1,
+    "diff_bytes": 8233
+  }
+}

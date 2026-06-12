@@ -1,0 +1,17 @@
+{
+  "number": 1999,
+  "title": "matched hsd_803B5C2C function in the hsd_3B34.c file",
+  "state": "MERGED",
+  "createdAt": "2025-12-22T01:55:04Z",
+  "updatedAt": "2025-12-22T02:56:44Z",
+  "mergedAt": "2025-12-22T02:56:44Z",
+  "closedAt": "2025-12-22T02:56:44Z",
+  "author": "asylum14",
+  "url": "https://github.com/doldecomp/melee/pull/1999",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 421
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 2054,
+  "title": "vi: Match cutscene functions (part 2)",
+  "state": "MERGED",
+  "createdAt": "2025-12-30T17:27:20Z",
+  "updatedAt": "2026-05-16T08:45:50Z",
+  "mergedAt": "2026-01-06T23:35:40Z",
+  "closedAt": "2026-01-06T23:35:40Z",
+  "author": "itsgrimetime",
+  "url": "https://github.com/doldecomp/melee/pull/2054",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 1354
+  }
+}

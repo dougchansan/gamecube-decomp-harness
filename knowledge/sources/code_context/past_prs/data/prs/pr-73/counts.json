@@ -1,0 +1,17 @@
+{
+  "number": 73,
+  "title": "Split out chunk of ef and remaining ft code from the text sections",
+  "state": "MERGED",
+  "createdAt": "2021-08-25T20:13:31Z",
+  "updatedAt": "2021-08-25T20:13:47Z",
+  "mergedAt": "2021-08-25T20:13:45Z",
+  "closedAt": "2021-08-25T20:13:45Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/73",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 56773859
+  }
+}

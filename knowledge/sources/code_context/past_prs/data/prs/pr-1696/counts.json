@@ -1,0 +1,17 @@
+{
+  "number": 1696,
+  "title": "grOnett, grFigureGet matches, get ftDrawCommon_80080E18 closer",
+  "state": "MERGED",
+  "createdAt": "2025-07-17T00:29:34Z",
+  "updatedAt": "2025-07-17T00:36:04Z",
+  "mergedAt": "2025-07-17T00:35:56Z",
+  "closedAt": "2025-07-17T00:35:56Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/1696",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 21901
+  }
+}

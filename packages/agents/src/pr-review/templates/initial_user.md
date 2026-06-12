@@ -1,10 +1,12 @@
-<run>
-Inspect this PR context object and produce the required JSON record.
-Use the local slice paths if you need to reason about exact files, but keep the answer evidence-grounded.
-</run>
+<task>
+    Intake this PR slice for knowledge-curator handoff.
+    Use the loaded PR evidence and standards below. Use listed tools only for targeted questions not answered by the loaded context.
+</task>
 
-<pr_context>
-{pr_context_json}
-</pr_context>
+{{DECOMP_STANDARDS_XML}}
+
+{{AVAILABLE_TOOLS_XML}}
+
+{{PR_CONTEXT_XML}}
 
 Return exactly one JSON object.

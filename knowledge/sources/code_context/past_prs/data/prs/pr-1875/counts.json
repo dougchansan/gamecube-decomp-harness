@@ -1,0 +1,17 @@
+{
+  "number": 1875,
+  "title": "ftanim matches",
+  "state": "MERGED",
+  "createdAt": "2025-08-29T01:47:35Z",
+  "updatedAt": "2025-08-29T01:55:02Z",
+  "mergedAt": "2025-08-29T01:55:00Z",
+  "closedAt": "2025-08-29T01:55:00Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1875",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 26156
+  }
+}

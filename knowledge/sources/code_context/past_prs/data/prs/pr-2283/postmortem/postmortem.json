@@ -1,0 +1,445 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2283",
+  "pr": {
+    "number": 2283,
+    "title": "Decompile 18 functions (pointer math)",
+    "url": "https://github.com/doldecomp/melee/pull/2283",
+    "state": "MERGED",
+    "author": "johnwinston",
+    "created_at": "2026-03-13T15:22:01Z",
+    "merged_at": "2026-03-13T18:40:49Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2283 decompiled a batch of pointer-math-heavy functions across game-mode, ground/stage, and item code, while also updating several headers and partial struct definitions. The PR body claimed all functions were 100% objdiff matches, but the loaded bot report records 14 new 100% matches plus 5 partial improvements and one unmatched-item .bss regression. Reviewer feedback explicitly called out pervasive raw pointer arithmetic as technical debt and said M2C_FIELD would be preferred over raw pointer arithmetic when real struct definitions are not yet available.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "cleanup",
+      "decomp-matching",
+      "headers",
+      "types-structs",
+      "pointer-math"
+    ],
+    "systems": [
+      "game-mode",
+      "ground-stage",
+      "item"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gm/gmregclear.c",
+      "role": "Decompiled fn_8017F14C and split lbl_80472D28 padding to expose x10A.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gm/gmregclear.c added 22 deleted 2",
+        "raw_diff: gmregclear.c fn_8017F14C implementation and lbl_80472D28_t x10A field"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmregclear.h",
+      "role": "Updated fn_8017F14C prototype from UNK_RET/UNK_PARAMS to s32 fn_8017F14C(void*).",
+      "evidence_refs": [
+        "raw_diff: gmregclear.h prototype change for fn_8017F14C"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmresultplayer.c",
+      "role": "Added globals/externs and implementations for fn_80179F84 and fn_8017A9B4, including HSD_JObj traversal and raw byte-buffer image descriptor setup.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gm/gmresultplayer.c added 75 deleted 3",
+        "raw_diff: gmresultplayer.c fn_80179F84 and fn_8017A9B4"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmresultplayer.h",
+      "role": "Updated prototypes for fn_80179F84 and fn_8017A9B4.",
+      "evidence_refs": [
+        "raw_diff: gmresultplayer.h prototype changes"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grcastle.c",
+      "role": "Decompiled grCastle_801CD960 using a typed castle3 DynamicsDesc array and grCastle_801CF750 using raw offset writes plus PAD_STACK.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gr/grcastle.c added 26 deleted 2",
+        "raw_diff: grcastle.c grCastle_801CD960 and grCastle_801CF750"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grmaterial.c",
+      "role": "Decompiled grMaterial_801C9490, grMaterial_801C9604, and grMaterial_801C9698; added grMaterial_GetOverlay helper wrapping a Ground+0x40 cast.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gr/grmaterial.c added 36 deleted 7",
+        "raw_diff: grmaterial.c grMaterial_GetOverlay and three function implementations"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grmaterial.h",
+      "role": "Updated grMaterial_801C9470 signature and added lb forward include.",
+      "evidence_refs": [
+        "raw_diff: grmaterial.h include and prototype change"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grrcruise.c",
+      "role": "Implemented fn_802010A4 with raw pointer arithmetic over an entry table.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gr/grrcruise.c added 21 deleted 1",
+        "raw_diff: grrcruise.c fn_802010A4"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grrcruise.h",
+      "role": "Updated fn_802010A4 prototype.",
+      "evidence_refs": [
+        "raw_diff: grrcruise.h prototype change"
+      ]
+    },
+    {
+      "path": "src/melee/gr/types.h",
+      "role": "Added grCastle_GroundVars3, Ground.xC0, lb/types include, and castle3 union arm.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gr/types.h added 9 deleted 1",
+        "raw_diff: gr/types.h struct and Ground layout changes"
+      ]
+    },
+    {
+      "path": "src/melee/it/itCommonItems.h",
+      "role": "Added itGShell_HurtInit, expanded itGShell_ItemVars, added itKamexAttributes, and changed pokemon x68/x6C to f32.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/it/itCommonItems.h added 22 deleted 3",
+        "raw_diff: itCommonItems.h item variable and attribute struct changes"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itkamex.c",
+      "role": "Decompiled it_802CA49C, it_802CA6A0, itKamex_UnkMotion1_Phys, and replaced an M2C_FIELD read at 0xE3C with pokemon.x68.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/it/items/itkamex.c added 50 deleted 4",
+        "raw_diff: itkamex.c function implementations and M2C_FIELD replacement"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itzgshell.c",
+      "role": "Decompiled five zgshell functions and replaced one M2C_FIELD store at 0xE0C with zgshell.xE0C.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/it/items/itzgshell.c added 64 deleted 6",
+        "raw_diff: itzgshell.c implementations and xE0C field replacement"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "The PR body scoped the work as 18 functions using pointer math patterns, including M2C_FIELD, raw pointer arithmetic, and u8* casts, across gmresultplayer, grrcruise, itzgshell, itkamex, gmregclear, grmaterial, and grcastle.",
+      "evidence_refs": [
+        "human_pr_text.md: PR summary function list"
+      ]
+    },
+    {
+      "text": "Headers were updated for recovered signatures in gmregclear.h, gmresultplayer.h, grmaterial.h, and grrcruise.h.",
+      "evidence_refs": [
+        "raw_diff: header prototype changes"
+      ]
+    },
+    {
+      "text": "Some pointer math was converted into typed fields or structs, such as itzgshell.xE0C, pokemon.x68/x6C, Ground.xC0, grCastle_GroundVars3.x1C, and itGShell_HurtInit.",
+      "evidence_refs": [
+        "raw_diff: itCommonItems.h, gr/types.h, itkamex.c, itzgshell.c"
+      ]
+    },
+    {
+      "text": "Other implementations retained raw pointer arithmetic and casts, including gmresultplayer buffer access, grRCruise entry traversal, grCastle_801CF750 offset writes, and grMaterial_GetOverlay's Ground+0x40 cast.",
+      "evidence_refs": [
+        "raw_diff: gmresultplayer.c fn_8017A9B4",
+        "raw_diff: grrcruise.c fn_802010A4",
+        "raw_diff: grcastle.c grCastle_801CF750",
+        "raw_diff: grmaterial.c grMaterial_GetOverlay"
+      ]
+    },
+    {
+      "text": "The bot report credited +1576 matched-code bytes, 14 new 100% matches, 5 partial improvements, and one unmatched-item .bss regression in gmresultplayer.",
+      "evidence_refs": [
+        "text_corpus.jsonl: decomp-dev[bot] report for GALE01"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "The PR grouped pointer-math-heavy functions together and explicitly flagged that they may need discussion on match quality versus code style.",
+      "evidence_refs": [
+        "human_pr_text.md: Summary paragraph"
+      ]
+    },
+    {
+      "text": "Several decompiled functions were accompanied by signature/header updates instead of leaving UNK_RET/UNK_PARAMS in the owning headers.",
+      "evidence_refs": [
+        "raw_diff: gmregclear.h, gmresultplayer.h, grmaterial.h, grrcruise.h"
+      ]
+    },
+    {
+      "text": "Some existing M2C_FIELD/raw-offset accesses were replaced with recovered fields in item variable structs, showing partial type recovery alongside matching work.",
+      "evidence_refs": [
+        "raw_diff: itkamex.c M2C_FIELD at 0xE3C replaced by pokemon.x68",
+        "raw_diff: itzgshell.c M2C_FIELD at 0xE0C replaced by zgshell.xE0C"
+      ]
+    },
+    {
+      "text": "Natural loops were used where repeated table/array work was evident, such as iterating 12 castle dynamics entries and 17 rcruise entries.",
+      "evidence_refs": [
+        "raw_diff: grCastle_801CD960 for loop",
+        "raw_diff: fn_802010A4 for loop"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "A PR can make substantial text progress while still creating review debt if many recovered functions keep raw pointer arithmetic instead of improving local structs or using an explicit bridge macro.",
+      "evidence_refs": [
+        "human_pr_text.md: pointer math scope",
+        "ribbanya issuecomment-4057163402: pointer math called technical debt",
+        "ribbanya issuecomment-4057232213: M2C_FIELD preferred over raw pointer arithmetic"
+      ],
+      "scope": [
+        "pointer-math-heavy decomp PRs",
+        "typed-field recovery",
+        "AI-assisted submissions"
+      ]
+    },
+    {
+      "lesson": "Verification claims in the PR body should be checked against bot reports: this PR body says all functions are 100% objdiff matches, while the loaded report shows several partial improvements rather than all listed functions at 100%.",
+      "evidence_refs": [
+        "human_pr_text.md: Test plan claims all functions are 100% matches",
+        "text_corpus.jsonl: bot report lists fn_8017A9B4 94.27%, fn_80179F84 85.00%, fn_802010A4 97.59%, grMaterial_801C9604 97.71%"
+      ],
+      "scope": [
+        "PR intake",
+        "verification-ledger review"
+      ]
+    },
+    {
+      "lesson": "When pointer offsets recur, even partial type recovery can reduce later debt: examples in this PR include replacing M2C_FIELD uses with pokemon.x68 and zgshell.xE0C, and adding small structs for shell hurt initialization and castle dynamics.",
+      "evidence_refs": [
+        "raw_diff: itCommonItems.h itGShell_HurtInit and pokemon x68/x6C type changes",
+        "raw_diff: itkamex.c replacement of M2C_FIELD with pokemon.x68",
+        "raw_diff: itzgshell.c replacement of M2C_FIELD with zgshell.xE0C",
+        "raw_diff: gr/types.h grCastle_GroundVars3"
+      ],
+      "scope": [
+        "item vars",
+        "ground vars",
+        "typed-fields-over-pointer-math"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "The PR mostly kept address-style names for unknown functions and data, such as fn_8017F14C, fn_802010A4, lbl_8046E1B0, and lbl_8046E3AC, while adding narrowly descriptive local or helper names like grMaterial_GetOverlay and itGShell_HurtInit.",
+      "evidence_refs": [
+        "raw_diff: address-style symbols retained",
+        "raw_diff: grMaterial_GetOverlay",
+        "raw_diff: itCommonItems.h itGShell_HurtInit"
+      ]
+    },
+    {
+      "text": "Recovered fields used offset-style names where semantics were not proven, such as x10A, xC0, x68, x6C, and x58_hurtInit.",
+      "evidence_refs": [
+        "raw_diff: gmregclear.c x10A",
+        "raw_diff: gr/types.h xC0",
+        "raw_diff: itCommonItems.h x68/x6C/x58_hurtInit"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "text": "PAD_STACK was used in grCastle_801CF750, it_802CA49C, and it_802DE0F0.",
+      "evidence_refs": [
+        "raw_diff: grCastle_801CF750 PAD_STACK(16)",
+        "raw_diff: it_802CA49C PAD_STACK(16)",
+        "raw_diff: it_802DE0F0 PAD_STACK(8)"
+      ]
+    },
+    {
+      "text": "Raw u8* base pointers and byte offsets were used to match packed or not-yet-typed data layouts, especially in gmresultplayer and grrcruise.",
+      "evidence_refs": [
+        "raw_diff: fn_8017A9B4 base/data/tbl pointer arithmetic",
+        "raw_diff: fn_802010A4 entry pointer arithmetic"
+      ]
+    },
+    {
+      "text": "A small static inline helper, grMaterial_GetOverlay, centralized a repeated Ground+0x40 cast to ColorOverlay.",
+      "evidence_refs": [
+        "raw_diff: grMaterial_GetOverlay and call sites in grMaterial_801C95C4, grMaterial_801C9604, grMaterial_801C9698"
+      ]
+    },
+    {
+      "text": "Natural loops replaced repeated generated-looking operations in HSD_JObj child traversal, castle dynamics initialization, and rcruise table scanning.",
+      "evidence_refs": [
+        "raw_diff: fn_80179F84 loop over 3 next siblings",
+        "raw_diff: grCastle_801CD960 loop over 12 DynamicsDesc entries",
+        "raw_diff: fn_802010A4 loop over 17 entries"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "author": "ribbanya",
+      "text": "Reviewer said the PR could be merged but asked the author to address pervasive generation of pointer math in their workflow, calling it unnecessary technical debt and noting that it was not contributing to struct definitions.",
+      "evidence_refs": [
+        "text_corpus.jsonl: issue_comment by ribbanya at 2026-03-13T18:26:04Z",
+        "https://github.com/doldecomp/melee/pull/2283#issuecomment-4057163402"
+      ]
+    },
+    {
+      "author": "ribbanya",
+      "text": "Reviewer additionally noted no application of M2C_FIELD and said M2C_FIELD would be greatly preferred over raw pointer arithmetic.",
+      "evidence_refs": [
+        "text_corpus.jsonl: issue_comment by ribbanya at 2026-03-13T18:40:24Z",
+        "https://github.com/doldecomp/melee/pull/2283#issuecomment-4057232213"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR 2283",
+    "Decompile 18 functions pointer math",
+    "johnwinston",
+    "ribbanya",
+    "M2C_FIELD",
+    "raw pointer arithmetic",
+    "u8* casts",
+    "technical debt",
+    "struct definitions",
+    "fn_80179F84",
+    "fn_8017A9B4",
+    "fn_802010A4",
+    "fn_8017F14C",
+    "grMaterial_801C9490",
+    "grMaterial_801C9604",
+    "grMaterial_801C9698",
+    "grCastle_801CD960",
+    "grCastle_801CF750",
+    "it_802CA49C",
+    "it_802CA6A0",
+    "itKamex_UnkMotion1_Phys",
+    "it_802DE0F0",
+    "it_2725_Logic11_EnteredAir",
+    "itZrshell_UnkMotion11_Coll",
+    "itZrshell_UnkMotion10_Coll",
+    "it_802DFF14",
+    "grMaterial_GetOverlay",
+    "itGShell_HurtInit",
+    "itKamexAttributes",
+    "grCastle_GroundVars3",
+    "PAD_STACK"
+  ],
+  "follow_up_queries": [
+    "pointer math technical debt M2C_FIELD raw pointer arithmetic",
+    "ribbanya M2C_FIELD preferred over raw pointer arithmetic",
+    "PR 2283 fn_8017A9B4 94.27 fn_80179F84 85.00",
+    "grMaterial_GetOverlay ColorOverlay Ground 0x40",
+    "itGShell_HurtInit x58_hurtInit",
+    "itKamexAttributes pokemon x68 x6C",
+    "grCastle_GroundVars3 DynamicsDesc x1C",
+    "fn_802010A4 rcruise entry raw pointer arithmetic",
+    "PAD_STACK pointer math decomp PR"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "raw/pr.json: PR metadata and body",
+      "human_pr_text.md: PR body and reviewer comments",
+      "raw/diff.diff: full diff",
+      "changed_files.jsonl: changed-file metadata",
+      "text_corpus.jsonl: bot report and comments"
+    ],
+    "notes": [
+      "Changed files and reviewer feedback are well supported by loaded diff and text corpus.",
+      "The PR body claims all functions are 100% objdiff matches, but the loaded bot report lists only 14 new 100% matches plus several partial improvements; intake treats this as mixed verification evidence rather than accepting the body claim wholesale.",
+      "There were no loaded GitHub review comments, only issue comments.",
+      "No independent build, objdiff, or source lookup was run during intake.",
+      "Reviewer comments support a workflow/style lesson about raw pointer arithmetic, but do not identify exact replacements for every raw offset in the diff."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "title": "Pointer-math-heavy matches need type-recovery or explicit bridge-code review",
+        "text": "PR #2283 shows that even mergeable decomp progress can receive reviewer pushback when raw pointer arithmetic is pervasive. Reviewer feedback specifically preferred M2C_FIELD over raw pointer arithmetic and identified pervasive pointer math as technical debt because it does not contribute to struct definitions.",
+        "scope": [
+          "decomp-matching",
+          "pointer math",
+          "type recovery"
+        ],
+        "evidence_refs": [
+          "ribbanya issuecomment-4057163402",
+          "ribbanya issuecomment-4057232213",
+          "raw_diff: raw pointer arithmetic in gmresultplayer, grrcruise, grcastle, grmaterial"
+        ]
+      },
+      {
+        "title": "Check PR-body match claims against bot/report output",
+        "text": "For PR #2283, the PR test plan says all functions are 100% objdiff matches, but the loaded bot report records several functions as partial improvements. Curators should preserve this distinction when using the PR as precedent.",
+        "scope": [
+          "verification",
+          "PR intake",
+          "objdiff claims"
+        ],
+        "evidence_refs": [
+          "human_pr_text.md: Test plan",
+          "text_corpus.jsonl: decomp-dev[bot] report"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Prefer M2C_FIELD bridge code over raw pointer arithmetic when a real field is not yet recovered",
+        "text": "Reviewer feedback in PR #2283 says that when pointer math cannot yet be turned into real fields or structs, M2C_FIELD is greatly preferred over raw pointer arithmetic. This may be worth making explicit as a bridge-code preference under typed-fields-over-pointer-math.",
+        "source_path": null,
+        "scope": [
+          "typed-fields-over-pointer-math",
+          "pointer-math-heavy decomp",
+          "reviewable bridge code"
+        ],
+        "evidence_refs": [
+          "https://github.com/doldecomp/melee/pull/2283#issuecomment-4057232213",
+          "human_pr_text.md: ribbanya M2C_FIELD comment"
+        ],
+        "reason": "Existing standards already prefer real fields over M2C_FIELD/raw pointer arithmetic, but this PR provides review evidence for ordering M2C_FIELD above raw pointer arithmetic as a temporary bridge."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "AI-assisted submissions should be checked for pervasive pointer-math generation",
+        "text": "PR #2283 was generated with Claude Code and reviewer feedback asked the author to address pointer-math generation in their workflow because it was creating technical debt and not contributing to struct definitions.",
+        "source_path": null,
+        "scope": [
+          "AI-assisted decomp submissions",
+          "pointer math",
+          "review workflow"
+        ],
+        "evidence_refs": [
+          "human_pr_text.md: Generated with Claude Code",
+          "https://github.com/doldecomp/melee/pull/2283#issuecomment-4057163402"
+        ],
+        "reason": "Potential workflow guidance; should be curated carefully so it does not overgeneralize beyond the loaded reviewer feedback."
+      }
+    ],
+    "rejection_notes": [
+      "Do not treat every function listed in the PR body as a verified 100% match based only on the body claim; the loaded bot report contradicts that for several functions.",
+      "Do not promote the new struct fields and helper names as canonical path facts from this intake alone; they are PR-local evidence requiring source-corpus validation.",
+      "Do not infer reviewer intent beyond the explicit comments about pointer math, technical debt, struct definitions, and M2C_FIELD preference."
+    ]
+  },
+  "confidence": 0.86,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

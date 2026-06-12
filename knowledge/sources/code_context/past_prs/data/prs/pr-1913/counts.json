@@ -1,0 +1,17 @@
+{
+  "number": 1913,
+  "title": "Remove DEBUG/NDEBUG flags from build script",
+  "state": "MERGED",
+  "createdAt": "2025-09-16T06:07:23Z",
+  "updatedAt": "2025-09-16T06:14:33Z",
+  "mergedAt": "2025-09-16T06:14:28Z",
+  "closedAt": "2025-09-16T06:14:28Z",
+  "author": "BR-",
+  "url": "https://github.com/doldecomp/melee/pull/1913",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 432
+  }
+}

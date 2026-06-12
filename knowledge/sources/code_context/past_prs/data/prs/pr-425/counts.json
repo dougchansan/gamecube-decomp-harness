@@ -1,0 +1,17 @@
+{
+  "number": 425,
+  "title": "Decompile cmsnap",
+  "state": "MERGED",
+  "createdAt": "2022-07-18T07:24:59Z",
+  "updatedAt": "2022-07-27T11:11:11Z",
+  "mergedAt": "2022-07-27T11:11:11Z",
+  "closedAt": "2022-07-27T11:11:11Z",
+  "author": "runlava",
+  "url": "https://github.com/doldecomp/melee/pull/425",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 4584
+  }
+}

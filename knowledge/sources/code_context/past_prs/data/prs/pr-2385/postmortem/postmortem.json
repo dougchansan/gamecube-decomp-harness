@@ -1,0 +1,369 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2385",
+  "pr": {
+    "number": 2385,
+    "title": "pltrick work",
+    "url": "https://github.com/doldecomp/melee/pull/2385",
+    "state": "MERGED",
+    "author": "sadkellz",
+    "created_at": "2026-04-04T01:57:30Z",
+    "merged_at": "2026-04-04T02:06:18Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2385 decompiled and typed several pltrick/player-stat paths, adding implementations for pltrick functions, tightening related prototypes, and refining fighter/player structs to expose bitfields and a float field. The bot report records new matches for fn_80037F00 and pl_80038628 plus near-complete improvements for pl_80037C60, pl_80038144, and pl_800384DC.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "type-recovery",
+      "prototype-cleanup"
+    ],
+    "systems": [
+      "fighter",
+      "player",
+      "pltrick",
+      "plbonuslib"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/pl/pltrick.c",
+      "role": "Main decomp work: added includes, static helper declaration, pl_803BCE70 table, implementations for pl_80037C60, fn_80037F00, pl_80038144, pl_800384DC, and pl_80038628, plus a local inline wrapper for pl_80037BC0.",
+      "evidence_refs": [
+        "raw_diff: src/melee/pl/pltrick.c hunks",
+        "text_corpus: decomp-dev bot report"
+      ]
+    },
+    {
+      "path": "src/melee/pl/pltrick.h",
+      "role": "Header updated from UNK_RET/UNK_PARAMS or incomplete prototypes to typed signatures for recovered pltrick functions.",
+      "evidence_refs": [
+        "raw_diff: src/melee/pl/pltrick.h hunk"
+      ]
+    },
+    {
+      "path": "src/melee/ft/types.h",
+      "role": "Type recovery for fighter-related bitfields: Struct2074 x2084 became a union with byte bitfields, and ft_800898B4_t bitfields changed from u32 to u8.",
+      "evidence_refs": [
+        "raw_diff: src/melee/ft/types.h hunks"
+      ]
+    },
+    {
+      "path": "src/melee/pl/types.h",
+      "role": "Refined pl_804D6470_t layout by exposing float x14 after shrinking padding.",
+      "evidence_refs": [
+        "raw_diff: src/melee/pl/types.h hunk"
+      ]
+    },
+    {
+      "path": "src/melee/pl/plbonuslib.c",
+      "role": "Adjusted several plbonuslib function signatures to carry an additional int argument and removed one PAD_STACK in pl_8003ED0C.",
+      "evidence_refs": [
+        "raw_diff: src/melee/pl/plbonuslib.c hunks"
+      ]
+    },
+    {
+      "path": "src/melee/pl/plbonuslib.h",
+      "role": "Synchronized plbonuslib prototypes with body signature changes.",
+      "evidence_refs": [
+        "raw_diff: src/melee/pl/plbonuslib.h hunks"
+      ]
+    },
+    {
+      "path": "src/melee/pl/pl_040D.c",
+      "role": "Changed unused UNK_T parameters to int for pl_80040FBC and pl_800410F4.",
+      "evidence_refs": [
+        "raw_diff: src/melee/pl/pl_040D.c hunks"
+      ]
+    },
+    {
+      "path": "src/melee/pl/pl_040D.h",
+      "role": "Synchronized pl_040D prototypes with int parameter changes.",
+      "evidence_refs": [
+        "raw_diff: src/melee/pl/pl_040D.h hunk"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Implemented fn_80037F00 as a static helper in pltrick.c, updating fighter damage event state, percent snapshot, magnify/status flags, knockback-threshold behavior via pl_804D6470_t.x14, victim checks through ft_80089914, and x10_b7 marking.",
+    "Implemented pl_80038628, including an HSD_ASSERT on kind range 1..0x10, lookup through new pl_803BCE70[16], and ftData_80085FD4(...)->x8 gating.",
+    "Added partial or near-matching implementations for pl_80037C60, pl_80038144, and pl_800384DC involving attack/hit stat counters, Struct2070 event decoding, team/stale-move calls, and bonuslib/pl_040D calls.",
+    "Added a static inline pl_80037BC0_inline wrapper that forwards to pl_80037BC0 and is used from the new pltrick implementations.",
+    "Updated pltrick.h prototypes, removing UNK_RET/UNK_PARAMS for recovered signatures and typing pl_80038144 arguments including ft_800898B4_t* and u16 attack_instance.",
+    "Updated related plbonuslib and pl_040D function signatures and headers to pass player slot/team-like int arguments used by the new pltrick call sites.",
+    "Recovered field access in ft/types.h and pl/types.h by exposing bitfields and pl_804D6470_t.x14 instead of leaving opaque words or padding.",
+    "Bot report recorded +756 matched-code bytes, +8 matched-data bytes, 3 new matches, and 4 unmatched-item improvements."
+  ],
+  "smart_moves": [
+    {
+      "text": "Body/header synchronization was done alongside decompilation: pltrick.h, plbonuslib.h, and pl_040D.h were updated to match recovered function bodies and call sites.",
+      "evidence_refs": [
+        "raw_diff: pltrick.h, plbonuslib.h, pl_040D.h"
+      ]
+    },
+    {
+      "text": "The PR used recovered struct fields and bitfields to express event flags and table data, enabling readable accesses such as fp->x2074.x2084_b7, ev_data->x10_b7, and table->x14.",
+      "evidence_refs": [
+        "raw_diff: ft/types.h",
+        "raw_diff: pl/types.h",
+        "raw_diff: pltrick.c"
+      ]
+    },
+    {
+      "text": "The PR kept fn_80037F00 source-local by declaring it static after replacing the placeholder, avoiding a public header declaration for a helper not shown as externally needed.",
+      "evidence_refs": [
+        "raw_diff: pltrick.c static fn_80037F00",
+        "raw_diff: pltrick.h removed fn_80037F00 public prototype"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When recovering a function that needs additional caller context, update the callee body and owning header together, then adjust new call sites to pass the recovered argument list.",
+      "scope": [
+        "src/melee/pl/pltrick.c",
+        "src/melee/pl/plbonuslib.c",
+        "src/melee/pl/plbonuslib.h",
+        "src/melee/pl/pl_040D.c",
+        "src/melee/pl/pl_040D.h"
+      ],
+      "evidence_refs": [
+        "raw_diff: plbonuslib signature changes",
+        "raw_diff: pl_040D signature changes",
+        "raw_diff: pltrick.c call sites"
+      ]
+    },
+    {
+      "lesson": "Typed bitfields can make decompiled fighter event/status code more direct than raw word access when individual flag bits are used throughout the recovered functions.",
+      "scope": [
+        "src/melee/ft/types.h",
+        "src/melee/pl/pltrick.c"
+      ],
+      "evidence_refs": [
+        "raw_diff: Struct2074 x2084 union bitfields",
+        "raw_diff: ft_800898B4_t u8 bitfields",
+        "raw_diff: pltrick.c x2084_b7 and x10/x11 flag accesses"
+      ]
+    },
+    {
+      "lesson": "Opaque padding can be narrowed when a recovered function proves a specific field access, as with pl_804D6470_t.x14 used for a knockback threshold in fn_80037F00.",
+      "scope": [
+        "src/melee/pl/types.h",
+        "src/melee/pl/pltrick.c"
+      ],
+      "evidence_refs": [
+        "raw_diff: pl/types.h x14 field",
+        "raw_diff: fn_80037F00 table->x14"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Address-style function names were retained for unresolved player/pltrick functions, while local variable names describe roles where apparent, such as attacker_fp, victim_fp, ev_data, attack_instance, source_ply, stale_moves, and attacked_from_behind.",
+      "evidence_refs": [
+        "raw_diff: pltrick.c",
+        "raw_diff: plbonuslib.c"
+      ]
+    },
+    {
+      "convention": "Recovered fields retained offset-style names where semantics were not fully proven, such as x2084_b7, x10_b7, x11_b4, and x14.",
+      "evidence_refs": [
+        "raw_diff: ft/types.h",
+        "raw_diff: pl/types.h"
+      ]
+    },
+    {
+      "convention": "Function prototype parameters moved away from UNK_T/UNK_PARAMS when body and call-site evidence supported concrete int, s32, u16, pointer, and Fighter_GObj/HSD_GObj types.",
+      "evidence_refs": [
+        "raw_diff: pltrick.h",
+        "raw_diff: pl_040D.h",
+        "raw_diff: plbonuslib.h"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Used PAD_STACK in fn_80037F00 and pl_80038144/pl_800384DC, while removing PAD_STACK(8) from pl_8003ED0C.",
+      "evidence_refs": [
+        "raw_diff: pltrick.c PAD_STACK(8) and PAD_STACK(16)",
+        "raw_diff: plbonuslib.c removed PAD_STACK(8)"
+      ],
+      "notes": "The PR evidence shows tactic use but does not include author explanation; bot output confirms function-level matching/progress, not the exact necessity of each PAD_STACK."
+    },
+    {
+      "tactic": "Used a volatile local in pl_80037C60 for prev2070_word with an inline source comment noting stack misalignment and uncertainty about an inline.",
+      "evidence_refs": [
+        "raw_diff: pl_80037C60 volatile s32 prev2070_word and comment"
+      ],
+      "notes": "This is explicitly marked uncertain in-source and should not be generalized as preferred style."
+    },
+    {
+      "tactic": "Added a local static inline wrapper around pl_80037BC0 and called the wrapper from newly recovered functions.",
+      "evidence_refs": [
+        "raw_diff: pl_80037BC0_inline",
+        "raw_diff: pl_80038144 and pl_800384DC call sites"
+      ],
+      "notes": "Evidence shows the wrapper exists; no review or author note explains why it was required."
+    },
+    {
+      "tactic": "Recovered table/data participation for pl_803BCE70 and .sdata2/.data progress in pltrick.",
+      "evidence_refs": [
+        "raw_diff: pl_803BCE70[16]",
+        "text_corpus: bot report .sdata2 100% and .data 80.65%"
+      ],
+      "notes": "The bot report supports data-section progress; ownership rationale is not described in PR text."
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "automated_report",
+      "author": "decomp-dev[bot]",
+      "text": "Report for GALE01 showed matched code 61.83% (+0.02%, +756 bytes), matched data 37.87% (+0.00%, +8 bytes), 3 new matches, and 4 improvements in unmatched pltrick items.",
+      "evidence_refs": [
+        "text_corpus: issue_comment decomp-dev[bot] 2026-04-04T02:02:22Z"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2385",
+    "pltrick work",
+    "sadkellz",
+    "src/melee/pl/pltrick.c",
+    "src/melee/pl/pltrick.h",
+    "src/melee/ft/types.h",
+    "src/melee/pl/types.h",
+    "pl_80037C60",
+    "fn_80037F00",
+    "pl_80038144",
+    "pl_800384DC",
+    "pl_80038628",
+    "pl_803BCE70",
+    "pl_8003ED0C",
+    "pl_8003FE40",
+    "pl_8003FE64",
+    "pl_80040D8C",
+    "pl_80040FBC",
+    "pl_800410F4",
+    "ft_800898B4_t",
+    "Struct2074",
+    "x2084_b7",
+    "x10_b7",
+    "pl_804D6470_t",
+    "x14",
+    "PAD_STACK",
+    "volatile prev2070_word",
+    "HSD_ASSERT",
+    "ftData_80085FD4",
+    "ifMagnify_802FB6E8"
+  ],
+  "follow_up_queries": [
+    "Find later PRs touching pl_80037C60 stack misalignment or volatile prev2070_word",
+    "Find later PRs completing pl_80038144 or pl_800384DC after 96% progress",
+    "Search pl_803BCE70 data ownership and symbol metadata in pltrick",
+    "Search ft_800898B4_t bitfield changes and x10_b7/x11_b* usage",
+    "Search pl_804D6470_t.x14 naming or semantic recovery",
+    "Search PAD_STACK uses in src/melee/pl/pltrick.c after PR 2385"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json",
+      "raw_diff",
+      "changed_files.jsonl",
+      "text_corpus.jsonl"
+    ],
+    "notes": [
+      "PR body is empty and there are no human review comments in the loaded slice.",
+      "Automated bot report provides concrete match/progress evidence, including exact matched bytes and per-item percentages.",
+      "Diff supports changed files, signatures, struct field recovery, and tactic usage, but does not prove author intent for PAD_STACK, volatile, inline wrapper, or data ownership choices.",
+      "Some functions were improved but not fully matched according to the bot report: pl_80038144 at 96.90%, pl_80037C60 at 99.98%, and pl_800384DC at 96.77%."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "type": "lesson_candidate",
+        "title": "Typed bitfields helped pltrick event-flag decompilation",
+        "text": "PR 2385 changed ft/types.h to expose byte-sized bitfields in Struct2074 and ft_800898B4_t, then used those fields in pltrick implementations such as fp->x2074.x2084_b7 and ev_data->x10_b7. This is a concrete instance supporting the existing typed-fields-over-pointer-math standard.",
+        "scope": [
+          "src/melee/ft/types.h",
+          "src/melee/pl/pltrick.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: ft/types.h bitfield changes",
+          "raw_diff: pltrick.c bitfield accesses"
+        ]
+      },
+      {
+        "type": "lesson_candidate",
+        "title": "Recovered pltrick signatures required synchronized caller and header updates",
+        "text": "PR 2385 updated prototypes in pltrick.h, plbonuslib.h, and pl_040D.h while changing bodies and pltrick call sites to use concrete int/s32/u16/pointer parameters instead of UNK_T/UNK_PARAMS placeholders.",
+        "scope": [
+          "src/melee/pl/pltrick.h",
+          "src/melee/pl/plbonuslib.h",
+          "src/melee/pl/pl_040D.h"
+        ],
+        "evidence_refs": [
+          "raw_diff: header and body signature changes"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "PR 2385 pltrick match/progress facts",
+        "text": "For src/melee/pl/pltrick.c, PR 2385 added implementations/progress for pl_80037C60, fn_80037F00, pl_80038144, pl_800384DC, and pl_80038628. The bot report recorded fn_80037F00 and pl_80038628 as new 100% matches, plus pl_80038144 at 96.90%, pl_80037C60 at 99.98%, and pl_800384DC at 96.77%.",
+        "source_path": "src/melee/pl/pltrick.c",
+        "scope": [
+          "pl_80037C60",
+          "fn_80037F00",
+          "pl_80038144",
+          "pl_800384DC",
+          "pl_80038628"
+        ],
+        "evidence_refs": [
+          "raw_diff: src/melee/pl/pltrick.c",
+          "text_corpus: decomp-dev bot report"
+        ],
+        "reason": "Useful path-specific historical progress fact; should be curated rather than promoted directly by intake."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "pltrick related type recovery in PR 2385",
+        "text": "PR 2385 exposed Struct2074.x2084 bitfields, changed ft_800898B4_t bitfields to u8, and added pl_804D6470_t.x14 as a float used by fn_80037F00.",
+        "source_path": null,
+        "scope": [
+          "src/melee/ft/types.h",
+          "src/melee/pl/types.h",
+          "src/melee/pl/pltrick.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: ft/types.h",
+          "raw_diff: pl/types.h",
+          "raw_diff: fn_80037F00 table->x14"
+        ],
+        "reason": "Potentially useful type-history fact for future work on fighter damage event data and pl table layout."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that PAD_STACK or volatile locals are generally acceptable from this PR; the only explicit source comment says pl_80037C60 stack is still misaligned and the inline hypothesis is uncertain.",
+      "Do not treat pl_80038144, pl_80037C60, or pl_800384DC as fully matched based on this slice; the bot report lists them as improvements below 100%.",
+      "Do not infer semantic names for x10_b*, x11_b*, x2084_b*, or x14 beyond the offset-style names shown in the diff.",
+      "Do not infer human reviewer approval rationale; the loaded slice contains no human review comments."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

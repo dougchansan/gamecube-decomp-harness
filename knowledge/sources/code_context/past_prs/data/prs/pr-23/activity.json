@@ -1,0 +1,10 @@
+{
+  "pr": 23,
+  "title": "Split MetroTRK and Dolphin SDK code from the CW stdlib, split player.s from text_1",
+  "url": "https://github.com/doldecomp/melee/pull/23",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 7,
+  "added_lines": 915817,
+  "deleted_lines": 915788
+}

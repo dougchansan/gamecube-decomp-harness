@@ -1,12 +1,14 @@
 import { randomUUID } from "node:crypto";
 import { resolve } from "node:path";
-import { loadKnowledgeBoardSnapshot, resourceGraphDbPath } from "@decomp-orchestrator/knowledge";
+import { loadKnowledgeBoardSnapshot, packageRoot, resourceGraphDbPath } from "@decomp-orchestrator/knowledge";
 import {
   activeWorkerCount,
   addEvent,
   blockedQueuedTargetCount,
+  DEFAULT_WORKER_TTL_SECONDS,
   getLatestRun,
   getRun,
+  listSavePoints,
   nextUnhandledEvent,
   openState,
   queuedTargetCount,
@@ -18,6 +20,8 @@ import {
   type StateStore,
 } from "@decomp-orchestrator/core/state";
 import { withBusyRetry } from "@decomp-orchestrator/core/state/db";
+import { runEpochCycle, type EpochCycleResult } from "@decomp-orchestrator/core/epoch";
+import { runPiAgent } from "@decomp-orchestrator/agents/runtime";
 import { booleanArg, numberArg, stringArg, workerReportTypeArg, type GlobalArgs } from "../args.js";
 import { assertSchedulableRun } from "./shared.js";
 import { runDirectorTick, type DirectorTickResult } from "./tick.js";
@@ -30,6 +34,10 @@ interface WorkerError {
 }
 
 interface KnowledgeMaintenanceError {
+  error: string;
+}
+
+interface EpochError {
   error: string;
 }
 
@@ -86,6 +94,11 @@ export interface TriggerAgentResult {
   desiredWorkers: number;
   maxWorkers: number;
   directorTicks: number;
+  epochCycle: boolean;
+  epochCycles: number;
+  epochErrors: EpochError[];
+  epochPaused: boolean;
+  lastEpoch?: EpochCycleResult;
   queueRefills: number;
   queuePriorityRefreshes: number;
   queueTargetsAdded: number;
@@ -93,6 +106,9 @@ export interface TriggerAgentResult {
   workersStarted: number;
   workerResults: WorkerCycleResult[];
   workerErrors: WorkerError[];
+  providerPauses: number;
+  providerPaused: boolean;
+  lastProviderError?: string;
   knowledgeMaintenanceRuns: Record<string, unknown>[];
   knowledgeMaintenanceErrors: KnowledgeMaintenanceError[];
   dryRun: boolean;
@@ -108,6 +124,41 @@ export interface TriggerAgentResult {
 function sleep(ms: number): Promise<void> {
   if (ms <= 0) return Promise.resolve();
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+const PROVIDER_PROBE_INITIAL_BACKOFF_MS = 30_000;
+const PROVIDER_PROBE_MAX_BACKOFF_MS = 300_000;
+
+// Cheapest truthful health check: a tiny no-tools session through the exact provider
+// path workers use. An LB liveness endpoint can say "ok" while its upstream account
+// pool is exhausted; a completion can't lie.
+async function probeProvider(globals: GlobalArgs, outputDir: string): Promise<{ healthy: boolean; error?: string }> {
+  try {
+    const result = await runPiAgent({
+      role: "worker",
+      cwd: globals.repoRoot,
+      prompt: {
+        systemPrompt: "You are a connectivity probe. Reply with the single word OK.",
+        userPrompt: "Reply with the single word OK.",
+        systemTemplatePath: "(provider-probe inline)",
+        userTemplatePath: "(provider-probe inline)",
+      },
+      outputDir,
+      dryRun: false,
+      provider: globals.provider,
+      model: globals.model,
+      thinkingLevel: "low",
+      timeoutMs: 120_000,
+      sessionDir: outputDir,
+      toolProfile: { replace: [] },
+    });
+    if (result.failed) return { healthy: false, error: result.error ?? "probe session failed" };
+    if (result.providerError) return { healthy: false, error: result.providerError };
+    if (!result.rawText.trim()) return { healthy: false, error: "probe returned empty output" };
+    return { healthy: true };
+  } catch (error) {
+    return { healthy: false, error: error instanceof Error ? error.message : String(error) };
+  }
 }
 
 function orchestratorRoot(): string {
@@ -383,12 +434,34 @@ function knowledgeMaintenanceIntervalMs(globals: GlobalArgs, args: Map<string, s
   return Math.max(0, Math.floor(numberArg(args, "--knowledge-maintenance-interval-ms", fallback)));
 }
 
-async function waitForRestingTrigger(runningWorkers: Set<Promise<void>>, idleSleepMs: number): Promise<void> {
-  if (runningWorkers.size === 0) {
+/** Completed leases (any worker report except provider_error) after the given time. */
+function completedLeaseCountSince(store: StateStore, runId: string, sinceIso: string): number {
+  const row = withBusyRetry(
+    () =>
+      store.db
+        .query(
+          `
+            SELECT COUNT(*) AS count
+            FROM worker_reports
+            JOIN leases ON leases.id = worker_reports.lease_id
+            JOIN queue ON queue.id = leases.queue_id
+            WHERE queue.run_id = ?
+              AND worker_reports.report_type != 'provider_error'
+              AND worker_reports.created_at > ?
+          `,
+        )
+        .get(runId, sinceIso) as Record<string, unknown> | undefined,
+  );
+  return Number(row?.count ?? 0);
+}
+
+async function waitForRestingTrigger(runningWorkers: Set<Promise<void>>, idleSleepMs: number, extras: Array<Promise<void> | null> = []): Promise<void> {
+  const live = [...runningWorkers, ...extras.filter((task): task is Promise<void> => task != null)];
+  if (live.length === 0) {
     await sleep(idleSleepMs);
     return;
   }
-  await Promise.race([sleep(idleSleepMs), ...runningWorkers]);
+  await Promise.race([sleep(idleSleepMs), ...live]);
 }
 
 function directorTickArgs(
@@ -468,6 +541,7 @@ async function runWorkerProcess(
     postReturnCheckCommand: string;
     graphDbPath: string;
   },
+  procRegistry?: Set<{ kill: (signal?: number) => void; exited: Promise<number> }>,
 ): Promise<WorkerCycleResult> {
   const command = workerCommand(globals, params);
   const proc = Bun.spawn(command, {
@@ -475,6 +549,8 @@ async function runWorkerProcess(
     stdout: "pipe",
     stderr: "pipe",
   });
+  procRegistry?.add(proc);
+  void proc.exited.finally(() => procRegistry?.delete(proc));
   const stdoutPromise = new Response(proc.stdout).text();
   const stderrPromise = new Response(proc.stderr).text();
   const [stdout, stderr, exitCode] = await Promise.all([stdoutPromise, stderrPromise, proc.exited]);
@@ -498,6 +574,7 @@ export async function runTriggerAgent(globals: GlobalArgs, args: Map<string, str
   const knowledgeMaintenanceErrors: KnowledgeMaintenanceError[] = [];
   const runningWorkers = new Set<Promise<void>>();
   const runningWorkerIds = new Set<string>();
+  const runningWorkerProcs = new Set<{ kill: (signal?: number) => void; exited: Promise<number> }>();
   let runningDirector: Promise<void> | null = null;
   let runningKnowledgeMaintenance: Promise<void> | null = null;
   let stoppedReason = "running";
@@ -506,6 +583,12 @@ export async function runTriggerAgent(globals: GlobalArgs, args: Map<string, str
   let idleIterations = 0;
   let workersStarted = 0;
   let workerOrdinal = 0;
+  let providerPausedSinceMs: number | null = null;
+  let providerPauses = 0;
+  let lastProviderError: string | undefined;
+  let providerProbeBackoffMs = PROVIDER_PROBE_INITIAL_BACKOFF_MS;
+  let nextProviderProbeMs = 0;
+  let runningProviderProbe: Promise<void> | null = null;
   const stop = () => {
     stopRequested = true;
     stoppedReason = "signal";
@@ -524,7 +607,14 @@ export async function runTriggerAgent(globals: GlobalArgs, args: Map<string, str
     const maxIterations = booleanArg(args, "--once") ? 1 : numberArg(args, "--max-iterations", 0);
     const maxIdleIterations = numberArg(args, "--max-idle-iterations", 0);
     const idleSleepMs = numberArg(args, "--idle-sleep-ms", 5_000);
-    const maxWorkers = Math.max(0, Math.min(run.desiredWorkers, numberArg(args, "--max-workers", run.desiredWorkers)));
+    const requestedMaxWorkers = numberArg(args, "--max-workers", run.desiredWorkers);
+    const maxWorkers = Math.max(0, Math.min(run.desiredWorkers, requestedMaxWorkers));
+    if (requestedMaxWorkers > run.desiredWorkers) {
+      console.error(
+        `[trigger-agent] --max-workers ${requestedMaxWorkers} exceeds run desired_workers ${run.desiredWorkers}; clamping to ${maxWorkers}. ` +
+          `Raise the run's desired_workers (or re-init with --desired-workers) to use the full pool.`,
+      );
+    }
     const candidateLimit = nonNegativeInt(numberArg(args, "--candidate-limit", globals.project?.dashboard.candidateLimit ?? Math.max(32, maxWorkers * 2)));
     const queueTargetSize = nonNegativeInt(
       numberArg(args, "--queue-target-size", globals.project?.dashboard.queueTargetSize ?? Math.max(candidateLimit, maxWorkers * 2)),
@@ -536,7 +626,7 @@ export async function runTriggerAgent(globals: GlobalArgs, args: Map<string, str
     );
     const reportType = workerReportTypeArg(args, "--report-type", "stalled_no_useful_guess");
     const baseRev = stringArg(args, "--base-rev", "unknown");
-    const ttlSeconds = numberArg(args, "--ttl-seconds", 60 * 60);
+    const ttlSeconds = numberArg(args, "--ttl-seconds", DEFAULT_WORKER_TTL_SECONDS);
     const repairAttempts = Math.max(0, Math.trunc(numberArg(args, "--repair-attempts", globals.dryRunAgents ? 0 : 2)));
     const postReturnCheckCommand = stringArg(args, "--post-return-check-command", "");
     const graphDbPath = stringArg(args, "--graph-db", globals.graphDbPath ?? resourceGraphDbPath());
@@ -544,6 +634,35 @@ export async function runTriggerAgent(globals: GlobalArgs, args: Map<string, str
     const workerThinkingLevel = stringArg(args, "--worker-thinking-level", globals.thinkingLevel);
     const maintenanceIntervalMs = knowledgeMaintenanceIntervalMs(globals, args);
     const policy = replanPolicy(args, { maxWorkers, queueTargetSize });
+    const epochCycleEnabled = !booleanArg(args, "--no-epoch-cycle");
+    const epochWorktreeDir = stringArg(args, "--epoch-worktree", resolve(globals.stateDir, "epoch_worktree"));
+    const epochConfigureCommand = stringArg(args, "--epoch-configure-command", "python3 configure.py --require-protos");
+    const epochLinkPaths = stringArg(args, "--epoch-link-paths", "orig")
+      .split(",")
+      .map((path) => path.trim())
+      .filter(Boolean);
+    const epochPauseThreshold = nonNegativeInt(numberArg(args, "--epoch-regression-pause-threshold", 12));
+    const epochRequeueLimit = nonNegativeInt(numberArg(args, "--epoch-regression-requeue-limit", 32));
+    const epochRetryMs = nonNegativeInt(numberArg(args, "--epoch-retry-ms", 10 * 60_000));
+    // Checkpoint cadence in completed leases. The queue keeps topping up from
+    // the board (watermark refill) and the epoch runs every N completions;
+    // 0 restores the legacy drain-to-zero mode, where inserts happen only
+    // after a checkpoint. Drain-to-zero starves on live runs: the director
+    // tops the queue up faster than it empties, so the epoch never fires.
+    // Default scales with pool size — 4 full worker rotations per checkpoint —
+    // so bigger pools don't checkpoint proportionally more often.
+    const epochLeaseInterval = nonNegativeInt(numberArg(args, "--epoch-lease-interval", maxWorkers * 4));
+    // Seed from the DB so a pool restart resumes the countdown instead of
+    // resetting it — otherwise frequent restarts could postpone checkpoints
+    // indefinitely.
+    const lastEpochSavePoint = listSavePoints(store, 200).find((savePoint) => savePoint.triggerKind === "epoch");
+    let completionsSinceEpoch = completedLeaseCountSince(store, runId, lastEpochSavePoint?.createdAt ?? run.createdAt);
+    let runningEpoch: Promise<void> | null = null;
+    let nextEpochAllowedMs = 0;
+    let epochCycles = 0;
+    let epochPaused = false;
+    let lastEpoch: EpochCycleResult | undefined;
+    const epochErrors: EpochError[] = [];
     let queueRefills = 0;
     let queuePriorityRefreshes = 0;
     let queueTargetsAdded = 0;
@@ -586,41 +705,190 @@ export async function runTriggerAgent(globals: GlobalArgs, args: Map<string, str
         store,
       });
       const nowMs = Date.now();
-      const refillNeeded = shouldAttemptQueueRefill(beforeRefill, policy);
-      const refreshDue = queueRefreshIntervalMs > 0 && beforeRefill.queuedTargets > 0 && nowMs - lastQueueRefreshMs >= queueRefreshIntervalMs;
-      const refill = refillQueueFromBoard({ forceRefresh: refreshDue, globals, graphDbPath, policy, runId, snapshot: beforeRefill, store });
-      if (refill) {
-        if (refillNeeded) queueRefills += 1;
-        if (refill.refreshed > 0) queuePriorityRefreshes += refill.refreshed;
-        queueTargetsAdded += refill.inserted;
-        if (refillNeeded) lastQueueRefill = refill;
-        if (refreshDue) lastQueueRefreshMs = nowMs;
-        if (refill.inserted > 0 || refill.refreshed > 0) didWork = true;
+      const launchEpochCycle = (trigger: string): void => {
+        const epochOrdinal = epochCycles + 1;
+        let task: Promise<void>;
+        task = (async () => {
+            try {
+              if (globals.dryRunAgents) {
+                // Dry runs skip the snapshot/build and refill straight from the
+                // current board so the pool keeps cycling in tests.
+                epochCycles += 1;
+                completionsSinceEpoch = 0;
+              } else {
+                console.error(`[trigger-agent] epoch ${epochOrdinal}: ${trigger}; snapshotting and rebuilding report`);
+                const result = await runEpochCycle(store, runId, globals.repoRoot, globals.stateDir, {
+                  baseRef: globals.project?.baseRef,
+                  configureCommand: epochConfigureCommand,
+                  label: `epoch-${epochOrdinal}`,
+                  linkPaths: epochLinkPaths,
+                  projectId: globals.project?.projectId ?? globals.projectId ?? null,
+                  qaScan: { orchestratorRoot: packageRoot() },
+                  regressionPauseThreshold: epochPauseThreshold,
+                  regressionRequeueLimit: epochRequeueLimit,
+                  reportRelPath: globals.project?.validation.reportPath,
+                  reportChangesRelPath: globals.project?.validation.reportChangesPath,
+                  worktreeDir: epochWorktreeDir,
+                });
+                epochCycles += 1;
+                lastEpoch = result;
+                epochPaused = result.repair.paused;
+                if (!result.repair.paused) completionsSinceEpoch = 0;
+                console.error(
+                  `[trigger-agent] epoch ${epochOrdinal}: matched_code ${result.matchedCodePercent ?? "?"}%, ` +
+                    `${result.regressions.regressedFunctions} regressed functions, ${result.repair.requeued} repairs requeued, ` +
+                    `qa gate ${result.qaGate === null ? "not run" : `${result.qaGate.status} (${result.qaGate.errors} errors, ${result.qaGate.warnings} warnings)`} ` +
+                    `(${Math.round(result.durationMs / 1000)}s)`,
+                );
+                if (result.repair.paused) {
+                  addEvent(store, runId, "epoch_regression_pause", "trigger-agent", {
+                    epoch: epochOrdinal,
+                    qa_gate: result.qaGate,
+                    reasons: result.repair.reasons,
+                    regressions: result.regressions,
+                    save_point_id: result.savePointId,
+                    created_by: "trigger-agent",
+                  });
+                  console.error(`[trigger-agent] epoch ${epochOrdinal}: paused on regressions; retrying in ${Math.round(epochRetryMs / 1000)}s`);
+                  nextEpochAllowedMs = Date.now() + epochRetryMs;
+                  return;
+                }
+              }
+              const refillSnapshot = queueSnapshot({
+                candidateLimit,
+                candidateWindow,
+                maxWorkers,
+                queueTargetSize,
+                runningWorkers,
+                runningWorkerIds,
+                runId,
+                store,
+              });
+              const epochRefill = refillQueueFromBoard({ forceRefresh: true, globals, graphDbPath, policy, runId, snapshot: refillSnapshot, store });
+              if (epochRefill) {
+                queueRefills += 1;
+                queueTargetsAdded += epochRefill.inserted;
+                lastQueueRefill = epochRefill;
+                if (epochRefill.queuedAfter === 0) {
+                  // Board exhausted: hand the long tail to the director and back
+                  // off instead of rebuilding the report in a tight loop.
+                  if (unhandledPoolEventCount(store, runId) === 0) {
+                    writeReplanEvent(store, runId, { reason: "queue_refill_exhausted", longTailSinceMs: null }, refillSnapshot, policy, epochRefill);
+                  }
+                  nextEpochAllowedMs = Date.now() + epochRetryMs;
+                }
+              }
+            } catch (error) {
+              const message = error instanceof Error ? error.message : String(error);
+              epochErrors.push({ error: message });
+              console.error(`[trigger-agent] epoch ${epochOrdinal} failed: ${message}`);
+              addEvent(store, runId, "epoch_cycle_error", "trigger-agent", {
+                epoch: epochOrdinal,
+                error: message.slice(0, 2000),
+                created_by: "trigger-agent",
+              });
+              nextEpochAllowedMs = Date.now() + epochRetryMs;
+            }
+        })().finally(() => {
+          if (runningEpoch === task) runningEpoch = null;
+        });
+        runningEpoch = task;
+      };
+
+      if (epochCycleEnabled && epochLeaseInterval === 0) {
+        // Legacy epoch mode: the queue is a batch that only drains. Queued
+        // priorities still refresh periodically, but inserts happen only in
+        // the epoch pipeline, after the report has been rebuilt.
+        const refreshDue = queueRefreshIntervalMs > 0 && beforeRefill.queuedTargets > 0 && nowMs - lastQueueRefreshMs >= queueRefreshIntervalMs;
+        if (refreshDue) {
+          const board = loadKnowledgeBoardSnapshot(globals.repoRoot, candidateWindow, { graphDbPath });
+          const refreshOnly = refillQueuedTargets(store, runId, board.candidates, { targetSize: 0, minSchedulableSources: 0 });
+          lastQueueRefreshMs = nowMs;
+          if (refreshOnly.refreshed > 0) {
+            queuePriorityRefreshes += refreshOnly.refreshed;
+            didWork = true;
+          }
+        }
+        if (beforeRefill.queuedTargets === 0 && !runningEpoch && nowMs >= nextEpochAllowedMs) {
+          didWork = true;
+          launchEpochCycle("queue drained");
+        }
+      } else {
+        const refillNeeded = shouldAttemptQueueRefill(beforeRefill, policy);
+        const refreshDue = queueRefreshIntervalMs > 0 && beforeRefill.queuedTargets > 0 && nowMs - lastQueueRefreshMs >= queueRefreshIntervalMs;
+        const refill = refillQueueFromBoard({ forceRefresh: refreshDue, globals, graphDbPath, policy, runId, snapshot: beforeRefill, store });
+        if (refill) {
+          if (refillNeeded) queueRefills += 1;
+          if (refill.refreshed > 0) queuePriorityRefreshes += refill.refreshed;
+          queueTargetsAdded += refill.inserted;
+          if (refillNeeded) lastQueueRefill = refill;
+          if (refreshDue) lastQueueRefreshMs = nowMs;
+          if (refill.inserted > 0 || refill.refreshed > 0) didWork = true;
+        }
+
+        const replanSnapshot = queueSnapshot({
+          candidateLimit,
+          candidateWindow,
+          maxWorkers,
+          queueTargetSize,
+          runningWorkers,
+          runningWorkerIds,
+          runId,
+          store,
+        });
+        const replanDecision = evaluateReplanDecision(replanSnapshot, policy, {
+          lastQueueRefill: refill,
+          lastPeriodicReplanMs,
+          lastReplanRequestMs,
+          longTailSinceMs,
+          nowMs: Date.now(),
+        });
+        longTailSinceMs = nextLongTailSinceMs(replanSnapshot, policy, longTailSinceMs, Date.now());
+        if (replanDecision && unhandledPoolEventCount(store, runId) === 0) {
+          writeReplanEvent(store, runId, replanDecision, replanSnapshot, policy, refill);
+          lastReplanRequestMs = Date.now();
+          if (replanDecision.reason === "periodic_replan") lastPeriodicReplanMs = lastReplanRequestMs;
+          didWork = true;
+        }
+
+        // Checkpoint by work done, not queue level: every N completed leases
+        // (or when the board is truly exhausted), commit + rebuild the report
+        // while the pool keeps running. The epoch commit already excludes
+        // files held by active leases, so no drain is needed.
+        if (
+          epochCycleEnabled &&
+          !runningEpoch &&
+          nowMs >= nextEpochAllowedMs &&
+          (completionsSinceEpoch >= epochLeaseInterval || (completionsSinceEpoch > 0 && replanSnapshot.queuedTargets === 0))
+        ) {
+          didWork = true;
+          launchEpochCycle(`${completionsSinceEpoch} leases completed since last checkpoint`);
+        }
       }
 
-      const replanSnapshot = queueSnapshot({
-        candidateLimit,
-        candidateWindow,
-        maxWorkers,
-        queueTargetSize,
-        runningWorkers,
-        runningWorkerIds,
-        runId,
-        store,
-      });
-      const replanDecision = evaluateReplanDecision(replanSnapshot, policy, {
-        lastQueueRefill: refill,
-        lastPeriodicReplanMs,
-        lastReplanRequestMs,
-        longTailSinceMs,
-        nowMs: Date.now(),
-      });
-      longTailSinceMs = nextLongTailSinceMs(replanSnapshot, policy, longTailSinceMs, Date.now());
-      if (replanDecision && unhandledPoolEventCount(store, runId) === 0) {
-        writeReplanEvent(store, runId, replanDecision, replanSnapshot, policy, refill);
-        lastReplanRequestMs = Date.now();
-        if (replanDecision.reason === "periodic_replan") lastPeriodicReplanMs = lastReplanRequestMs;
-        didWork = true;
+      if (providerPausedSinceMs != null && !runningProviderProbe && Date.now() >= nextProviderProbeMs) {
+        const probeDir = resolve(globals.stateDir, "runs", runId, "provider_probes");
+        let probeTask: Promise<void>;
+        probeTask = probeProvider(globals, probeDir)
+          .then((probe) => {
+            if (probe.healthy) {
+              const pausedForMs = Date.now() - (providerPausedSinceMs ?? Date.now());
+              console.error(`[trigger-agent] provider probe succeeded after ${Math.round(pausedForMs / 1000)}s paused; resuming worker spawns`);
+              providerPausedSinceMs = null;
+              providerProbeBackoffMs = PROVIDER_PROBE_INITIAL_BACKOFF_MS;
+            } else {
+              lastProviderError = probe.error ?? lastProviderError;
+              providerProbeBackoffMs = Math.min(providerProbeBackoffMs * 2, PROVIDER_PROBE_MAX_BACKOFF_MS);
+              nextProviderProbeMs = Date.now() + providerProbeBackoffMs;
+              console.error(
+                `[trigger-agent] provider probe failed (${probe.error ?? "unknown"}); next probe in ${Math.round(providerProbeBackoffMs / 1000)}s`,
+              );
+            }
+          })
+          .finally(() => {
+            if (runningProviderProbe === probeTask) runningProviderProbe = null;
+          });
+        runningProviderProbe = probeTask;
       }
 
       const activeWorkers = activeWorkerCount(store, runId);
@@ -632,7 +900,7 @@ export async function runTriggerAgent(globals: GlobalArgs, args: Map<string, str
         runningWorkers: runningWorkers.size,
         activeLocalWorkers,
       });
-      const workersToStart = Math.min(openSlots, queuedTargets);
+      const workersToStart = providerPausedSinceMs != null ? 0 : Math.min(openSlots, queuedTargets);
       for (let index = 0; index < workersToStart; index += 1) {
         workerOrdinal += 1;
         workersStarted += 1;
@@ -652,9 +920,30 @@ export async function runTriggerAgent(globals: GlobalArgs, args: Map<string, str
             postReturnCheckCommand,
             graphDbPath,
           },
+          runningWorkerProcs,
         )
           .then((result) => {
             workerResults.push(result);
+            // Provider failures requeue their target and pause spawning until a probe
+            // succeeds — the provider being down is not the pool's fault, so it never
+            // trips exit-on-worker-error.
+            if (result.providerFailure) {
+              lastProviderError = result.error ?? "provider error";
+              if (providerPausedSinceMs == null) {
+                providerPausedSinceMs = Date.now();
+                providerPauses += 1;
+                providerProbeBackoffMs = PROVIDER_PROBE_INITIAL_BACKOFF_MS;
+                nextProviderProbeMs = Date.now() + providerProbeBackoffMs;
+                console.error(
+                  `[trigger-agent] provider failure from ${workerId}: ${lastProviderError}; pausing worker spawns until a provider probe succeeds`,
+                );
+              }
+              return;
+            }
+            completionsSinceEpoch += 1;
+            // failed is set only for explicit tool_error (infrastructure) results;
+            // needs_rework gate rejections and heuristic tool_error guesses are normal
+            // completions and never trip exit-on-worker-error.
             if (result.failed) {
               workerErrors.push({
                 workerId,
@@ -706,24 +995,39 @@ export async function runTriggerAgent(globals: GlobalArgs, args: Map<string, str
       }
 
       if (didWork || runningWorkers.size === 0) iterations += 1;
-      if (didWork || runningWorkers.size > 0) idleIterations = 0;
+      if (didWork || runningWorkers.size > 0 || runningEpoch) idleIterations = 0;
       else idleIterations += 1;
 
       if (maxIdleIterations > 0 && idleIterations >= maxIdleIterations && unhandledEventCount(store, runId) === 0) {
         stoppedReason = "idle";
         break;
       }
-      if (maxIterations > 0 && iterations >= maxIterations && runningWorkers.size === 0) {
+      if (maxIterations > 0 && iterations >= maxIterations && runningWorkers.size === 0 && !runningEpoch) {
         stoppedReason = "max_iterations";
         break;
       }
 
-      await waitForRestingTrigger(runningWorkers, idleSleepMs);
+      await waitForRestingTrigger(runningWorkers, idleSleepMs, [runningEpoch]);
     }
 
-    if (runningWorkers.size > 0) await Promise.allSettled([...runningWorkers]);
+    if (runningWorkers.size > 0) {
+      // A stopped pool must not wedge for hours awaiting worker TTLs (workers
+      // ignore SIGTERM). Give in-flight workers a short grace, then kill them;
+      // babysit's lease recovery requeues whatever they were holding.
+      addEvent(store, runId, "pool_stopping", "trigger-agent", {
+        reason: stoppedReason,
+        running_workers: runningWorkers.size,
+        created_by: "trigger-agent",
+      });
+      const grace = new Promise<void>((resolveGrace) => setTimeout(resolveGrace, 30_000));
+      await Promise.race([Promise.allSettled([...runningWorkers]).then(() => undefined), grace]);
+      for (const proc of runningWorkerProcs) proc.kill(9);
+      await Promise.allSettled([...runningWorkers]);
+    }
+    if (runningEpoch) await runningEpoch;
     if (runningDirector) await runningDirector;
     if (runningKnowledgeMaintenance) await runningKnowledgeMaintenance;
+    if (runningProviderProbe) await runningProviderProbe;
     if (stoppedReason === "running") stoppedReason = "complete";
 
     return {
@@ -735,6 +1039,11 @@ export async function runTriggerAgent(globals: GlobalArgs, args: Map<string, str
       desiredWorkers: run.desiredWorkers,
       maxWorkers,
       directorTicks: directorResults.filter((result) => result.status !== "no_unhandled_events").length,
+      epochCycle: epochCycleEnabled,
+      epochCycles,
+      epochErrors,
+      epochPaused,
+      lastEpoch,
       queueRefills,
       queuePriorityRefreshes,
       queueTargetsAdded,
@@ -742,6 +1051,9 @@ export async function runTriggerAgent(globals: GlobalArgs, args: Map<string, str
       workersStarted,
       workerResults,
       workerErrors,
+      providerPauses,
+      providerPaused: providerPausedSinceMs != null,
+      lastProviderError,
       knowledgeMaintenanceRuns,
       knowledgeMaintenanceErrors,
       dryRun: globals.dryRunAgents,

@@ -1,0 +1,17 @@
+{
+  "number": 1374,
+  "title": "Implement initial ninja asm support",
+  "state": "MERGED",
+  "createdAt": "2024-03-05T05:45:05Z",
+  "updatedAt": "2024-03-05T06:32:33Z",
+  "mergedAt": "2024-03-05T06:32:33Z",
+  "closedAt": "2024-03-05T06:32:33Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1374",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 1027539
+  }
+}

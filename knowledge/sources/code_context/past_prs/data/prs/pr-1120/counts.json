@@ -1,0 +1,17 @@
+{
+  "number": 1120,
+  "title": "Fix include paths in `sysdolphin`",
+  "state": "MERGED",
+  "createdAt": "2024-01-25T18:18:01Z",
+  "updatedAt": "2024-01-25T18:19:20Z",
+  "mergedAt": "2024-01-25T18:19:20Z",
+  "closedAt": "2024-01-25T18:19:20Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1120",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 23742
+  }
+}

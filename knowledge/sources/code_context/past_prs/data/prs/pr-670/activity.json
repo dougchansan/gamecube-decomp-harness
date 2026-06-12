@@ -1,0 +1,10 @@
+{
+  "pr": 670,
+  "title": "Fix `generate_context.sh`",
+  "url": "https://github.com/doldecomp/melee/pull/670",
+  "text_records_with_body": 5,
+  "review_comments": 4,
+  "changed_files": 2,
+  "added_lines": 26,
+  "deleted_lines": 16
+}

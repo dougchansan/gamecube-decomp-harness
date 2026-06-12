@@ -63,36 +63,50 @@ The director does not directly own process spawning. It decides what should be
 worked next; the trigger/runtime layer makes that process work happen under
 leases.
 
-## Ready Pool Refill
+## Epoch Queue Cycle
 
-The trigger actor treats queue shape as process state. On each loop pass it
-re-reads the current board snapshot artifacts, refills queued work toward the
-configured queue target, starts workers for open slots, and then lets the
-director handle one wake event. Worker-slot refill therefore does not wait for a
-long director turn when unlocked queued work already exists.
+The trigger actor treats the queue as one epoch batch rather than a
+continuously topped-up pool. Each epoch:
 
-The queue target and board scan width are separate:
+1. Refill fills the queue to the configured queue target from the freshest
+   board ranking.
+2. Workers lease and drain the batch. No new targets are inserted while it
+   drains, but queued-but-not-leased targets still receive periodic priority
+   refreshes from the graph-ranked board.
+3. When queued work reaches zero, the epoch pipeline runs while in-flight
+   workers finish: commit validated work (excluding files under active
+   leases, so half-finished attempts never poison the checkpoint), rebuild
+   the full objdiff report in a persistent epoch worktree, publish the fresh
+   report for board scoring, record an `epoch` save point as the run's
+   measured progress checkpoint, and requeue regressed functions as
+   priority repair targets.
+4. Refill grabs the next batch from the re-scored board and the cycle
+   repeats.
 
-- Queue target: the number of queued targets the trigger tries to maintain.
-- Queue low watermark: the point where a `pool_below_target` event asks the
-  director to reconsider the pool.
-- Schedulable low watermark: the minimum useful count of distinct unlocked
-  source paths, because many queued functions in one locked file cannot keep a
-  parallel worker pool full.
-- Candidate window: the number of board-ranked candidates inspected for fresh
-  refill work.
+The epoch boundary is therefore both the rescoring point and the progress
+checkpoint: every batch is ranked against the codebase as it actually stands,
+not against a stale report, and the run's history is the sequence of epoch
+save points. Work still in flight when the queue empties simply counts toward
+the next epoch's checkpoint.
 
-Refill prefers candidates that have not already been queued, leased, reported,
-or stalled in the run. It also prefers distinct unlocked source paths before
-adding additional functions from an already queued source. If deterministic
-refill cannot satisfy the target or distinct-source floor, the trigger emits a
-`pool_below_target` event so the director can replan with the latest worker
-reports and facts.
+Two safety valves shape the boundary. If one epoch regresses more report rows
+than the pause threshold, the pipeline records the checkpoint but withholds
+the refill and emits an `epoch_regression_pause` event instead of building on
+a damaged base. If refill after a rebuild finds no fresh board work, the
+trigger emits `pool_below_target` so the director can replan the long tail,
+and backs off before rebuilding again.
 
-Director target packets can requeue a previously attempted target when new
-facts or changed board context make that target worth another pass. That
-authority stays with the director; automatic refill is deliberately biased
-toward fresh, unattempted work.
+Refill itself prefers candidates that have not already been queued, leased,
+reported, or stalled in the run, and prefers distinct unlocked source paths
+before adding additional functions from an already queued source. Director
+target packets can requeue a previously attempted target when new facts make
+it worth another pass; the epoch pipeline uses that same requeue authority for
+regression repairs, while batch refill stays biased toward fresh work.
+
+`--no-epoch-cycle` restores the legacy continuous mode, where the trigger tops
+the queue back up toward the target on every pass and watermark policies
+(queue low, schedulable low, active low, long tail) emit `pool_below_target`
+replans as the pool runs down.
 
 ## Wake Events
 

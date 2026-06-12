@@ -1,0 +1,17 @@
+{
+  "number": 858,
+  "title": "Partially match `ftCo_DamageFall`",
+  "state": "MERGED",
+  "createdAt": "2023-05-19T23:43:25Z",
+  "updatedAt": "2023-05-20T13:51:50Z",
+  "mergedAt": "2023-05-19T23:51:03Z",
+  "closedAt": "2023-05-19T23:51:03Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/858",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 50444
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 1278,
+  "title": "Match Ninja flags more closely to Make in CI",
+  "state": "MERGED",
+  "createdAt": "2024-02-21T00:30:47Z",
+  "updatedAt": "2024-02-21T00:54:33Z",
+  "mergedAt": "2024-02-21T00:54:33Z",
+  "closedAt": "2024-02-21T00:54:33Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1278",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 657
+  }
+}

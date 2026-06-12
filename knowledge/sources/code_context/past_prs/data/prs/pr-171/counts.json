@@ -1,0 +1,17 @@
+{
+  "number": 171,
+  "title": "output calcprogress to console if map output enabled",
+  "state": "MERGED",
+  "createdAt": "2021-12-11T00:58:16Z",
+  "updatedAt": "2021-12-11T00:58:39Z",
+  "mergedAt": "2021-12-11T00:58:39Z",
+  "closedAt": "2021-12-11T00:58:39Z",
+  "author": "EpochFlame",
+  "url": "https://github.com/doldecomp/melee/pull/171",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 806
+  }
+}

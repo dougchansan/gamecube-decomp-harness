@@ -1,0 +1,10 @@
+{
+  "pr": 29,
+  "title": "Further Sysdolphin matching and splitting out of some stage .c file assembly",
+  "url": "https://github.com/doldecomp/melee/pull/29",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 25,
+  "added_lines": 324368,
+  "deleted_lines": 324287
+}

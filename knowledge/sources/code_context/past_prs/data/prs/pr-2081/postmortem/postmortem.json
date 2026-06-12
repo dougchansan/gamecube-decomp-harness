@@ -1,0 +1,331 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2081",
+  "pr": {
+    "number": 2081,
+    "title": "Pr/mn mainrule",
+    "url": "https://github.com/doldecomp/melee/pull/2081",
+    "state": "CLOSED",
+    "author": "itsgrimetime",
+    "created_at": "2026-01-10T02:36:23Z",
+    "merged_at": null
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Draft closed PR for menu main-rule decomp work. The diff implements mn_802307F8 fully, adds near-complete source for mn_8023164C and mn_80231714, updates related mnmain/mnmainrule prototypes from UNK_RET/UNK_PARAMS to concrete signatures, removes stale asm placeholder comments for already-present mnmain helpers, and adds narrow dont_inline pragmas around two digit-buffer helpers. Bot output reports one new full match for mn_802307F8 and two 99.90% improvements for mn_8023164C and mn_80231714.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "prototype-cleanup",
+      "matching-tactics"
+    ],
+    "systems": [
+      "melee-core",
+      "menu",
+      "mn"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/mn/mnmainrule.c",
+      "role": "Primary decomp source changes: implements mn_802307F8 and adds source bodies for mn_8023164C and mn_80231714; introduces temporary local GObj bitfield struct and externs for globals/floats used by the new bodies.",
+      "evidence_refs": [
+        "raw_diff: src/melee/mn/mnmainrule.c hunks",
+        "text_corpus: decomp-dev bot report lists mn_802307F8 as 100% matched and mn_8023164C/mn_80231714 as 99.90% improved"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnmainrule.h",
+      "role": "Header prototype cleanup for newly recovered mnmainrule functions.",
+      "evidence_refs": [
+        "raw_diff: mn_802307F8 changed from UNK_RET/UNK_PARAMS to void mn_802307F8(s32, s32, s32)",
+        "raw_diff: mn_8023164C and mn_80231714 changed to void(void)"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnmain.c",
+      "role": "Adds dont_inline pragma blocks around mn_8022EA08 and mn_8022EA78 and removes asm placeholder comments for mn_8022EA08, mn_8022EA78, mn_8022EB24, and mn_8022EB78.",
+      "evidence_refs": [
+        "raw_diff: src/melee/mn/mnmain.c hunks around mn_8022EA08/mn_8022EA78 and placeholder removals"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnmain.h",
+      "role": "Prototype cleanup for several mnmain functions from UNK_RET/UNK_PARAMS to concrete void or typed signatures.",
+      "evidence_refs": [
+        "raw_diff: mn_8022EBDC, mn_8022F268, mn_8022F360, and mn_8022F4CC prototype changes"
+      ]
+    },
+    {
+      "path": ".build_validated",
+      "role": "Empty build-validation marker added in diff, but not listed in changed_files metadata.",
+      "evidence_refs": [
+        "raw_diff: new file mode 100644 .build_validated",
+        "metadata_json.changed_files lists only four source/header files"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Implemented mn_802307F8 in src/melee/mn/mnmainrule.c, including cleanup of an existing text object at data+0x130, selection of a text/index value from mn_804D4B96 or mn_803EC818, creation of an HSD_Text via HSD_SisLib_803A5ACC, font_size initialization, and HSD_SisLib_803A6368 call.",
+    "Added source bodies for mn_8023164C and mn_80231714 that update mn_804A04F0 menu flow state, choose hovered_selection/mode via switch on prev_menu, create a GObj with fn_8022F538, set render_plink through a local bitfield view, and call HSD_GObj_80390CD4(mn_80230E38(mode)); mn_80231714 additionally sets mn_804D6BD4 = 1.",
+    "Updated mnmainrule.h signatures for mn_802307F8, mn_8023164C, and mn_80231714 from unknown prototypes to concrete void-return prototypes.",
+    "Updated mnmain.h signatures for mn_8022EBDC, mn_8022F268, mn_8022F360, and mn_8022F4CC from UNK_RET/UNK_PARAMS to concrete void or typed signatures.",
+    "Added scoped #pragma dont_inline on/off around mn_8022EA08 and mn_8022EA78 in mnmain.c.",
+    "Removed asm-placeholder comments for mn_8022EA08, mn_8022EA78, mn_8022EB24, and mn_8022EB78 in mnmain.c.",
+    "Added an empty .build_validated file in the diff, although changed-file metadata only enumerates the four source/header files."
+  ],
+  "smart_moves": [
+    "The PR keeps prototype updates with the recovered bodies instead of leaving UNK_RET/UNK_PARAMS in the owning headers.",
+    "The PR uses ordinary switch control flow for the prev_menu dispatch in mn_8023164C and mn_80231714 rather than preserving a branch ladder in the submitted C.",
+    "The bot report gives narrow function-level progress for mn_802307F8, mn_8023164C, and mn_80231714 rather than only a broad build statement."
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a function body proves a signature, update the owning header in the same slice; this PR changes mnmainrule and mnmain prototypes away from UNK_RET/UNK_PARAMS alongside source recovery.",
+      "evidence_refs": [
+        "raw_diff: src/melee/mn/mnmainrule.h prototype changes",
+        "raw_diff: src/melee/mn/mnmain.h prototype changes"
+      ],
+      "confidence": 0.86
+    },
+    {
+      "lesson": "Function-level bot reports are useful intake evidence for matching status, but they should be recorded narrowly: here only mn_802307F8 is reported as 100%, while mn_8023164C and mn_80231714 are reported as 99.90% improvements rather than full matches.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev bot report"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "lesson": "Local bitfield overlay structs can express a recovered bitfield write, but in this PR the temporary GObjBitfield is introduced only in the C file and should be treated as a matching tactic or type-recovery bridge until stronger type evidence exists.",
+      "evidence_refs": [
+        "raw_diff: typedef GObjBitfield and ((GObjBitfield*) gobj)->render_plink assignment"
+      ],
+      "confidence": 0.62
+    }
+  ],
+  "naming_conventions": [
+    {
+      "pattern": "Address-style names retained for uncertain menu globals and functions, e.g. mn_804D6BD4, mn_804D4B96, mn_803EC818, mn_804DBE18 through mn_804DBE2C, mn_802307F8, mn_8023164C, and mn_80231714.",
+      "evidence_refs": [
+        "raw_diff: extern additions and function definitions in mnmainrule.c"
+      ]
+    },
+    {
+      "pattern": "Short local role names are used where roles are apparent or register-derived: data, prev, gobj, mode, sis, zero, idx, r30.",
+      "evidence_refs": [
+        "raw_diff: mn_802307F8, mn_8023164C, mn_80231714 bodies"
+      ]
+    },
+    {
+      "pattern": "Semantic field names are used where existing structs expose them, such as MenuFlow.prev_menu, cur_menu, hovered_selection and HSD_Text.font_size.",
+      "evidence_refs": [
+        "raw_diff: mn_8023164C/mn_80231714 MenuFlow accesses",
+        "raw_diff: mn_802307F8 HSD_Text font_size assignments"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Scoped #pragma dont_inline blocks were added around mn_8022EA08 and mn_8022EA78.",
+      "evidence_refs": [
+        "raw_diff: #pragma dont_inline on/off around mn_8022EA08 and mn_8022EA78"
+      ],
+      "risk_or_note": "The PR slice does not include commentary explaining why the pragmas are required or adjacent-function regression evidence; under loaded standards this remains an exception tactic needing narrow evidence."
+    },
+    {
+      "tactic": "Temporary local bitfield struct GObjBitfield is used to write gobj render_plink bits.",
+      "evidence_refs": [
+        "raw_diff: GObjBitfield typedef",
+        "raw_diff: ((GObjBitfield*) gobj)->render_plink = HSD_GObj_804D783C"
+      ],
+      "risk_or_note": "Useful as a bridge for matching a bitfield write, but the slice does not prove this is the canonical HSD_GObj type representation."
+    },
+    {
+      "tactic": "Pointer-offset access on a u8* data base is used in mn_802307F8 for offsets 0x130 and 2.",
+      "evidence_refs": [
+        "raw_diff: u8* data = (u8*) arg0 and *(void**) (data + 0x130), *(u8*) (data + 2)"
+      ],
+      "risk_or_note": "Grounded in the submitted diff, but type recovery may be incomplete; loaded standards prefer typed fields when recoverable."
+    },
+    {
+      "tactic": "Switch statement is used for prev_menu cases 0x0F and 0x10, with a default case assigning hovered_selection and mode.",
+      "evidence_refs": [
+        "raw_diff: switch in mn_8023164C",
+        "raw_diff: switch in mn_80231714"
+      ],
+      "risk_or_note": "Consistent with canonical control-flow cleanup, but no review discussion states it was chosen for source-style reasons."
+    }
+  ],
+  "review_feedback": [
+    {
+      "type": "bot_report",
+      "author": "decomp-dev[bot]",
+      "created_at": "2026-01-10T02:40:45Z",
+      "text": "Matched code increased by +248 bytes (+0.01%); mn_802307F8 in main/melee/mn/mnmainrule is reported as a new 100% match; mn_80231714 and mn_8023164C are reported as 99.90% improvements.",
+      "evidence_refs": [
+        "text_corpus: issue_comment https://github.com/doldecomp/melee/pull/2081#issuecomment-3731616831"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2081",
+    "Pr/mn mainrule",
+    "itsgrimetime",
+    "src/melee/mn/mnmainrule.c",
+    "src/melee/mn/mnmainrule.h",
+    "src/melee/mn/mnmain.c",
+    "src/melee/mn/mnmain.h",
+    "mn_802307F8",
+    "mn_8023164C",
+    "mn_80231714",
+    "mn_80230E38",
+    "fn_8022F538",
+    "mn_804A04F0",
+    "MenuFlow",
+    "hovered_selection",
+    "prev_menu",
+    "cur_menu",
+    "GObjBitfield",
+    "render_plink",
+    "HSD_GObj_804D783C",
+    "HSD_SisLib_803A5CC4",
+    "HSD_SisLib_803A5ACC",
+    "HSD_SisLib_803A6368",
+    "HSD_Text",
+    "font_size",
+    "mn_804D4B96",
+    "mn_803EC818",
+    "mn_804DBE18",
+    "mn_804DBE1C",
+    "mn_804DBE20",
+    "mn_804DBE24",
+    "mn_804DBE28",
+    "mn_804DBE2C",
+    "mn_804D6BD4",
+    "pragma dont_inline",
+    "UNK_RET",
+    "UNK_PARAMS",
+    ".build_validated"
+  ],
+  "follow_up_queries": [
+    "Search later PRs for mn_8023164C and mn_80231714 to see whether the remaining 0.10% gaps were resolved or whether shared helper extraction was attempted.",
+    "Search for GObjBitfield or render_plink writes to determine whether a canonical HSD_GObj bitfield type already exists and whether this local typedef was later replaced.",
+    "Search for mn_802307F8 and offsets 0x130 or +2 in menu structs to identify a typed structure candidate for the data pointer.",
+    "Search for #pragma dont_inline around mn_8022EA08 and mn_8022EA78 to see whether the pragma tactic persisted, was justified, or was removed.",
+    "Search later history for .build_validated handling in draft PRs, because this slice adds the marker but does not provide explicit validation details beyond the bot report."
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR state/title/author/dates and changed_files counts",
+      "raw_diff: complete diff excerpt for source/header changes",
+      "text_corpus: empty PR body and one decomp-dev bot issue comment",
+      "raw_pr_json: merged_at null, draft true, state closed"
+    ],
+    "notes": [
+      "PR body is empty and there are no human review comments or reviews in the loaded slice.",
+      "The PR is closed with merged_at null and raw PR JSON indicates draft true, so this intake does not treat the changes as accepted upstream.",
+      "Bot report provides narrow function-level matching evidence, but no build log, objdiff details, or rationale for dont_inline pragmas, local bitfield struct, pointer-offset access, or extern additions.",
+      "Changed-file metadata lists four files, while the raw diff also adds an empty .build_validated file; this discrepancy is preserved rather than resolved by assumption.",
+      "The bot report supports a full match claim only for mn_802307F8. mn_8023164C and mn_80231714 are improvements at 99.90%, not accepted as matched functions."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "pr_lesson_candidate",
+        "title": "Keep header prototypes synchronized with recovered bodies",
+        "text": "PR 2081 updates mnmainrule.h and mnmain.h from UNK_RET/UNK_PARAMS to concrete signatures alongside decomp source changes; this is a concrete example of truthful header cleanup tied to body recovery.",
+        "scope": [
+          "src/melee/mn/mnmainrule.h",
+          "src/melee/mn/mnmain.h",
+          "truthful-headers-and-includes"
+        ],
+        "evidence_refs": [
+          "raw_diff: mnmainrule.h and mnmain.h prototype changes"
+        ]
+      },
+      {
+        "record_type": "pr_lesson_candidate",
+        "title": "Record partial matching evidence precisely",
+        "text": "The bot report distinguishes mn_802307F8 as 100% matched from mn_8023164C and mn_80231714 as 99.90% improvements; curator records should preserve that distinction.",
+        "scope": [
+          "src/melee/mn/mnmainrule.c",
+          "verification-and-regression-ledger"
+        ],
+        "evidence_refs": [
+          "text_corpus: decomp-dev bot report"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "mnmainrule.c contains main-rule menu functions touched by PR 2081",
+        "text": "PR 2081's diff shows src/melee/mn/mnmainrule.c defining or working on menu main-rule functions including mn_802307F8, mn_8023164C, mn_80231714, mn_802317E4, and references to MenuFlow mn_804A04F0.",
+        "source_path": "src/melee/mn/mnmainrule.c",
+        "scope": [
+          "src/melee/mn",
+          "menu",
+          "mnmainrule"
+        ],
+        "evidence_refs": [
+          "raw_diff: src/melee/mn/mnmainrule.c hunks"
+        ],
+        "reason": "Potential path-fact enrichment; should be curated against current source before acceptance."
+      },
+      {
+        "target_source_id": "other",
+        "update_kind": "source_update",
+        "title": "Check whether local GObjBitfield should become a real type or be replaced",
+        "text": "PR 2081 introduces a local GObjBitfield typedef solely to set render_plink on an HSD_GObj. Curator may want to flag this for source/type cleanup review if the pattern appears in current source.",
+        "source_path": "src/melee/mn/mnmainrule.c",
+        "scope": [
+          "typed-fields-over-pointer-math",
+          "matching-tactics-need-evidence",
+          "HSD_GObj"
+        ],
+        "evidence_refs": [
+          "raw_diff: GObjBitfield typedef and render_plink assignment"
+        ],
+        "reason": "The slice supports this as a tactic, not as an accepted canonical type."
+      },
+      {
+        "target_source_id": "other",
+        "update_kind": "source_update",
+        "title": "Audit dont_inline pragmas around mn_8022EA08 and mn_8022EA78",
+        "text": "PR 2081 adds scoped #pragma dont_inline around two mnmain digit-buffer helpers without loaded rationale beyond the bot report. If these pragmas remain, current-source curation should verify narrow matching/regression evidence.",
+        "source_path": "src/melee/mn/mnmain.c",
+        "scope": [
+          "avoid-pragmas-register-asm",
+          "matching-tactics-need-evidence",
+          "mn_8022EA08",
+          "mn_8022EA78"
+        ],
+        "evidence_refs": [
+          "raw_diff: #pragma dont_inline on/off additions"
+        ],
+        "reason": "Loaded standards treat pragmas as exceptional; PR evidence does not explain necessity."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote mn_8023164C or mn_80231714 as matched; the only loaded verifier report says they are 99.90% improved.",
+      "Do not infer reviewer approval or merge acceptance; the PR has no review comments, is closed, and merged_at is null.",
+      "Do not treat the empty .build_validated file as proof of a successful build beyond the bot report present in the issue comment.",
+      "Do not canonize GObjBitfield, mn_804D4B96, mn_803EC818, or mn_804DBE18-through-mn_804DBE2C semantics from this slice alone; the diff only shows address-style externs and use sites.",
+      "Do not generalize that dont_inline pragmas are acceptable for mn helpers without separate verifier and regression evidence."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

@@ -2,12 +2,12 @@
   "id": "m2c_decomp",
   "title": "m2c decompilation scaffold",
   "trust_tier": "tool_evidence",
-  "description": "Run the harness-vendored m2c fork to generate a C-like scaffold for a function or translation unit.",
-  "operation_mode": "harness_bridge_v1",
-  "runner_status": "on_demand_bridge",
-  "status_message": "Harness bridge v1: APIs delegate to reference/melee-harness-master/tools/decomp.py and the harness-vendored m2c fork.",
+  "description": "Run the tool-local m2c fork to generate a C-like scaffold for a function or translation unit.",
+  "operation_mode": "tool_local_impl",
+  "runner_status": "on_demand",
+  "status_message": "Tool-local implementation: APIs invoke tools/_impl/melee/tools/decomp.py and the vendored m2c package.",
   "limitations": [
-    "The harness-vendored m2c fork is GPL-3.0 licensed; this suite bridges to it rather than copying implementation code into the orchestrator.",
+    "The vendored m2c fork is GPL-3.0 licensed and lives under tools/_impl/melee/m2c.",
     "m2c output is a scaffold for understanding control/data flow, not reviewable source and not a substitute for natural decompilation.",
     "Requires pyelftools, pcpp, generated object/asm artifacts, and the melee m2ctx.py helper."
   ],

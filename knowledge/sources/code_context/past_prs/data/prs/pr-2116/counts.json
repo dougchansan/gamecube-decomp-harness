@@ -1,0 +1,17 @@
+{
+  "number": 2116,
+  "title": "Finish itfire, match and link",
+  "state": "MERGED",
+  "createdAt": "2026-01-22T13:19:30Z",
+  "updatedAt": "2026-01-22T13:23:01Z",
+  "mergedAt": "2026-01-22T13:22:52Z",
+  "closedAt": "2026-01-22T13:22:52Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/2116",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 2433
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "pr": 2588,
+  "title": "Cleanup statics in vi, match and link vi1202",
+  "url": "https://github.com/doldecomp/melee/pull/2588",
+  "text_records_with_body": 2,
+  "review_comments": 0,
+  "changed_files": 14,
+  "added_lines": 702,
+  "deleted_lines": 815
+}

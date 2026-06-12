@@ -1,0 +1,439 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2380",
+  "pr": {
+    "number": 2380,
+    "title": "Link mngallery",
+    "url": "https://github.com/doldecomp/melee/pull/2380",
+    "state": "MERGED",
+    "author": "jellejurre",
+    "created_at": "2026-04-02T23:42:44Z",
+    "merged_at": "2026-04-03T06:25:22Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2380 linked melee/mn/mngallery.c by marking it Matching, restructuring mngallery source around typed userdata/static model data, adjusting adjacent mn/mnsnap ownership in splits/symbols, and cleaning some literals and local symbols. The bot report recorded mngallery linked-code/data progress and fn_802590C4 reaching 100%, while review discussion focused on direct HSD_GObjGetUserData use versus a file-local GET_804D6C88 helper.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "types-structs",
+      "data-symbols",
+      "splits"
+    ],
+    "systems": [
+      "config",
+      "game-mode",
+      "melee-core",
+      "mn",
+      "mngallery",
+      "mnsnap"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/mn/mngallery.c",
+      "role": "Primary matching source: added typed mngallery userdata structs, local helper macros, static model descriptors, inline literals, function scope/static changes, and matching tactics around fn_802590C4.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mngallery.c added 163 deleted 283 hunks 14",
+        "raw_diff: src/melee/mn/mngallery.c include cleanup and StaticModelDesc/mnGallery_804D6C88 declarations",
+        "raw_diff: src/melee/mn/mngallery.c adds GET_804D6C88, mnGallery_804D6C88_userdata, mnGallery_child_userdata, STATIC_ASSERTs",
+        "review_comments.md: discussion_r3031627398/discussion_r3031631641/discussion_r3031685408"
+      ]
+    },
+    {
+      "path": "configure.py",
+      "role": "Build configuration changed mngallery object from NonMatching to Matching.",
+      "evidence_refs": [
+        "raw_diff: Object(NonMatching, \"melee/mn/mngallery.c\") changed to Object(Matching, \"melee/mn/mngallery.c\")"
+      ]
+    },
+    {
+      "path": "config/GALE01/splits.txt",
+      "role": "Adjusted mnsnap and mngallery bss/data/sdata split boundaries.",
+      "evidence_refs": [
+        "raw_diff: mnsnap .bss end 0x804A0B90 to 0x804A0BA0",
+        "raw_diff: mngallery .data end 0x803F06D0 to 0x803F06CC, .bss start 0x804A0B90 to 0x804A0BA0, .sdata end 0x804D50A0 to 0x804D509D"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Updated symbol ownership/scope for mngallery local rodata/data/sdata/sdata2 labels and corrected 0x804A0B90 ownership to mnSnap.",
+      "evidence_refs": [
+        "raw_diff: mnGallery_803B8538/803B8544 changed to local @157/@158",
+        "raw_diff: mnGallery_803F0570/803F0580 expanded into local string/object labels",
+        "raw_diff: mnGallery_804A0B90 changed to mnSnap_804A0B90",
+        "raw_diff: mnGallery_804D5090/804D5098 and mnGallery_804DC358..804DC390 changed to local labels"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1B03.c",
+      "role": "Adjusted game-mode allocation code to use mnSnap_804A0B90 and include mnsnap.h.",
+      "evidence_refs": [
+        "raw_diff: adds #include <melee/mn/mnsnap.h>",
+        "raw_diff: gm_801B0FF8 loop changed from mnGallery_804A0B90/struct mnGallery_804A0B90_t to mnSnap_804A0B90/struct mnSnap_804A0B90_t"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mngallery.h",
+      "role": "Header surface changed, but exact declarations are not visible in the loaded diff excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mngallery.h added 1 deleted 5 hunks 2"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnsnap.h",
+      "role": "Header surface changed to support mnsnap symbol ownership, but exact added declaration is not visible in the loaded diff excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mnsnap.h added 1 deleted 0 hunks 1",
+        "raw_diff: gm_1B03.c newly includes <melee/mn/mnsnap.h>"
+      ]
+    },
+    {
+      "path": "src/melee/mn/types.h",
+      "role": "Type definitions changed, but exact type changes are not visible in the loaded diff excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/types.h added 2 deleted 2 hunks 1"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "mngallery.c was promoted to Matching in configure.py.",
+      "evidence_refs": [
+        "raw_diff: configure.py Object(NonMatching, \"melee/mn/mngallery.c\") to Object(Matching, \"melee/mn/mngallery.c\")"
+      ]
+    },
+    {
+      "text": "The source replaced several ad hoc local/padded structs with a file-local mnGallery_804D6C88_userdata struct, a child userdata struct, GET_* helpers, and STATIC_ASSERT size checks.",
+      "evidence_refs": [
+        "raw_diff: adds struct mnGallery_804D6C88_userdata and STATIC_ASSERT size 0x24",
+        "raw_diff: adds struct mnGallery_child_userdata and STATIC_ASSERT size 8"
+      ]
+    },
+    {
+      "text": "The source removed several extern data references and used inline literals for camera vectors, zero/far values, and movie file names such as \"MvOmake15.mth\" and \"MvHowTo.mth\".",
+      "evidence_refs": [
+        "raw_diff: mnGallery_80258A08 replaces extern Vec3/floats with Vec3 eye/interest literals and 0.0f/2.0f",
+        "raw_diff: mnGallery_80258BC4 replaces mnGallery_803F0570/mnGallery_803F0580 with string literals"
+      ]
+    },
+    {
+      "text": "mnsnap/mngallery data ownership was adjusted: split boundaries moved and mnGallery_804A0B90 was renamed/attributed to mnSnap_804A0B90 in symbols and gm_1B03 allocation code.",
+      "evidence_refs": [
+        "raw_diff: splits.txt bss boundary changes for mnsnap and mngallery",
+        "raw_diff: symbols.txt mnGallery_804A0B90 to mnSnap_804A0B90",
+        "raw_diff: gm_1B03.c uses mnSnap_804A0B90 and struct mnSnap_804A0B90_t"
+      ]
+    },
+    {
+      "text": "The bot report recorded 7 new matches, including mngallery data/bss/rodata/sdata2 progress and fn_802590C4 reaching 100%.",
+      "evidence_refs": [
+        "text_corpus.jsonl: decomp-dev[bot] report, 7 new matches; fn_802590C4 +2 bytes 99.19% to 100.00%"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Correcting 0x804A0B90 ownership to mnSnap and updating gm_1B03.c avoided keeping an apparently wrong mngallery symbol for mnsnap allocation data.",
+      "evidence_refs": [
+        "raw_diff: symbols.txt mnGallery_804A0B90 to mnSnap_804A0B90",
+        "raw_diff: gm_1B03.c allocation loop changed to mnSnap_804A0B90 and mnSnap_804A0B90_t"
+      ]
+    },
+    {
+      "text": "Inlining ordinary asset/file strings instead of referencing generated mnGallery data symbols reduced reliance on named data where local source did not require a global symbol.",
+      "evidence_refs": [
+        "raw_diff: lbMthp_8001F410 now called with \"MvOmake15.mth\" and \"MvHowTo.mth\"",
+        "decomp_standards: no-string-literal-symbol-regression",
+        "decomp_standards: literals-and-data-ownership"
+      ]
+    },
+    {
+      "text": "Introducing userdata structs and STATIC_ASSERTs made repeated raw/padded access shapes more reviewable while preserving known size constraints.",
+      "evidence_refs": [
+        "raw_diff: adds mnGallery_804D6C88_userdata and mnGallery_child_userdata with STATIC_ASSERTs"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "text": "When a menu file's data ownership is ambiguous, check adjacent TU boundaries and callsites before accepting address-style names; this PR moved 0x804A0B90 from mngallery to mnsnap and updated the allocation code accordingly.",
+      "scope": [
+        "melee/mn",
+        "config/GALE01/symbols.txt",
+        "config/GALE01/splits.txt"
+      ],
+      "evidence_refs": [
+        "raw_diff: splits.txt mnsnap .bss expands to 0x804A0BA0 while mngallery .bss starts at 0x804A0BA0",
+        "raw_diff: symbols.txt mnGallery_804A0B90 to mnSnap_804A0B90",
+        "raw_diff: gm_1B03.c uses mnSnap_804A0B90"
+      ]
+    },
+    {
+      "text": "For GObj userdata in subsystem-local code, a local GET_* macro that wraps HSD_GObjGetUserData and casts to the recovered userdata type can document the intended access pattern, but matching may still require direct HSD_GObjGetUserData at specific callsites.",
+      "scope": [
+        "src/melee/mn/mngallery.c",
+        "HSD_GObjGetUserData",
+        "GET_804D6C88"
+      ],
+      "evidence_refs": [
+        "raw_diff: defines GET_804D6C88 as cast of HSD_GObjGetUserData",
+        "review_comments.md: jellejurre says HSD_GObjGetUserData had to be used directly instead of helper method",
+        "review_comments.md: BR- explains HSD_GObjGetUserData drives GET_FIGHTER and GET_804D6C88 mimics that pattern"
+      ]
+    },
+    {
+      "text": "Replacing generated extern literals with source-level literals and ordinary local constants can pair with symbol-scope cleanup when the PR is explicitly linking the object and data labels are adjusted accordingly.",
+      "scope": [
+        "src/melee/mn/mngallery.c",
+        "config/GALE01/symbols.txt"
+      ],
+      "evidence_refs": [
+        "raw_diff: mngallery.c replaces extern vectors/floats/strings with inline literals",
+        "raw_diff: symbols.txt converts mngallery rodata/data/sdata/sdata2 globals to local @ labels",
+        "text_corpus.jsonl: bot report records mngallery .data/.rodata/.sdata2 progress"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "Recovered field name: data->unk14 was renamed to data->state where menu state comparisons/assignments are visible.",
+      "evidence_refs": [
+        "raw_diff/review hunk: data->unk14 = 3 changed to data->state = 3",
+        "raw_diff: mnGallery_8025896C checks GET_804D6C88(data)->state == 3"
+      ]
+    },
+    {
+      "text": "For still-uncertain struct members, the PR retained conservative names such as unk0, unk1, unk2, unk15 while naming clearer pointer roles gobj4, gobj8, sobj, text, frame, and gobjs.",
+      "evidence_refs": [
+        "raw_diff: struct mnGallery_804D6C88_userdata fields"
+      ]
+    },
+    {
+      "text": "The local userdata accessor name GET_804D6C88 follows the address-based naming style used when semantic meaning is not fully known.",
+      "evidence_refs": [
+        "raw_diff: #define GET_804D6C88(gobj)",
+        "review_comments.md: BR- says GET_804D6C88 is a macro made to mimic GET_FIGHTER for this file"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "text": "The PR removed some optimization pragmas around mngallery functions but retained a narrow #pragma dont_inline around mnGallery_80258D50.",
+      "evidence_refs": [
+        "review hunk: removes #pragma optimization_level 2, opt_strength_reduction on, opt_propagation off before fn_802590C4",
+        "raw_diff: #pragma push / #pragma dont_inline on around mnGallery_80258D50"
+      ]
+    },
+    {
+      "text": "A direct HSD_GObjGetUserData call was used in fn_802590C4_inline because the file-local GET_804D6C88 helper reportedly broke matching at that site.",
+      "evidence_refs": [
+        "review hunk: tmp = HSD_GObjGetUserData(gobj); /// @todo GET_804D6C88 breaks these",
+        "review_comments.md: jellejurre explanation",
+        "review_comments.md: BR- explanation"
+      ]
+    },
+    {
+      "text": "The source includes narrow matching hacks/comments in fn_80258ED0_helper, including direct user_data access because GET_804D6C88 'blows the stack' and a volatile cast marked 'hacky'.",
+      "evidence_refs": [
+        "raw_diff: fn_80258ED0_helper comments: GET_804D6C88 blows the stack; HSD_GObj* volatile cast marked hacky"
+      ]
+    },
+    {
+      "text": "A small float_order_helper was introduced to set sobj->x10 = 96.0f and sobj->x14 = 72.0f, apparently preserving float/order behavior while avoiding named extern float data.",
+      "evidence_refs": [
+        "raw_diff: static void float_order_helper(HSD_SObj* sobj)",
+        "raw_diff: mnGallery_80258BC4 calls float_order_helper(sobj)"
+      ]
+    },
+    {
+      "text": "PAD_STACK(0x10) remains in mnGallery_8025896C, so any reuse of this tactic should require narrow objdiff evidence.",
+      "evidence_refs": [
+        "raw_diff: mnGallery_8025896C contains PAD_STACK(0x10)",
+        "decomp_standards: matching-tactics-need-evidence"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "author": "jurrejelle",
+      "text": "Asked 'what's this?' on the fn_802590C4_inline change that directly called HSD_GObjGetUserData with a TODO about GET_804D6C88 breaking.",
+      "path": "src/melee/mn/mngallery.c",
+      "evidence_refs": [
+        "review_comments.md: discussion_r3031627398"
+      ]
+    },
+    {
+      "author": "jellejurre",
+      "text": "Explained that the noteworthy issue was needing to use HSD_GObjGetUserData directly instead of the helper method defined for the file.",
+      "path": "src/melee/mn/mngallery.c",
+      "evidence_refs": [
+        "review_comments.md: discussion_r3031631641"
+      ]
+    },
+    {
+      "author": "BR-",
+      "text": "Clarified that HSD_GObjGetUserData is the inline behind GET_FIGHTER-style accessors, returns userdata through void*, and that GET_804D6C88 was made to mimic GET_FIGHTER by calling the inline and casting to mnGallery_804D6C88_userdata*.",
+      "path": "src/melee/mn/mngallery.c",
+      "evidence_refs": [
+        "review_comments.md: discussion_r3031685408"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2380",
+    "Link mngallery",
+    "mngallery",
+    "mnGallery_804D6C88_userdata",
+    "GET_804D6C88",
+    "HSD_GObjGetUserData",
+    "GET_FIGHTER",
+    "fn_802590C4",
+    "fn_802590C4_inline",
+    "mnGallery_80258BC4",
+    "mnGallery_80258D50",
+    "fn_80258ED0_helper",
+    "mnSnap_804A0B90",
+    "mnGallery_804A0B90",
+    "MvOmake15.mth",
+    "MvHowTo.mth",
+    "float_order_helper",
+    "PAD_STACK",
+    "pragma dont_inline",
+    "StaticModelDesc",
+    "symbols.txt local @ labels",
+    "splits.txt mngallery mnsnap"
+  ],
+  "follow_up_queries": [
+    "GET_804D6C88 HSD_GObjGetUserData breaks these",
+    "GET_804D6C88 blows the stack",
+    "mnGallery_804D6C88_userdata struct",
+    "mnGallery_804A0B90 mnSnap_804A0B90 ownership",
+    "mngallery float_order_helper",
+    "fn_802590C4_inline direct HSD_GObjGetUserData",
+    "mngallery PAD_STACK 0x10",
+    "mngallery pragma dont_inline mnGallery_80258D50",
+    "MvOmake15.mth MvHowTo.mth mngallery literals"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR state MERGED, changed_files counts",
+      "changed_files.jsonl: 8 changed files",
+      "raw_diff: truncated at 34343 chars but includes main hunks",
+      "text_corpus.jsonl: bot report and review comments",
+      "human_pr_text.md: author note says 90% done and mentions messy mnGallery_t and unknown mnGallery_804D6C88 struct"
+    ],
+    "notes": [
+      "Loaded raw_diff is truncated, so exact final contents of later mngallery.c hunks, mngallery.h, mnsnap.h, and types.h are not fully visible.",
+      "Bot report provides progress/match metrics, but no local build command, objdiff command, or adjacent-function regression evidence is shown in the slice.",
+      "The PR author's comment says '90% done' and calls out messy mnGallery_t and unresolved mnGallery_804D6C88 struct understanding; the merge state and bot report indicate accepted progress, but the slice should not be read as proving all struct semantics.",
+      "Review discussion documents the HSD_GObjGetUserData/GET_804D6C88 issue, but does not prove a general rule that direct calls are always preferable."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "title": "GObj userdata helpers may be useful but matching can require direct HSD_GObjGetUserData at isolated sites",
+        "text": "In PR #2380, mngallery introduced GET_804D6C88 as a GET_FIGHTER-like wrapper around HSD_GObjGetUserData, but fn_802590C4_inline used HSD_GObjGetUserData directly with a TODO that GET_804D6C88 broke matching. Review clarified that HSD_GObjGetUserData is the inline behind GET_FIGHTER-style accessors and simply returns userdata through void* before the wrapper casts it.",
+        "scope": [
+          "src/melee/mn/mngallery.c",
+          "HSD_GObjGetUserData",
+          "GET_804D6C88"
+        ],
+        "evidence_refs": [
+          "raw_diff: #define GET_804D6C88",
+          "review_comments.md: discussion_r3031631641",
+          "review_comments.md: discussion_r3031685408"
+        ]
+      },
+      {
+        "title": "Check adjacent TU data ownership when linking menu files",
+        "text": "PR #2380 linked mngallery while moving the 0x804A0B90 bss object from mnGallery to mnSnap ownership, expanding the mnsnap bss split and updating gm_1B03 allocation code to include mnsnap.h and use mnSnap_804A0B90.",
+        "scope": [
+          "melee/mn/mngallery.c",
+          "melee/mn/mnsnap.c",
+          "config/GALE01/splits.txt",
+          "config/GALE01/symbols.txt"
+        ],
+        "evidence_refs": [
+          "raw_diff: splits.txt mnsnap/mngallery bss changes",
+          "raw_diff: symbols.txt mnGallery_804A0B90 to mnSnap_804A0B90",
+          "raw_diff: gm_1B03.c allocation loop uses mnSnap_804A0B90"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "mngallery linked as Matching in PR #2380",
+        "text": "PR #2380 changed configure.py so Object(NonMatching, \"melee/mn/mngallery.c\") became Object(Matching, \"melee/mn/mngallery.c\"). The bot report recorded linked code +4268 bytes and 7 new matches including mngallery .data/.bss/.rodata/.sdata2 and fn_802590C4.",
+        "source_path": "configure.py",
+        "scope": [
+          "melee/mn/mngallery.c",
+          "GALE01"
+        ],
+        "evidence_refs": [
+          "raw_diff: configure.py mngallery Object Matching",
+          "text_corpus.jsonl: decomp-dev[bot] report"
+        ],
+        "reason": "Potential path fact about object matching status and historical progress; should be checked against current source before promotion."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "0x804A0B90 bss ownership moved from mngallery to mnsnap",
+        "text": "PR #2380 changed symbols.txt from mnGallery_804A0B90 to mnSnap_804A0B90, expanded mnsnap .bss to 0x804A0BA0, started mngallery .bss at 0x804A0BA0, and updated gm_1B03.c allocation code to use mnSnap_804A0B90.",
+        "source_path": "config/GALE01/symbols.txt",
+        "scope": [
+          "config/GALE01/symbols.txt",
+          "config/GALE01/splits.txt",
+          "src/melee/gm/gm_1B03.c",
+          "src/melee/mn/mnsnap.h"
+        ],
+        "evidence_refs": [
+          "raw_diff: symbols.txt mnGallery_804A0B90 to mnSnap_804A0B90",
+          "raw_diff: splits.txt mnsnap/mngallery bss boundary changes",
+          "raw_diff: gm_1B03.c mnSnap_804A0B90 allocation"
+        ],
+        "reason": "Concrete historical ownership correction, but current source should verify whether this fact remains accurate."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "GET_* userdata wrappers are not mandatory when they perturb matching",
+        "text": "Consider adding a note under typed-fields/accessors or matching tactics: file-local GET_* wrappers around HSD_GObjGetUserData can improve readability, but a direct HSD_GObjGetUserData call may be acceptable at narrow sites when the wrapper changes stack/codegen and the reason is documented.",
+        "source_path": null,
+        "scope": [
+          "GObj userdata access",
+          "HSD_GObjGetUserData",
+          "matching tactics"
+        ],
+        "evidence_refs": [
+          "review_comments.md: jellejurre says direct HSD_GObjGetUserData was needed instead of helper",
+          "review_comments.md: BR- explains relationship between HSD_GObjGetUserData and GET_FIGHTER-style macros",
+          "raw_diff: TODO comments around GET_804D6C88 breaking/blowing stack"
+        ],
+        "reason": "May refine existing standards on typed fields and matching tactics, but evidence is one PR and should not become a broad exception without curator review."
+      }
+    ],
+    "rejection_notes": [
+      "Do not generalize that all GET_* macros should be avoided; the review explicitly says GET_804D6C88 mimics GET_FIGHTER and only documents local breakage in this PR.",
+      "Do not promote the exact mnGallery_804D6C88_userdata field semantics beyond names shown in the diff; the author explicitly noted uncertainty about the struct.",
+      "Do not treat the local labels @144/@157/etc. as durable semantic names; they are symbol/split metadata in the PR evidence, not source-level meaning.",
+      "Do not claim full objdiff/regression validation beyond the bot report, because no command output or adjacent regression ledger is included in the slice."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

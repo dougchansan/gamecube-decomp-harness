@@ -1,0 +1,10 @@
+{
+  "pr": 1747,
+  "title": " Split mnmain/mnmainrule, partial match mn_80231804",
+  "url": "https://github.com/doldecomp/melee/pull/1747",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 18,
+  "added_lines": 354,
+  "deleted_lines": 102
+}

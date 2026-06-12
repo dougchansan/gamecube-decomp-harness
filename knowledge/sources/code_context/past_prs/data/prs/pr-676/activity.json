@@ -1,0 +1,10 @@
+{
+  "pr": 676,
+  "title": "Fix `item.h`, pass 2",
+  "url": "https://github.com/doldecomp/melee/pull/676",
+  "text_records_with_body": 5,
+  "review_comments": 3,
+  "changed_files": 10,
+  "added_lines": 563,
+  "deleted_lines": 428
+}

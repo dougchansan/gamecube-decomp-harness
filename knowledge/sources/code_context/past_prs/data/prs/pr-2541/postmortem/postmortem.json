@@ -1,0 +1,318 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2541",
+  "pr": {
+    "number": 2541,
+    "title": "Match hsd_803A949C (92%)",
+    "url": "https://github.com/doldecomp/melee/pull/2541",
+    "state": "MERGED",
+    "author": "jurrejelle",
+    "created_at": "2026-05-25T19:47:01Z",
+    "merged_at": "2026-05-31T13:45:23Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2541 advanced matching for sysdolphin baselib function hsd_803A949C, changing the implementation and header signature. The diff replaces a local CardStateExt/CardCmdEntry approach with CardState field usage and command-buffer access macros, adjusts control flow and data checks across CARD close/read/verify cases, and updates the public prototype to void hsd_803A949C(s32 chan, s32 arg1). Bot output reports hsd_803A949C improving from 58.78% to 93.40%, while the PR title says 92%.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "typed-struct-cleanup",
+      "matching-tactics"
+    ],
+    "systems": [
+      "src/sysdolphin/baselib",
+      "CARD"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/sysdolphin/baselib/hsd_3A94.c",
+      "role": "Primary implementation changed for hsd_803A949C and helper types/macros.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/sysdolphin/baselib/hsd_3A94.c added 148 deleted 164 hunks 17",
+        "raw_diff: hsd_3A94.c replaces CardStateExt/CardCmdEntry with CardBufEntry and CMD_* macros",
+        "raw_diff: hsd_3A94.c changes hsd_803A949C from one argument to two arguments",
+        "text_corpus.jsonl: bot report for main/sysdolphin/baselib/hsd_3A94 hsd_803A949C 58.78% -> 93.40%"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/hsd_3A94.h",
+      "role": "Header prototype updated to match recovered function signature.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/sysdolphin/baselib/hsd_3A94.h added 1 deleted 1 hunks 1",
+        "raw_diff lines 546-551: void hsd_803A949C(s32 arg1) -> void hsd_803A949C(s32 chan, s32 arg1)"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Changed extern hsd_804D7980 from s32 to volatile s32 in hsd_3A94.c.",
+    "Removed local CardStateExt and CardCmdEntry definitions and introduced a compact CardBufEntry type.",
+    "Removed hsd_803A949C_GetEntry and replaced entry field access with CMD_S32, CMD_STATE, CMD_PTR, and CMD_TYPE macros over hsd_804D1138 plus the volatile hsd_804D7980 index.",
+    "Changed helpers hsd_803A949C_Close and hsd_803A949C_IconSize to take CardState* and use named CardState fields such as file_info and digest.",
+    "Changed hsd_803A949C signature from void hsd_803A949C(s32 arg1) to void hsd_803A949C(s32 chan, s32 arg1), and updated the header prototype.",
+    "Reworked command-case logic to use CMD_* command-buffer reads, direct CardState fields, explicit NULL checks for copy destinations, and repeated digest/update calls through CMD_STATE.",
+    "Added a bounded for loop before assigning state->x20 from state->file_info.fileNo.",
+    "In case 13, replaced some CardBlock pointer use with direct byte indexing into state->x0 for file id/version extraction.",
+    "Bot report records hsd_803A949C score improvement from 58.78% to 93.40%."
+  ],
+  "smart_moves": [
+    {
+      "text": "Updated the owning header when the implementation signature changed, avoiding a stale prototype.",
+      "evidence_refs": [
+        "raw_diff: hsd_3A94.c changes hsd_803A949C(s32 arg1) to hsd_803A949C(s32 chan, s32 arg1)",
+        "raw_diff lines 550-551: hsd_3A94.h prototype updated"
+      ]
+    },
+    {
+      "text": "Moved several accesses from an ad hoc local CardStateExt layout to the existing CardState type and named fields, improving type fidelity for known structure members.",
+      "evidence_refs": [
+        "raw_diff: CARDClose(&state->xC) -> CARDClose(&state->file_info)",
+        "raw_diff: state->x430 digest accesses -> CMD_STATE->digest accesses"
+      ]
+    },
+    {
+      "text": "Centralized command-buffer indexing behind CMD_* macros instead of repeating hand-expanded pointer expressions throughout the function.",
+      "evidence_refs": [
+        "raw_diff: introduces CMD_S32, CMD_STATE, CMD_PTR, CMD_TYPE",
+        "raw_diff: switch(entry->x0) -> switch(CMD_TYPE)"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a recovered function signature changes, update the matching header in the same PR so call surfaces remain truthful.",
+      "scope": [
+        "headers",
+        "function prototypes"
+      ],
+      "evidence_refs": [
+        "raw_diff: implementation signature changed to void hsd_803A949C(s32 chan, s32 arg1)",
+        "raw_diff lines 550-551: header prototype changed to the same two-argument signature"
+      ],
+      "standard_refs": [
+        "truthful-headers-and-includes"
+      ]
+    },
+    {
+      "lesson": "Prefer real recovered struct fields over temporary duplicate local layouts when the underlying type is known.",
+      "scope": [
+        "typed fields",
+        "CardState",
+        "sysdolphin baselib"
+      ],
+      "evidence_refs": [
+        "raw_diff: removes CardStateExt",
+        "raw_diff: uses CardState* in hsd_803A949C_Close and hsd_803A949C_IconSize",
+        "raw_diff: state->file_info and CMD_STATE->digest replace offset-style fields xC and x430 in several places"
+      ],
+      "standard_refs": [
+        "typed-fields-over-pointer-math"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "CardBufEntry",
+      "kind": "local struct name",
+      "observation": "Introduced as a compact local type for command-buffer slots while retaining unknown field names x0/x4/etc.",
+      "evidence_refs": [
+        "raw_diff: typedef struct CardBufEntry { s32 x0, x4, x8, xC; ... }"
+      ]
+    },
+    {
+      "name": "CMD_S32 / CMD_STATE / CMD_PTR / CMD_TYPE",
+      "kind": "local macro names",
+      "observation": "Uppercase local macros describe command-buffer access patterns and distinguish scalar, pointer, state, and type access.",
+      "evidence_refs": [
+        "raw_diff: defines CMD_S32, CMD_STATE, CMD_PTR, CMD_TYPE"
+      ]
+    },
+    {
+      "name": "chan",
+      "kind": "parameter name",
+      "observation": "The newly added first parameter is named chan in both the implementation and header; the diff does not show it being used in the excerpt.",
+      "evidence_refs": [
+        "raw_diff: void hsd_803A949C(s32 chan, s32 arg1)",
+        "raw_diff lines 550-551: header prototype uses s32 chan"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Use volatile on the command-buffer index global hsd_804D7980.",
+      "evidence_refs": [
+        "raw_diff: extern s32 hsd_804D7980 -> extern volatile s32 hsd_804D7980"
+      ],
+      "notes": "This is a matching tactic visible in the diff, but the PR evidence does not include an explanation or adjacent regression evidence."
+    },
+    {
+      "tactic": "Replace an entry pointer local with macro-expanded command-buffer reads at different offsets.",
+      "evidence_refs": [
+        "raw_diff: removes hsd_803A949C_GetEntry",
+        "raw_diff: introduces CMD_S32(off) over hsd_804D1138 + off indexed by hsd_804D7980"
+      ],
+      "notes": "The macros likely affect generated access shape. The PR evidence supports that they improved the function score, but does not prove they are a general style preference."
+    },
+    {
+      "tactic": "Introduce a bounded empty loop before reading file_info.fileNo.",
+      "evidence_refs": [
+        "raw_diff: for (i = 0; i < 10; i++) { if (state->file_info.fileNo != -1) break; } state->x20 = state->file_info.fileNo;"
+      ],
+      "notes": "The loop is evidence of a matching/control-flow change in this function only; no validation details explain why the bound 10 is required."
+    },
+    {
+      "tactic": "Duplicate verification blocks inside each branch instead of sharing a common post-branch block.",
+      "evidence_refs": [
+        "raw_diff: file id, x12, and memcmp checks are moved inside both offset and non-offset branches in one case"
+      ],
+      "notes": "This likely changes control-flow shape for matching. Treat as local evidence, not a global recommendation."
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "automation",
+      "author": "decomp-dev[bot]",
+      "feedback": "Report for GALE01 shows one unmatched item improvement: main/sysdolphin/baselib/hsd_3A94 hsd_803A949C +1679 bytes, 58.78% before, 93.40% after.",
+      "evidence_refs": [
+        "text_corpus.jsonl issue_comment by decomp-dev[bot] created_at 2026-05-25T19:50:31Z"
+      ]
+    },
+    {
+      "kind": "absence",
+      "author": null,
+      "feedback": "No human review comments or review records are present in the supplied PR slice.",
+      "evidence_refs": [
+        "metadata_json counts: issue_comments 1, review_comments 0, reviews 0",
+        "text_corpus.jsonl contains PR body and one bot issue comment only"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2541",
+    "hsd_803A949C",
+    "Match hsd_803A949C",
+    "src/sysdolphin/baselib/hsd_3A94.c",
+    "src/sysdolphin/baselib/hsd_3A94.h",
+    "CardState",
+    "CardBufEntry",
+    "CMD_S32",
+    "CMD_STATE",
+    "CMD_PTR",
+    "CMD_TYPE",
+    "hsd_804D7980",
+    "volatile hsd_804D7980",
+    "hsd_804D1138",
+    "hsd_804D1148",
+    "file_info",
+    "digest",
+    "CARDClose",
+    "hsd_803B31CC",
+    "hsd_803B2B20",
+    "hsd_803AC558",
+    "GALE01",
+    "93.40%",
+    "58.78%"
+  ],
+  "follow_up_queries": [
+    "hsd_803A949C CMD_S32 CMD_TYPE",
+    "volatile hsd_804D7980 matching tactic",
+    "CardState file_info digest hsd_3A94",
+    "hsd_804D1138 command buffer CardBufEntry",
+    "hsd_803A949C signature chan arg1",
+    "main/sysdolphin/baselib/hsd_3A94 hsd_803A949C 93.40"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR 2541 title/state/author/merge timestamps and changed-file counts",
+      "changed_files.jsonl: two changed files",
+      "raw_diff: implementation and header excerpts",
+      "text_corpus.jsonl: empty PR body and one bot report",
+      "metadata_json counts: review_comments 0, reviews 0"
+    ],
+    "notes": [
+      "The loaded diff is truncated in the prompt, but a targeted lookup recovered the header hunk.",
+      "There is no PR body explaining rationale and no human review feedback in the slice.",
+      "The PR title says 92%, while the bot report says 93.40% after; both are preserved without reconciling them.",
+      "The bot report supports score improvement, but no build command, objdiff screenshot, or adjacent-regression evidence is present.",
+      "Macro and volatile changes are treated as local tactics, not accepted global style."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson",
+        "title": "Keep recovered signatures synchronized with owning headers",
+        "text": "PR 2541 changed hsd_803A949C to take s32 chan, s32 arg1 in hsd_3A94.c and updated hsd_3A94.h to the same prototype. This is a concrete example of the truthful-header standard during matching work.",
+        "scope": [
+          "headers",
+          "function prototypes",
+          "sysdolphin/baselib"
+        ],
+        "evidence_refs": [
+          "raw_diff: hsd_3A94.c signature changed to void hsd_803A949C(s32 chan, s32 arg1)",
+          "raw_diff lines 550-551: hsd_3A94.h prototype updated"
+        ],
+        "standard_refs": [
+          "truthful-headers-and-includes"
+        ]
+      },
+      {
+        "record_type": "decomp_lesson",
+        "title": "Replace temporary struct mirrors with known typed fields when possible",
+        "text": "PR 2541 removed a local CardStateExt mirror and changed helpers to accept CardState*, using named fields such as file_info and digest where available. This is a concrete example of preferring recovered types over duplicate local layouts.",
+        "scope": [
+          "typed fields",
+          "CardState",
+          "sysdolphin/baselib"
+        ],
+        "evidence_refs": [
+          "raw_diff: removes CardStateExt",
+          "raw_diff: hsd_803A949C_Close(CardState*) uses state->file_info",
+          "raw_diff: digest accesses use CMD_STATE->digest"
+        ],
+        "standard_refs": [
+          "typed-fields-over-pointer-math"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "other",
+        "update_kind": "source_update",
+        "title": "Consider documenting hsd_3A94 command-buffer access pattern",
+        "text": "PR 2541 replaces a CardCmdEntry pointer model with CMD_S32/CMD_STATE/CMD_PTR/CMD_TYPE macros over hsd_804D1138 plus hsd_804D7980. If later PRs confirm this is the correct command-buffer layout, it may merit a local source comment, typed wrapper, or path fact for sysdolphin/baselib hsd_3A94.",
+        "source_path": "src/sysdolphin/baselib/hsd_3A94.c",
+        "scope": [
+          "hsd_3A94",
+          "hsd_804D1138",
+          "hsd_804D7980",
+          "command buffer"
+        ],
+        "evidence_refs": [
+          "raw_diff: defines CMD_S32(off) using hsd_804D1138 + off and hsd_804D7980",
+          "raw_diff: switch(entry->x0) -> switch(CMD_TYPE)",
+          "raw_diff: state = ((CardState*) CMD_S32(0x14))"
+        ],
+        "reason": "The pattern is central to the PR and may be reusable, but this single slice lacks enough explanation to promote a canonical layout or global convention."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote volatile hsd_804D7980 as a general matching tactic; the PR shows the edit but gives no rationale or regression evidence.",
+      "Do not treat CMD_* macros as a global standard; they are local evidence for hsd_3A94 only.",
+      "Do not claim a fully matched function; the title and bot report indicate partial match percentages, not 100%.",
+      "Do not infer human reviewer intent; no review comments are present."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

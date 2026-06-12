@@ -1,0 +1,562 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2317",
+  "pr": {
+    "number": 2317,
+    "title": "Misc item work",
+    "url": "https://github.com/doldecomp/melee/pull/2317",
+    "state": "MERGED",
+    "author": "lukechampine",
+    "created_at": "2026-03-18T04:37:42Z",
+    "merged_at": "2026-03-18T18:07:07Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Large item decomp/matching PR touching 30 item-related files. It replaced many item function placeholders with C, expanded item attribute and item-var structs, and updated several prototypes from UNK_RET/UNK_PARAMS to typed signatures. The bot report recorded +8716 matched-code bytes, +48 matched-data bytes, and 51 new matches, with prominent matches in itflipper, ittools, itwhitebea, Game & Watch items, Yoshi egg throw, Hinoarashi, Patapata, and Zgshell.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "prototype-cleanup",
+      "typed-item-fields",
+      "matching-tactics"
+    ],
+    "systems": [
+      "item",
+      "item/common",
+      "item/character-items"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/it/itCharItems.h",
+      "role": "Expanded character item attributes and item vars, including Climbers Ice, Arwing laser Vec3 fields, Game & Watch parachute attributes, and Hinoarashi structs.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:itCharItems.h"
+      ]
+    },
+    {
+      "path": "src/melee/it/itCommonItems.h",
+      "role": "Expanded common item dat attrs/item vars for Flipper, Tincle, Tools, Mewtwo Shadowball, and WhiteBea.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:itCommonItems.h"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itflipper.c",
+      "role": "Largest implementation addition; added multiple Flipper functions, collision/physics logic, and two matching handlers guarded by scoped dont_inline plus PAD_STACK.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:itflipper.c",
+        "bot_report:itflipper matches"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/ittools.c",
+      "role": "Added several Tools functions and logic handlers, including spawn/collision/absorbed-related routines.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:ittools.c",
+        "bot_report:ittools matches"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itwhitebea.c",
+      "role": "Added WhiteBea movement/physics routines and used newly expanded WhiteBea attributes.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:itwhitebea.c",
+        "bot_report:itwhitebea matches"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itarwinglaser.c",
+      "role": "Added Arwing laser cleanup, animation, effect-spawn, and Vec3 state handling routines.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:itarwinglaser.c"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itgamewatchchef.c",
+      "role": "Implemented it_802C837C item spawn helper and linked spawned item to parent/debug tracking.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:itgamewatchchef.c",
+        "bot_report:it_802C837C"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itgamewatchparachute.c",
+      "role": "Implemented parachute spawn helper and UnkMotion1 animation/removal check.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:itgamewatchparachute.c",
+        "bot_report:it_802C6C38"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/ithinoarashi.c",
+      "role": "Added Hinoarashi routines including animation and damage-received logic using new item vars/attributes.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:ithinoarashi.c",
+        "bot_report:ithinoarashi matches"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itclimbersstring.c",
+      "role": "Added item cleanup/destruction routine that clears owner and destroys linked child gobjs with an ItemLink traversal.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:itclimbersstring.c"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itmewtwoshadowball.c",
+      "role": "Added Mewtwo Shadowball destroy/shield-bounce related logic and angle normalization using M_TAU.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:itmewtwoshadowball.c"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/ityoshieggthrow.c",
+      "role": "Added Yoshi egg throw spawn/effect-related routines.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:ityoshieggthrow.c",
+        "bot_report:ityoshieggthrow matches"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itpatapata.c",
+      "role": "Added Patapata animation routine.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:itpatapata.c",
+        "bot_report:itPatapata_UnkMotion3_Anim"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itsscope.c",
+      "role": "Added/changed charge-level outline helper logic using switch-style dispatch.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:itsscope.c"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/ittincle.c",
+      "role": "Added Tincle routine using newly exposed item-var and attribute fields.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:ittincle.c",
+        "bot_report:it_802EBD14"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itzgshell.c",
+      "role": "Added Zgshell functions including clanked logic and random include.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:itzgshell.c",
+        "bot_report:itzgshell matches"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itclimbersice.c",
+      "role": "Added math and itcoll includes needed by Climbers Ice work.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:itclimbersice.c"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itclimbersice.h",
+      "role": "Updated it_802C1854 prototype from unknown to bool(void).",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:itclimbersice.h"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itflipper.h",
+      "role": "Updated Flipper prototypes for implemented functions.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:itflipper.h"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itfreeze.h",
+      "role": "Updated it_8028EB88 prototype to a typed Item_GObj* signature.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:itfreeze.h"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itgamewatchparachute.h",
+      "role": "Declared new Game & Watch parachute animation function.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:itgamewatchparachute.h"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/ithinoarashi.h",
+      "role": "Header updates for Hinoarashi functions.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:ithinoarashi.h"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itklap.c",
+      "role": "Added Klap functions with collision/velocity handling.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:itklap.c"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itklap.h",
+      "role": "Prototype cleanup for Klap.",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itlipstickspore.c",
+      "role": "Added db and efsync includes for lipstick spore work.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:itlipstickspore.c"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itlipstickspore.h",
+      "role": "Prototype cleanup for lipstick spore.",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itsscope.h",
+      "role": "Prototype cleanup for SScope.",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/ittincle.h",
+      "role": "Prototype cleanup for Tincle.",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/ittools.h",
+      "role": "Prototype cleanup for Tools.",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/it/types.h",
+      "role": "Small shared item type update.",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Replaced many item placeholders with C implementations across common and character item files.",
+    "Expanded item-specific structs instead of leaving broad padding, including Flipper dat attrs, Tincle item vars/attrs, Mewtwo Shadowball item vars, WhiteBea attrs, Arwing laser Vec3 fields, and Hinoarashi structs.",
+    "Updated headers from UNK_RET/UNK_PARAMS to typed prototypes where function bodies or call surfaces were added.",
+    "Added exact includes needed by recovered code, such as db/db.h, ef/efsync.h, ef/efasync.h, lb/lb_00B0.h, lbvector.h, itcoll.h, and fighter-specific headers.",
+    "Bot report recorded 51 new matches and +8716 matched-code bytes, with multiple item functions reaching 100%."
+  ],
+  "smart_moves": [
+    "Used typed item-var and dat-attr fields to express offset accesses in headers before or alongside recovered C bodies.",
+    "Kept unknown global/function names in address-style form where semantics were not established, while using local role names such as ip, attrs, gobj, parent, pos, and spawn.",
+    "Spawn helper implementations consistently filled SpawnItem fields, parent links, facing direction, velocity, and flags before Item_80268B18.",
+    "Scoped the Flipper dont_inline workaround with an on/reset pair rather than leaving a broad pragma active.",
+    "Arwing laser state used Vec3 assignment for adjacent position fields after header conversion from scalar slots."
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When item code repeatedly accesses offsets in xDD4_itemVar or x4_specialAttributes, recovering a narrow item-specific struct can turn raw offset work into readable field access and support matching.",
+      "evidence_refs": [
+        "raw_diff:itCharItems.h",
+        "raw_diff:itCommonItems.h",
+        "raw_diff:itflipper.c",
+        "raw_diff:itwhitebea.c",
+        "raw_diff:ithinoarashi.c"
+      ],
+      "standards": [
+        "typed-fields-over-pointer-math",
+        "truthful-headers-and-includes"
+      ]
+    },
+    {
+      "lesson": "When a placeholder implementation proves a function signature, update the owning header in the same PR rather than leaving UNK_RET/UNK_PARAMS.",
+      "evidence_refs": [
+        "raw_diff:itflipper.h",
+        "raw_diff:itfreeze.h",
+        "raw_diff:itclimbersice.h",
+        "raw_diff:itgamewatchparachute.h"
+      ],
+      "standards": [
+        "truthful-headers-and-includes"
+      ]
+    },
+    {
+      "lesson": "Scoped matching tactics such as PAD_STACK and dont_inline appeared only around narrow functions in this slice; intake evidence supports flagging them for verification tracking, not treating them as ordinary style.",
+      "evidence_refs": [
+        "raw_diff:itflipper.c",
+        "raw_diff:itgamewatchchef.c",
+        "raw_diff:itgamewatchparachute.c",
+        "bot_report:51 new matches"
+      ],
+      "standards": [
+        "matching-tactics-need-evidence",
+        "avoid-pragmas-register-asm"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Address-style names such as it_80290C38, it_802C837C, it_802EEFA8, and fn_802C29E8 were retained where semantic names were not proven.",
+      "evidence_refs": [
+        "raw_diff",
+        "changed_files.jsonl"
+      ],
+      "standards": [
+        "conservative-naming"
+      ]
+    },
+    {
+      "convention": "Local variables use common decomp role names: ip for Item*, gobj for Item_GObj/HSD_GObj, attrs for special attributes, parent for parent gobj, pos for Vec3 position, and spawn for SpawnItem.",
+      "evidence_refs": [
+        "raw_diff:itflipper.c",
+        "raw_diff:itgamewatchchef.c",
+        "raw_diff:itgamewatchparachute.c"
+      ],
+      "standards": [
+        "conservative-naming"
+      ]
+    },
+    {
+      "convention": "Unknown recovered struct fields remain offset-based xNN names rather than guessed semantic names.",
+      "evidence_refs": [
+        "raw_diff:itCharItems.h",
+        "raw_diff:itCommonItems.h"
+      ],
+      "standards": [
+        "conservative-naming"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "PAD_STACK used in several newly matched functions to control stack shape.",
+      "evidence_refs": [
+        "raw_diff:itflipper.c",
+        "raw_diff:itgamewatchchef.c",
+        "raw_diff:itgamewatchparachute.c"
+      ]
+    },
+    {
+      "tactic": "Scoped #pragma dont_inline on/reset used around it_3F14_Logic20_Clanked and it_3F14_Logic20_HitShield.",
+      "evidence_refs": [
+        "raw_diff:itflipper.c"
+      ]
+    },
+    {
+      "tactic": "Explicit SpawnItem field initialization used for item factory helpers before calling Item_80268B18.",
+      "evidence_refs": [
+        "raw_diff:itgamewatchchef.c",
+        "raw_diff:itgamewatchparachute.c",
+        "raw_diff:ityoshieggthrow.c",
+        "raw_diff:ittools.c"
+      ]
+    },
+    {
+      "tactic": "Switch statements and exact branch forms appear in recovered state/charge logic, including Arwing laser state cleanup and SScope charge-level handling.",
+      "evidence_refs": [
+        "raw_diff:itarwinglaser.c",
+        "raw_diff:itsscope.c"
+      ]
+    },
+    {
+      "tactic": "Angle normalization in Mewtwo Shadowball used while loops against 0.0f and M_TAU.",
+      "evidence_refs": [
+        "raw_diff:itmewtwoshadowball.c"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "author": "decomp-dev[bot]",
+      "summary": "Reported matched code 58.97% (+0.22%, +8716 bytes), matched data 37.69% (+0.00%, +48 bytes), 51 new matches, and 11 improvements in unmatched items.",
+      "evidence_refs": [
+        "text_corpus.jsonl:issue_comment:decomp-dev[bot]"
+      ]
+    },
+    {
+      "kind": "review_absence",
+      "author": null,
+      "summary": "No human review comments or review records were present in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata_json:counts.review_comments=0",
+        "metadata_json:counts.reviews=0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2317",
+    "Misc item work",
+    "lukechampine",
+    "item decomp",
+    "itflipper",
+    "ittools",
+    "itwhitebea",
+    "ithinoarashi",
+    "itarwinglaser",
+    "itgamewatchchef",
+    "itgamewatchparachute",
+    "itclimbersstring",
+    "itmewtwoshadowball",
+    "ityoshieggthrow",
+    "itpatapata",
+    "itsscope",
+    "ittincle",
+    "itzgshell",
+    "itCharItems.h",
+    "itCommonItems.h",
+    "PAD_STACK",
+    "dont_inline",
+    "SpawnItem",
+    "xDD4_itemVar",
+    "x4_specialAttributes",
+    "UNK_RET",
+    "UNK_PARAMS"
+  ],
+  "follow_up_queries": [
+    "PR2317 PAD_STACK dont_inline itflipper",
+    "itFlipper_DatAttrs x24 x1C PR2317",
+    "itGamewatchparachuteAttributes x0 it_802C6C38",
+    "itHinoarashi_ItemVars x60 x64",
+    "itMewtwoShadowball_ItemVars HSD_GObj x2C",
+    "truthful headers item UNK_RET UNK_PARAMS PR2317",
+    "SpawnItem Item_80268B18 db_80225DD8 it_8027CE64 item helpers"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json",
+      "changed_files.jsonl",
+      "raw_diff",
+      "text_corpus.jsonl:decomp-dev bot report"
+    ],
+    "notes": [
+      "Changed-file metadata and raw diff support the file list and concrete code/header changes.",
+      "The PR body is empty, so author intent and rationale are not available.",
+      "No human review comments were loaded.",
+      "The bot report supports match/improvement claims, but no explicit local build command, objdiff transcript, or reviewer acceptance rationale is present beyond the bot summary and merge metadata.",
+      "The diff excerpt in the prompt was truncated; targeted grep of the local raw diff was used only to classify added functions and tactics."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "type": "candidate_decomp_lesson",
+        "title": "Typed item vars and attributes can unlock broad item matching",
+        "text": "PR2317 shows many item matches landing together with expanded item-var/dat-attr structs in itCharItems.h and itCommonItems.h. Candidate lesson: for item functions, recover narrow xDD4_itemVar and x4_specialAttributes fields before preserving raw padding or offset math.",
+        "scope": [
+          "src/melee/it",
+          "src/melee/it/items"
+        ],
+        "evidence_refs": [
+          "raw_diff:itCharItems.h",
+          "raw_diff:itCommonItems.h",
+          "bot_report:+8716 matched-code bytes"
+        ],
+        "standards": [
+          "typed-fields-over-pointer-math",
+          "truthful-headers-and-includes"
+        ]
+      },
+      {
+        "type": "candidate_decomp_lesson",
+        "title": "Keep speculative item names address-style while using clear local role names",
+        "text": "PR2317 retained address-style global function names for unknown semantics while using local role names such as ip, attrs, gobj, parent, pos, and spawn.",
+        "scope": [
+          "src/melee/it/items"
+        ],
+        "evidence_refs": [
+          "raw_diff:itflipper.c",
+          "raw_diff:itgamewatchchef.c",
+          "raw_diff:itgamewatchparachute.c"
+        ],
+        "standards": [
+          "conservative-naming"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Require ledger notes for scoped dont_inline plus PAD_STACK matching",
+        "text": "PR2317 includes a narrow #pragma dont_inline on/reset region around two Flipper handlers and PAD_STACK in multiple newly matched functions. Existing standards already caution that these tactics need evidence; curator may consider adding this PR as an example requiring narrow bot/objdiff evidence and adjacency checks.",
+        "source_path": null,
+        "scope": [
+          "matching tactics",
+          "item decomp",
+          "src/melee/it/items/itflipper.c"
+        ],
+        "evidence_refs": [
+          "raw_diff:itflipper.c",
+          "text_corpus.jsonl:decomp-dev bot report"
+        ],
+        "reason": "The PR provides a concrete historical example of scoped pragma and PAD_STACK use, but the slice does not include explicit author rationale or objdiff details, so this should be curated as an example only if standards maintainers want one."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "Item implementation/header split in PR2317",
+        "text": "This PR changed item implementations under src/melee/it/items while shared item structs/prototypes were updated in src/melee/it/itCommonItems.h, src/melee/it/itCharItems.h, src/melee/it/items/*.h, and src/melee/it/types.h.",
+        "source_path": "src/melee/it",
+        "scope": [
+          "src/melee/it",
+          "src/melee/it/items"
+        ],
+        "evidence_refs": [
+          "changed_files.jsonl"
+        ],
+        "reason": "Useful as a path-scoping aid for future item decomp, but should be validated against current source ownership before becoming a path fact."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that every PAD_STACK or dont_inline use in item code is acceptable; this slice only shows narrow use plus a bot match report.",
+      "Do not infer semantic meanings for xNN struct fields from this PR; most fields remain offset-style names.",
+      "Do not treat the bot report's unrelated gr/* improvements as intentional PR scope; changed files in this slice are item-related."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

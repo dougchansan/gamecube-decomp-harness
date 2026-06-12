@@ -1,0 +1,17 @@
+{
+  "number": 805,
+  "title": "Clean up `ftYoshi` motion definitions",
+  "state": "MERGED",
+  "createdAt": "2023-04-23T00:20:26Z",
+  "updatedAt": "2023-04-23T00:28:55Z",
+  "mergedAt": "2023-04-23T00:28:54Z",
+  "closedAt": "2023-04-23T00:28:54Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/805",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 10351
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 1758,
+  "title": "Cleaning up efLib_8005D174",
+  "state": "MERGED",
+  "createdAt": "2025-07-28T21:27:10Z",
+  "updatedAt": "2025-07-29T00:31:12Z",
+  "mergedAt": "2025-07-29T00:31:12Z",
+  "closedAt": "2025-07-29T00:31:12Z",
+  "author": "AaronB-Hub",
+  "url": "https://github.com/doldecomp/melee/pull/1758",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 34255
+  }
+}

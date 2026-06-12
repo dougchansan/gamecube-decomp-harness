@@ -1,0 +1,10 @@
+{
+  "pr": 727,
+  "title": "[skip editorconfig] Fix git subtrees",
+  "url": "https://github.com/doldecomp/melee/pull/727",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 6,
+  "added_lines": 267,
+  "deleted_lines": 119
+}

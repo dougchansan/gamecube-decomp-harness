@@ -1,0 +1,17 @@
+{
+  "number": 964,
+  "title": "Remove MUST_MATCH from lbfile due to new compiler",
+  "state": "MERGED",
+  "createdAt": "2023-09-14T00:35:30Z",
+  "updatedAt": "2023-09-14T00:35:49Z",
+  "mergedAt": "2023-09-14T00:35:46Z",
+  "closedAt": "2023-09-14T00:35:46Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/964",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 1104
+  }
+}

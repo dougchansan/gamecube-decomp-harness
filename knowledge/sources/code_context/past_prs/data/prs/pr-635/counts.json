@@ -1,0 +1,17 @@
+{
+  "number": 635,
+  "title": "Enforce 80-character column limit",
+  "state": "MERGED",
+  "createdAt": "2022-12-30T06:37:23Z",
+  "updatedAt": "2022-12-30T08:07:56Z",
+  "mergedAt": "2022-12-30T08:07:55Z",
+  "closedAt": "2022-12-30T08:07:55Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/635",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 1,
+    "diff_bytes": 0
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 101,
+  "title": "Initial cleanup of the Character Data Pointer tables",
+  "state": "MERGED",
+  "createdAt": "2021-11-13T06:14:36Z",
+  "updatedAt": "2021-11-13T06:14:44Z",
+  "mergedAt": "2021-11-13T06:14:42Z",
+  "closedAt": "2021-11-13T06:14:42Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/101",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 53192
+  }
+}

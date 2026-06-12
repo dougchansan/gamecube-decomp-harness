@@ -1,0 +1,17 @@
+{
+  "number": 1148,
+  "title": "Re-link `lb`",
+  "state": "MERGED",
+  "createdAt": "2024-01-29T01:21:43Z",
+  "updatedAt": "2024-01-29T01:22:49Z",
+  "mergedAt": "2024-01-29T01:22:48Z",
+  "closedAt": "2024-01-29T01:22:48Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1148",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 32080
+  }
+}

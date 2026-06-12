@@ -1,0 +1,17 @@
+{
+  "number": 79,
+  "title": "GrTMars conversion to C and matching of basic functions",
+  "state": "MERGED",
+  "createdAt": "2021-09-14T17:56:46Z",
+  "updatedAt": "2021-09-14T17:57:07Z",
+  "mergedAt": "2021-09-14T17:57:03Z",
+  "closedAt": "2021-09-14T17:57:03Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/79",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 11962
+  }
+}

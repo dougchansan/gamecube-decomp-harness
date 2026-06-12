@@ -1,0 +1,10 @@
+{
+  "pr": 1720,
+  "title": "Work around `ninja diff` return code",
+  "url": "https://github.com/doldecomp/melee/pull/1720",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 3,
+  "added_lines": 283,
+  "deleted_lines": 270
+}

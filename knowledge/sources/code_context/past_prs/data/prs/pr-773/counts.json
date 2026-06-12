@@ -1,0 +1,17 @@
+{
+  "number": 773,
+  "title": "Pull file renames from #766",
+  "state": "MERGED",
+  "createdAt": "2023-04-13T18:26:38Z",
+  "updatedAt": "2023-04-13T18:35:11Z",
+  "mergedAt": "2023-04-13T18:35:10Z",
+  "closedAt": "2023-04-13T18:35:10Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/773",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 22062
+  }
+}

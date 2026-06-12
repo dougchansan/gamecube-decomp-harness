@@ -1,0 +1,17 @@
+{
+  "number": 1617,
+  "title": "Match psdisptev",
+  "state": "MERGED",
+  "createdAt": "2025-06-21T06:03:23Z",
+  "updatedAt": "2025-06-21T06:07:41Z",
+  "mergedAt": "2025-06-21T06:07:29Z",
+  "closedAt": "2025-06-21T06:07:29Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1617",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 9648
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 1258,
+  "title": "Bring progress site back from the dead",
+  "state": "MERGED",
+  "createdAt": "2024-02-20T04:03:53Z",
+  "updatedAt": "2024-02-20T04:11:33Z",
+  "mergedAt": "2024-02-20T04:11:32Z",
+  "closedAt": "2024-02-20T04:11:32Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1258",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 182703
+  }
+}

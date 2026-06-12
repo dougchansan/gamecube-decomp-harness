@@ -1,0 +1,10 @@
+{
+  "pr": 747,
+  "title": "Use container image for `check-editorconfig` [skip editorconfig]",
+  "url": "https://github.com/doldecomp/melee/pull/747",
+  "text_records_with_body": 2,
+  "review_comments": 0,
+  "changed_files": 1,
+  "added_lines": 24,
+  "deleted_lines": 24
+}

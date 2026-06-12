@@ -1,0 +1,17 @@
+{
+  "number": 238,
+  "title": "Start matching some fighter functions",
+  "state": "MERGED",
+  "createdAt": "2022-01-05T18:12:41Z",
+  "updatedAt": "2022-01-05T18:12:53Z",
+  "mergedAt": "2022-01-05T18:12:51Z",
+  "closedAt": "2022-01-05T18:12:51Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/238",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 15480
+  }
+}

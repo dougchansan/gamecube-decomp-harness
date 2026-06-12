@@ -1,0 +1,360 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2437",
+  "pr": {
+    "number": 2437,
+    "title": "Jj/groldpupupu",
+    "url": "https://github.com/doldecomp/melee/pull/2437",
+    "state": "MERGED",
+    "author": "jurrejelle",
+    "created_at": "2026-04-28T19:14:38Z",
+    "merged_at": "2026-04-30T20:10:02Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Decomp/matching PR centered on Old Pupupu stage code. It implements previously stubbed groldpupupu functions, adds stage data and local data tables, replaces several gv.unk accesses with typed oldpupupu/oldpupupu2 GroundVars, and makes small formatting-only edits in related gr stage files. The only loaded feedback is an automated decomp report showing matched-code/data improvements and two new matches.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "data-tables",
+      "typed-ground-vars",
+      "stage"
+    ],
+    "systems": [
+      "stage",
+      "ground",
+      "groldpupupu"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gr/groldpupupu.c",
+      "role": "Primary implementation file; adds includes, stage data, static tables, two large function bodies, typed GroundVars access, and a narrow noinline wrapper.",
+      "evidence_refs": [
+        "changed_files: src/melee/gr/groldpupupu.c added 383 deleted 28 hunks 14",
+        "diff_excerpt: groldpupupu.c adds grOp_803E6748 StageData, grOldPupupuSpawnDesc, grOp_803E67B0, grOp_803E67D8, grOp_803E67E4",
+        "diff_excerpt: replaces /// #grOldPupupu_80210D10 and /// #grOldPupupu_802113E0 with C implementations",
+        "diff_excerpt: replaces gp->gv.unk accesses with gp->gv.oldpupupu and gp->gv.oldpupupu2"
+      ]
+    },
+    {
+      "path": "src/melee/gr/types.h",
+      "role": "Header/type update; adds Old Pupupu ground variable structs and union arms.",
+      "evidence_refs": [
+        "changed_files: src/melee/gr/types.h added 18 deleted 0 hunks 2",
+        "raw_diff: adds struct grOldPupupu_GroundVars with xC4..xE0 s32 fields",
+        "raw_diff: adds struct grOldPupupu_GroundVars2 with s16 xC4 and xC6",
+        "raw_diff: adds oldpupupu and oldpupupu2 to Ground gv union"
+      ]
+    },
+    {
+      "path": "src/melee/gr/groldkongo.c",
+      "role": "Incidental formatting changes in existing Old Kongo code.",
+      "evidence_refs": [
+        "changed_files: src/melee/gr/groldkongo.c added 4 deleted 6 hunks 3",
+        "diff_excerpt: line wrapping/indentation changes around DegToRad expression, distance expression, and temp_r3_8 declaration"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grkinokoroute.c",
+      "role": "Incidental formatting change in existing Kinoko Route code.",
+      "evidence_refs": [
+        "changed_files: src/melee/gr/grkinokoroute.c added 2 deleted 1 hunks 1",
+        "diff_excerpt: wraps Ground_801C3DB4 assignment to spawn_idx"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Added Old Pupupu stage-owned data in groldpupupu.c, including the /GrOp.dat StageData record, animation index tables, spawn descriptor table, phase order table, and two Vec3 direction vectors.",
+    "Implemented grOldPupupu_80210D10 with timer decrement/respawn logic, random spawn selection, camera bounds, natural for-loop over spawned objects, JObj translation setup, animation start, and JOBJ_HIDDEN clearing.",
+    "Implemented grOldPupupu_802113E0 with a three-case state machine using gp->gv.oldpupupu fields, animation transitions, paired state propagation to Ground_801C2BA4(1), camera/audio/effect calls, and side-dependent behavior.",
+    "Recovered typed GroundVars for Old Pupupu in types.h and changed groldpupupu.c from gp->gv.unk/raw cast access to gp->gv.oldpupupu and gp->gv.oldpupupu2 access.",
+    "Changed fn_802112F4 to use GET_GROUND(gobj) and gp->gv.oldpupupu.xDC instead of a void* temporary and gp->gv.unk.xDC.",
+    "Added a pragma-scoped grOldPupupu_802108B4_noinline wrapper and calls it from grOldPupupu_80210D10.",
+    "Added includes needed by the recovered code, including camera, grdisplay, lbaudio_ax, baselib/debug, gobjgxlink, and gobjproc.",
+    "Made small formatting-only edits in grkinokoroute.c and groldkongo.c."
+  ],
+  "smart_moves": [
+    "Introduced explicit GroundVars structs and union arms instead of continuing to use gp->gv.unk and a raw s16 cast, improving reviewability while staying local to the ground/stage type system.",
+    "Used project-level helpers/macros such as GET_GROUND, HSD_ASSERT, HSD_JObjSetTranslate*, HSD_JObjClearFlagsAll, grAnime_801C7FF8, and grAnime_801C8138 rather than leaving expanded or raw generated patterns in the shown code.",
+    "Expressed repeated spawns in grOldPupupu_80210D10 as a natural for loop over count, matching the loaded natural-loops standard.",
+    "Kept the noinline steering tightly scoped with pragma push/pop around a single wrapper, which is preferable to broad pragma changes if the tactic is required."
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a stage function repeatedly accesses gp->gv.unk fields with consistent offsets, adding a stage-specific GroundVars struct and union arm can turn generated-looking storage into typed, reviewable source.",
+      "scope": [
+        "src/melee/gr/types.h",
+        "src/melee/gr/groldpupupu.c",
+        "ground stage vars"
+      ],
+      "evidence_refs": [
+        "raw_diff: adds grOldPupupu_GroundVars and grOldPupupu_GroundVars2",
+        "diff_excerpt: gp->gv.unk.xC4/xC8/xCC/xD0/xD4/xD8/xDC/xE0 replaced with gp->gv.oldpupupu fields",
+        "diff_excerpt: *(s16*) &gp->gv.unk.xC4 replaced with gp->gv.oldpupupu2.xC4"
+      ],
+      "confidence": 0.88
+    },
+    {
+      "lesson": "Header-level type recovery may be part of a matching PR when the body proves the access surface; here the code and types.h were updated together for Old Pupupu GroundVars.",
+      "scope": [
+        "src/melee/gr/types.h",
+        "src/melee/gr/groldpupupu.c"
+      ],
+      "evidence_refs": [
+        "changed_files: types.h changed with groldpupupu.c",
+        "raw_diff: union gains oldpupupu and oldpupupu2",
+        "diff_excerpt: groldpupupu.c uses the new union arms"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "lesson": "Recovered stage behavior can combine code and stage-owned data tables; however, data-table changes should be tied to the function work or explicit report improvements rather than treated as generic data cleanup.",
+      "scope": [
+        "src/melee/gr/groldpupupu.c",
+        "stage data tables"
+      ],
+      "evidence_refs": [
+        "diff_excerpt: adds grOp_803E6748, grOp_803E67B0, grOp_803E67D8, grOp_803E67E4",
+        "text_corpus: bot report shows groldpupupu .data improved from 48.13% to 86.86%, .sdata from 61.54% to 80.88%, and .sdata2 from 13.33% to 100.00%"
+      ],
+      "confidence": 0.72
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "grOp_ prefix",
+      "meaning": "Old Pupupu file-local/static data symbol prefix used for grOp_804D6A98, grOp_803E6748, grOp_803E67B0, and related tables.",
+      "evidence_refs": [
+        "diff_excerpt: static symbols grOp_804D6A98, grOp_804D48A0, grOp_804D48C8, grOp_803E67B0",
+        "diff_excerpt: StageData grOp_803E6748"
+      ]
+    },
+    {
+      "name": "grOldPupupu_*",
+      "meaning": "Function prefix for Old Pupupu stage callbacks and helpers.",
+      "evidence_refs": [
+        "diff_excerpt: grOldPupupu_80210D10",
+        "diff_excerpt: grOldPupupu_802113E0",
+        "diff_excerpt: StageCallbacks grOp_803E6688 uses grOldPupupu_* callbacks"
+      ]
+    },
+    {
+      "name": "oldpupupu and oldpupupu2",
+      "meaning": "Ground gv union arms for Old Pupupu state; oldpupupu2 is used for the s16 timer-like xC4 field in the shown code.",
+      "evidence_refs": [
+        "raw_diff: union arms oldpupupu and oldpupupu2 added",
+        "diff_excerpt: gp->gv.oldpupupu2.xC4 is decremented and reset in grOldPupupu_80210D10"
+      ]
+    },
+    {
+      "name": "grOldPupupuSpawnDesc",
+      "meaning": "Local typedef for entries in the Old Pupupu spawn descriptor table with x0, x1, and x2 fields; semantic field names were not recovered in this PR slice.",
+      "evidence_refs": [
+        "diff_excerpt: typedef struct grOldPupupuSpawnDesc { s8 x0; s8 x1; s16 x2; }",
+        "diff_excerpt: grOp_803E67B0[10] initialized and indexed in grOldPupupu_80210D10"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Use a tightly scoped noinline wrapper when direct helper calls do not produce the desired call shape.",
+      "evidence_refs": [
+        "diff_excerpt: #pragma push / #pragma dont_inline on around grOldPupupu_802108B4_noinline",
+        "diff_excerpt: grOldPupupu_80210D10 calls grOldPupupu_802108B4_noinline(2)"
+      ],
+      "caveat": "The loaded PR evidence does not include an author explanation or objdiff snippet proving why this wrapper was required; only the automated report shows score improvements."
+    },
+    {
+      "tactic": "Replace expanded JObj/assert logic with project macros and inlines when the source-level operation is clear.",
+      "evidence_refs": [
+        "diff_excerpt: HSD_ASSERT(0x216, jobj)",
+        "diff_excerpt: HSD_JObjSetTranslateX/Y/Z and HSD_JObjClearFlagsAll are used in grOldPupupu_80210D10"
+      ],
+      "caveat": "No review discussion confirms the exact matching rationale."
+    },
+    {
+      "tactic": "Use natural loops for repeated object spawning where each iteration only changes index-derived animation offset and x-position.",
+      "evidence_refs": [
+        "diff_excerpt: for (i = 0; i < count; i++) loop in grOldPupupu_80210D10",
+        "diff_excerpt: x += step and grAnime_801C7FF8(... 40.0F * (f32) i ...)"
+      ],
+      "caveat": "The report gives function score improvements but not full function matches for grOldPupupu_80210D10."
+    },
+    {
+      "tactic": "Use typed union fields and GET_GROUND to reduce raw pointer/void* artifacts.",
+      "evidence_refs": [
+        "diff_excerpt: fn_802112F4 changes gp = (new_var = gobj->user_data) to gp = GET_GROUND(gobj)",
+        "diff_excerpt: switch changes from gp->gv.unk.xDC to gp->gv.oldpupupu.xDC"
+      ],
+      "caveat": "Bot report shows fn_802112F4 improved to 100%, but it does not isolate which source change caused the match."
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "automated_report",
+      "author": "decomp-dev[bot]",
+      "created_at": "2026-04-28T19:18:28Z",
+      "text": "Report for GALE01 showed matched code 65.05% (+0.01%, +236 bytes) and matched data 38.57% (+0.00%, +56 bytes). It listed two new matches: groldpupupu .sdata2 to 100% and fn_802112F4 to 100%, plus improvements for grOldPupupu_802113E0, grOldPupupu_80210D10, .data, and .sdata.",
+      "evidence_refs": [
+        "text_corpus: issue_comment by decomp-dev[bot] at 2026-04-28T19:18:28Z"
+      ]
+    },
+    {
+      "kind": "missing_human_review",
+      "author": null,
+      "created_at": null,
+      "text": "No review comments or human review records are present in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata_json: counts.review_comments 0 and counts.reviews 0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2437",
+    "Jj/groldpupupu",
+    "jurrejelle",
+    "groldpupupu",
+    "Old Pupupu",
+    "grOldPupupu_80210D10",
+    "grOldPupupu_802113E0",
+    "fn_802112F4",
+    "grOldPupupuSpawnDesc",
+    "grOp_803E6748",
+    "grOp_803E67B0",
+    "grOp_803E67D8",
+    "grOp_803E67E4",
+    "grOp_804D48C8",
+    "grOp_804D48D0",
+    "grOp_804D48D8",
+    "grOp_804D6A98",
+    "grOp_804D6A9C",
+    "oldpupupu",
+    "oldpupupu2",
+    "GroundVars",
+    "GET_GROUND",
+    "HSD_ASSERT",
+    "HSD_JObjSetTranslateX",
+    "HSD_JObjClearFlagsAll",
+    "PAD_STACK",
+    "pragma dont_inline",
+    "grOldPupupu_802108B4_noinline",
+    "StageData",
+    "StageCallbacks",
+    "/GrOp.dat",
+    "OLDPUPUPU",
+    "Camera_800307D0",
+    "Camera_80030E44",
+    "lbAudioAx_800237A8",
+    "grAnime_801C7FF8",
+    "grAnime_801C8138",
+    "grAnime_801C83D0"
+  ],
+  "follow_up_queries": [
+    "groldpupupu oldpupupu GroundVars gv.unk xC4 xC8 xCC xD0 xD4 xD8 xDC xE0",
+    "grOldPupupu_80210D10 PAD_STACK noinline wrapper grOldPupupu_802108B4_noinline",
+    "grOldPupupu_802113E0 state machine grOp_804D48C8 grOp_804D48D0 grOp_804D48D8",
+    "Old Pupupu /GrOp.dat StageData grOp_803E6748",
+    "fn_802112F4 GET_GROUND oldpupupu xDC matched 100",
+    "groldpupupu .data .sdata .sdata2 bot report PR 2437"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR 2437 title, author, state, URL, timestamps, changed files",
+      "loaded_files: changed_files.jsonl complete",
+      "loaded_files: text_corpus.jsonl complete with empty PR body and one bot issue comment",
+      "loaded_files: raw_diff marked truncated but includes primary groldpupupu excerpt and types.h hunk obtained by targeted local grep",
+      "metadata_json: review_comments 0, reviews 0"
+    ],
+    "notes": [
+      "The PR body is empty and there are no human review comments in the loaded slice, so author intent and reviewer rationale are not available.",
+      "The raw diff loaded inline is truncated; targeted local grep recovered the types.h hunk, but this intake does not claim exhaustive line-by-line coverage of the full patch beyond changed-file metadata and visible hunks.",
+      "The automated report supports score improvements and two new matches, but it is not a full build/objdiff ledger and does not prove which tactic caused each score change.",
+      "grOldPupupu_80210D10 and grOldPupupu_802113E0 are reported as improved, not fully matched, so tactics from those functions should be treated as candidates rather than accepted matching standards."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson_candidate",
+        "title": "Typed GroundVars can replace gv.unk/raw casts when a stage-specific access pattern is recovered",
+        "text": "PR 2437 added grOldPupupu_GroundVars and grOldPupupu_GroundVars2 to src/melee/gr/types.h and changed groldpupupu.c accesses from gp->gv.unk and a raw s16 cast to gp->gv.oldpupupu/oldpupupu2 fields. This is a concrete example of typed-fields-over-pointer-math in the ground stage subsystem.",
+        "scope": [
+          "src/melee/gr/types.h",
+          "src/melee/gr/groldpupupu.c",
+          "ground stage vars"
+        ],
+        "evidence_refs": [
+          "raw_diff: grOldPupupu_GroundVars structs and union arms",
+          "diff_excerpt: gp->gv.unk replacements in grOldPupupu_802109D8, grOldPupupu_80210A24, grOldPupupu_8021119C, fn_802112F4"
+        ]
+      },
+      {
+        "record_type": "matching_tactic_candidate",
+        "title": "If noinline is required, isolate it around a wrapper",
+        "text": "PR 2437 used pragma push/pop and dont_inline around only grOldPupupu_802108B4_noinline, then called that wrapper from grOldPupupu_80210D10. The loaded evidence supports this as a narrow tactic pattern, but not as proof that the tactic is broadly necessary.",
+        "scope": [
+          "src/melee/gr/groldpupupu.c"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: grOldPupupu_802108B4_noinline pragma block",
+          "diff_excerpt: call from grOldPupupu_80210D10"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "Old Pupupu stage data path and StageData symbol in groldpupupu.c",
+        "text": "PR 2437 shows src/melee/gr/groldpupupu.c defining char grOp_803E673C[] = \"/GrOp.dat\" and StageData grOp_803E6748 with stage ID OLDPUPUPU and grOp_803E6688 callbacks.",
+        "source_path": "src/melee/gr/groldpupupu.c",
+        "scope": [
+          "Old Pupupu",
+          "StageData",
+          "stage asset path"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: char grOp_803E673C[] = \"/GrOp.dat\"",
+          "diff_excerpt: StageData grOp_803E6748 = { OLDPUPUPU, grOp_803E6688, grOp_803E673C, ... }"
+        ],
+        "reason": "Potential path/source fact for the stage data registry; route to curator because PR intake must not promote path facts directly."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Narrow pragma/noinline wrapper examples should require explicit verifier evidence",
+        "text": "This PR contains a tightly scoped dont_inline wrapper around grOldPupupu_802108B4_noinline and an automated report showing progress, but no author note explaining the need. Curator may consider adding this as an example under existing pragma/register/asm or matching-tactics standards: acceptable only with narrow scope and verifier evidence.",
+        "source_path": "src/melee/gr/groldpupupu.c",
+        "scope": [
+          "matching tactics",
+          "pragma dont_inline",
+          "stage code"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: #pragma push / #pragma dont_inline on / #pragma pop around one wrapper",
+          "text_corpus: bot report shows grOldPupupu_80210D10 improved to 85.46%, not fully matched"
+        ],
+        "reason": "The example is useful but evidence is insufficient to promote as a new accepted standard without curator review."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that grOldPupupu_80210D10 or grOldPupupu_802113E0 fully matched; the bot report lists them as improvements to 85.46% and 87.16%, respectively.",
+      "Do not infer human reviewer approval rationale; no human review comments are present.",
+      "Do not promote the added data tables as globally correct data ownership facts solely from this intake; the report shows data improvements, but no section ownership discussion is loaded.",
+      "Do not treat the noinline wrapper as normal style; it is a narrow tactic with incomplete verifier evidence in this slice."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

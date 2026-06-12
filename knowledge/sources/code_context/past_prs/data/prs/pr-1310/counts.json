@@ -1,0 +1,17 @@
+{
+  "number": 1310,
+  "title": "Match `ftCo_8009F4A4` (168 bytes)",
+  "state": "MERGED",
+  "createdAt": "2024-02-23T11:57:58Z",
+  "updatedAt": "2024-02-23T12:00:15Z",
+  "mergedAt": "2024-02-23T12:00:15Z",
+  "closedAt": "2024-02-23T12:00:15Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1310",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 363061
+  }
+}

@@ -1,0 +1,401 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2466",
+  "pr": {
+    "number": 2466,
+    "title": "resplit, match, and link ftPp_SpecialS.c",
+    "url": "https://github.com/doldecomp/melee/pull/2466",
+    "state": "MERGED",
+    "author": "lukechampine",
+    "created_at": "2026-05-07T23:16:49Z",
+    "merged_at": "2026-05-08T01:19:24Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2466 resplit the former Popo ftPp_SpecialS translation-unit range into ftPp_SpecialS.c, new ftPp_SpecialHi.c, and new ftPp_SpecialLw.c, updated splits/symbol metadata, linked the three Popo objects as Matching in configure.py, and adjusted includes/header surfaces for callers. Bot output reported +14416 linked-code bytes and 80 new matches, with corresponding broken matches in the old ftPp_SpecialS unit caused by the resplit. The slice includes one author review comment calling out a deliberately added sdata2_ordering float-alignment hack in ftPp_SpecialHi.c.",
+  "change_classification": {
+    "primary_type": "decomp-matching-resplit",
+    "categories": [
+      "decomp-matching",
+      "translation-unit-resplit",
+      "headers",
+      "symbol-metadata",
+      "configuration"
+    ],
+    "systems": [
+      "fighter",
+      "ftPopo",
+      "ftNana",
+      "ftCommon",
+      "config",
+      "repo-root"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/ft/chara/ftPopo/ftPp_SpecialS.c",
+      "role": "Original Popo SpecialS source was reduced after moving later address ranges into new SpecialHi and SpecialLw files.",
+      "evidence_refs": [
+        "changed_files: added 4 deleted 1148",
+        "diff:splits.txt ftPp_SpecialS text end changed 0x80122EDC -> 0x80120E68"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftPopo/ftPp_SpecialHi.c",
+      "role": "New matched source file for the 0x80120E68-0x80122898 split, including SpecialHi functions and some ftPp_SpecialS_* functions now located in this unit.",
+      "evidence_refs": [
+        "changed_files: added 932 deleted 0",
+        "diff:splits.txt adds ftPp_SpecialHi.c text 0x80120E68-0x80122898 sdata2 0x804D9860-0x804D9890",
+        "text_corpus: bot report lists many 100% new matches in main/melee/ft/chara/ftPopo/ftPp_SpecialHi"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftPopo/ftPp_SpecialLw.c",
+      "role": "New matched source file for the 0x80122898-0x80122EDC split.",
+      "evidence_refs": [
+        "changed_files: added 212 deleted 0",
+        "diff:splits.txt adds ftPp_SpecialLw.c text 0x80122898-0x80122EDC sdata2 0x804D9890-0x804D9898",
+        "text_corpus: bot report lists new matches in main/melee/ft/chara/ftPopo/ftPp_SpecialLw"
+      ]
+    },
+    {
+      "path": "config/GALE01/splits.txt",
+      "role": "Adjusted translation-unit section boundaries for ftPp_SpecialS and added split entries for ftPp_SpecialHi and ftPp_SpecialLw.",
+      "evidence_refs": [
+        "diff:splits.txt hunk around ftPp_SpecialN/SpecialS"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Changed several Popo-adjacent data and sdata2 symbols from global address-style names to local @ labels with explicit sizes, alignments, and data kinds.",
+      "evidence_refs": [
+        "diff:symbols.txt ftNn_Init_803CD7F8 -> @265",
+        "diff:symbols.txt ftPp_Unk0_804D3E10/@804D3E18 -> @263/@264",
+        "diff:symbols.txt ftPp_Init_804D9848-804D9894 -> local @ labels"
+      ]
+    },
+    {
+      "path": "configure.py",
+      "role": "Changed ftPp_SpecialS.c from NonMatching to Matching and added Matching objects for ftPp_SpecialHi.c and ftPp_SpecialLw.c.",
+      "evidence_refs": [
+        "diff:configure.py MatchingFor Popo object list"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftPopo/ftPp_SpecialHi.h",
+      "role": "Header surface updated for SpecialHi declarations after the resplit.",
+      "evidence_refs": [
+        "changed_files: added 17 deleted 10"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftPopo/ftPp_SpecialLw.h",
+      "role": "New header for SpecialLw declarations after the resplit.",
+      "evidence_refs": [
+        "changed_files: added 20 deleted 0"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftPopo/ftPp_SpecialS.h",
+      "role": "Header declarations removed as responsibilities moved to the new split headers.",
+      "evidence_refs": [
+        "changed_files: added 0 deleted 31"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_0A01.c",
+      "role": "Include updated from old ftPp_1211.h to new SpecialHi/SpecialLw headers.",
+      "evidence_refs": [
+        "diff:ftCo_0A01.c include replacement"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftNana/ftNn_Init.c",
+      "role": "Includes updated to reference new Popo SpecialHi and SpecialLw headers.",
+      "evidence_refs": [
+        "diff:ftNn_Init.c include replacement"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftPopo/ftPp_Init.c",
+      "role": "Includes updated to reference new Popo SpecialHi and SpecialLw headers.",
+      "evidence_refs": [
+        "diff:ftPp_Init.c include replacement"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftdata.c",
+      "role": "Small ftdata include/reference adjustment listed in changed-file metadata; exact hunk not present in loaded diff excerpt.",
+      "evidence_refs": [
+        "changed_files: added 2 deleted 1"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Resplit ftPp_SpecialS.c so its text section ends at 0x80120E68 instead of 0x80122EDC.",
+    "Added ftPp_SpecialHi.c covering text 0x80120E68-0x80122898 and sdata2 0x804D9860-0x804D9890.",
+    "Added ftPp_SpecialLw.c covering text 0x80122898-0x80122EDC and sdata2 0x804D9890-0x804D9898.",
+    "Marked ftPp_SpecialS.c, ftPp_SpecialHi.c, and ftPp_SpecialLw.c as Matching objects in configure.py.",
+    "Replaced old ftPp_1211.h includes in touched callers with ftPp_SpecialHi.h and ftPp_SpecialLw.h.",
+    "Changed Popo-adjacent data/sdata/sdata2 symbol ownership from global address-style names to local @ labels in symbols.txt.",
+    "Bot report recorded 80 new matches and 77 broken matches, where the broken matches are shown under the old ftPp_SpecialS unit and correspond to functions now reported under the new units."
+  ],
+  "smart_moves": [
+    {
+      "text": "The PR paired source resplitting with splits.txt boundaries and configure.py object status changes, making the new SpecialHi/SpecialLw units explicit rather than only moving code.",
+      "evidence_refs": [
+        "diff:splits.txt",
+        "diff:configure.py"
+      ]
+    },
+    {
+      "text": "Include users were moved away from an old aggregate/unknown header name toward the new split-specific headers.",
+      "evidence_refs": [
+        "diff:ftCo_0A01.c",
+        "diff:ftNn_Init.c",
+        "diff:ftPp_Init.c"
+      ]
+    },
+    {
+      "text": "The author explicitly flagged the sdata2_ordering helper as a hack rather than presenting it as normal style.",
+      "evidence_refs": [
+        "review_comments:discussion_r3205218907"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a historical object was over-broad, a resplit can convert apparent regressions in the old unit into new matches in the correct new units; read bot broken-match tables alongside split-boundary changes before treating them as true regressions.",
+      "scope": [
+        "translation-unit resplits",
+        "configure.py object status",
+        "check/bot match reports"
+      ],
+      "evidence_refs": [
+        "diff:splits.txt ftPp_SpecialS shortened and ftPp_SpecialHi/Lw added",
+        "text_corpus:80 new matches and 77 broken matches listed under old/new units"
+      ]
+    },
+    {
+      "lesson": "Header cleanup should accompany a resplit when external users need declarations from the newly separated files.",
+      "scope": [
+        "fighter headers",
+        "Popo SpecialHi/SpecialLw"
+      ],
+      "evidence_refs": [
+        "diff:ftCo_0A01.c include replacement",
+        "diff:ftNn_Init.c include replacement",
+        "diff:ftPp_Init.c include replacement",
+        "changed_files:ftPp_SpecialHi.h and ftPp_SpecialLw.h"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "The resplit uses move-specific file/header names ftPp_SpecialHi and ftPp_SpecialLw instead of the old ftPp_1211 include name.",
+      "evidence_refs": [
+        "diff:include replacements",
+        "changed_files:ftPp_SpecialHi.c/.h and ftPp_SpecialLw.c/.h"
+      ]
+    },
+    {
+      "text": "Unproven data symbols in the touched range were represented as local @ labels rather than semantic global names.",
+      "evidence_refs": [
+        "diff:symbols.txt ftPp_Init_804D9848-804D9894 -> @ labels",
+        "diff:symbols.txt ftPp_Unk0_804D3E10/18 -> @ labels"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Used splits.txt section boundaries to carve one large SpecialS range into SpecialS, SpecialHi, and SpecialLw translation units.",
+      "evidence_refs": [
+        "diff:splits.txt"
+      ],
+      "caution": "This is split metadata work; do not infer author intent beyond the explicit new boundaries."
+    },
+    {
+      "tactic": "Added a static sdata2_ordering function in ftPp_SpecialHi.c containing float and double literals to influence sdata2 ordering/alignment.",
+      "evidence_refs": [
+        "review_comments:discussion_r3205218907",
+        "diff:ftPp_SpecialHi.c sdata2_ordering"
+      ],
+      "caution": "The author called this a hideous hack and asked for a better way; treat as a narrow matching workaround, not accepted style."
+    },
+    {
+      "tactic": "The new source uses PAD_STACK in several functions and a custom inline my_sqrtf using __frsqrte and volatile float storage.",
+      "evidence_refs": [
+        "diff:ftPp_SpecialHi.c excerpts show PAD_STACK",
+        "diff:ftPp_SpecialHi.c my_sqrtf"
+      ],
+      "caution": "Loaded evidence does not include discussion proving these tactics were reviewed as reusable style."
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "author_self_review_comment",
+      "path": "src/melee/ft/chara/ftPopo/ftPp_SpecialHi.c",
+      "text": "please forgive this hideous hack. If there's a better way to align the floats, I'm all ears!",
+      "evidence_refs": [
+        "review_comments:discussion_r3205218907",
+        "text_corpus:review_comment by lukechampine at line 37"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2466",
+    "lukechampine",
+    "ftPp_SpecialS.c",
+    "ftPp_SpecialHi.c",
+    "ftPp_SpecialLw.c",
+    "Popo",
+    "Ice Climbers",
+    "resplit",
+    "MatchingFor",
+    "configure.py",
+    "splits.txt",
+    "symbols.txt",
+    "sdata2_ordering",
+    "align the floats",
+    "ftPp_1211.h",
+    "ftPp_SpecialHi_Enter",
+    "ftPp_SpecialAirHi_Enter",
+    "ftPp_SpecialLw_Enter",
+    "PAD_STACK",
+    "my_sqrtf",
+    "__frsqrte",
+    "Player_GetEntityAtIndex",
+    "ftNn_Init"
+  ],
+  "follow_up_queries": [
+    "sdata2_ordering float alignment hack ftPp_SpecialHi",
+    "ftPp_1211.h replacement ftPp_SpecialHi.h ftPp_SpecialLw.h",
+    "resplit ftPp_SpecialS SpecialHi SpecialLw 0x80120E68 0x80122898",
+    "symbols.txt ftPp_Init_804D9848 local @ labels",
+    "Popo SpecialHi PAD_STACK my_sqrtf __frsqrte",
+    "bot report 80 new matches 77 broken matches resplit"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json",
+      "changed_files.jsonl",
+      "raw_diff excerpt",
+      "review_comments.md",
+      "text_corpus.jsonl bot report"
+    ],
+    "notes": [
+      "Strong evidence exists for PR identity, changed files, split/config changes, include updates, and the author comment about sdata2_ordering.",
+      "The raw diff loaded for source bodies is truncated, so detailed function-by-function source changes are only partially visible.",
+      "The PR body is empty; no author rationale beyond the title and one review comment is available.",
+      "Bot report supports match-count and linked-code progress, but the intake did not independently run builds or objdiff.",
+      "The only loaded review comment is by the PR author, not an external reviewer; do not infer external reviewer acceptance or requested changes."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson_candidate",
+        "title": "Interpret broken matches carefully during TU resplits",
+        "text": "During a translation-unit resplit, bot reports can show broken matches in the old unit while listing corresponding new matches in the new units. Compare the broken/new unit paths and split-boundary changes before treating the report as a regression.",
+        "scope": [
+          "translation-unit resplits",
+          "matching reports",
+          "config/GALE01/splits.txt",
+          "configure.py"
+        ],
+        "evidence_refs": [
+          "diff:splits.txt SpecialS shortened and SpecialHi/Lw added",
+          "text_corpus:80 new matches and 77 broken matches"
+        ]
+      },
+      {
+        "record_type": "decomp_lesson_candidate",
+        "title": "Resplit source, headers, and object config together",
+        "text": "A move-specific resplit should update split metadata, object matching status, new headers, and include users in one coherent patch when declarations move across file boundaries.",
+        "scope": [
+          "fighter source resplits",
+          "headers",
+          "configure.py"
+        ],
+        "evidence_refs": [
+          "diff:splits.txt",
+          "diff:configure.py",
+          "diff:ftCo_0A01.c",
+          "diff:ftNn_Init.c",
+          "diff:ftPp_Init.c",
+          "changed_files:ftPp_SpecialHi.h ftPp_SpecialLw.h ftPp_SpecialS.h"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Treat literal-ordering helper functions as hacks requiring evidence",
+        "text": "PR #2466 contains a static sdata2_ordering function used around float/double literals and an author comment calling it a hideous hack for aligning floats. Consider adding or cross-linking guidance that literal/data-order helper functions should be narrow, explicitly justified by verifier evidence, and not treated as normal source style.",
+        "source_path": null,
+        "scope": [
+          "sdata2",
+          "literal ordering",
+          "data-section matching",
+          "matching tactics"
+        ],
+        "evidence_refs": [
+          "review_comments:discussion_r3205218907",
+          "diff:ftPp_SpecialHi.c sdata2_ordering"
+        ],
+        "reason": "The loaded standards already warn against fake data/literal tactics, but this PR provides a concrete historical example of a float-alignment helper being flagged as a hack."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "ftPopo SpecialS range split into SpecialS, SpecialHi, and SpecialLw",
+        "text": "In PR #2466, config/GALE01/splits.txt changed ftPp_SpecialS.c to text 0x8011F68C-0x80120E68 and added ftPp_SpecialHi.c text 0x80120E68-0x80122898 plus ftPp_SpecialLw.c text 0x80122898-0x80122EDC, with corresponding sdata2 subranges.",
+        "source_path": "config/GALE01/splits.txt",
+        "scope": [
+          "src/melee/ft/chara/ftPopo/ftPp_SpecialS.c",
+          "src/melee/ft/chara/ftPopo/ftPp_SpecialHi.c",
+          "src/melee/ft/chara/ftPopo/ftPp_SpecialLw.c"
+        ],
+        "evidence_refs": [
+          "diff:splits.txt"
+        ],
+        "reason": "This is a precise path/split fact supported by the diff, but should be curated against current source before promotion."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "Old ftPp_1211 include users moved to SpecialHi/SpecialLw headers",
+        "text": "PR #2466 replaces ftPp_1211.h includes in ftCo_0A01.c, ftNn_Init.c, and ftPp_Init.c with ftPp_SpecialHi.h and ftPp_SpecialLw.h.",
+        "source_path": null,
+        "scope": [
+          "src/melee/ft/chara/ftCommon/ftCo_0A01.c",
+          "src/melee/ft/chara/ftNana/ftNn_Init.c",
+          "src/melee/ft/chara/ftPopo/ftPp_Init.c"
+        ],
+        "evidence_refs": [
+          "diff:ftCo_0A01.c",
+          "diff:ftNn_Init.c",
+          "diff:ftPp_Init.c"
+        ],
+        "reason": "Useful include-surface history for curator review; current source should verify the final header layout."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote sdata2_ordering as accepted style; the only direct comment calls it a hack.",
+      "Do not claim all functions in the new files are independently reviewed or cleanly authored; loaded source diff is truncated and only bot match summaries are available.",
+      "Do not infer external reviewer intent or approval from the single loaded review comment, which is authored by lukechampine.",
+      "Do not treat the symbol local-label changes as a global naming convention without checking current symbol ownership and data metadata."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

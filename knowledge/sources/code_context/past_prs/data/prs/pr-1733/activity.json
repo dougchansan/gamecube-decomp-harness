@@ -1,0 +1,10 @@
+{
+  "pr": 1733,
+  "title": "Remove fighter-specific `HSD_GObj` aliases",
+  "url": "https://github.com/doldecomp/melee/pull/1733",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 21,
+  "added_lines": 2049,
+  "deleted_lines": 2052
+}

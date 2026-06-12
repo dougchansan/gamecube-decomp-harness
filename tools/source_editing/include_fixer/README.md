@@ -1,6 +1,6 @@
 # Include Fixer Tool Suite
 
-This suite ports the harness `fix_includes.py` workflow into a non-mutating
+This suite exposes the tool-local `fix_includes.py` workflow through a non-mutating
 preview API. It runs a clang syntax-only check, extracts undeclared function
 diagnostics, searches headers for declarations, and returns proposed include
 lines plus a unified diff.

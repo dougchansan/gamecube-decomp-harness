@@ -1,0 +1,17 @@
+{
+  "number": 464,
+  "title": "hi",
+  "state": "CLOSED",
+  "createdAt": "2022-08-17T00:21:48Z",
+  "updatedAt": "2022-08-17T00:24:47Z",
+  "mergedAt": null,
+  "closedAt": "2022-08-17T00:23:49Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/464",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 1069
+  }
+}

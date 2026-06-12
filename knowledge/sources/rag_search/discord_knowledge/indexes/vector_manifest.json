@@ -1,0 +1,19 @@
+{
+  "build_seconds": 8.681,
+  "built_at": "2026-06-09T22:18:33Z",
+  "chunking": {
+    "overlap_tokens": 100,
+    "target_tokens": 700,
+    "tokenizer": "cl100k_base"
+  },
+  "dimensions": 1536,
+  "index_records": 328,
+  "metric": "cosine",
+  "model": "text-embedding-3-small",
+  "normalization": "l2",
+  "provider": "openai",
+  "schema_version": "vector_index_v1",
+  "source": "discord_knowledge",
+  "source_fingerprint": "fb9c5c4a56e6e88abecf2685955f7d0e40993dd639e2365a9c3c8b057cf2e9be",
+  "vector_chunks": 625
+}

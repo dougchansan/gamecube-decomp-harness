@@ -1,0 +1,316 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2456",
+  "pr": {
+    "number": 2456,
+    "title": "vi1201v2",
+    "url": "https://github.com/doldecomp/melee/pull/2456",
+    "state": "MERGED",
+    "author": "jurrejelle",
+    "created_at": "2026-05-01T16:49:27Z",
+    "merged_at": "2026-05-08T22:01:06Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Decompiled and typed more of src/melee/vi/vi1201v2, centered on un_80320A40_OnEnter. The PR added includes, local data declarations, asset-string/data layout for un_80400304, typed un_804D7028 as GXColor, added JObj setter helper variants, and updated the public header prototype for un_80320A40_OnEnter. Bot report showed one new .sdata match, improvements in un_80320A40_OnEnter, .data, and .sbss, and a small .sdata2 regression.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "data-layout",
+      "typing"
+    ],
+    "systems": [
+      "melee-core",
+      "vi"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/vi/vi1201v2.c",
+      "role": "Main decompilation work: added dependencies, recovered local data layout, typed globals, implemented un_80320A40_OnEnter, and added local HSD_JObj setter helper variants.",
+      "evidence_refs": [
+        "metadata.changed_files: src/melee/vi/vi1201v2.c added 202 deleted 4 hunks 5",
+        "raw_diff: vi1201v2.c include additions and un_80400304_t definition",
+        "raw_diff: un_80320A40_OnEnter added",
+        "text_corpus: decomp-dev bot report for main/melee/vi/vi1201v2"
+      ]
+    },
+    {
+      "path": "src/melee/vi/vi1201v2.h",
+      "role": "Header update: added GXStruct include, changed un_804D7028 extern from u8 to GXColor, and updated OnEnter prototype from UNK_T to void*.",
+      "evidence_refs": [
+        "metadata.changed_files: src/melee/vi/vi1201v2.h added 4 deleted 2 hunks 2",
+        "raw_diff: vi1201v2.h GXColor extern and void* prototype changes"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Added vi1201v2.c includes for baselib forward declarations, effects, ft_0C31, lb_00B0, lbarchive, and toy headers to support the recovered function body.",
+      "evidence_refs": [
+        "raw_diff: include block additions in src/melee/vi/vi1201v2.c"
+      ]
+    },
+    {
+      "text": "Replaced Vec3 un_80400304 with a structured data block containing player_spawn plus assert/asset/resource strings such as Vi1201v2.dat, visual1201v2Scene, TyKoopa.dat, ToyKoopaModel_TopN_joint, GmRgStnd.dat, and standScene.",
+      "evidence_refs": [
+        "raw_diff: typedef struct un_80400304_t and initializer for un_80400304"
+      ]
+    },
+    {
+      "text": "Adjusted Player_80032768 call to pass &un_80400304.player_spawn after structuring un_80400304.",
+      "evidence_refs": [
+        "raw_diff: Player_80032768(1, &un_80400304.player_spawn)"
+      ]
+    },
+    {
+      "text": "Typed un_804D7028 as GXColor and changed erase-color setup from byte indexing to field accesses r, g, b, and a.",
+      "evidence_refs": [
+        "raw_diff: GXColor un_804D7028 and HSD_SetEraseColor(colors->r, colors->g, colors->b, colors->a)",
+        "raw_diff: vi1201v2.h extern GXColor un_804D7028"
+      ]
+    },
+    {
+      "text": "Added static JObj setter helper variants for rotation Y, scale XYZ, and translate XYZ that include jobj asserts and call ftCo_800C6AFC when JOBJ_MTX_INDEP_SRT is not set.",
+      "evidence_refs": [
+        "raw_diff: HSD_JObjSetRotationY_2, HSD_JObjSetScaleX_2/Y_2/Z_2, HSD_JObjSetTranslateX_2/Y_2/Z_2"
+      ]
+    },
+    {
+      "text": "Added un_80320A40_OnEnter implementation that initializes effects/audio, loads archives and symbols, creates camera/model/fog/light GObjs, loads JObjs, applies transforms and scale, and stores fog color.",
+      "evidence_refs": [
+        "raw_diff: un_80320A40_OnEnter body"
+      ]
+    },
+    {
+      "text": "Updated un_80320A40_OnEnter header prototype from UNK_T to void*.",
+      "evidence_refs": [
+        "raw_diff: vi1201v2.h prototype change"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Recovered a concrete GXColor type for un_804D7028 and propagated it to the header, improving readability and replacing raw byte-color access.",
+      "evidence_refs": [
+        "raw_diff: u8* colors changed to GXColor* colors",
+        "raw_diff: extern u8 un_804D7028 changed to extern GXColor un_804D7028"
+      ]
+    },
+    {
+      "text": "Kept the header in sync with the recovered OnEnter argument type instead of leaving the public declaration as UNK_T.",
+      "evidence_refs": [
+        "raw_diff: un_80320A40_OnEnter(void*) in vi1201v2.h",
+        "raw_diff: un_80320A40_OnEnter(void* arg) in vi1201v2.c"
+      ]
+    },
+    {
+      "text": "Grouped adjacent data and strings into a temporary struct so existing offset-based string uses could be expressed relative to one recovered data block.",
+      "evidence_refs": [
+        "raw_diff: un_80400304_t fields and char* data = (char*) &un_804002F8",
+        "raw_diff: lbArchive_LoadSymbols(data + 0x40, data + 0x50, data + 0x64, data + 0x70, data + 0x8C, data + 0x9C)"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When recovering a body proves a global's real type, update both the source and header declarations; here a GXColor global enabled field-based color access and an owning header include.",
+      "scope": [
+        "src/melee/vi/vi1201v2.c",
+        "src/melee/vi/vi1201v2.h"
+      ],
+      "evidence_refs": [
+        "raw_diff: GXColor un_804D7028 in .c",
+        "raw_diff: #include \"dolphin/gx/GXStruct.h\" and extern GXColor un_804D7028 in .h"
+      ]
+    },
+    {
+      "lesson": "Recovered function signatures should replace placeholder prototypes when the implementation makes the argument type concrete enough for review; this PR changed OnEnter from UNK_T to void* after adding a body that casts arg to u8*.",
+      "scope": [
+        "src/melee/vi/vi1201v2.h",
+        "un_80320A40_OnEnter"
+      ],
+      "evidence_refs": [
+        "raw_diff: void un_80320A40_OnEnter(void* arg)",
+        "raw_diff: header prototype changed from UNK_T to void*"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Address-style symbol names were preserved for unresolved globals and functions, while local variables used role names such as input, cobj, fog, gobj, child, jobj, scale, and colors.",
+      "evidence_refs": [
+        "raw_diff: un_804D7010/un_804D7014/un_804D7020/un_804D7028/un_804D7030/un_804D7034 declarations",
+        "raw_diff: local declarations in un_80320A40_OnEnter and un_803208F0"
+      ]
+    },
+    {
+      "convention": "Temporary data-struct field names encode observed resource roles where strings directly support them, such as vi1201v2_dat, visual1201v2_scene, tykoopa_dat, toykoopa_model_topn_joint, gmrgstnd_dat, and stand_scene.",
+      "evidence_refs": [
+        "raw_diff: un_80400304_t field names and string initializer"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Used a temporary aggregate struct over adjacent data/string storage to preserve offsets while giving the player spawn vector a typed field.",
+      "evidence_refs": [
+        "raw_diff: un_80400304_t layout and Player_80032768 uses .player_spawn"
+      ],
+      "caveat": "The PR evidence shows data progress but not the rationale for every string being grouped into this struct."
+    },
+    {
+      "tactic": "Used static local HSD_JObjSet*_2 helper variants with expanded assertions and explicit ftCo_800C6AFC invalidation calls, apparently to match the local call shape.",
+      "evidence_refs": [
+        "raw_diff: added HSD_JObjSetRotationY_2 and scale/translate helper variants"
+      ],
+      "caveat": "No review comments or author notes explain why existing HSD_JObjSet* inlines were insufficient; loaded standards would require caution around expanded header asserts."
+    },
+    {
+      "tactic": "Used PAD_STACK(24) in un_80320A40_OnEnter.",
+      "evidence_refs": [
+        "raw_diff: PAD_STACK(24) in un_80320A40_OnEnter"
+      ],
+      "caveat": "Bot report shows function improvement to 97.14%, but the slice does not provide narrow evidence that PAD_STACK was necessary."
+    },
+    {
+      "tactic": "Tracked code/data progress through bot checkdiff-style report: un_80320A40_OnEnter improved by 1659 bytes to 97.14%, .sdata became 100%, .data and .sbss improved, and .sdata2 regressed slightly.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev bot report"
+      ],
+      "caveat": "The report does not claim full text match for un_80320A40_OnEnter."
+    }
+  ],
+  "review_feedback": [
+    {
+      "source": "decomp-dev[bot]",
+      "feedback": "Automated report for GALE01 showed one new match in main/melee/vi/vi1201v2 .sdata (+16 bytes, 0.00% to 100.00%), improvements in un_80320A40_OnEnter (+1659 bytes, 0.00% to 97.14%), .data (+123 bytes, 25.00% to 98.80%), and .sbss (+13 bytes, 62.50% to 91.67%), plus a .sdata2 regression (-2 bytes, 76.92% to 71.43%).",
+      "evidence_refs": [
+        "text_corpus: issue_comment by decomp-dev[bot] at 2026-05-01T16:53:03Z"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2456",
+    "vi1201v2",
+    "jurrejelle",
+    "src/melee/vi/vi1201v2.c",
+    "src/melee/vi/vi1201v2.h",
+    "un_80320A40_OnEnter",
+    "un_803208F0",
+    "un_80400304_t",
+    "un_80400304",
+    "un_804D7028",
+    "GXColor",
+    "Player_80032768",
+    "HSD_JObjSetRotationY_2",
+    "HSD_JObjSetScaleX_2",
+    "HSD_JObjSetScaleY_2",
+    "HSD_JObjSetScaleZ_2",
+    "HSD_JObjSetTranslateX_2",
+    "HSD_JObjSetTranslateY_2",
+    "HSD_JObjSetTranslateZ_2",
+    "PAD_STACK",
+    "lbArchive_LoadSymbols",
+    "Vi1201v2.dat",
+    "visual1201v2Scene",
+    "TyKoopa.dat",
+    "ToyKoopaModel_TopN_joint",
+    "GmRgStnd.dat",
+    "standScene",
+    "JOBJ_USE_QUATERNION",
+    "JOBJ_MTX_INDEP_SRT",
+    "ftCo_800C6AFC"
+  ],
+  "follow_up_queries": [
+    "Search later vi1201v2 PRs for cleanup of HSD_JObjSet*_2 helper variants or replacement with header inlines.",
+    "Search for later changes to un_80400304_t or vi1201v2 asset string/data ownership.",
+    "Search for follow-up on the .sdata2 regression reported in PR 2456.",
+    "Search current source for whether un_80320A40_OnEnter later reached a full match."
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR 2456 metadata and changed file list",
+      "raw_diff: complete diff excerpt for src/melee/vi/vi1201v2.c and .h",
+      "text_corpus: empty PR body and one decomp-dev bot issue comment"
+    ],
+    "notes": [
+      "PR body is empty and there are no human review comments in the loaded slice.",
+      "Automated bot evidence supports measured progress but only reports un_80320A40_OnEnter at 97.14%, not a full function match.",
+      "The slice includes a reported .sdata2 regression and does not explain whether it was accepted as a tradeoff.",
+      "No author or reviewer rationale is available for PAD_STACK(24), the local HSD_JObjSet*_2 helper variants, or the exact data-string grouping."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "type": "decomp_lesson",
+        "title": "Propagate recovered concrete types into headers",
+        "text": "PR 2456 shows a local global changed from u8 to GXColor in both vi1201v2.c and vi1201v2.h, enabling HSD_SetEraseColor to use r/g/b/a fields instead of byte indexing.",
+        "scope": [
+          "src/melee/vi/vi1201v2.c",
+          "src/melee/vi/vi1201v2.h",
+          "typing",
+          "headers"
+        ],
+        "evidence_refs": [
+          "raw_diff: GXColor un_804D7028 and GXColor* colors",
+          "raw_diff: vi1201v2.h extern GXColor un_804D7028"
+        ]
+      },
+      {
+        "type": "decomp_lesson",
+        "title": "Replace placeholder prototypes when implementation evidence proves a safer signature",
+        "text": "PR 2456 changed un_80320A40_OnEnter from UNK_T to void* in the header after adding an implementation that accepts void* and interprets it as a byte input buffer.",
+        "scope": [
+          "src/melee/vi/vi1201v2.h",
+          "un_80320A40_OnEnter"
+        ],
+        "evidence_refs": [
+          "raw_diff: un_80320A40_OnEnter(void* arg)",
+          "raw_diff: header prototype changed from UNK_T to void*"
+        ]
+      }
+    ],
+    "source_update_candidates": [],
+    "rejection_notes": [
+      {
+        "title": "Do not promote local expanded HSD_JObjSet*_2 helpers as a general cleanup pattern",
+        "reason": "The PR diff adds local helpers with expanded jobj.h assertions, but the loaded slice has no author/reviewer explanation and loaded standards prefer mapping identifiable header asserts back to existing inline/helper forms when possible.",
+        "evidence_refs": [
+          "raw_diff: HSD_JObjSetRotationY_2 and related helper variants",
+          "decomp_standards: header-inlines",
+          "decomp_standards: assert-report-macros"
+        ]
+      },
+      {
+        "title": "Do not treat PAD_STACK(24) as an accepted tactic from this PR alone",
+        "reason": "PAD_STACK appears in the recovered function body, but the only validation evidence is an automated improvement report and not a specific demonstration that the stack pad was necessary.",
+        "evidence_refs": [
+          "raw_diff: PAD_STACK(24)",
+          "text_corpus: bot report un_80320A40_OnEnter 97.14%",
+          "decomp_standards: matching-tactics-need-evidence"
+        ]
+      },
+      {
+        "title": "Do not claim full vi1201v2 text match",
+        "reason": "The bot report says un_80320A40_OnEnter improved to 97.14%, with a .sdata2 regression; it does not report full function or TU text completion.",
+        "evidence_refs": [
+          "text_corpus: decomp-dev bot report"
+        ]
+      }
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

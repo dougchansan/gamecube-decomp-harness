@@ -1,0 +1,292 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2262",
+  "pr": {
+    "number": 2262,
+    "title": "fighters: match 6 functions",
+    "url": "https://github.com/doldecomp/melee/pull/2262",
+    "state": "MERGED",
+    "author": "johnwinston",
+    "created_at": "2026-03-10T20:24:49Z",
+    "merged_at": "2026-03-10T22:32:58Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2262 decompiled six fighter functions across Kirby, Popo, and Crazy Hand source files. The PR body claimed clean ninja build and fuzzy_match_percent 100.0 for all functions, and the bot report recorded six new 100% matches totaling +652 matched-code bytes plus a small .sdata2 improvement.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "fighter-source"
+    ],
+    "systems": [
+      "fighter",
+      "Kirby",
+      "Popo",
+      "CrazyHand"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/ft/chara/ftCrazyHand/ftCh_Init.c",
+      "role": "Replaced ftCh_Slap_Anim placeholder with a matched animation-transition function.",
+      "evidence_refs": [
+        "changed_files: ftCh_Init.c added 9 deleted 1",
+        "raw_diff: ftCh_Slap_Anim implementation",
+        "text_corpus: bot report lists ftCh_Slap_Anim 0.00% to 100.00%, +116 bytes"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_SpecialN.c",
+      "role": "Replaced two large Kirby neutral-special collision placeholders with matched ground/air transition handlers.",
+      "evidence_refs": [
+        "changed_files: ftKb_SpecialN.c added 20 deleted 2",
+        "raw_diff: ftKb_LgSpecialN_Coll and ftKb_LgSpecialAirN_Coll implementations",
+        "text_corpus: bot report lists both functions 0.00% to 100.00%, +116 bytes each"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_SpecialNPk.c",
+      "role": "Replaced ftKb_SpecialNFx_800FDC00 placeholder with a matched helper that computes an effect position from a fighter part joint or clears the output vector on null input.",
+      "evidence_refs": [
+        "changed_files: ftKb_SpecialNPk.c added 17 deleted 1",
+        "raw_diff: ftKb_SpecialNFx_800FDC00 implementation",
+        "text_corpus: bot report lists ftKb_SpecialNFx_800FDC00 0.00% to 100.00%, +112 bytes"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_SpecialNZd.c",
+      "role": "Replaced ftKb_SpecialNMt_80106FEC placeholder with a matched Mewtwo-copy motion-state predicate using a grouped switch.",
+      "evidence_refs": [
+        "changed_files: ftKb_SpecialNZd.c added 20 deleted 1",
+        "raw_diff: ftKb_SpecialNMt_80106FEC implementation",
+        "text_corpus: bot report lists ftKb_SpecialNMt_80106FEC 0.00% to 100.00%, +84 bytes"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftPopo/ftPp_SpecialS.c",
+      "role": "Replaced ftPp_SpecialHi_80122898 placeholder with a matched cleanup/reset function for a Popo special state flag, effects, callbacks, and part rotation.",
+      "evidence_refs": [
+        "changed_files: ftPp_SpecialS.c added 13 deleted 1",
+        "raw_diff: ftPp_SpecialHi_80122898 implementation with PAD_STACK(16)",
+        "text_corpus: bot report lists ftPp_SpecialHi_80122898 0.00% to 100.00%, +108 bytes"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Six placeholder comments were replaced with C implementations: ftKb_SpecialNMt_80106FEC, ftKb_SpecialNFx_800FDC00, ftKb_LgSpecialN_Coll, ftKb_LgSpecialAirN_Coll, ftPp_SpecialHi_80122898, and ftCh_Slap_Anim.",
+    "Kirby large neutral-special collision handlers now switch between ground and air motion states using ft_80082708 or ft_80081D0C, call ftCommon ground/air transition helpers, preserve fp->cur_anim_frame, and restore accessory4_cb to fn_800F98F4.",
+    "Kirby Mewtwo-copy helper ftKb_SpecialNMt_80106FEC now returns false for eight listed Mewtwo-copy start/loop/full/end ground and air motion IDs and true otherwise, including null gobj.",
+    "Kirby Pikachu-copy effect helper ftKb_SpecialNFx_800FDC00 now guards gobj and fp, uses GET_FIGHTER, computes an output Vec3 through lb_8000B1CC from fp->parts[44].joint with offset {0.0f, 1.45f, 5.016f}, and zeros the output vector on null input.",
+    "Popo helper ftPp_SpecialHi_80122898 now checks fp->fv.pp.x2230_b0, destroys effects, clears the flag and death/damage callbacks, and resets part rotation with ftPartSetRotX; the implementation includes PAD_STACK(16).",
+    "Crazy Hand ftCh_Slap_Anim now waits until no animation frames remain, changes to motion state 0x15D, calls ftAnim_8006EBA4, and restores accessory4_cb to fn_801577B4."
+  ],
+  "smart_moves": [
+    {
+      "text": "Used direct Fighter fields and existing helpers rather than raw pointer arithmetic for state, callbacks, current animation frame, and fighter vars.",
+      "evidence_refs": [
+        "raw_diff: uses fp->cur_anim_frame, fp->accessory4_cb, fp->fv.pp.x2230_b0, fp->death2_cb, fp->take_dmg_cb"
+      ]
+    },
+    {
+      "text": "Grouped related motion IDs in a switch for ftKb_SpecialNMt_80106FEC instead of a long branch ladder.",
+      "evidence_refs": [
+        "raw_diff: ftKb_SpecialNMt_80106FEC switch over fp->motion_id"
+      ]
+    },
+    {
+      "text": "Kept the PAD_STACK use narrow to one matched Popo function rather than applying broad stack steering across the file.",
+      "evidence_refs": [
+        "raw_diff: PAD_STACK(16) appears only in ftPp_SpecialHi_80122898 excerpt",
+        "text_corpus: bot report lists ftPp_SpecialHi_80122898 as 100.00%"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "Small fighter callback and collision functions can often match with straightforward existing helper calls and typed Fighter fields: motion-state changes, ground/air transition helpers, callback restoration, and fighter vars carried most of this PR.",
+      "scope": [
+        "src/melee/ft/chara"
+      ],
+      "evidence_refs": [
+        "raw_diff: ftKb_LgSpecialN_Coll, ftKb_LgSpecialAirN_Coll, ftCh_Slap_Anim, ftPp_SpecialHi_80122898",
+        "text_corpus: bot report six new 100% matches"
+      ],
+      "confidence": 0.83
+    },
+    {
+      "lesson": "For predicate-style motion checks, a grouped switch over motion_id can be a clean, matchable source form when several adjacent named motion states share the same return behavior.",
+      "scope": [
+        "src/melee/ft/chara/ftKirby/ftKb_SpecialNZd.c"
+      ],
+      "evidence_refs": [
+        "raw_diff: ftKb_SpecialNMt_80106FEC grouped switch",
+        "text_corpus: bot report ftKb_SpecialNMt_80106FEC 100.00%"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "When a helper writes an output Vec3, preserving explicit null guards and field-by-field fallback zeroing may be part of the matching source shape.",
+      "scope": [
+        "src/melee/ft/chara/ftKirby/ftKb_SpecialNPk.c"
+      ],
+      "evidence_refs": [
+        "raw_diff: ftKb_SpecialNFx_800FDC00 null checks and vec->z/y/x zeroing",
+        "text_corpus: bot report ftKb_SpecialNFx_800FDC00 100.00%"
+      ],
+      "confidence": 0.72
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Address-suffixed or address-style function names were retained where semantic names were not introduced by the PR: ftKb_SpecialNMt_80106FEC, ftKb_SpecialNFx_800FDC00, ftPp_SpecialHi_80122898, fn_800F98F4, and fn_801577B4.",
+      "evidence_refs": [
+        "human_pr_text: listed matched functions retain address-style names",
+        "raw_diff: implementations call fn_800F98F4 and fn_801577B4"
+      ]
+    },
+    {
+      "convention": "Local fighter object pointer is named gobj and Fighter pointer is named fp, consistent with common fighter-source shorthand visible in the diff.",
+      "evidence_refs": [
+        "raw_diff: all new functions use HSD_GObj* or Fighter_GObj* gobj and Fighter* fp"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Used PAD_STACK(16) in ftPp_SpecialHi_80122898.",
+      "evidence_refs": [
+        "raw_diff: ftPp_SpecialHi_80122898 contains PAD_STACK(16)",
+        "text_corpus: bot report ftPp_SpecialHi_80122898 0.00% to 100.00%, +108 bytes"
+      ],
+      "notes": "The PR evidence supports that this function matched with PAD_STACK present, but the slice does not include discussion explaining why the stack pad was necessary or whether alternatives were tried."
+    },
+    {
+      "tactic": "Used grouped switch cases over named motion IDs for ftKb_SpecialNMt_80106FEC.",
+      "evidence_refs": [
+        "raw_diff: switch over fp->motion_id",
+        "text_corpus: bot report ftKb_SpecialNMt_80106FEC 100.00%"
+      ],
+      "notes": "This aligns with the loaded canonical-control-flow-and-macros standard, but no reviewer discussion is present."
+    },
+    {
+      "tactic": "Used typed field access and existing project helpers instead of generated offset math.",
+      "evidence_refs": [
+        "raw_diff: GET_FIGHTER, gobj->user_data, fp->parts[44].joint, fp->fv.pp.x2230_b0, Fighter_ChangeMotionState, ftCommon_8007D5D4, ftCommon_8007D7FC"
+      ],
+      "notes": "The match report supports the resulting functions as 100%, but the slice does not show the decompiler output or rejected alternatives."
+    }
+  ],
+  "review_feedback": [],
+  "searchable_terms": [
+    "PR2262",
+    "fighters match 6 functions",
+    "johnwinston",
+    "ftKb_SpecialNMt_80106FEC",
+    "ftKb_SpecialNFx_800FDC00",
+    "ftKb_LgSpecialN_Coll",
+    "ftKb_LgSpecialAirN_Coll",
+    "ftPp_SpecialHi_80122898",
+    "ftCh_Slap_Anim",
+    "ftKb_SpecialNZd",
+    "ftKb_SpecialNPk",
+    "ftKb_SpecialN",
+    "ftPp_SpecialS",
+    "ftCh_Init",
+    "PAD_STACK(16)",
+    "fp->fv.pp.x2230_b0",
+    "fp->accessory4_cb",
+    "fn_800F98F4",
+    "fn_801577B4",
+    "Fighter_ChangeMotionState",
+    "ftCommon_8007D5D4",
+    "ftCommon_8007D7FC",
+    "lb_8000B1CC",
+    "fp->parts[44].joint",
+    "fuzzy_match_percent 100.0"
+  ],
+  "follow_up_queries": [
+    "ftPp_SpecialHi_80122898 PAD_STACK",
+    "fp->fv.pp.x2230_b0 Popo callback cleanup",
+    "ftKb_SpecialNMt_80106FEC motion_id switch",
+    "ftKb_LgSpecialN_Coll ftKb_LgSpecialAirN_Coll accessory4_cb",
+    "ftKb_SpecialNFx_800FDC00 lb_8000B1CC parts[44].joint",
+    "ftCh_Slap_Anim accessory4_cb fn_801577B4"
+  ],
+  "evidence_quality": {
+    "status": "strong",
+    "evidence_refs": [
+      "metadata_json: PR identity, merged state, author, timestamps, changed-file list",
+      "human_pr_text: PR summary and claimed verification",
+      "raw_diff: complete 4465-byte diff for five changed files",
+      "text_corpus: decomp-dev bot report with six 100% new matches"
+    ],
+    "notes": [
+      "No review comments or reviews are present in the slice, so reviewer intent and review feedback cannot be inferred.",
+      "The PR body claims ninja builds clean and fuzzy_match_percent 100.0; the bot report independently records six new 100% matches, but no full build log or objdiff artifacts are loaded.",
+      "The raw PR JSON is truncated, but the loaded human_pr_text, raw_diff, changed_files, and text_corpus are sufficient for this compact intake.",
+      "The PR body says the code was generated with Claude Code; this is recorded as PR text evidence only and not treated as proof of authored intent."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "title": "Grouped motion-id switch matched a fighter predicate",
+        "text": "In PR #2262, ftKb_SpecialNMt_80106FEC matched at 100% using a switch over fp->motion_id with grouped Mewtwo-copy motion-state cases returning false and default/null paths returning true. This is a concrete example supporting ordinary switch forms for adjacent state predicates.",
+        "scope": [
+          "src/melee/ft/chara/ftKirby/ftKb_SpecialNZd.c",
+          "fighter motion-state predicates"
+        ],
+        "evidence_refs": [
+          "raw_diff: ftKb_SpecialNMt_80106FEC",
+          "text_corpus: bot report ftKb_SpecialNMt_80106FEC 100.00%"
+        ]
+      },
+      {
+        "title": "Typed fighter fields and helpers were enough for several 100% fighter matches",
+        "text": "PR #2262 matched six small fighter functions while using gobj->user_data or GET_FIGHTER, Fighter fields, fighter-var fields, and existing helpers such as Fighter_ChangeMotionState, ftCommon_8007D5D4, ftCommon_8007D7FC, efLib_DestroyAll, ftPartSetRotX, and lb_8000B1CC.",
+        "scope": [
+          "src/melee/ft/chara"
+        ],
+        "evidence_refs": [
+          "raw_diff: all six implementations",
+          "text_corpus: bot report six new 100% matches"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "PAD_STACK example with narrow match evidence",
+        "text": "PR #2262 provides an example where PAD_STACK(16) appears in a single matched fighter function, ftPp_SpecialHi_80122898, and the bot report records that function as a new 100% match. The slice does not explain why the pad was necessary, so this should only be considered as an example under the existing matching-tactics evidence standard, not as a general recommendation.",
+        "source_path": null,
+        "scope": [
+          "matching tactics",
+          "fighter functions",
+          "src/melee/ft/chara/ftPopo/ftPp_SpecialS.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: ftPp_SpecialHi_80122898 contains PAD_STACK(16)",
+          "text_corpus: bot report ftPp_SpecialHi_80122898 100.00%"
+        ],
+        "reason": "Could enrich the existing matching-tactics-need-evidence standard with a concrete, narrowly evidenced historical example while preserving that PAD_STACK requires justification."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote 'Claude Code generated' as a decomp method or accepted source style; it is only present in the PR body footer.",
+      "Do not infer reviewer approval rationale because the slice has no review comments or reviews.",
+      "Do not generalize PAD_STACK as acceptable style from this PR alone; the slice lacks explanation of necessity or alternative attempts.",
+      "Do not claim all six functions were objdiff-verified from loaded artifacts; the available evidence is PR-body verification text plus decomp-dev bot match percentages."
+    ]
+  },
+  "confidence": 0.88,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

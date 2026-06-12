@@ -1,0 +1,440 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2515",
+  "pr": {
+    "number": 2515,
+    "title": "lb: improve lbcollision capsule-collision matching",
+    "url": "https://github.com/doldecomp/melee/pull/2515",
+    "state": "MERGED",
+    "author": "itsgrimetime",
+    "created_at": "2026-05-19T19:52:34Z",
+    "merged_at": "2026-05-19T21:57:50Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2515 is focused match work in src/melee/lb/lbcollision.c for lb collision capsule/segment collision routines. The PR body reports four new 100% matches, four improved but still sub-100% functions, role-based parameter names for lbColl_80006E58, removal of an unused JObj matrix helper/assert strings, Vec3 grouping of coordinate triplets, an assignment-expression shape in the closest-points solve, and a float-register tactic that caches 1.0. Loaded bot feedback also reported an intermediate broken match in lbColl_80005C44 and the author said they would fix regressions, but the loaded slice does not include final regression output.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "naming",
+      "types-structs",
+      "matching-tactics",
+      "regression-risk"
+    ],
+    "systems": [
+      "library",
+      "lb",
+      "collision"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/lb/lbcollision.c",
+      "role": "Only changed file; capsule-collision matching and cleanup for lb collision routines.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/lb/lbcollision.c added 670 deleted 621 hunks 50",
+        "human_pr_text.md: PR body says match work on lbcollision.c",
+        "raw_diff.diff: prototype and body changes for lbColl_80006E58, lbColl_80005C44, lbColl_80006094, lbColl_800067F8"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Reported new 100% matches for lbColl_8000A244, lbColl_8000A78C, lbColl_8000A95C, and lbColl_8000AB2C.",
+      "evidence_refs": [
+        "human_pr_text.md: New 100% matches table",
+        "text_corpus.jsonl: decomp-dev bot report lists 4 new matches"
+      ]
+    },
+    {
+      "text": "Reported improvements, still below 100%, for lbColl_80006094, lbColl_800067F8, lbColl_80006E58, and lbColl_8000A584.",
+      "evidence_refs": [
+        "human_pr_text.md: Improved still <100% table",
+        "text_corpus.jsonl: bot report lists improvements for unmatched items"
+      ]
+    },
+    {
+      "text": "Renamed lbColl_80006E58 parameters from generic arg names to collision-role names such as hit_start, hurt_start, hit_closest, hurt_closest, hurt_mtx, out_contact_pos, out_overlap, hit_radius, hurt_radius, and broadphase_scale.",
+      "evidence_refs": [
+        "human_pr_text.md: Code changes bullet for lbColl_80006E58 parameter names",
+        "raw_diff.diff: lbColl_80006E58 forward declaration changed from arg0/arg1/etc. to role names"
+      ]
+    },
+    {
+      "text": "Removed lbColl_JObjGetMtxPtr and the associated lbColl_804D3700/lbColl_804D3708 assert strings after they were no longer referenced.",
+      "evidence_refs": [
+        "human_pr_text.md: Code changes bullet says helper and assert strings were dropped",
+        "raw_diff.diff: deletes lbColl_804D3700, lbColl_804D3708, and static inline lbColl_JObjGetMtxPtr"
+      ]
+    },
+    {
+      "text": "Reworked several scalar coordinate temporaries into Vec3 locals or copies in collision math branches.",
+      "evidence_refs": [
+        "human_pr_text.md: Code changes bullet says float xx_x/_y/_z triplets collapsed into Vec3 xx in lbColl_80005C44 and parallel-axes branches of lbColl_80006E58",
+        "raw_diff.diff: examples include Vec3 arg2_copy, c3, a2, c2, b0 replacing scattered scalar sp variables"
+      ]
+    },
+    {
+      "text": "Adjusted literal and constant access shapes around near-zero checks, clamping, SQ macro use, and stored float constants in the excerpted collision routines.",
+      "evidence_refs": [
+        "raw_diff.diff: nearzero uses 1e-5F and -1e-5F",
+        "raw_diff.diff: temp_f2 * temp_f2 comparison changed to SQ(temp_f2) and SQ components",
+        "raw_diff.diff: several 0.0/1.0 comparisons changed to lbColl_804D79F8/lbColl_804D7A08/lbColl_804D7A10/lbColl_804D7A00 in later functions"
+      ]
+    },
+    {
+      "text": "Used stack-padding and local declaration/lifetime reshaping in at least lbColl_80006094 and lbColl_800067F8.",
+      "evidence_refs": [
+        "raw_diff.diff: PAD_STACK(56) changed to PAD_STACK(80) in lbColl_80006094",
+        "raw_diff.diff: PAD_STACK(24) changed to PAD_STACK(72) in lbColl_800067F8"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Role-based parameter names make a dense capsule-collision solve more reviewable while staying tied to the author’s stated confidence and the function’s collision roles.",
+      "evidence_refs": [
+        "human_pr_text.md: author says they named fields they were pretty confident about",
+        "human_pr_text.md: lbColl_80006E58 role-name bullet"
+      ]
+    },
+    {
+      "text": "Converting repeated x/y/z scratch groups into Vec3 locals is a useful cleanup when the code is operating on geometric vectors and the diff shows equivalent grouped copies.",
+      "evidence_refs": [
+        "human_pr_text.md: collapse float triplets into Vec3 bullet",
+        "raw_diff.diff: Vec3 c3/a2/c2/b0 locals replace scalar stack temporaries in branches"
+      ]
+    },
+    {
+      "text": "Removing a no-longer-referenced inline helper and its assert strings reduces stale source/data surface instead of preserving dead scaffolding.",
+      "evidence_refs": [
+        "human_pr_text.md: Drop lbColl_JObjGetMtxPtr and assert strings; no longer referenced",
+        "raw_diff.diff: deleted helper and strings"
+      ]
+    },
+    {
+      "text": "The PR body explicitly separates new 100% matches from still-imperfect functions, avoiding overclaiming the large capsule routines.",
+      "evidence_refs": [
+        "human_pr_text.md: New 100% matches table and Improved still <100% table",
+        "human_pr_text.md: residual float-register-allocation mismatches note"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "text": "For dense geometry/collision routines, semantic role names for endpoints, closest points, matrices, radii, and outputs can be justified when the function roles are clear; keep confidence bounded when the author notes remaining uncertainty.",
+      "evidence_refs": [
+        "human_pr_text.md: role names for lbColl_80006E58",
+        "human_pr_text.md: author says named fields they were pretty confident about but more work likely needed"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "text": "When scalar x/y/z temporaries form whole vector values, trying Vec3 locals/copies can improve readability and may help match shape, especially in parallel-axis collision branches.",
+      "evidence_refs": [
+        "human_pr_text.md: collapse float xx_x/_y/_z triplets into Vec3 xx",
+        "raw_diff.diff: Vec3 locals replace scalar stack temporaries"
+      ],
+      "confidence": 0.76
+    },
+    {
+      "text": "Do not keep helper/assert scaffolding after a matching rewrite removes all references; deleting unused inline helpers and their private strings can be part of code-match cleanup when the PR evidence identifies them as unreferenced.",
+      "evidence_refs": [
+        "human_pr_text.md: Drop lbColl_JObjGetMtxPtr and assert strings; no longer referenced",
+        "raw_diff.diff: deleted helper and strings"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "text": "Float-register-allocation mismatches may remain after major structural improvements; record them as residual match debt instead of claiming complete recovery.",
+      "evidence_refs": [
+        "human_pr_text.md: three remaining sub-100% functions still have residual float-register-allocation mismatches"
+      ],
+      "confidence": 0.84
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "Use role-pair names for collision capsule endpoints and closest-point outputs: hit_start/hit_end, hurt_start/hurt_end, hit_closest/hurt_closest.",
+      "scope": [
+        "lbColl_80006E58",
+        "capsule collision math"
+      ],
+      "evidence_refs": [
+        "human_pr_text.md: lbColl_80006E58 parameter-name bullet",
+        "raw_diff.diff: lbColl_80006E58 prototype"
+      ]
+    },
+    {
+      "text": "Use output-prefixed names for explicit out parameters: out_contact_pos and out_overlap.",
+      "scope": [
+        "lbColl_80006E58"
+      ],
+      "evidence_refs": [
+        "human_pr_text.md: lbColl_80006E58 parameter-name bullet",
+        "raw_diff.diff: lbColl_80006E58 prototype"
+      ]
+    },
+    {
+      "text": "Use domain-specific radius and scale names when supported by collision math roles: hit_radius, hurt_radius, broadphase_scale.",
+      "scope": [
+        "lbColl_80006E58"
+      ],
+      "evidence_refs": [
+        "human_pr_text.md: lbColl_80006E58 parameter-name bullet",
+        "raw_diff.diff: lbColl_80006E58 prototype"
+      ]
+    },
+    {
+      "text": "Matrix parameters can be role-qualified by object/side, as in hurt_mtx.",
+      "scope": [
+        "lbColl_80006E58"
+      ],
+      "evidence_refs": [
+        "human_pr_text.md: lbColl_80006E58 parameter-name bullet",
+        "raw_diff.diff: lbColl_80006E58 prototype"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "text": "Cache 1.0 in a callee-save float to avoid reloading across *_param = 1.0 branches in lbColl_80006E58.",
+      "evidence_refs": [
+        "human_pr_text.md: Code changes bullet explicitly describes this tactic"
+      ],
+      "caution": "This is a register-allocation tactic; keep narrow and require objdiff/regression evidence before generalizing."
+    },
+    {
+      "text": "Use assignment-expression shape for the closest-points solve where the PR found it useful: hit_param = (hit_param_candidate = ...).",
+      "evidence_refs": [
+        "human_pr_text.md: Code changes bullet says assignment expression was folded into closest-points solve"
+      ],
+      "caution": "Loaded diff excerpt does not include the exact final lbColl_80006E58 assignment-expression hunk, so this is grounded mainly in the PR body."
+    },
+    {
+      "text": "Local block scoping and declaration order changes were used to alter lifetimes/register allocation around dot products and clamp calculations.",
+      "evidence_refs": [
+        "raw_diff.diff: lbColl_80005C44 wraps d1_dot_d1, d1_dot_d2, and scale in an inner block",
+        "raw_diff.diff: lbColl_80006094 introduces nested Vec3 and dot-product locals"
+      ],
+      "caution": "Treat as matching tactics, not source style, unless verified by narrow objdiff."
+    },
+    {
+      "text": "PAD_STACK was adjusted in large collision routines, including lbColl_80006094 and lbColl_800067F8.",
+      "evidence_refs": [
+        "raw_diff.diff: PAD_STACK(56) to PAD_STACK(80)",
+        "raw_diff.diff: PAD_STACK(24) to PAD_STACK(72)"
+      ],
+      "caution": "Current decomp standards require explicit build/objdiff/regression evidence for PAD_STACK; loaded slice only shows the tactic and an intermediate bot report."
+    },
+    {
+      "text": "Macro/literal reshaping appeared in the excerpt, including SQ for square expressions and direct nearzero literals in one helper.",
+      "evidence_refs": [
+        "raw_diff.diff: SQ(temp_f2) and SQ(d2_x/y/z)",
+        "raw_diff.diff: nearzero changed to x < 1e-5F && x > -1e-5F"
+      ],
+      "caution": "The PR body does not emphasize these as lessons; avoid promoting them beyond this PR without more evidence."
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "author_note",
+      "text": "Author said the PR was opened prematurely.",
+      "evidence_refs": [
+        "text_corpus.jsonl: issuecomment-4491500413"
+      ]
+    },
+    {
+      "kind": "bot_regression_report",
+      "text": "Bot report showed +0.03% matched code and four new matches, but also one broken match: lbColl_80005C44 moved from 100.00% to 99.99% in that report.",
+      "evidence_refs": [
+        "text_corpus.jsonl: decomp-dev bot report issuecomment-4491801020"
+      ]
+    },
+    {
+      "kind": "author_followup",
+      "text": "Author replied that they would fix the regressions.",
+      "evidence_refs": [
+        "text_corpus.jsonl: issuecomment-4492065244"
+      ]
+    },
+    {
+      "kind": "tooling_note",
+      "text": "Author reported editor config could not be rerun due to a network error while downloading nix packages.",
+      "evidence_refs": [
+        "text_corpus.jsonl: issuecomment-4492147028"
+      ]
+    },
+    {
+      "kind": "missing_evidence",
+      "text": "No review comments are loaded, and no final post-fix bot/regression report is included in the slice.",
+      "evidence_refs": [
+        "metadata_json: review_comments count is 0",
+        "loaded text_corpus.jsonl contains one bot report and later author comments but no final report"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2515",
+    "lb collision",
+    "lbcollision.c",
+    "capsule collision",
+    "3d capsule",
+    "lbColl_80006E58",
+    "lbColl_80006094",
+    "lbColl_800067F8",
+    "lbColl_80005C44",
+    "lbColl_8000A244",
+    "lbColl_8000A78C",
+    "lbColl_8000A95C",
+    "lbColl_8000AB2C",
+    "lbColl_8000A584",
+    "hit_start",
+    "hit_end",
+    "hurt_start",
+    "hurt_end",
+    "hit_closest",
+    "hurt_closest",
+    "hurt_mtx",
+    "out_contact_pos",
+    "out_overlap",
+    "hit_radius",
+    "hurt_radius",
+    "broadphase_scale",
+    "Vec3 triplets",
+    "float-register-allocation",
+    "PAD_STACK",
+    "lbColl_JObjGetMtxPtr",
+    "JObj assert strings",
+    "SQ macro",
+    "nearzero",
+    "approximatelyZero"
+  ],
+  "follow_up_queries": [
+    "PR 2515 final bot report lbColl_80005C44 regression fixed",
+    "lbColl_80006E58 hit_param_candidate assignment expression",
+    "lbcollision capsule collision Vec3 triplets",
+    "lbColl_80006094 PAD_STACK 80",
+    "lbColl_800067F8 PAD_STACK 72",
+    "lbColl_JObjGetMtxPtr removed no longer referenced",
+    "lbcollision residual float-register-allocation mismatches"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR metadata, merged state, changed file counts",
+      "human_pr_text.md: complete PR body and issue comments",
+      "text_corpus.jsonl: bot report and issue comments",
+      "raw_diff.diff: diff loaded but truncated from 78585 chars"
+    ],
+    "notes": [
+      "Strong evidence for PR identity, changed file, author-stated match targets, naming changes, helper removal, and several shown diff tactics.",
+      "Diff is truncated, so not every stated lbColl_80006E58 hunk can be independently inspected from loaded content.",
+      "The only loaded bot report is intermediate and shows a broken lbColl_80005C44 match; the slice does not include final regression/checkdiff output after the author said they would fix regressions.",
+      "No reviewer comments or reviews are loaded; review_feedback is limited to author comments and bot feedback.",
+      "Do not treat role names or matching tactics as global accepted standards solely from this PR."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "kind": "decomp_lesson_candidate",
+        "title": "Use role-pair parameter names in capsule collision routines when roles are clear",
+        "text": "PR #2515 supports using names such as hit_start/hit_end, hurt_start/hurt_end, hit_closest/hurt_closest, out_contact_pos, out_overlap, hit_radius, hurt_radius, and broadphase_scale for lbColl_80006E58. The lesson is local and evidence-backed for this capsule-collision solve, not a blanket naming rule.",
+        "scope": [
+          "src/melee/lb/lbcollision.c",
+          "lbColl_80006E58",
+          "capsule collision"
+        ],
+        "evidence_refs": [
+          "human_pr_text.md: lbColl_80006E58 role names",
+          "raw_diff.diff: lbColl_80006E58 prototype"
+        ],
+        "confidence": 0.8
+      },
+      {
+        "kind": "decomp_lesson_candidate",
+        "title": "Try Vec3 locals when scalar x/y/z temporaries are acting as a vector",
+        "text": "PR #2515 states and the diff illustrates that collapsing float xx_x/_y/_z triplets into Vec3 locals was part of improving lbcollision matching/readability. This is most supported for lbColl_80005C44 and parallel-axis collision branches.",
+        "scope": [
+          "src/melee/lb/lbcollision.c",
+          "lbColl_80005C44",
+          "lbColl_80006E58",
+          "collision geometry"
+        ],
+        "evidence_refs": [
+          "human_pr_text.md: Vec3 triplet collapse bullet",
+          "raw_diff.diff: Vec3 c3/a2/c2/b0 and other grouped vector locals"
+        ],
+        "confidence": 0.76
+      },
+      {
+        "kind": "matching_tactic_candidate",
+        "title": "Record residual float-register allocation debt separately from structural progress",
+        "text": "PR #2515 reports large percentage improvements while explicitly noting that three remaining sub-100% functions still have residual float-register-allocation mismatches. This is useful bookkeeping for later match work.",
+        "scope": [
+          "src/melee/lb/lbcollision.c",
+          "lbColl_80006094",
+          "lbColl_800067F8",
+          "lbColl_80006E58"
+        ],
+        "evidence_refs": [
+          "human_pr_text.md: residual float-register-allocation mismatches"
+        ],
+        "confidence": 0.84
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Consider documenting Vec3 grouping as a typed-fields/vector-structure matching cleanup pattern",
+        "text": "This PR provides a concrete example where scalar coordinate triplets were collapsed into Vec3 locals in collision math. A curator may consider whether existing standards should explicitly mention using known math/vector types for x/y/z scratch groups when evidence supports the grouped value.",
+        "source_path": null,
+        "scope": [
+          "geometry code",
+          "collision code",
+          "Vec3 temporaries"
+        ],
+        "evidence_refs": [
+          "human_pr_text.md: collapse float xx_x/_y/_z triplets into Vec3 xx",
+          "raw_diff.diff: Vec3 locals replace scalar temporaries"
+        ],
+        "reason": "This overlaps with typed-fields-over-pointer-math and infer-authored-source-style, but the current standards do not explicitly call out vector triplet grouping."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Consider adding a cautionary note for float-register-allocation tactics",
+        "text": "The PR body names float-register-allocation mismatches and a tactic of caching 1.0 in a callee-save float. Curator may decide whether matching-tactics guidance should include examples for float constant caching/register allocation, with required objdiff/regression evidence.",
+        "source_path": null,
+        "scope": [
+          "matching tactics",
+          "float register allocation",
+          "collision math"
+        ],
+        "evidence_refs": [
+          "human_pr_text.md: cache 1.0 in a callee-save float",
+          "human_pr_text.md: residual float-register-allocation mismatches"
+        ],
+        "reason": "Current standards cover broad tactics needing evidence; this PR offers a searchable example but not enough evidence to promote a universal tactic."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote the intermediate bot report as final validation because it included a broken lbColl_80005C44 match and no later bot report is loaded.",
+      "Do not infer reviewer intent or acceptance rationale; no reviews or review comments are present.",
+      "Do not generalize PAD_STACK increases as acceptable style from this PR alone; the loaded evidence shows use but not narrow objdiff/regression justification.",
+      "Do not promote all renamed fields as globally proven semantic names; the author explicitly framed some naming as confident but still likely needing future work."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

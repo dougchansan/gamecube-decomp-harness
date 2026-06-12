@@ -1,0 +1,887 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sidebar Flow Design — D-Comp Orchestrator</title>
+<style>
+  :root {
+    --ink: #0f172a;
+    --raised: #1e293b;
+    --card: #16213a;
+    --line: #2c3a55;
+    --line2: #243352;
+    --fg: #e2e8f0;
+    --soft: #cbd5e1;
+    --dim: #7c8db0;
+    --up: #34d399;
+    --warn: #fbbf24;
+    --down: #f87171;
+    --accent: #60a5fa;
+    --doc-bg: #f8fafc;
+    --doc-fg: #0f172a;
+    --doc-dim: #64748b;
+    --doc-line: #e2e8f0;
+    --doc-card: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--doc-bg);
+    color: var(--doc-fg);
+    font: 14px/1.55 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  main { max-width: 1280px; margin: 0 auto; padding: 32px 24px 96px; }
+  h1 { font-size: 22px; letter-spacing: 0.02em; margin: 0 0 4px; }
+  h2 { font-size: 16px; text-transform: uppercase; letter-spacing: 0.12em; margin: 56px 0 6px; color: var(--doc-fg); }
+  h3 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--doc-dim); margin: 28px 0 8px; }
+  p.lede { color: var(--doc-dim); max-width: 860px; margin: 0 0 8px; }
+  .rule { height: 1px; background: var(--doc-line); margin: 12px 0 20px; }
+  code { font: 12px/1.4 ui-monospace, "SF Mono", Menlo, Consolas, monospace; background: #eef2f7; border: 1px solid var(--doc-line); padding: 1px 5px; border-radius: 3px; }
+  .note { font-size: 12.5px; color: var(--doc-dim); max-width: 860px; }
+
+  /* ---------- flow diagram ---------- */
+  .flow { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0; align-items: stretch; margin: 18px 0 6px; }
+  .phase {
+    background: var(--doc-card); border: 1px solid var(--doc-line); border-radius: 6px;
+    padding: 12px 14px; margin-right: 26px; position: relative; min-height: 168px;
+  }
+  .phase:last-child { margin-right: 0; }
+  .phase::after {
+    content: "→"; position: absolute; right: -22px; top: 14px;
+    color: var(--doc-dim); font-size: 16px;
+  }
+  .phase:last-child::after, .phase:nth-last-child(2)::after { content: ""; }
+  .phase .num { font: 11px ui-monospace, Menlo, monospace; color: var(--doc-dim); }
+  .phase .name { font-weight: 700; font-size: 13px; margin: 2px 0 6px; }
+  .phase ul { margin: 0; padding-left: 16px; font-size: 12px; color: #334155; }
+  .phase li { margin: 2px 0; }
+  .gate {
+    margin-top: 8px; font-size: 11px; border-top: 1px dashed var(--doc-line); padding-top: 6px; color: var(--doc-dim);
+  }
+  .gate b { color: #047857; font-weight: 600; }
+  .lockbadge { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 2px 6px; border-radius: 3px; margin-bottom: 6px; }
+  .lock-frozen { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+  .lock-open { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+  .lock-external { background: #e0e7ff; color: #3730a3; border: 1px solid #c7d2fe; }
+  .loopback {
+    margin: 4px 26px 0 0; grid-column: 1 / -1; text-align: center; color: var(--doc-dim); font-size: 12px;
+    border: 1px dashed #cbd5e1; border-top: none; border-radius: 0 0 8px 8px; padding: 6px 10px 8px;
+  }
+
+  /* ---------- figma-style system map ---------- */
+  .figma { background: #fff; border: 1px solid var(--doc-line); border-radius: 8px; padding: 10px; margin-top: 14px; }
+  .figma svg { width: 100%; height: auto; display: block; }
+  .figma .ttl { font: 600 15px -apple-system, "Segoe UI", Roboto, sans-serif; fill: #0f172a; }
+  .figma .sub { font: 12px -apple-system, "Segoe UI", Roboto, sans-serif; fill: #64748b; }
+  .figma .lbl { font: 12px -apple-system, "Segoe UI", Roboto, sans-serif; fill: #475569; paint-order: stroke; stroke: #fff; stroke-width: 4px; stroke-linejoin: round; }
+  .figma .lbl9 { font: 11px -apple-system, "Segoe UI", Roboto, sans-serif; fill: #64748b; paint-order: stroke; stroke: #fff; stroke-width: 4px; stroke-linejoin: round; }
+  .figma .zlbl { font: 700 13px -apple-system, "Segoe UI", Roboto, sans-serif; letter-spacing: 0.12em; fill: #94a3b8; }
+  .figma .e { fill: none; stroke-width: 2; }
+  .figma .eB { stroke: #3b82f6; } .figma .eG { stroke: #10b981; } .figma .eV { stroke: #8b5cf6; }
+  .figma .eA { stroke: #f59e0b; } .figma .eS { stroke: #94a3b8; }
+  .figma .card { fill: #fff; stroke: #e2e8f0; }
+  .figma .ghost { fill: #fff; stroke: #e2e8f0; }
+  .figma .ext { fill: #fff; stroke: #cbd5e1; stroke-dasharray: 4 3; }
+
+  /* ---------- sequence chains ---------- */
+  .seq { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 10px 0 4px; }
+  .seq .s { background: var(--doc-card); border: 1px solid var(--doc-line); border-radius: 4px; padding: 6px 10px; font-size: 12px; }
+  .seq .s.agent { border-color: #c7d2fe; background: #eef2ff; color: #3730a3; font-weight: 600; }
+  .seq .a { color: var(--doc-dim); }
+  .seq .loop { font-size: 11px; color: #b45309; border: 1px dashed #fcd34d; border-radius: 4px; padding: 4px 8px; }
+
+  /* ---------- matrix ---------- */
+  table { border-collapse: collapse; width: 100%; background: var(--doc-card); font-size: 12.5px; }
+  th, td { border: 1px solid var(--doc-line); padding: 7px 10px; text-align: left; vertical-align: top; }
+  th { background: #f1f5f9; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--doc-dim); }
+  td.c { text-align: center; font-weight: 700; }
+  .ok { color: #047857; }
+  .no { color: #b91c1c; }
+  .meh { color: #b45309; }
+  td code { white-space: nowrap; }
+
+  /* ---------- sidebar mockups (rendered in app dark theme) ---------- */
+  .mockrow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; align-items: start; margin-top: 16px; }
+  .mock { background: var(--ink); border: 1px solid #334155; border-radius: 8px; overflow: hidden; color: var(--fg); }
+  .mock .caption { background: #f1f5f9; color: var(--doc-fg); font-size: 12px; font-weight: 600; padding: 8px 12px; border-bottom: 1px solid var(--doc-line); }
+  .mock .caption small { display: block; font-weight: 400; color: var(--doc-dim); }
+  .sb { padding: 10px; font-size: 11.5px; }
+  .sb-head { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: var(--fg);
+    padding: 8px 10px; background: var(--raised); border-bottom: 1px solid var(--line); }
+
+  /* stepper */
+  .stepper { display: grid; gap: 0; padding: 10px; background: var(--raised); border-bottom: 1px solid var(--line); }
+  .step { display: grid; grid-template-columns: 18px minmax(0,1fr) auto; gap: 8px; align-items: center; padding: 4px 2px; color: var(--dim); }
+  .step .dot { width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid var(--line); display: grid; place-items: center; font-size: 8px; }
+  .step.done { color: var(--soft); }
+  .step.done .dot { background: var(--up); border-color: var(--up); color: #052e16; }
+  .step.now { color: var(--fg); font-weight: 700; }
+  .step.now .dot { border-color: var(--accent); background: var(--accent); box-shadow: none; }
+  .step .tag { font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; }
+  .step.now .tag { color: var(--accent); }
+  .step.locked .tag { color: var(--warn); }
+
+  .panel { border: 1px solid var(--line); background: var(--card); border-radius: 4px; margin: 10px 0; }
+  .panel.dimmed { opacity: 0.45; }
+  .panel-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--dim);
+    padding: 7px 10px 0; display: flex; justify-content: space-between; align-items: center; }
+  .panel-title .pill { font-size: 9px; padding: 1px 6px; border-radius: 999px; border: 1px solid var(--line); letter-spacing: 0.06em; }
+  .pill.green { color: var(--up); border-color: rgba(52,211,153,.4); }
+  .pill.amber { color: var(--warn); border-color: rgba(251,191,36,.4); }
+  .pill.red { color: var(--down); border-color: rgba(248,113,113,.4); }
+  .pill.gray { color: var(--dim); }
+  .panel-body { padding: 8px 10px 10px; }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; color: var(--soft); }
+  .kv span:nth-child(odd) { color: var(--dim); }
+  .kv span:nth-child(even) { text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .btnrow { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px; }
+  .btn { border: 1px solid var(--line); background: var(--raised); color: var(--soft); border-radius: 3px;
+    padding: 6px 8px; font-size: 11px; text-align: center; font-weight: 600; }
+  .btn.primary { background: #1d4ed8; border-color: #1d4ed8; color: #fff; }
+  .btn.warning { border-color: rgba(251,191,36,.5); color: var(--warn); }
+  .btn.danger { border-color: rgba(248,113,113,.5); color: var(--down); }
+  .btn.disabled { opacity: 0.35; }
+  .btn.wide { grid-column: 1 / -1; }
+  .lockline { font-size: 10px; color: var(--warn); padding: 6px 8px; border: 1px dashed rgba(251,191,36,.4); border-radius: 3px; margin-top: 8px; }
+  .checklist { margin: 0; padding: 0; list-style: none; color: var(--soft); }
+  .checklist li { padding: 2px 0; display: flex; gap: 7px; align-items: baseline; }
+  .checklist .t { color: var(--up); }
+  .checklist .x { color: var(--dim); }
+  .checklist .w { color: var(--warn); }
+
+  @media (max-width: 1100px) {
+    .flow { grid-template-columns: repeat(3, 1fr); row-gap: 26px; }
+    .mockrow { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>Sidebar Flow Design</h1>
+  <p class="lede">
+    Proposal for restructuring the dashboard's left rail around the operating cycle of a decomp
+    session, instead of a flat list of always-visible control panels. The core idea: the sidebar is a
+    <strong>phase stepper</strong>. The system derives the current phase from durable state, surfaces
+    one primary next action, and visibly locks the actions that must not run in the current phase
+    (e.g. no PR intake while workers are running, no scheduling while handoff is in flight).
+  </p>
+  <div class="rule"></div>
+
+  <h2>1 · The Operating Cycle</h2>
+  <p class="note">
+    Each pass through this loop is one run session — one grouping of changes measured against one
+    frozen baseline. Sync exists for two reasons: it catches duplicate work (upstream may have
+    matched a function we also hold locally) and it keeps a known-good recovery point if our changes
+    break something. The loop never deletes local evidence: carry-forward items (clean non-exact
+    improvements, fact requests, stalls) survive checkpoint and fresh-run and re-enter the next
+    session.
+  </p>
+
+  <div class="flow">
+    <div class="phase">
+      <span class="lockbadge lock-open">intake open</span>
+      <div class="num">PHASE 1</div>
+      <div class="name">Sync &amp; Intake</div>
+      <ul>
+        <li>Fetch / rebase onto <code>origin/master</code></li>
+        <li>Intake newly merged PRs → postmortems</li>
+        <li>Rebuild indexes + knowledge graph</li>
+        <li>Rebuild saved baseline + report</li>
+      </ul>
+      <div class="gate"><b>Gate:</b> clean rebase · graph smoke passes · fresh baseline report</div>
+    </div>
+
+    <div class="phase">
+      <span class="lockbadge lock-open">intake open</span>
+      <div class="num">PHASE 2</div>
+      <div class="name">Baseline &amp; Init</div>
+      <ul>
+        <li><code>init-run</code> with checkpoint goal</li>
+        <li>Seed queue from ranked board</li>
+        <li>Capture baseline report for the run</li>
+      </ul>
+      <div class="gate"><b>Gate:</b> run exists · baseline captured at current HEAD</div>
+    </div>
+
+    <div class="phase">
+      <span class="lockbadge lock-frozen">intake frozen</span>
+      <div class="num">PHASE 3</div>
+      <div class="name">Run</div>
+      <ul>
+        <li>Start babysit / trigger-agent</li>
+        <li>Director plans · workers lease + report</li>
+        <li>Score gate integrates verified wins</li>
+        <li><strong>No sync, no PR intake, no handoff</strong></li>
+      </ul>
+      <div class="gate"><b>Exit:</b> goal checkpoint reached · or operator pauses</div>
+    </div>
+
+    <div class="phase">
+      <span class="lockbadge lock-frozen">intake frozen</span>
+      <div class="num">PHASE 4</div>
+      <div class="name">Checkpoint &amp; Validate</div>
+      <ul>
+        <li>Pause intake → drain to 0 leases</li>
+        <li>Checkpoint: PR candidates vs carry-forward</li>
+        <li>QA: regression + PR promotion gate</li>
+        <li><strong>Reconcile agent</strong> fixes regressions until clean</li>
+        <li>Plan PRs: subsystem split slices</li>
+      </ul>
+      <div class="gate"><b>Gate:</b> 0 active leases · QA <b>pr_ready</b> · zero regressions</div>
+    </div>
+
+    <div class="phase">
+      <span class="lockbadge lock-external">operator owned</span>
+      <div class="num">PHASE 5</div>
+      <div class="name">Ship PRs</div>
+      <ul>
+        <li>Slice branches from split plan</li>
+        <li>Merge latest master · resolve conflicts</li>
+        <li><strong>Reconcile agent</strong> fixes errors · rebuild clean</li>
+        <li>Isolation-check, push, open PRs, watch CI</li>
+      </ul>
+      <div class="gate"><b>Gate:</b> PRs merged · zero regressions pushed upstream</div>
+    </div>
+
+    <div class="phase">
+      <span class="lockbadge lock-open">intake open</span>
+      <div class="num">PHASE 6</div>
+      <div class="name">Resync &amp; Continue</div>
+      <ul>
+        <li>Pull + intake the just-merged PRs</li>
+        <li>Replay carry-forward onto new master</li>
+        <li><strong>Reconcile agent</strong>: conflicts · dupes · errors</li>
+        <li>New baseline → new session</li>
+      </ul>
+      <div class="gate"><b>Loops:</b> surviving carry-forward re-enters Phase 2</div>
+    </div>
+
+    <div class="loopback">⟲ Phase 6 feeds back into Phase 2 — un-shipped local work stays in the system as carry-forward and informs the next session</div>
+  </div>
+
+  <h2>2 · System Map</h2>
+  <p class="note">
+    The map is built around two ideas. First, the <b>knowledge core is the hub</b>: the resource
+    graph and its feeders sit in the center, and everything else either feeds it (worker reports
+    down, merged PRs up from sync) or reads it (ranked board and <code>knowledge_context</code> back
+    up into the run loop). Second, the <b>operational cycle reads clockwise by number</b>: ① run
+    across the top — workers are the main thing happening — then when the goal is reached, ② pause
+    → validate → ship down the right column, then ③ sync along the bottom flowing right-to-left,
+    closing the loop up the left edge into the next session. Colors: <b style="color:#3b82f6">blue</b>
+    control/scheduling, <b style="color:#10b981">green</b> evidence, <b style="color:#8b5cf6">violet</b>
+    knowledge, <b style="color:#f59e0b">amber</b> git/baseline/ship. The hard lock means only one
+    numbered stage is ever active at a time.
+  </p>
+  <div class="figma">
+  <svg viewBox="0 0 1800 1300" role="img" aria-label="System map of the decomp orchestrator">
+    <defs>
+      <marker id="mB" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#3b82f6"/></marker>
+      <marker id="mG" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#10b981"/></marker>
+      <marker id="mV" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#8b5cf6"/></marker>
+      <marker id="mA" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#f59e0b"/></marker>
+      <marker id="mS" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#94a3b8"/></marker>
+    </defs>
+
+    <!-- legend: edge colors -->
+    <g>
+      <line class="e eB" x1="1000" y1="28" x2="1030" y2="28"/><text class="lbl9" x="1038" y="32">control</text>
+      <line class="e eG" x1="1140" y1="28" x2="1170" y2="28"/><text class="lbl9" x="1178" y="32">evidence</text>
+      <line class="e eV" x1="1290" y1="28" x2="1320" y2="28"/><text class="lbl9" x="1328" y="32">knowledge</text>
+      <line class="e eA" x1="1450" y1="28" x2="1480" y2="28"/><text class="lbl9" x="1488" y="32">git · baseline · ship</text>
+    </g>
+
+    <!-- ================= zones ================= -->
+    <rect x="40" y="70" width="1720" height="360" rx="14" fill="#eff6ff" fill-opacity="0.55" stroke="#bfdbfe" stroke-dasharray="5 5"/>
+    <text class="zlbl" x="60" y="92" fill="#3b82f6">1 · RUN — WORKERS DRIVE THE BOARD</text>
+    <rect x="200" y="470" width="840" height="430" rx="16" fill="#f5f3ff" fill-opacity="0.75" stroke="#c4b5fd" stroke-width="1.5"/>
+    <text class="zlbl" x="230" y="505" fill="#8b5cf6">KNOWLEDGE CORE — THE SHARED BRAIN</text>
+    <rect x="1100" y="470" width="660" height="430" rx="14" fill="#fffbeb" fill-opacity="0.6" stroke="#fde68a" stroke-dasharray="5 5"/>
+    <text class="zlbl" x="1744" y="498" text-anchor="end" fill="#d97706">2 · PAUSE → VALIDATE → SHIP</text>
+    <rect x="40" y="980" width="1720" height="260" rx="14" fill="#ecfdf5" fill-opacity="0.55" stroke="#a7f3d0" stroke-dasharray="5 5"/>
+    <text class="zlbl" x="80" y="1006" fill="#10b981">3 · SYNC ← SHIP — RECONCILE, THEN OPEN THE NEXT SESSION</text>
+
+    <!-- ================= zone 1: run ================= -->
+    <g>
+      <rect class="card" x="90" y="130" width="220" height="76" rx="8"/>
+      <rect x="90" y="130" width="3" height="76" rx="1.5" fill="#64748b"/>
+      <text class="ttl" x="107" y="158">Trigger actor</text>
+      <text class="sub" x="107" y="180">evented loop · wake &amp; refill</text>
+    </g>
+    <g>
+      <rect class="card" x="90" y="270" width="220" height="76" rx="8"/>
+      <rect x="90" y="270" width="3" height="76" rx="1.5" fill="#6366f1"/>
+      <text class="ttl" x="107" y="298">Pi Director</text>
+      <text class="sub" x="107" y="320">board read → target packets</text>
+    </g>
+    <g>
+      <rect class="card" x="400" y="150" width="260" height="170" rx="8"/>
+      <rect x="400" y="150" width="3" height="170" rx="1.5" fill="#0d9488"/>
+      <text class="ttl" x="417" y="178">Board · SQLite</text>
+      <text class="sub" x="417" y="204">queue · leases · events</text>
+      <text class="sub" x="417" y="226">facts · worker reports</text>
+      <text class="sub" x="417" y="248">score candidates · artifacts</text>
+    </g>
+    <g>
+      <rect class="ghost" x="778" y="138" width="230" height="100" rx="8"/>
+      <rect class="ghost" x="769" y="129" width="230" height="100" rx="8"/>
+      <rect class="card" x="760" y="120" width="230" height="100" rx="8"/>
+      <rect x="760" y="120" width="3" height="100" rx="1.5" fill="#6366f1"/>
+      <text class="ttl" x="777" y="148">Worker pool</text>
+      <text class="sub" x="777" y="170">Pi workers under leases</text>
+      <text class="sub" x="777" y="188">research · edit · verify · report</text>
+    </g>
+    <g>
+      <rect class="card" x="760" y="280" width="230" height="76" rx="8"/>
+      <rect x="760" y="280" width="3" height="76" rx="1.5" fill="#64748b"/>
+      <text class="ttl" x="777" y="308">Melee checkout</text>
+      <text class="sub" x="777" y="330">edit · ninja · objdiff</text>
+    </g>
+    <g>
+      <rect class="card" x="1130" y="200" width="240" height="80" rx="8"/>
+      <rect x="1130" y="200" width="3" height="80" rx="1.5" fill="#d97706"/>
+      <text class="ttl" x="1147" y="228">Score gate</text>
+      <text class="sub" x="1147" y="252">verify · absorb · baseline</text>
+    </g>
+    <g>
+      <rect class="ext" x="1490" y="130" width="240" height="86" rx="8"/>
+      <text class="ttl" x="1507" y="158">Babysit guardian</text>
+      <text class="sub" x="1507" y="180">wraps the loop · restarts</text>
+      <text class="sub" x="1507" y="198">on health incidents</text>
+    </g>
+    <path class="e eS" d="M1490,173 L1440,173" marker-end="url(#mS)" stroke-dasharray="5 4"/>
+
+    <!-- zone 1 edges -->
+    <path class="e eB" d="M400,190 L350,190 L350,168 L310,168" marker-end="url(#mB)"/>
+    <text class="lbl9" x="356" y="158">wake events</text>
+    <path class="e eB" d="M200,206 L200,270" marker-end="url(#mB)"/>
+    <text class="lbl9" x="208" y="242">one turn</text>
+    <path class="e eB" d="M310,308 L370,308 L370,290 L400,290" marker-end="url(#mB)"/>
+    <text class="lbl9" x="340" y="332">target packets</text>
+    <path class="e eB" d="M200,130 L200,104 L875,104 L875,120" marker-end="url(#mB)"/>
+    <text class="lbl" x="550" y="98" text-anchor="middle">start workers under lease</text>
+    <path class="e eS" d="M875,240 L875,280" marker-end="url(#mS)"/>
+    <path class="e eG" d="M760,170 L660,170" marker-end="url(#mG)"/>
+    <text class="lbl9" x="710" y="162" text-anchor="middle">reports · facts</text>
+    <path class="e eG" d="M660,250 L1130,250" marker-end="url(#mG)"/>
+    <text class="lbl9" x="900" y="268" text-anchor="middle">score candidates</text>
+    <path class="e eA" d="M1250,200 L1250,90 L545,90 L545,150" marker-end="url(#mA)"/>
+    <text class="lbl" x="880" y="82" text-anchor="middle">new baseline metrics → board</text>
+    <path class="e eA" d="M1130,262 L1060,262 L1060,318 L990,318" marker-end="url(#mA)"/>
+    <text class="lbl9" x="1068" y="300">integrate</text>
+
+    <!-- ================= knowledge core (hub) ================= -->
+    <g>
+      <rect class="card" x="440" y="540" width="380" height="110" rx="10" stroke="#c4b5fd" stroke-width="1.5"/>
+      <rect x="440" y="540" width="4" height="110" rx="2" fill="#8b5cf6"/>
+      <text class="ttl" x="459" y="570">Resource graph · SQLite</text>
+      <text class="sub" x="459" y="594">files · symbols · PRs · rank features</text>
+      <text class="sub" x="459" y="612">mismatch patterns · lessons</text>
+    </g>
+    <g>
+      <rect class="card" x="250" y="700" width="220" height="80" rx="8"/>
+      <rect x="250" y="700" width="3" height="80" rx="1.5" fill="#6366f1"/>
+      <text class="ttl" x="267" y="728">Knowledge curator</text>
+      <text class="sub" x="267" y="752">evidence → lessons</text>
+    </g>
+    <g>
+      <rect class="card" x="790" y="700" width="220" height="80" rx="8"/>
+      <rect x="790" y="700" width="3" height="80" rx="1.5" fill="#64748b"/>
+      <text class="ttl" x="807" y="728">Graph rebuild</text>
+      <text class="sub" x="807" y="752">deterministic ingest</text>
+    </g>
+    <g>
+      <rect class="card" x="250" y="810" width="220" height="80" rx="8"/>
+      <rect x="250" y="810" width="3" height="80" rx="1.5" fill="#0d9488"/>
+      <text class="ttl" x="267" y="838">Past-PR corpus</text>
+      <text class="sub" x="267" y="862">dumps · postmortems</text>
+    </g>
+    <g>
+      <rect class="card" x="790" y="810" width="220" height="80" rx="8"/>
+      <rect x="790" y="810" width="3" height="80" rx="1.5" fill="#6366f1"/>
+      <text class="ttl" x="807" y="838">PR-review agent</text>
+      <text class="sub" x="807" y="862">writes postmortems</text>
+    </g>
+
+    <!-- hub internal pipeline -->
+    <path class="e eV" d="M360,810 L360,780" marker-end="url(#mV)"/>
+    <path class="e eV" d="M470,740 L790,740" marker-end="url(#mV)"/>
+    <text class="lbl9" x="630" y="732" text-anchor="middle">enrichments</text>
+    <path class="e eV" d="M900,700 L900,595 L820,595" marker-end="url(#mV)"/>
+    <text class="lbl9" x="908" y="655">ingest</text>
+    <path class="e eV" d="M470,836 L790,836" marker-end="url(#mV)"/>
+    <text class="lbl9" x="630" y="828" text-anchor="middle">pending PRs</text>
+    <path class="e eV" d="M790,864 L470,864" marker-end="url(#mV)"/>
+    <text class="lbl9" x="630" y="882" text-anchor="middle">postmortems</text>
+
+    <!-- spokes: run ⇅ hub -->
+    <path class="e eG" d="M480,320 L480,540" marker-end="url(#mG)"/>
+    <text class="lbl" x="470" y="450" text-anchor="end">worker reports · evidence</text>
+    <path class="e eV" d="M560,540 L560,320" marker-end="url(#mV)"/>
+    <text class="lbl" x="570" y="450">ranked board · knowledge_context</text>
+
+    <!-- ================= zone 2: handoff ================= -->
+    <g>
+      <rect class="card" x="1140" y="520" width="180" height="76" rx="8"/>
+      <rect x="1140" y="520" width="3" height="76" rx="1.5" fill="#64748b"/>
+      <text class="ttl" x="1157" y="548">Pause &amp; drain</text>
+      <text class="sub" x="1157" y="570">0 active leases</text>
+    </g>
+    <g>
+      <rect class="card" x="1390" y="520" width="200" height="76" rx="8"/>
+      <rect x="1390" y="520" width="3" height="76" rx="1.5" fill="#0d9488"/>
+      <text class="ttl" x="1407" y="548">Checkpoint</text>
+      <text class="sub" x="1407" y="570">PR cands · carry-fwd</text>
+    </g>
+    <g>
+      <rect class="card" x="1140" y="660" width="180" height="76" rx="8"/>
+      <rect x="1140" y="660" width="3" height="76" rx="1.5" fill="#d97706"/>
+      <text class="ttl" x="1157" y="688">QA gate</text>
+      <text class="sub" x="1157" y="710">regression · promotion</text>
+    </g>
+    <g>
+      <rect class="card" x="1390" y="660" width="200" height="76" rx="8"/>
+      <rect x="1390" y="660" width="3" height="76" rx="1.5" fill="#6366f1"/>
+      <text class="ttl" x="1407" y="688">Reconcile agent</text>
+      <text class="sub" x="1407" y="710">ship-validate · fix loop</text>
+    </g>
+    <g>
+      <rect class="card" x="1140" y="790" width="180" height="76" rx="8"/>
+      <rect x="1140" y="790" width="3" height="76" rx="1.5" fill="#64748b"/>
+      <text class="ttl" x="1157" y="818">Split plan</text>
+      <text class="sub" x="1157" y="840">review slices</text>
+    </g>
+    <g>
+      <rect class="ext" x="1390" y="790" width="200" height="76" rx="8"/>
+      <text class="ttl" x="1407" y="818">Operator ships</text>
+      <text class="sub" x="1407" y="840">push · PRs · CI</text>
+    </g>
+
+    <!-- zone 2 edges -->
+    <path class="e eB" d="M1370,240 L1640,240 L1640,440 L1230,440 L1230,520" marker-end="url(#mB)"/>
+    <text class="lbl" x="1452" y="432" text-anchor="middle">goal reached → pause intake</text>
+    <path class="e eB" d="M1320,558 L1390,558" marker-end="url(#mB)"/>
+    <path class="e eB" d="M1490,596 L1490,628 L1230,628 L1230,660" marker-end="url(#mB)"/>
+    <path class="e eA" d="M1320,684 L1390,684" marker-end="url(#mA)"/>
+    <text class="lbl9" x="1355" y="676" text-anchor="middle">blocked</text>
+    <path class="e eG" d="M1390,712 L1320,712" marker-end="url(#mG)"/>
+    <text class="lbl9" x="1355" y="730" text-anchor="middle">fixed</text>
+    <path class="e eB" d="M1230,736 L1230,790" marker-end="url(#mB)"/>
+    <text class="lbl9" x="1240" y="768">pr_ready</text>
+    <path class="e eB" d="M1320,828 L1390,828" marker-end="url(#mB)"/>
+    <path class="e eA" d="M1490,866 L1490,1020" marker-end="url(#mA)"/>
+    <text class="lbl" x="1500" y="950">PRs merged upstream</text>
+    <path class="e eG" d="M1590,558 L1700,558 L1700,918 L220,918 L220,1020" marker-end="url(#mG)"/>
+    <text class="lbl" x="1300" y="910" text-anchor="middle">carry-forward → local ledger</text>
+
+    <!-- ================= zone 3: sync (flows right to left) ================= -->
+    <g>
+      <rect class="ext" x="1400" y="1020" width="220" height="80" rx="8"/>
+      <text class="ttl" x="1417" y="1048">doldecomp/melee</text>
+      <text class="sub" x="1417" y="1072">upstream master</text>
+    </g>
+    <g>
+      <rect class="card" x="1000" y="1020" width="230" height="80" rx="8"/>
+      <rect x="1000" y="1020" width="3" height="80" rx="1.5" fill="#64748b"/>
+      <text class="ttl" x="1017" y="1048">Pull · intake</text>
+      <text class="sub" x="1017" y="1072">rebase · merged-PR intake</text>
+    </g>
+    <g>
+      <rect class="card" x="700" y="1020" width="230" height="80" rx="8"/>
+      <rect x="700" y="1020" width="3" height="80" rx="1.5" fill="#6366f1"/>
+      <text class="ttl" x="717" y="1048">Reconcile agent</text>
+      <text class="sub" x="717" y="1072">sync-merge · dupes · conflicts</text>
+    </g>
+    <g>
+      <rect class="card" x="420" y="1020" width="230" height="80" rx="8"/>
+      <rect x="420" y="1020" width="3" height="80" rx="1.5" fill="#d97706"/>
+      <text class="ttl" x="437" y="1048">New baseline</text>
+      <text class="sub" x="437" y="1072">report refresh · new session</text>
+    </g>
+    <g>
+      <rect class="card" x="90" y="1020" width="260" height="140" rx="8"/>
+      <rect x="90" y="1020" width="3" height="140" rx="1.5" fill="#0d9488"/>
+      <text class="ttl" x="107" y="1048">Local change ledger</text>
+      <text class="sub" x="107" y="1072">carry-forward patches</text>
+      <text class="sub" x="107" y="1092">facts · lessons · negatives</text>
+      <text class="sub" x="107" y="1112">persists across sessions</text>
+    </g>
+
+    <!-- zone 3 edges -->
+    <path class="e eA" d="M1400,1060 L1230,1060" marker-end="url(#mA)"/>
+    <text class="lbl9" x="1315" y="1052" text-anchor="middle">pull · rebase</text>
+    <path class="e eA" d="M1000,1060 L930,1060" marker-end="url(#mA)"/>
+    <path class="e eA" d="M700,1060 L650,1060" marker-end="url(#mA)"/>
+    <text class="lbl9" x="675" y="1050" text-anchor="middle">clean</text>
+    <path class="e eA" d="M420,1060 L350,1060" marker-end="url(#mA)"/>
+    <path class="e eG" d="M350,1130 L815,1130 L815,1100" marker-end="url(#mG)"/>
+    <text class="lbl" x="580" y="1122" text-anchor="middle">replay carry-forward onto new master</text>
+    <path class="e eV" d="M1115,1020 L1115,942 L360,942 L360,890" marker-end="url(#mV)"/>
+    <text class="lbl" x="730" y="962" text-anchor="middle">merged PRs feed the corpus</text>
+    <path class="e eA" d="M90,1060 L60,1060 L60,168 L90,168" marker-end="url(#mA)"/>
+    <text class="lbl" transform="rotate(-90 52 640)" x="52" y="640" text-anchor="middle">next session · resume with new baseline + ledger</text>
+
+    <!-- legend: card accents -->
+    <g>
+      <rect x="60" y="1264" width="12" height="12" rx="2" fill="#6366f1"/><text class="lbl9" x="80" y="1275">Pi agent</text>
+      <rect x="170" y="1264" width="12" height="12" rx="2" fill="#0d9488"/><text class="lbl9" x="190" y="1275">durable store</text>
+      <rect x="310" y="1264" width="12" height="12" rx="2" fill="#d97706"/><text class="lbl9" x="330" y="1275">gate</text>
+      <rect x="400" y="1264" width="12" height="12" rx="2" fill="#64748b"/><text class="lbl9" x="420" y="1275">deterministic process</text>
+      <rect x="590" y="1264" width="12" height="12" rx="2" fill="#fff" stroke="#cbd5e1" stroke-dasharray="3 2"/><text class="lbl9" x="610" y="1275">external / operator</text>
+    </g>
+  </svg>
+  </div>
+  <p class="note" style="margin-top:10px">
+    The quick read: the <b>trigger actor</b> (a plain process, not an agent) watches the board, wakes
+    the <b>director</b> for one turn at a time, and starts <b>workers</b> under leases. Workers edit
+    the checkout and write everything they learn back to the <b>board</b> — reports, facts, negative
+    results. The <b>score gate</b> is the only thing that moves the baseline. In the background, the
+    <b>knowledge curator</b> reduces worker reports and PR postmortems into lessons, a deterministic
+    rebuild ingests them into the <b>resource graph</b>, and the graph flows back in as ranked
+    priorities for the trigger and <code>knowledge_context</code> in worker packets — that's the
+    full circle: workers produce evidence, curation turns it into knowledge, knowledge makes the
+    next worker smarter. When the run goal is reached the cycle leaves the top band: handoff (②)
+    drains, checkpoints, QA-validates with the reconcile agent fixing regressions, and ships;
+    sync (③) pulls upstream back in, reconciles the ledger onto the new master, and the left-edge
+    arrow closes the loop into the next session. This map supersedes the old mermaid diagram as
+    the canonical visual.
+  </p>
+
+  <h2>3 · The Reconcile Agent (new)</h2>
+  <p class="note">
+    Workers improve match coverage inside leases; the director schedules; the PR-review and curator
+    agents handle knowledge. Nobody currently owns "make this bundle safe" — safe to ship upstream,
+    and safe to continue from after upstream moves. That is the reconcile agent: an
+    operator-triggered Pi agent beside the PR-review agent, outside the worker lease loop, sharing
+    the same runner-owned validation gates. It runs only while scheduling is locked (run paused or
+    no session active) and works the build until the gate is green or it escalates.
+  </p>
+  <table>
+    <tr><th>Mode</th><th>Triggered</th><th>Job</th><th>Done when</th></tr>
+    <tr>
+      <td><b>ship-validate</b></td>
+      <td>Phase 4, when QA fails after checkpoint; again in Phase 5 before push</td>
+      <td>Walk the regression report; fix broken matches, fuzzy regressions, and metric regressions caused by the bundle; rebuild; re-run <code>regression-check</code></td>
+      <td>QA is <code>pr_ready</code> with zero regressions, or attempt budget exhausted → durable incident for the operator</td>
+    </tr>
+    <tr>
+      <td><b>sync-merge</b></td>
+      <td>Phase 6, after pull + PR intake</td>
+      <td>Replay the carry-forward branch onto new master; resolve merge conflicts; detect duplicates (upstream already matched a function held locally → take upstream, keep local facts/lessons as graph evidence); fix build errors; re-run regression against the new baseline</td>
+      <td>Clean build at the new baseline; surviving carry-forward re-enters the ledger</td>
+    </tr>
+  </table>
+
+  <h3>Ship-validate loop (Phase 4 → 5)</h3>
+  <div class="seq">
+    <span class="s">drain</span><span class="a">→</span>
+    <span class="s">checkpoint</span><span class="a">→</span>
+    <span class="s">build + regression report</span><span class="a">→</span>
+    <span class="s agent">reconcile: fix regression</span><span class="a">→</span>
+    <span class="s">rebuild · re-report</span>
+    <span class="loop">⟲ until clean (budgeted)</span>
+    <span class="a">→</span>
+    <span class="s">split plan</span><span class="a">→</span>
+    <span class="s">merge latest master</span><span class="a">→</span>
+    <span class="s agent">reconcile: conflicts · errors</span><span class="a">→</span>
+    <span class="s">push PR</span>
+  </div>
+
+  <h3>Sync-merge loop (Phase 6 → 2)</h3>
+  <div class="seq">
+    <span class="s">pull origin/master</span><span class="a">→</span>
+    <span class="s">intake merged PRs</span><span class="a">→</span>
+    <span class="s">replay carry-forward</span><span class="a">→</span>
+    <span class="s agent">reconcile: conflicts · dupes · build errors</span>
+    <span class="loop">⟲ until clean build</span>
+    <span class="a">→</span>
+    <span class="s">new baseline</span><span class="a">→</span>
+    <span class="s">new session</span>
+  </div>
+  <p class="note">
+    The lock around all of this is hard, not advisory. Once a sync starts, the old session is closed —
+    there is no resuming the old session against the old baseline. While the reconcile agent holds
+    the checkout, director/worker scheduling is refused server-side, the same way worker and trigger
+    commands already reject non-active runs.
+  </p>
+
+  <h2>4 · Sessions and the Local Change Ledger</h2>
+  <p class="note">
+    A run session is a grouping of changes measured against one frozen baseline. Shipping moves a
+    subset of that grouping upstream; syncing closes the session and opens the next one against the
+    updated baseline. The local change ledger — carry-forward patches, facts, lessons, rejected
+    hypotheses — is the part of the ecosystem that persists across sessions.
+  </p>
+  <div class="flow" style="grid-template-columns: repeat(3, 1fr);">
+    <div class="phase">
+      <div class="num">SESSION N</div>
+      <div class="name">baseline Bₙ = master @ a1b2c3</div>
+      <ul>
+        <li>Runs accumulate changes c1 … c9</li>
+        <li>Checkpoint splits the grouping:</li>
+        <li>PR candidates {c1 c2 c4} → shipped</li>
+        <li>Carry-forward {c3 c5–c9} → ledger</li>
+      </ul>
+    </div>
+    <div class="phase">
+      <div class="num">SYNC BOUNDARY</div>
+      <div class="name">session closes · hard lock</div>
+      <ul>
+        <li>master moves: our PRs + others' merge</li>
+        <li>Reconcile: replay ledger onto new master</li>
+        <li>Dupes resolved: upstream wins, facts kept</li>
+        <li>New baseline Bₙ₊₁ captured</li>
+      </ul>
+    </div>
+    <div class="phase">
+      <div class="num">SESSION N+1</div>
+      <div class="name">baseline Bₙ₊₁ = updated master</div>
+      <ul>
+        <li>Starts already holding {c3 c5–c9}′</li>
+        <li>Board re-ranked with new graph facts</li>
+        <li>Runs continue from the updated state</li>
+      </ul>
+    </div>
+    <div class="loopback">The ledger is the continuity: only shipped PR candidates ever leave the system; everything else flows into the next session</div>
+  </div>
+
+  <h2>5 · Phase Derivation (no new state required)</h2>
+  <p class="note">The phase is computed, not stored. Everything below already exists in the dashboard payload.</p>
+  <table>
+    <tr><th>Phase</th><th>Derived from</th></tr>
+    <tr><td><b>1 · Sync &amp; Intake</b></td><td>No run, or run <code>complete</code>/<code>failed</code>; or checkout behind <code>origin/master</code> / no fresh baseline report. <code>process.projectSyncActive</code> = in progress.</td></tr>
+    <tr><td><b>2 · Baseline &amp; Init</b></td><td>Sync gate satisfied, no <code>active</code> run yet (or fresh-run pending).</td></tr>
+    <tr><td><b>3 · Run</b></td><td><code>run.status === "active"</code> and managed process alive (running / detached-alive).</td></tr>
+    <tr><td><b>4 · Checkpoint &amp; Validate</b></td><td><code>run.status === "paused"</code>; sub-state from <code>activeLeases</code> (draining vs drained), <code>handoff.checkpoint / qa / splitPlan</code> artifacts, and reconcile-agent activity (QA blocked → fixing).</td></tr>
+    <tr><td><b>5 · Ship</b></td><td>QA promotion <code>pr_ready</code> + split plan written. System shows artifacts and waits; shipping is operator work (gh / melee-pr-workflow).</td></tr>
+    <tr><td><b>6 · Resync</b></td><td>Operator confirms PRs landed (or chooses to continue locally) → sync + intake + reconcile sequence, then New Session (<code>Fresh Run</code> with checkpoint-before-fresh).</td></tr>
+  </table>
+
+  <h2>6 · Action Lock Matrix</h2>
+  <p class="note">
+    Today every action is always visible and merely greyed out by ad-hoc conditions. The proposal
+    makes the lock an explicit, explained rule per phase. ✓ enabled · ✗ locked (with reason shown on
+    hover) · ◦ available but secondary.
+  </p>
+  <table>
+    <tr>
+      <th>Action</th><th>Endpoint</th>
+      <th>1 Sync</th><th>2 Init</th><th>3 Run</th><th>4 Checkpoint</th><th>5 Ship</th><th>6 Resync</th>
+    </tr>
+    <tr><td>Intake Merged PRs (sync + rebase + KG rebuild)</td><td><code>/api/process/sync</code></td>
+      <td class="c ok">✓</td><td class="c meh">◦</td><td class="c no">✗ running</td><td class="c no">✗ unshipped work</td><td class="c no">✗ unshipped work</td><td class="c ok">✓</td></tr>
+    <tr><td>Report Now</td><td><code>/api/report/run</code></td>
+      <td class="c ok">✓</td><td class="c ok">✓</td><td class="c meh">◦</td><td class="c ok">✓</td><td class="c meh">◦</td><td class="c ok">✓</td></tr>
+    <tr><td>Init Run</td><td><code>/api/run/init</code></td>
+      <td class="c no">✗ sync gate</td><td class="c ok">✓</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗ use Fresh Run</td></tr>
+    <tr><td>Start</td><td><code>/api/process/start</code></td>
+      <td class="c no">✗ no run</td><td class="c ok">✓ after init</td><td class="c no">✗ running</td><td class="c no">✗ paused</td><td class="c no">✗ paused</td><td class="c no">✗ resume first</td></tr>
+    <tr><td>Stop / Force Stop</td><td><code>/api/process/drain·stop</code></td>
+      <td class="c no">✗</td><td class="c no">✗</td><td class="c ok">✓</td><td class="c meh">◦ drain</td><td class="c no">✗</td><td class="c no">✗</td></tr>
+    <tr><td>Pause Intake / Resume</td><td><code>/api/pr/pause·resume</code></td>
+      <td class="c no">✗</td><td class="c no">✗</td><td class="c ok">✓ pause</td><td class="c ok">✓ resume</td><td class="c ok">✓ resume</td><td class="c ok">✓ resume</td></tr>
+    <tr><td>Checkpoint</td><td><code>/api/run/checkpoint</code></td>
+      <td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗ leases</td><td class="c ok">✓ drained</td><td class="c meh">◦ re-run</td><td class="c no">✗</td></tr>
+    <tr><td>Run QA</td><td><code>/api/pr/qa</code></td>
+      <td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c ok">✓</td><td class="c meh">◦ re-run</td><td class="c no">✗</td></tr>
+    <tr><td>Plan PRs</td><td><code>/api/pr/split-plan</code></td>
+      <td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c ok">✓ QA pass</td><td class="c ok">✓</td><td class="c no">✗</td></tr>
+    <tr><td>Prepare (pause→ckpt→QA→plan)</td><td><code>/api/pr/prepare</code></td>
+      <td class="c no">✗</td><td class="c no">✗</td><td class="c ok">✓ one-click exit</td><td class="c ok">✓</td><td class="c no">✗</td><td class="c no">✗</td></tr>
+    <tr><td>Fresh Run (ckpt-before-fresh)</td><td><code>/api/run/fresh</code></td>
+      <td class="c no">✗</td><td class="c meh">◦</td><td class="c no">✗ running</td><td class="c no">✗ unshipped</td><td class="c meh">◦ skip ship</td><td class="c ok">✓ primary</td></tr>
+    <tr><td>Reconcile Agent (ship-validate / sync-merge)</td><td><i>new</i></td>
+      <td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗ leases</td><td class="c ok">✓ ship-validate</td><td class="c ok">✓ pre-push</td><td class="c ok">✓ sync-merge</td></tr>
+  </table>
+  <p class="note">
+    These locks are hard and server-enforced, not UI suggestions: <b>(a)</b> sync/intake is rejected
+    the moment a run is active and stays rejected until the bundle ships or the operator explicitly
+    discards it — pulling upstream mid-run would invalidate the baseline all worker evidence is
+    measured against; <b>(b)</b> handoff and reconcile actions are rejected while anything holds a
+    lease, so validation always sees a quiet checkout; <b>(c)</b> a started sync closes the session —
+    there is no path back to the old baseline.
+  </p>
+
+  <h2>7 · Sidebar Proposal</h2>
+  <p class="note">
+    The rail keeps its three structural pieces (Project disclosure at top, Process panel at bottom)
+    but the middle becomes phase-driven: a persistent stepper, then <em>one</em> expanded panel for
+    the current phase with its primary action, with other phases' panels collapsed and lock-annotated.
+    Settings (agent, scheduling, QA/split inputs) stay inside their phase's panel — you meet each
+    setting when it becomes relevant.
+  </p>
+
+  <div class="mockrow">
+
+    <!-- ============ MOCK A: RUN PHASE ============ -->
+    <div class="mock">
+      <div class="caption">A — Phase 3 · Run<small>workers active · intake visibly frozen</small></div>
+      <div class="sb-head">Decomp Orchestrator</div>
+      <div class="stepper">
+        <div class="step done"><span class="dot">✓</span><span>Sync &amp; Intake</span><span class="tag">12m ago</span></div>
+        <div class="step done"><span class="dot">✓</span><span>Baseline &amp; Init</span><span class="tag">run #42</span></div>
+        <div class="step now"><span class="dot"></span><span>Run</span><span class="tag">16 workers</span></div>
+        <div class="step"><span class="dot"></span><span>Checkpoint &amp; Validate</span><span class="tag"></span></div>
+        <div class="step"><span class="dot"></span><span>Ship PRs</span><span class="tag"></span></div>
+        <div class="step"><span class="dot"></span><span>Resync</span><span class="tag"></span></div>
+      </div>
+      <div class="sb">
+        <div class="panel">
+          <div class="panel-title">Run <span class="pill green">active</span></div>
+          <div class="panel-body">
+            <div class="kv">
+              <span>Goal</span><span>matched_code 64.0%</span>
+              <span>Now</span><span>63.41% · +0.22 this run</span>
+              <span>Leases</span><span>16 active · 58 queued</span>
+              <span>Scheduling</span><span>Large · 16 workers</span>
+            </div>
+            <div class="btnrow">
+              <div class="btn warning">Stop (drain)</div>
+              <div class="btn danger">Force Stop</div>
+              <div class="btn primary wide">Prepare Handoff →</div>
+            </div>
+          </div>
+        </div>
+        <div class="panel dimmed">
+          <div class="panel-title">Sync &amp; Intake <span class="pill amber">frozen</span></div>
+          <div class="panel-body">
+            <div class="lockline">🔒 Locked while the run is active — pulling upstream PRs now would invalidate the run baseline. Unlocks after handoff or fresh run.</div>
+          </div>
+        </div>
+        <div class="panel dimmed">
+          <div class="panel-title">Checkpoint &amp; Validate <span class="pill gray">waiting</span></div>
+          <div class="panel-body">
+            <div class="lockline">Requires 0 active leases — use Stop or Prepare Handoff to drain first.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ MOCK B: CHECKPOINT PHASE ============ -->
+    <div class="mock">
+      <div class="caption">B — Phase 4 · Checkpoint &amp; Validate<small>drained · QA blocked → reconcile agent fixing</small></div>
+      <div class="sb-head">Decomp Orchestrator</div>
+      <div class="stepper">
+        <div class="step done"><span class="dot">✓</span><span>Sync &amp; Intake</span><span class="tag"></span></div>
+        <div class="step done"><span class="dot">✓</span><span>Baseline &amp; Init</span><span class="tag">run #42</span></div>
+        <div class="step done"><span class="dot">✓</span><span>Run</span><span class="tag">paused</span></div>
+        <div class="step now"><span class="dot"></span><span>Checkpoint &amp; Validate</span><span class="tag">2 / 4</span></div>
+        <div class="step"><span class="dot"></span><span>Ship PRs</span><span class="tag"></span></div>
+        <div class="step"><span class="dot"></span><span>Resync</span><span class="tag"></span></div>
+      </div>
+      <div class="sb">
+        <div class="panel">
+          <div class="panel-title">Handoff checklist <span class="pill amber">in progress</span></div>
+          <div class="panel-body">
+            <ul class="checklist">
+              <li><span class="t">✓</span> Intake paused · 0 active leases</li>
+              <li><span class="t">✓</span> Checkpoint · 7 PR candidates / 11 carry-forward</li>
+              <li><span class="w">●</span> QA blocked · 2 fuzzy regressions</li>
+              <li><span class="w">●</span> Reconcile agent · fixing regressions (attempt 1/3)</li>
+              <li><span class="x">○</span> Split plan · waiting on clean QA</li>
+            </ul>
+            <div class="btnrow">
+              <div class="btn disabled">Re-checkpoint</div>
+              <div class="btn warning">Stop reconcile</div>
+              <div class="btn primary wide disabled">Plan PRs (after clean QA)</div>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-title">Escape hatches</div>
+          <div class="panel-body">
+            <div class="btnrow">
+              <div class="btn">Resume run instead</div>
+              <div class="btn warning">Skip ship → Fresh Run</div>
+            </div>
+            <div class="lockline">Carry-forward items are kept either way — only PR candidates leave the system when shipped.</div>
+          </div>
+        </div>
+        <div class="panel dimmed">
+          <div class="panel-title">Sync &amp; Intake <span class="pill amber">frozen</span></div>
+          <div class="panel-body">
+            <div class="lockline">🔒 Still locked — there is checkpointed work that hasn't shipped. Ship PRs or discard the checkpoint to unlock.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ MOCK C: RESYNC PHASE ============ -->
+    <div class="mock">
+      <div class="caption">C — Phase 6 · Resync &amp; Continue<small>PRs shipped · sync closes session N, opens N+1</small></div>
+      <div class="sb-head">Decomp Orchestrator</div>
+      <div class="stepper">
+        <div class="step done"><span class="dot">✓</span><span>Sync &amp; Intake</span><span class="tag"></span></div>
+        <div class="step done"><span class="dot">✓</span><span>Baseline &amp; Init</span><span class="tag">run #42</span></div>
+        <div class="step done"><span class="dot">✓</span><span>Run</span><span class="tag"></span></div>
+        <div class="step done"><span class="dot">✓</span><span>Checkpoint &amp; Validate</span><span class="tag">pr_ready</span></div>
+        <div class="step done"><span class="dot">✓</span><span>Ship PRs</span><span class="tag">3 PRs</span></div>
+        <div class="step now"><span class="dot"></span><span>Resync</span><span class="tag">unlocked</span></div>
+      </div>
+      <div class="sb">
+        <div class="panel">
+          <div class="panel-title">Resync <span class="pill green">intake open</span></div>
+          <div class="panel-body">
+            <div class="kv">
+              <span>Upstream</span><span>origin/master +4 commits</span>
+              <span>Ledger</span><span>11 carry-forward items</span>
+              <span>Graph</span><span>stale · rebuild on intake</span>
+            </div>
+            <div class="btnrow">
+              <div class="btn primary wide">Sync · Intake · Reconcile</div>
+              <div class="btn wide">New Session (keeps ledger) →</div>
+            </div>
+            <div class="lockline">Sequence: pull + intake merged PRs → replay carry-forward → reconcile agent (conflicts · dupes · build errors) → rebuild knowledge graph → new baseline → new session seeded with the surviving ledger.</div>
+          </div>
+        </div>
+        <div class="panel dimmed">
+          <div class="panel-title">Run <span class="pill gray">none</span></div>
+          <div class="panel-body">
+            <div class="lockline">Start unlocks after the next Init / Fresh Run.</div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-title">Last session</div>
+          <div class="panel-body">
+            <div class="kv">
+              <span>Shipped</span><span>3 PRs · 7 exact matches</span>
+              <span>QA</span><span>pr_ready</span>
+              <span>Artifacts</span><span>checkpoint · qa · split plan</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>What stays the same</h3>
+  <p class="note">
+    Project disclosure stays pinned at the top of the rail above the stepper; the Process panel
+    (PID, saved processes, logs link) stays pinned at the bottom — both are ambient, not phase-bound.
+    All existing endpoints are reused as-is; this is a presentation + gating layer, not a new API.
+    A "show all controls" escape (the current flat layout) can remain behind an advanced toggle for
+    debugging, since the CLI keeps single-step commands for the same reason.
+  </p>
+
+  <h2>8 · Open Questions</h2>
+  <table>
+    <tr><th>#</th><th>Question</th><th>Leaning</th></tr>
+    <tr><td>1</td><td>How does the system know Phase 5 → 6 (PRs shipped)? It never publishes PRs itself.</td>
+      <td>Explicit operator confirmation ("Mark shipped"), cross-checked against <code>gh pr status</code> when available.</td></tr>
+    <tr><td>2</td><td>Reconcile attempt budget — how many fix → rebuild → re-report cycles before it stops?</td>
+      <td>3 attempts per regression, then a durable incident report for the operator; same repair-loop shape as the worker post-return gate.</td></tr>
+    <tr><td>3</td><td>Duplicate policy on sync: upstream matched a function we also hold locally — who wins?</td>
+      <td>Upstream wins by default; the local attempt is preserved as graph facts/lessons, not as code.</td></tr>
+    <tr><td>4</td><td>Is reconcile a new top-level agent or a worker capability?</td>
+      <td>New top-level agent beside PR-review: it needs whole-checkout authority (merge, rebuild, multi-file fixes) that the lease/write-set model deliberately denies workers.</td></tr>
+    <tr><td>5</td><td>Where does "behind origin/master" freshness come from?</td>
+      <td>Cheap fetch + ref compare on the dashboard interval, or last-intake timestamp in <code>/api/config</code>.</td></tr>
+    <tr><td>6</td><td>Mid-run upstream merge of a file a worker is editing — surface it?</td>
+      <td>No: the hard freeze means the run completes against its baseline; the conflict surfaces at the sync boundary, where the reconcile agent owns it.</td></tr>
+  </table>
+
+</main>
+</body>
+</html>

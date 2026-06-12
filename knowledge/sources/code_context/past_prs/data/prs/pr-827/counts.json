@@ -1,0 +1,17 @@
+{
+  "number": 827,
+  "title": "Partially match all of `ftCa_SpecialHi`",
+  "state": "MERGED",
+  "createdAt": "2023-04-30T04:41:10Z",
+  "updatedAt": "2023-04-30T04:50:12Z",
+  "mergedAt": "2023-04-30T04:50:11Z",
+  "closedAt": "2023-04-30T04:50:11Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/827",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 68697
+  }
+}

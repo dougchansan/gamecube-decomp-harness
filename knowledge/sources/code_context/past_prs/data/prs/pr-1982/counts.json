@@ -1,0 +1,17 @@
+{
+  "number": 1982,
+  "title": "A bunch of easy_funcs",
+  "state": "MERGED",
+  "createdAt": "2025-11-14T21:19:00Z",
+  "updatedAt": "2025-11-20T11:49:48Z",
+  "mergedAt": "2025-11-17T00:18:06Z",
+  "closedAt": "2025-11-17T00:18:06Z",
+  "author": "Gelatart",
+  "url": "https://github.com/doldecomp/melee/pull/1982",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 4,
+    "reviews": 4,
+    "diff_bytes": 11772
+  }
+}

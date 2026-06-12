@@ -3,6 +3,7 @@ import { existsSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import { isAbsolute, resolve } from "node:path";
 import {
+  appendWorkerActivityEvent,
   captureWorkerChangeBaseline,
   evaluateWorkerReportAcceptance,
   isWorkerReportType,
@@ -14,13 +15,14 @@ import {
   workerPrompt,
   workerReturnRepairReasons,
   type WorkerChangeBaseline,
+  type WorkerReviewLint,
   type WorkerRunnerValidation,
 } from "@decomp-orchestrator/agents/worker";
+import { qaLintRepairReasons, type WorkerChangeValidation } from "@decomp-orchestrator/agents/worker/change-validation";
 import { runPiAgent } from "@decomp-orchestrator/agents/runtime";
 import { defaultWorkerToolProfile } from "@decomp-orchestrator/agents/tools";
 import {
   fileGraphCard,
-  globalStandardsContext,
   graphDbExists,
   loadKnowledgeBoardSnapshot,
   openKnowledgeGraph,
@@ -28,7 +30,16 @@ import {
   resourceGraphDbPath,
 } from "@decomp-orchestrator/knowledge";
 import { runCommand } from "@decomp-orchestrator/core/shell";
-import { addPiSession, getLatestRun, getRun, leaseNextQueuedTarget, openState, recordWorkerReport } from "@decomp-orchestrator/core/state";
+import {
+  addPiSession,
+  DEFAULT_WORKER_TTL_SECONDS,
+  getLatestRun,
+  getRun,
+  leaseNextQueuedTarget,
+  openState,
+  recordRunnerAttempt,
+  recordWorkerReport,
+} from "@decomp-orchestrator/core/state";
 import type { PiRunResult, WorkerReportType } from "@decomp-orchestrator/core/types";
 import { numberArg, projectMetadata, stringArg, workerReportTypeArg, type GlobalArgs } from "../args.js";
 import { assertSchedulableRun } from "./shared.js";
@@ -47,6 +58,8 @@ export interface WorkerCycleResult {
   wakeEvent: string;
   dryRun: boolean;
   failed?: boolean;
+  providerFailure?: boolean;
+  errorKind?: string;
   error?: string;
 }
 
@@ -56,7 +69,7 @@ interface WorkerAttemptEvaluation {
   parsedError?: string;
   intendedReportType: WorkerReportType;
   acceptanceGate: ReturnType<typeof evaluateWorkerReportAcceptance>;
-  runnerValidation: WorkerRunnerValidation;
+  runnerValidation: WorkerChangeValidation;
   repairReasons: string[];
   writeSetDiffChanged: boolean;
   postAttemptDiffPath: string;
@@ -118,7 +131,10 @@ function normalizedStopReason(agentReport: Record<string, unknown> | null, repor
   const explicit = recordString(agentReport?.stop_reason);
   if (reportType === "tool_error") return "stalled";
   if (explicit === "needs_fact" && reportType === "needs_fact") return "needs_fact";
-  if ((explicit === "target_complete" || explicit === "stalled") && workerStopReasons.has(explicit as WorkerStopReason)) return explicit as WorkerStopReason;
+  // The model can only claim target_complete when the canonical result agrees;
+  // an over-claimed exact that validated as merely improved records stalled.
+  if (explicit === "target_complete") return result === "exact" ? "target_complete" : "stalled";
+  if (explicit === "stalled" && workerStopReasons.has(explicit as WorkerStopReason)) return explicit as WorkerStopReason;
   if (explicit === "no_useful_hypothesis") return "stalled";
   if (result === "exact") return "target_complete";
   if (reportType === "needs_fact") return "needs_fact";
@@ -150,25 +166,38 @@ function textLooksLikeToolError(value: unknown): boolean {
   return toolTerm.test(text) && failureTerm.test(text);
 }
 
-function agentReportSignalsToolError(agentReport: Record<string, unknown> | null): string[] {
-  if (!agentReport) return [];
-  const reasons: string[] = [];
+function blockerIsExplicitlyNonBlocking(record: Record<string, unknown>): boolean {
+  const kind = recordString(record.kind || record.type || record.status || record.reason);
+  const text = [kind, ...stringValuesFromObject(record)].join("\n");
+  return /(?:non[_ -]?blocking|optional|did not block|does not block|not block normal|regular .* sufficient|usable .* evidence|rerunning .* succeeded)/i.test(text);
+}
+
+// fatal: the agent explicitly declared a tool failure (report_type or a structured
+// blocker kind) — trustworthy enough to drain the pool via --exit-on-worker-error.
+// advisory: a regex hunch over free text. Worth classifying as tool_error for triage,
+// but a hunch must never have pool-drain authority (a needs_fact whose *description*
+// mentions a tool and a failure word once cost a full 32-worker drain cycle).
+export function agentReportSignalsToolError(agentReport: Record<string, unknown> | null): { fatal: string[]; advisory: string[] } {
+  if (!agentReport) return { fatal: [], advisory: [] };
+  const fatal: string[] = [];
+  const advisory: string[] = [];
   const reportType = recordString(agentReport.report_type);
-  if (reportType === "tool_error") reasons.push("agent report_type is tool_error");
+  if (reportType === "tool_error") fatal.push("agent report_type is tool_error");
   const blockers = Array.isArray(agentReport.blockers) ? agentReport.blockers : [];
   for (const blocker of blockers) {
     const record = blocker && typeof blocker === "object" && !Array.isArray(blocker) ? (blocker as Record<string, unknown>) : {};
+    if (blockerIsExplicitlyNonBlocking(record)) continue;
     const kind = recordString(record.kind || record.type || record.status || record.reason);
     if (/(?:tool|command|api|build|validation|compiler|runner|parse|timeout).*error|error.*(?:tool|command|api|build|validation|compiler|runner|parse|timeout)/i.test(kind)) {
-      reasons.push(`agent blocker marks tool error: ${kind}`);
+      fatal.push(`agent blocker marks tool error: ${kind}`);
       continue;
     }
-    if (textLooksLikeToolError(record)) reasons.push(`agent blocker looks like a tool error: ${stringValuesFromObject(record).join("; ").slice(0, 240)}`);
+    if (textLooksLikeToolError(record)) advisory.push(`agent blocker looks like a tool error: ${stringValuesFromObject(record).join("; ").slice(0, 240)}`);
   }
   if (reportType === "needs_fact" && (textLooksLikeToolError(agentReport.needed_fact) || textLooksLikeToolError(agentReport.summary))) {
-    reasons.push("agent reported needs_fact for text that looks like a tool/build/validation failure");
+    advisory.push("agent reported needs_fact for text that looks like a tool/build/validation failure");
   }
-  return reasons;
+  return { fatal, advisory };
 }
 
 function runnerValidationFailureReasons(validation: WorkerRunnerValidation): string[] {
@@ -185,14 +214,12 @@ function runnerValidationFailureReasons(validation: WorkerRunnerValidation): str
   return reasons;
 }
 
-function classifyWorkerError(params: {
+export function classifyWorkerError(params: {
   result: PiRunResult;
   parsedError?: string;
   agentReport: Record<string, unknown> | null;
   acceptanceGate: ReturnType<typeof evaluateWorkerReportAcceptance>;
-  runnerValidation: WorkerRunnerValidation;
-  repairExhausted: boolean;
-  repairReasons: string[];
+  runnerValidation: WorkerChangeValidation;
 }): WorkerErrorClassification | null {
   if (params.result.failed) {
     const message = params.result.error ?? "unknown Pi session error";
@@ -200,6 +227,13 @@ function classifyWorkerError(params: {
       kind: "worker_session_failed",
       summary: `Worker Pi session failed before producing a complete report: ${message}`,
       reasons: [message],
+    };
+  }
+  if (params.parsedError && params.result.providerError) {
+    return {
+      kind: "provider_error",
+      summary: `LLM provider failed before the worker produced a report: ${params.result.providerError}`,
+      reasons: [params.result.providerError, params.parsedError],
     };
   }
   if (params.parsedError) {
@@ -210,14 +244,33 @@ function classifyWorkerError(params: {
     };
   }
   const agentToolErrors = agentReportSignalsToolError(params.agentReport);
-  if (agentToolErrors.length > 0) {
+  if (agentToolErrors.fatal.length > 0) {
     return {
       kind: "agent_reported_tool_error",
-      summary: `Worker reported a tool/build/validation failure: ${agentToolErrors.join("; ")}`,
-      reasons: agentToolErrors,
+      summary: `Worker reported a tool/build/validation failure: ${agentToolErrors.fatal.join("; ")}`,
+      reasons: agentToolErrors.fatal,
+    };
+  }
+  if (agentToolErrors.advisory.length > 0) {
+    return {
+      kind: "agent_reported_tool_error_advisory",
+      summary: `Worker report text resembles a tool/build/validation failure (heuristic): ${agentToolErrors.advisory.join("; ")}`,
+      reasons: agentToolErrors.advisory,
     };
   }
   const validationReasons = runnerValidationFailureReasons(params.runnerValidation);
+  // L1 QA lint rejection: the attempt re-added a maintainer-rejected pattern.
+  // The runner_validation_ prefix keeps this a rework kind (isReworkErrorKind),
+  // so it routes to needs_rework/repair and can never hit the tool_error
+  // quarantine path — by policy, tool_error targets are never auto-requeued.
+  if (params.runnerValidation.qaLint?.status === "violations") {
+    const qaReasons = qaLintRepairReasons(params.runnerValidation.qaLint);
+    return {
+      kind: "runner_validation_qa_lint_failed",
+      summary: `QA lint rejected the attempt: ${params.runnerValidation.qaLint.findings.length} maintainer-rejected pattern finding(s)`,
+      reasons: [...validationReasons, ...qaReasons.filter((reason) => !validationReasons.includes(reason))],
+    };
+  }
   if (validationReasons.length > 0) {
     return {
       kind: `runner_validation_${params.runnerValidation.status}`,
@@ -233,15 +286,55 @@ function classifyWorkerError(params: {
       reasons,
     };
   }
-  if (params.repairExhausted) {
-    const reasons = params.repairReasons.length > 0 ? params.repairReasons : ["post-return repair attempts were exhausted"];
-    return {
-      kind: "repair_exhausted",
-      summary: `Worker exhausted repair attempts; latest return still failed the post-return gate: ${reasons.join("; ")}`,
-      reasons,
-    };
-  }
   return null;
+}
+
+// Gate rejections mean the worker ran fine but its return didn't verify (claim vs
+// canonical measurement disagree, or the return state was inconsistent). The work may
+// even be correct — code, tooling, or our understanding needs another look — so these
+// are needs_rework, never tool_error, and they never count as system failures.
+export function isReworkErrorKind(kind: string): boolean {
+  return /^(?:runner_validation_|acceptance_gate_failed$)/.test(kind);
+}
+
+// Advisory (heuristic) tool-error kinds still report as tool_error for triage, but they
+// never set the pool-fatal failed flag — only explicit/structured tool errors may drain
+// the pool via --exit-on-worker-error.
+export function isPoolFatalErrorKind(kind: string): boolean {
+  return kind !== "agent_reported_tool_error_advisory" && kind !== "provider_error";
+}
+
+// All repair feedback for one attempt: the shared return-gate reasons plus the
+// L1 QA lint findings, formatted verbatim for the worker's next iteration.
+export function workerAttemptRepairReasons(params: {
+  acceptanceGate: ReturnType<typeof evaluateWorkerReportAcceptance>;
+  writeSetDiffChanged: boolean;
+  runnerValidation: WorkerChangeValidation;
+  reviewLint?: WorkerReviewLint;
+}): string[] {
+  return [
+    ...workerReturnRepairReasons({
+      acceptanceGate: params.acceptanceGate,
+      writeSetDiffChanged: params.writeSetDiffChanged,
+      runnerValidation: params.runnerValidation,
+      reviewLint: params.reviewLint,
+    }),
+    ...qaLintRepairReasons(params.runnerValidation.qaLint),
+  ];
+}
+
+export function finalWorkerReportType(params: {
+  errorClassification: { kind: string; summary: string; reasons: string[] } | null;
+  repairExhausted: boolean;
+  acceptanceGate: ReturnType<typeof evaluateWorkerReportAcceptance>;
+}): WorkerReportType {
+  if (params.errorClassification) {
+    if (isReworkErrorKind(params.errorClassification.kind)) return "needs_rework";
+    if (params.errorClassification.kind === "provider_error") return "provider_error";
+    return "tool_error";
+  }
+  if (params.repairExhausted) return "needs_rework";
+  return params.acceptanceGate.effectiveReportType;
 }
 
 function renderPostReturnCheckCommand(
@@ -332,7 +425,7 @@ function compactPostReturnCheck(validation: PostReturnCheckValidation): NonNulla
   };
 }
 
-function mergeRunnerValidation(changeValidation: WorkerRunnerValidation, postReturnCheck: PostReturnCheckValidation): WorkerRunnerValidation {
+function mergeRunnerValidation(changeValidation: WorkerChangeValidation, postReturnCheck: PostReturnCheckValidation): WorkerChangeValidation {
   const postReturnCheckSummary = compactPostReturnCheck(postReturnCheck);
   if (changeValidation.status !== "passed") {
     return { ...changeValidation, postReturnCheck: postReturnCheckSummary };
@@ -348,6 +441,42 @@ function mergeRunnerValidation(changeValidation: WorkerRunnerValidation, postRet
   return { ...changeValidation, postReturnCheck: postReturnCheckSummary };
 }
 
+/**
+ * Derive the durable worker result from runner-owned validation evidence.
+ *
+ * The model's JSON stays a proposed claim: only a passed runner validation can
+ * mark a live report exact/improved. Dry-run agents skip runner validation, so
+ * they keep the model/configured result to preserve smoke flows.
+ */
+export function canonicalWorkerResult(params: {
+  runnerValidation: WorkerRunnerValidation;
+  agentReport: Record<string, unknown> | null;
+  dryRun: boolean;
+}): WorkerOutcomeResult {
+  const target = params.runnerValidation.target;
+  if (params.runnerValidation.status === "passed" && target) {
+    if (target.exact) return "exact";
+    if (target.improved) return "improved";
+    return "no_progress";
+  }
+  if (params.dryRun) return normalizedWorkerResult(params.agentReport);
+  return "no_progress";
+}
+
+function runnerValidationCompiled(validation: WorkerRunnerValidation): boolean {
+  if (validation.status === "build_failed") return false;
+  if (validation.status === "passed" || validation.status === "failed") return Boolean(validation.target) || validation.exitCode === 0;
+  if (validation.status === "no_official_score_change" || validation.status === "target_regressed" || validation.status === "same_unit_regression") return true;
+  // snapshot_unavailable after a successful object build still carries the unit
+  // diff command; pre-build failures carry no command at all.
+  return typeof validation.command === "string" && validation.command.includes("objdiff");
+}
+
+function clampSummary(text: string, maxChars = 400): string {
+  const trimmed = text.trim();
+  return trimmed.length <= maxChars ? trimmed : `${trimmed.slice(0, maxChars)}…`;
+}
+
 export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, string | true>): Promise<WorkerCycleResult> {
   const store = openState(globals.stateDir);
   try {
@@ -360,7 +489,7 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
     const workerId = stringArg(args, "--worker-id", `worker-${process.pid}-${Date.now()}-${randomUUID().slice(0, 8)}`);
     const fallbackReportType = workerReportTypeArg(args, "--report-type", "stalled_no_useful_guess");
     const baseRev = stringArg(args, "--base-rev", "unknown");
-    const ttlSeconds = numberArg(args, "--ttl-seconds", 60 * 60);
+    const ttlSeconds = numberArg(args, "--ttl-seconds", DEFAULT_WORKER_TTL_SECONDS);
     const repairAttempts = Math.max(0, Math.trunc(numberArg(args, "--repair-attempts", globals.dryRunAgents ? 0 : 2)));
     const postReturnCheckCommand = stringArg(args, "--post-return-check-command", "");
     const graphDbPath = stringArg(args, "--graph-db", globals.graphDbPath ?? resourceGraphDbPath());
@@ -395,6 +524,21 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
       dryRun: globals.dryRunAgents,
     });
     await writeFile(resolve(validationDir, "pre_worker_baseline.summary.json"), JSON.stringify(workerChangeBaseline, null, 2));
+    const targetUnit = String(target.unit ?? "");
+    const targetSymbol = String(target.symbol ?? "");
+    appendWorkerActivityEvent(outputDir, {
+      lease_id: leased.leaseId,
+      phase: "setup",
+      event_type: "lease_started",
+      unit: targetUnit,
+      symbol: targetSymbol,
+      summary: `worker ${leased.workerId} leased ${targetSymbol} (${targetUnit}); baseline ${workerChangeBaseline.status}`,
+      score:
+        workerChangeBaseline.snapshot?.targetScore != null
+          ? { before: workerChangeBaseline.snapshot.targetScore, after: null, exact: false }
+          : undefined,
+      artifact_path: workerChangeBaseline.snapshotPath,
+    });
     const artifactExists = (artifactPath: string): boolean => {
       if (isAbsolute(artifactPath)) return existsSync(artifactPath);
       return [globals.repoRoot, globals.stateDir, outputDir].some((root) => existsSync(resolve(root, artifactPath)));
@@ -409,6 +553,17 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
             repair_request: repairRequest,
           }
         : packet;
+      appendWorkerActivityEvent(outputDir, {
+        lease_id: leased.leaseId,
+        attempt_index: attemptIndex,
+        phase: repairRequest ? "repair" : "attempt",
+        event_type: "attempt_started",
+        unit: targetUnit,
+        symbol: targetSymbol,
+        summary: repairRequest
+          ? clampSummary(`repair attempt ${attemptIndex} in flight: ${(repairRequest.reasons as string[]).join("; ")}`)
+          : `worker attempt ${attemptIndex} started`,
+      });
       let result: PiRunResult;
       try {
         result = await runPiAgent({
@@ -435,6 +590,8 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
             packet: attemptPacket,
             initialBoardPath,
             workerLogDir: outputDir,
+            leaseId: leased.leaseId,
+            attemptIndex,
           },
         });
       } catch (error) {
@@ -464,8 +621,19 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
         provider: globals.provider,
         model: globals.model,
         thinkingLevel: globals.thinkingLevel,
-        status: result.failed ? "failed" : result.dryRun ? "dry_run" : "succeeded",
+        status: result.failed || result.providerError ? "failed" : result.dryRun ? "dry_run" : "succeeded",
         outputPath: result.outputPath,
+      });
+      appendWorkerActivityEvent(outputDir, {
+        lease_id: leased.leaseId,
+        session_id: result.sessionId,
+        attempt_index: attemptIndex,
+        phase: repairRequest ? "repair" : "attempt",
+        event_type: "pi_session_finished",
+        unit: targetUnit,
+        symbol: targetSymbol,
+        summary: result.failed ? clampSummary(`Pi session failed: ${result.error ?? "unknown error"}`) : "Pi session returned; evaluating report",
+        artifact_path: result.outputPath,
       });
 
       const parsedAgentReport =
@@ -511,7 +679,43 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
       });
       const runnerValidation = mergeRunnerValidation(changeValidation, postReturnCheck);
       if (runnerValidation.summaryPath) await writeFile(runnerValidation.summaryPath, JSON.stringify(runnerValidation, null, 2));
-      const repairReasons = workerReturnRepairReasons({ acceptanceGate, writeSetDiffChanged, runnerValidation, reviewLint });
+      recordRunnerAttempt(store, {
+        leaseId: leased.leaseId,
+        targetId: leased.targetId,
+        attemptIndex,
+        artifactPath: runnerValidation.summaryPath ?? null,
+        compiled: runnerValidationCompiled(runnerValidation),
+        oldScore: runnerValidation.target?.before ?? null,
+        newScore: runnerValidation.target?.after ?? null,
+        status: runnerValidation.status,
+      });
+      appendWorkerActivityEvent(outputDir, {
+        lease_id: leased.leaseId,
+        session_id: result.sessionId,
+        attempt_index: attemptIndex,
+        phase: repairRequest ? "repair_validation" : "validation",
+        event_type: "acceptance_gate",
+        unit: targetUnit,
+        symbol: targetSymbol,
+        summary: acceptanceGate.accepted
+          ? `acceptance gate accepted ${acceptanceGate.effectiveReportType}`
+          : clampSummary(`acceptance gate rejected ${acceptanceGate.intendedReportType}: ${acceptanceGate.reasons.join("; ")}`),
+      });
+      appendWorkerActivityEvent(outputDir, {
+        lease_id: leased.leaseId,
+        session_id: result.sessionId,
+        attempt_index: attemptIndex,
+        phase: repairRequest ? "repair_validation" : "validation",
+        event_type: runnerValidation.status === "passed" ? "runner_validation_passed" : runnerValidation.status === "skipped" ? "runner_validation_skipped" : "runner_validation_rejected",
+        unit: targetUnit,
+        symbol: targetSymbol,
+        summary: clampSummary(`runner validation ${runnerValidation.status}${runnerValidation.reasons.length > 0 ? `: ${runnerValidation.reasons.join("; ")}` : ""}`),
+        score: runnerValidation.target
+          ? { before: runnerValidation.target.before, after: runnerValidation.target.after, exact: runnerValidation.target.exact }
+          : undefined,
+        artifact_path: runnerValidation.summaryPath,
+      });
+      const repairReasons = workerAttemptRepairReasons({ acceptanceGate, writeSetDiffChanged, runnerValidation, reviewLint });
       const attemptGatePath = resolve(validationDir, `attempt-${attemptIndex}.return_gate.json`);
       const evaluation: WorkerAttemptEvaluation = {
         result,
@@ -549,6 +753,9 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
       );
 
       finalEvaluation = evaluation;
+      // A dead provider can't repair anything — retrying just burns ~20 minutes of
+      // timeout-retries per attempt while the endpoint is down.
+      if (result.providerError && !agentReport) break;
       if (repairReasons.length === 0 || attemptIndex >= repairAttempts || result.dryRun) break;
 
       const repairFeedbackPath = resolve(validationDir, `attempt-${attemptIndex}.repair_request.json`);
@@ -563,6 +770,17 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
       };
       evaluation.repairFeedbackPath = repairFeedbackPath;
       await writeFile(repairFeedbackPath, JSON.stringify(repairRequest, null, 2));
+      appendWorkerActivityEvent(outputDir, {
+        lease_id: leased.leaseId,
+        session_id: result.sessionId,
+        attempt_index: attemptIndex,
+        phase: "repair_request",
+        event_type: "repair_requested",
+        unit: targetUnit,
+        symbol: targetSymbol,
+        summary: clampSummary(`runner rejected the return; repair attempt ${attemptIndex + 1} requested: ${repairReasons.join("; ")}`),
+        artifact_path: repairFeedbackPath,
+      });
     }
 
     if (!finalEvaluation) throw new Error("Worker loop ended without an attempt evaluation");
@@ -577,17 +795,20 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
       agentReport,
       acceptanceGate,
       runnerValidation: finalEvaluation.runnerValidation,
-      repairExhausted,
-      repairReasons: finalEvaluation.repairReasons,
     });
-    const reportType: WorkerReportType = errorClassification ? "tool_error" : acceptanceGate.effectiveReportType;
-    const outcomeResult = normalizedWorkerResult(agentReport);
-    const outcomeStopReason = normalizedStopReason(agentReport, reportType, outcomeResult);
-    const outcomeNeededFact = errorClassification ? null : neededFact(agentReport);
+    const reportType = finalWorkerReportType({ errorClassification, repairExhausted, acceptanceGate });
+    const outcomeResult = canonicalWorkerResult({
+      runnerValidation: finalEvaluation.runnerValidation,
+      agentReport,
+      dryRun: result.dryRun,
+    });
+    const outcomeStopReason = repairExhausted && !errorClassification ? "stalled" : normalizedStopReason(agentReport, reportType, outcomeResult);
+    const outcomeNeededFact = errorClassification || (repairExhausted && reportType === "stalled_no_useful_guess") ? null : neededFact(agentReport);
     const agentFacts = Array.isArray(agentReport?.facts) ? agentReport.facts : [];
     const agentBlockers = Array.isArray(agentReport?.blockers) ? agentReport.blockers : [];
     const blockerPath =
       reportType === "tool_error" ||
+      reportType === "provider_error" ||
       reportType === "stalled_no_useful_guess" ||
       reportType === "needs_fact" ||
       finalEvaluation.parsedError ||
@@ -722,6 +943,23 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
         summary_path: summaryPath,
       },
     });
+    appendWorkerActivityEvent(outputDir, {
+      lease_id: leased.leaseId,
+      session_id: result.sessionId,
+      phase: "report",
+      event_type: "report_recorded",
+      unit: targetUnit,
+      symbol: targetSymbol,
+      summary: clampSummary(`recorded ${reportType} / ${outcomeResult} (${outcomeStopReason}): ${reportSummaryText}`),
+      score: finalEvaluation.runnerValidation.target
+        ? {
+            before: finalEvaluation.runnerValidation.target.before,
+            after: finalEvaluation.runnerValidation.target.after,
+            exact: finalEvaluation.runnerValidation.target.exact,
+          }
+        : undefined,
+      artifact_path: summaryPath,
+    });
     return {
       runId,
       leaseId: leased.leaseId,
@@ -735,7 +973,9 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
       reportId: report.reportId,
       wakeEvent: report.eventId,
       dryRun: result.dryRun,
-      failed: Boolean(errorClassification),
+      failed: reportType === "tool_error" && (!errorClassification || isPoolFatalErrorKind(errorClassification.kind)),
+      providerFailure: reportType === "provider_error",
+      errorKind: errorClassification?.kind,
       error: errorClassification?.summary,
     };
   } finally {
@@ -744,14 +984,12 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
 }
 
 export function buildWorkerKnowledgeContext(sourcePath: string, graphDb = resourceGraphDbPath()): Record<string, unknown> {
-  const decompStandards = globalStandardsContext();
   const pathFacts = sourcePath ? resolvePathFactsContext(sourcePath, 5) : null;
-  const lookupTools = defaultWorkerToolProfile.filter((toolId) => toolId !== "worker_context_get" && toolId !== "decomp_standards_context");
+  const lookupTools = [...defaultWorkerToolProfile];
   if (!sourcePath) {
     return {
       status: "missing_source_path",
       graph_db: graphDb,
-      decomp_standards: decompStandards,
       path_facts: { source: "path_facts", status: "missing_source_path" },
       lookup_tools: lookupTools,
     };
@@ -760,7 +998,6 @@ export function buildWorkerKnowledgeContext(sourcePath: string, graphDb = resour
     return {
       status: "graph_missing",
       graph_db: graphDb,
-      decomp_standards: decompStandards,
       path_facts: pathFacts,
       lookup_tools: lookupTools,
     };
@@ -772,7 +1009,6 @@ export function buildWorkerKnowledgeContext(sourcePath: string, graphDb = resour
       graph_db: graphDb,
       generated_at: new Date().toISOString(),
       file_card: fileGraphCard(store, sourcePath),
-      decomp_standards: decompStandards,
       path_facts: pathFacts,
       lookup_tools: lookupTools,
     };
@@ -781,7 +1017,6 @@ export function buildWorkerKnowledgeContext(sourcePath: string, graphDb = resour
       status: "failed",
       graph_db: graphDb,
       reason: error instanceof Error ? error.message : String(error),
-      decomp_standards: decompStandards,
       path_facts: pathFacts,
       lookup_tools: lookupTools,
     };

@@ -1,0 +1,17 @@
+{
+  "number": 1303,
+  "title": "Match `ft_80081938` (112 bytes)",
+  "state": "MERGED",
+  "createdAt": "2024-02-22T11:36:15Z",
+  "updatedAt": "2024-02-22T11:40:04Z",
+  "mergedAt": "2024-02-22T11:40:03Z",
+  "closedAt": "2024-02-22T11:40:03Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1303",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 9003
+  }
+}

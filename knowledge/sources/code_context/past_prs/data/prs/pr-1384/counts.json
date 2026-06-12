@@ -1,0 +1,17 @@
+{
+  "number": 1384,
+  "title": "Misc match improvements and cleanups",
+  "state": "MERGED",
+  "createdAt": "2024-05-10T00:27:50Z",
+  "updatedAt": "2024-05-10T00:48:56Z",
+  "mergedAt": "2024-05-10T00:48:53Z",
+  "closedAt": "2024-05-10T00:48:53Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1384",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 21990
+  }
+}

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run harness decomp.py/m2c for a function or translation unit."""
+"""Run tool-local decomp.py/m2c for a function or translation unit."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from pathlib import Path
 import sys
 
 sys.path.append(str(Path(__file__).resolve().parents[3] / "_shared"))
-from harness import clamp_int, print_json, resolve_repo_root, run_harness_script
+from melee_tooling import clamp_int, print_json, resolve_repo_root, run_tool_script
 
 
 def main() -> None:
@@ -31,7 +31,7 @@ def main() -> None:
     command_args.extend(args.extra_arg)
 
     repo_root = resolve_repo_root(args.repo_root)
-    payload = run_harness_script(
+    payload = run_tool_script(
         "decomp.py",
         command_args,
         repo_root=repo_root,

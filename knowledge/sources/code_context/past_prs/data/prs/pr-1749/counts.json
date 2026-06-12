@@ -1,0 +1,17 @@
+{
+  "number": 1749,
+  "title": "Decompile 3 functions from Toy.s",
+  "state": "MERGED",
+  "createdAt": "2025-07-27T00:56:19Z",
+  "updatedAt": "2025-07-28T06:55:31Z",
+  "mergedAt": "2025-07-28T06:55:31Z",
+  "closedAt": "2025-07-28T06:55:31Z",
+  "author": "ChaseHaymond",
+  "url": "https://github.com/doldecomp/melee/pull/1749",
+  "counts": {
+    "issue_comments": 2,
+    "review_comments": 2,
+    "reviews": 3,
+    "diff_bytes": 2609
+  }
+}

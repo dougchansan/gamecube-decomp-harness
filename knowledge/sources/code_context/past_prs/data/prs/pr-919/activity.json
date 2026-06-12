@@ -1,0 +1,10 @@
+{
+  "pr": 919,
+  "title": "Pass `--passthru-magic-macros` to `pcpp`",
+  "url": "https://github.com/doldecomp/melee/pull/919",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 1,
+  "added_lines": 1,
+  "deleted_lines": 0
+}

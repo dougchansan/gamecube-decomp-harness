@@ -1,0 +1,17 @@
+{
+  "number": 415,
+  "title": "Ft samus - Done",
+  "state": "MERGED",
+  "createdAt": "2022-07-14T05:21:29Z",
+  "updatedAt": "2022-07-14T10:19:19Z",
+  "mergedAt": "2022-07-14T10:19:18Z",
+  "closedAt": "2022-07-14T10:19:18Z",
+  "author": "snuffysasa",
+  "url": "https://github.com/doldecomp/melee/pull/415",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 75298
+  }
+}

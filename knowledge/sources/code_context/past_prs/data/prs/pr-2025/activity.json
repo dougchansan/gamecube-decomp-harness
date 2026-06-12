@@ -1,0 +1,10 @@
+{
+  "pr": 2025,
+  "title": "lb: Match lbRefract, lbBgFlash, lbAudio, and lbColl functions",
+  "url": "https://github.com/doldecomp/melee/pull/2025",
+  "text_records_with_body": 5,
+  "review_comments": 3,
+  "changed_files": 9,
+  "added_lines": 190,
+  "deleted_lines": 76
+}

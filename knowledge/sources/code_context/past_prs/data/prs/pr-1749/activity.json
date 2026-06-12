@@ -1,0 +1,10 @@
+{
+  "pr": 1749,
+  "title": "Decompile 3 functions from Toy.s",
+  "url": "https://github.com/doldecomp/melee/pull/1749",
+  "text_records_with_body": 5,
+  "review_comments": 2,
+  "changed_files": 3,
+  "added_lines": 55,
+  "deleted_lines": 6
+}

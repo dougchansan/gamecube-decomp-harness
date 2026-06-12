@@ -1,0 +1,17 @@
+{
+  "number": 242,
+  "title": "Matching player c",
+  "state": "MERGED",
+  "createdAt": "2022-01-13T00:42:15Z",
+  "updatedAt": "2022-01-17T10:14:06Z",
+  "mergedAt": "2022-01-17T10:14:06Z",
+  "closedAt": "2022-01-17T10:14:06Z",
+  "author": "snuffysasa",
+  "url": "https://github.com/doldecomp/melee/pull/242",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 4,
+    "reviews": 5,
+    "diff_bytes": 42946
+  }
+}

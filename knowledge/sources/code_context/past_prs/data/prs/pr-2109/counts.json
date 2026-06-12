@@ -1,0 +1,17 @@
+{
+  "number": 2109,
+  "title": "Assorted gr* matches",
+  "state": "MERGED",
+  "createdAt": "2026-01-19T12:12:34Z",
+  "updatedAt": "2026-01-19T12:20:00Z",
+  "mergedAt": "2026-01-19T12:19:52Z",
+  "closedAt": "2026-01-19T12:19:53Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/2109",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 17637
+  }
+}

@@ -1,0 +1,434 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2532",
+  "pr": {
+    "number": 2532,
+    "title": "Jj/grbigblueroute 2",
+    "url": "https://github.com/doldecomp/melee/pull/2532",
+    "state": "MERGED",
+    "author": "jurrejelle",
+    "created_at": "2026-05-24T18:54:13Z",
+    "merged_at": "2026-05-31T10:10:56Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Big Blue Route stage decomp work focused on src/melee/gr/grbigblueroute.c with supporting header/type updates. The PR replaced many raw Ground offset accesses with typed GroundVars, RouteEntry, and track fields, implemented grBigBlueRoute_8020CD20 to a high partial match, cleaned assert/report and literal uses, and improved or matched several functions. Bot evidence reports four new function matches and one .sdata regression.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "typed-struct-recovery",
+      "stage-code"
+    ],
+    "systems": [
+      "stage",
+      "Big Blue Route",
+      "ground"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gr/grbigblueroute.c",
+      "role": "Main decomp source changes for Big Blue Route functions, typed field conversions, grBigBlueRoute_8020CD20 implementation, assert/literal cleanup, and matching tactics.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gr/grbigblueroute.c +439/-127, 22 hunks",
+        "diff_excerpt: grBigBlueRoute_8020BC68 typed bigblueroute2 tracks and xCC fields",
+        "diff_excerpt: grBigBlueRoute_8020BF38 typed track loop and stage_info.x6DC",
+        "diff_excerpt: grBigBlueRoute_8020C85C RouteEntry car_info indexing and PAD_STACK(8)",
+        "raw/diff.diff lines 650-739: grBigBlueRoute_8020CD20 loop body and state handling",
+        "text_corpus.jsonl issue_comment: bot report for new matches and improvements"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grbigblueroute.h",
+      "role": "RouteEntry and prototype updates for recovered source types/signatures.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gr/grbigblueroute.h +2/-2, 2 hunks",
+        "raw/diff.diff lines 837-856: RouteEntry pad_24 changed to f32 x24; grBigBlueRoute_8020CD20 prototype changed from UNK_RET to void"
+      ]
+    },
+    {
+      "path": "src/melee/gr/types.h",
+      "role": "Ground union and Big Blue Route GroundVars updates enabling typed accesses.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gr/types.h +16/-2, 4 hunks",
+        "raw/diff.diff lines 863-878: car_info rename and grBigBlueRoute_Track addition",
+        "raw/diff.diff lines 880-897: bigblueroute2 union arm and u.car GroundVars addition"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Added includes needed by the new source shape: baselib/debug.h, lb/lbshadow.h, and trigf.h.",
+      "evidence_refs": [
+        "diff_excerpt: include additions at top of grbigblueroute.c"
+      ]
+    },
+    {
+      "text": "Replaced a local filename data symbol used in OSReport with __FILE__ and converted raw __assert expansions to HSD_ASSERT in shown code.",
+      "evidence_refs": [
+        "diff_excerpt: removed char grBb_Route_803E61D4 and OSReport now passes __FILE__",
+        "diff_excerpt: HSD_ASSERT(0x2A2, gp->u.car.car_info)",
+        "diff_excerpt: HSD_ASSERT(0X2E5, NULL)"
+      ]
+    },
+    {
+      "text": "Recovered typed access paths for Big Blue Route ground data: gp->u.car fields, gp->gv.bigblueroute2.xC8/xCC, and gp->gv.bigblueroute2.tracks[i].offset/jobj replaced many byte-offset casts.",
+      "evidence_refs": [
+        "diff_excerpt: grBigBlueRoute_8020BC68 offset casts replaced with bigblueroute2 fields",
+        "diff_excerpt: grBigBlueRoute_8020BF38 car pointer loop replaced with tracks[i]",
+        "raw/diff.diff lines 863-897: types.h adds car_info, grBigBlueRoute_Track, grBigBlueRoute_GroundVars2, and u.car"
+      ]
+    },
+    {
+      "text": "Converted several generated-looking extern float/s16 data references into inline literals or known globals, including Ground_801C3D44 arguments, stage_info.x6DC, camera clamp constants, and route random-angle constants.",
+      "evidence_refs": [
+        "diff_excerpt: Ground_801C3D44(0, 30.0f, 4000.0f)",
+        "diff_excerpt: stage_info.x6DC = gp->gv.bigblueroute2.xC8",
+        "raw/diff.diff lines 785-836: grBigBlueRoute_8020DED4 uses 20.0f, 250.0f, -3.0f"
+      ]
+    },
+    {
+      "text": "Implemented grBigBlueRoute_8020CD20 from a placeholder into a large state-machine update over 31 RouteEntry records using spline points, vector math, rotations, JObj transforms, proximity checks, camera/audio calls, and item state.",
+      "evidence_refs": [
+        "diff_excerpt: /// #grBigBlueRoute_8020CD20 replaced by full function",
+        "raw/diff.diff lines 650-739: later CD20 state handling, JObj transforms, proximity checks, and do-while termination"
+      ]
+    },
+    {
+      "text": "Updated grBigBlueRoute_8020CD20 header signature from UNK_RET to void and changed RouteEntry offset x24 from padding to an f32 field.",
+      "evidence_refs": [
+        "raw/diff.diff lines 841-855"
+      ]
+    },
+    {
+      "text": "Bot report recorded four new matches: grBigBlueRoute_8020BC68, grBigBlueRoute_8020BF38, grBigBlueRoute_8020DAB4, and grBigBlueRoute_8020C530; it also recorded grBigBlueRoute_8020CD20 improvement from 0.00% to 89.73%.",
+      "evidence_refs": [
+        "text_corpus.jsonl issue_comment by decomp-dev[bot], 2026-05-24T18:58:54Z"
+      ]
+    },
+    {
+      "text": "Bot report also recorded one broken match: main/melee/gr/grbigblueroute .sdata from 100.00% to 92.86%.",
+      "evidence_refs": [
+        "text_corpus.jsonl issue_comment: broken match table"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "The PR leaned on recovered structs and union arms instead of preserving raw byte arithmetic, making route/car state reviewable while still improving match scores.",
+      "evidence_refs": [
+        "diff_excerpt: gp->u.car.car_info and RouteEntry indexing",
+        "diff_excerpt: gp->gv.bigblueroute2.tracks[i].offset/jobj",
+        "text_corpus.jsonl issue_comment: four new matches"
+      ]
+    },
+    {
+      "text": "The author kept non-perfect functions annotated with concrete remaining-diff notes such as register allocation, string-pool symbols, addressing-mode choices, and float-constant hoisting.",
+      "evidence_refs": [
+        "diff_excerpt: todo notes for grBigBlueRoute_8020BC68, 8020BF38, 8020C85C, 8020CD20"
+      ]
+    },
+    {
+      "text": "Header and type surfaces were updated when the body evidence became more concrete, instead of hiding recovered fields behind source-local casts.",
+      "evidence_refs": [
+        "raw/diff.diff lines 841-897"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When repeated offsets form an array-like ground state, recovering a small element struct can both improve readability and support matching; here RouteEntry and grBigBlueRoute_Track replaced repeated gp byte offsets.",
+      "scope": [
+        "src/melee/gr/grbigblueroute.c",
+        "src/melee/gr/types.h"
+      ],
+      "evidence_refs": [
+        "diff_excerpt: tracks[0..3].jobj and tracks[i].offset replacements",
+        "diff_excerpt: ((RouteEntry*) gp->u.car.car_info)[i] replacements",
+        "raw/diff.diff lines 876-887: grBigBlueRoute_Track and grBigBlueRoute_GroundVars2"
+      ]
+    },
+    {
+      "lesson": "Function-body recovery should propagate to owning headers and shared types when the PR evidence proves the signature or field role; grBigBlueRoute_8020CD20 changed from UNK_RET to void and RouteEntry gained f32 x24.",
+      "scope": [
+        "src/melee/gr/grbigblueroute.h"
+      ],
+      "evidence_refs": [
+        "raw/diff.diff lines 841-855"
+      ]
+    },
+    {
+      "lesson": "Literal cleanup can be part of decomp matching when the diff shows generated extern constants being replaced with inline float values, but the bot report's .sdata regression means such edits need curator caution rather than broad acceptance.",
+      "scope": [
+        "src/melee/gr/grbigblueroute.c"
+      ],
+      "evidence_refs": [
+        "diff_excerpt: removed extern floats and inline 30.0f/4000.0f",
+        "raw/diff.diff lines 785-836: camera clamp constants inlined",
+        "text_corpus.jsonl issue_comment: .sdata broken match"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "Observed typed GroundVars naming kept many offset-style field names where semantics were not fully proven, while giving the allocated route array the clearer name car_info.",
+      "examples": [
+        "gp->u.car.car_info",
+        "gp->u.car.x108",
+        "gp->u.car.x10A",
+        "gp->u.car.xCC",
+        "gp->u.car.xD0",
+        "gp->u.car.xD4"
+      ],
+      "evidence_refs": [
+        "raw/diff.diff lines 863-873",
+        "diff_excerpt: grBigBlueRoute_8020C238 and grBigBlueRoute_8020C85C"
+      ]
+    },
+    {
+      "text": "A second Big Blue Route GroundVars arm was named bigblueroute2 and contains a tracks array with offset and jobj fields for JObj translation tracking.",
+      "examples": [
+        "gp->gv.bigblueroute2.xC8",
+        "gp->gv.bigblueroute2.xCC",
+        "gp->gv.bigblueroute2.tracks[i].offset",
+        "gp->gv.bigblueroute2.tracks[i].jobj"
+      ],
+      "evidence_refs": [
+        "diff_excerpt: grBigBlueRoute_8020BC68 and 8020BF38",
+        "raw/diff.diff lines 876-887"
+      ]
+    },
+    {
+      "text": "Local variable names were ordinary role names rather than speculative semantics where evidence was limited.",
+      "examples": [
+        "gp",
+        "gobj",
+        "jobj",
+        "fighter_pos",
+        "route_idx",
+        "min_val",
+        "max_val",
+        "spline_pt"
+      ],
+      "evidence_refs": [
+        "diff_excerpt: grBigBlueRoute_8020BF38, 8020C238, 8020C85C, 8020CD20"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Used typed array indexing over raw pointer-stride arithmetic for track and RouteEntry data; this aligns with typed-field recovery and improved several functions according to bot output.",
+      "evidence_refs": [
+        "diff_excerpt: for (i = 0; i < 3; i++) over tracks[i]",
+        "diff_excerpt: RouteEntry* re = &((RouteEntry*) gp->u.car.car_info)[route_idx]",
+        "text_corpus.jsonl issue_comment: new matches and improvements"
+      ]
+    },
+    {
+      "tactic": "Kept PAD_STACK(8) in grBigBlueRoute_8020C85C while noting remaining match issues were register allocation and addressing-mode choices.",
+      "evidence_refs": [
+        "diff_excerpt: PAD_STACK(8) and 92.06% todo for grBigBlueRoute_8020C85C"
+      ]
+    },
+    {
+      "tactic": "Used a local RE_ENTRY macro to reduce repeated RouteEntry indexing in grBigBlueRoute_8020CD20, then undefined it after the function.",
+      "evidence_refs": [
+        "diff_excerpt: #define RE_ENTRY (&((RouteEntry*) gp->u.car.car_info)[i])",
+        "raw/diff.diff line 739: #undef RE_ENTRY"
+      ]
+    },
+    {
+      "tactic": "Documented unresolved matching causes directly in todo comments: anonymous string-pool symbols, register allocation, addressing-mode choices, float-constant hoisting order, and register pressure.",
+      "evidence_refs": [
+        "diff_excerpt: todo comments for 8020BC68, 8020BF38, 8020C85C, 8020CD20"
+      ]
+    },
+    {
+      "tactic": "Converted gobj->hsd_obj to HSD_GObjGetHSDObj(gobj) in grBigBlueRoute_8020DAB4 and adjusted loop behavior from continue to break when *arr is NULL.",
+      "evidence_refs": [
+        "raw/diff.diff lines 996-1021"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "author": "decomp-dev[bot]",
+      "text": "GALE01 report: matched code increased by 0.07% (+2728 bytes); matched data decreased by 40 bytes. Four new function matches were reported, five unmatched items improved, and .sdata became a broken match.",
+      "evidence_refs": [
+        "text_corpus.jsonl issue_comment, 2026-05-24T18:58:54Z"
+      ]
+    },
+    {
+      "kind": "missing_human_review",
+      "author": null,
+      "text": "No review comments or human review records were present in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata_json counts: review_comments 0, reviews 0",
+        "text_corpus.jsonl contains PR body and one bot issue comment only"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2532",
+    "Jj/grbigblueroute 2",
+    "jurrejelle",
+    "grbigblueroute",
+    "Big Blue Route",
+    "src/melee/gr/grbigblueroute.c",
+    "src/melee/gr/grbigblueroute.h",
+    "src/melee/gr/types.h",
+    "grBigBlueRoute_8020BC68",
+    "grBigBlueRoute_8020BF38",
+    "grBigBlueRoute_8020C530",
+    "grBigBlueRoute_8020C85C",
+    "grBigBlueRoute_8020CD20",
+    "grBigBlueRoute_8020DAB4",
+    "grBigBlueRoute_8020DED4",
+    "RouteEntry",
+    "RouteEntryFlags",
+    "grBigBlueRoute_Track",
+    "grBigBlueRoute_GroundVars2",
+    "car_info",
+    "bigblueroute2",
+    "tracks",
+    "HSD_ASSERT",
+    "OSReport",
+    "__FILE__",
+    "PAD_STACK",
+    "RE_ENTRY",
+    "HSD_JObjGetTranslation",
+    "HSD_JObjSetTranslate",
+    "lbShadow_8000E9F0",
+    "atan2f",
+    "stage_info.x6DC",
+    ".sdata regression"
+  ],
+  "follow_up_queries": [
+    "grbigblueroute car_info RouteEntry flags b0 b1 b2_5",
+    "grBigBlueRoute_8020CD20 float-constant hoisting register pressure",
+    "grBigBlueRoute_8020C85C PAD_STACK RouteEntry addressing mode",
+    "bigblueroute2 tracks offset jobj GroundVars2",
+    "Big Blue Route .sdata regression PR 2532",
+    "grBigBlueRoute_8020DAB4 HSD_GObjGetHSDObj break continue"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR metadata, state, changed file counts",
+      "changed_files.jsonl: exact changed files and hunk counts",
+      "diff_excerpt and raw/diff.diff: source-level changes",
+      "text_corpus.jsonl: bot report with match metrics"
+    ],
+    "notes": [
+      "PR body is empty.",
+      "No human review comments were loaded, so reviewer intent cannot be inferred.",
+      "The loaded diff excerpt is truncated, but targeted raw diff reads supplied header/type tails and additional grbigblueroute.c context.",
+      "Bot report provides match and regression evidence, but no local build logs or objdiff artifacts beyond the report are included.",
+      "The PR was merged, but merge status alone is not treated as acceptance of any broad decomp standard."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "historical_pr_lesson",
+        "title": "PR 2532 used typed GroundVars and RouteEntry recovery to match Big Blue Route functions",
+        "text": "In src/melee/gr/grbigblueroute.c, many raw gp offset casts were replaced by gp->u.car, gp->gv.bigblueroute2, grBigBlueRoute_Track, and RouteEntry field accesses. The bot report for the PR recorded four new function matches, including grBigBlueRoute_8020BC68, grBigBlueRoute_8020BF38, grBigBlueRoute_8020C530, and grBigBlueRoute_8020DAB4.",
+        "scope": [
+          "src/melee/gr/grbigblueroute.c",
+          "src/melee/gr/types.h",
+          "src/melee/gr/grbigblueroute.h"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: typed field replacements",
+          "raw/diff.diff lines 863-897: type additions",
+          "text_corpus.jsonl issue_comment: four new matches"
+        ]
+      },
+      {
+        "record_type": "historical_pr_caution",
+        "title": "PR 2532 improved text matches but introduced a reported .sdata regression",
+        "text": "The bot report shows code progress and four new matches, but also reports main/melee/gr/grbigblueroute .sdata dropping from 100.00% to 92.86%. Treat literal/data cleanup in this PR as evidence to inspect, not as a blanket rule.",
+        "scope": [
+          "main/melee/gr/grbigblueroute",
+          "src/melee/gr/grbigblueroute.c"
+        ],
+        "evidence_refs": [
+          "text_corpus.jsonl issue_comment: matched code/data summary and broken .sdata table"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "Big Blue Route ground route data uses car_info RouteEntry storage in PR 2532",
+        "text": "PR 2532 changed grBigBlueRoute_GroundVars.xC8 to car_info and updated src/melee/gr/grbigblueroute.c to access it as a RouteEntry array for route state. Candidate path fact only; verify against current source before accepting.",
+        "source_path": "src/melee/gr/grbigblueroute.c",
+        "scope": [
+          "src/melee/gr/grbigblueroute.c",
+          "src/melee/gr/types.h",
+          "RouteEntry",
+          "grBigBlueRoute_GroundVars"
+        ],
+        "evidence_refs": [
+          "raw/diff.diff lines 863-873",
+          "diff_excerpt: gp->u.car.car_info allocation, memzero, HSD_Free, RouteEntry indexing"
+        ],
+        "reason": "Useful searchable path fact for future Big Blue Route decomp work, but should be verified against current source because PR evidence is historical."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "Big Blue Route secondary GroundVars track array in PR 2532",
+        "text": "PR 2532 added grBigBlueRoute_GroundVars2 with xC8, xCC, and tracks[4], where each track has Vec3 offset and HSD_JObj* jobj. Candidate path fact only; verify current layout before accepting.",
+        "source_path": "src/melee/gr/types.h",
+        "scope": [
+          "src/melee/gr/types.h",
+          "src/melee/gr/grbigblueroute.c",
+          "grBigBlueRoute_GroundVars2",
+          "grBigBlueRoute_Track"
+        ],
+        "evidence_refs": [
+          "raw/diff.diff lines 876-887",
+          "diff_excerpt: grBigBlueRoute_8020BC68 track initialization and grBigBlueRoute_8020BF38 track loop"
+        ],
+        "reason": "Potentially valuable local layout knowledge for the ground subsystem; route to path facts rather than accepting globally."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Historical support for typed fields over raw offsets in ground route code",
+        "text": "PR 2532 is additional historical evidence for the existing typed-fields-over-pointer-math standard: typed GroundVars and RouteEntry accesses replaced raw offset casts and accompanied function match improvements. This appears already covered by current standards, so use as supporting example rather than a new rule unless the curator wants examples attached.",
+        "source_path": null,
+        "scope": [
+          "typed-fields-over-pointer-math",
+          "stage",
+          "ground"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: raw casts replaced by gp->u.car and gp->gv.bigblueroute2 fields",
+          "text_corpus.jsonl issue_comment: four new matches"
+        ],
+        "reason": "Candidate supporting example for an existing standard, not a new accepted standard."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that all literal externs in stage files should be inlined; this PR's bot report includes a .sdata regression.",
+      "Do not infer reviewer approval rationale; no human review comments were loaded.",
+      "Do not promote PAD_STACK(8) or the RE_ENTRY macro as normal style; the diff gives local matching context but no broad validation.",
+      "Do not claim grBigBlueRoute_8020CD20 was matched; bot report says it improved from 0.00% to 89.73%, and the source todo says it remained partial."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

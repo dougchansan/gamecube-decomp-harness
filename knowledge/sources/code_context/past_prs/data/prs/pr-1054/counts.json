@@ -1,0 +1,17 @@
+{
+  "number": 1054,
+  "title": "Match most of melee/gr/grT-",
+  "state": "MERGED",
+  "createdAt": "2024-01-11T14:37:15Z",
+  "updatedAt": "2024-01-11T22:00:42Z",
+  "mergedAt": "2024-01-11T22:00:41Z",
+  "closedAt": "2024-01-11T22:00:41Z",
+  "author": "ndhaba",
+  "url": "https://github.com/doldecomp/melee/pull/1054",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 150043
+  }
+}

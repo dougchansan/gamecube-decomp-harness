@@ -1,0 +1,196 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2628",
+  "pr": {
+    "number": 2628,
+    "title": "Improvements to split up: PL",
+    "url": "https://github.com/doldecomp/melee/pull/2628",
+    "state": "MERGED",
+    "author": "fjooord",
+    "created_at": "2026-06-08T14:30:50Z",
+    "merged_at": "2026-06-08T15:37:23Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Small PL subsystem decomp-matching slice split from #2617. The only changed file was src/melee/pl/pltrick.c, where local Fighter* declaration order in pl_80038144 was changed by moving attacker_fp after victim_fp. The decomp-dev bot reported one unmatched-item improvement for main/melee/pl/pltrick::pl_80038144, +5 bytes, from 98.26% to 98.73%. No human review comments were present in the loaded slice.",
+  "change_classification": {
+    "primary_type": "decomp-matching local declaration order adjustment",
+    "categories": [
+      "decomp-matching",
+      "local-variable-order",
+      "score-improvement"
+    ],
+    "systems": [
+      "melee-core",
+      "src/melee/pl",
+      "pltrick"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/pl/pltrick.c",
+      "role": "Only changed source file; local Fighter* declaration order changed in pl_80038144.",
+      "evidence_refs": [
+        "changed_files: src/melee/pl/pltrick.c added 1 deleted 1 hunk 1",
+        "raw_diff: pl_80038144 declaration block changed from attacker_fp before victim_fp to victim_fp before attacker_fp"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "path": "src/melee/pl/pltrick.c",
+      "symbol": "pl_80038144",
+      "change": "Moved the local declaration of Fighter* attacker_fp to appear after Fighter* victim_fp.",
+      "evidence_refs": [
+        "raw_diff: - Fighter* attacker_fp; then Fighter* victim_fp; + Fighter* victim_fp; + Fighter* attacker_fp;"
+      ]
+    },
+    {
+      "scope": "PR packaging",
+      "change": "PR body says this was split from #2617 by directory/subsystem with scope src/melee/pl.",
+      "evidence_refs": [
+        "human_pr_text: Split from #2617 by directory/subsystem",
+        "human_pr_text: Scope `src/melee/pl`"
+      ]
+    },
+    {
+      "scope": "automated score report",
+      "change": "decomp-dev reported one improvement in an unmatched item: main/melee/pl/pltrick pl_80038144 +5 bytes, 98.26% before to 98.73% after.",
+      "evidence_refs": [
+        "text_corpus issue_comment decomp-dev[bot] 2026-06-08T14:39:19Z"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Kept the slice narrow to the planned PL path and changed only one declaration-order line in one function.",
+      "evidence_refs": [
+        "human_pr_text: Scope `src/melee/pl`",
+        "changed_files: one changed file, one added line, one deleted line"
+      ]
+    },
+    {
+      "text": "Included local hygiene evidence for the slice: created from origin/master as an isolated path slice and git diff --check passed.",
+      "evidence_refs": [
+        "human_pr_text: Local Checks"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For MWCC matching work, local declaration order can be a narrow, evidence-backed lever for improving a specific function's score, but it should be tied to automated diff evidence rather than generalized as style.",
+      "scope": [
+        "src/melee/pl/pltrick.c",
+        "pl_80038144"
+      ],
+      "evidence_refs": [
+        "raw_diff: only declaration order changed",
+        "decomp-dev report: pl_80038144 +5 bytes, 98.26% to 98.73%"
+      ],
+      "related_standard_ids": [
+        "matching-tactics-need-evidence",
+        "verification-and-regression-ledger"
+      ]
+    }
+  ],
+  "naming_conventions": [],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Reorder local pointer declarations to influence matching/codegen for a single function.",
+      "details": "The PR moved attacker_fp below victim_fp in pl_80038144 and the bot reported a +5 byte unmatched-item improvement for that symbol.",
+      "evidence_refs": [
+        "raw_diff: Fighter* attacker_fp moved after Fighter* victim_fp",
+        "text_corpus issue_comment: main/melee/pl/pltrick pl_80038144 +5 bytes"
+      ],
+      "caution": "The evidence supports only this local improvement, not a global declaration-order rule."
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "automated_report",
+      "author": "decomp-dev[bot]",
+      "feedback": "Reported 1 improvement in an unmatched item: main/melee/pl/pltrick pl_80038144 +5 bytes, 98.26% before, 98.73% after.",
+      "evidence_refs": [
+        "text_corpus issue_comment decomp-dev[bot] 2026-06-08T14:39:19Z"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR 2628",
+    "Improvements to split up: PL",
+    "src/melee/pl/pltrick.c",
+    "pltrick",
+    "pl_80038144",
+    "HSD_GObj",
+    "attacker_gobj",
+    "victim_gobj",
+    "Fighter* attacker_fp",
+    "Fighter* victim_fp",
+    "Fighter* attacker_fp2",
+    "plActionStats",
+    "local declaration order",
+    "MWCC local order",
+    "decomp-dev report",
+    "98.26%",
+    "98.73%",
+    "+5 bytes",
+    "split from #2617"
+  ],
+  "follow_up_queries": [
+    "pl_80038144 declaration order attacker_fp victim_fp",
+    "src/melee/pl/pltrick.c Fighter* attacker_fp victim_fp",
+    "main/melee/pl/pltrick pl_80038144 +5 bytes",
+    "PR 2628 split from #2617 PL",
+    "local variable declaration order MWCC matching"
+  ],
+  "evidence_quality": {
+    "status": "strong",
+    "evidence_refs": [
+      "metadata_json: PR identity, state, author, dates, changed file counts",
+      "human_pr_text: PR body with scope, preliminary report, local checks, files",
+      "raw_diff: complete one-hunk diff",
+      "changed_files.jsonl: one changed file",
+      "text_corpus.jsonl: decomp-dev bot report"
+    ],
+    "notes": [
+      "The diff evidence is complete and very small: one added line and one deleted line in one hunk.",
+      "The per-PR decomp-dev report provides narrow score evidence for pl_80038144.",
+      "The broader preliminary report in the PR body describes the full unsplit source branch and explicitly says per-PR CI/decomp-dev reporting is authoritative for the slice; therefore broad branch metrics are not treated as proof of this slice's exact effect.",
+      "No human review comments or reviewer intent were present in the loaded slice.",
+      "No build logs, objdiff details, or adjacent-function checks beyond the bot summary were loaded."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "matching_tactic",
+        "title": "Local declaration order tweak improved pl_80038144 score",
+        "text": "In PR #2628, src/melee/pl/pltrick.c changed only the order of Fighter* local declarations in pl_80038144, moving attacker_fp after victim_fp. The decomp-dev bot reported main/melee/pl/pltrick::pl_80038144 improved by +5 bytes from 98.26% to 98.73%. Treat this as a narrow evidence-backed matching tactic, not a global naming or style rule.",
+        "scope": [
+          "src/melee/pl/pltrick.c",
+          "pl_80038144"
+        ],
+        "evidence_refs": [
+          "raw_diff",
+          "text_corpus issue_comment decomp-dev[bot]"
+        ],
+        "confidence": 0.86
+      }
+    ],
+    "source_update_candidates": [],
+    "rejection_notes": [
+      "Do not promote the PR body's full unsplit branch metrics as this slice's exact result; the body itself says per-PR CI/decomp-dev reporting is authoritative for the slice.",
+      "Do not infer a global convention that victim_fp should always be declared before attacker_fp; the evidence only shows one local declaration-order adjustment.",
+      "Do not claim pl_80038144 fully matched; the bot report shows an improvement to 98.73%, not a completed match."
+    ]
+  },
+  "confidence": 0.86,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "schema_version": "melee_pr_vertical_slice_v1",
+  "pr": 2220,
+  "title": "Match itoctarockstone and cleanup it_27CF to match it, rename to ityoshiegglay, rename it_2F2B to ityoshitongue",
+  "state": "MERGED",
+  "path": "prs/pr-2220",
+  "files": {
+    "raw": [
+      "raw/pr.json",
+      "raw/issue_comments.json",
+      "raw/review_comments.json",
+      "raw/reviews.json",
+      "raw/diff.diff"
+    ],
+    "extracted": [
+      "extracted/text_corpus.jsonl",
+      "extracted/changed_files.jsonl",
+      "extracted/diff_lines.jsonl"
+    ],
+    "postmortem": [
+      "postmortem/postmortem.json"
+    ],
+    "metadata": [
+      "counts.json",
+      "activity.json"
+    ]
+  }
+}

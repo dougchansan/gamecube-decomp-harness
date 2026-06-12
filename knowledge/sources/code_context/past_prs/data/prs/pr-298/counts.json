@@ -1,0 +1,17 @@
+{
+  "number": 298,
+  "title": "Fixup remaining alignment issues for r40 support",
+  "state": "MERGED",
+  "createdAt": "2022-02-21T16:54:29Z",
+  "updatedAt": "2022-02-21T16:54:37Z",
+  "mergedAt": "2022-02-21T16:54:34Z",
+  "closedAt": "2022-02-21T16:54:34Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/298",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 101734
+  }
+}

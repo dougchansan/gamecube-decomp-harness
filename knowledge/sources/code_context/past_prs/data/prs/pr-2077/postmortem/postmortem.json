@@ -1,0 +1,421 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2077",
+  "pr": {
+    "number": 2077,
+    "title": "mn: match mnitemsw, mnstagesw, and mnvibration functions",
+    "url": "https://github.com/doldecomp/melee/pull/2077",
+    "state": "CLOSED",
+    "author": "itsgrimetime",
+    "created_at": "2026-01-10T02:36:12Z",
+    "merged_at": null
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Draft/WIP PR adding matched or improved menu settings functions for mnitemsw, mnstagesw, and mnvibration, plus headers and local structs/prototypes. Bot report claimed 7 new 100% matches and 3 improved unmatched functions, but the PR was closed unmerged and review comments flagged WIP cleanup concerns around a GObj wrapper and apparent deletion/replacement of an existing function.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "types-structs",
+      "menu-settings"
+    ],
+    "systems": [
+      "melee-core",
+      "mn"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/mn/mnitemsw.c",
+      "role": "Adds implementations for mnItemSw_80233A98, mnItemSw_8023405C, and mnItemSw_802358C0, including item-switch table lookup, node traversal, and menu transition/proc creation logic.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mnitemsw.c added 98 deleted 0",
+        "raw_diff: mnitemsw.c hunk adds mnItemSw_80233A98, mnItemSw_8023405C, mnItemSw_802358C0",
+        "text_corpus: bot report lists mnItemSw_80233A98 and mnItemSw_8023405C as 100% matches and mnItemSw_802358C0 as 92.10%"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnitemsw.h",
+      "role": "Adds header guard, ItemSwTable type, prototypes, and extern declarations for item-switch data.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mnitemsw.h added 19 deleted 0",
+        "raw_diff: mnitemsw.h adds ItemSwTable, mnItemSw prototypes, mnItemSw_803ED340, mnItemSw_804D6BEC"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnstagesw.c",
+      "role": "Adds implementations for mnStageSw_8023593C, mnStageSw_802364A0, and mnStageSw_80237410, including stage settings loop, node traversal, and menu transition/proc creation logic.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mnstagesw.c added 107 deleted 0",
+        "raw_diff: mnstagesw.c hunk adds mnStageSw_8023593C, mnStageSw_802364A0, mnStageSw_80237410",
+        "text_corpus: bot report lists all three mnstagesw functions as 100% matches"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnstagesw.h",
+      "role": "Adds header guard, prototypes, and extern declarations for stage-switch data.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mnstagesw.h added 12 deleted 0",
+        "raw_diff: mnstagesw.h adds mnStageSw prototypes and externs mnStageSw_803ED4C4, mnStageSw_804D6BF4"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnvibration.c",
+      "role": "Modifies vibration menu implementation: adds mnVibration_802474C4, fn_80248084, fn_80248748, retains/reworks mnVibration_80249174, and changes includes/proc flag handling.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mnvibration.c added 92 deleted 41",
+        "raw_diff: mnvibration.c hunk adds mnVibration_802474C4, fn_80248084, fn_80248748, and edits mnVibration_80249174",
+        "text_corpus: bot report lists mnVibration_802474C4 and fn_80248084 as 100% matches and fn_80248748/mnVibration_80249174 as improvements",
+        "review_comments.md: reviewer questioned GObj wrapper and deletion of an entire function"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnvibration.h",
+      "role": "Adds VibNode/VibNodeContainer/VibData/VibJObjData structs, concrete prototypes for matched vibration helpers, and extern declarations for vibration data.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mnvibration.h added 35 deleted 3",
+        "raw_diff: mnvibration.h replaces some UNK_RET/UNK_PARAMS with typed signatures and adds vibration structs/externs"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Added three mnitemsw functions and a new mnitemsw header with ItemSwTable, prototypes, and externs.",
+      "evidence_refs": [
+        "raw_diff: mnitemsw.c",
+        "raw_diff: mnitemsw.h"
+      ]
+    },
+    {
+      "text": "Added three mnstagesw functions and a new mnstagesw header with prototypes and externs.",
+      "evidence_refs": [
+        "raw_diff: mnstagesw.c",
+        "raw_diff: mnstagesw.h"
+      ]
+    },
+    {
+      "text": "Added or improved multiple mnvibration functions and header declarations; mnVibration_80249174 was reworked rather than only appended.",
+      "evidence_refs": [
+        "raw_diff: mnvibration.c",
+        "raw_diff: mnvibration.h"
+      ]
+    },
+    {
+      "text": "Bot report claimed +948 matched bytes, 7 new 100% matches, and 3 improved unmatched functions.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev[bot] report for GALE01"
+      ]
+    },
+    {
+      "text": "PR was explicitly WIP/draft and later closed with merged_at null.",
+      "evidence_refs": [
+        "human_pr_text.md: Still a WIP, will mark ready once I've cleaned it up",
+        "metadata_json: state CLOSED, merged_at null, draft true"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Header updates accompanied recovered bodies for several functions, replacing some UNK_RET/UNK_PARAMS with concrete prototypes in mnvibration.h and adding new mnitemsw/mnstagesw headers.",
+      "evidence_refs": [
+        "raw_diff: mnvibration.h",
+        "raw_diff: mnitemsw.h",
+        "raw_diff: mnstagesw.h",
+        "decomp_standards: truthful-headers-and-includes"
+      ]
+    },
+    {
+      "text": "Repeated linked-node traversal was expressed as loops in mnItemSw_8023405C, mnStageSw_802364A0, and mnVibration_802474C4 rather than as copied repeated blocks.",
+      "evidence_refs": [
+        "raw_diff: mnitemsw.c mnItemSw_8023405C",
+        "raw_diff: mnstagesw.c mnStageSw_802364A0",
+        "raw_diff: mnvibration.c mnVibration_802474C4",
+        "decomp_standards: natural-loops"
+      ]
+    },
+    {
+      "text": "Raw byte manipulation of a GObj-created object's flags was replaced in mnVibration_80249174 with the HSD_GObjProc return value and proc->flags_3 assignment.",
+      "evidence_refs": [
+        "raw_diff: mnvibration.c mnVibration_80249174"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For menu node accessors that select a head pointer and then walk x8 links by index, compact for-loops can match and are preferable to unrolled traversal when verifier output supports them.",
+      "scope": [
+        "src/melee/mn/mnitemsw.c",
+        "src/melee/mn/mnstagesw.c",
+        "src/melee/mn/mnvibration.c"
+      ],
+      "evidence_refs": [
+        "raw_diff: mnItemSw_8023405C uses for loops over ItemSwNode->x8",
+        "raw_diff: mnStageSw_802364A0 uses for loops over StageSw_Node->x8",
+        "raw_diff: mnVibration_802474C4 uses for loop over VibNode->x8",
+        "text_corpus: bot report lists these traversal functions as 100% matches where applicable"
+      ]
+    },
+    {
+      "lesson": "When recovering functions, update headers with concrete signatures and necessary forward includes only where the PR evidence proves the body/signature surface.",
+      "scope": [
+        "src/melee/mn/mnvibration.h",
+        "src/melee/mn/mnitemsw.h",
+        "src/melee/mn/mnstagesw.h"
+      ],
+      "evidence_refs": [
+        "raw_diff: mnvibration.h changes mnVibration_802474C4, fn_80248084, fn_80248748 prototypes",
+        "raw_diff: mnitemsw.h and mnstagesw.h add prototypes for new bodies",
+        "decomp_standards: truthful-headers-and-includes"
+      ]
+    },
+    {
+      "lesson": "Avoid treating a draft PR's matching report as final review acceptance; review comments and author WIP notes can make otherwise useful matching tactics unsuitable for promotion.",
+      "scope": [
+        "PR #2077"
+      ],
+      "evidence_refs": [
+        "human_pr_text.md: Still a WIP",
+        "review_comments.md: author says will clean this stuff up",
+        "metadata_json: draft true, merged_at null"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "Address-style names remained for unresolved functions and globals, such as fn_80233E10, fn_80235F80, fn_80247510, mnItemSw_803ED340, mnStageSw_803ED4C4, and mnVibration_804D6C28.",
+      "evidence_refs": [
+        "raw_diff: mnitemsw.c/h",
+        "raw_diff: mnstagesw.c/h",
+        "raw_diff: mnvibration.c/h",
+        "decomp_standards: conservative-naming"
+      ]
+    },
+    {
+      "text": "Local recovered structs used subsystem-specific prefixes plus offset-style fields where semantics were not proven, e.g. ItemSwNode x8/x10, StageSw_Node x8/x10, VibNode x8/x10, and VibData x2C.",
+      "evidence_refs": [
+        "raw_diff: mnitemsw.c ItemSwNode/ItemSwData",
+        "raw_diff: mnstagesw.c StageSw_Node/StageSw_NodeData",
+        "raw_diff: mnvibration.h VibNode/VibData"
+      ]
+    },
+    {
+      "text": "The reviewer questioned a proposed wrapper type for GObj access, indicating that wrapper names like VibGObj/StageSw_GObj need stronger type evidence when an existing HSD_GObj type can be used directly.",
+      "evidence_refs": [
+        "review_comments.md: Why are we making a wrapper type for a GObj instead of using it directly?",
+        "raw_diff: mnstagesw.c defines StageSw_GObj",
+        "review hunk excerpt: VibGObj wrapper"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "text": "Used explicit dummy stack storage in mnStageSw_8023593C: s32 dummy[3]; (void) dummy;",
+      "evidence_refs": [
+        "raw_diff: mnstagesw.c mnStageSw_8023593C"
+      ],
+      "caution": "No narrow rationale is given beyond the bot match report; this falls under the standard requiring explicit evidence for stack-shape tactics."
+    },
+    {
+      "text": "Used function-pointer casts to call mnVibration_80248ED4 and fn_80247510 while related prototypes remained unknown or mismatched.",
+      "evidence_refs": [
+        "raw_diff: mnvibration.c mnVibration_80249174",
+        "raw_diff: mnvibration.h leaves fn_80247510 and mnVibration_80248ED4 as UNK_RET/UNK_PARAMS"
+      ],
+      "caution": "Useful as a bridge tactic, but should be revisited when the callee signatures are recovered."
+    },
+    {
+      "text": "Replaced direct GObj byte flag manipulation with assigning proc->flags_3 from HSD_GObj_804D783C after HSD_GObjProc_8038FD54.",
+      "evidence_refs": [
+        "raw_diff: mnvibration.c mnVibration_80249174"
+      ]
+    },
+    {
+      "text": "Used switch cases in mnItemSw_80233A98 to special-case non-Japanese language behavior for indices 0x11 and 0x13.",
+      "evidence_refs": [
+        "raw_diff: mnitemsw.c mnItemSw_80233A98"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "author": "PsiLupan",
+      "path": "src/melee/mn/mnvibration.c",
+      "comment": "Why are we making a wrapper type for a GObj instead of using it directly?",
+      "evidence_refs": [
+        "review_comments.md: discussion_r2679122071"
+      ],
+      "intake_note": "Treat as a review concern against speculative wrapper structs over known engine types, not as proof of final required code."
+    },
+    {
+      "author": "PsiLupan",
+      "path": "src/melee/mn/mnvibration.c",
+      "comment": "Very confused why an entire function was deleted?",
+      "evidence_refs": [
+        "review_comments.md: discussion_r2679123141"
+      ],
+      "intake_note": "Reviewer flagged that the large mnvibration.c rewrite made function removal/replacement unclear."
+    },
+    {
+      "author": "itsgrimetime",
+      "path": "src/melee/mn/mnvibration.c",
+      "comment": "I shoulda called out that this one is still a WIP - will clean this stuff up",
+      "evidence_refs": [
+        "review_comments.md: discussion_r2693199676"
+      ],
+      "intake_note": "Author acknowledged WIP cleanup was still needed."
+    }
+  ],
+  "searchable_terms": [
+    "PR2077",
+    "mnitemsw",
+    "mnstagesw",
+    "mnvibration",
+    "mnItemSw_80233A98",
+    "mnItemSw_8023405C",
+    "mnItemSw_802358C0",
+    "mnStageSw_8023593C",
+    "mnStageSw_802364A0",
+    "mnStageSw_80237410",
+    "mnVibration_802474C4",
+    "fn_80248084",
+    "fn_80248748",
+    "mnVibration_80249174",
+    "ItemSwNode",
+    "StageSw_Node",
+    "VibNode",
+    "VibData",
+    "GObj wrapper",
+    "HSD_GObjProc_8038FD54",
+    "HSD_GObjPLink_80390228",
+    "flags_3",
+    "lbArchive_LoadSections",
+    "lbLang_IsSettingJP",
+    "draft WIP cleanup"
+  ],
+  "follow_up_queries": [
+    "PR 2077 GObj wrapper VibGObj review PsiLupan",
+    "mnVibration_80249174 function deleted WIP cleanup",
+    "mnStageSw_8023593C dummy stack s32 dummy[3]",
+    "mnItemSw_8023405C mnStageSw_802364A0 linked node traversal",
+    "HSD_GObjProc flags_3 HSD_GObj_804D783C menu proc",
+    "mnvibration fn_80248748 AnimLoopSettings end_frame"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json",
+      "human_pr_text.md",
+      "review_comments.md",
+      "raw_diff",
+      "changed_files.jsonl",
+      "text_corpus.jsonl"
+    ],
+    "notes": [
+      "Diff, changed-file metadata, and bot report provide strong evidence for what code was attempted and the claimed match/improvement numbers.",
+      "PR was draft/WIP and closed with merged_at null, so intake should not treat the changes as accepted final project style.",
+      "Review feedback specifically challenges parts of mnvibration.c; lessons involving wrapper types, function deletion, and stack/prototype tactics should be treated as cautions or curator candidates, not settled standards.",
+      "No local build logs beyond the bot report excerpt are included; no separate objdiff command output or final resolved review state is available."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "title": "Menu node traversal accessors can match as simple indexed linked-list walks",
+        "text": "In PR #2077, mnItemSw_8023405C, mnStageSw_802364A0, and mnVibration_802474C4 all recover a node by selecting a starting node pointer and walking x8 links in a for-loop. Bot report lists mnItemSw_8023405C, mnStageSw_802364A0, and mnVibration_802474C4 as 100% matches.",
+        "scope": [
+          "src/melee/mn/mnitemsw.c",
+          "src/melee/mn/mnstagesw.c",
+          "src/melee/mn/mnvibration.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: mnItemSw_8023405C",
+          "raw_diff: mnStageSw_802364A0",
+          "raw_diff: mnVibration_802474C4",
+          "text_corpus: decomp-dev[bot] report"
+        ],
+        "confidence": 0.82
+      },
+      {
+        "title": "Draft matching PRs can contain useful match evidence without accepted style evidence",
+        "text": "PR #2077 had a bot report with new matches and improvements, but the author described it as WIP, the PR was draft/closed unmerged, and review comments flagged cleanup concerns. Use its matched functions as search evidence, not as proof that every tactic was review-accepted.",
+        "scope": [
+          "PR #2077"
+        ],
+        "evidence_refs": [
+          "human_pr_text.md",
+          "metadata_json: draft true and merged_at null",
+          "review_comments.md"
+        ],
+        "confidence": 0.9
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Prefer existing engine object types over wrapper structs when accessing known HSD_GObj fields",
+        "text": "Reviewer questioned creating a wrapper type for a GObj instead of using HSD_GObj directly in mnvibration.c. Consider adding guidance that wrapper structs over known engine objects need stronger evidence and should not hide available typed fields.",
+        "source_path": null,
+        "scope": [
+          "src/melee/mn/mnvibration.c",
+          "sysdolphin/baselib/gobj.h"
+        ],
+        "evidence_refs": [
+          "review_comments.md: PsiLupan discussion_r2679122071",
+          "decomp_standards: typed-fields-over-pointer-math"
+        ],
+        "reason": "This is source-standard adjacent, but evidence is a single reviewer question on a WIP PR, so curator review is needed before promoting it."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Call out apparent function deletion/replacement in WIP decomp diffs",
+        "text": "Reviewer confusion over an entire function being deleted in mnvibration.c suggests that large decomp rewrites should clearly preserve or explain replaced functions, especially in draft PRs.",
+        "source_path": null,
+        "scope": [
+          "src/melee/mn/mnvibration.c"
+        ],
+        "evidence_refs": [
+          "review_comments.md: PsiLupan discussion_r2679123141",
+          "review_comments.md: author says WIP cleanup remains"
+        ],
+        "reason": "Could become review-process guidance, but the PR evidence does not prove final reviewer intent or an accepted repository-wide rule."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "mnitemsw/mnstagesw/mnvibration are menu settings translation units with node traversal helpers",
+        "text": "PR #2077 changed src/melee/mn/mnitemsw.c, mnstagesw.c, and mnvibration.c to recover menu settings functions including linked-node traversal helpers and menu transition/proc setup functions.",
+        "source_path": "src/melee/mn",
+        "scope": [
+          "src/melee/mn/mnitemsw.c",
+          "src/melee/mn/mnstagesw.c",
+          "src/melee/mn/mnvibration.c"
+        ],
+        "evidence_refs": [
+          "raw_diff",
+          "changed_files.jsonl",
+          "text_corpus: bot report"
+        ],
+        "reason": "Useful path classification candidate, but should be validated against current source before adding as a durable path fact."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote VibGObj or StageSw_GObj wrapper style as accepted; reviewer explicitly questioned the GObj wrapper and PR was WIP.",
+      "Do not promote dummy stack arrays or function-pointer casts as normal style from this PR alone; the evidence shows use, not final acceptance.",
+      "Do not claim the PR was merged or accepted; metadata says merged_at null and state CLOSED.",
+      "Do not treat all bot-reported improvements as completed matches: fn_80248748, mnVibration_80249174, and mnItemSw_802358C0 were reported as improved but not 100% matched."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

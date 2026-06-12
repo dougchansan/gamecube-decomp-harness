@@ -1,0 +1,17 @@
+{
+  "number": 1505,
+  "title": "ftCo_ItemThrow cleanup and matches",
+  "state": "MERGED",
+  "createdAt": "2025-05-22T17:31:48Z",
+  "updatedAt": "2025-05-22T17:43:12Z",
+  "mergedAt": "2025-05-22T17:41:36Z",
+  "closedAt": "2025-05-22T17:41:36Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/1505",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 11831
+  }
+}

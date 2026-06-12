@@ -1,0 +1,10 @@
+{
+  "pr": 143,
+  "title": "Fix write error and handle other mr cases",
+  "url": "https://github.com/doldecomp/melee/pull/143",
+  "text_records_with_body": 0,
+  "review_comments": 0,
+  "changed_files": 1,
+  "added_lines": 2,
+  "deleted_lines": 1
+}

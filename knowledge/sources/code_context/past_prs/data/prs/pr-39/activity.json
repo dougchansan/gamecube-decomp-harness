@@ -1,0 +1,10 @@
+{
+  "pr": 39,
+  "title": "disassemble a bunch of data pointer tables",
+  "url": "https://github.com/doldecomp/melee/pull/39",
+  "text_records_with_body": 0,
+  "review_comments": 0,
+  "changed_files": 3,
+  "added_lines": 10525,
+  "deleted_lines": 180
+}

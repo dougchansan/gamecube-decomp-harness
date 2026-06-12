@@ -3,64 +3,10 @@
   "description": "Runtime agent context for D-Comp Orchestrator agents. Paths are relative to the decomp-orchestrator repo root. Knowledge sources and the resource graph live under knowledge/; reusable tool suites live under tools/; role behavior lives beside the agents package.",
   "role_defaults": {
     "director": [],
-    "worker": [
-      "worker_operating_guide"
-    ]
+    "worker": []
   },
-  "capability_routes": {
-    "context_packaging": [
-      "worker_lookup_guide"
-    ],
-    "type_symbol_resolution": [
-      "worker_lookup_guide",
-      "worker_matching_guide"
-    ],
-    "scratch_history_recon": [
-      "worker_lookup_guide"
-    ],
-    "isolated_check_loop": [
-      "worker_matching_guide"
-    ],
-    "duplicate_adaptation": [
-      "worker_matching_guide"
-    ],
-    "focused_source_editing": [
-      "worker_matching_guide"
-    ],
-    "fact_research": [
-      "worker_lookup_guide"
-    ],
-    "review_cleanup": [],
-    "experimental_search": [
-      "worker_last_resort_sweeps"
-    ],
-    "permuter_handoff": [
-      "worker_last_resort_sweeps",
-      "worker_matching_guide"
-    ]
-  },
-  "references": {
-    "worker_operating_guide": {
-      "path": "packages/agents/src/worker/context/operating-guide.md",
-      "role": "worker",
-      "purpose": "Compact default worker operating contract, source quality rules, validation loop, and stop conditions."
-    },
-    "worker_lookup_guide": {
-      "path": "packages/agents/src/worker/context/lookup-guide.md",
-      "role": "worker",
-      "purpose": "Opt-in source, graph, PR, and resource lookup guide for fact research and type/symbol resolution."
-    },
-    "worker_matching_guide": {
-      "path": "packages/agents/src/worker/context/matching-guide.md",
-      "role": "worker",
-      "purpose": "Opt-in MWCC/source-shape tactics for focused editing, duplicate adaptation, and isolated check loops."
-    },
-    "worker_last_resort_sweeps": {
-      "path": "packages/agents/src/worker/context/last-resort-sweeps.md",
-      "role": "worker",
-      "purpose": "Compact last-resort sweep guardrails for bounded source-shape experiments."
-    }
-  },
+  "capability_routes": {},
+  "references": {},
   "scripts": {
     "rank_decomp_candidates": {
       "path": "tools/operations/rank_decomp_candidates.py",
@@ -87,15 +33,15 @@
       "purpose": "Render experimental search progress, Pareto, and mismatch SVG charts."
     },
     "fetch_recent_pr_dump": {
-      "path": "knowledge/sources/past_prs/commands/fetch_recent_pr_dump.py",
+      "path": "knowledge/sources/code_context/past_prs/commands/fetch_recent_pr_dump.py",
       "purpose": "Fetch recent GitHub PR metadata, comments, reviews, and diffs into the orchestrator-owned past-PR dump."
     },
     "build_pr_postmortems": {
-      "path": "knowledge/sources/past_prs/commands/build_pr_postmortems.py",
+      "path": "knowledge/sources/code_context/past_prs/commands/build_pr_postmortems.py",
       "purpose": "Build searchable per-PR JSON knowledge records and shared Pi-agent prompt standards."
     },
     "sync_repo_and_pr_library": {
-      "path": "knowledge/sources/past_prs/commands/sync_repo_and_pr_library.py",
+      "path": "knowledge/sources/code_context/past_prs/commands/sync_repo_and_pr_library.py",
       "purpose": "Fetch/rebase the local repo and refresh the orchestrator-owned PR knowledge library."
     }
   }

@@ -1,0 +1,17 @@
+{
+  "number": 2102,
+  "title": "Match a bunch of \"duplicate\" functions with Claude",
+  "state": "MERGED",
+  "createdAt": "2026-01-17T09:38:07Z",
+  "updatedAt": "2026-01-18T19:33:34Z",
+  "mergedAt": "2026-01-18T19:33:34Z",
+  "closedAt": "2026-01-18T19:33:34Z",
+  "author": "lukechampine",
+  "url": "https://github.com/doldecomp/melee/pull/2102",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 9,
+    "reviews": 5,
+    "diff_bytes": 201176
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 874,
+  "title": "Match `ftCo_Passive`",
+  "state": "MERGED",
+  "createdAt": "2023-05-27T09:52:18Z",
+  "updatedAt": "2023-05-27T10:05:04Z",
+  "mergedAt": "2023-05-27T10:05:03Z",
+  "closedAt": "2023-05-27T10:05:03Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/874",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 10332
+  }
+}

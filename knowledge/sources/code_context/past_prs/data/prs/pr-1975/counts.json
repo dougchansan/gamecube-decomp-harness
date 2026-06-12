@@ -1,0 +1,17 @@
+{
+  "number": 1975,
+  "title": "Bump m2c for nix build",
+  "state": "MERGED",
+  "createdAt": "2025-11-04T12:41:53Z",
+  "updatedAt": "2025-11-04T12:47:07Z",
+  "mergedAt": "2025-11-04T12:47:04Z",
+  "closedAt": "2025-11-04T12:47:04Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1975",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 500
+  }
+}

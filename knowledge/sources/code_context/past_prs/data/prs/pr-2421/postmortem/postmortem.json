@@ -1,0 +1,484 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2421",
+  "pr": {
+    "number": 2421,
+    "title": "More item progress",
+    "url": "https://github.com/doldecomp/melee/pull/2421",
+    "state": "MERGED",
+    "author": "lukechampine",
+    "created_at": "2026-04-17T17:48:20Z",
+    "merged_at": "2026-04-18T20:59:24Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Large item decompilation progress PR touching 22 files, primarily item C sources and item headers. The author explicitly says itlugia and itclimbersice are matching but their sdata2 order was not resolved. Bot report records +0.45% matched code, +17508 bytes, 69 new matches, and 11 unmatched-item improvements. Diff excerpt shows extensive symbols.txt metadata changes, including object size changes and many global data/string/float symbols converted to local @ labels.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "symbols-metadata",
+      "matching-config"
+    ],
+    "systems": [
+      "item",
+      "config",
+      "mpcoll",
+      "repo-build-config"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/it/items/itseakchain.c",
+      "role": "large item source progress; bot report lists major unmatched improvements for itseakchain functions and .sdata2",
+      "evidence_refs": [
+        "changed_files.jsonl: itseakchain.c +421/-207 in 16 hunks",
+        "text_corpus.jsonl: bot report lists it_802BC080 to 93.36%, it_802BAF2C to 91.78%, .sdata2 to 87.50%"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itzgshell.c",
+      "role": "large item source progress with multiple new matches and matched .data",
+      "evidence_refs": [
+        "changed_files.jsonl: itzgshell.c +356/-15 in 7 hunks",
+        "text_corpus.jsonl: bot report lists it_802DF230, itZrshell_UnkMotion11_Anim, it_802E0100, it_802DDEB4, itZrshell_UnkMotion6_Anim, .data, and itZrshell_UnkMotion10_Anim as new 100% matches"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itclimbersstring.c",
+      "role": "large item source progress with several new matches and one unmatched improvement",
+      "evidence_refs": [
+        "changed_files.jsonl: itclimbersstring.c +324/-20 in 7 hunks",
+        "text_corpus.jsonl: bot report lists it_802C3520, it_802C2EC4, it_802C30E8, it_802C33B8 as new 100% matches and it_802C248C to 95.99%"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itclimbersice.c",
+      "role": "item source reported by author as matching, with sdata2 ordering caveat",
+      "evidence_refs": [
+        "changed_files.jsonl: itclimbersice.c +159/-108 in 11 hunks",
+        "human_pr_text.md: author says itclimbersice is matching but sdata2 order could not be corrected",
+        "text_corpus.jsonl: bot report lists it_802C1590, itClimbersice_UnkMotion3_Coll, and it_802C1854 as new 100% matches"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itlugia.c",
+      "role": "item source reported by author as matching, with sdata2 ordering caveat",
+      "evidence_refs": [
+        "changed_files.jsonl: itlugia.c +203/-22 in 11 hunks",
+        "human_pr_text.md: author says itlugia is matching but sdata2 order could not be corrected",
+        "text_corpus.jsonl: bot report lists it_802D208C, it_802D1BBC, it_802D1F64, and it_802D1830 as new 100% matches"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itoldottosea.c",
+      "role": "item source progress with multiple new matches and matched .data",
+      "evidence_refs": [
+        "changed_files.jsonl: itoldottosea.c +182/-22 in 8 hunks",
+        "text_corpus.jsonl: bot report lists itOldottosea_UnkMotion2_Anim, it_2725_Logic8_DmgReceived, itOldottosea_UnkMotion7_Phys, it_802E2470, and .data as new 100% matches"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itklap.c",
+      "role": "item source progress with new matches and matched .data",
+      "evidence_refs": [
+        "changed_files.jsonl: itklap.c +74/-31 in 4 hunks",
+        "text_corpus.jsonl: bot report lists itKlap_UnkMotion1_Coll, it_802E215C, and .data as new 100% matches"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itsscopebeam.c",
+      "role": "item source progress and configure status change candidate",
+      "evidence_refs": [
+        "changed_files.jsonl: itsscopebeam.c +81/-23 in 4 hunks",
+        "text_corpus.jsonl: bot report lists itSscopebeam_UnkMotion9_Coll and .data as new 100% matches",
+        "raw_diff excerpt: configure.py hunk changes itsscopebeam object entry from NonMatching context"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/it_2E5A.c",
+      "role": "item source cleanup/progress with several unmatched-score improvements",
+      "evidence_refs": [
+        "changed_files.jsonl: it_2E5A.c +85/-251 in 23 hunks",
+        "text_corpus.jsonl: bot report lists it_802E6380, it_802E66A0, .sdata2, it_2E5A_UnkMotion2_Coll, and it_802E5AC4 improvements"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "symbol metadata updates for rodata/data/sdata/sdata2 sizes, scopes, labels, and local string/float symbols",
+      "evidence_refs": [
+        "changed_files.jsonl: symbols.txt +73/-68 in 12 hunks",
+        "raw_diff excerpt: it_803B86E8 size 0x10 to 0xC; jumptable_803F6608 to @188; many global sdata/sdata2 symbols to local @ labels"
+      ]
+    },
+    {
+      "path": "configure.py",
+      "role": "matching configuration updates for item objects",
+      "evidence_refs": [
+        "changed_files.jsonl: configure.py +7/-7 in 5 hunks",
+        "raw_diff excerpt: configure.py hunk includes itsscopebeam object status change context"
+      ]
+    },
+    {
+      "path": "src/melee/it/itCharItems.h",
+      "role": "item header/prototype updates",
+      "evidence_refs": [
+        "changed_files.jsonl: itCharItems.h +43/-13 in 3 hunks"
+      ]
+    },
+    {
+      "path": "src/melee/it/itCommonItems.h",
+      "role": "item header/prototype updates",
+      "evidence_refs": [
+        "changed_files.jsonl: itCommonItems.h +76/-74 in 5 hunks"
+      ]
+    },
+    {
+      "path": "src/melee/mp/mpcoll.c",
+      "role": "small map-collision source change supporting item work",
+      "evidence_refs": [
+        "changed_files.jsonl: mpcoll.c +1/-1 in 1 hunk"
+      ]
+    },
+    {
+      "path": "src/melee/mp/mpcoll.h",
+      "role": "small map-collision header change supporting item work",
+      "evidence_refs": [
+        "changed_files.jsonl: mpcoll.h +1/-1 in 1 hunk"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Touched 22 files: 14 item C sources/headers, 2 item aggregate headers, symbols.txt, configure.py, and mpcoll.c/mpcoll.h.",
+    "Advanced item decompilation matching across itzgshell, itclimbersstring, itlugia, itclimbersice, itoldottosea, itklap, itsscopebeam, itcrazyhandbomb, itseakchain, and it_2E5A.",
+    "Bot report recorded 69 new matches and 11 improvements in unmatched items for GALE01, including +17508 matched-code bytes.",
+    "Author specifically called out itlugia and itclimbersice as matching while noting unresolved sdata2 ordering.",
+    "Updated symbols.txt metadata, including data object sizes, local labels, local string labels, and many sdata/sdata2 float/double symbols changed from global address-style names to local @ labels.",
+    "Updated configure.py item object matching classifications; the excerpt shows itsscopebeam in the changed matching configuration area.",
+    "Updated item headers, including itCharItems.h, itCommonItems.h, and per-item headers for climbersstring, seakchain, lugia, klap, zgshell, and zrshell."
+  ],
+  "smart_moves": [
+    {
+      "text": "The PR separates a known data-order caveat from the text-match claim: itlugia and itclimbersice are described as matching, but sdata2 ordering is explicitly called unresolved.",
+      "evidence_refs": [
+        "human_pr_text.md"
+      ]
+    },
+    {
+      "text": "The PR pairs source progress with symbol metadata updates rather than only adding C code; the diff adjusts sizes, scopes, and local labels for rodata/data/sdata/sdata2.",
+      "evidence_refs": [
+        "raw_diff excerpt: symbols.txt hunks",
+        "changed_files.jsonl: symbols.txt +73/-68"
+      ]
+    },
+    {
+      "text": "Header surfaces were updated alongside item source progress, consistent with recovered signatures or shared item declarations being moved into item headers.",
+      "evidence_refs": [
+        "changed_files.jsonl: itCharItems.h, itCommonItems.h, climbersstring.h, seakchain.h, lugia.h, klap.h, zgshell.h, zrshell.h"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For item matching work, text-section matches may coexist with unresolved small-data ordering; record the caveat rather than overstating data completion.",
+      "scope": [
+        "src/melee/it/items/itlugia.c",
+        "src/melee/it/items/itclimbersice.c",
+        "config/GALE01/symbols.txt"
+      ],
+      "evidence_refs": [
+        "human_pr_text.md: author notes itlugia and itclimbersice are matching but sdata2 order could not be corrected",
+        "text_corpus.jsonl: bot report lists new 100% matches for itlugia and itclimbersice"
+      ],
+      "confidence": 0.86
+    },
+    {
+      "lesson": "Large item progress can require synchronized edits across C sources, item headers, configure matching status, and symbols metadata.",
+      "scope": [
+        "src/melee/it/items",
+        "src/melee/it/itCharItems.h",
+        "src/melee/it/itCommonItems.h",
+        "configure.py",
+        "config/GALE01/symbols.txt"
+      ],
+      "evidence_refs": [
+        "changed_files.jsonl: 22 changed files across item sources, headers, configure.py, and symbols.txt",
+        "text_corpus.jsonl: bot report records new matches and unmatched improvements"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "Symbol metadata cleanup may involve converting address-style global data names into local @ labels when the diff evidence says those objects are local strings, floats, doubles, or labels.",
+      "scope": [
+        "config/GALE01/symbols.txt"
+      ],
+      "evidence_refs": [
+        "raw_diff excerpt: it_804DCC10..it_804DCC1C global sdata2 floats converted to @161/@198/@222/@223 local labels",
+        "raw_diff excerpt: it_803F8990 and it_803F89B8 global data strings converted to @288 and @367 local strings"
+      ],
+      "confidence": 0.74
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "The PR retains many unknown item functions under address-style it_802... names when semantics are not shown by the evidence.",
+      "examples": [
+        "it_802DF230",
+        "it_802C3520",
+        "it_802D208C",
+        "it_802BC080"
+      ],
+      "evidence_refs": [
+        "text_corpus.jsonl: bot report new matches and improvements list address-style item function names"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "convention": "Known item callbacks use item-prefixed motion/logic names such as itKlap_UnkMotion1_Coll, itSscopebeam_UnkMotion9_Coll, itCrazyhandbomb_UnkMotion0_Phys, and itOldottosea_UnkMotion2_Anim.",
+      "examples": [
+        "itKlap_UnkMotion1_Coll",
+        "itSscopebeam_UnkMotion9_Coll",
+        "itCrazyhandbomb_UnkMotion0_Phys",
+        "itOldottosea_UnkMotion2_Anim"
+      ],
+      "evidence_refs": [
+        "text_corpus.jsonl: bot report new matches table"
+      ],
+      "confidence": 0.84
+    },
+    {
+      "convention": "Local compiler/data labels in symbols.txt appear as @number entries, while some global address-style it_80... data symbols remain where not changed.",
+      "examples": [
+        "@188",
+        "@608",
+        "@161",
+        "it_804DCC20"
+      ],
+      "evidence_refs": [
+        "raw_diff excerpt: jumptable_803F6608 changed to @188; multiple sdata2 globals changed to @ labels; nearby it_804DCC20 remains global"
+      ],
+      "confidence": 0.8
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Use bot/checkdiff-style progress reports to distinguish new full matches from partial unmatched improvements.",
+      "evidence_refs": [
+        "text_corpus.jsonl: bot report separates 69 new matches from 11 improvements in unmatched items"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "tactic": "When source functions match but sdata2 ordering remains off, keep the ordering issue explicit and avoid treating data order as solved.",
+      "evidence_refs": [
+        "human_pr_text.md"
+      ],
+      "confidence": 0.86
+    },
+    {
+      "tactic": "Adjust symbols metadata for exact section ownership and locality, including object size and local labels, when matching item data and literals.",
+      "evidence_refs": [
+        "raw_diff excerpt: it_803B86E8 size adjusted; many .data/.sdata/.sdata2 entries converted from global it_... names to local @ labels"
+      ],
+      "confidence": 0.76
+    },
+    {
+      "tactic": "Promote item objects in configure.py only as matching evidence supports object-level status changes.",
+      "evidence_refs": [
+        "changed_files.jsonl: configure.py +7/-7 in 5 hunks",
+        "raw_diff excerpt: configure.py changed item object classification near itsscopebeam",
+        "text_corpus.jsonl: bot report includes item units with new full matches"
+      ],
+      "confidence": 0.58
+    }
+  ],
+  "review_feedback": [
+    {
+      "type": "author_note",
+      "text": "Author says itlugia and itclimbersice are matching, but sdata2 order could not be corrected.",
+      "evidence_refs": [
+        "human_pr_text.md",
+        "raw_pr_json.body"
+      ]
+    },
+    {
+      "type": "bot_report",
+      "text": "Bot report for GALE01 records +0.45% matched code, +17508 matched-code bytes, +0.13% matched data, 69 new matches, and 11 unmatched-item improvements.",
+      "evidence_refs": [
+        "text_corpus.jsonl: decomp-dev[bot] issue comment"
+      ]
+    },
+    {
+      "type": "missing_review",
+      "text": "No human review comments or review records were included in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata_json.counts.review_comments: 0",
+        "metadata_json.counts.reviews: 0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR 2421",
+    "More item progress",
+    "lukechampine",
+    "itlugia",
+    "itclimbersice",
+    "sdata2 order",
+    "itclimbersstring",
+    "itseakchain",
+    "itzgshell",
+    "itzrshell",
+    "itoldottosea",
+    "itklap",
+    "itsscopebeam",
+    "itcrazyhandbomb",
+    "it_2E5A",
+    "itCharItems.h",
+    "itCommonItems.h",
+    "symbols.txt",
+    "configure.py",
+    "local @ labels",
+    "global to local symbols",
+    "matched code +17508",
+    "69 new matches",
+    "11 unmatched improvements",
+    "it_802DF230",
+    "it_802C3520",
+    "it_802D208C",
+    "it_802BC080",
+    "itKlap_UnkMotion1_Coll",
+    "itSscopebeam_UnkMotion9_Coll"
+  ],
+  "follow_up_queries": [
+    "PR 2421 sdata2 order itlugia itclimbersice",
+    "itlugia matching sdata2 order",
+    "itclimbersice matching sdata2 order",
+    "symbols.txt global to local @ labels item sdata2",
+    "itsscopebeam configure.py Matching NonMatching PR 2421",
+    "itseakchain it_802BC080 93.36",
+    "it_2E5A sdata2 improvement PR 2421",
+    "itzgshell .data 100% match"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR identity, state, changed-file counts, changed files",
+      "human_pr_text.md: author statement about itlugia/itclimbersice and sdata2",
+      "text_corpus.jsonl: bot report with match metrics and match lists",
+      "raw_diff excerpt: symbols.txt and configure.py examples",
+      "changed_files.jsonl: complete changed-file list"
+    ],
+    "notes": [
+      "Loaded diff is truncated, so detailed per-function source tactics inside each C file are not fully visible from the slice.",
+      "No human review comments are present; review feedback is limited to the author note and bot report.",
+      "The bot report supports many match/improvement claims, but the intake did not run builds or objdiff and does not independently validate them.",
+      "configure.py is known changed, but only a partial hunk is visible; exact object status changes beyond the shown itsscopebeam context are not fully enumerated.",
+      "Header changes are known by file metadata, but exact recovered prototypes/signatures are not visible in the loaded excerpt."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson",
+        "title": "Separate text match from unresolved sdata2 ordering",
+        "text": "PR 2421 is evidence that item functions can be reported as matching while sdata2 ordering remains unresolved; postmortems should preserve that caveat instead of converting it into a full data-match claim.",
+        "scope": [
+          "src/melee/it/items/itlugia.c",
+          "src/melee/it/items/itclimbersice.c",
+          "config/GALE01/symbols.txt"
+        ],
+        "evidence_refs": [
+          "human_pr_text.md",
+          "text_corpus.jsonl: bot report new matches"
+        ],
+        "confidence": 0.86
+      },
+      {
+        "record_type": "matching_tactic",
+        "title": "Item matching often spans source, headers, configure, and symbols metadata",
+        "text": "This PR's item matching progress changed item sources, item headers, configure.py, and symbols.txt; future item work should search all of those surfaces when a match depends on declarations, object status, or data/symbol ownership.",
+        "scope": [
+          "src/melee/it/items",
+          "src/melee/it",
+          "configure.py",
+          "config/GALE01/symbols.txt"
+        ],
+        "evidence_refs": [
+          "changed_files.jsonl",
+          "raw_diff excerpt",
+          "text_corpus.jsonl: bot report"
+        ],
+        "confidence": 0.78
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "Item matching surface includes aggregate headers and symbols metadata",
+        "text": "PR 2421 item matching work touched src/melee/it/items/*.c, per-item headers, src/melee/it/itCharItems.h, src/melee/it/itCommonItems.h, configure.py, and config/GALE01/symbols.txt.",
+        "source_path": null,
+        "scope": [
+          "src/melee/it/items",
+          "src/melee/it/itCharItems.h",
+          "src/melee/it/itCommonItems.h",
+          "configure.py",
+          "config/GALE01/symbols.txt"
+        ],
+        "evidence_refs": [
+          "changed_files.jsonl"
+        ],
+        "reason": "Potential path-scope fact for future item decomp searches; should be curated before promotion."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Record unresolved small-data order separately from text match",
+        "text": "When a PR author reports functions as matching but identifies unresolved sdata/sdata2 ordering, preserve the caveat and avoid claiming complete data ownership/order resolution.",
+        "source_path": null,
+        "scope": [
+          "matching reports",
+          "sdata2",
+          "item decompilation"
+        ],
+        "evidence_refs": [
+          "human_pr_text.md: itlugia and itclimbersice matching with unresolved sdata2 order"
+        ],
+        "reason": "Consistent with existing verification/data-section standards, but PR evidence is one historical example rather than a full global rule by itself."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "symbols.txt local @ labels used for item data/string/float symbols",
+        "text": "PR 2421 changes many config/GALE01/symbols.txt entries in item-related regions from global address-style it_80... data symbols to local @number labels for .data, .sdata, and .sdata2 entries.",
+        "source_path": "config/GALE01/symbols.txt",
+        "scope": [
+          ".data",
+          ".sdata",
+          ".sdata2",
+          "item symbols"
+        ],
+        "evidence_refs": [
+          "raw_diff excerpt: it_803F8990 to @288, it_804DCC10 to @161, it_804DD678 to @172, and related hunks"
+        ],
+        "reason": "Could help future symbol metadata searches, but exact ownership/locality should remain source-owned and not inferred beyond the shown diff."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that every changed item source became fully matching; the bot report distinguishes 69 new matches from 11 partial improvements.",
+      "Do not claim sdata2 order was fixed for itlugia or itclimbersice; the author says it was not.",
+      "Do not infer reviewer intent or acceptance rationale; no human review comments were included.",
+      "Do not generalize every global-to-local symbol change as a universal naming rule without checking section ownership and current symbols metadata."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

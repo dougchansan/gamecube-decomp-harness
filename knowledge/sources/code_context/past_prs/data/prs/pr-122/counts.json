@@ -1,0 +1,17 @@
+{
+  "number": 122,
+  "title": "Match Melee's version of __start.c to fix splitting issue",
+  "state": "MERGED",
+  "createdAt": "2021-11-22T19:26:17Z",
+  "updatedAt": "2021-11-22T21:09:05Z",
+  "mergedAt": "2021-11-22T21:09:03Z",
+  "closedAt": "2021-11-22T21:09:03Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/122",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 79620
+  }
+}

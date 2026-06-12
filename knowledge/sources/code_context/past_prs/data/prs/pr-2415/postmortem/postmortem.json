@@ -1,0 +1,318 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2415",
+  "pr": {
+    "number": 2415,
+    "title": "ftdrawcommon work",
+    "url": "https://github.com/doldecomp/melee/pull/2415",
+    "state": "MERGED",
+    "author": "lukechampine",
+    "created_at": "2026-04-14T20:03:22Z",
+    "merged_at": "2026-04-14T21:37:35Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2415 advances ftdrawcommon matching work by changing ftdrawcommon.c, marking melee/ft/ftdrawcommon.c as Matching in configure.py, and adjusting symbol metadata for local data/string/float/double entries. The main code tactic is extracting a static inline helper equivalent to ftDrawCommon_8008051C's matrix setup and using it at call sites in ftDrawCommon_800805C8 and ftDrawCommon_80080C28 while reshaping locals, stack padding, and matrix/vector temporaries.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "code-change",
+      "matching-status-change",
+      "symbol-metadata"
+    ],
+    "systems": [
+      "fighter",
+      "ftdrawcommon",
+      "config",
+      "symbols"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/ft/ftdrawcommon.c",
+      "role": "Primary decomp source change; adds ftDrawCommon_8008051C_inline and changes call sites/local layout in ftDrawCommon_800805C8 and ftDrawCommon_80080C28.",
+      "evidence_refs": [
+        "raw_diff: src/melee/ft/ftdrawcommon.c hunk adds static inline MtxPtr ftDrawCommon_8008051C_inline",
+        "raw_diff: ftDrawCommon_800805C8 changes locals, PAD_STACK, and replaces ftDrawCommon_8008051C call with ftDrawCommon_8008051C_inline",
+        "raw_diff: ftDrawCommon_80080C28 adds sp18/sp54/v locals and uses ftDrawCommon_8008051C_inline"
+      ]
+    },
+    {
+      "path": "configure.py",
+      "role": "Build configuration change; promotes melee/ft/ftdrawcommon.c from NonMatching to Matching.",
+      "evidence_refs": [
+        "raw_diff: configure.py changes Object(NonMatching, \"melee/ft/ftdrawcommon.c\") to Object(Matching, \"melee/ft/ftdrawcommon.c\")"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Symbol metadata update; renames several data/sdata/sdata2 entries to local @ labels and changes ftDrawCommon_804D8370 size from 0x8 to 0x4.",
+      "evidence_refs": [
+        "raw_diff: config/GALE01/symbols.txt changes ftDrawCommon_803C0EB0 to @463",
+        "raw_diff: config/GALE01/symbols.txt changes ftDrawCommon_804D3A94/@3A9C strings to @461/@462",
+        "raw_diff: config/GALE01/symbols.txt changes ftDrawCommon_804D8370 size 0x8 to 0x4",
+        "raw_diff: config/GALE01/symbols.txt changes multiple it_* global float/double/string symbols to local @ labels"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Added a static inline helper, ftDrawCommon_8008051C_inline, that zeros two Vec3s, calls ftLib_80087074, reads HSD_CObjGetCurrent()->view_mtx, initializes a matrix, applies mtx_thing_2, concatenates matrices, and returns either the output matrix or NULL.",
+      "evidence_refs": [
+        "raw_diff: added ftDrawCommon_8008051C_inline body in src/melee/ft/ftdrawcommon.c"
+      ]
+    },
+    {
+      "text": "Changed ftDrawCommon_800805C8 local declarations and stack layout, including adding matrix/vector locals, a 12-byte pad array, and PAD_STACK(12), then replaced a call to ftDrawCommon_8008051C with the new inline helper.",
+      "evidence_refs": [
+        "raw_diff: ftDrawCommon_800805C8 adds Mtx sp78, Mtx sp18, Vec3 sp54, Vec3 v, u8 _pad[12], PAD_STACK(12)",
+        "raw_diff: ftDrawCommon_800805C8 replaces mtx = ftDrawCommon_8008051C(gobj, sp78) with ftDrawCommon_8008051C_inline(...)"
+      ]
+    },
+    {
+      "text": "Changed ftDrawCommon_80080C28 local declarations and replaced its ftDrawCommon_8008051C call with the same inline helper.",
+      "evidence_refs": [
+        "raw_diff: ftDrawCommon_80080C28 adds Mtx sp18, Vec3 sp54, Vec3 v",
+        "raw_diff: ftDrawCommon_80080C28 replaces phi_r28 = ftDrawCommon_8008051C(gobj, sp70) with ftDrawCommon_8008051C_inline(...)"
+      ]
+    },
+    {
+      "text": "Marked ftdrawcommon.c as Matching in configure.py.",
+      "evidence_refs": [
+        "raw_diff: configure.py MatchingFor object list changes melee/ft/ftdrawcommon.c from NonMatching to Matching"
+      ]
+    },
+    {
+      "text": "Adjusted symbol metadata for several local strings/floats/doubles, including converting some named global it_* and ftDrawCommon_* symbols to local @ labels and narrowing ftDrawCommon_804D8370 from size 0x8 to 0x4.",
+      "evidence_refs": [
+        "raw_diff: config/GALE01/symbols.txt hunks for .data, .sdata, and .sdata2 symbol changes"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "The author avoided relying only on a direct function call in a large hard-to-permute function by extracting the relevant matrix setup into a static inline helper and using it at multiple call sites.",
+      "evidence_refs": [
+        "human_pr_text: author says ftDrawCommon_800805C8 is one tiny regswap away and huge, so the permuter struggles",
+        "raw_diff: ftDrawCommon_8008051C_inline added and used in ftDrawCommon_800805C8 and ftDrawCommon_80080C28"
+      ]
+    },
+    {
+      "text": "The PR paired source-level matching work with build configuration promotion to Matching and symbol metadata cleanup, indicating the object-level status was part of the change scope.",
+      "evidence_refs": [
+        "raw_diff: configure.py promotes ftdrawcommon.c to Matching",
+        "raw_diff: config/GALE01/symbols.txt metadata updates"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For very large functions where a permuter struggles with a small register-allocation issue, a narrow static inline helper can sometimes expose the intended codegen shape at call sites without duplicating a full function body.",
+      "scope": [
+        "ftdrawcommon",
+        "large fighter draw functions",
+        "matrix setup helpers"
+      ],
+      "evidence_refs": [
+        "human_pr_text: \"one tiny regswap away\" and \"huge function, so the permuter really struggles\"",
+        "raw_diff: added ftDrawCommon_8008051C_inline and used it in ftDrawCommon_800805C8"
+      ],
+      "confidence": 0.73
+    },
+    {
+      "lesson": "When inlining a helper for matching, the local stack shape may need to include the helper's temporaries at the caller, such as extra Mtx and Vec3 locals plus explicit padding.",
+      "scope": [
+        "stack layout",
+        "inline helper matching",
+        "MWCC codegen"
+      ],
+      "evidence_refs": [
+        "raw_diff: ftDrawCommon_800805C8 adds Mtx sp18/sp78, Vec3 sp54/v, u8 _pad[12], and PAD_STACK(12)",
+        "raw_diff: ftDrawCommon_80080C28 adds Mtx sp18 and Vec3 sp54/v before calling inline helper"
+      ],
+      "confidence": 0.68
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "The new inline helper keeps the address-style base name ftDrawCommon_8008051C and appends _inline rather than inventing a semantic name.",
+      "evidence_refs": [
+        "raw_diff: static inline MtxPtr ftDrawCommon_8008051C_inline(...)"
+      ]
+    },
+    {
+      "text": "Several symbols in symbols.txt were changed from semantic/address-style global names to local compiler-style @ labels, suggesting the PR treated those data entries as local literals or constants rather than canonical named globals.",
+      "evidence_refs": [
+        "raw_diff: ftDrawCommon_803C0EB0 -> @463",
+        "raw_diff: it_803F67A8 -> @239",
+        "raw_diff: it_804DCCB0..it_804DCCE8 -> @160/@190/@191/@192/@236/@286/@287/@288/@289/@290/@345"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Extracted and reused a static inline form of ftDrawCommon_8008051C to influence call-site codegen in ftDrawCommon_800805C8 and ftDrawCommon_80080C28.",
+      "evidence_refs": [
+        "raw_diff: added ftDrawCommon_8008051C_inline",
+        "raw_diff: ftDrawCommon_800805C8 and ftDrawCommon_80080C28 call ftDrawCommon_8008051C_inline"
+      ]
+    },
+    {
+      "tactic": "Adjusted declaration order and local lifetimes for MWCC stack/register behavior, including moving int i earlier and hoisting Mtx sp78 out of an inner block.",
+      "evidence_refs": [
+        "raw_diff: ftDrawCommon_800805C8 adds int i near GXColor locals and removes prior int i location",
+        "raw_diff: ftDrawCommon_800805C8 moves Mtx sp78 from inside conditional block to function-scope local declarations"
+      ]
+    },
+    {
+      "tactic": "Used explicit padding alongside stack local reshaping.",
+      "evidence_refs": [
+        "raw_diff: ftDrawCommon_800805C8 adds u8 _pad[12] and changes PAD_STACK(0x18) to PAD_STACK(12)",
+        "raw_diff: ftDrawCommon_80080C28 keeps PAD_STACK(4)"
+      ]
+    },
+    {
+      "tactic": "Updated symbol scope/name/size metadata for data sections as part of matching work.",
+      "evidence_refs": [
+        "raw_diff: config/GALE01/symbols.txt converts multiple global symbols to local @ labels",
+        "raw_diff: ftDrawCommon_804D8370 size changes from 0x8 to 0x4"
+      ]
+    }
+  ],
+  "review_feedback": [],
+  "searchable_terms": [
+    "pr-2415",
+    "ftdrawcommon work",
+    "lukechampine",
+    "ftDrawCommon_800805C8",
+    "ftDrawCommon_8008051C",
+    "ftDrawCommon_8008051C_inline",
+    "ftDrawCommon_80080C28",
+    "ftdrawcommon.c Matching",
+    "configure.py NonMatching Matching",
+    "Mtx sp18",
+    "Mtx sp78",
+    "Vec3 sp54",
+    "PAD_STACK",
+    "regswap",
+    "permuter struggles",
+    "HSD_CObjGetCurrent",
+    "view_mtx",
+    "PSMTXIdentity",
+    "PSMTXConcat",
+    "mtx_thing_2",
+    "symbols.txt local @ labels",
+    "ftDrawCommon_804D8370"
+  ],
+  "follow_up_queries": [
+    "ftDrawCommon_8008051C_inline PAD_STACK regswap",
+    "ftDrawCommon_800805C8 one tiny regswap",
+    "ftdrawcommon.c Matching configure.py PR 2415",
+    "ftDrawCommon_804D8370 size 0x4 0x8",
+    "symbols.txt it_804DCCB0 @160 local float",
+    "large function permuter struggles inline helper"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR #2415 merged, 3 changed files, no review comments, no issue comments",
+      "human_pr_text: body mentions ftDrawCommon_800805C8 is one regswap away and permuter struggles",
+      "raw_diff: full diff for symbols.txt, configure.py, and ftdrawcommon.c"
+    ],
+    "notes": [
+      "The diff and PR body strongly support what changed and the broad matching motivation.",
+      "No review comments are present, so reviewer intent or feedback cannot be inferred.",
+      "No build, objdiff, checkdiff, or CI output is included in the slice; the configure.py promotion to Matching is evidence of claimed status in the PR, but not independent verifier evidence.",
+      "The reason for each symbols.txt metadata change is not explained in comments; only the concrete metadata edits are supported."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "matching_tactic",
+        "title": "Use a narrow static inline helper when a huge function is blocked by a tiny regswap",
+        "text": "In PR #2415, the author stated ftDrawCommon_800805C8 was one tiny regswap away but too large for the permuter to handle well. The diff adds ftDrawCommon_8008051C_inline and uses it at ftdrawcommon call sites while reshaping locals and stack padding. This is evidence that localized inline extraction can be a useful tactic for large-function codegen issues, provided the result is verified separately.",
+        "scope": [
+          "large functions",
+          "inline helpers",
+          "register allocation",
+          "fighter draw code"
+        ],
+        "evidence_refs": [
+          "human_pr_text: one tiny regswap away; huge function; permuter struggles",
+          "raw_diff: ftDrawCommon_8008051C_inline added and called from ftDrawCommon_800805C8"
+        ],
+        "confidence": 0.73
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Document static inline extraction as an evidence-requiring matching tactic",
+        "text": "Consider adding explicit guidance that static inline helper extraction can be a legitimate matching tactic for large functions with small register/codegen blockers, but it should be scoped narrowly and backed by objdiff/build evidence because it changes local stack/register behavior.",
+        "source_path": null,
+        "scope": [
+          "matching tactics",
+          "inline helpers",
+          "large functions"
+        ],
+        "evidence_refs": [
+          "human_pr_text: ftDrawCommon_800805C8 is one tiny regswap away and the permuter struggles",
+          "raw_diff: new static inline helper used to replace calls in ftdrawcommon.c",
+          "decomp_standards: matching-tactics-need-evidence"
+        ],
+        "reason": "The loaded standards discuss manual inline expansion and tactic evidence broadly; this PR provides a concrete pattern for curator review, but the slice lacks verifier logs so it should not be promoted automatically."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "ftdrawcommon.c was promoted to Matching in PR #2415",
+        "text": "configure.py changed melee/ft/ftdrawcommon.c from Object(NonMatching, ...) to Object(Matching, ...) in PR #2415.",
+        "source_path": "configure.py",
+        "scope": [
+          "melee/ft/ftdrawcommon.c",
+          "configure.py",
+          "MatchingFor"
+        ],
+        "evidence_refs": [
+          "raw_diff: configure.py changes Object(NonMatching, \"melee/ft/ftdrawcommon.c\") to Object(Matching, \"melee/ft/ftdrawcommon.c\")"
+        ],
+        "reason": "This is a concrete path/status fact from the PR diff, but should be checked against current source before adding to any path-fact corpus."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "ftdrawcommon symbol metadata adjusted in PR #2415",
+        "text": "PR #2415 changed multiple config/GALE01/symbols.txt entries related to ftDrawCommon and nearby item data from named global/address-style symbols to local @ labels, and narrowed ftDrawCommon_804D8370 from size 0x8 to 0x4.",
+        "source_path": "config/GALE01/symbols.txt",
+        "scope": [
+          "symbols.txt",
+          ".data",
+          ".sdata",
+          ".sdata2",
+          "ftDrawCommon_804D8370"
+        ],
+        "evidence_refs": [
+          "raw_diff: config/GALE01/symbols.txt hunks converting ftDrawCommon_803C0EB0, ftDrawCommon_804D3A94, ftDrawCommon_804D3A9C, and multiple it_* symbols to @ labels",
+          "raw_diff: ftDrawCommon_804D8370 size changes from 0x8 to 0x4"
+        ],
+        "reason": "The metadata edits are explicit, but their ownership rationale is not documented in the PR body; curator should verify against current symbols and section ownership before recording a durable path fact."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that ftDrawCommon_800805C8 fully matched from the PR body alone; the body says it is one regswap away, while configure.py marks the object Matching, and no objdiff/checkdiff output is loaded.",
+      "Do not infer reviewer approval rationale or requested changes; there are no review or issue comments in the slice.",
+      "Do not generalize the symbol renames into a rule that named globals should become @ labels; this PR only shows specific metadata changes without explanatory rationale."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

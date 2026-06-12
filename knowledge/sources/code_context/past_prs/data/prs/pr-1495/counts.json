@@ -1,0 +1,17 @@
+{
+  "number": 1495,
+  "title": "More matches to vi code",
+  "state": "MERGED",
+  "createdAt": "2025-05-21T19:37:39Z",
+  "updatedAt": "2025-05-21T19:52:54Z",
+  "mergedAt": "2025-05-21T19:52:49Z",
+  "closedAt": "2025-05-21T19:52:49Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/1495",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 44284
+  }
+}

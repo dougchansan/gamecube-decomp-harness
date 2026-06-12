@@ -1,0 +1,305 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2224",
+  "pr": {
+    "number": 2224,
+    "title": "Match gmadventure, link, and ninja apply",
+    "url": "https://github.com/doldecomp/melee/pull/2224",
+    "state": "MERGED",
+    "author": "PsiLupan",
+    "created_at": "2026-03-05T20:41:50Z",
+    "merged_at": "2026-03-05T20:49:19Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2224 matched the gmadventure object by extracting a repeated gm_8016A22C setup sequence into a shared local helper, marking melee/gm/gmadventure.c as Matching in configure.py, and renaming several local .sdata2 symbols from gm_804DACxx address-style names to local @ labels. The bot report recorded one new match for main/melee/gm/gmadventure: gm_801B4974 reaching 100.00%, with code/link/data progress.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "config",
+      "symbol-metadata"
+    ],
+    "systems": [
+      "game-mode",
+      "gm",
+      "gmadventure",
+      "build-config",
+      "symbols"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gm/gmadventure.c",
+      "role": "Source match cleanup: introduced static helper gm_8016A22C_inline and replaced duplicated gm_8016A22C argument-building blocks in gm_801B4974 and inline0.",
+      "evidence_refs": [
+        "raw_diff: src/melee/gm/gmadventure.c hunk around lines 1467-1524",
+        "changed_files.jsonl: src/melee/gm/gmadventure.c added 17 deleted 21 hunks 3"
+      ]
+    },
+    {
+      "path": "configure.py",
+      "role": "Build configuration: changed melee/gm/gmadventure.c from NonMatching to Matching.",
+      "evidence_refs": [
+        "raw_diff: configure.py hunk around MatchingFor object list",
+        "changed_files.jsonl: configure.py added 1 deleted 1 hunks 1"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Symbol metadata: renamed six local .sdata2 entries at 0x804DAC18-0x804DAC2C from gm_804DACxx names to local @ labels.",
+      "evidence_refs": [
+        "raw_diff: config/GALE01/symbols.txt hunk around .sdata2 0x804DAC18-0x804DAC2C",
+        "changed_files.jsonl: config/GALE01/symbols.txt added 6 deleted 6 hunks 1"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Added static void gm_8016A22C_inline(MinorScene* arg0, UnkAdventureData* temp_r29), which computes count via gm_8017E48C, looks up gm_803DE650_t data via gm_8017E4C4(arg0->idx), calls gm_8016A22C with the repeated argument list, and sets temp_r29->x0.xC.x11 = 1.",
+      "evidence_refs": [
+        "raw_diff: src/melee/gm/gmadventure.c added helper gm_8016A22C_inline"
+      ]
+    },
+    {
+      "text": "Replaced the inline gm_8016A22C setup block in gm_801B4974 with gm_8016A22C_inline(arg0, temp_r29), removing local variables count and temp_r25_2 from that function.",
+      "evidence_refs": [
+        "raw_diff: src/melee/gm/gmadventure.c gm_801B4974 hunk"
+      ]
+    },
+    {
+      "text": "Replaced the equivalent setup block in inline0 with gm_8016A22C_inline(scene, adv_data), while preserving the existing unused calls to gm_80169520 and gm_80169540 before the helper call.",
+      "evidence_refs": [
+        "raw_diff: src/melee/gm/gmadventure.c inline0 hunk"
+      ]
+    },
+    {
+      "text": "Marked Object(Matching, \"melee/gm/gmadventure.c\") in configure.py.",
+      "evidence_refs": [
+        "raw_diff: configure.py"
+      ]
+    },
+    {
+      "text": "Changed local .sdata2 symbols gm_804DAC18, gm_804DAC1C, gm_804DAC20, gm_804DAC24, gm_804DAC28, and gm_804DAC2C to local labels @217, @218, @244, @306, @307, and @330 respectively.",
+      "evidence_refs": [
+        "raw_diff: config/GALE01/symbols.txt"
+      ]
+    },
+    {
+      "text": "Bot report recorded matched code +436 bytes, linked code +5092 bytes, linked data +1996 bytes, and one new match: main/melee/gm/gmadventure gm_801B4974 from 99.04% to 100.00%.",
+      "evidence_refs": [
+        "text_corpus.jsonl: decomp-dev[bot] issue comment 2026-03-05T20:48:54Z"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "A repeated long call setup was factored into one file-local helper rather than duplicated in two call sites, reducing source duplication while preserving the side effect that marks x0.xC.x11 as initialized.",
+      "evidence_refs": [
+        "raw_diff: src/melee/gm/gmadventure.c helper addition and two replacement call sites"
+      ]
+    },
+    {
+      "text": "The PR paired the source match with the narrow build configuration flip from NonMatching to Matching for the same object.",
+      "evidence_refs": [
+        "raw_diff: configure.py",
+        "text_corpus.jsonl: bot report shows one new match for main/melee/gm/gmadventure"
+      ]
+    },
+    {
+      "text": "Local .sdata2 labels were normalized away from address-style gm_804DACxx names to local @ labels, consistent with the diff evidence that these entries were local-scope data symbols.",
+      "evidence_refs": [
+        "raw_diff: config/GALE01/symbols.txt entries include scope:local"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When the same long call argument construction appears in multiple nearby paths, a small file-local helper can be a viable match shape if the helper captures the shared computations and required side effects exactly.",
+      "scope": [
+        "src/melee/gm/gmadventure.c",
+        "gm_801B4974",
+        "inline0",
+        "gm_8016A22C_inline"
+      ],
+      "evidence_refs": [
+        "raw_diff: duplicated gm_8016A22C setup replaced by gm_8016A22C_inline in two locations",
+        "text_corpus.jsonl: bot report shows gm_801B4974 reached 100.00%"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "lesson": "For local-scope data entries, address-style global-looking labels may be replaced by local @ labels when the symbol metadata and matching work identify them as local literals/data rather than semantic globals.",
+      "scope": [
+        "config/GALE01/symbols.txt",
+        ".sdata2",
+        "local symbols"
+      ],
+      "evidence_refs": [
+        "raw_diff: gm_804DAC18-gm_804DAC2C renamed to @217-@330 with scope:local metadata"
+      ],
+      "confidence": 0.75
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "gm_8016A22C_inline",
+      "kind": "file-local helper",
+      "convention": "The helper name keeps the callee address-style name and appends _inline, indicating it encapsulates an inlined call/setup pattern rather than claiming recovered semantic meaning.",
+      "evidence_refs": [
+        "raw_diff: static void gm_8016A22C_inline(MinorScene* arg0, UnkAdventureData* temp_r29)"
+      ]
+    },
+    {
+      "name": "@217, @218, @244, @306, @307, @330",
+      "kind": "local data labels",
+      "convention": "Local .sdata2 entries were represented as @ local labels rather than gm_804DACxx address-style symbols.",
+      "evidence_refs": [
+        "raw_diff: config/GALE01/symbols.txt local .sdata2 rename hunk"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Extract duplicated source sequence into a static helper used by both the direct scene path and the inline0 path.",
+      "evidence_refs": [
+        "raw_diff: src/melee/gm/gmadventure.c gm_8016A22C_inline addition and call-site replacements"
+      ],
+      "notes": "The bot report supports that this contributed to a match for gm_801B4974, but the PR does not include objdiff logs beyond the automated progress report."
+    },
+    {
+      "tactic": "Flip configure.py object status only after source and symbol metadata changes for gmadventure.",
+      "evidence_refs": [
+        "raw_diff: configure.py NonMatching to Matching",
+        "text_corpus.jsonl: decomp-dev[bot] report with 1 new match"
+      ],
+      "notes": "No separate build command or manual verification transcript is present in the slice."
+    },
+    {
+      "tactic": "Adjust local .sdata2 symbol labels to match expected local label ownership/order.",
+      "evidence_refs": [
+        "raw_diff: config/GALE01/symbols.txt"
+      ],
+      "notes": "The slice shows the metadata edit but not the underlying linker/map rationale."
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "automation_report",
+      "author": "decomp-dev[bot]",
+      "text": "Report for GALE01 recorded matched code 55.14% (+0.01%, +436 bytes), linked code 31.75% (+0.13%, +5092 bytes), linked data 29.16% (+0.16%, +1996 bytes), and one new match: main/melee/gm/gmadventure gm_801B4974 99.04% to 100.00%.",
+      "evidence_refs": [
+        "text_corpus.jsonl: issue_comment by decomp-dev[bot]"
+      ]
+    },
+    {
+      "kind": "absence",
+      "author": null,
+      "text": "No human review comments or review records are present in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata_json: counts.review_comments = 0, counts.reviews = 0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2224",
+    "PsiLupan",
+    "gmadventure",
+    "gm_801B4974",
+    "gm_8016A22C_inline",
+    "gm_8016A22C",
+    "gm_8017E48C",
+    "gm_8017E4C4",
+    "gm_8017BE8C",
+    "UnkAdventureData",
+    "MinorScene",
+    "gm_803DE650_t",
+    "configure.py Matching",
+    "melee/gm/gmadventure.c",
+    "config/GALE01/symbols.txt",
+    ".sdata2",
+    "gm_804DAC18",
+    "gm_804DAC1C",
+    "gm_804DAC20",
+    "gm_804DAC24",
+    "gm_804DAC28",
+    "gm_804DAC2C",
+    "@217",
+    "@218",
+    "@244",
+    "@306",
+    "@307",
+    "@330",
+    "decomp-dev bot",
+    "one new match"
+  ],
+  "follow_up_queries": [
+    "gm_8016A22C_inline gmadventure",
+    "gm_801B4974 100.00 gmadventure",
+    "gm_804DAC18 @217 symbols.txt",
+    "Object(Matching, \"melee/gm/gmadventure.c\")",
+    "duplicated gm_8016A22C setup helper",
+    "UnkAdventureData x0 xC x11"
+  ],
+  "evidence_quality": {
+    "status": "strong",
+    "evidence_refs": [
+      "metadata_json: PR identity, state, author, timestamps, changed file counts",
+      "raw_diff: complete 5294-byte diff for all three changed files",
+      "changed_files.jsonl: file-level added/deleted/hunk metadata",
+      "text_corpus.jsonl: bot report with match metrics"
+    ],
+    "notes": [
+      "PR body is empty, so author rationale for the helper extraction and symbol relabeling is not directly stated.",
+      "No human review comments are available.",
+      "The bot report supports the match result for gm_801B4974, but no raw objdiff/checkdiff output or build command transcript is included.",
+      "The PR title mentions link and ninja apply, but the loaded evidence only directly shows source, symbols, configure.py, and bot progress metrics."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson",
+        "title": "Factor repeated long call setup into a local helper when it preserves exact computations and side effects",
+        "text": "In gmadventure, two duplicated gm_8016A22C setup blocks were replaced by a static helper gm_8016A22C_inline that computes count, loads scene data, calls gm_8016A22C, and sets x0.xC.x11. The bot report recorded gm_801B4974 reaching 100.00%.",
+        "scope": [
+          "src/melee/gm/gmadventure.c",
+          "gm_801B4974",
+          "inline0"
+        ],
+        "evidence_refs": [
+          "raw_diff: src/melee/gm/gmadventure.c",
+          "text_corpus.jsonl: bot report"
+        ]
+      },
+      {
+        "record_type": "symbol_metadata_lesson",
+        "title": "Use local @ labels for local-scope .sdata2 entries when semantic/global ownership is not shown",
+        "text": "The PR changed six local .sdata2 entries at 0x804DAC18-0x804DAC2C from gm_804DACxx address-style names to local @ labels while keeping their local scope metadata.",
+        "scope": [
+          "config/GALE01/symbols.txt",
+          ".sdata2"
+        ],
+        "evidence_refs": [
+          "raw_diff: config/GALE01/symbols.txt"
+        ]
+      }
+    ],
+    "source_update_candidates": [],
+    "rejection_notes": [
+      "Do not infer a general rule that helper extraction always improves matching; this slice only supports the specific repeated gm_8016A22C setup case and the bot-reported gm_801B4974 match.",
+      "Do not promote the symbol renames as proof of data ownership rationale beyond local-scope relabeling; the slice lacks map/linker explanation.",
+      "Do not claim human reviewer approval or intent; no review comments or reviews are present.",
+      "Do not claim ninja apply behavior from the title alone; no ninja command output is included."
+    ]
+  },
+  "confidence": 0.86,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

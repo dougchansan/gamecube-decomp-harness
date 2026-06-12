@@ -1,0 +1,17 @@
+{
+  "number": 650,
+  "title": "Fix `deprecated-non-prototype` warnings, pass 1",
+  "state": "MERGED",
+  "createdAt": "2023-01-05T14:26:32Z",
+  "updatedAt": "2023-01-06T09:08:21Z",
+  "mergedAt": "2023-01-06T09:08:21Z",
+  "closedAt": "2023-01-06T09:08:21Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/650",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 13,
+    "reviews": 14,
+    "diff_bytes": 38209
+  }
+}

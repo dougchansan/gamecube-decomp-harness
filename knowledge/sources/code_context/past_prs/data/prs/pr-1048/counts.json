@@ -1,0 +1,17 @@
+{
+  "number": 1048,
+  "title": "Split up un_2FC9.s into various remaining files",
+  "state": "MERGED",
+  "createdAt": "2024-01-08T17:49:53Z",
+  "updatedAt": "2024-01-08T18:00:25Z",
+  "mergedAt": "2024-01-08T18:00:22Z",
+  "closedAt": "2024-01-08T18:00:22Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/1048",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 3521895
+  }
+}

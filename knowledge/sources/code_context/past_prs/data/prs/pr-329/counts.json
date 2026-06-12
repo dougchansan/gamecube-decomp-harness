@@ -1,0 +1,17 @@
+{
+  "number": 329,
+  "title": "Split .data section from code_8008521C into fighters",
+  "state": "MERGED",
+  "createdAt": "2022-03-20T21:14:15Z",
+  "updatedAt": "2022-03-20T21:23:43Z",
+  "mergedAt": "2022-03-20T21:17:15Z",
+  "closedAt": "2022-03-20T21:17:15Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/329",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 606632
+  }
+}

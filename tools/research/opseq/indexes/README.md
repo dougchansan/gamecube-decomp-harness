@@ -6,4 +6,5 @@ Planned normalized outputs:
 - `unmatched_candidates.jsonl`
 - `sequence_fingerprints.jsonl`
 
-These records can feed `knowledge/sources/tool_outputs`.
+These records are tool-local cache/index evidence consumed by the opseq API.
+They are not registered as a knowledge source.

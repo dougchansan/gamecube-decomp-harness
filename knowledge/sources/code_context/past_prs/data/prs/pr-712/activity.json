@@ -1,0 +1,10 @@
+{
+  "pr": 712,
+  "title": "Use `GET_FIGHTER` macro, pass 2",
+  "url": "https://github.com/doldecomp/melee/pull/712",
+  "text_records_with_body": 4,
+  "review_comments": 3,
+  "changed_files": 67,
+  "added_lines": 989,
+  "deleted_lines": 743
+}

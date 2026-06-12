@@ -1,0 +1,17 @@
+{
+  "number": 824,
+  "title": "Rename `ftdata3` to `ftCo_Init`",
+  "state": "MERGED",
+  "createdAt": "2023-04-28T20:09:22Z",
+  "updatedAt": "2023-04-28T20:15:27Z",
+  "mergedAt": "2023-04-28T20:15:26Z",
+  "closedAt": "2023-04-28T20:15:26Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/824",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 888
+  }
+}

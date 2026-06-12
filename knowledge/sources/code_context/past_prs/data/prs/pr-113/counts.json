@@ -1,0 +1,17 @@
+{
+  "number": 113,
+  "title": "Work through data labels and fix lwzu cases that were preventing shiftability",
+  "state": "MERGED",
+  "createdAt": "2021-11-19T17:41:49Z",
+  "updatedAt": "2021-11-19T17:42:01Z",
+  "mergedAt": "2021-11-19T17:41:58Z",
+  "closedAt": "2021-11-19T17:41:58Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/113",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 75833
+  }
+}

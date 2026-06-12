@@ -1,0 +1,17 @@
+{
+  "number": 882,
+  "title": "Match `ftCo_EscapeN`",
+  "state": "MERGED",
+  "createdAt": "2023-05-27T23:59:22Z",
+  "updatedAt": "2023-05-28T00:08:16Z",
+  "mergedAt": "2023-05-28T00:08:15Z",
+  "closedAt": "2023-05-28T00:08:15Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/882",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 3324
+  }
+}

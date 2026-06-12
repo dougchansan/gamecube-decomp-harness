@@ -1,0 +1,17 @@
+{
+  "number": 434,
+  "title": "Create `lbrefract.h` and add `decomp.me` links to `lbrefract.s`",
+  "state": "CLOSED",
+  "createdAt": "2022-08-05T15:12:04Z",
+  "updatedAt": "2022-08-06T00:17:55Z",
+  "mergedAt": null,
+  "closedAt": "2022-08-06T00:17:46Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/434",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 0
+  }
+}

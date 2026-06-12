@@ -1,0 +1,285 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2645",
+  "pr": {
+    "number": 2645,
+    "title": "Link `grinishie2`",
+    "url": "https://github.com/doldecomp/melee/pull/2645",
+    "state": "MERGED",
+    "author": "ribbanya",
+    "created_at": "2026-06-10T16:07:35Z",
+    "merged_at": "2026-06-10T16:13:44Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2645 linked `melee/gr/grinishie2.c` by changing its object status from NonMatching to Matching in `configure.py` and adjusting GALE01 split/symbol metadata for the unit's data, sdata, sbss, and sdata2 ranges. Bot report evidence says this produced linked-code/data progress and two new matches for `main/melee/gr/grinishie2`: `.sbss` to 100% and `.data` to 100%. No PR body or human review comments were present.",
+  "change_classification": {
+    "primary_type": "decomp-matching metadata link",
+    "categories": [
+      "decomp-matching",
+      "configuration",
+      "symbol-metadata",
+      "split-metadata"
+    ],
+    "systems": [
+      "config/GALE01",
+      "configure.py",
+      "melee/gr/grinishie2.c"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "configure.py",
+      "role": "Changed `melee/gr/grinishie2.c` from `Object(NonMatching, ...)` to `Object(Matching, ...)`.",
+      "evidence_refs": [
+        "raw_diff:configure.py hunk around line 1055"
+      ]
+    },
+    {
+      "path": "config/GALE01/splits.txt",
+      "role": "Adjusted `melee/gr/grinishie2.c` `.data` split end from `0x803E4C78` to `0x803E4C72` while leaving text/sdata/sbss/sdata2 ranges shown in the hunk unchanged.",
+      "evidence_refs": [
+        "raw_diff:config/GALE01/splits.txt hunk around line 2602"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Updated grinishie2-related symbol metadata: added local labels/locals, narrowed some object sizes, changed several global string/float symbols to local `@NNN` symbols, and changed `grI2_804D6A00` size from `0x8` to `0x4`.",
+      "evidence_refs": [
+        "raw_diff:config/GALE01/symbols.txt hunks around lines 22772, 26710, 28158, 31996"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "`melee/gr/grinishie2.c` was marked Matching in the build configuration.",
+      "evidence_refs": [
+        "raw_diff:configure.py hunk around line 1055"
+      ]
+    },
+    {
+      "text": "The `grinishie2.c` `.data` split end was reduced by 6 bytes, from `0x803E4C78` to `0x803E4C72`.",
+      "evidence_refs": [
+        "raw_diff:config/GALE01/splits.txt hunk around line 2602",
+        "text_corpus:decomp-dev[bot] report `Total data: 1211228 bytes (-6 bytes)`"
+      ]
+    },
+    {
+      "text": "Several grinishie2 data symbols were re-scoped or resized: `grI2_803E4BF4` became local `@185`, `grI2_803E4C00` size changed from `0x78` to `0x34`, local strings `@207`, `@208`, and `@517` were added, sdata strings became local `@343` and `@344`, and sdata2 floats became local `@189`, `@190`, `@216`, and `@345`.",
+      "evidence_refs": [
+        "raw_diff:config/GALE01/symbols.txt"
+      ]
+    },
+    {
+      "text": "The bot report recorded two new matches for `main/melee/gr/grinishie2`: `.sbss` improved from 50.00% to 100.00%, and `.data` improved from 99.44% to 100.00%.",
+      "evidence_refs": [
+        "text_corpus:issue_comment by decomp-dev[bot] at 2026-06-10T16:11:35Z"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "The PR linked the object only after adjusting split and symbol metadata for the affected unit, rather than changing source code in this slice.",
+      "evidence_refs": [
+        "raw_diff:configure.py",
+        "raw_diff:config/GALE01/splits.txt",
+        "raw_diff:config/GALE01/symbols.txt"
+      ]
+    },
+    {
+      "text": "Metadata changes used local labels and local `@NNN` symbols for data that the diff no longer kept as global `grI2_...` symbols.",
+      "evidence_refs": [
+        "raw_diff:config/GALE01/symbols.txt"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For a link-only matching PR, object status changes may need coordinated updates to `configure.py`, `config/GALE01/splits.txt`, and `config/GALE01/symbols.txt`; the bot report can then confirm linked/matched section progress.",
+      "scope": [
+        "matching link PRs",
+        "GALE01 config metadata"
+      ],
+      "evidence_refs": [
+        "raw_diff:configure.py",
+        "raw_diff:config/GALE01/splits.txt",
+        "raw_diff:config/GALE01/symbols.txt",
+        "text_corpus:decomp-dev[bot] report"
+      ],
+      "confidence": 0.86
+    },
+    {
+      "lesson": "When section ownership is being finalized for a unit, symbol size/scope metadata and split endpoints may be part of the matching change, not just cosmetic cleanup.",
+      "scope": [
+        "symbol metadata",
+        "split metadata",
+        "data sections"
+      ],
+      "evidence_refs": [
+        "raw_diff:config/GALE01/splits.txt `.data` end change",
+        "raw_diff:config/GALE01/symbols.txt size/scope changes",
+        "decomp_standards:data-sections-and-tu-splits"
+      ],
+      "confidence": 0.74
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "This PR retained address-style global names such as `grI2_803E4A60`, `grI2_803E4AB4`, and `grI2_803E4C00` where globals remained, while converting some previous `grI2_...` string/float symbols to local `@NNN` names.",
+      "evidence_refs": [
+        "raw_diff:config/GALE01/symbols.txt"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "convention": "Local labels for data boundaries use forms like `...data.0`, and local object symbols in this diff use `@NNN` labels.",
+      "evidence_refs": [
+        "raw_diff:config/GALE01/symbols.txt"
+      ],
+      "confidence": 0.83
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Link the unit by flipping its build object status from `NonMatching` to `Matching` once metadata changes bring reported sections to full match.",
+      "evidence_refs": [
+        "raw_diff:configure.py",
+        "text_corpus:decomp-dev[bot] report with `.sbss` and `.data` new matches"
+      ],
+      "confidence": 0.86
+    },
+    {
+      "tactic": "Use symbol metadata edits, including local scope conversion and object size correction, to align data section ownership before linking a matching object.",
+      "evidence_refs": [
+        "raw_diff:config/GALE01/symbols.txt",
+        "raw_diff:config/GALE01/splits.txt",
+        "text_corpus:decomp-dev[bot] report"
+      ],
+      "confidence": 0.78
+    }
+  ],
+  "review_feedback": [],
+  "searchable_terms": [
+    "pr-2645",
+    "Link grinishie2",
+    "ribbanya",
+    "melee/gr/grinishie2.c",
+    "configure.py",
+    "Object(Matching)",
+    "Object(NonMatching)",
+    "config/GALE01/splits.txt",
+    "config/GALE01/symbols.txt",
+    "grI2_803E4A60",
+    "grI2_803E4AB4",
+    "grI2_803E4C00",
+    "grI2_804D6A00",
+    "804DB610",
+    "804DB614",
+    "804DB618",
+    "804DB61C",
+    "main/melee/gr/grinishie2",
+    "linked code",
+    "matched data",
+    "linked data",
+    "data split end 0x803E4C72"
+  ],
+  "follow_up_queries": [
+    "grinishie2 matching metadata symbols.txt local @343 @344 @345",
+    "grI2_803E4C00 size 0x34 grinishie2",
+    "melee/gr/grinishie2.c Object(Matching) configure.py",
+    "grinishie2 .data split end 0x803E4C72",
+    "PR 2645 Link grinishie2 data sbss 100%"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json:pr fields and changed_files",
+      "raw_diff:complete diff, 5526 chars",
+      "changed_files:3 changed files",
+      "text_corpus:empty PR body and one decomp-dev[bot] report",
+      "metadata_json:review_comments=0, reviews=0"
+    ],
+    "notes": [
+      "Changed files and exact metadata edits are strongly evidenced by the loaded diff.",
+      "The PR body is empty and there are no human review comments, so reviewer intent and rationale are not evidenced.",
+      "The bot report provides progress numbers and section match claims, but no build log, objdiff details, or author explanation is included in the slice.",
+      "No source-code edits to `melee/gr/grinishie2.c` are present in this PR slice."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "kind": "matching_tactic",
+        "title": "Link-only object promotion can be paired with split/symbol metadata fixes",
+        "text": "PR 2645 linked `melee/gr/grinishie2.c` by changing `configure.py` from `Object(NonMatching, ...)` to `Object(Matching, ...)` while also correcting GALE01 split and symbol metadata. The bot report then recorded new `.data` and `.sbss` matches for `main/melee/gr/grinishie2`.",
+        "scope": [
+          "matching PRs",
+          "object linking",
+          "GALE01 metadata"
+        ],
+        "evidence_refs": [
+          "raw_diff:configure.py",
+          "raw_diff:config/GALE01/splits.txt",
+          "raw_diff:config/GALE01/symbols.txt",
+          "text_corpus:decomp-dev[bot] report"
+        ],
+        "confidence": 0.84
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "PR 2645 touched grinishie2 link metadata paths",
+        "text": "`melee/gr/grinishie2.c` was linked through metadata/config changes in `configure.py`, `config/GALE01/splits.txt`, and `config/GALE01/symbols.txt`; no source file edit for `melee/gr/grinishie2.c` appears in this slice.",
+        "source_path": "melee/gr/grinishie2.c",
+        "scope": [
+          "pr-2645",
+          "grinishie2",
+          "matching status",
+          "config metadata"
+        ],
+        "evidence_refs": [
+          "changed_files:config/GALE01/splits.txt",
+          "changed_files:config/GALE01/symbols.txt",
+          "changed_files:configure.py",
+          "raw_diff"
+        ],
+        "reason": "Potential curator-owned path fact for future searches around grinishie2 linking and metadata-only matching PRs."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Metadata corrections are legitimate matching work when linking a unit",
+        "text": "Consider clarifying that split endpoints and symbol size/scope/local-label metadata can be part of a focused matching/link PR when backed by section ownership and report evidence, as in PR 2645.",
+        "source_path": null,
+        "scope": [
+          "data-sections-and-tu-splits",
+          "verification-and-regression-ledger",
+          "matching link PRs"
+        ],
+        "evidence_refs": [
+          "raw_diff:config/GALE01/splits.txt",
+          "raw_diff:config/GALE01/symbols.txt",
+          "text_corpus:decomp-dev[bot] report"
+        ],
+        "reason": "This aligns with the loaded data-section standards, but should remain a curator-reviewed standards wording candidate rather than an accepted new global rule."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer why each individual symbol was renamed or resized beyond the diff evidence.",
+      "Do not claim human review approval details; the slice shows zero reviews and zero review comments.",
+      "Do not claim a full object/code match from objdiff details; the available evidence is the configure status change plus bot report, not a loaded objdiff log.",
+      "Do not generalize that all grI2 symbols should be local; this PR only changed the listed symbols."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

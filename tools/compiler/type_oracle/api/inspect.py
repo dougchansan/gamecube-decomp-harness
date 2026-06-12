@@ -9,7 +9,7 @@ import sys
 from typing import Any
 
 sys.path.append(str(Path(__file__).resolve().parents[3] / "_shared"))
-from harness import clamp_int, import_harness_module, print_json, resolve_repo_root
+from melee_tooling import clamp_int, import_tool_module, print_json, resolve_repo_root
 
 
 def expression_occurrences(source: bytes, expression: str) -> list[tuple[int, int]]:
@@ -62,7 +62,7 @@ def main() -> None:
         return
 
     try:
-        type_oracle = import_harness_module("type_oracle", repo_root)
+        type_oracle = import_tool_module("type_oracle", repo_root)
         if not type_oracle.available():
             payload.update({"status": "libclang_unavailable", "types": []})
             print_json(payload)
@@ -115,7 +115,7 @@ def main() -> None:
             ]
             payload.update({"status": "ok", "type_count": len(type_map), "types": rows})
     except Exception as error:  # noqa: BLE001 - API boundary should report every oracle failure.
-        payload.update({"status": "bridge_error", "error": str(error)})
+        payload.update({"status": "tool_impl_error", "error": str(error)})
     print_json(payload)
 
 

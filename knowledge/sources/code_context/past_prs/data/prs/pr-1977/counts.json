@@ -1,0 +1,17 @@
+{
+  "number": 1977,
+  "title": "Improved ft_0852.c accuracy",
+  "state": "MERGED",
+  "createdAt": "2025-11-06T15:59:56Z",
+  "updatedAt": "2025-11-06T17:13:22Z",
+  "mergedAt": "2025-11-06T17:13:22Z",
+  "closedAt": "2025-11-06T17:13:22Z",
+  "author": "rbasamoyai",
+  "url": "https://github.com/doldecomp/melee/pull/1977",
+  "counts": {
+    "issue_comments": 2,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 4341
+  }
+}

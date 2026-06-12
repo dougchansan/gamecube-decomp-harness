@@ -1,0 +1,17 @@
+{
+  "number": 1748,
+  "title": "gm_1601 matches",
+  "state": "MERGED",
+  "createdAt": "2025-07-26T23:44:12Z",
+  "updatedAt": "2025-07-26T23:56:35Z",
+  "mergedAt": "2025-07-26T23:56:32Z",
+  "closedAt": "2025-07-26T23:56:32Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1748",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 19225
+  }
+}

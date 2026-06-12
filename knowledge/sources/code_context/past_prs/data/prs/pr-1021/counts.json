@@ -1,0 +1,17 @@
+{
+  "number": 1021,
+  "title": "Match 95.98% of `ftCo_AirCatch` (2.74 KB)",
+  "state": "MERGED",
+  "createdAt": "2023-11-20T12:10:12Z",
+  "updatedAt": "2023-11-20T12:28:48Z",
+  "mergedAt": "2023-11-20T12:28:47Z",
+  "closedAt": "2023-11-20T12:28:47Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1021",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 109975
+  }
+}

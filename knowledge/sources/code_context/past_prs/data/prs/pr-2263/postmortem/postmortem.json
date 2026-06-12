@@ -1,0 +1,401 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2263",
+  "pr": {
+    "number": 2263,
+    "title": "stages: match 6 functions",
+    "url": "https://github.com/doldecomp/melee/pull/2263",
+    "state": "MERGED",
+    "author": "johnwinston",
+    "created_at": "2026-03-10T20:25:00Z",
+    "merged_at": "2026-03-10T22:32:15Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2263 decompiled six stage functions across grcastle, grcorneria, grrcruise, grzebesroute, groldyoshi, and grpushon, updated several recovered prototypes in headers, and added or refined small local stage data/ground-var structs needed by those matches. The PR body claims ninja builds clean and 100.0 fuzzy match for all six functions; the bot report corroborates six new 100% matches totaling +680 matched bytes.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "typed-struct-recovery",
+      "stage-callbacks"
+    ],
+    "systems": [
+      "stage",
+      "grcastle",
+      "grcorneria",
+      "grrcruise",
+      "grzebesroute",
+      "groldyoshi",
+      "grpushon"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gr/grcastle.c",
+      "role": "Recovered fn_801CFB68 and adjusted grCastleParams x4 from f32 into two s16 fields.",
+      "evidence_refs": [
+        "raw_diff:grcastle.c",
+        "human_pr_text:summary"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grcastle.h",
+      "role": "Replaced UNK_RET/UNK_PARAMS prototype for fn_801CFB68 with void fn_801CFB68(Item_GObj*, Ground*, HSD_GObj*) and added it/forward.h.",
+      "evidence_refs": [
+        "raw_diff:grcastle.h"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grcorneria.c",
+      "role": "Recovered fn_801E12D4 beam-damage handler, added static grCn_804D69A0, uses OSReport, damage accumulation, M2C_FIELD threshold access, and cannon material calls.",
+      "evidence_refs": [
+        "raw_diff:grcorneria.c",
+        "bot_report:fn_801E12D4"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grrcruise.c",
+      "role": "Recovered fn_80201BE0 display gate using gm_801A45E8, Camera_8003010C, and grDisplay_801C5DB0; added required includes.",
+      "evidence_refs": [
+        "raw_diff:grrcruise.c",
+        "bot_report:fn_80201BE0"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grrcruise.h",
+      "role": "Updated fn_80201BE0 prototype from unknown to void fn_80201BE0(HSD_GObj*, s32).",
+      "evidence_refs": [
+        "raw_diff:grrcruise.h"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grzebesroute.c",
+      "role": "Recovered fn_8020B4D8 collision/stage flag handler with PAD_STACK(16).",
+      "evidence_refs": [
+        "raw_diff:grzebesroute.c",
+        "bot_report:fn_8020B4D8"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grzebesroute.h",
+      "role": "Updated fn_8020B4D8 prototype and added lb/mp forward includes.",
+      "evidence_refs": [
+        "raw_diff:grzebesroute.h"
+      ]
+    },
+    {
+      "path": "src/melee/gr/groldyoshi.c",
+      "role": "Recovered fn_8020F2A8 collision/joint lookup handler, added local grOy_JointPair typedef and extern grOy_803E6574.",
+      "evidence_refs": [
+        "raw_diff:groldyoshi.c",
+        "bot_report:fn_8020F2A8"
+      ]
+    },
+    {
+      "path": "src/melee/gr/groldyoshi.h",
+      "role": "Updated fn_8020F2A8 prototype and added forward includes needed by recovered signature.",
+      "evidence_refs": [
+        "raw_diff:groldyoshi.h"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grpushon.c",
+      "role": "Recovered grPushOn_80219230 sentinel lookup function and refined grPushOn data layout by splitting x1c and adding x10c lookup entries.",
+      "evidence_refs": [
+        "raw_diff:grpushon.c",
+        "bot_report:grPushOn_80219230"
+      ]
+    },
+    {
+      "path": "src/melee/gr/types.h",
+      "role": "Added grOldYoshi_Entry and grOldYoshi_GroundVars, then added oldyoshi union arm to Ground for typed access in fn_8020F2A8.",
+      "evidence_refs": [
+        "raw_diff:types.h"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Decompiled six previously placeholder stage functions: fn_801CFB68, fn_801E12D4, fn_80201BE0, fn_8020B4D8, fn_8020F2A8, and grPushOn_80219230.",
+    "Updated recovered function prototypes in grcastle.h, grrcruise.h, grzebesroute.h, and groldyoshi.h, replacing UNK_RET/UNK_PARAMS where signatures were recovered.",
+    "Added includes or forward declarations needed by recovered signatures and calls, including it/forward.h, lb/forward.h, mp/forward.h, cm/camera.h, gm/gm_1A45.h, and gr/grdisplay.h.",
+    "Refined small stage data layouts: grCastleParams x4 became s16 x4 plus s16 x6; grPushOn_804D6AB8 gained a lookup-table struct; Ground gained a grOldYoshi_GroundVars union arm.",
+    "Introduced local typed access for Old Yoshi ground vars and joint-pair data instead of leaving only placeholder function body.",
+    "Kept at least one bridge-style access in grcorneria via M2C_FIELD(grCn_804D69A0, f32*, 0x38), indicating the threshold data type was not fully recovered in this PR."
+  ],
+  "smart_moves": [
+    "Header prototypes were updated alongside recovered function bodies, keeping declarations consistent with new signatures.",
+    "The Old Yoshi function used a recovered Ground union arm and bitfield entry structure to express gp->gv.oldyoshi.entries[idx].b4 instead of raw offset writes.",
+    "The grpushon match modeled a key/value lookup table with a small struct and a sentinel loop, making the recovered function more reviewable than raw array indexing.",
+    "The PR limited the scope to six small stage functions and their immediate type/prototype dependencies, making the matching changes easy to audit."
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a recovered stage callback proves its parameter types, update the owning header prototype rather than leaving UNK_RET/UNK_PARAMS.",
+      "evidence_refs": [
+        "raw_diff:grcastle.h",
+        "raw_diff:grrcruise.h",
+        "raw_diff:grzebesroute.h",
+        "raw_diff:groldyoshi.h",
+        "decomp_standards:truthful-headers-and-includes"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "lesson": "Small stage-specific GroundVars structs can turn callback body writes into typed union-arm accesses, as shown by gp->gv.oldyoshi.entries[idx].b4 in fn_8020F2A8.",
+      "evidence_refs": [
+        "raw_diff:types.h",
+        "raw_diff:groldyoshi.c",
+        "decomp_standards:typed-fields-over-pointer-math"
+      ],
+      "confidence": 0.86
+    },
+    {
+      "lesson": "For table search functions, model the backing data as a key/value struct and recover the sentinel loop when the function scans until key == -1.",
+      "evidence_refs": [
+        "raw_diff:grpushon.c"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "lesson": "A 100% function match can still contain bridge code such as M2C_FIELD or PAD_STACK; preserve those as narrow tactics only when the PR evidence says they were part of the matched solution.",
+      "evidence_refs": [
+        "raw_diff:grcorneria.c",
+        "raw_diff:grzebesroute.c",
+        "human_pr_text:verification",
+        "bot_report:6_new_matches",
+        "decomp_standards:matching-tactics-need-evidence"
+      ],
+      "confidence": 0.78
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Preserved address-style fn_ names for functions whose semantic names were not proven: fn_801CFB68, fn_801E12D4, fn_80201BE0, fn_8020B4D8, and fn_8020F2A8.",
+      "evidence_refs": [
+        "raw_diff",
+        "decomp_standards:conservative-naming"
+      ]
+    },
+    {
+      "convention": "Stage-local globals and structs followed existing stage prefixes: grCs_ for Castle, grCn_ for Corneria, grOy_ for Old Yoshi, and grPushOn_ for PushOn.",
+      "evidence_refs": [
+        "raw_diff:grcastle.c",
+        "raw_diff:grcorneria.c",
+        "raw_diff:groldyoshi.c",
+        "raw_diff:grpushon.c"
+      ]
+    },
+    {
+      "convention": "Temporary or unknown fields retained offset-style names such as x4, x6, x10c, x114, and x108 where stronger semantics were not provided by the PR evidence.",
+      "evidence_refs": [
+        "raw_diff:grcastle.c",
+        "raw_diff:grcorneria.c",
+        "raw_diff:grpushon.c"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Used PAD_STACK(16) in fn_8020B4D8 to obtain the matched grzebesroute function shape.",
+      "evidence_refs": [
+        "raw_diff:grzebesroute.c",
+        "human_pr_text:verification",
+        "bot_report:fn_8020B4D8"
+      ],
+      "risk": "PAD_STACK is a matching tactic and should remain narrow; no adjacent-function regression detail is present beyond the bot's new-match report."
+    },
+    {
+      "tactic": "Recovered grPushOn_80219230 as a bounded while loop over 0x21 entries with an early stop on key == -1 and __assert fallback.",
+      "evidence_refs": [
+        "raw_diff:grpushon.c",
+        "bot_report:grPushOn_80219230"
+      ],
+      "risk": "The raw __assert was kept rather than converted to a macro; PR evidence does not show whether a macro form was attempted."
+    },
+    {
+      "tactic": "Used short-circuit early-return control flow in fn_80201BE0 to avoid display when two gm_801A45E8 checks or Camera_8003010C are active.",
+      "evidence_refs": [
+        "raw_diff:grrcruise.c",
+        "bot_report:fn_80201BE0"
+      ],
+      "risk": "No review discussion explains whether alternate branch shapes were tested."
+    },
+    {
+      "tactic": "Recovered grCastleParams field sizing from one f32 at x4 to two s16 fields x4/x6, then cast x4 to f32 at use site.",
+      "evidence_refs": [
+        "raw_diff:grcastle.c",
+        "bot_report:fn_801CFB68"
+      ],
+      "risk": "The PR slice does not include additional data-layout proof beyond the diff and match report."
+    },
+    {
+      "tactic": "Used M2C_FIELD for Corneria threshold access through grCn_804D69A0 at offset 0x38.",
+      "evidence_refs": [
+        "raw_diff:grcorneria.c",
+        "bot_report:fn_801E12D4"
+      ],
+      "risk": "This is bridge code under typed-fields-over-pointer-math; the PR evidence does not prove the owning type for grCn_804D69A0."
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "feedback": "decomp-dev[bot] reported six new 100.00% matches and +680 matched bytes for GALE01 from d64e258 to c66eb32.",
+      "evidence_refs": [
+        "text_corpus:issue_comment:decomp-dev[bot]"
+      ]
+    },
+    {
+      "kind": "missing_human_review",
+      "feedback": "No loaded review comments or reviews were present in the slice.",
+      "evidence_refs": [
+        "metadata_json:counts.review_comments=0",
+        "metadata_json:counts.reviews=0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2263",
+    "stages match 6 functions",
+    "johnwinston",
+    "fn_801CFB68",
+    "fn_801E12D4",
+    "fn_80201BE0",
+    "fn_8020B4D8",
+    "fn_8020F2A8",
+    "grPushOn_80219230",
+    "grcastle",
+    "grcorneria",
+    "grrcruise",
+    "grzebesroute",
+    "groldyoshi",
+    "grpushon",
+    "grCastleParams",
+    "grOldYoshi_GroundVars",
+    "grOldYoshi_Entry",
+    "grOy_JointPair",
+    "grPushOn_Lookup",
+    "M2C_FIELD",
+    "PAD_STACK",
+    "OSReport Beam Damage",
+    "stage_info.flags",
+    "CollData x34_flags b1234",
+    "mpLib_GroundEnum",
+    "truthful headers",
+    "typed GroundVars"
+  ],
+  "follow_up_queries": [
+    "Search later PRs for cleanup of M2C_FIELD(grCn_804D69A0, f32*, 0x38) or a recovered Corneria parameter/data type.",
+    "Search later PRs for removal or justification of PAD_STACK(16) in fn_8020B4D8.",
+    "Search grpushon follow-ups for grPushOn_Lookup field naming or conversion of __assert(\"grpushon.c\", 0x35D, \"0\") to an assert macro.",
+    "Search Old Yoshi follow-ups for semantic naming of grOldYoshi_Entry bitfields b0123/b4/b567 and grOy_JointPair fields x/y.",
+    "Search grcastle follow-ups for semantic naming or broader validation of grCastleParams x4/x6 split."
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "human_pr_text:summary",
+      "human_pr_text:verification",
+      "raw_diff",
+      "changed_files.jsonl",
+      "text_corpus:issue_comment:decomp-dev[bot]",
+      "metadata_json"
+    ],
+    "notes": [
+      "Strong evidence for PR identity, changed files, function names, signatures, diff content, and bot-reported 100% matches.",
+      "The PR body claims ninja builds clean and fuzzy_match_percent 100.0 for all functions; the bot report corroborates six new 100.00% matches but does not include full build logs.",
+      "No human review comments are loaded, so reviewer intent and requested cleanup cannot be inferred.",
+      "Some tactics remain weakly explained by PR evidence: M2C_FIELD in grcorneria, PAD_STACK in grzebesroute, and raw __assert in grpushon.",
+      "The PR body notes Claude Code generation; this is evidence about authorship/tooling note only, not proof that any specific shape was AI-selected."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "title": "Recovered stage callbacks should update owning header prototypes",
+        "text": "PR #2263 matched multiple stage functions and changed their headers from UNK_RET/UNK_PARAMS to recovered signatures in the same PR, consistent with truthful-header practice.",
+        "scope": [
+          "src/melee/gr/*.h",
+          "stage callback decompilation"
+        ],
+        "evidence_refs": [
+          "raw_diff:grcastle.h",
+          "raw_diff:grrcruise.h",
+          "raw_diff:grzebesroute.h",
+          "raw_diff:groldyoshi.h",
+          "human_pr_text:verification",
+          "bot_report:6_new_matches"
+        ]
+      },
+      {
+        "title": "Small typed GroundVars union arms can unblock stage callback matches",
+        "text": "PR #2263 added grOldYoshi_Entry and grOldYoshi_GroundVars to types.h, added the oldyoshi union arm to Ground, and used it in fn_8020F2A8 for a matched Old Yoshi callback.",
+        "scope": [
+          "src/melee/gr/types.h",
+          "src/melee/gr/groldyoshi.c"
+        ],
+        "evidence_refs": [
+          "raw_diff:types.h",
+          "raw_diff:groldyoshi.c",
+          "bot_report:fn_8020F2A8"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Track bridge tactics even when a function is reported 100% matched",
+        "text": "PR #2263 shows a 100% matched stage-function batch that still includes M2C_FIELD and PAD_STACK in two recovered bodies. Curator may consider adding this as an example under matching-tactics-need-evidence or typed-fields-over-pointer-math, emphasizing that such tactics should remain narrow and be revisited when types/stack shape are understood.",
+        "source_path": null,
+        "scope": [
+          "matching tactics",
+          "stage functions",
+          "M2C_FIELD",
+          "PAD_STACK"
+        ],
+        "evidence_refs": [
+          "raw_diff:grcorneria.c",
+          "raw_diff:grzebesroute.c",
+          "human_pr_text:verification",
+          "bot_report:6_new_matches"
+        ],
+        "reason": "The PR evidence supports the presence of narrow tactics in matched functions but does not by itself prove they are preferred style; route as a standards example candidate, not an accepted rule."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "src/melee/gr stage matching often touches paired .c/.h files plus shared gr/types.h",
+        "text": "This PR matched six stage functions and changed implementation files, owning headers for recovered prototypes, and shared gr/types.h for GroundVars typing.",
+        "source_path": "src/melee/gr",
+        "scope": [
+          "src/melee/gr/*.c",
+          "src/melee/gr/*.h",
+          "src/melee/gr/types.h"
+        ],
+        "evidence_refs": [
+          "changed_files.jsonl",
+          "raw_diff"
+        ],
+        "reason": "Could help future path-scope lookup for stage decomp work; evidence is limited to this PR slice and should be curated as an example/path fact only if corroborated."
+      }
+    ],
+    "rejection_notes": [
+      "Do not generalize that raw __assert is acceptable style from this PR alone; no review or standards evidence says a macro conversion was impossible.",
+      "Do not promote M2C_FIELD(grCn_804D69A0, f32*, 0x38) as final typed style; it is explicitly bridge-like under the loaded standards.",
+      "Do not infer semantic names for grOldYoshi_Entry bitfields, grPushOn_Lookup fields beyond key/value, or grCastleParams x4/x6 beyond what the diff names.",
+      "Do not claim objdiff was run manually; the loaded evidence contains PR-body fuzzy match claims and a bot report, not detailed local objdiff logs."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

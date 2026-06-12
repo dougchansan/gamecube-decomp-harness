@@ -14,7 +14,3 @@ writes:
 `build_tool_indexes.py` still generates `indexes/function_shapes.jsonl` from
 local code-graph/function-shape evidence, so `api/similar_functions.py` can
 search both live opcode fingerprints and supplemental shape rows.
-
-Reference material:
-
-- `reference/SKILL.md`

@@ -1,0 +1,17 @@
+{
+  "number": 2163,
+  "title": "Some gm17C0 matches",
+  "state": "MERGED",
+  "createdAt": "2026-02-10T13:38:57Z",
+  "updatedAt": "2026-02-10T20:01:41Z",
+  "mergedAt": "2026-02-10T20:01:41Z",
+  "closedAt": "2026-02-10T20:01:41Z",
+  "author": "Duglas560",
+  "url": "https://github.com/doldecomp/melee/pull/2163",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 6571
+  }
+}

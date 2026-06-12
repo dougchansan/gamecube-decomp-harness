@@ -1,0 +1,17 @@
+{
+  "number": 795,
+  "title": "Clean up `ftMars` and `ftEmblem` motion definitions",
+  "state": "MERGED",
+  "createdAt": "2023-04-22T15:12:58Z",
+  "updatedAt": "2023-04-22T15:24:35Z",
+  "mergedAt": "2023-04-22T15:24:34Z",
+  "closedAt": "2023-04-22T15:24:34Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/795",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 22756
+  }
+}

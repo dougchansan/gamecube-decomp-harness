@@ -1,0 +1,17 @@
+{
+  "number": 1390,
+  "title": "Match `itlinkbow`",
+  "state": "MERGED",
+  "createdAt": "2024-06-21T13:33:01Z",
+  "updatedAt": "2024-07-31T20:15:36Z",
+  "mergedAt": "2024-07-08T05:05:27Z",
+  "closedAt": "2024-07-08T05:05:27Z",
+  "author": "thefoxcam",
+  "url": "https://github.com/doldecomp/melee/pull/1390",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 53098
+  }
+}

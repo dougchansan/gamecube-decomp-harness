@@ -1,0 +1,17 @@
+{
+  "number": 2133,
+  "title": "adding 2 func to itsonans",
+  "state": "MERGED",
+  "createdAt": "2026-01-26T16:30:32Z",
+  "updatedAt": "2026-01-26T18:44:56Z",
+  "mergedAt": "2026-01-26T18:44:55Z",
+  "closedAt": "2026-01-26T18:44:55Z",
+  "author": "Duglas560",
+  "url": "https://github.com/doldecomp/melee/pull/2133",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 5531
+  }
+}

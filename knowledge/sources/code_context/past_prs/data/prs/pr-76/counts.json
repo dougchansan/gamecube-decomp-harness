@@ -1,0 +1,17 @@
+{
+  "number": 76,
+  "title": "Split out lbfile and fighter",
+  "state": "MERGED",
+  "createdAt": "2021-08-26T03:45:20Z",
+  "updatedAt": "2021-08-26T03:45:28Z",
+  "mergedAt": "2021-08-26T03:45:26Z",
+  "closedAt": "2021-08-26T03:45:26Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/76",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 2911471
+  }
+}

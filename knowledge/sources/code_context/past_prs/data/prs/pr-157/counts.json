@@ -1,0 +1,17 @@
+{
+  "number": 157,
+  "title": "Match HSD_CObjEraseScreen but mark NON_MATCHING for now",
+  "state": "MERGED",
+  "createdAt": "2021-12-09T00:06:04Z",
+  "updatedAt": "2021-12-09T00:06:14Z",
+  "mergedAt": "2021-12-09T00:06:12Z",
+  "closedAt": "2021-12-09T00:06:12Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/157",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 39792
+  }
+}

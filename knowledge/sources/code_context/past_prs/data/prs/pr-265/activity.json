@@ -1,0 +1,10 @@
+{
+  "pr": 265,
+  "title": "lots of clean up in player, remove ifdefs, and remove a bunch of decomp links, rename labels, etc",
+  "url": "https://github.com/doldecomp/melee/pull/265",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 1,
+  "added_lines": 385,
+  "deleted_lines": 7697
+}

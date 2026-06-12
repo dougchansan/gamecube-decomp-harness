@@ -1,0 +1,17 @@
+{
+  "number": 1341,
+  "title": "Match 50.21% of `grdisplay` (1.07 KB)",
+  "state": "MERGED",
+  "createdAt": "2024-02-27T16:29:37Z",
+  "updatedAt": "2024-02-27T16:34:55Z",
+  "mergedAt": "2024-02-27T16:34:54Z",
+  "closedAt": "2024-02-27T16:34:54Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1341",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 6788
+  }
+}

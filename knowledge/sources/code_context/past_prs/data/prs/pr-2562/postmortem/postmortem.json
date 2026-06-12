@@ -1,0 +1,308 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2562",
+  "pr": {
+    "number": 2562,
+    "title": "Match two stage functions",
+    "url": "https://github.com/doldecomp/melee/pull/2562",
+    "state": "MERGED",
+    "author": "itsgrimetime",
+    "created_at": "2026-05-31T21:13:49Z",
+    "merged_at": "2026-06-01T03:51:54Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2562 matched two stage functions, `grGreatBay_801F60C4` and `grInishie1_801FC4A0`, touching Great Bay and Inishie stage source files. The bot report recorded 2 new matches and +1016 matched-code bytes.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "stage function matching",
+      "source cleanup",
+      "prototype/build verification"
+    ],
+    "systems": [
+      "stage",
+      "ground",
+      "Great Bay",
+      "Inishie"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gr/grgreatbay.c",
+      "role": "Refined `grGreatBay_801F60C4` source shape to reach a full match.",
+      "evidence_refs": [
+        "changed_files: src/melee/gr/grgreatbay.c added 24 deleted 27 hunks 3",
+        "raw_diff: grGreatBay_801F60C4 hunk",
+        "text_corpus: bot report lists `main/melee/gr/grgreatbay` `grGreatBay_801F60C4` +31 bytes, 94.67% to 100.00%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grinishie1.c",
+      "role": "Extended a stage data struct and implemented `grInishie1_801FC4A0`.",
+      "evidence_refs": [
+        "changed_files: src/melee/gr/grinishie1.c added 35 deleted 0 hunks 2",
+        "raw_diff: grInishie1_stuff adds unk44/unk48/unk4C/unk50 and implements grInishie1_801FC4A0",
+        "text_corpus: bot report lists `main/melee/gr/grinishie1` `grInishie1_801FC4A0` +452 bytes, 0.00% to 100.00%"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "path": "src/melee/gr/grgreatbay.c",
+      "change": "`grGreatBay_801F60C4` removed the separate `damage` local and mutates/uses `arg3` directly after the landing-rate adjustment.",
+      "evidence_refs": [
+        "raw_diff: `s32 damage = arg3;` removed; landing-rate multiplication assigned to `arg3`"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grgreatbay.c",
+      "change": "`Vec3 pos` was moved into the non-null JObj block, and JObj assignment was folded into the null check.",
+      "evidence_refs": [
+        "raw_diff: `if ((jobj = gp->gv.greatbay3.jobj) != NULL) { ... Vec3 pos; ... }`"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grgreatbay.c",
+      "change": "Negative clamp branches were simplified by comparing directly against negated Great Bay limits instead of introducing temporary `min` locals.",
+      "evidence_refs": [
+        "raw_diff: removal of `f32 min = -..._limit` blocks for slant, slide, and down limits"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grinishie1.c",
+      "change": "`grInishie1_stuff` gained four trailing float fields named `unk44`, `unk48`, `unk4C`, and `unk50`.",
+      "evidence_refs": [
+        "raw_diff: grInishie1_stuff struct hunk"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grinishie1.c",
+      "change": "`grInishie1_801FC4A0` was implemented to decay `gp->gv.inishie1.xF0` toward zero using `grI1_804D69F8->unk50`, reset several movement/state fields when zero is reached, and update two JObj Y translations with `HSD_JObjSetTranslateY`.",
+      "evidence_refs": [
+        "raw_diff: full added body of grInishie1_801FC4A0"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Kept unknown stage struct and GroundVars fields conservatively named (`unk50`, `xF0`, `x108`, `x10C`) rather than inventing semantic names not proven by the PR evidence.",
+      "evidence_refs": [
+        "raw_diff: grInishie1_stuff and grInishie1_801FC4A0 additions",
+        "decomp_standards: conservative-naming"
+      ]
+    },
+    {
+      "text": "Used existing typed stage and JObj access paths (`gp->gv.greatbay3`, `gp->gv.inishie1`, `HSD_JObjSetTranslateY`) instead of raw pointer arithmetic.",
+      "evidence_refs": [
+        "raw_diff: grGreatBay_801F60C4 and grInishie1_801FC4A0 hunks",
+        "decomp_standards: typed-fields-over-pointer-math"
+      ]
+    },
+    {
+      "text": "Included a narrow verification command in the PR body and received a bot report showing both target functions reached 100%.",
+      "evidence_refs": [
+        "human_pr_text: Verification `python configure.py --require-protos && ninja`",
+        "text_corpus: decomp-dev bot report with 2 new matches"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For small stage-function matches, local variable lifetime and declaration placement can be match-relevant: `Vec3 pos` moved into the JObj-present block while other locals were split around it.",
+      "scope": [
+        "stage functions",
+        "local stack/register shaping"
+      ],
+      "evidence_refs": [
+        "raw_diff: grGreatBay_801F60C4 moves `Vec3 pos` from function top to inside `if ((jobj = ... ) != NULL)`"
+      ]
+    },
+    {
+      "lesson": "Directly reusing a parameter after an adjustment can match better than preserving a semantic temporary copy; this PR replaced `damage` with adjusted `arg3` in `grGreatBay_801F60C4`.",
+      "scope": [
+        "MWCC local allocation",
+        "stage collision response"
+      ],
+      "evidence_refs": [
+        "raw_diff: `damage` local removed and `arg3` used in subsequent floatfloor calculations",
+        "text_corpus: bot report shows grGreatBay_801F60C4 reached 100%"
+      ]
+    },
+    {
+      "lesson": "Clamp-like code should be tested in direct comparison/assignment forms as well as with temporary min/max locals; the direct negated-limit form was part of the matched Great Bay cleanup here.",
+      "scope": [
+        "control flow",
+        "stage movement clamps"
+      ],
+      "evidence_refs": [
+        "raw_diff: removal of temporary `min` locals and direct comparisons to `-..._limit`",
+        "decomp_standards: canonical-control-flow-and-macros"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Retain address-style function names and unknown field names when the PR evidence does not prove a semantic name.",
+      "examples": [
+        "grInishie1_801FC4A0",
+        "unk50",
+        "xF0",
+        "x10C"
+      ],
+      "evidence_refs": [
+        "raw_diff: grInishie1_801FC4A0 implementation and grInishie1_stuff fields",
+        "decomp_standards: conservative-naming"
+      ]
+    },
+    {
+      "convention": "Use short local role names where roles are clear from type and access pattern.",
+      "examples": [
+        "gp",
+        "jobj",
+        "pos",
+        "dx",
+        "t"
+      ],
+      "evidence_refs": [
+        "raw_diff: grGreatBay_801F60C4 and grInishie1_801FC4A0"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Preserved a narrow `PAD_STACK(4)` in `grGreatBay_801F60C4` while adjusting local declarations and expressions around it.",
+      "evidence_refs": [
+        "raw_diff: `PAD_STACK(4);` remains in grGreatBay_801F60C4",
+        "text_corpus: bot report shows grGreatBay_801F60C4 reached 100%"
+      ],
+      "caution": "The PR does not explain why `PAD_STACK(4)` is required; retain as PR-local evidence, not a global style rule."
+    },
+    {
+      "tactic": "Folded assignment into condition for the JObj null check: `if ((jobj = gp->gv.greatbay3.jobj) != NULL)`.",
+      "evidence_refs": [
+        "raw_diff: grGreatBay_801F60C4 JObj assignment/check rewrite"
+      ]
+    },
+    {
+      "tactic": "Introduced an explicit `zero` float local and `reached` integer flag in `grInishie1_801FC4A0` to express sign-dependent convergence to zero.",
+      "evidence_refs": [
+        "raw_diff: added `s32 reached = 0; f32 zero = 0.0f;` and sign branches"
+      ]
+    },
+    {
+      "tactic": "Used existing JObj setter inline/helper calls rather than expanded transform writes for Y translation updates.",
+      "evidence_refs": [
+        "raw_diff: `HSD_JObjSetTranslateY(gp->gv.inishie1.x108, ...)` and `HSD_JObjSetTranslateY(gp->gv.inishie1.x10C, ...)`",
+        "decomp_standards: header-inlines"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "automated_report",
+      "author": "decomp-dev[bot]",
+      "text": "Report for GALE01 showed matched code 69.37% (+0.03%, +1016 bytes) and 2 new matches: `grInishie1_801FC4A0` and `grGreatBay_801F60C4`.",
+      "evidence_refs": [
+        "text_corpus: issue_comment by decomp-dev[bot] at 2026-05-31T21:17:26Z"
+      ]
+    },
+    {
+      "kind": "human_review",
+      "author": null,
+      "text": "No human review comments were present in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata_json: review_comments 0, reviews 0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR 2562",
+    "Match two stage functions",
+    "itsgrimetime",
+    "grGreatBay_801F60C4",
+    "grInishie1_801FC4A0",
+    "src/melee/gr/grgreatbay.c",
+    "src/melee/gr/grinishie1.c",
+    "Great Bay",
+    "Inishie",
+    "grInishie1_stuff",
+    "grI1_804D69F8",
+    "floatfloor_landing_rate",
+    "floatfloor_slant_limit",
+    "floatfloor_slide_limit",
+    "floatfloor_down_limit",
+    "HSD_JObjSetTranslateY",
+    "PAD_STACK",
+    "require-protos",
+    "decomp-dev bot 2 new matches"
+  ],
+  "follow_up_queries": [
+    "grGreatBay_801F60C4 PAD_STACK(4)",
+    "grGreatBay_801F60C4 damage arg3 local variable",
+    "grgreatbay floatfloor slant slide down limit direct clamp",
+    "grInishie1_801FC4A0 reached zero xF0 HSD_JObjSetTranslateY",
+    "grInishie1_stuff unk50",
+    "stage function matching local declaration placement Vec3 pos"
+  ],
+  "evidence_quality": {
+    "status": "strong",
+    "evidence_refs": [
+      "metadata_json: PR number/title/author/state/merge timestamps and changed-file counts",
+      "human_pr_text: summary and verification command",
+      "raw_diff: complete diff for two changed files",
+      "text_corpus: bot issue comment with match report"
+    ],
+    "notes": [
+      "The slice contains no human review comments, so reviewer intent or requested changes cannot be inferred.",
+      "The PR body reports `python configure.py --require-protos && ninja`; the bot report provides match percentages and bytes, but the slice does not include a separate objdiff transcript.",
+      "The `PAD_STACK(4)` use is visible and associated with a matched function, but the PR does not document why it is necessary."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "pr_specific_lesson",
+        "title": "Local declaration placement helped match grGreatBay_801F60C4",
+        "text": "In PR #2562, `grGreatBay_801F60C4` reached 100% after local-shape cleanup including moving `Vec3 pos` inside the non-null JObj block and splitting float declarations near use.",
+        "scope": [
+          "src/melee/gr/grgreatbay.c",
+          "grGreatBay_801F60C4"
+        ],
+        "evidence_refs": [
+          "raw_diff: grGreatBay_801F60C4 local declaration changes",
+          "text_corpus: bot report shows grGreatBay_801F60C4 94.67% to 100.00%"
+        ]
+      },
+      {
+        "record_type": "pr_specific_lesson",
+        "title": "Conservative unknown names were retained for matched Inishie stage code",
+        "text": "PR #2562 implemented `grInishie1_801FC4A0` while retaining unknown field names such as `unk50`, `xF0`, `x108`, and `x10C`, matching the conservative-naming standard when semantics were not proven in the PR evidence.",
+        "scope": [
+          "src/melee/gr/grinishie1.c",
+          "grInishie1_801FC4A0"
+        ],
+        "evidence_refs": [
+          "raw_diff: grInishie1_stuff fields and grInishie1_801FC4A0 body",
+          "decomp_standards: conservative-naming",
+          "text_corpus: bot report shows grInishie1_801FC4A0 0.00% to 100.00%"
+        ]
+      }
+    ],
+    "source_update_candidates": [],
+    "rejection_notes": [
+      "Do not promote `PAD_STACK(4)` as a general tactic from this PR alone; the slice shows it remained in a matched function but does not explain necessity or adjacent-regression checks.",
+      "Do not infer semantic names for `grInishie1_stuff` trailing fields or GroundVars fields from this PR; the diff intentionally uses unknown/address-style naming.",
+      "Do not claim human reviewer approval details beyond merge status; no human reviews or review comments are loaded."
+    ]
+  },
+  "confidence": 0.88,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

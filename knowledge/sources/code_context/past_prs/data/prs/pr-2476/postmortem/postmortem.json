@@ -1,0 +1,385 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2476",
+  "pr": {
+    "number": 2476,
+    "title": "link misc completed objects",
+    "url": "https://github.com/doldecomp/melee/pull/2476",
+    "state": "MERGED",
+    "author": "r-burns",
+    "created_at": "2026-05-10T04:44:06Z",
+    "merged_at": "2026-05-10T04:57:16Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2476 linked several previously incomplete or nonmatching objects by updating configure.py object status/flags, moving an .sdata2 split range from hsd_40FF.c to hsd_3B34.c, correcting symbol metadata around exception tables, bytecode strings, psappsrt .bss/.sdata2, and making small source edits in mndiagram.c and psappsrt.c. Bot report records linked code/data and matched data improvements with five new matches, mainly for sysdolphin/baselib/psappsrt sections.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "object-linking",
+      "symbol-metadata",
+      "split-metadata",
+      "compiler-flags",
+      "small-source-adjustment"
+    ],
+    "systems": [
+      "config/GALE01",
+      "configure.py",
+      "sysdolphin/baselib",
+      "melee/mn",
+      "MSL"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "configure.py",
+      "role": "Marks MSL/math_data.c, sysdolphin/baselib/psappsrt.c, hsd_3B27.c, and hsd_3B2B.c as Matching; adds -Cpp_exceptions on to particle.c, psdisp.c, and psappsrt.c.",
+      "evidence_refs": [
+        "raw_diff:configure.py hunks around MatchingFor object list",
+        "changed_files.jsonl:configure.py"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Adjusts extab/extabindex local labels, splits former HSD_ByteCode_804074F0 into string labels, shrinks HSD_PSAppSrt_804D10B0 size, and changes psappsrt sdata2 floats from global HSD_PSAppSrt names to local numeric labels.",
+      "evidence_refs": [
+        "raw_diff:config/GALE01/symbols.txt hunks at extab/extabindex, .data, .bss, .sdata2",
+        "changed_files.jsonl:config/GALE01/symbols.txt"
+      ]
+    },
+    {
+      "path": "config/GALE01/splits.txt",
+      "role": "Moves .sdata2 range 0x804DEB10-0x804DEC00 from sysdolphin/baselib/hsd_40FF.c to sysdolphin/baselib/hsd_3B34.c.",
+      "evidence_refs": [
+        "raw_diff:config/GALE01/splits.txt",
+        "changed_files.jsonl:config/GALE01/splits.txt"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/psappsrt.c",
+      "role": "Changes local/global storage declarations for HSD_PSAppSrt_804D7958 and HSD_PSAppSrt_804D10B0 and reorders nearby extern declarations.",
+      "evidence_refs": [
+        "raw_diff:src/sysdolphin/baselib/psappsrt.c",
+        "changed_files.jsonl:src/sysdolphin/baselib/psappsrt.c"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mndiagram.c",
+      "role": "Changes a distance conversion divisor literal from float-suffixed 30.4788F to unsuffixed 30.4788 after an explicit f64 cast.",
+      "evidence_refs": [
+        "raw_diff:src/melee/mn/mndiagram.c",
+        "changed_files.jsonl:src/melee/mn/mndiagram.c"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "configure.py promoted MSL/math_data.c, sysdolphin/baselib/psappsrt.c, hsd_3B27.c, and hsd_3B2B.c from NonMatching to Matching.",
+      "evidence_refs": [
+        "raw_diff:configure.py"
+      ]
+    },
+    {
+      "text": "configure.py added extra_cflags=[\"-Cpp_exceptions on\"] to particle.c, psdisp.c, and psappsrt.c; psdisptev.c already used that flag in the nearby list.",
+      "evidence_refs": [
+        "raw_diff:configure.py"
+      ]
+    },
+    {
+      "text": "splits.txt reassigned the .sdata2 range 0x804DEB10-0x804DEC00 from hsd_40FF.c to hsd_3B34.c.",
+      "evidence_refs": [
+        "raw_diff:config/GALE01/splits.txt"
+      ]
+    },
+    {
+      "text": "symbols.txt replaced several address-style extab/extabindex names with local numeric labels and adjusted bytecode-area .data metadata into multiple string labels.",
+      "evidence_refs": [
+        "raw_diff:config/GALE01/symbols.txt"
+      ]
+    },
+    {
+      "text": "symbols.txt changed HSD_PSAppSrt_804D10B0 .bss size from 0x30 to 0x2C and made two psappsrt .sdata2 floats local numeric labels instead of global HSD_PSAppSrt names.",
+      "evidence_refs": [
+        "raw_diff:config/GALE01/symbols.txt"
+      ]
+    },
+    {
+      "text": "psappsrt.c changed HSD_PSAppSrt_804D7958 from extern to static and HSD_PSAppSrt_804D10B0 from extern to a definition.",
+      "evidence_refs": [
+        "raw_diff:src/sysdolphin/baselib/psappsrt.c"
+      ]
+    },
+    {
+      "text": "mndiagram.c changed one literal suffix, using 30.4788 instead of 30.4788F in mnDiagram_ConvertDistanceForDisplay.",
+      "evidence_refs": [
+        "raw_diff:src/melee/mn/mndiagram.c"
+      ]
+    },
+    {
+      "text": "Bot report claims +2428 linked-code bytes, +336 matched-data bytes, +1288 linked-data bytes, and five new matches for psappsrt extabindex/.bss/extab/.sbss plus bytecode .data.",
+      "evidence_refs": [
+        "text_corpus.jsonl:decomp-dev[bot] issue comment 2026-05-10T04:47:48Z"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "The PR pairs Matching status flips with symbol and split metadata edits, suggesting object-link completion was handled at the configuration/metadata level rather than by broad source rewrites.",
+      "evidence_refs": [
+        "raw_diff:configure.py",
+        "raw_diff:config/GALE01/symbols.txt",
+        "raw_diff:config/GALE01/splits.txt"
+      ]
+    },
+    {
+      "text": "Adding -Cpp_exceptions on to psappsrt and related particle/psdisp objects coincides with extab/extabindex metadata changes and bot-reported psappsrt exception-table matches.",
+      "evidence_refs": [
+        "raw_diff:configure.py",
+        "raw_diff:config/GALE01/symbols.txt",
+        "text_corpus.jsonl:decomp-dev[bot] issue comment"
+      ]
+    },
+    {
+      "text": "The psappsrt source edits are narrow storage-class/declaration changes aligned with symbol metadata changes for HSD_PSAppSrt_804D10B0 and HSD_PSAppSrt_804D7958.",
+      "evidence_refs": [
+        "raw_diff:src/sysdolphin/baselib/psappsrt.c",
+        "raw_diff:config/GALE01/symbols.txt"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When linking completed baselib objects that use exception metadata, check configure.py compiler exception flags together with extab/extabindex symbol labels; both may need to move in the same PR for the object to link cleanly.",
+      "scope": [
+        "sysdolphin/baselib",
+        "configure.py",
+        "config/GALE01/symbols.txt"
+      ],
+      "evidence_refs": [
+        "raw_diff:configure.py",
+        "raw_diff:config/GALE01/symbols.txt",
+        "text_corpus.jsonl:bot report psappsrt extab/extabindex matches"
+      ]
+    },
+    {
+      "lesson": "Section ownership fixes can be required even for a PR titled as object linking; this PR moved a whole .sdata2 range between baselib split entries.",
+      "scope": [
+        "config/GALE01/splits.txt",
+        "sysdolphin/baselib/hsd_40FF.c",
+        "sysdolphin/baselib/hsd_3B34.c"
+      ],
+      "evidence_refs": [
+        "raw_diff:config/GALE01/splits.txt"
+      ]
+    },
+    {
+      "lesson": "Small literal-type changes can matter for matching: this PR changed 30.4788F to 30.4788 in a calculation already casting distance to f64.",
+      "scope": [
+        "src/melee/mn/mndiagram.c",
+        "mnDiagram_ConvertDistanceForDisplay"
+      ],
+      "evidence_refs": [
+        "raw_diff:src/melee/mn/mndiagram.c"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "For local hidden extab/extabindex entries, this PR used numeric local labels such as @141/@142 rather than address-derived names like @etb_80005628 or @eti_8000584C.",
+      "evidence_refs": [
+        "raw_diff:config/GALE01/symbols.txt extab/extabindex hunks"
+      ]
+    },
+    {
+      "text": "For data now identified as strings under the former HSD_ByteCode_804074F0 range, this PR used lbl_8040xxxx address-style labels with data:string metadata rather than retaining one broad HSD_ByteCode object.",
+      "evidence_refs": [
+        "raw_diff:config/GALE01/symbols.txt .data hunk at 0x804074F0"
+      ]
+    },
+    {
+      "text": "For psappsrt .sdata2 float constants at 0x804DEA68 and 0x804DEA6C, this PR used local numeric labels @151 and @152 instead of global HSD_PSAppSrt_ address names.",
+      "evidence_refs": [
+        "raw_diff:config/GALE01/symbols.txt .sdata2 hunk"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Use -Cpp_exceptions on for specific baselib objects when exception table sections are part of object linking.",
+      "evidence_refs": [
+        "raw_diff:configure.py",
+        "text_corpus.jsonl:bot report psappsrt extab/extabindex new matches"
+      ],
+      "caveat": "The PR does not explain why particle.c and psdisp.c received the flag while remaining NonMatching; treat as PR-local evidence, not a global rule."
+    },
+    {
+      "tactic": "Adjust symbol sizes/scopes and split ownership instead of compensating in C source when object section ownership changes.",
+      "evidence_refs": [
+        "raw_diff:config/GALE01/symbols.txt",
+        "raw_diff:config/GALE01/splits.txt",
+        "raw_diff:src/sysdolphin/baselib/psappsrt.c"
+      ],
+      "caveat": "The bot report gives aggregate section progress but no objdiff transcript or author rationale."
+    },
+    {
+      "tactic": "Use exact floating literal type spelling to affect generated code; in this slice, removing the F suffix from 30.4788 was the only source change in mndiagram.c.",
+      "evidence_refs": [
+        "raw_diff:src/melee/mn/mndiagram.c"
+      ],
+      "caveat": "No local verification output ties this one-line source change to a named match."
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "author": "decomp-dev[bot]",
+      "text": "Report for GALE01 records linked code 38.81% (+0.06%, +2428 bytes), matched data 38.80% (+0.03%, +336 bytes), linked data 33.14% (+0.11%, +1288 bytes), and five new matches.",
+      "evidence_refs": [
+        "text_corpus.jsonl:issue_comment by decomp-dev[bot] at 2026-05-10T04:47:48Z"
+      ]
+    },
+    {
+      "kind": "absence",
+      "author": null,
+      "text": "No human review comments or PR body rationale are present in the loaded slice.",
+      "evidence_refs": [
+        "metadata_json:counts.review_comments=0",
+        "text_corpus.jsonl:empty pr_body"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR 2476",
+    "link misc completed objects",
+    "r-burns",
+    "configure.py Matching",
+    "MSL/math_data.c",
+    "sysdolphin/baselib/psappsrt.c",
+    "sysdolphin/baselib/hsd_3B27.c",
+    "sysdolphin/baselib/hsd_3B2B.c",
+    "-Cpp_exceptions on",
+    "particle.c",
+    "psdisp.c",
+    "psdisptev.c",
+    "extab",
+    "extabindex",
+    "HSD_PSAppSrt_804D10B0",
+    "HSD_PSAppSrt_804D7958",
+    "HSD_ByteCode_804074F0",
+    "lbl_804074F0",
+    "mnDiagram_ConvertDistanceForDisplay",
+    "30.4788F",
+    "30.4788",
+    "hsd_40FF.c",
+    "hsd_3B34.c",
+    "0x804DEB10",
+    "0x804DEC00"
+  ],
+  "follow_up_queries": [
+    "psappsrt -Cpp_exceptions on extab extabindex",
+    "HSD_PSAppSrt_804D10B0 size 0x2C",
+    "HSD_PSAppSrt_804D7958 static",
+    "HSD_ByteCode_804074F0 lbl_804074F0 strings",
+    "mnDiagram_ConvertDistanceForDisplay 30.4788",
+    "hsd_3B34 sdata2 804DEB10 804DEC00",
+    "configure.py hsd_3B27 Matching hsd_3B2B Matching",
+    "MSL/math_data.c Matching PR 2476"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json",
+      "raw_diff",
+      "changed_files.jsonl",
+      "text_corpus.jsonl"
+    ],
+    "notes": [
+      "Changed files and exact diffs are well supported by loaded raw_diff and changed_files.jsonl.",
+      "The PR body is empty and there are no human review comments, so author intent and reviewer intent are not evidenced.",
+      "The bot report provides progress numbers and named new section matches, but no full build log, objdiff output, or per-source-line verification.",
+      "Lessons are limited to the observed PR-local pattern and should not be promoted into global standards without additional corroborating PRs or source evidence."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "title": "PR-local tactic: exception flags plus extab metadata for psappsrt linking",
+        "text": "In PR 2476, psappsrt.c was promoted to Matching while receiving -Cpp_exceptions on, and symbols.txt adjusted psappsrt-related extab/extabindex metadata; the bot report lists psappsrt extab and extabindex as new 100% matches.",
+        "scope": [
+          "PR 2476",
+          "sysdolphin/baselib/psappsrt.c",
+          "configure.py",
+          "config/GALE01/symbols.txt"
+        ],
+        "evidence_refs": [
+          "raw_diff:configure.py",
+          "raw_diff:config/GALE01/symbols.txt",
+          "text_corpus.jsonl:bot report"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "psappsrt object linked with C++ exception flag in PR 2476",
+        "text": "PR 2476 changed configure.py so sysdolphin/baselib/psappsrt.c is Matching and uses extra_cflags=[\"-Cpp_exceptions on\"]. The bot report then lists psappsrt extabindex, .bss, extab, and .sbss as new matches.",
+        "source_path": "configure.py",
+        "scope": [
+          "sysdolphin/baselib/psappsrt.c",
+          "config/GALE01/symbols.txt"
+        ],
+        "evidence_refs": [
+          "raw_diff:configure.py",
+          "text_corpus.jsonl:bot report"
+        ],
+        "reason": "Potentially useful path-specific fact for future baselib object-linking work; not broad enough to become a global standard from this PR alone."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "hsd_3B34 owns .sdata2 range 0x804DEB10-0x804DEC00 after PR 2476",
+        "text": "PR 2476 removed .sdata2 start:0x804DEB10 end:0x804DEC00 from sysdolphin/baselib/hsd_40FF.c and added it under sysdolphin/baselib/hsd_3B34.c.",
+        "source_path": "config/GALE01/splits.txt",
+        "scope": [
+          "sysdolphin/baselib/hsd_40FF.c",
+          "sysdolphin/baselib/hsd_3B34.c",
+          "config/GALE01/splits.txt"
+        ],
+        "evidence_refs": [
+          "raw_diff:config/GALE01/splits.txt"
+        ],
+        "reason": "This is a concrete split ownership change that may be valuable as a path fact, subject to curator validation against current source."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "mndiagram distance conversion used unsuffixed double literal in PR 2476",
+        "text": "PR 2476 changed mnDiagram_ConvertDistanceForDisplay to divide by 30.4788 instead of 30.4788F after casting distance to f64.",
+        "source_path": "src/melee/mn/mndiagram.c",
+        "scope": [
+          "src/melee/mn/mndiagram.c",
+          "mnDiagram_ConvertDistanceForDisplay"
+        ],
+        "evidence_refs": [
+          "raw_diff:src/melee/mn/mndiagram.c"
+        ],
+        "reason": "Potential local matching clue for this function; no bot report line directly attributes a match to this change."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote '-Cpp_exceptions on for all baselib particle/ps objects' as a global standard; the PR only shows targeted configure.py edits and no rationale.",
+      "Do not infer that all HSD_ByteCode-like ranges should be split into lbl_ string symbols; this PR shows one metadata edit only.",
+      "Do not claim full object match verification beyond the bot-reported section matches and configure.py Matching status changes; no objdiff log is loaded."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

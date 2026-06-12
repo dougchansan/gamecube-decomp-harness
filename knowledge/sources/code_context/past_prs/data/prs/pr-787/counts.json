@@ -1,0 +1,17 @@
+{
+  "number": 787,
+  "title": "Refactor fighter headers",
+  "state": "MERGED",
+  "createdAt": "2023-04-21T07:45:40Z",
+  "updatedAt": "2023-04-21T11:06:33Z",
+  "mergedAt": "2023-04-21T11:06:32Z",
+  "closedAt": "2023-04-21T11:06:32Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/787",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 0
+  }
+}

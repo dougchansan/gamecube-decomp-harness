@@ -1,0 +1,17 @@
+{
+  "number": 1034,
+  "title": "Match `ftCo_0C60` (136 bytes)",
+  "state": "MERGED",
+  "createdAt": "2023-11-21T19:40:40Z",
+  "updatedAt": "2023-11-21T19:59:52Z",
+  "mergedAt": "2023-11-21T19:59:51Z",
+  "closedAt": "2023-11-21T19:59:51Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1034",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 5705
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 314,
+  "title": "Match `HSD_JObj`",
+  "state": "MERGED",
+  "createdAt": "2022-02-26T00:12:09Z",
+  "updatedAt": "2022-09-14T13:34:56Z",
+  "mergedAt": "2022-08-22T15:28:54Z",
+  "closedAt": "2022-08-22T15:28:54Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/314",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 1,
+    "diff_bytes": 119705
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 69,
+  "title": "Split pad.s to controller and rumble based on later map files",
+  "state": "MERGED",
+  "createdAt": "2021-08-25T16:22:09Z",
+  "updatedAt": "2021-08-25T16:25:46Z",
+  "mergedAt": "2021-08-25T16:22:15Z",
+  "closedAt": "2021-08-25T16:22:15Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/69",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 70934
+  }
+}

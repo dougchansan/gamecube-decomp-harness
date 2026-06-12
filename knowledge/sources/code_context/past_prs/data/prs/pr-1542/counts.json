@@ -1,0 +1,17 @@
+{
+  "number": 1542,
+  "title": "feat: match `Camera_80030788`",
+  "state": "MERGED",
+  "createdAt": "2025-05-29T04:43:52Z",
+  "updatedAt": "2025-05-29T04:53:38Z",
+  "mergedAt": "2025-05-29T04:53:38Z",
+  "closedAt": "2025-05-29T04:53:38Z",
+  "author": "PlatinumMaster",
+  "url": "https://github.com/doldecomp/melee/pull/1542",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 953
+  }
+}

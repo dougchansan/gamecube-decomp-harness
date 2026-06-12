@@ -1,0 +1,10 @@
+{
+  "pr": 1775,
+  "title": "Port over most remaining dolphin code from SMS / oot-gc",
+  "url": "https://github.com/doldecomp/melee/pull/1775",
+  "text_records_with_body": 2,
+  "review_comments": 0,
+  "changed_files": 21,
+  "added_lines": 1290,
+  "deleted_lines": 297
+}

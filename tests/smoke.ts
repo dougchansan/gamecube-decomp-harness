@@ -12,14 +12,18 @@ import {
   workerReturnRepairReasons,
   type WorkerUnitScoreSnapshot,
 } from "@decomp-orchestrator/agents/worker";
+import { defaultWorkerToolProfile } from "@decomp-orchestrator/agents/tools";
 import { loadBoardSnapshot } from "@decomp-orchestrator/core/board";
 import { parse } from "../apps/cli/src/cli/args.js";
 import { buildPrSplitPlanFromChanges } from "../apps/cli/src/cli/commands/pr-split-plan.js";
 import { evaluateReplanDecision, refillQueueFromBoard, workerOpenSlots } from "../apps/cli/src/cli/commands/trigger-agent.js";
+import { agentReportSignalsToolError, finalWorkerReportType } from "../apps/cli/src/cli/commands/worker.js";
 import { loadKnowledgeBoardSnapshot, openKnowledgeGraph } from "@decomp-orchestrator/knowledge";
+import { planRegressionRepair } from "@decomp-orchestrator/core/epoch";
 import { evaluatePrPromotion, readRegressionReport } from "@decomp-orchestrator/core/objdiff/report";
 import {
   createRun,
+  DEFAULT_WORKER_TTL_SECONDS,
   leaseNextQueuedTarget,
   openState,
   prioritizeQueuedTargets,
@@ -32,6 +36,8 @@ import {
 import { listProjects, resolveProject } from "@decomp-orchestrator/core";
 import { scoreOrPercent, scorePairLooksPercent } from "@decomp-orchestrator/ui-contract";
 import { loadTrustedReport } from "../apps/dashboard-server/src/trusted-report.js";
+import { fetchAgentViewerServer } from "../apps/agent-viewer/src/server.js";
+import { promptStats } from "../apps/agent-viewer/src/lib/promptStats.js";
 import type { TargetCandidate } from "@decomp-orchestrator/core/types";
 
 type SqlBinding = string | number | bigint | boolean | null | Uint8Array;
@@ -156,13 +162,13 @@ function createLegacyAgentStateDb(path: string): void {
       "resolved",
       "feature",
       "checkdiff",
-      "fixture prototype lesson",
-      "Fixture body says prototype evidence should be searched through the graph enrichment.",
+      "fixture stack frame mismatch lesson",
+      "Fixture body says src/melee/ft/chara/ftDemo.c has a stack frame mismatch and register allocation mismatch that should be searched through graph mismatch patterns.",
       JSON.stringify(["ftDemo_Unmatched"]),
       1760000000,
       1760000100,
       1760000100,
-      "fixture resolution note",
+      "fixture resolution note for stack frame mismatch evidence",
     );
     db.query(
       `
@@ -176,8 +182,8 @@ function createLegacyAgentStateDb(path: string): void {
       42,
       "in_progress",
       "passing",
-      "Fixture build diagnosis for source-shape matching.",
-      "Fixture nontrivial function note.",
+      "Fixture build diagnosis for source-shape matching with stack frame mismatch evidence.",
+      "Fixture nontrivial function note with register allocation mismatch evidence.",
       1760000200,
     );
   } finally {
@@ -318,6 +324,41 @@ async function main(): Promise<void> {
   assertSmoke("pr-split-plan marks root build/config changes as shared prep", configureSlice?.independence.kind === "shared-prep");
   assertSmoke("pr-split-plan emits slice isolation commands", itemSlice?.isolationCommands.some((command) => command.includes("git worktree add")) === true);
   assertSmoke("pr-split-plan records worktree warnings", prSplitPlan.warnings.some((warning) => warning.includes("Worktree changes")));
+  assertSmoke("pr-split-plan stays lane-less without a checkpoint", prSplitPlan.lanesApplied === false && prSplitPlan.slices.every((slice) => slice.lane === null));
+
+  const lanePlan = buildPrSplitPlanFromChanges(
+    [
+      { path: "src/melee/it/items/itfoo.c", status: "M", source: "branch" },
+      { path: "include/melee/it/itfoo.h", status: "M", source: "branch" },
+      { path: "src/melee/it/items/itbar.c", status: "M", source: "branch" },
+    ],
+    {
+      repoRoot: fixtureRoot,
+      baseRef: "origin/master",
+      headRef: "fixture-head",
+      currentBranch: "fixture-branch",
+      groupMode: "melee-subsystem",
+      maxFilesPerPr: 30,
+      branchPrefix: "review",
+      titlePrefix: "Melee decomp",
+      sliceCheckCommand: "ninja changes_all",
+      lanes: {
+        matchPaths: ["src/melee/it/items/itfoo.c"],
+        improvementPaths: ["src/melee/it/items/itbar.c"],
+      },
+    },
+  );
+  const laneMatchSlice = lanePlan.slices.find((slice) => slice.id === "it");
+  const laneLocalSlice = lanePlan.slices.find((slice) => slice.id === "local-it");
+  assertSmoke("pr-split-plan applies lanes from checkpoint candidates", lanePlan.lanesApplied === true && lanePlan.slices.length === 2);
+  assertSmoke(
+    "pr-split-plan match lane carries match and supporting files",
+    laneMatchSlice?.lane === "match" && laneMatchSlice.fileCount === 2 && laneMatchSlice.files.some((file) => file.path === "include/melee/it/itfoo.h"),
+  );
+  assertSmoke(
+    "pr-split-plan keeps non-match work in a local-only slice that does not ship",
+    laneLocalSlice?.lane === "local" && laneLocalSlice.fileCount === 1 && laneLocalSlice.warnings.some((warning) => warning.includes("do not ship")),
+  );
 
   const cleanWorkerProgress = evaluateWorkerReportAcceptance({
     agentReport: {
@@ -399,6 +440,158 @@ async function main(): Promise<void> {
     artifactExists: () => false,
   });
   assertSmoke("worker progress acceptance gate rejects missing validation artifacts", !missingArtifactProgress.accepted);
+  const stdoutEvidenceProgress = evaluateWorkerReportAcceptance({
+    agentReport: {
+      report_type: "progress",
+      lease: {
+        write_set_checked: true,
+        edited_paths: ["src/a.c"],
+      },
+      local_regression_check: {
+        status: "passed",
+        baseline_artifact: "checkdiff_run fn_a: FAIL (99.9%)",
+        final_artifact: "checkdiff_summary fn_a: PASS (100.00000%)",
+        target_regression: false,
+        neighbor_regressions: [],
+      },
+    },
+    reportType: "progress",
+    writeSet: ["src/a.c"],
+    artifactExists: () => false,
+  });
+  assertSmoke("worker progress acceptance gate accepts stdout validation evidence", stdoutEvidenceProgress.accepted);
+  const slashEvidenceProgress = evaluateWorkerReportAcceptance({
+    agentReport: {
+      report_type: "progress",
+      lease: {
+        write_set_checked: true,
+        edited_paths: ["src/a.c"],
+      },
+      local_regression_check: {
+        status: "passed",
+        baseline_artifact: "Baseline task reported 97.74039%, but current local checkdiff supersedes it.",
+        final_artifact: "checkdiff_summary target and adjacent fn_a/fn_b PASS",
+        target_regression: false,
+        neighbor_regressions: [],
+      },
+    },
+    reportType: "progress",
+    writeSet: ["src/a.c"],
+    artifactExists: () => false,
+  });
+  assertSmoke("worker progress acceptance gate accepts slash-separated stdout evidence", slashEvidenceProgress.accepted);
+  const structuredEvidenceProgress = evaluateWorkerReportAcceptance({
+    agentReport: {
+      report_type: "progress",
+      lease: {
+        write_set_checked: true,
+        edited_paths: [],
+      },
+      local_regression_check: {
+        status: "passed",
+        baseline_artifact: { injected_baseline: "99.9% fuzzy match" },
+        final_artifact: { stdout: "checkdiff_run fn_a: PASS (100.00000%)" },
+        target_regression: false,
+        neighbor_regressions: [],
+      },
+    },
+    reportType: "progress",
+    writeSet: ["src/a.c"],
+    artifactExists: () => false,
+  });
+  assertSmoke("worker progress acceptance gate accepts structured validation evidence", structuredEvidenceProgress.accepted);
+  assertSmoke(
+    "worker classifier ignores explicit non-blocking tool issues",
+    agentReportSignalsToolError({
+      report_type: "stalled_no_useful_guess",
+      blockers: [
+        {
+          type: "non_blocking_tool_issue",
+          detail: "mwcc_debug_diagnose_regflow could not provide debug compiler trace because mwcceppc_debug.exe is missing.",
+          impact: "Did not block normal checkdiff validation.",
+        },
+      ],
+    }).advisory.length === 0,
+  );
+  assertSmoke(
+    "worker classifier ignores optional tool issues that recovered",
+    agentReportSignalsToolError({
+      report_type: "stalled_no_useful_guess",
+      blockers: [
+        {
+          tool: "m2c_decompile --format",
+          issue: "Formatting mode failed because clang-format was not found; rerunning without formatting succeeded.",
+          impact: "Did not block scaffold evidence.",
+        },
+      ],
+    }).advisory.length === 0,
+  );
+  assertSmoke(
+    "worker classifier still flags blocking tool failures",
+    agentReportSignalsToolError({
+      report_type: "stalled_no_useful_guess",
+      blockers: [{ tool: "checkdiff", issue: "checkdiff failed because executable missing" }],
+    }).advisory.length > 0,
+  );
+  assertSmoke(
+    "worker classifier keeps explicit tool_error report types pool-fatal",
+    agentReportSignalsToolError({ report_type: "tool_error" }).fatal.length > 0,
+  );
+  assertSmoke(
+    "worker classifier treats needs_fact tool-ish text as advisory only",
+    (() => {
+      const signals = agentReportSignalsToolError({
+        report_type: "needs_fact",
+        needed_fact: "need to know why the checkdiff command failed for this unit",
+        summary: "checkdiff command failed while gathering evidence",
+      });
+      return signals.fatal.length === 0 && signals.advisory.length > 0;
+    })(),
+  );
+  assertSmoke(
+    "worker final report type maps exhausted non-tool repair to needs_rework",
+    finalWorkerReportType({
+      errorClassification: null,
+      repairExhausted: true,
+      acceptanceGate: cleanWorkerProgress,
+    }) === "needs_rework",
+  );
+  assertSmoke(
+    "worker final report type maps runner validation failures to needs_rework",
+    finalWorkerReportType({
+      errorClassification: {
+        kind: "runner_validation_failed",
+        summary: "Runner validation failed.",
+        reasons: ["post-return check command exited 1"],
+      },
+      repairExhausted: true,
+      acceptanceGate: cleanWorkerProgress,
+    }) === "needs_rework",
+  );
+  assertSmoke(
+    "worker final report type preserves real tool errors",
+    finalWorkerReportType({
+      errorClassification: {
+        kind: "agent_reported_tool_error",
+        summary: "Worker reported a tool/build/validation failure.",
+        reasons: ["agent report_type is tool_error"],
+      },
+      repairExhausted: false,
+      acceptanceGate: cleanWorkerProgress,
+    }) === "tool_error",
+  );
+  assertSmoke(
+    "worker final report type maps provider_error classification to provider_error",
+    finalWorkerReportType({
+      errorClassification: {
+        kind: "provider_error",
+        summary: "LLM provider failed before the worker produced a report: Request timed out.",
+        reasons: ["Request timed out."],
+      },
+      repairExhausted: false,
+      acceptanceGate: cleanWorkerProgress,
+    }) === "provider_error",
+  );
   assertSmoke(
     "worker post-return gate asks for repair on failed acceptance",
     workerReturnRepairReasons({
@@ -622,6 +815,42 @@ async function main(): Promise<void> {
     ) == null,
   );
 
+  const repairEntry = (unitName: string, itemName: string, fromPercent: number, toPercent: number) => ({
+    unitName,
+    itemName,
+    sourcePath: "",
+    size: 128,
+    fromPercent,
+    toPercent,
+    bytesDelta: Math.round((128 * (toPercent - fromPercent)) / 100),
+  });
+  const repairSources = new Map([["GALE01:ft/ft_a", "src/melee/ft/ft_a.c"]]);
+  const repairPlan = planRegressionRepair(
+    {
+      brokenMatches: [repairEntry("GALE01:ft/ft_a", "ftA_Broken", 100, 94)],
+      fuzzyRegressions: [repairEntry("GALE01:ft/ft_a", ".data", 90, 88), repairEntry("GALE01:ft/ft_b", "ftB_NoSource", 97, 95)],
+      regressions: [],
+    },
+    { pauseThreshold: 12, repairPriorityBase: 400, requeueLimit: 32, sourcePaths: repairSources },
+  );
+  assertSmoke(
+    "epoch repair plan requeues regressed functions with source paths",
+    repairPlan.repairCandidates.length === 1 && repairPlan.repairCandidates[0]?.symbol === "ftA_Broken",
+  );
+  assertSmoke("epoch repair plan outranks board candidates", (repairPlan.repairCandidates[0]?.priority ?? 0) >= 400);
+  assertSmoke("epoch repair plan counts sections toward the regression summary", repairPlan.summary.regressedSections === 1);
+  assertSmoke("epoch repair plan reports skipped no-source functions", repairPlan.reasons.some((reason: string) => reason.includes("ftB_NoSource")));
+  assertSmoke("epoch repair plan does not pause under the threshold", repairPlan.paused === false);
+  const pausedPlan = planRegressionRepair(
+    {
+      brokenMatches: Array.from({ length: 13 }, (_, index) => repairEntry("GALE01:ft/ft_a", `ftA_Regressed_${index}`, 100, 90)),
+      fuzzyRegressions: [],
+      regressions: [],
+    },
+    { pauseThreshold: 12, repairPriorityBase: 400, requeueLimit: 32, sourcePaths: repairSources },
+  );
+  assertSmoke("epoch repair plan pauses above the regression threshold", pausedPlan.paused === true && pausedPlan.repairCandidates.length === 0);
+
   const refillStateDir = await mkdtemp(join(tmpdir(), "decomp-orchestrator-refill-smoke-"));
   const refillStore = openState(refillStateDir);
   try {
@@ -669,9 +898,13 @@ async function main(): Promise<void> {
       runId: run.id,
       workerId: "refill-lock-smoke-worker",
       baseRev: "smoke-base",
-      ttlSeconds: 3600,
     });
     assertSmoke("queue refill smoke created an active lease", Boolean(leased));
+    const defaultLeaseMs = new Date(leased?.ttl ?? "").getTime() - Date.now();
+    assertSmoke(
+      "worker lease default ttl is four hours",
+      defaultLeaseMs > (DEFAULT_WORKER_TTL_SECONDS - 5) * 1000 && defaultLeaseMs <= DEFAULT_WORKER_TTL_SECONDS * 1000,
+    );
     const lockedSource = String(leased?.target.source_path ?? "");
     const secondRefill = refillQueuedTargets(
       refillStore,
@@ -871,6 +1104,7 @@ async function main(): Promise<void> {
   const graphDb = join(stateDir, "knowledge-graph.sqlite");
   const legacyAgentStateDb = join(stateDir, "legacy-agent-state.sqlite");
   const legacyAgentStateEnrichment = join(stateDir, "agent-shared-state-lessons.jsonl");
+  const emptyCuratorEnrichment = join(stateDir, "empty-knowledge-curator-updates.jsonl");
   createLegacyAgentStateDb(legacyAgentStateDb);
   const kgImportAgentState = parseJson<{ tool_issues: number; function_hints: number; skipped_audit_log: boolean }>(
     await runCli([...commonFlags, "kg-import-agent-state", "--input", legacyAgentStateDb, "--output", legacyAgentStateEnrichment]),
@@ -879,31 +1113,51 @@ async function main(): Promise<void> {
   assertSmoke("kg-import-agent-state extracts useful function hints", kgImportAgentState.function_hints === 1);
   assertSmoke("kg-import-agent-state skips legacy audit log state", kgImportAgentState.skipped_audit_log);
   const kgRebuild = parseJson<{ indexed_sources: string[]; stats: { entities: number; edges: number; search_chunks: number } }>(
-    await runCli([...commonFlags, "kg-rebuild-graph", "--graph-db", graphDb, "--agent-state-enrichment", legacyAgentStateEnrichment]),
+    await runCli([
+      ...commonFlags,
+      "kg-rebuild-graph",
+      "--graph-db",
+      graphDb,
+      "--agent-state-enrichment",
+      legacyAgentStateEnrichment,
+      "--knowledge-curator-enrichment",
+      emptyCuratorEnrichment,
+    ]),
   );
   assertSmoke(
-    "kg-rebuild-graph indexes code graph, past PRs, and agent shared state enrichment",
+    "kg-rebuild-graph indexes code graph, past PRs, agent state, and mismatch patterns",
     kgRebuild.indexed_sources.includes("code_graph") &&
       kgRebuild.indexed_sources.includes("past_prs") &&
-      kgRebuild.indexed_sources.includes("agent_shared_state"),
+      kgRebuild.indexed_sources.includes("agent_shared_state") &&
+      kgRebuild.indexed_sources.includes("mismatch_patterns"),
   );
   assertSmoke("kg-rebuild-graph writes graph entities", kgRebuild.stats.entities > 0);
   assertSmoke("kg-rebuild-graph writes graph edges", kgRebuild.stats.edges > 0);
   assertSmoke("kg-rebuild-graph writes search chunks", kgRebuild.stats.search_chunks > 0);
-  const kgFileCard = parseJson<{ editability: { mode: string }; functions: unknown[]; scheduling_signals: { priority_bonus: number } }>(
+  const kgFileCard = parseJson<{
+    editability: { mode: string };
+    functions: unknown[];
+    mismatch_patterns: unknown[];
+    scheduling_signals: { priority_bonus: number };
+  }>(
     await runCli([...commonFlags, "kg-file-card", "--graph-db", graphDb, "--source", "src/melee/ft/chara/ftDemo.c"]),
   );
   assertSmoke("kg-file-card reports fixture file editable", kgFileCard.editability.mode === "editable");
   assertSmoke("kg-file-card includes fixture functions", kgFileCard.functions.length === 2);
+  assertSmoke("kg-file-card includes linked mismatch patterns", kgFileCard.mismatch_patterns.length > 0);
   assertSmoke("kg-file-card includes graph scheduling signals", Number.isFinite(kgFileCard.scheduling_signals.priority_bonus));
   const kgSearch = parseJson<{ results: unknown[] }>(
     await runCli([...commonFlags, "kg-search", "--graph-db", graphDb, "--source", "past_prs", "--query", "ftDemo", "--limit", "3"]),
   );
   assertSmoke("kg-search can query past PR source", kgSearch.results.length > 0);
   const kgAgentStateSearch = parseJson<{ results: unknown[] }>(
-    await runCli([...commonFlags, "kg-search", "--graph-db", graphDb, "--source", "agent_shared_state", "--query", "fixture prototype", "--limit", "3"]),
+    await runCli([...commonFlags, "kg-search", "--graph-db", graphDb, "--source", "agent_shared_state", "--query", "fixture stack", "--limit", "3"]),
   );
   assertSmoke("kg-search can query agent shared state enrichment", kgAgentStateSearch.results.length > 0);
+  const kgMismatchPatternSearch = parseJson<{ results: unknown[] }>(
+    await runCli([...commonFlags, "kg-search", "--graph-db", graphDb, "--source", "mismatch_patterns", "--query", "stack mismatch", "--limit", "3"]),
+  );
+  assertSmoke("kg-search can query graph-owned mismatch patterns", kgMismatchPatternSearch.results.length > 0);
   const kgRank = parseJson<{ features: unknown[] }>(await runCli([...commonFlags, "kg-rank-features", "--graph-db", graphDb, "--limit", "3"]));
   assertSmoke("kg-rank-features returns fixture candidate features", kgRank.features.length === 1);
 
@@ -972,8 +1226,16 @@ async function main(): Promise<void> {
   const skippedExactPatchPath = join(exactReportDir, "patch_skipped_validation.diff");
   const toolErrorSummaryPath = join(exactReportDir, "worker_report_tool_error.json");
   const toolErrorBlockerPath = join(exactReportDir, "worker_report_tool_error_blocker.json");
+  const improveSummaryPath = join(exactReportDir, "worker_report_improve.json");
+  const improvePatchPath = join(exactReportDir, "patch_improve.diff");
+  const improveBaselinePath = join(exactReportDir, "baseline_improve.json");
+  const tinyImproveSummaryPath = join(exactReportDir, "worker_report_tiny_improve.json");
+  const tinyImprovePatchPath = join(exactReportDir, "patch_tiny_improve.diff");
+  const tinyImproveBaselinePath = join(exactReportDir, "baseline_tiny_improve.json");
   await writeFile(exactPatchPath, "diff --git a/src/melee/ft/chara/ftDemo.c b/src/melee/ft/chara/ftDemo.c\n");
   await writeFile(skippedExactPatchPath, "diff --git a/src/melee/ft/chara/ftDemo2.c b/src/melee/ft/chara/ftDemo2.c\n");
+  await writeFile(improvePatchPath, "diff --git a/src/melee/ft/chara/ftDemo4.c b/src/melee/ft/chara/ftDemo4.c\n");
+  await writeFile(tinyImprovePatchPath, "diff --git a/src/melee/ft/chara/ftDemo5.c b/src/melee/ft/chara/ftDemo5.c\n");
   await writeFile(
     exactSummaryPath,
     JSON.stringify(
@@ -1127,6 +1389,85 @@ async function main(): Promise<void> {
       2,
     ),
   );
+  const improvementSummary = (params: {
+    leaseId: string;
+    unit: string;
+    symbol: string;
+    sourcePath: string;
+    before: number;
+    after: number;
+    patchPath: string;
+    baselinePath: string;
+  }): string =>
+    JSON.stringify(
+      {
+        run_id: init.run.id,
+        lease_id: params.leaseId,
+        target: { unit: params.unit, symbol: params.symbol, source_path: params.sourcePath },
+        write_set: [params.sourcePath],
+        report_type: "progress",
+        summary: "Synthetic non-exact improvement for checkpoint smoke.",
+        agent_report: {
+          patch_path: params.patchPath,
+          attempts: [
+            {
+              description: "Synthetic improvement attempt.",
+              old_score: params.before,
+              new_score: params.after,
+              delta: params.after - params.before,
+              artifact_path: "synthetic-objdiff.json",
+            },
+          ],
+        },
+        acceptance_gate: { accepted: true, intendedReportType: "progress", effectiveReportType: "progress", reasons: [] },
+        runner_validation: {
+          status: "passed",
+          reasons: [],
+          target: { unit: params.unit, symbol: params.symbol, before: params.before, after: params.after, improved: true, exact: false },
+          regressions: [],
+          improvements: [{ kind: "function", unit: params.unit, item: params.symbol, before: params.before, after: params.after }],
+          baselinePath: params.baselinePath,
+        },
+        repair_attempts: { exhausted: false },
+        created_at: new Date().toISOString(),
+      },
+      null,
+      2,
+    );
+  await writeFile(
+    improveBaselinePath,
+    JSON.stringify({ unit: "main/melee/ft/chara/ftDemo4", symbol: "ftDemo_Improve", functions: [{ name: "ftDemo_Improve", score: 60, size: 512 }], sections: [] }, null, 2),
+  );
+  await writeFile(
+    improveSummaryPath,
+    improvementSummary({
+      leaseId: "checkpoint-improve-lease",
+      unit: "main/melee/ft/chara/ftDemo4",
+      symbol: "ftDemo_Improve",
+      sourcePath: "src/melee/ft/chara/ftDemo4.c",
+      before: 60,
+      after: 75,
+      patchPath: improvePatchPath,
+      baselinePath: improveBaselinePath,
+    }),
+  );
+  await writeFile(
+    tinyImproveBaselinePath,
+    JSON.stringify({ unit: "main/melee/ft/chara/ftDemo5", symbol: "ftDemo_TinyImprove", functions: [{ name: "ftDemo_TinyImprove", score: 99, size: 512 }], sections: [] }, null, 2),
+  );
+  await writeFile(
+    tinyImproveSummaryPath,
+    improvementSummary({
+      leaseId: "checkpoint-tiny-improve-lease",
+      unit: "main/melee/ft/chara/ftDemo5",
+      symbol: "ftDemo_TinyImprove",
+      sourcePath: "src/melee/ft/chara/ftDemo5.c",
+      before: 99,
+      after: 99.4,
+      patchPath: tinyImprovePatchPath,
+      baselinePath: tinyImproveBaselinePath,
+    }),
+  );
   const checkpointSeedStore = openState(stateDir);
   try {
     const createdAt = new Date().toISOString();
@@ -1264,6 +1605,40 @@ async function main(): Promise<void> {
         null,
         createdAt,
       );
+    const seedImprovementRows = (params: { key: string; unit: string; symbol: string; sourcePath: string; fuzzy: number; summaryPath: string; patchPath: string }): void => {
+      checkpointSeedStore.db
+        .query(
+          "INSERT INTO targets (id, run_id, unit, symbol, source_path, size, fuzzy, status, priority, reason, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        )
+        .run(`${params.key}-target`, init.run.id, params.unit, params.symbol, params.sourcePath, 512, params.fuzzy, "reported", 100, `synthetic ${params.key} checkpoint target`, createdAt);
+      checkpointSeedStore.db
+        .query("INSERT INTO queue (id, run_id, target_id, priority, reason, status, created_at, leased_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
+        .run(`${params.key}-queue`, init.run.id, `${params.key}-target`, 100, `synthetic ${params.key} checkpoint target`, "reported", createdAt, createdAt);
+      checkpointSeedStore.db
+        .query("INSERT INTO leases (id, queue_id, worker_id, base_rev, write_set_hash, worktree_path, ttl, heartbeat_at, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
+        .run(`${params.key}-lease`, `${params.key}-queue`, `${params.key}-worker`, "smoke-base", "synthetic", null, createdAt, createdAt, "released_complete");
+      checkpointSeedStore.db
+        .query("INSERT INTO worker_reports (id, lease_id, report_type, summary_path, facts_path, blocker_path, patch_path, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
+        .run(`${params.key}-report`, `${params.key}-lease`, "progress", params.summaryPath, null, null, params.patchPath, createdAt);
+    };
+    seedImprovementRows({
+      key: "checkpoint-improve",
+      unit: "main/melee/ft/chara/ftDemo4",
+      symbol: "ftDemo_Improve",
+      sourcePath: "src/melee/ft/chara/ftDemo4.c",
+      fuzzy: 60,
+      summaryPath: improveSummaryPath,
+      patchPath: improvePatchPath,
+    });
+    seedImprovementRows({
+      key: "checkpoint-tiny-improve",
+      unit: "main/melee/ft/chara/ftDemo5",
+      symbol: "ftDemo_TinyImprove",
+      sourcePath: "src/melee/ft/chara/ftDemo5.c",
+      fuzzy: 99,
+      summaryPath: tinyImproveSummaryPath,
+      patchPath: tinyImprovePatchPath,
+    });
   } finally {
     checkpointSeedStore.db.close();
   }
@@ -1272,17 +1647,34 @@ async function main(): Promise<void> {
     checkpoint: { summaryPath: string; prCandidatesPath: string; carryForwardPath: string };
     counts: Record<string, number>;
     prCandidates: unknown[];
+    improvementCandidates: unknown[];
     carryForwardCount: number;
   }>(await runCli([...commonFlags, "checkpoint-run", "--run-id", init.run.id, "--artifact-dir", checkpointOutputDir]));
   assertSmoke("checkpoint-run allows runner-validated exact match as PR candidate", checkpoint.counts.pr_candidate === 1 && checkpoint.prCandidates.length === 1);
   assertSmoke("checkpoint-run does not promote exact match without runner validation", checkpoint.counts.review_required === 1);
-  assertSmoke("checkpoint-run carries non-PR work forward", checkpoint.carryForwardCount === 3 && checkpoint.counts.stalled === 1 && checkpoint.counts.tool_error === 1);
+  assertSmoke(
+    "checkpoint-run flags validated improvement above the floors as notable",
+    checkpoint.counts.improvement_candidate === 1 && checkpoint.improvementCandidates.length === 1,
+  );
+  assertSmoke("checkpoint-run keeps sub-floor improvement local", checkpoint.counts.deferred_patch === 1);
+  assertSmoke(
+    "checkpoint-run carries everything except matches forward",
+    checkpoint.carryForwardCount === 5 && checkpoint.counts.stalled === 1 && checkpoint.counts.tool_error === 1,
+  );
   assertSmoke("checkpoint-run writes checkpoint artifacts", existsSync(checkpoint.checkpoint.summaryPath) && existsSync(checkpoint.checkpoint.prCandidatesPath) && existsSync(checkpoint.checkpoint.carryForwardPath));
   const checkpointStore = openState(stateDir);
   try {
     assertSmoke("checkpoint-run persists checkpoint row", count(checkpointStore, "SELECT COUNT(*) AS count FROM run_checkpoints WHERE run_id = ?", init.run.id) === 1);
-    assertSmoke("checkpoint-run persists checkpoint item rows", count(checkpointStore, "SELECT COUNT(*) AS count FROM checkpoint_items WHERE run_id = ?", init.run.id) === 4);
+    assertSmoke("checkpoint-run persists checkpoint item rows", count(checkpointStore, "SELECT COUNT(*) AS count FROM checkpoint_items WHERE run_id = ?", init.run.id) === 6);
     assertSmoke("checkpoint-run marks exact matches as PR candidates", count(checkpointStore, "SELECT COUNT(*) AS count FROM checkpoint_items WHERE run_id = ? AND disposition = 'pr_candidate' AND exact_match = 1", init.run.id) === 1);
+    assertSmoke(
+      "checkpoint-run persists improvement candidate disposition",
+      count(checkpointStore, "SELECT COUNT(*) AS count FROM checkpoint_items WHERE run_id = ? AND disposition = 'improvement_candidate' AND symbol = 'ftDemo_Improve'", init.run.id) === 1,
+    );
+    assertSmoke(
+      "checkpoint-run keeps tiny improvement as deferred patch",
+      count(checkpointStore, "SELECT COUNT(*) AS count FROM checkpoint_items WHERE run_id = ? AND disposition = 'deferred_patch' AND symbol = 'ftDemo_TinyImprove'", init.run.id) === 1,
+    );
     assertSmoke(
       "checkpoint-run keeps skipped runner validation out of PR candidates",
       count(
@@ -1298,6 +1690,19 @@ async function main(): Promise<void> {
   } finally {
     checkpointStore.db.close();
   }
+  const reworkCheckpoint = parseJson<{
+    counts: Record<string, number>;
+    prCandidates: unknown[];
+    improvementCandidates: unknown[];
+  }>(await runCli([...commonFlags, "checkpoint-run", "--run-id", init.run.id, "--rework-symbols", "ftDemo_Exact,ftDemo_Improve"]));
+  assertSmoke(
+    "checkpoint-run pulls baseline-regressed symbols out of the shipping lanes",
+    reworkCheckpoint.counts.needs_rework === 2 &&
+      reworkCheckpoint.counts.pr_candidate === 0 &&
+      reworkCheckpoint.counts.improvement_candidate === 0 &&
+      reworkCheckpoint.prCandidates.length === 0 &&
+      reworkCheckpoint.improvementCandidates.length === 0,
+  );
 
   const pausedStore = openState(stateDir);
   try {
@@ -1514,95 +1919,145 @@ async function main(): Promise<void> {
   assertSmoke("director system prompt names director role", directorSystemPrompt.includes("director Pi agent"));
   assertSmoke("director system prompt embeds scheduling rules", directorSystemPrompt.includes("Do not schedule already exact 100% complete files"));
   assertSmoke("director user prompt includes current state", directorUserPrompt.includes("<current_state_json>"));
-  assertSmoke("worker system prompt names lease write-set rule", workerSystemPrompt.includes("write_set"));
+  assertSmoke("worker system prompt names target-file edit rule", workerSystemPrompt.includes('<target_file path="...">'));
   assertSmoke("worker system prompt requires local regression ledger", workerSystemPrompt.includes("local regression ledger"));
   assertSmoke("worker system prompt has local regression output contract", workerSystemPrompt.includes("local_regression_check"));
   assertSmoke("worker system prompt is compact", workerSystemPrompt.length < 12000);
-  assertSmoke("worker system prompt keeps structured workflow phases", workerSystemPrompt.includes("<workflow>") && workerSystemPrompt.includes('<phase id="1" name="understand_packet">'));
+  assertSmoke("worker system prompt keeps structured workflow phases", workerSystemPrompt.includes("<workflow>") && workerSystemPrompt.includes('<phase id="1" name="understand_task">'));
   assertSmoke("worker system prompt includes Sudoku board metaphor", workerSystemPrompt.includes("Think like Sudoku"));
   assertSmoke("worker system prompt does not embed standards section", !workerSystemPrompt.includes("<source_standardization_rules>"));
-  assertSmoke("worker user prompt forbids unresolved local regressions", workerUserPrompt.includes("unresolved local regression"));
-  assertSmoke("worker user prompt injects decomp standards", workerUserPrompt.includes("<decomp_standards_json>") && workerUserPrompt.includes("global_standard:natural-loops"));
-  assertSmoke("worker user prompt describes attempt evaluation as optional feedback", workerUserPrompt.includes("attempt-evaluation feedback"));
-  assertSmoke("worker user prompt includes primary source path", workerUserPrompt.includes("src/melee/ft/chara/ftDemo.c"));
+  assertSmoke("worker system prompt forbids unresolved local regressions", workerSystemPrompt.includes("unresolved local regression"));
+  assertSmoke(
+    "worker user prompt includes complete target and baseline JSON instead of current state JSON",
+    workerUserPrompt.includes("<target>") &&
+      workerUserPrompt.includes("<baseline") &&
+      workerUserPrompt.includes("<details_json>") &&
+      workerUserPrompt.includes('"source_path": "src/melee/ft/chara/ftDemo.c"') &&
+      workerUserPrompt.includes('"current_scores"') &&
+      workerUserPrompt.includes('"fuzzy_match_percent"') &&
+      !workerUserPrompt.includes("<current_state_json>") &&
+      !workerUserPrompt.includes('"run"') &&
+      !workerUserPrompt.includes('"lease"'),
+  );
+  const injectedStandardsBlock = workerUserPrompt.match(/<decomp_standards\b[\s\S]*?<\/decomp_standards>/)?.[0] ?? "";
+  assertSmoke(
+    "worker user prompt injects decomp standards as XML",
+    injectedStandardsBlock.includes('<standard id="natural-loops">') && injectedStandardsBlock.includes("<do>") && injectedStandardsBlock.includes("<do_not>"),
+  );
+  assertSmoke("worker user prompt omits legacy tool/resource catalogs", !workerUserPrompt.includes("<available_pi_tools_json>") && !workerUserPrompt.includes("<available_resources_json>"));
+  assertSmoke("worker system prompt describes attempt evaluation", workerSystemPrompt.includes("Evaluate attempts"));
+  assertSmoke(
+    "worker user prompt includes compact target file XML",
+    workerUserPrompt.includes("<target>") &&
+      workerUserPrompt.includes("<target_file") &&
+      workerUserPrompt.includes('path="src/melee/ft/chara/ftDemo.c"') &&
+      workerUserPrompt.includes("baseline_match_percent") &&
+      workerUserPrompt.includes("<![CDATA["),
+  );
+  assertSmoke(
+    "worker user prompt includes available tools XML",
+    workerUserPrompt.includes("<available_tools>") &&
+      workerUserPrompt.includes('<tool_group provider="code_graph" type="target_context">') &&
+      workerUserPrompt.includes('name="code_graph_file_card"') &&
+      workerUserPrompt.includes('use_when="Get the file card for a specific source file."'),
+  );
+  assertSmoke(
+    "worker user prompt injects compact target graph file card at bottom",
+    workerUserPrompt.includes("<target_graph_file_card>") &&
+      workerUserPrompt.includes('"source": "code_graph_file_card"') &&
+      workerUserPrompt.includes('"editability"') &&
+      workerUserPrompt.includes('"search_leads"') &&
+      workerUserPrompt.includes('"symbols"') &&
+      workerUserPrompt.includes('"target_symbol"') &&
+      workerUserPrompt.includes('"past_prs"') &&
+      workerUserPrompt.includes('"path_facts"') &&
+      workerUserPrompt.includes('"follow_up_queries"') &&
+      workerUserPrompt.includes('"path_facts_resolve"') &&
+      !workerUserPrompt.includes('"scheduling_signals"') &&
+      !workerUserPrompt.includes('"priority_bonus"') &&
+      workerUserPrompt.trimEnd().endsWith("</target_graph_file_card>"),
+  );
+  assertSmoke("worker user prompt omits selected context references", !workerUserPrompt.includes("selected_agent_context_references") && !workerUserPrompt.includes("worker_operating_guide"));
+  const agentViewerResponse = await fetchAgentViewerServer(new Request("http://agent-viewer.local/api/agents/render?agent=worker&source=sample"));
+  const agentViewerPreview = (await agentViewerResponse.json()) as {
+    context?: Record<string, unknown>;
+    systemPrompt?: string;
+    systemStats?: { tokens: number; unresolvedPlaceholders: string[] };
+    userPrompt?: string;
+    userStats?: { tokens: number; unresolvedPlaceholders: string[] };
+  };
+  const agentViewerWorkerPrompt = agentViewerPreview.userPrompt ?? "";
+  const agentViewerSystemPrompt = agentViewerPreview.systemPrompt ?? "";
+  const agentViewerAttachedTools = Array.isArray(agentViewerPreview.context?.attached_tools) ? agentViewerPreview.context.attached_tools : [];
+  assertSmoke("agent viewer sample worker render exposes attached tools out of prompt", agentViewerAttachedTools.length === defaultWorkerToolProfile.length);
+  assertSmoke(
+    "agent viewer sample worker stats are calculated after prompt hydration",
+    agentViewerPreview.userStats?.tokens === promptStats(agentViewerWorkerPrompt).tokens &&
+      agentViewerPreview.systemStats?.tokens === promptStats(agentViewerSystemPrompt).tokens &&
+      agentViewerPreview.userStats.unresolvedPlaceholders.length === 0 &&
+      agentViewerPreview.systemStats.unresolvedPlaceholders.length === 0,
+  );
+  assertSmoke(
+    "agent viewer sample worker prompt renders fixture target file content",
+    agentViewerResponse.ok &&
+      agentViewerWorkerPrompt.includes('<target_file path="src/melee/ft/chara/ftDemo.c"') &&
+      agentViewerWorkerPrompt.includes("void ftDemo_Unmatched(void) {}") &&
+      !agentViewerWorkerPrompt.includes('unavailable="true"'),
+  );
+  assertSmoke(
+    "agent viewer sample worker prompt keeps target, baseline, and standards",
+    agentViewerWorkerPrompt.includes("<target>") &&
+      agentViewerWorkerPrompt.includes("<baseline") &&
+      agentViewerWorkerPrompt.includes("<target_graph_file_card") &&
+      agentViewerWorkerPrompt.includes("<details_json>") &&
+      agentViewerWorkerPrompt.includes('"source_path": "src/melee/ft/chara/ftDemo.c"') &&
+      agentViewerWorkerPrompt.includes('"current_scores"') &&
+      agentViewerWorkerPrompt.includes('"search_leads"') &&
+      agentViewerWorkerPrompt.includes('"same_file_symbols"') &&
+      agentViewerWorkerPrompt.includes('"same_file_functions"') &&
+      agentViewerWorkerPrompt.includes('"mismatch_patterns"') &&
+      agentViewerWorkerPrompt.includes('"Stack/frame layout mismatch"') &&
+      agentViewerWorkerPrompt.includes('"resources"') &&
+      agentViewerWorkerPrompt.includes('"path_facts"') &&
+      agentViewerWorkerPrompt.includes('"Fighter character source style"') &&
+      agentViewerWorkerPrompt.includes('"past_prs"') &&
+      agentViewerWorkerPrompt.includes('"follow_up_queries"') &&
+      !agentViewerWorkerPrompt.includes('"scheduling_signals"') &&
+      !agentViewerWorkerPrompt.includes('"priority_bonus"') &&
+      agentViewerWorkerPrompt.includes("<decomp_standards>") &&
+      agentViewerWorkerPrompt.includes("<available_tools>") &&
+      !agentViewerWorkerPrompt.includes("<current_state_json>") &&
+      !agentViewerWorkerPrompt.includes("<available_pi_tools_json>") &&
+      !agentViewerWorkerPrompt.includes("selected_agent_context_references") &&
+      !agentViewerWorkerPrompt.includes('"lease"'),
+  );
   assertSmoke("director dry-run uses gpt-5.5", readFileSync(tick.directorOutput, "utf8").includes("model: gpt-5.5"));
   assertSmoke("director dry-run uses medium thinking", readFileSync(tick.directorOutput, "utf8").includes("thinking: medium"));
   const workerOutput = readFileSync(worker.workerOutput, "utf8");
   const workerCustomToolsLine = workerOutput
     .split("\n")
     .find((line) => line.startsWith("custom_tools: ")) ?? "";
-  const expectedWorkerTools = [
-    "worker_context_get",
-    "code_graph_file_card",
-    "code_graph_search",
-    "past_prs_search",
-    "discord_knowledge_search",
-    "discord_knowledge_topics_for_terms",
-    "ssbm_data_sheet_search",
-    "ssbm_data_sheet_lookup_address",
-    "ssbm_data_sheet_lookup_offset",
-    "powerpc_docs_search",
-    "powerpc_instruction_lookup",
-    "external_mirrors_search",
-    "external_symbol_lookup",
-    "resource_guides_search",
-    "reference_docs_search",
-    "tool_outputs_search",
-    "tool_outputs_similar_functions",
-    "tool_outputs_mismatch_patterns",
-    "tool_outputs_tool_lookup",
-    "decomp_standards_search",
-    "decomp_standards_context",
-    "path_facts_resolve",
-    "path_facts_search",
-    "ghidra_lookup",
-    "opseq_similar_functions",
-    "mismatch_db_search",
-    "mwcc_debug_lookup",
-    "checkdiff_run",
-    "checkdiff_summary",
-    "direct_compile_tu",
-    "objdiff_score_candidate",
-    "mwcc_debug_dump_function",
-    "mwcc_debug_diagnose_stack",
-    "mwcc_debug_diagnose_regflow",
-    "mwcc_debug_diagnose_inlines",
-    "mwcc_debug_raw_dump",
-    "source_permuter_run",
-    "source_permuter_replay",
-    "source_mutation_preview",
-    "type_oracle_lookup",
-    "struct_infer_from_asm",
-    "m2c_decompile",
-    "include_fixer_preview",
-    "item_state_table_preview",
-    "review_lint_scan",
-  ];
+  const expectedWorkerTools = [...defaultWorkerToolProfile];
   assertSmoke("worker dry-run uses gpt-5.5", workerOutput.includes("model: gpt-5.5"));
   assertSmoke("worker dry-run uses medium thinking", workerOutput.includes("thinking: medium"));
   assertSmoke("worker dry-run attaches decomposed Pi tools", expectedWorkerTools.every((toolId) => workerCustomToolsLine.includes(toolId)));
+  assertSmoke("worker dry-run omits old context guide tool", !workerCustomToolsLine.includes("worker_context_get"));
   assertSmoke("worker dry-run omits generic lookup router by default", !workerCustomToolsLine.includes("decomp_lookup"));
-  assertSmoke(
-    "worker knowledge context lists lookup tool ids instead of commands",
-    workerUserPrompt.includes('"lookup_tools"') && workerUserPrompt.includes('"powerpc_instruction_lookup"') && !workerUserPrompt.includes('"lookup_commands"'),
-  );
+  assertSmoke("worker user prompt does not list lookup commands", !workerUserPrompt.includes('"lookup_commands"'));
   assertSmoke("rendered prompts do not reference design doc", !renderedPrompts.includes("decomp-orchestrator-design.html"));
   assertSmoke("rendered prompts do not reference Codex skill paths", !renderedPrompts.includes(".codex/skills"));
-  assertSmoke("rendered prompts include structured past PR index", renderedPrompts.includes("decomp-orchestrator/knowledge/sources/past_prs/data/prs/index.jsonl"));
-  assertSmoke("rendered prompts include data sheet resources", renderedPrompts.includes("knowledge/sources/ssbm_data_sheet/data/csv"));
+  assertSmoke("rendered prompts include structured past PR index", renderedPrompts.includes("past_prs") && renderedPrompts.includes("index.jsonl"));
+  assertSmoke("rendered prompts include data sheet resources", renderedPrompts.includes("ssbm_data_sheet/data/csv"));
   assertSmoke("rendered prompts include agent context manifest", renderedPrompts.includes("decomp-orchestrator/packages/agents/src/context/manifest.json"));
   assertSmoke("rendered prompts do not include director scheduling context", !renderedPrompts.includes("packages/agents/src/director/context/scheduling.md"));
-  assertSmoke("rendered prompts include worker operating context", renderedPrompts.includes("packages/agents/src/worker/context/operating-guide.md"));
-  assertSmoke(
-    "worker user prompt includes compact Pi tool affordances",
-    workerUserPrompt.includes("<available_pi_tools_json>") && expectedWorkerTools.every((toolId) => workerUserPrompt.includes(toolId)),
-  );
+  assertSmoke("rendered prompts do not include worker context guide paths", !renderedPrompts.includes("packages/agents/src/worker/context/"));
+  assertSmoke("worker user prompt does not duplicate Pi tool affordances", !workerUserPrompt.includes("<available_pi_tools_json>"));
   assertSmoke("rendered prompts do not include old worker overview context", !renderedPrompts.includes("packages/agents/src/worker/context/overview.md"));
   assertSmoke("rendered prompts do not reference old knowledge references", !renderedPrompts.includes("knowledge/references"));
   assertSmoke("rendered prompts do not reference old knowledge workflows", !renderedPrompts.includes("knowledge/workflows"));
   assertSmoke("rendered prompts do not reference targeted iteration workflow file", !renderedPrompts.includes("workflows/targeted-iteration.md"));
   assertSmoke("rendered prompts omit legacy sweep workflow", !renderedPrompts.includes("melee-decomp-sweep"));
-  assertSmoke("worker prompt prefers Pi tools over helper command paths", !workerUserPrompt.includes("decomp_context_lookup.py") && workerUserPrompt.includes("<available_pi_tools_json>"));
+  assertSmoke("worker prompt omits helper command paths", !workerUserPrompt.includes("decomp_context_lookup.py"));
 
   const summary = {
     state_dir: stateDir,

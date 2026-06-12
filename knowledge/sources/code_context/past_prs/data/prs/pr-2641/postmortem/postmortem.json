@@ -1,0 +1,479 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2641",
+  "pr": {
+    "number": 2641,
+    "title": "HSD Cleanup Work",
+    "url": "https://github.com/doldecomp/melee/pull/2641",
+    "state": "MERGED",
+    "author": "PsiLupan",
+    "created_at": "2026-06-10T00:46:49Z",
+    "merged_at": "2026-06-10T01:09:07Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "HSD cleanup PR touching SysDolphin baselib TExp and SisLib. The PR reordered early TExp allocation/free helpers, refactored TExpAssignReg conditionals, renamed SisLib allocator/free functions and allocator block fields, updated matching headers/forward declarations, and renamed related symbols. The only loaded validation evidence is an automated report showing HSD_SisLib_Free improved from 92.57% to 99.82%.",
+  "change_classification": {
+    "primary_type": "cleanup",
+    "categories": [
+      "cleanup",
+      "decomp-matching",
+      "headers",
+      "naming",
+      "symbol-renames"
+    ],
+    "systems": [
+      "src/sysdolphin/baselib",
+      "config/GALE01"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/sysdolphin/baselib/sislib.c",
+      "role": "Main SisLib cleanup: renamed allocator functions, allocator globals, struct type and fields; replaced callsites; removed stale AI/todo match comments.",
+      "evidence_refs": [
+        "changed_files: sislib.c +135/-155, 35 hunks",
+        "diff:sislib.c HSD_SisLib_803A5798 -> HSD_SisLib_Alloc",
+        "diff:sislib.c HSD_SisLib_803A594C -> HSD_SisLib_Free",
+        "diff:sislib.c sislib_UnkAllocData/data_0/data_1 -> SisBlock/next/data",
+        "diff:sislib.c HSD_SisLib_804D7970/HSD_SisLib_804D7974 -> free_head/used_head",
+        "pr_body: Cleanup and rename some SisLib code, remove unnecessary AI comments"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/sislib.h",
+      "role": "Header updates for SisLib type and prototype renames.",
+      "evidence_refs": [
+        "changed_files: sislib.h +8/-9, 4 hunks",
+        "diff:sislib.h struct sislib_UnkAllocData -> struct SisBlock",
+        "diff:sislib.h fields data_0/data_1 -> next/data",
+        "diff:sislib.h prototypes HSD_SisLib_803A5798/HSD_SisLib_803A594C -> HSD_SisLib_Alloc/HSD_SisLib_Free"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/forward.h",
+      "role": "Forward declaration updated for renamed SisLib allocator block type.",
+      "evidence_refs": [
+        "changed_files: forward.h +1/-1, 1 hunk",
+        "diff:forward.h typedef struct sislib_UnkAllocData -> typedef struct SisBlock"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Symbol table synchronized with SisLib function and global renames.",
+      "evidence_refs": [
+        "changed_files: symbols.txt +4/-4, 2 hunks",
+        "diff:symbols.txt HSD_SisLib_803A5798 -> HSD_SisLib_Alloc at .text:0x803A5798",
+        "diff:symbols.txt HSD_SisLib_803A594C -> HSD_SisLib_Free at .text:0x803A594C",
+        "diff:symbols.txt HSD_SisLib_804D7970/HSD_SisLib_804D7974 -> free_head/used_head at .sbss:0x804D7970/.sbss:0x804D7974"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/texp.c",
+      "role": "TExp cleanup: moved allocation/free helpers earlier and rewrote TExpAssignReg conditionals into clearer nested checks.",
+      "evidence_refs": [
+        "changed_files: texp.c +72/-66, 4 hunks",
+        "pr_body: TExp adjustments to function order and cleanup of TExpAssignReg",
+        "diff:texp.c TevAlloc/CnstAlloc/HSD_TExpFree moved near HSD_TExpGetType",
+        "diff:texp.c TExpAssignReg split compound assignment-in-condition checks into explicit val assignment followed by val < 0 checks"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Renamed SisLib allocation functions from address-style names to semantic allocator/free names: HSD_SisLib_803A5798 became HSD_SisLib_Alloc and HSD_SisLib_803A594C became HSD_SisLib_Free.",
+      "evidence_refs": [
+        "diff:sislib.c function definitions and callsites",
+        "diff:sislib.h prototypes",
+        "diff:symbols.txt .text symbol renames"
+      ]
+    },
+    {
+      "text": "Renamed the SisLib allocator block struct from sislib_UnkAllocData to SisBlock and changed field names from data_0/data_1 to next/data.",
+      "evidence_refs": [
+        "diff:sislib.h struct rename and field rename",
+        "diff:sislib.c local declarations and field use replacements",
+        "diff:forward.h forward typedef update"
+      ]
+    },
+    {
+      "text": "Renamed two SisLib sbss globals from address-style names to free_head and used_head, and updated source and symbols.txt to use those names.",
+      "evidence_refs": [
+        "diff:sislib.c global declarations and uses",
+        "diff:sislib.h extern declarations",
+        "diff:symbols.txt .sbss symbol renames"
+      ]
+    },
+    {
+      "text": "Removed stale SisLib comments describing previous match percentages, register allocation issues, literal pooling, and AI/todo notes.",
+      "evidence_refs": [
+        "diff:sislib.c deleted comments before HSD_SisLib_Alloc and HSD_SisLib_Free",
+        "pr_body: remove unnecessary AI comments"
+      ]
+    },
+    {
+      "text": "Moved TExp TevAlloc, CnstAlloc, and HSD_TExpFree earlier in texp.c, near HSD_TExpGetType and before ref/unref functions.",
+      "evidence_refs": [
+        "diff:texp.c helper block added near top and deleted from later location",
+        "pr_body: TExp adjustments to function order"
+      ]
+    },
+    {
+      "text": "Rewrote several TExpAssignReg compound conditionals so AssignColorReg, AssignColorKonst, AssignAlphaReg, and AssignAlphaKonst calls are made in separate statements before checking val < 0.",
+      "evidence_refs": [
+        "diff:texp.c TExpAssignReg hunk around AssignColorReg/AssignColorKonst",
+        "diff:texp.c TExpAssignReg hunk around AssignAlphaReg/AssignAlphaKonst"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Kept SisLib source, header declarations, forward declarations, and symbols.txt in sync for the same semantic renames.",
+      "evidence_refs": [
+        "diff:sislib.c",
+        "diff:sislib.h",
+        "diff:forward.h",
+        "diff:symbols.txt"
+      ]
+    },
+    {
+      "text": "Used behavior-revealing names for allocator list state: free_head and used_head clearly track the free and allocated SisBlock lists in HSD_SisLib_Alloc/HSD_SisLib_Free.",
+      "evidence_refs": [
+        "diff:sislib.c free_head and used_head used as list heads",
+        "diff:sislib.c traversal via next in allocation/free routines"
+      ]
+    },
+    {
+      "text": "Removed stale generated/AI-style match notes instead of preserving comments that no longer reflected the cleaned source.",
+      "evidence_refs": [
+        "diff:sislib.c deleted @todo match-percentage comments",
+        "pr_body: remove unnecessary AI comments"
+      ]
+    },
+    {
+      "text": "TExpAssignReg cleanup preserved existing assert IDs while separating side-effecting assignment calls from boolean conditions, improving readability without evidence of broad behavior changes.",
+      "evidence_refs": [
+        "diff:texp.c HSD_ASSERT line IDs 0x47B, 0x488, 0x49D, 0x4A6, 0x4B6, 0x4C2, 0x4CF, 0x4D8 retained"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a recovered routine's behavior is clear, semantic renames should be propagated through the implementation, header prototypes, forward declarations, and symbols metadata together.",
+      "scope": [
+        "SisLib allocator cleanup",
+        "function/type/global renames"
+      ],
+      "evidence_refs": [
+        "diff:sislib.c HSD_SisLib_Alloc/HSD_SisLib_Free",
+        "diff:sislib.h prototypes and struct type",
+        "diff:forward.h typedef",
+        "diff:symbols.txt function and sbss renames"
+      ],
+      "confidence": 0.84
+    },
+    {
+      "lesson": "For allocator-like structs, replacing unknown field names with role names such as next, data, and size can make list manipulation and allocation ownership reviewable when the code repeatedly uses those fields in that role.",
+      "scope": [
+        "SisLib SisBlock"
+      ],
+      "evidence_refs": [
+        "diff:sislib.h SisBlock fields next/data/size",
+        "diff:sislib.c free/used list traversal via next",
+        "diff:sislib.c returned allocation pointer uses data"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "Stale match-score comments and AI-generated notes are cleanup candidates once the source has been renamed and refactored; preserve only current evidence-backed notes.",
+      "scope": [
+        "source comments",
+        "cleanup PRs"
+      ],
+      "evidence_refs": [
+        "diff:sislib.c deleted match-percentage and AI/todo comments",
+        "pr_body: remove unnecessary AI comments"
+      ],
+      "confidence": 0.76
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "HSD_SisLib_Alloc",
+      "kind": "function",
+      "meaning": "Semantic rename for SisLib allocation routine previously named HSD_SisLib_803A5798.",
+      "evidence_refs": [
+        "diff:sislib.c function definition and allocation callsites",
+        "diff:sislib.h prototype",
+        "diff:symbols.txt .text:0x803A5798"
+      ]
+    },
+    {
+      "name": "HSD_SisLib_Free",
+      "kind": "function",
+      "meaning": "Semantic rename for SisLib free routine previously named HSD_SisLib_803A594C.",
+      "evidence_refs": [
+        "diff:sislib.c function definition and free callsites",
+        "diff:sislib.h prototype",
+        "diff:symbols.txt .text:0x803A594C",
+        "bot_report: HSD_SisLib_Free improved from 92.57% to 99.82%"
+      ]
+    },
+    {
+      "name": "SisBlock",
+      "kind": "struct",
+      "meaning": "Renamed allocator block type previously named sislib_UnkAllocData.",
+      "evidence_refs": [
+        "diff:sislib.h struct rename",
+        "diff:forward.h typedef rename",
+        "diff:sislib.c local type replacements"
+      ]
+    },
+    {
+      "name": "next",
+      "kind": "field",
+      "meaning": "SisBlock link field replacing data_0.",
+      "evidence_refs": [
+        "diff:sislib.h data_0 -> next",
+        "diff:sislib.c list traversal and linking via next"
+      ]
+    },
+    {
+      "name": "data",
+      "kind": "field",
+      "meaning": "SisBlock payload pointer replacing data_1.",
+      "evidence_refs": [
+        "diff:sislib.h data_1 -> data",
+        "diff:sislib.c allocation return and buffer ownership uses via data"
+      ]
+    },
+    {
+      "name": "free_head",
+      "kind": "global",
+      "meaning": "Free-list head global at .sbss:0x804D7970, previously HSD_SisLib_804D7970.",
+      "evidence_refs": [
+        "diff:sislib.c global declaration and free-list operations",
+        "diff:sislib.h extern",
+        "diff:symbols.txt .sbss:0x804D7970"
+      ]
+    },
+    {
+      "name": "used_head",
+      "kind": "global",
+      "meaning": "Allocated/used-list head global at .sbss:0x804D7974, previously HSD_SisLib_804D7974.",
+      "evidence_refs": [
+        "diff:sislib.c global declaration and used-list operations",
+        "diff:sislib.h extern",
+        "diff:symbols.txt .sbss:0x804D7974"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Function order adjustment",
+      "description": "TExp helper/free functions were moved earlier in texp.c as part of the author's stated TExp function order adjustment.",
+      "evidence_refs": [
+        "pr_body: TExp adjustments to function order",
+        "diff:texp.c TevAlloc/CnstAlloc/HSD_TExpFree moved"
+      ],
+      "caveat": "No loaded objdiff/checkdiff evidence ties the TExp reorder to a specific match result."
+    },
+    {
+      "tactic": "Separate side-effecting calls from compound conditions",
+      "description": "TExpAssignReg changes split assignment and fallback calls out of && expressions into explicit nested if statements while retaining assert IDs.",
+      "evidence_refs": [
+        "diff:texp.c TExpAssignReg AssignColorReg/AssignColorKonst cleanup",
+        "diff:texp.c TExpAssignReg AssignAlphaReg/AssignAlphaKonst cleanup"
+      ],
+      "caveat": "The slice does not include a validation report for texp.c."
+    },
+    {
+      "tactic": "Narrow matching improvement report",
+      "description": "The automated PR report attributes a matching improvement to HSD_SisLib_Free: before 92.57%, after 99.82%, +16 bytes in main/sysdolphin/baselib/sislib.",
+      "evidence_refs": [
+        "text_corpus issue_comment by decomp-dev[bot] at 2026-06-10T00:52:07Z"
+      ],
+      "caveat": "The report covers HSD_SisLib_Free only; no loaded report claims full function match or validates the rest of the PR."
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "automated_report",
+      "author": "decomp-dev[bot]",
+      "text": "Report for GALE01 showed 1 improvement in an unmatched item: main/sysdolphin/baselib/sislib HSD_SisLib_Free +16 bytes, 92.57% before to 99.82% after.",
+      "evidence_refs": [
+        "text_corpus issue_comment decomp-dev[bot] https://github.com/doldecomp/melee/pull/2641#issuecomment-4665459268"
+      ]
+    },
+    {
+      "kind": "missing_review_comments",
+      "author": null,
+      "text": "No human review comments or review records were loaded for this PR slice.",
+      "evidence_refs": [
+        "metadata_json counts.review_comments=0",
+        "metadata_json counts.reviews=0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2641",
+    "HSD Cleanup Work",
+    "PsiLupan",
+    "SisLib",
+    "TExp",
+    "TExpAssignReg",
+    "HSD_SisLib_Alloc",
+    "HSD_SisLib_Free",
+    "HSD_SisLib_803A5798",
+    "HSD_SisLib_803A594C",
+    "SisBlock",
+    "sislib_UnkAllocData",
+    "free_head",
+    "used_head",
+    "data_0",
+    "data_1",
+    "next",
+    "data",
+    "TevAlloc",
+    "CnstAlloc",
+    "HSD_TExpFree",
+    "AssignColorReg",
+    "AssignColorKonst",
+    "AssignAlphaReg",
+    "AssignAlphaKonst",
+    "HSD_ASSERT",
+    "src/sysdolphin/baselib/sislib.c",
+    "src/sysdolphin/baselib/sislib.h",
+    "src/sysdolphin/baselib/texp.c",
+    "config/GALE01/symbols.txt"
+  ],
+  "follow_up_queries": [
+    "Find later PRs or commits that finish matching HSD_SisLib_Free after PR #2641",
+    "Search for remaining sislib_UnkAllocData or data_0/data_1 uses after PR #2641",
+    "Search for later renames of SisBlock, free_head, or used_head",
+    "Search TExpAssignReg history for additional matching reports or function-order changes",
+    "Search for decomp-dev bot reports mentioning HSD_TExpFree or TExpAssignReg"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json PR identity and changed file counts",
+      "human_pr_text PR body",
+      "raw_diff excerpts and targeted local diff reads",
+      "changed_files.jsonl",
+      "text_corpus.jsonl automated report"
+    ],
+    "notes": [
+      "Changed files and rename details are well supported by the diff and metadata.",
+      "The raw diff was truncated in the loaded file, but targeted local reads supplied the missing sislib.h and texp.c hunks.",
+      "Only one automated validation comment is loaded, and it reports improvement for HSD_SisLib_Free only.",
+      "No human review comments are present in the loaded slice, so reviewer intent cannot be inferred.",
+      "No build log, objdiff output, or full regression ledger is loaded; do not claim the PR fully matched any function beyond the bot's reported percentage improvement."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "lesson_candidate",
+        "title": "Synchronize semantic renames across source, headers, forward declarations, and symbols",
+        "text": "PR #2641 renamed SisLib allocator/free functions and allocator block names in sislib.c, sislib.h, forward.h, and config/GALE01/symbols.txt together. This is evidence for a reusable cleanup pattern: when a semantic rename is supported, update all declaration and symbol surfaces in the same focused PR.",
+        "scope": [
+          "decomp cleanup",
+          "headers",
+          "symbols",
+          "naming"
+        ],
+        "evidence_refs": [
+          "diff:sislib.c",
+          "diff:sislib.h",
+          "diff:forward.h",
+          "diff:symbols.txt"
+        ]
+      },
+      {
+        "record_type": "lesson_candidate",
+        "title": "Replace unknown allocator field names with role names when use is clear",
+        "text": "PR #2641 changed SisLib allocator block fields from data_0/data_1 to next/data and updated list traversal, allocation, free, and buffer ownership sites consistently. This supports using field role evidence from repeated access patterns to improve names.",
+        "scope": [
+          "struct recovery",
+          "SisLib allocator"
+        ],
+        "evidence_refs": [
+          "diff:sislib.h SisBlock fields",
+          "diff:sislib.c list traversal and allocation uses"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "SisLib allocator function renames in PR #2641",
+        "text": "In PR #2641, HSD_SisLib_803A5798 at .text:0x803A5798 was renamed to HSD_SisLib_Alloc, and HSD_SisLib_803A594C at .text:0x803A594C was renamed to HSD_SisLib_Free.",
+        "source_path": "config/GALE01/symbols.txt",
+        "scope": [
+          "src/sysdolphin/baselib/sislib.c",
+          "src/sysdolphin/baselib/sislib.h",
+          "config/GALE01/symbols.txt"
+        ],
+        "evidence_refs": [
+          "diff:symbols.txt .text renames",
+          "diff:sislib.c function definition renames",
+          "diff:sislib.h prototype renames"
+        ],
+        "reason": "Potential source-owned path fact for curator review; the PR evidence supports the historical rename but intake should not promote it directly."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "SisLib allocator block and list-head names in PR #2641",
+        "text": "In PR #2641, sislib_UnkAllocData was renamed to SisBlock, fields data_0/data_1 were renamed to next/data, and globals at .sbss:0x804D7970/.sbss:0x804D7974 were renamed to free_head/used_head.",
+        "source_path": "src/sysdolphin/baselib/sislib.h",
+        "scope": [
+          "src/sysdolphin/baselib/sislib.c",
+          "src/sysdolphin/baselib/sislib.h",
+          "src/sysdolphin/baselib/forward.h",
+          "config/GALE01/symbols.txt"
+        ],
+        "evidence_refs": [
+          "diff:sislib.h struct and field renames",
+          "diff:forward.h typedef rename",
+          "diff:symbols.txt .sbss renames",
+          "diff:sislib.c free_head/used_head uses"
+        ],
+        "reason": "Potential path fact about SisLib allocator naming; curator should decide whether to record it as source-owned knowledge."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Cleanup stale AI/match-score comments after source improves",
+        "text": "PR #2641 removed stale comments that described old match percentages, register allocation issues, literal pooling, and AI/todo notes while renaming and cleaning SisLib allocator code. This may reinforce a standard that obsolete generated/AI commentary should not remain once cleaner source evidence exists.",
+        "source_path": null,
+        "scope": [
+          "comment cleanup",
+          "decomp source review"
+        ],
+        "evidence_refs": [
+          "pr_body: remove unnecessary AI comments",
+          "diff:sislib.c deleted @todo match-percentage comments"
+        ],
+        "reason": "This overlaps with existing standards about authored source style and evidence-backed notes; curator should decide if an explicit comment-cleanup note is worth adding."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that all SisLib or TExp changes matched; the only loaded validation report is for HSD_SisLib_Free improving to 99.82%.",
+      "Do not infer human reviewer approval rationale; no review comments or reviews were loaded.",
+      "Do not treat TExp function order changes as a proven matching tactic beyond this PR without additional objdiff/checkdiff evidence.",
+      "Do not promote free_head/used_head as a general global-naming standard; this PR only supports the specific SisLib allocator context."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

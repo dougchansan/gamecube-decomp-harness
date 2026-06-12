@@ -1,0 +1,17 @@
+{
+  "number": 1177,
+  "title": "Cleanup additional ASSERT macros in texp",
+  "state": "MERGED",
+  "createdAt": "2024-02-01T18:22:06Z",
+  "updatedAt": "2024-02-01T19:15:05Z",
+  "mergedAt": "2024-02-01T19:15:02Z",
+  "closedAt": "2024-02-01T19:15:02Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/1177",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 15688
+  }
+}

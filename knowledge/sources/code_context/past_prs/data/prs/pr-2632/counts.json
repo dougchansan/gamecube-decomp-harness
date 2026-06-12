@@ -1,0 +1,17 @@
+{
+  "number": 2632,
+  "title": "Improvements to split up: Dolphin support",
+  "state": "MERGED",
+  "createdAt": "2026-06-08T14:32:46Z",
+  "updatedAt": "2026-06-08T16:11:45Z",
+  "mergedAt": "2026-06-08T16:11:45Z",
+  "closedAt": "2026-06-08T16:11:45Z",
+  "author": "fjooord",
+  "url": "https://github.com/doldecomp/melee/pull/2632",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 3,
+    "reviews": 3,
+    "diff_bytes": 5046
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 550,
+  "title": "Exclude `asm` functions from `calcprogress`",
+  "state": "MERGED",
+  "createdAt": "2022-09-04T21:23:01Z",
+  "updatedAt": "2022-09-05T08:04:37Z",
+  "mergedAt": "2022-09-05T08:04:37Z",
+  "closedAt": "2022-09-05T08:04:37Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/550",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 1,
+    "diff_bytes": 8003
+  }
+}

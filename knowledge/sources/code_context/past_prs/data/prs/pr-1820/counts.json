@@ -1,0 +1,17 @@
+{
+  "number": 1820,
+  "title": "Match scratch submissions",
+  "state": "MERGED",
+  "createdAt": "2025-08-09T12:59:25Z",
+  "updatedAt": "2025-08-09T13:20:52Z",
+  "mergedAt": "2025-08-09T13:20:51Z",
+  "closedAt": "2025-08-09T13:20:52Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1820",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 35464
+  }
+}

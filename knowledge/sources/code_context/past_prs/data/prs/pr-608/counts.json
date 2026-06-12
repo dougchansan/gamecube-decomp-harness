@@ -1,0 +1,17 @@
+{
+  "number": 608,
+  "title": "Improve lobj matches",
+  "state": "MERGED",
+  "createdAt": "2022-12-15T06:42:24Z",
+  "updatedAt": "2022-12-15T06:48:18Z",
+  "mergedAt": "2022-12-15T06:44:33Z",
+  "closedAt": "2022-12-15T06:44:33Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/608",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 1,
+    "diff_bytes": 20393
+  }
+}

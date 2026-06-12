@@ -1,0 +1,17 @@
+{
+  "number": 475,
+  "title": "Match HSD class",
+  "state": "MERGED",
+  "createdAt": "2022-08-23T04:58:05Z",
+  "updatedAt": "2022-08-23T15:38:44Z",
+  "mergedAt": "2022-08-23T10:26:39Z",
+  "closedAt": "2022-08-23T10:26:39Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/475",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 3,
+    "reviews": 4,
+    "diff_bytes": 55221
+  }
+}

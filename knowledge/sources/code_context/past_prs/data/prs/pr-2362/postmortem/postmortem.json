@@ -1,0 +1,336 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2362",
+  "pr": {
+    "number": 2362,
+    "title": "Link itsonans",
+    "url": "https://github.com/doldecomp/melee/pull/2362",
+    "state": "MERGED",
+    "author": "jellejurre",
+    "created_at": "2026-03-27T19:19:49Z",
+    "merged_at": "2026-03-27T22:13:47Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Linked the item translation unit `melee/it/items/itsonans.c` by switching it from NonMatching to Matching, cleaning two near-matching functions, correcting item state table/data symbol metadata, and removing local literal globals from the header/source.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "symbol-metadata",
+      "data-metadata"
+    ],
+    "systems": [
+      "item",
+      "config",
+      "repo-root"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/it/items/itsonans.c",
+      "role": "Main item source linked; item state table symbol/name adjusted; functions `it_802CD4FC`, `it_802CD7D4`, and `itSonans_UnkMotion1_Anim` rewritten for matching.",
+      "evidence_refs": [
+        "raw_diff: src/melee/it/items/itsonans.c hunks",
+        "text_corpus: decomp-dev bot reports `it_802CD4FC` and `it_802CD7D4` reached 100%"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itsonans.h",
+      "role": "Header cleanup; removed definitions of literal-backed globals `it_804DD3D0` and `it_804DD3C8` while keeping the `it_803F7CA0` extern.",
+      "evidence_refs": [
+        "raw_diff: src/melee/it/items/itsonans.h hunk"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Symbol metadata changed several itsonans-adjacent string/float/double symbols from global address-style names to local labels.",
+      "evidence_refs": [
+        "raw_diff: config/GALE01/symbols.txt hunks"
+      ]
+    },
+    {
+      "path": "configure.py",
+      "role": "Build configuration changed `melee/it/items/itsonans.c` from `Object(NonMatching, ...)` to `Object(Matching, ...)`.",
+      "evidence_refs": [
+        "raw_diff: configure.py hunk"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "`itsonans.c` was promoted in `configure.py` from `NonMatching` to `Matching`.",
+      "evidence_refs": [
+        "raw_diff: configure.py hunk"
+      ]
+    },
+    {
+      "text": "The item state table definition was renamed from `it_803F7C70` to `it_803F7CA0`, and the third state id changed from `2` to `-1`.",
+      "evidence_refs": [
+        "raw_diff: src/melee/it/items/itsonans.c initial hunk"
+      ]
+    },
+    {
+      "text": "`it_802CD4FC` replaced manual absolute-value branches with `ABS`, inlined `-0.9` and `0.017453292f`, and removed use of generated-looking global literal names.",
+      "evidence_refs": [
+        "raw_diff: src/melee/it/items/itsonans.c `it_802CD4FC` hunk"
+      ]
+    },
+    {
+      "text": "`it_802CD7D4` removed temporary locals and manual absolute-value logic in favor of `ABS(...)` comparisons and direct expressions.",
+      "evidence_refs": [
+        "raw_diff: src/melee/it/items/itsonans.c `it_802CD7D4` hunk"
+      ]
+    },
+    {
+      "text": "`itSonans_UnkMotion1_Anim` removed the source-level `it_804DD3B8` zero global and rewrote the decrement/compare using a local `int zero`, a `f32 lifetime`, and a ternary return.",
+      "evidence_refs": [
+        "raw_diff: src/melee/it/items/itsonans.c `itSonans_UnkMotion1_Anim` hunk"
+      ]
+    },
+    {
+      "text": "Header definitions for `it_804DD3D0 = 0.017453292f` and `it_804DD3C8 = -0.9` were deleted.",
+      "evidence_refs": [
+        "raw_diff: src/melee/it/items/itsonans.h hunk"
+      ]
+    },
+    {
+      "text": "Several `.data`, `.sdata`, and `.sdata2` entries in `symbols.txt` were changed from global address-style names to local labels such as `@228`, `@229`, `@230`, `@159`, `@226`, `@227`, `@233`, and `@259`.",
+      "evidence_refs": [
+        "raw_diff: config/GALE01/symbols.txt hunks"
+      ]
+    },
+    {
+      "text": "The bot report recorded five new matches for the itsonans unit, including `.sdata2`, `.sdata`, `.data`, `it_802CD4FC`, and `it_802CD7D4`.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev bot issue comment 2026-03-27T19:23:18Z"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Used project macro-style cleanup (`ABS`) to replace generated-looking manual sign checks while landing full matches for two functions.",
+      "evidence_refs": [
+        "raw_diff: `it_802CD4FC` and `it_802CD7D4` ABS changes",
+        "text_corpus: bot report new matches for both functions"
+      ]
+    },
+    {
+      "text": "Removed fake-looking header/source literal globals and represented the constants as literals in the function body, while updating symbol metadata to local labels.",
+      "evidence_refs": [
+        "raw_diff: removal of `it_804DD3D0`, `it_804DD3C8`, `it_804DD3B8`",
+        "raw_diff: `symbols.txt` local-label changes"
+      ]
+    },
+    {
+      "text": "Kept the PR focused on one item TU and its required build/symbol metadata rather than broad unrelated cleanup.",
+      "evidence_refs": [
+        "changed_files: 4 files all tied to itsonans link"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For item functions with manual sign-normalization patterns, try the project `ABS` macro before preserving branchy decompiler output.",
+      "scope": [
+        "src/melee/it/items",
+        "float absolute-value comparisons"
+      ],
+      "evidence_refs": [
+        "raw_diff: `it_802CD4FC` replaces two manual abs blocks with `ABS`",
+        "raw_diff: `it_802CD7D4` replaces manual abs temporaries with `ABS`",
+        "text_corpus: bot report shows both functions reached 100%"
+      ]
+    },
+    {
+      "lesson": "Do not keep file-local constants as globally named variables in headers when the matching source can use literals and symbol metadata can mark the backing data as local.",
+      "scope": [
+        "item TUs",
+        "literal constants",
+        "symbols.txt metadata"
+      ],
+      "evidence_refs": [
+        "raw_diff: header removes `it_804DD3D0` and `it_804DD3C8` definitions",
+        "raw_diff: source inlines `-0.9` and `0.017453292f`",
+        "raw_diff: `.sdata2` symbols changed from global names to local labels"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "This PR prefers local-label metadata such as `@228`, `@229`, and `@230` over global address-style names for itsonans string/float/double data when the data appears local.",
+      "evidence_refs": [
+        "raw_diff: config/GALE01/symbols.txt local-label changes"
+      ]
+    },
+    {
+      "text": "The item state table symbol used by the source/header is `it_803F7CA0`, not the prior source definition name `it_803F7C70`.",
+      "evidence_refs": [
+        "raw_diff: `ItemStateTable it_803F7C70[]` changed to `it_803F7CA0[]`",
+        "raw_diff: `itsonans.h` retains `extern ItemStateTable it_803F7CA0[]`"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Use `ABS(expr)` for MWCC-friendly absolute-value code shape instead of manual `if (x < 0) x = -x` temporaries when bot/objdiff evidence supports the match.",
+      "evidence_refs": [
+        "raw_diff: `it_802CD4FC` ABS replacement",
+        "raw_diff: `it_802CD7D4` ABS replacement",
+        "text_corpus: bot report new function matches"
+      ]
+    },
+    {
+      "tactic": "Inline numeric constants and mark backing float/double/string symbols local when global literal variables were only scaffolding for the prior nonmatching source.",
+      "evidence_refs": [
+        "raw_diff: `it_804DD3C8` replaced by `-0.9`",
+        "raw_diff: `it_804DD3D0` replaced by `0.017453292f`",
+        "raw_diff: `symbols.txt` local-label changes"
+      ]
+    },
+    {
+      "tactic": "A local integer zero plus a separate `f32 lifetime` temporary and ternary return was used in `itSonans_UnkMotion1_Anim`; this is recorded as PR-specific matching evidence, not a general style rule.",
+      "evidence_refs": [
+        "raw_diff: `itSonans_UnkMotion1_Anim` hunk"
+      ]
+    }
+  ],
+  "review_feedback": [],
+  "searchable_terms": [
+    "pr-2362",
+    "Link itsonans",
+    "jellejurre",
+    "itsonans.c",
+    "itsonans.h",
+    "configure.py",
+    "symbols.txt",
+    "Object(Matching)",
+    "Object(NonMatching)",
+    "it_802CD4FC",
+    "it_802CD7D4",
+    "itSonans_UnkMotion1_Anim",
+    "itSonans_Logic9_DmgDealt",
+    "ItemStateTable",
+    "it_803F7CA0",
+    "it_803F7C70",
+    "ABS",
+    "HSD_JObjSetRotationZ",
+    "it_804DD3C8",
+    "it_804DD3D0",
+    "it_804DD3B8",
+    "@228",
+    "@229",
+    "@230",
+    "@159",
+    "@226",
+    "@227",
+    "@233",
+    "@259",
+    "xDD4_itemVar.sonans",
+    "xD44_lifeTimer",
+    "xDAC_itcmd_var0",
+    "xCCC_incDamageDirection"
+  ],
+  "follow_up_queries": [
+    "Find other item PRs where manual absolute-value branches were replaced with ABS for final matching.",
+    "Search for header-defined float/double literal globals in item headers that may be scaffolding rather than source-owned data.",
+    "Search for item TUs still marked NonMatching next to similar configure.py one-line promotions.",
+    "Search symbols.txt for global address-style data symbols in item TUs that later became local labels.",
+    "Review other `ItemStateTable` definitions where a final state id may need `-1` rather than a numeric motion id."
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR metadata, changed files, merge timestamp",
+      "raw_diff: complete diff, 9295 chars, not truncated",
+      "text_corpus: decomp-dev bot report with match deltas"
+    ],
+    "notes": [
+      "PR body is empty and there are no review comments, so reviewer rationale and author intent are not available.",
+      "Bot report supports match outcomes for two functions and data sections, but no full build log or objdiff transcript is included in the slice.",
+      "The diff supports concrete code and metadata changes; broader conclusions about original source style should remain curator-reviewed."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson_candidate",
+        "title": "Use ABS for branchy sign-normalization cleanup when matching item float comparisons",
+        "text": "In PR 2362, replacing manual negative checks with `ABS(...)` in `it_802CD4FC` and `it_802CD7D4` corresponded with both functions reaching 100% in the bot report. Candidate scope: item float absolute-value comparisons.",
+        "scope": [
+          "src/melee/it/items",
+          "float comparisons",
+          "ABS macro"
+        ],
+        "evidence_refs": [
+          "raw_diff: `it_802CD4FC` ABS changes",
+          "raw_diff: `it_802CD7D4` ABS changes",
+          "text_corpus: bot report"
+        ]
+      },
+      {
+        "record_type": "decomp_lesson_candidate",
+        "title": "Prefer literals/local symbol metadata over fake global constant definitions",
+        "text": "PR 2362 removed global-looking literal definitions from `itsonans.h`/`itsonans.c`, inlined `-0.9` and `0.017453292f`, and changed related symbols to local labels while linking the TU.",
+        "scope": [
+          "literal constants",
+          "headers",
+          "symbols.txt",
+          "item TUs"
+        ],
+        "evidence_refs": [
+          "raw_diff: header/source literal removals",
+          "raw_diff: symbols.txt local-label changes"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "`src/melee/it/items/itsonans.c` linked in PR 2362",
+        "text": "PR 2362 changed `configure.py` so `melee/it/items/itsonans.c` is built as `Object(Matching, ...)` instead of `Object(NonMatching, ...)`; bot report recorded five new matches for the itsonans unit.",
+        "source_path": "src/melee/it/items/itsonans.c",
+        "scope": [
+          "configure.py",
+          "src/melee/it/items/itsonans.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: configure.py hunk",
+          "text_corpus: decomp-dev bot report"
+        ],
+        "reason": "Path status and matching state are source/path facts and should be curated, not promoted by intake."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "itsonans local data symbol metadata changes",
+        "text": "PR 2362 changed several itsonans-related `.data`, `.sdata`, and `.sdata2` symbols from global address-style names to local labels in `config/GALE01/symbols.txt`.",
+        "source_path": "config/GALE01/symbols.txt",
+        "scope": [
+          "config/GALE01/symbols.txt",
+          "itsonans data metadata"
+        ],
+        "evidence_refs": [
+          "raw_diff: config/GALE01/symbols.txt hunks"
+        ],
+        "reason": "Symbol ownership/scope metadata belongs in source-owned path facts or data sheets after curator review."
+      }
+    ],
+    "rejection_notes": [
+      "Do not generalize the `int zero` plus ternary pattern in `itSonans_UnkMotion1_Anim` into a standard; the slice only proves this PR used it.",
+      "Do not infer reviewer approval rationale from merge status; there are no review comments in the slice.",
+      "Do not claim complete objdiff/build validation beyond the bot report's listed match deltas."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

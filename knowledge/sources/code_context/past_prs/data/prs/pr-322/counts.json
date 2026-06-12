@@ -1,0 +1,17 @@
+{
+  "number": 322,
+  "title": "Match rest of ftclink",
+  "state": "MERGED",
+  "createdAt": "2022-03-01T07:19:42Z",
+  "updatedAt": "2022-03-01T17:58:55Z",
+  "mergedAt": "2022-03-01T10:15:25Z",
+  "closedAt": "2022-03-01T10:15:25Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/322",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 9138
+  }
+}

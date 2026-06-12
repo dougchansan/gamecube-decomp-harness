@@ -1,0 +1,10 @@
+{
+  "pr": 1231,
+  "title": "Implement CI build for `ninja`",
+  "url": "https://github.com/doldecomp/melee/pull/1231",
+  "text_records_with_body": 0,
+  "review_comments": 0,
+  "changed_files": 1,
+  "added_lines": 46,
+  "deleted_lines": 0
+}

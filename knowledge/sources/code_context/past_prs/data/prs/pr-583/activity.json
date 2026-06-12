@@ -1,0 +1,10 @@
+{
+  "pr": 583,
+  "title": "Fix context generation and support Linux in `m2ctx`",
+  "url": "https://github.com/doldecomp/melee/pull/583",
+  "text_records_with_body": 0,
+  "review_comments": 0,
+  "changed_files": 17,
+  "added_lines": 20,
+  "deleted_lines": 76
+}

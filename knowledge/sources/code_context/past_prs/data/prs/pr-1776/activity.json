@@ -1,0 +1,10 @@
+{
+  "pr": 1776,
+  "title": "Infer function types from ItemStateTables",
+  "url": "https://github.com/doldecomp/melee/pull/1776",
+  "text_records_with_body": 4,
+  "review_comments": 2,
+  "changed_files": 148,
+  "added_lines": 1375,
+  "deleted_lines": 1356
+}

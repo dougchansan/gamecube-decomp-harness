@@ -1,0 +1,17 @@
+{
+  "number": 1532,
+  "title": "Rename some `HSD_ObjAllocData` instances",
+  "state": "MERGED",
+  "createdAt": "2025-05-27T22:12:53Z",
+  "updatedAt": "2025-05-27T22:15:57Z",
+  "mergedAt": "2025-05-27T22:15:56Z",
+  "closedAt": "2025-05-27T22:15:56Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1532",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 61117
+  }
+}

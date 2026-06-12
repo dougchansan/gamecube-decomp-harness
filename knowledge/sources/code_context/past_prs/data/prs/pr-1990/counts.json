@@ -1,0 +1,17 @@
+{
+  "number": 1990,
+  "title": "plAttack & ftDevice work",
+  "state": "MERGED",
+  "createdAt": "2025-11-26T01:59:46Z",
+  "updatedAt": "2025-11-26T02:11:03Z",
+  "mergedAt": "2025-11-26T02:10:58Z",
+  "closedAt": "2025-11-26T02:10:58Z",
+  "author": "sadkellz",
+  "url": "https://github.com/doldecomp/melee/pull/1990",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 27564
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 1970,
+  "title": "Some ftYs_Guard functions and easy_funcs",
+  "state": "MERGED",
+  "createdAt": "2025-10-23T14:18:52Z",
+  "updatedAt": "2025-11-05T20:46:42Z",
+  "mergedAt": "2025-10-31T01:32:17Z",
+  "closedAt": "2025-10-31T01:32:17Z",
+  "author": "Gelatart",
+  "url": "https://github.com/doldecomp/melee/pull/1970",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 15218
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "pr": 1826,
+  "title": "Fix `--require-protos` build",
+  "url": "https://github.com/doldecomp/melee/pull/1826",
+  "text_records_with_body": 2,
+  "review_comments": 0,
+  "changed_files": 86,
+  "added_lines": 1181,
+  "deleted_lines": 788
+}

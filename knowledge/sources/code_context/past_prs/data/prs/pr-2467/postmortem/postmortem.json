@@ -1,0 +1,947 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2467",
+  "pr": {
+    "number": 2467,
+    "title": "Fix various literals and frame sizes",
+    "url": "https://github.com/doldecomp/melee/pull/2467",
+    "state": "MERGED",
+    "author": "lukechampine",
+    "created_at": "2026-05-08T02:07:23Z",
+    "merged_at": "2026-05-08T03:24:57Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Bulk matching cleanup from two scripts: one corrected literals, and one adjusted stack frame sizes by adding, removing, or changing padding. The author says the scripts were run over all nonmatching functions and only kept results that improved total match score, with some false positives. The diff spans 84 source files across fighter, game-mode, stage, interface, item, library, menu, trophy, video, and sysdolphin code. Evidence shows many PAD_STACK or explicit u8 padding changes plus representative literal/control-flow edits. Bot report shows +212 matched-code bytes, +16 matched-data bytes, 2 new matches, 192 unmatched-item improvements, and 1 unmatched .sdata2 regression in gmresult. Reviewer approved, praising literal changes while warning that some stack-frame changes may need to be reverted for final matches.",
+  "change_classification": {
+    "primary_type": "decomp-matching cleanup",
+    "categories": [
+      "decomp-matching",
+      "literal-fix",
+      "stack-frame-padding",
+      "bulk-scripted-cleanup",
+      "score-improvement"
+    ],
+    "systems": [
+      "fighter",
+      "game-mode",
+      "stage",
+      "interface",
+      "item",
+      "library",
+      "menu",
+      "melee-core",
+      "trophy",
+      "video",
+      "sysdolphin-baselib"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/cm/camera.c",
+      "role": "camera file with both literal corrections and padding/PAD_STACK placement changes",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff: camera.c hunks"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_09F7.c",
+      "role": "fighter common file with PAD_STACK frame-size adjustment",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff: ftCo_09F7.c hunk"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_0A01.c",
+      "role": "fighter common file with boolean/control-flow rewrite that improved score",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff: ftCo_0A01.c hunk",
+        "text_corpus: bot report lists ftCo_800A2718 improvement"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_Damage.c",
+      "role": "fighter common file with PAD_STACK frame-size adjustments",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff: ftCo_Damage.c hunks"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_DownBound.c",
+      "role": "fighter common file with PAD_STACK frame-size adjustments",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff: ftCo_DownBound.c hunks"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_Guard.c",
+      "role": "fighter common file with multiple PAD_STACK frame-size adjustments",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff: ftCo_Guard.c hunks"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_Shouldered.c",
+      "role": "fighter common file with PAD_STACK frame-size adjustment",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff: ftCo_Shouldered.c hunk"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_ThrownKirby.c",
+      "role": "fighter common file with PAD_STACK frame-size adjustments",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff: ftCo_ThrownKirby.c hunks"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_SpecialN.c",
+      "role": "Kirby fighter file with PAD_STACK frame-size adjustments",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff: ftKb_SpecialN.c hunks"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftNana/ftNn_Init.c",
+      "role": "Nana fighter file with PAD_STACK frame-size adjustments",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff: ftNn_Init.c hunks"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftaction.c",
+      "role": "fighter action file with PAD_STACK frame-size adjustment",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff: ftaction.c hunk"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftcoll.c",
+      "role": "fighter collision file with literal correction and PAD_STACK frame-size adjustment",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff: ftcoll.c hunks",
+        "text_corpus: bot report lists ftColl_80079C70 improvement"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftdynamics.c",
+      "role": "fighter dynamics file with PAD_STACK frame-size adjustments",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff: ftdynamics.c hunks"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftmaterial.c",
+      "role": "fighter material file with large PAD_STACK frame-size adjustment",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff: ftmaterial.c hunk",
+        "text_corpus: bot report lists ftMaterial_800BF6BC improvement"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1601.c",
+      "role": "game-mode file with PAD_STACK frame-size adjustment",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff: gm_1601.c hunk"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_16F1.c",
+      "role": "game-mode file with explicit u8 padding array frame-size adjustment",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff: gm_16F1.c hunk"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1832.c",
+      "role": "game-mode file with explicit padding and PAD_STACK frame-size adjustments",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff: gm_1832.c hunks"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_18A5.c",
+      "role": "game-mode file with removed/converted PAD_STACK frame-size adjustments",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff: gm_18A5.c hunks"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmallstar.c",
+      "role": "game-mode file with adjusted PAD_STACK sizes",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff: gmallstar.c hunks"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmclassic.c",
+      "role": "game-mode file with PAD_STACK frame-size adjustment",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff: gmclassic.c hunk"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmmain_lib.c",
+      "role": "game-mode library file with PAD_STACK frame-size adjustment",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff: gmmain_lib.c hunk"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmresult.c",
+      "role": "results file with multiple PAD_STACK adjustments and a float literal change; bot report notes one .sdata2 regression in this unit",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff: gmresult.c hunks",
+        "text_corpus: bot report regression"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmresultplayer.c",
+      "role": "results player file with adjusted PAD_STACK size",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff: gmresultplayer.c hunk"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmstaffroll.c",
+      "role": "staff roll file with PAD_STACK size changed from hex 0x60 to decimal 88",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff: gmstaffroll.c hunk",
+        "text_corpus: bot report lists fn_801AB200 improvement"
+      ]
+    },
+    {
+      "path": "src/melee/gr/granime.c",
+      "role": "stage animation file with PAD_STACK frame-size adjustments; bot report lists grAnime_801C83D0 as a new match",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff: granime.c hunks",
+        "text_corpus: bot report new match"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grbigblue.c",
+      "role": "stage file with padding and literal/constant changes",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff: grbigblue.c excerpt"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grbigblueroute.c",
+      "role": "stage route file changed by PR scope",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grcastle.c",
+      "role": "stage file changed by PR scope",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "text_corpus: bot report lists grCastle_801CDC44 improvement"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grflatzone.c",
+      "role": "stage file changed by PR scope",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grfourside.c",
+      "role": "stage file changed by PR scope",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gr/gricemt.c",
+      "role": "stage file with largest changed-file hunk count in loaded metadata",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grinishie1.c",
+      "role": "stage file changed by PR scope",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grinishie2.c",
+      "role": "stage file changed by PR scope",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grkinokoroute.c",
+      "role": "stage route file changed by PR scope",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grkongo.c",
+      "role": "stage file changed by PR scope; bot report lists multiple grKongo improvements",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "text_corpus: bot report"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grmutecity.c",
+      "role": "stage file changed by PR scope; bot report lists grMuteCity_801F1A34 improvement",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "text_corpus: bot report"
+      ]
+    },
+    {
+      "path": "src/melee/gr/groldkongo.c",
+      "role": "stage file changed by PR scope",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gr/groldpupupu.c",
+      "role": "stage file changed by PR scope",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gr/groldyoshi.c",
+      "role": "stage file changed by PR scope",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gr/gronett.c",
+      "role": "stage file changed by PR scope; bot report lists grOnett_801E5214 improvement",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "text_corpus: bot report"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grpstadium.c",
+      "role": "stage file changed by PR scope; bot report lists grStadium_801D3BBC improvement",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "text_corpus: bot report"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grpura.c",
+      "role": "stage file changed by PR scope",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grrcruise.c",
+      "role": "stage file changed by PR scope",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grshrineroute.c",
+      "role": "stage route file changed by PR scope",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grvenom.c",
+      "role": "stage file changed by PR scope",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gr/gryorster.c",
+      "role": "stage file changed by PR scope",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grzebes.c",
+      "role": "stage file changed by PR scope; bot report lists grZebes_801D881C improvement",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "text_corpus: bot report"
+      ]
+    },
+    {
+      "path": "src/melee/if/if_2F72.c",
+      "role": "interface file changed by PR scope; bot report lists .sdata2 as a new match",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "text_corpus: bot report new match"
+      ]
+    },
+    {
+      "path": "src/melee/if/if_2FC93.c",
+      "role": "interface file changed by PR scope",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/if/ifcoget.c",
+      "role": "interface file changed by PR scope",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/if/ifprize.c",
+      "role": "interface file changed by PR scope",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/if/ifstock.c",
+      "role": "interface file changed by PR scope",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/if/textdraw.c",
+      "role": "interface text drawing file changed by PR scope",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/if/textlib.c",
+      "role": "interface text library file changed by PR scope",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itlinkhookshot.c",
+      "role": "item file changed by PR scope",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itmasterhandlaser.c",
+      "role": "item file changed by PR scope; bot report lists it_802F063C improvement",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "text_corpus: bot report"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lb_00F9.c",
+      "role": "melee library file changed by PR scope; bot report lists lb_8001044C improvement",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "text_corpus: bot report"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lbaudio_ax.c",
+      "role": "audio library file changed by PR scope; bot report lists lbAudioAx_8002838C improvement",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "text_corpus: bot report"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lbbgflash.c",
+      "role": "background flash library file changed by PR scope; bot report lists fn_8001FEC4 improvement",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "text_corpus: bot report"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lbcollision.c",
+      "role": "collision library file changed by PR scope; bot report lists multiple lbColl improvements",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "text_corpus: bot report"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lbsnap.c",
+      "role": "snapshot library file changed by PR scope",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mncharsel.c",
+      "role": "menu character select file changed by PR scope",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mncount.c",
+      "role": "menu count file changed by PR scope",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mndiagram.c",
+      "role": "menu diagram file changed by PR scope with high hunk count",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mndiagram2.c",
+      "role": "menu diagram file changed by PR scope",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mndiagram3.c",
+      "role": "menu diagram file changed by PR scope",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnname.c",
+      "role": "menu name-entry file changed by PR scope",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnnamenew.c",
+      "role": "menu new-name file changed by PR scope",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnruleplus.c",
+      "role": "menu rule-plus file changed by PR scope",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnsnap.c",
+      "role": "menu snapshot file changed by PR scope; bot report lists fn_802545C4 improvement",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "text_corpus: bot report"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnsound.c",
+      "role": "menu sound file changed by PR scope",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnsoundtest.c",
+      "role": "menu sound-test file changed by PR scope",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnvibration.c",
+      "role": "menu vibration file changed by PR scope",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/mp/mplib.c",
+      "role": "map/platform library file changed by PR scope; bot report lists mpLib improvements",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "text_corpus: bot report"
+      ]
+    },
+    {
+      "path": "src/melee/ty/toy.c",
+      "role": "trophy/toy file changed by PR scope",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/ty/tydisplay.c",
+      "role": "trophy display file changed by PR scope",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/ty/tyfigupon.c",
+      "role": "trophy figupon file changed by PR scope",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/vi/vi0401.c",
+      "role": "video file changed by PR scope",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/vi/vi0502.c",
+      "role": "video file changed by PR scope",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/cobj.c",
+      "role": "sysdolphin baselib camera-object file changed by PR scope",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/particle.c",
+      "role": "sysdolphin baselib particle file changed by PR scope; bot report lists hsd_8039254C improvement",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "text_corpus: bot report"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/sislib.c",
+      "role": "sysdolphin baselib SIS file changed by PR scope",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/sobjlib.c",
+      "role": "sysdolphin baselib SObj file changed by PR scope",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/texpdag.c",
+      "role": "sysdolphin baselib TExp DAG file changed by PR scope",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Author states two scripts were used: one to find and fix incorrect literals, and one to fix frame sizes by adding or removing padding.",
+    "Author states scripts were run on all nonmatching functions and only results that improved total match score were kept, with some false positives.",
+    "Changed-file metadata lists 84 touched files, 212 added lines, and 45 deleted lines.",
+    "Diff excerpt shows many PAD_STACK additions, removals, or size changes, plus some explicit padding arrays such as u8 _padA[16], u8 _padA[24], and u8 _padA[8].",
+    "Diff excerpt shows representative literal changes, including camera pause-eye offsets/distances, ftColl facing_dir comparison from 1.0F to -1.0f, gmresult float argument from 0.09F to 0.11f, and gmstaffroll PAD_STACK(0x60) to PAD_STACK(88).",
+    "Bot report recorded +0.01% matched code, +212 matched-code bytes, +16 matched-data bytes, 2 new matches, 192 unmatched-item improvements, and 1 unmatched-item regression in main/melee/gm/gmresult .sdata2.",
+    "Reviewer ribbanya approved, saying the literal changes are nice and stack frame changes are acceptable, while cautioning that final matches may need to change some stack-frame edits back."
+  ],
+  "smart_moves": [
+    {
+      "text": "Kept the scripted bulk edit bounded by score improvement rather than applying every script suggestion blindly.",
+      "evidence_refs": [
+        "human_pr_text: kept only results that improved total match score"
+      ]
+    },
+    {
+      "text": "Separated two mechanical edit families: literal corrections and frame-size padding adjustments.",
+      "evidence_refs": [
+        "human_pr_text: two scripts"
+      ]
+    },
+    {
+      "text": "Accepted that false positives existed, rather than presenting the script output as infallible.",
+      "evidence_refs": [
+        "human_pr_text: handful of false positives"
+      ]
+    },
+    {
+      "text": "Used automated score reporting to expose both wins and regression risk.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev bot report"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "Scripted literal and stack-frame searches can find many small matching improvements, but their output should be filtered by objective score evidence and reviewed for false positives.",
+      "evidence_refs": [
+        "human_pr_text",
+        "text_corpus: bot report"
+      ],
+      "confidence": 0.86
+    },
+    {
+      "lesson": "Stack-frame padding changes can improve current score without necessarily being stable final-source shape; treat them as narrow matching tactics that may need later reversal.",
+      "evidence_refs": [
+        "raw_diff: many PAD_STACK and u8 padding changes",
+        "text_corpus: ribbanya approved review"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "lesson": "Literal corrections may affect both code and data match reports; watch for data-section regressions even when total text score improves.",
+      "evidence_refs": [
+        "raw_diff: representative float literal changes",
+        "text_corpus: bot report gmresult .sdata2 regression"
+      ],
+      "confidence": 0.74
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Explicit padding arrays introduced by this PR use local generated-style names such as _padA.",
+      "scope": [
+        "local stack padding"
+      ],
+      "evidence_refs": [
+        "raw_diff: camera.c u8 _padA[16]",
+        "raw_diff: camera.c u8 _padA[24]",
+        "raw_diff: gm_16F1.c u8 _padA[8]",
+        "raw_diff: gm_1832.c u8 _padA[8]"
+      ],
+      "confidence": 0.8
+    },
+    {
+      "convention": "No evidence in this slice supports a broader semantic rename convention; changed symbols largely retain existing address-style names such as fn_80184138 and ftCo_800A2718.",
+      "scope": [
+        "PR-local observation"
+      ],
+      "evidence_refs": [
+        "raw_diff",
+        "changed_files.jsonl"
+      ],
+      "confidence": 0.68
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Add, remove, resize, or move PAD_STACK calls to influence stack frame size for nonmatching functions.",
+      "evidence_refs": [
+        "human_pr_text: fixes frame sizes by adding or removing padding",
+        "raw_diff: multiple PAD_STACK hunks"
+      ],
+      "risk": "Reviewer warned some stack-frame changes may need to be changed back for final matches."
+    },
+    {
+      "tactic": "Use explicit local u8 padding arrays when PAD_STACK placement is not the selected shape.",
+      "evidence_refs": [
+        "raw_diff: camera.c _padA additions",
+        "raw_diff: gm_16F1.c _padA addition",
+        "raw_diff: gm_1832.c _padA addition"
+      ],
+      "risk": "This is a matching tactic, not evidence of preferred source style."
+    },
+    {
+      "tactic": "Correct float/int literal values when script and match score indicate the existing literal is wrong.",
+      "evidence_refs": [
+        "human_pr_text: script finds and fixes incorrect literals",
+        "raw_diff: camera literal changes",
+        "raw_diff: ftcoll facing_dir literal change",
+        "raw_diff: gmresult 0.09F to 0.11f"
+      ],
+      "risk": "Bot report recorded one .sdata2 regression, so literal edits should be checked against data reports as well as text score."
+    },
+    {
+      "tactic": "Reshape small boolean/control-flow expressions when the generated expression does not match as well.",
+      "evidence_refs": [
+        "raw_diff: ftCo_800A2718 return false/true nested inlineL0/inlineL1 rewrite",
+        "text_corpus: bot report lists ftCo_800A2718 score improvement"
+      ],
+      "risk": "Only one representative control-flow rewrite is visible in the loaded diff excerpt; do not generalize beyond this PR evidence."
+    }
+  ],
+  "review_feedback": [
+    {
+      "author": "ribbanya",
+      "state": "APPROVED",
+      "body": "The literal changes are nice. I don't mind the stack frame changes, but I think there will be at least some instances where the final match will need to change it back to what it was before.",
+      "evidence_refs": [
+        "text_corpus: review by ribbanya at 2026-05-08T03:24:08Z"
+      ],
+      "actionable_takeaway": "Literal fixes were positively received; stack-frame padding edits are acceptable as interim matching improvements but should not be treated as guaranteed final source shape."
+    }
+  ],
+  "searchable_terms": [
+    "PR 2467",
+    "Fix various literals and frame sizes",
+    "lukechampine",
+    "claude-fix",
+    "incorrect literals",
+    "frame sizes",
+    "padding",
+    "PAD_STACK",
+    "_padA",
+    "bulk scripted cleanup",
+    "match score",
+    "false positives",
+    "decomp-dev bot report",
+    "matched code +212 bytes",
+    "matched data +16 bytes",
+    "2 new matches",
+    "192 improvements",
+    "gmresult .sdata2 regression",
+    "grAnime_801C83D0",
+    "ftCo_800A2718",
+    "ftColl_80079C70",
+    "fn_801AB200"
+  ],
+  "follow_up_queries": [
+    "PR 2467 PAD_STACK false positives",
+    "PR 2467 literals frame sizes",
+    "ribbanya stack frame changes final match change back",
+    "gmresult .sdata2 regression PR 2467",
+    "grAnime_801C83D0 new match PR 2467",
+    "ftCo_800A2718 inlineL0 inlineL1 PR 2467",
+    "scripted literal fixes match score false positives",
+    "u8 _padA PAD_STACK decomp matching"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json",
+      "human_pr_text",
+      "changed_files.jsonl",
+      "raw_diff excerpt",
+      "text_corpus bot report",
+      "text_corpus approved review"
+    ],
+    "notes": [
+      "PR identity, author, title, URL, merge timestamp, changed-file list, PR body, bot report, and approval review are loaded.",
+      "The raw diff is truncated in the prompt, so detailed hunk-level classification is strongest for the visible excerpt and weaker for later changed files.",
+      "Changed-file metadata is complete in loaded changed_files.jsonl and includes 84 files, including vi0401.c, vi0502.c, and texpdag.c.",
+      "No inline review comments are present; review feedback is limited to one approving review body.",
+      "The author claims score filtering, and the bot report provides aggregate score evidence, but this slice does not include per-edit objdiff/build logs.",
+      "Because the PR body explicitly mentions false positives and the reviewer cautions about stack-frame edits, padding changes should be treated as matching tactics rather than accepted source-style standards."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "lesson",
+        "title": "Scripted literal/frame-size cleanup needs score filtering and false-positive review",
+        "text": "PR #2467 supports a reusable lesson that bulk scripts can identify many literal and frame-size matching improvements, but results should be filtered by match-score evidence and reviewed for false positives.",
+        "scope": [
+          "bulk decomp matching",
+          "literal fixes",
+          "stack frame padding"
+        ],
+        "evidence_refs": [
+          "human_pr_text",
+          "text_corpus: bot report"
+        ],
+        "confidence": 0.86
+      },
+      {
+        "record_type": "lesson",
+        "title": "Stack padding wins may be temporary",
+        "text": "PR #2467 supports treating PAD_STACK or explicit padding-array changes as narrow matching tactics: the reviewer approved but warned that some stack-frame changes may need to be changed back for final matches.",
+        "scope": [
+          "PAD_STACK",
+          "stack frame matching"
+        ],
+        "evidence_refs": [
+          "raw_diff",
+          "text_corpus: ribbanya review"
+        ],
+        "confidence": 0.82
+      },
+      {
+        "record_type": "review_feedback",
+        "title": "Literal fixes were well received; frame-size edits accepted with caution",
+        "text": "Reviewer ribbanya said the literal changes were nice, did not object to stack-frame changes, but expected some final matches may need to revert those stack-frame edits.",
+        "scope": [
+          "PR 2467"
+        ],
+        "evidence_refs": [
+          "text_corpus: review"
+        ],
+        "confidence": 0.92
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Document bulk-scripted matching cleanup safeguards",
+        "text": "Consider adding or cross-linking guidance that bulk scripts for literals or stack-frame padding should keep only edits backed by narrow score/objdiff evidence, explicitly note false-positive handling, and avoid treating PAD_STACK or padding arrays as final source style without later cleanup review.",
+        "source_path": null,
+        "scope": [
+          "bulk scripted decomp cleanup",
+          "literal fixes",
+          "PAD_STACK",
+          "verification-and-regression-ledger",
+          "matching-tactics-need-evidence"
+        ],
+        "evidence_refs": [
+          "human_pr_text: scripts and false positives",
+          "text_corpus: bot report",
+          "text_corpus: ribbanya review"
+        ],
+        "reason": "Current loaded standards already cover matching tactics needing evidence, but this PR provides concrete historical evidence for bulk-script false-positive filtering and the temporary nature of stack-frame padding edits."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote _padA as a global naming standard; evidence only shows PR-local explicit padding variable names.",
+      "Do not promote PAD_STACK additions as preferred final style; reviewer explicitly warned some stack-frame changes may need changing back.",
+      "Do not claim every changed file improved individually; the bot report gives aggregate results and selected examples, while the full per-edit validation is not loaded.",
+      "Do not infer reviewer intent beyond the approval text; only literal changes were explicitly praised and stack-frame changes explicitly accepted with caution.",
+      "Do not treat the gmresult .sdata2 regression as necessarily unacceptable; the PR was merged, but the slice does not explain the tradeoff beyond the bot report."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

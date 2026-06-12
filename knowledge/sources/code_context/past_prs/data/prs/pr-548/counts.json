@@ -1,0 +1,17 @@
+{
+  "number": 548,
+  "title": "Improve Python-related quality of life",
+  "state": "MERGED",
+  "createdAt": "2022-09-04T15:41:09Z",
+  "updatedAt": "2022-09-04T15:43:56Z",
+  "mergedAt": "2022-09-04T15:43:55Z",
+  "closedAt": "2022-09-04T15:43:55Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/548",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 1424
+  }
+}

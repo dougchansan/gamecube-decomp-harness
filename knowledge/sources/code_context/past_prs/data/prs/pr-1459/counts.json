@@ -1,0 +1,17 @@
+{
+  "number": 1459,
+  "title": "Added fox item attr and some small fixes",
+  "state": "CLOSED",
+  "createdAt": "2024-09-23T00:01:46Z",
+  "updatedAt": "2024-09-23T00:15:13Z",
+  "mergedAt": null,
+  "closedAt": "2024-09-23T00:15:12Z",
+  "author": "AaronB-Hub",
+  "url": "https://github.com/doldecomp/melee/pull/1459",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 17164
+  }
+}

@@ -200,8 +200,42 @@ export function ensureSchema(db: Database): void {
 
     CREATE INDEX IF NOT EXISTS checkpoint_items_checkpoint
       ON checkpoint_items (checkpoint_id);
+
+    CREATE TABLE IF NOT EXISTS campaigns (
+      id TEXT PRIMARY KEY,
+      project_id TEXT,
+      branch TEXT,
+      base_ref TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS save_points (
+      id TEXT PRIMARY KEY,
+      campaign_id TEXT NOT NULL,
+      run_id TEXT,
+      trigger_kind TEXT NOT NULL,
+      label TEXT,
+      commit_sha TEXT,
+      branch TEXT,
+      base_ref TEXT,
+      base_sha TEXT,
+      worktree_dirty INTEGER NOT NULL DEFAULT 0,
+      committed INTEGER NOT NULL DEFAULT 0,
+      matched_code_percent REAL,
+      report_path TEXT,
+      report_changes_path TEXT,
+      board_snapshot_path TEXT,
+      artifact_dir TEXT,
+      payload_json TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS save_points_campaign
+      ON save_points (campaign_id, created_at);
   `);
 
+  ensureColumn(db, "attempts", "attempt_index", "INTEGER");
+  ensureColumn(db, "attempts", "created_at", "TEXT");
   ensureColumn(db, "runs", "project_id", "TEXT");
   ensureColumn(db, "runs", "project_kind", "TEXT");
   ensureColumn(db, "runs", "project_repo_root", "TEXT");

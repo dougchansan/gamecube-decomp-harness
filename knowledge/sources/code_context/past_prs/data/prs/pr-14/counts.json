@@ -1,0 +1,17 @@
+{
+  "number": 14,
+  "title": "[WIP] decompile libvector.s",
+  "state": "CLOSED",
+  "createdAt": "2020-07-03T03:40:00Z",
+  "updatedAt": "2021-12-02T00:43:23Z",
+  "mergedAt": null,
+  "closedAt": "2021-12-02T00:43:23Z",
+  "author": "camthesaxman",
+  "url": "https://github.com/doldecomp/melee/pull/14",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 98540187
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 383,
+  "title": "add PUSH_ATTRS macro for fighter chara OnLoad, works on the first 8 o…",
+  "state": "MERGED",
+  "createdAt": "2022-05-21T19:15:58Z",
+  "updatedAt": "2022-05-22T00:04:27Z",
+  "mergedAt": "2022-05-22T00:04:27Z",
+  "closedAt": "2022-05-22T00:04:27Z",
+  "author": "snuffysasa",
+  "url": "https://github.com/doldecomp/melee/pull/383",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 48935
+  }
+}

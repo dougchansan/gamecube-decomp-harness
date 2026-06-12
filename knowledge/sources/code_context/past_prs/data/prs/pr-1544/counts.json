@@ -1,0 +1,17 @@
+{
+  "number": 1544,
+  "title": "Relax `melee-issues` error handling",
+  "state": "MERGED",
+  "createdAt": "2025-05-29T22:10:52Z",
+  "updatedAt": "2025-05-29T22:14:12Z",
+  "mergedAt": "2025-05-29T22:14:10Z",
+  "closedAt": "2025-05-29T22:14:10Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1544",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 1111
+  }
+}

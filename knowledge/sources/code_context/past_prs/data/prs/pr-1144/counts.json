@@ -1,0 +1,17 @@
+{
+  "number": 1144,
+  "title": "Clean up `lbrefract`",
+  "state": "MERGED",
+  "createdAt": "2024-01-28T14:06:24Z",
+  "updatedAt": "2024-01-28T14:07:34Z",
+  "mergedAt": "2024-01-28T14:07:33Z",
+  "closedAt": "2024-01-28T14:07:33Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1144",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 156596
+  }
+}

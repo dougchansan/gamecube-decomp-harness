@@ -1,0 +1,13 @@
+diff --git a/src/melee/gm/gm_1832.c b/src/melee/gm/gm_1832.c
+index 1111111..2222222 100644
+--- a/src/melee/gm/gm_1832.c
++++ b/src/melee/gm/gm_1832.c
+@@ -190,6 +190,8 @@ extern ClassicStageEntry lbl_803D9910[65];
+
+ static TrainingModeState lbl_80473700;
+
++extern const f32 un_804DDF70;
++
+ int gm_80188454(int idx)
+ {
+     return idx;

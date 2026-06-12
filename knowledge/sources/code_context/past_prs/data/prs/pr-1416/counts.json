@@ -1,0 +1,17 @@
+{
+  "number": 1416,
+  "title": "Match 93.15% of `ftwaitanim` (864 bytes)",
+  "state": "MERGED",
+  "createdAt": "2024-08-05T17:18:44Z",
+  "updatedAt": "2024-08-05T17:37:32Z",
+  "mergedAt": "2024-08-05T17:37:31Z",
+  "closedAt": "2024-08-05T17:37:31Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1416",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 38759
+  }
+}

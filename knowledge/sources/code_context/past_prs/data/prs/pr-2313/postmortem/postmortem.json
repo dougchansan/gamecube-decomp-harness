@@ -1,0 +1,421 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2313",
+  "pr": {
+    "number": 2313,
+    "title": "lb/lbbgflash",
+    "url": "https://github.com/doldecomp/melee/pull/2313",
+    "state": "MERGED",
+    "author": "jurrejelle",
+    "created_at": "2026-03-17T16:41:35Z",
+    "merged_at": "2026-03-20T00:50:31Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2313 worked on src/melee/lb/lbbgflash, adding a large amount of C for background flash and related JObj/IK math routines, updating local data typing around BgFlashData/GXColor, and changing the lbbgflash header. The bot report records 5 new matches and 8 unmatched-item improvements for main/melee/lb/lbbgflash.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "typed-struct-recovery",
+      "graphics-rendering",
+      "math-jobj"
+    ],
+    "systems": [
+      "library",
+      "lb",
+      "lbbgflash"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/lb/lbbgflash.c",
+      "role": "Primary decompilation target; diff adds implementations, includes, typed BgFlashData fields, GX drawing, GObj setup, JObj matrix/quaternion helpers, and matching tactics.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/lb/lbbgflash.c added 802 deleted 65 hunks 5",
+        "raw_diff: lbbgflash.c include additions and BgFlashData expansion",
+        "raw_diff: implementations for fn_8001FC08, fn_8001FEC4, lbBgFlash_800206D4, lbBgFlash_800208EC, fn_80020AEC, lbBgFlash_80020E38, fn_8002113C, lbBgFlash_80021410 excerpted",
+        "text_corpus: decomp-dev bot report for main/melee/lb/lbbgflash"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lbbgflash.h",
+      "role": "Header touched by PR; exact header diff is not present in loaded excerpt, but changed-file metadata records 12 additions and 10 deletions.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/lb/lbbgflash.h added 12 deleted 10 hunks 1",
+        "metadata_json: initial classification includes headers"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Expanded BgFlashData from a small partially typed structure into an offset-commented structure using GXColor fields for x4, x8, and xC, float arrays x10/x20, state bytes, counters, and HSD_GObj pointers.",
+      "evidence_refs": [
+        "raw_diff: typedef struct BgFlashData changes int x4/x8/xC to GXColor x4/x8/xC and adds x10/x20/x30-x44 fields"
+      ]
+    },
+    {
+      "text": "Changed lbl_804D3840, lbl_804D3844, lbl_804D3848, and lbl_804D384C extern declarations from s32 to GXColor.",
+      "evidence_refs": [
+        "raw_diff: extern s32 lbl_804D3840... replaced by extern GXColor lbl_804D3840..."
+      ]
+    },
+    {
+      "text": "Added library, baselib, GX, math, JObj, matrix, particle, quaternion, archive, and vector includes needed by the new source bodies.",
+      "evidence_refs": [
+        "raw_diff: added includes for dolphin/gx/GXStruct.h, dolphin/gx.h, gobjplink.h, gobjuserdata.h, jobj.h, mtx.h, particle.h, quatlib.h, MSL/trigf.h, lbarchive.h, lbvector.h, MSL/math.h"
+      ]
+    },
+    {
+      "text": "Implemented color interpolation/update code in fn_8001FC08 using four repeated channel blocks over x10/x20 and GXColor channel endpoints.",
+      "evidence_refs": [
+        "raw_diff: fn_8001FC08 body with TODO about un-unrolling and per-channel x10/x20 updates against data->x8.r/g/b/a"
+      ]
+    },
+    {
+      "text": "Implemented background flash rendering path in fn_8001FEC4 with GXBegin/GXPosition2f32/GXColor4u8 quads, mode checks, strip drawing loops, and PAD_STACK(8).",
+      "evidence_refs": [
+        "raw_diff: fn_8001FEC4 body with hsd_80391A04, GX_QUADS, mode handling, y loops, strip_h, neg_y, neg_yh"
+      ]
+    },
+    {
+      "text": "Updated fn_800204C8 to use BgFlashData and state.mode, and to write data->xC.r/g/b/a from data->x10[0..3] instead of byte fields on the older BgFlashData2 view.",
+      "evidence_refs": [
+        "raw_diff: fn_800204C8 changes BgFlashData2 cast to BgFlashData pointer and xC/xD/xE/xF assignments to xC.r/g/b/a"
+      ]
+    },
+    {
+      "text": "Implemented lbBgFlash_800206D4 as a two-color transition initializer using GXColor inputs and per-channel step values; also changed lbBgFlash_InitState parameter from int* duration to GXColor* color in the C diff excerpt.",
+      "evidence_refs": [
+        "raw_diff: lbBgFlash_800206D4 body and lbBgFlash_InitState signature/body change"
+      ]
+    },
+    {
+      "text": "Implemented or adjusted GObj setup routines lbBgFlash_800208EC and lbBgFlash_800209F4, including CObj creation, GX link setup, proc setup, and flash state initialization.",
+      "evidence_refs": [
+        "raw_diff: lbBgFlash_800208EC implementation under #pragma dont_inline",
+        "raw_diff: lbBgFlash_800209F4 changes with GObj_Create, HSD_GObjObject_80390A70, GObj_SetupGXLinkMax, GObj_SetupGXLink, HSD_GObj_SetupProc"
+      ]
+    },
+    {
+      "text": "Added JObj matrix/quaternion-related routines and helpers, including fn_80020AEC, lbBgFlash_80020E38, fn_8002113C, FakeHSD_JObjSetRotation, Fake_HSD_JObjGetRotation, IKChainData, and lbBgFlash_80021410 excerpted in the diff.",
+      "evidence_refs": [
+        "raw_diff: fn_80020AEC matrix normalization and parent traversal",
+        "raw_diff: lbBgFlash_80020E38 angle clamp and quaternion/non-quaternion paths",
+        "raw_diff: fake_HSD_ASSERT and FakeHSD_JObjSetRotation/Fake_HSD_JObjGetRotation",
+        "raw_diff: fn_8002113C and IKChainData/lbBgFlash_80021410 start"
+      ]
+    },
+    {
+      "text": "Bot report recorded 5 new matches: lbBgFlash_800206D4, fn_80021B04, lbBgFlash_800208EC, lbBgFlash_80021A18, and lbBgFlash_800209F4.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev bot report '✅ 5 new matches'"
+      ]
+    },
+    {
+      "text": "Bot report recorded improvements in fn_8001FEC4, lbBgFlash_80021410, lbBgFlash_80020E38, fn_80020AEC, fn_8002113C, fn_8001FC08, .sdata2, and .sdata.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev bot report '📈 8 improvements in unmatched items'"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Recovered color fields as GXColor and used named r/g/b/a channel accesses instead of the prior integer/byte field view, making the background flash color state more reviewable.",
+      "evidence_refs": [
+        "raw_diff: BgFlashData x4/x8/xC become GXColor",
+        "raw_diff: data->xC.r/g/b/a and col1->r/g/b/a uses"
+      ]
+    },
+    {
+      "text": "Kept offset comments in recovered structs, which helps reviewers check the reconstructed layout against known offsets.",
+      "evidence_refs": [
+        "raw_diff: BgFlashData and IKChainData fields include /* 0x.. */ comments"
+      ]
+    },
+    {
+      "text": "The author left an explicit TODO on fn_8001FC08 explaining that attempts to un-unroll the repeated channel code kept a loop in asm, preserving useful matching context rather than silently normalizing the code.",
+      "evidence_refs": [
+        "raw_diff: fn_8001FC08 comments 'TODO: Un-unroll this somehow?' and 'When I try it just stays a loop in the asm'"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When recovering packed color state, replacing integer or byte-field stand-ins with GXColor can clarify channel semantics and call signatures, but the field typing should stay tied to concrete accesses and layout evidence.",
+      "scope": [
+        "src/melee/lb/lbbgflash.c",
+        "GXColor-backed color state"
+      ],
+      "evidence_refs": [
+        "raw_diff: BgFlashData x4/x8/xC changed to GXColor",
+        "raw_diff: lbBgFlash_800206D4 uses GXColor* col1/col2 and channel math",
+        "decomp_standards: typed-fields-over-pointer-math"
+      ]
+    },
+    {
+      "lesson": "Repeated channel update code may look like a natural loop, but matching can force an unrolled form; if an unrolled form remains, record the failed loop attempt or reason in source comments.",
+      "scope": [
+        "fn_8001FC08",
+        "channel-wise color interpolation"
+      ],
+      "evidence_refs": [
+        "raw_diff: fn_8001FC08 four repeated channel blocks",
+        "raw_diff: TODO says un-unroll attempts stayed a loop in asm",
+        "decomp_standards: natural-loops"
+      ]
+    },
+    {
+      "lesson": "For partially matched functions, bot score evidence can document progress without implying full source quality; PR #2313 had several functions improved but still below 100%.",
+      "scope": [
+        "main/melee/lb/lbbgflash"
+      ],
+      "evidence_refs": [
+        "text_corpus: fn_8001FEC4 91.15%, lbBgFlash_80021410 81.06%, fn_80020AEC 88.27%, fn_8002113C 93.17%, fn_8001FC08 89.68%",
+        "decomp_standards: verification-and-regression-ledger"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Address-style names such as fn_8001FC08, fn_8001FEC4, fn_80020AEC, fn_8002113C, and lbl_80433658 were retained where stronger semantics are not shown in the PR evidence.",
+      "evidence_refs": [
+        "raw_diff: retained fn_ and lbl_ names throughout lbbgflash.c",
+        "decomp_standards: conservative-naming"
+      ]
+    },
+    {
+      "convention": "Short role-based local names were used where the role is clear, such as data, flash, gobj1_slot, gobj2_slot, parent, cur, grandpar, axis, angle, max_angle, and min_angle.",
+      "evidence_refs": [
+        "raw_diff: local variables in lbBgFlash_800208EC, lbBgFlash_800209F4, fn_80020AEC, lbBgFlash_80020E38, fn_8002113C"
+      ]
+    },
+    {
+      "convention": "Recovered struct names BgFlashData, BgFlashState, and IKChainData are semantic enough for local review while still keeping unknown fields as x-offset-style names.",
+      "evidence_refs": [
+        "raw_diff: typedef struct BgFlashData with x4/x8/xC/x10/x20 fields",
+        "raw_diff: typedef struct IKChainData with jobj0/jobj1/pos0-pos4/len0/len1"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Used PAD_STACK in fn_8001FEC4, lbBgFlash_800209F4, and fn_8002113C to influence stack shape.",
+      "evidence_refs": [
+        "raw_diff: PAD_STACK(8) in fn_8001FEC4",
+        "raw_diff: PAD_STACK(0x8) in lbBgFlash_800209F4",
+        "raw_diff: PAD_STACK(0x10) in fn_8002113C",
+        "decomp_standards: matching-tactics-need-evidence"
+      ],
+      "caveat": "The loaded PR evidence has bot score output but no narrow objdiff explanation for each PAD_STACK use."
+    },
+    {
+      "tactic": "Used scoped pragmas around lbBgFlash_800208EC: #pragma push, #pragma dont_inline on, and #pragma pop.",
+      "evidence_refs": [
+        "raw_diff: pragma block enclosing lbBgFlash_800208EC",
+        "text_corpus: bot report shows lbBgFlash_800208EC reached 100%",
+        "decomp_standards: avoid-pragmas-register-asm"
+      ],
+      "caveat": "No reviewer discussion or adjacent-function regression evidence is loaded for the pragma choice."
+    },
+    {
+      "tactic": "Adjusted inline depth around JObj/math routines with #pragma inline_depth(1) before fn_80020AEC and #pragma inline_depth(8) before lbBgFlash_80020E38.",
+      "evidence_refs": [
+        "raw_diff: #pragma inline_depth(1)",
+        "raw_diff: #pragma inline_depth(8)"
+      ],
+      "caveat": "The PR slice does not include an explanation of why these inline depths were required."
+    },
+    {
+      "tactic": "Used fake_HSD_ASSERT and local FakeHSD_JObjSetRotation/Fake_HSD_JObjGetRotation inlines to reproduce jobj.h assert behavior and rotation access patterns.",
+      "evidence_refs": [
+        "raw_diff: fake_HSD_ASSERT macro with __assert(\"jobj.h\", line, #cond)",
+        "raw_diff: FakeHSD_JObjSetRotation and Fake_HSD_JObjGetRotation"
+      ],
+      "caveat": "Loaded standards prefer existing header inlines when identifiable; this PR evidence shows fake local inlines but not reviewer acceptance rationale."
+    },
+    {
+      "tactic": "Used volatile f32 tmp in lbBgFlash_80020E38 during reciprocal-square-root length calculation.",
+      "evidence_refs": [
+        "raw_diff: volatile f32 tmp; tmp assigned from __frsqrte refinement result"
+      ],
+      "caveat": "No explicit objdiff note explains the volatile local."
+    },
+    {
+      "tactic": "Preserved suspicious no-op conditionals such as if ((data && data) && data){} and if ((!HSD_GObj_804D784B) && (!HSD_GObj_804D784B)){} in the excerpt, likely as local codegen steering, but the PR evidence does not explain them.",
+      "evidence_refs": [
+        "raw_diff: no-op if in fn_800208B0",
+        "raw_diff: no-op if in lbBgFlash_800209F4"
+      ],
+      "caveat": "Treat as matching-tactic evidence only, not accepted style."
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "author": "decomp-dev[bot]",
+      "text": "Report for GALE01 f58c7e5 - eb52544: matched code improved by +0.04% / +1448 bytes, with 5 new matches and 8 improvements in unmatched items.",
+      "evidence_refs": [
+        "text_corpus: issue_comment by decomp-dev[bot] created_at 2026-03-17T16:45:31Z"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2313",
+    "lb/lbbgflash",
+    "jurrejelle",
+    "src/melee/lb/lbbgflash.c",
+    "src/melee/lb/lbbgflash.h",
+    "BgFlashData",
+    "BgFlashState",
+    "GXColor",
+    "lbl_80433658",
+    "lbl_804D3840",
+    "lbl_804D3844",
+    "lbl_804D3848",
+    "lbl_804D384C",
+    "fn_8001FC08",
+    "fn_8001FEC4",
+    "fn_800204C8",
+    "lbBgFlash_800206D4",
+    "lbBgFlash_InitState",
+    "fn_800208B0",
+    "lbBgFlash_800208EC",
+    "lbBgFlash_800209F4",
+    "fn_80020AEC",
+    "lbBgFlash_80020E38",
+    "fn_8002113C",
+    "lbBgFlash_80021410",
+    "fn_80021B04",
+    "lbBgFlash_80021A18",
+    "IKChainData",
+    "PAD_STACK",
+    "dont_inline",
+    "inline_depth",
+    "fake_HSD_ASSERT",
+    "HSD_JObjGetMtxPtr",
+    "HSD_MtxInverseConcat",
+    "PSVECMag",
+    "__frsqrte",
+    "GXBegin",
+    "GX_QUADS",
+    "GXPosition2f32",
+    "GXColor4u8",
+    "GObj_Create",
+    "GObj_SetupGXLink",
+    "HSD_GObj_SetupProc"
+  ],
+  "follow_up_queries": [
+    "src/melee/lb/lbbgflash.c PAD_STACK dont_inline inline_depth",
+    "fake_HSD_ASSERT FakeHSD_JObjSetRotation Fake_HSD_JObjGetRotation jobj.h",
+    "fn_8001FC08 un-unroll color channel loop",
+    "BgFlashData GXColor lbl_80433658 x10 x20",
+    "lbBgFlash_800208EC pragma dont_inline",
+    "lbBgFlash_80021410 IKChainData",
+    "lbbgflash.h lbBgFlash_InitState GXColor"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR metadata, changed files, counts, state MERGED",
+      "human_pr_text: body only says 'Tracking PR as per usual'",
+      "raw_diff: truncated but includes large lbbgflash.c excerpt",
+      "changed_files.jsonl: exact changed files and line counts",
+      "text_corpus: bot report with match/improvement table"
+    ],
+    "notes": [
+      "No human review comments are present in the loaded slice.",
+      "The raw diff is truncated; later parts of lbbgflash.c and the exact lbbgflash.h diff are not available in loaded evidence.",
+      "Bot report provides match percentages and byte changes but not per-tactic objdiff rationale.",
+      "Several tactics visible in the diff, including PAD_STACK, pragmas, fake asserts, volatile locals, and no-op conditionals, are evidence-backed as used in this PR but should not be promoted as accepted style without curator review.",
+      "PR body is minimal and does not explain author intent beyond tracking."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson_candidate",
+        "title": "Typed GXColor recovery in lbbgflash",
+        "text": "PR #2313 shows lbbgflash color state becoming more reviewable by typing BgFlashData color fields and related externs as GXColor, then using r/g/b/a channel accesses in initializers and updates.",
+        "scope": [
+          "src/melee/lb/lbbgflash.c",
+          "BgFlashData",
+          "GXColor"
+        ],
+        "evidence_refs": [
+          "raw_diff: BgFlashData x4/x8/xC as GXColor",
+          "raw_diff: lbBgFlash_800206D4 channel math",
+          "raw_diff: fn_800204C8 xC.r/g/b/a assignments"
+        ]
+      },
+      {
+        "record_type": "matching_context_candidate",
+        "title": "Document failed loop cleanup when unrolled channel code remains",
+        "text": "In fn_8001FC08, the author left a TODO noting that attempts to un-unroll the repeated channel logic stayed as a loop in asm. This is useful context when an unrolled form remains for matching.",
+        "scope": [
+          "fn_8001FC08"
+        ],
+        "evidence_refs": [
+          "raw_diff: fn_8001FC08 TODO and repeated channel blocks",
+          "decomp_standards: natural-loops"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Clarify local fake header inlines/assert wrappers",
+        "text": "PR #2313 used local fake_HSD_ASSERT plus FakeHSD_JObjSetRotation/Fake_HSD_JObjGetRotation wrappers for jobj.h-like rotation helpers. Existing standards already prefer header inlines and assert macros; curator may consider adding an example warning that local fake header helpers require explicit objdiff evidence and should be replaced by real header inlines when possible.",
+        "source_path": null,
+        "scope": [
+          "header-inlines",
+          "assert-report-macros",
+          "matching-tactics-need-evidence",
+          "src/melee/lb/lbbgflash.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: fake_HSD_ASSERT macro and FakeHSD_JObjSetRotation/Fake_HSD_JObjGetRotation",
+          "decomp_standards: header-inlines",
+          "decomp_standards: assert-report-macros"
+        ],
+        "reason": "The PR provides a concrete historical example of local fake header helpers being used as a matching tactic, but the slice lacks enough rationale to mark it as accepted style."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "lbbgflash.c contains background flash GX rendering and JObj/IK math routines",
+        "text": "The PR evidence shows src/melee/lb/lbbgflash.c covering background flash GX quad rendering, GObj setup, color transition state, and JObj matrix/quaternion/IK-like helper routines.",
+        "source_path": "src/melee/lb/lbbgflash.c",
+        "scope": [
+          "library",
+          "lb",
+          "lbbgflash",
+          "GX rendering",
+          "JObj math"
+        ],
+        "evidence_refs": [
+          "raw_diff: fn_8001FEC4 GX rendering",
+          "raw_diff: lbBgFlash_800208EC/lbBgFlash_800209F4 GObj setup",
+          "raw_diff: fn_80020AEC/lbBgFlash_80020E38/fn_8002113C/lbBgFlash_80021410 JObj and IK-related code"
+        ],
+        "reason": "Potential path fact for source navigation; should be checked against current source before promotion."
+      }
+    ],
+    "rejection_notes": [
+      "Do not treat PAD_STACK, #pragma dont_inline, #pragma inline_depth, volatile locals, fake_HSD_ASSERT wrappers, or no-op conditionals from this PR as globally accepted style; the loaded evidence does not include per-tactic verifier rationale.",
+      "Do not infer that all functions in lbbgflash were fully matched; the bot report explicitly lists several functions as improvements below 100%.",
+      "Do not infer specific contents of src/melee/lb/lbbgflash.h beyond changed-file metadata because its diff was not loaded."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

@@ -3,7 +3,14 @@ export type EventType =
   | "run_status_changed"
   | "worker_finished"
   | "worker_stalled"
+  | "worker_needs_rework"
   | "worker_error"
+  | "worker_provider_error"
   | "needs_fact"
   | "score_candidate"
-  | "pool_below_target";
+  | "pool_below_target"
+  | "epoch_regression_pause"
+  | "epoch_cycle_error"
+  | "epoch_started"
+  | "epoch_finished"
+  | "pool_stopping";

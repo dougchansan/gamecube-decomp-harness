@@ -1,0 +1,17 @@
+{
+  "number": 2589,
+  "title": "link some free files",
+  "state": "CLOSED",
+  "createdAt": "2026-06-06T19:12:59Z",
+  "updatedAt": "2026-06-07T17:25:18Z",
+  "mergedAt": null,
+  "closedAt": "2026-06-07T04:00:35Z",
+  "author": "BR-",
+  "url": "https://github.com/doldecomp/melee/pull/2589",
+  "counts": {
+    "issue_comments": 2,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 2930
+  }
+}

@@ -1,0 +1,382 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2291",
+  "pr": {
+    "number": 2291,
+    "title": "it: decompile Super Scope functions",
+    "url": "https://github.com/doldecomp/melee/pull/2291",
+    "state": "MERGED",
+    "author": "johnwinston",
+    "created_at": "2026-03-15T05:59:52Z",
+    "merged_at": "2026-03-15T18:22:14Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Decompiled two Super Scope item functions in itsscope.c, updated related prototypes, added an itsscopebeam include, and refined itSScopeAttributes padding into a float array used for charge-cost indexing. The PR body and bot report claim both functions reached 100% objdiff match and main.dol SHA1 verification passed.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "typed-field-recovery"
+    ],
+    "systems": [
+      "item",
+      "Super Scope"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/it/items/itsscope.c",
+      "role": "Replaced placeholders for it_80291F14 and it_80291FA8 with C implementations; added itsscopebeam.h include; used GET_ITEM, GET_ATTRS, charge-cost logic, beam spawn call, and PAD_STACK.",
+      "evidence_refs": [
+        "raw_diff: itsscope.c hunk adds include \"itsscopebeam.h\" and implementations for it_80291F14 and it_80291FA8",
+        "human_pr_text: summary says decompile it_80291F14 and it_80291FA8 in itsscope.c"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itsscope.h",
+      "role": "Updated recovered function prototypes, replacing UNK_RET/UNK_PARAMS for it_80291D38, it_80291F14, and it_80291FA8.",
+      "evidence_refs": [
+        "raw_diff: itsscope.h changes it_80291D38 to int(Item_GObj*, int), it_80291F14 to void(Item_GObj*, int), and it_80291FA8 to void(Item_GObj*, Vec3*, int, float)"
+      ]
+    },
+    {
+      "path": "src/melee/it/itCommonItems.h",
+      "role": "Split itSScopeAttributes padding at offset 0xC into float xC[10], enabling typed indexed access in it_80291F14.",
+      "evidence_refs": [
+        "raw_diff: itCommonItems.h changes pad_xC[0x28] to float xC[10]",
+        "human_pr_text: body says padding was split in itSScopeAttributes to expose xC float array"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Implemented it_80291F14 as a void function taking Item_GObj* and int charge_level; it reads Super Scope attributes, selects a cost from attrs->xC by charge level, subtracts it from ip->xD4C, clamps xD4C to zero, and uses PAD_STACK(16).",
+      "evidence_refs": [
+        "raw_diff: itsscope.c implementation of it_80291F14"
+      ]
+    },
+    {
+      "text": "Implemented it_80291FA8 as a void function taking Item_GObj*, Vec3*, int charge_level, and float scale; it gets a cost from it_80291D38, subtracts and clamps ip->xD4C, then calls it_80298DEC(ip->owner, pos, charge_level, scale), with PAD_STACK(8).",
+      "evidence_refs": [
+        "raw_diff: itsscope.c implementation of it_80291FA8"
+      ]
+    },
+    {
+      "text": "Changed itSScopeAttributes at offset 0xC from char padding of 0x28 bytes to float xC[10].",
+      "evidence_refs": [
+        "raw_diff: itCommonItems.h struct change"
+      ]
+    },
+    {
+      "text": "Replaced unknown prototypes in itsscope.h with concrete signatures for it_80291D38, it_80291F14, and it_80291FA8.",
+      "evidence_refs": [
+        "raw_diff: itsscope.h prototype changes"
+      ]
+    },
+    {
+      "text": "The loaded bot report records two new matches in main/melee/it/items/itsscope: it_80291F14 at +148 bytes and it_80291FA8 at +136 bytes, each moving from 0.00% to 100.00%.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev[bot] issue_comment report for GALE01"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Recovered a typed float array in itSScopeAttributes instead of continuing to treat offset 0xC as opaque padding, allowing charge-level cost indexing through attrs->xC.",
+      "evidence_refs": [
+        "human_pr_text: padding split to expose xC float array",
+        "raw_diff: itCommonItems.h pad_xC[0x28] to float xC[10]",
+        "raw_diff: itsscope.c uses attrs->xC[charge_level]"
+      ]
+    },
+    {
+      "text": "Updated the public item header prototypes alongside the recovered function bodies, reducing UNK_RET/UNK_PARAMS use for the touched Super Scope functions.",
+      "evidence_refs": [
+        "raw_diff: itsscope.h prototype changes"
+      ]
+    },
+    {
+      "text": "Added the itsscopebeam.h include where the decompiled body calls it_80298DEC, keeping the dependency visible in the C source.",
+      "evidence_refs": [
+        "raw_diff: itsscope.c include addition and call to it_80298DEC"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When decompiling item behavior that indexes into previously opaque item attributes, a small typed-struct recovery can be necessary for readable and matching source.",
+      "scope": [
+        "item attributes",
+        "itSScopeAttributes",
+        "Super Scope"
+      ],
+      "evidence_refs": [
+        "human_pr_text: padding split to expose xC float array",
+        "raw_diff: itCommonItems.h exposes float xC[10]",
+        "raw_diff: itsscope.c indexes attrs->xC in it_80291F14"
+      ]
+    },
+    {
+      "lesson": "Recovered function bodies should be paired with truthful header prototypes when the signature becomes known.",
+      "scope": [
+        "headers",
+        "item function prototypes"
+      ],
+      "evidence_refs": [
+        "raw_diff: itsscope.h replaces UNK_RET/UNK_PARAMS for recovered functions",
+        "decomp_standards: truthful-headers-and-includes"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "ip",
+      "meaning": "local Item* from GET_ITEM(gobj)",
+      "evidence_refs": [
+        "raw_diff: it_80291F14 and it_80291FA8 use Item* ip = GET_ITEM(gobj)"
+      ]
+    },
+    {
+      "name": "attrs",
+      "meaning": "local itSScopeAttributes* from GET_ATTRS(ip)",
+      "evidence_refs": [
+        "raw_diff: it_80291F14 uses itSScopeAttributes* attrs = GET_ATTRS(ip)"
+      ]
+    },
+    {
+      "name": "charge_level",
+      "meaning": "integer argument used to select or forward the Super Scope charge level",
+      "evidence_refs": [
+        "raw_diff: it_80291F14 and it_80291FA8 signatures and body references"
+      ]
+    },
+    {
+      "name": "cost",
+      "meaning": "local integer amount subtracted from ip->xD4C",
+      "evidence_refs": [
+        "raw_diff: both decompiled functions define cost and subtract it from ip->xD4C"
+      ]
+    },
+    {
+      "name": "xC",
+      "meaning": "address-style field name for recovered float array at itSScopeAttributes offset 0xC; semantic meaning remains unproven in PR evidence",
+      "evidence_refs": [
+        "raw_diff: itCommonItems.h field named xC[10]",
+        "human_pr_text: expose xC float array"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Used PAD_STACK in narrow function scope: PAD_STACK(16) in it_80291F14 and PAD_STACK(8) in it_80291FA8.",
+      "evidence_refs": [
+        "raw_diff: PAD_STACK calls at ends of new implementations"
+      ],
+      "notes": "PR body and bot report provide match evidence, but the slice does not include detailed objdiff output explaining why PAD_STACK was needed."
+    },
+    {
+      "tactic": "Used grouped switch cases for charge_level values 0 through 9, with cases 1 through 8 sharing attrs->xC[charge_level].",
+      "evidence_refs": [
+        "raw_diff: switch in it_80291F14"
+      ],
+      "notes": "This is a concrete control-flow shape in the diff; no reviewer discussion explains whether alternate forms were tried."
+    },
+    {
+      "tactic": "Used a typed attribute array to avoid raw pointer arithmetic for offsets under itSScopeAttributes.",
+      "evidence_refs": [
+        "raw_diff: itCommonItems.h field recovery",
+        "raw_diff: itsscope.c attrs->xC indexed loads"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "text": "decomp-dev[bot] reported +284 matched-code bytes and two new 100% matches: it_80291F14 (+148 bytes) and it_80291FA8 (+136 bytes).",
+      "evidence_refs": [
+        "text_corpus: issue_comment by decomp-dev[bot] at 2026-03-15T06:07:51Z"
+      ]
+    },
+    {
+      "kind": "missing_human_review_comments",
+      "text": "No review comments or reviews are present in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata_json: counts show review_comments 0 and reviews 0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2291",
+    "it: decompile Super Scope functions",
+    "johnwinston",
+    "Super Scope",
+    "itsscope",
+    "itsscope.c",
+    "itsscope.h",
+    "itCommonItems.h",
+    "itSScopeAttributes",
+    "pad_xC",
+    "xC",
+    "float xC[10]",
+    "it_80291F14",
+    "it_80291FA8",
+    "it_80291D38",
+    "it_80298DEC",
+    "itsscopebeam.h",
+    "Item_GObj",
+    "GET_ITEM",
+    "GET_ATTRS",
+    "charge_level",
+    "xD4C",
+    "PAD_STACK(16)",
+    "PAD_STACK(8)",
+    "UNK_RET",
+    "UNK_PARAMS",
+    "objdiff 100%",
+    "main.dol OK"
+  ],
+  "follow_up_queries": [
+    "PR 2291 it_80291F14 PAD_STACK 16",
+    "PR 2291 it_80291FA8 PAD_STACK 8",
+    "itSScopeAttributes xC float array Super Scope charge cost",
+    "itsscope it_80291D38 prototype Item_GObj int",
+    "it_80298DEC itsscopebeam owner pos charge_level scale",
+    "Super Scope xD4C charge cost clamp"
+  ],
+  "evidence_quality": {
+    "status": "strong",
+    "evidence_refs": [
+      "metadata_json: PR identity, state, author, timestamps, changed files, counts",
+      "human_pr_text: summary and verification claims",
+      "raw_diff: full loaded diff for three changed files",
+      "changed_files: file list and hunk counts",
+      "text_corpus: PR body and decomp-dev bot report"
+    ],
+    "notes": [
+      "The loaded slice includes complete diff text for the changed files and the PR body, so changed files and code edits are well supported.",
+      "Verification is represented as PR-author and bot-report evidence; no raw objdiff logs are included in the slice.",
+      "No human review comments are available, so reviewer intent and requested changes cannot be inferred.",
+      "The semantic meaning of xC and xD4C beyond their observed charge-cost use is not proven by the PR slice.",
+      "PAD_STACK usage is visible and associated with claimed 100% match, but the exact assembly reason for the padding is not documented in the slice."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "type": "decomp_lesson",
+        "title": "Recover typed item-attribute arrays when indexed access appears in matched functions",
+        "text": "PR #2291 shows a Super Scope decomp where itSScopeAttributes padding at offset 0xC was split into float xC[10], enabling it_80291F14 to index attrs->xC by charge_level instead of using opaque padding or raw offsets.",
+        "scope": [
+          "item attributes",
+          "Super Scope",
+          "typed fields over pointer math"
+        ],
+        "evidence_refs": [
+          "human_pr_text: padding split to expose xC float array",
+          "raw_diff: itCommonItems.h pad_xC[0x28] to float xC[10]",
+          "raw_diff: itsscope.c uses attrs->xC[charge_level]"
+        ]
+      },
+      {
+        "type": "decomp_lesson",
+        "title": "Update owning headers when decompiled bodies recover signatures",
+        "text": "PR #2291 paired the new C implementations of it_80291F14 and it_80291FA8 with itsscope.h prototype updates, and also recovered it_80291D38 as int(Item_GObj*, int).",
+        "scope": [
+          "headers",
+          "item functions",
+          "truthful prototypes"
+        ],
+        "evidence_refs": [
+          "raw_diff: itsscope.h prototype changes",
+          "raw_diff: itsscope.c implementations"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "Super Scope item code and header locations",
+        "text": "PR #2291 provides evidence that Super Scope item implementation work touched src/melee/it/items/itsscope.c and src/melee/it/items/itsscope.h, while the shared item attributes struct itSScopeAttributes is in src/melee/it/itCommonItems.h.",
+        "source_path": null,
+        "scope": [
+          "src/melee/it/items/itsscope.c",
+          "src/melee/it/items/itsscope.h",
+          "src/melee/it/itCommonItems.h",
+          "Super Scope item"
+        ],
+        "evidence_refs": [
+          "changed_files: three changed files listed",
+          "raw_diff: file paths and edits"
+        ],
+        "reason": "This is a path/scope fact candidate, not an accepted global lesson."
+      },
+      {
+        "target_source_id": "ssbm_data_sheet",
+        "update_kind": "source_update",
+        "title": "itSScopeAttributes offset 0xC recovered as float xC[10]",
+        "text": "PR #2291 changed itSScopeAttributes at offset +0xC from pad_xC[0x28] to float xC[10], with +0x34 remaining Vec3 x34. The PR body states this split exposed the xC float array.",
+        "source_path": "src/melee/it/itCommonItems.h",
+        "scope": [
+          "itSScopeAttributes",
+          "Super Scope",
+          "item attributes"
+        ],
+        "evidence_refs": [
+          "raw_diff: itCommonItems.h struct change",
+          "human_pr_text: padding split to expose xC float array"
+        ],
+        "reason": "Potential data-sheet/struct-layout update for curator review; semantics beyond field type and offset should remain cautious."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "PAD_STACK must keep verifier evidence",
+        "text": "PR #2291 used PAD_STACK(16) and PAD_STACK(8) in newly matched functions and included PR/body bot evidence of 100% matches. This supports the existing standard that stack-padding tactics need narrow verifier evidence, but does not require a new standard.",
+        "source_path": null,
+        "scope": [
+          "PAD_STACK",
+          "matching tactics",
+          "item decomp"
+        ],
+        "evidence_refs": [
+          "raw_diff: PAD_STACK in it_80291F14 and it_80291FA8",
+          "human_pr_text: all functions at 100% match via objdiff",
+          "text_corpus: bot report lists both functions at 100.00%"
+        ],
+        "reason": "Candidate note for standards curation; current loaded standards already cover matching tactics needing evidence."
+      }
+    ],
+    "rejection_notes": [
+      {
+        "text": "Do not promote a semantic name for itSScopeAttributes.xC or Item.xD4C from this PR alone; the slice shows usage as cost/charge-related storage but does not prove canonical field meaning.",
+        "evidence_refs": [
+          "raw_diff: field remains address-style xC and item field remains xD4C"
+        ]
+      },
+      {
+        "text": "Do not infer that Claude-generated code is accepted as a general workflow standard; the PR body only notes it was generated with Claude Code.",
+        "evidence_refs": [
+          "human_pr_text: generated with Claude Code footer"
+        ]
+      },
+      {
+        "text": "Do not infer reviewer approval rationale or requested changes; no human review comments are present in the loaded evidence.",
+        "evidence_refs": [
+          "metadata_json: review_comments 0, reviews 0"
+        ]
+      }
+    ]
+  },
+  "confidence": 0.88,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

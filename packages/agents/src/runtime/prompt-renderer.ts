@@ -1,12 +1,22 @@
 import { readFileSync } from "node:fs";
 
 export interface PromptTemplateValues {
-  CURRENT_STATE_JSON: string;
-  DECOMP_STANDARDS_JSON?: string;
-  FILES_TO_READ_JSON: string;
+  AVAILABLE_TOOLS_XML?: string;
+  BASELINE_XML?: string;
+  CURATOR_CONTEXT_JSON?: string;
+  CURATOR_OUTPUT_SCHEMA_JSON?: string;
+  CURRENT_STATE_JSON?: string;
+  DECOMP_STANDARDS_XML?: string;
+  FILES_TO_READ_JSON?: string;
   PI_TOOLS_JSON?: string;
-  RESOURCES_JSON: string;
+  PR_CONTEXT_JSON?: string;
+  PR_CONTEXT_XML?: string;
+  PR_OUTPUT_SCHEMA_JSON?: string;
+  RESOURCES_JSON?: string;
   PRIMARY_SOURCE_PATH?: string;
+  TARGET_FILE_XML?: string;
+  TARGET_GRAPH_FILE_CARD_XML?: string;
+  TARGET_XML?: string;
 }
 
 export function readTemplate(path: string): string {

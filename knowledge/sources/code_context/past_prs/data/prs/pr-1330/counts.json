@@ -1,0 +1,17 @@
+{
+  "number": 1330,
+  "title": "Match 9.92% of `ftPr_SpecialN` (19.6 KB)",
+  "state": "MERGED",
+  "createdAt": "2024-02-26T16:58:04Z",
+  "updatedAt": "2024-02-26T17:00:19Z",
+  "mergedAt": "2024-02-26T17:00:19Z",
+  "closedAt": "2024-02-26T17:00:19Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1330",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 15722
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 2620,
+  "title": "Improvements to split up: FT",
+  "state": "MERGED",
+  "createdAt": "2026-06-08T14:30:28Z",
+  "updatedAt": "2026-06-08T15:10:00Z",
+  "mergedAt": "2026-06-08T15:10:00Z",
+  "closedAt": "2026-06-08T15:10:00Z",
+  "author": "fjooord",
+  "url": "https://github.com/doldecomp/melee/pull/2620",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 11935
+  }
+}

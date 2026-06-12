@@ -1,0 +1,17 @@
+{
+  "number": 2000,
+  "title": "Matched THPDec_803302EC function in the THPDec.c file",
+  "state": "MERGED",
+  "createdAt": "2025-12-22T03:31:15Z",
+  "updatedAt": "2025-12-23T03:00:06Z",
+  "mergedAt": "2025-12-23T03:00:06Z",
+  "closedAt": "2025-12-23T03:00:06Z",
+  "author": "asylum14",
+  "url": "https://github.com/doldecomp/melee/pull/2000",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 31648
+  }
+}

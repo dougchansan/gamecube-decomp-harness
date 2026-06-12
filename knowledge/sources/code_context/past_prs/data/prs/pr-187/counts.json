@@ -1,0 +1,17 @@
+{
+  "number": 187,
+  "title": "Match HSD_StateInitDirect and add matching HSD_InitComponent that needs data split",
+  "state": "MERGED",
+  "createdAt": "2021-12-13T21:50:04Z",
+  "updatedAt": "2021-12-13T21:50:13Z",
+  "mergedAt": "2021-12-13T21:50:11Z",
+  "closedAt": "2021-12-13T21:50:11Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/187",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 69511
+  }
+}

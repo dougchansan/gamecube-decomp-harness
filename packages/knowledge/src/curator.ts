@@ -165,7 +165,7 @@ function workerRecordFromRow(row: WorkerReportRow, options: CurateKnowledgeOptio
     repairAttempts.exhausted !== true &&
     (reportType === "progress" || reportType === "score_candidate");
   const status = cleanReturn ? "accepted" : "proposal";
-  const confidence = cleanReturn ? 0.8 : reportType === "needs_fact" ? 0.45 : reportType === "tool_error" || validationFailed ? 0.2 : 0.3;
+  const confidence = cleanReturn ? 0.8 : reportType === "needs_fact" ? 0.45 : reportType === "tool_error" || reportType === "needs_rework" || validationFailed ? 0.2 : 0.3;
   const summaryText = stringValue(summary.summary, "Worker report was persisted for curator review.");
   const text = [
     sourcePath,
@@ -213,12 +213,12 @@ function workerRecordFromRow(row: WorkerReportRow, options: CurateKnowledgeOptio
 
 function prLessonRecords(options: CurateKnowledgeOptions): CuratedKnowledgeRecord[] {
   const root = pastPrsRoot();
-  const indexPath = resolve(root, "prs/index.jsonl");
+  const indexPath = resolve(root, "library/index.jsonl");
   const records: CuratedKnowledgeRecord[] = [];
   for (const row of readJsonl(indexPath, nonNegativeLimit(options.prLimit, 500))) {
     const postmortemRel = stringValue(row.postmortem_json);
     if (!postmortemRel) continue;
-    const postmortemPath = resolve(root, "prs", postmortemRel);
+    const postmortemPath = resolve(root, postmortemRel);
     const postmortem = readJsonObject(postmortemPath);
     if (!Object.keys(postmortem).length) continue;
     const pr = objectValue(postmortem.pr);
@@ -312,7 +312,6 @@ function targetSourceForText(value: string): string | null {
   if (/\b0x[0-9a-f]{6,8}\b/i.test(value) || /\b(offset|address|data sheet|action state|hitbox|hurtbox|id list)\b/i.test(text)) {
     return "ssbm_data_sheet";
   }
-  if (/\b(ghidra|opseq|mismatch|mwcc|compiler dump)\b/i.test(text)) return "tool_outputs";
   return null;
 }
 
@@ -326,7 +325,7 @@ function sourceUpdateReason(targetSourceId: string): string {
   if (targetSourceId === "decomp_standards") return "Evidence proposes a broad decomp/review standard; standards source owner should review before changing global injected rules.";
   if (targetSourceId === "path_facts") return "Evidence proposes a scoped known win for a directory or path; path facts source owner should validate scope, stale checks, and provenance before applying.";
   if (targetSourceId === "ssbm_data_sheet") return "Evidence references address, offset, ID, or data-sheet-like terms; source owner should review before mutating CSV data.";
-  return "Evidence references tool-output-like terms; tool output indexes may need a refresh or note.";
+  return "Evidence references source-like terms; source owner should review before mutating registered source data.";
 }
 
 function prLessonText(postmortem: Record<string, unknown>, sourcePath: string): string {

@@ -1,0 +1,17 @@
+{
+  "number": 180,
+  "title": "Decompiled `cstring.s`",
+  "state": "MERGED",
+  "createdAt": "2021-12-13T02:55:04Z",
+  "updatedAt": "2021-12-13T02:57:24Z",
+  "mergedAt": "2021-12-13T02:57:24Z",
+  "closedAt": "2021-12-13T02:57:24Z",
+  "author": "kiwi515",
+  "url": "https://github.com/doldecomp/melee/pull/180",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 4370
+  }
+}

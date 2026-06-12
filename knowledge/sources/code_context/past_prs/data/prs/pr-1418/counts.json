@@ -1,0 +1,17 @@
+{
+  "number": 1418,
+  "title": "Remove reference to Trello in docs",
+  "state": "MERGED",
+  "createdAt": "2024-08-10T18:51:39Z",
+  "updatedAt": "2024-08-10T18:54:09Z",
+  "mergedAt": "2024-08-10T18:54:08Z",
+  "closedAt": "2024-08-10T18:54:08Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1418",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 917
+  }
+}

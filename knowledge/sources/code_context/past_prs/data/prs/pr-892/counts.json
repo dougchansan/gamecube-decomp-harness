@@ -1,0 +1,17 @@
+{
+  "number": 892,
+  "title": "Clean up `ftCommon` symbol prefixes",
+  "state": "MERGED",
+  "createdAt": "2023-05-29T02:02:17Z",
+  "updatedAt": "2023-05-29T02:10:36Z",
+  "mergedAt": "2023-05-29T02:10:35Z",
+  "closedAt": "2023-05-29T02:10:35Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/892",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 853899
+  }
+}

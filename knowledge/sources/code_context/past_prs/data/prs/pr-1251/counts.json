@@ -1,0 +1,17 @@
+{
+  "number": 1251,
+  "title": "Fix `gen-pages` entrypoint",
+  "state": "MERGED",
+  "createdAt": "2024-02-18T20:16:46Z",
+  "updatedAt": "2024-02-18T20:20:16Z",
+  "mergedAt": "2024-02-18T20:20:16Z",
+  "closedAt": "2024-02-18T20:20:16Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1251",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 129
+  }
+}

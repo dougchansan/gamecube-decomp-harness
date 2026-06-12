@@ -1,0 +1,17 @@
+{
+  "number": 542,
+  "title": "Replace all instances of `fighterObj` with `fighter_gobj`",
+  "state": "MERGED",
+  "createdAt": "2022-09-04T10:55:01Z",
+  "updatedAt": "2022-09-04T14:55:43Z",
+  "mergedAt": "2022-09-04T14:55:42Z",
+  "closedAt": "2022-09-04T14:55:42Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/542",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 1,
+    "diff_bytes": 443488
+  }
+}

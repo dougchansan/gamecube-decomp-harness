@@ -1,0 +1,17 @@
+{
+  "number": 1969,
+  "title": "Spline text near match",
+  "state": "MERGED",
+  "createdAt": "2025-10-20T19:26:21Z",
+  "updatedAt": "2025-10-22T18:44:02Z",
+  "mergedAt": "2025-10-22T18:44:01Z",
+  "closedAt": "2025-10-22T18:44:01Z",
+  "author": "rbasamoyai",
+  "url": "https://github.com/doldecomp/melee/pull/1969",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 10368
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 1938,
+  "title": "Match ftKirby's Game&Watch callbacks",
+  "state": "MERGED",
+  "createdAt": "2025-09-25T01:33:43Z",
+  "updatedAt": "2025-09-25T01:43:06Z",
+  "mergedAt": "2025-09-25T01:43:03Z",
+  "closedAt": "2025-09-25T01:43:03Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1938",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 9844
+  }
+}

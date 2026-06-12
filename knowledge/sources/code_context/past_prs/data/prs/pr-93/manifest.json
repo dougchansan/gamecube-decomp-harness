@@ -1,0 +1,28 @@
+{
+  "schema_version": "melee_pr_vertical_slice_v1",
+  "pr": 93,
+  "title": "Handle AObj jump tables using function label + offset",
+  "state": "MERGED",
+  "path": "prs/pr-93",
+  "files": {
+    "raw": [
+      "raw/pr.json",
+      "raw/issue_comments.json",
+      "raw/review_comments.json",
+      "raw/reviews.json",
+      "raw/diff.diff"
+    ],
+    "extracted": [
+      "extracted/text_corpus.jsonl",
+      "extracted/changed_files.jsonl",
+      "extracted/diff_lines.jsonl"
+    ],
+    "postmortem": [
+      "postmortem/postmortem.json"
+    ],
+    "metadata": [
+      "counts.json",
+      "activity.json"
+    ]
+  }
+}

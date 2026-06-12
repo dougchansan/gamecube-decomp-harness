@@ -1,0 +1,17 @@
+{
+  "number": 369,
+  "title": "Match `ifstatus`",
+  "state": "CLOSED",
+  "createdAt": "2022-05-08T03:26:16Z",
+  "updatedAt": "2022-08-26T21:06:46Z",
+  "mergedAt": null,
+  "closedAt": "2022-08-26T03:02:02Z",
+  "author": "MarkMcCaskey",
+  "url": "https://github.com/doldecomp/melee/pull/369",
+  "counts": {
+    "issue_comments": 2,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 137221
+  }
+}

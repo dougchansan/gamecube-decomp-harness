@@ -1,0 +1,17 @@
+{
+  "number": 58,
+  "title": "Start of matching initialize.c",
+  "state": "MERGED",
+  "createdAt": "2020-10-22T13:50:28Z",
+  "updatedAt": "2020-10-22T13:51:09Z",
+  "mergedAt": "2020-10-22T13:50:44Z",
+  "closedAt": "2020-10-22T13:50:44Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/58",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 10878
+  }
+}

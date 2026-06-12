@@ -1,0 +1,349 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2539",
+  "pr": {
+    "number": 2539,
+    "title": "Jj/vi0501 and psdisp",
+    "url": "https://github.com/doldecomp/melee/pull/2539",
+    "state": "MERGED",
+    "author": "jurrejelle",
+    "created_at": "2026-05-25T18:27:03Z",
+    "merged_at": "2026-05-31T13:37:47Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2539 decompiled and improved code in vi0501 and sysdolphin psdisp. It replaced the stub for un_8031D9F8, matched particleSort according to the automated report, improved psDispParticles, added psdisp point/trail inline helpers, and deleted a temporary target_funcs.txt checklist.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "source-cleanup",
+      "target-list-cleanup"
+    ],
+    "systems": [
+      "src/melee/vi",
+      "src/sysdolphin/baselib",
+      "repo-root"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/vi/vi0501.c",
+      "role": "Recovered un_8031D9F8 from a stub, added required subsystem includes, static HSD_GObj storage, player/stage setup calls, a Kirby spawn loop, JObj animation/translation access, and audio setup.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/vi/vi0501.c added 82 deleted 1 in 4 hunks",
+        "raw_diff.diff: vi0501.c replaces /// #un_8031D9F8 with a full function body",
+        "text_corpus.jsonl: bot report says main/melee/vi/vi0501 un_8031D9F8 improved +640 bytes, 0.00% to 98.83%; .sdata +16 reached 100%"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/psdisp.c",
+      "role": "Reworked particle sorting and particle display code, including natural loops over sort buckets, inline color helper wrappers, new psDispSubPoint and psDispSubPointTrail helpers, and control-flow/local lifetime changes in psDispParticles.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/sysdolphin/baselib/psdisp.c added 641 deleted 267 in 17 hunks",
+        "raw_diff.diff: particleSort unrolled bucket handling replaced by for loops over buckets[0..7] and buckets[8..15]",
+        "raw_diff.diff: new static inline getColorMatAmb_inner/getColorMatAmb_noinline, psDispSubPoint, and psDispSubPointTrail",
+        "text_corpus.jsonl: bot report says particleSort reached 100.00% and psDispParticles improved 39.03% to 58.06%"
+      ]
+    },
+    {
+      "path": "target_funcs.txt",
+      "role": "Deleted a temporary target checklist for mncharsel functions.",
+      "evidence_refs": [
+        "changed_files.jsonl: target_funcs.txt added 0 deleted 13 in 1 hunk",
+        "raw_diff.diff: target_funcs.txt deleted file mode 100644 with mnCharSel checklist entries"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Implemented vi0501 function un_8031D9F8 with setup for camera, collision, ground/stage, items, fighter demo allocation, player initialization, Kirby demo spawn loop, JObj animation sampling, scaled position writes, and audio calls.",
+    "Added vi0501 includes for camera, fighter demo, ground/stage, item, collision, player, baselib gobj, and baselib jobj to support the recovered body.",
+    "Added static HSD_GObj* un_804A2E98[4] in vi0501.c for entities used by the un_8031D9F8 loop.",
+    "In particleSort, replaced a long hand-unrolled sequence over 16 particle sort buckets with two indexed for loops covering buckets 0-7 and 8-15.",
+    "Added psdisp inline wrapper helpers around getColorMatAmb and new inline helpers psDispSubPoint and psDispSubPointTrail that batch point/trail particle drawing through stack buffers and GXWGFifo writes.",
+    "Adjusted psDispParticles local variable/lifetime and control flow, including moving cache initialization earlier and changing channel-state branching from a switch-like form to nested conditionals in the shown diff excerpt.",
+    "Deleted target_funcs.txt, which contained a completed mncharsel target checklist unrelated to the two source files in the PR title."
+  ],
+  "smart_moves": [
+    {
+      "text": "The particleSort cleanup uses bounded indexed loops for repeated bucket-linking logic instead of preserving generated-looking repeated blocks.",
+      "evidence_refs": [
+        "raw_diff.diff: particleSort buckets[0..7] and buckets[8..15] handled by for loops",
+        "decomp_standards:natural-loops"
+      ]
+    },
+    {
+      "text": "The vi0501 recovery keeps uncertain global/function names in address-style form while using clearer local role names such as jobj, pos, counts, scale, and v.",
+      "evidence_refs": [
+        "raw_diff.diff: un_8031D9F8 local declarations and calls to un_804A2E98/un_804D6F80",
+        "decomp_standards:conservative-naming"
+      ]
+    },
+    {
+      "text": "The PR scopes target-list cleanup separately by deleting target_funcs.txt rather than mixing stale checklist entries with active matching targets.",
+      "evidence_refs": [
+        "raw_diff.diff: target_funcs.txt deleted file mode 100644"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a particle or bucket routine has repeated blocks that differ only by bucket index, try small fixed-bound for loops before accepting unrolled decompiler output.",
+      "scope": [
+        "src/sysdolphin/baselib/psdisp.c",
+        "particleSort",
+        "bucket list stitching"
+      ],
+      "evidence_refs": [
+        "raw_diff.diff: particleSort replaces repeated bucket checks with for (i = 0; i < 8; i++) and for (i = 8; i < 16; i++)",
+        "text_corpus.jsonl: particleSort reported as 100.00% after PR"
+      ]
+    },
+    {
+      "lesson": "For partially matched display routines, helper extraction into static inline functions can isolate repeated point/trail emission patterns while preserving callsite inlining opportunities.",
+      "scope": [
+        "src/sysdolphin/baselib/psdisp.c",
+        "psDispSubPoint",
+        "psDispSubPointTrail"
+      ],
+      "evidence_refs": [
+        "raw_diff.diff: adds static inline psDispSubPoint and psDispSubPointTrail",
+        "text_corpus.jsonl: psDispParticles improved from 39.03% to 58.06%"
+      ]
+    },
+    {
+      "lesson": "Large recovered scene/demo setup functions may need broad subsystem includes, but unknown globals and address-style function names should remain conservative until semantics are proven.",
+      "scope": [
+        "src/melee/vi/vi0501.c",
+        "un_8031D9F8"
+      ],
+      "evidence_refs": [
+        "raw_diff.diff: un_8031D9F8 adds includes and retains un_804D6F74, un_804D6F78, un_804A2E98 naming",
+        "decomp_standards:truthful-headers-and-includes",
+        "decomp_standards:conservative-naming"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Address-style names were retained for uncertain recovered symbols, such as un_8031D9F8 and un_804A2E98, while local variables used role names once their role was evident.",
+      "evidence_refs": [
+        "raw_diff.diff: static HSD_GObj* un_804A2E98[4]",
+        "raw_diff.diff: locals jobj, pos, counts, scale, v in un_8031D9F8"
+      ]
+    },
+    {
+      "convention": "New psdisp helpers use descriptive particle-display names with local subsystem prefixing: psDispSubPoint and psDispSubPointTrail.",
+      "evidence_refs": [
+        "raw_diff.diff: static inline HSD_Particle* psDispSubPoint",
+        "raw_diff.diff: static inline HSD_Particle* psDispSubPointTrail"
+      ]
+    },
+    {
+      "convention": "The PR does not provide evidence for renaming unresolved globals or functions beyond the names shown in the diff.",
+      "evidence_refs": [
+        "raw_diff.diff: retained un_* identifiers in vi0501.c",
+        "decomp_standards:conservative-naming"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Used natural fixed-count loops to replace repeated bucket-chain blocks in particleSort.",
+      "evidence_refs": [
+        "raw_diff.diff: particleSort for loops over buckets"
+      ]
+    },
+    {
+      "tactic": "Used PAD_STACK(4) and explicit unused pad locals in un_8031D9F8, which is a stack-shaping tactic requiring verifier evidence before treating as ordinary style.",
+      "evidence_refs": [
+        "raw_diff.diff: un_8031D9F8 declares pad0-pad4 and calls PAD_STACK(4)",
+        "decomp_standards:matching-tactics-need-evidence"
+      ]
+    },
+    {
+      "tactic": "Adjusted local lifetime/register shape in psdisp by introducing new_var for &hsd_804D0908[arg0] and moving cache initialization earlier.",
+      "evidence_refs": [
+        "raw_diff.diff: temp_r29 = (new_var = &hsd_804D0908[arg0])",
+        "raw_diff.diff: cache = (f32*) &HSD_PSDisp_804D0FC0 moved before loop in psDispParticles"
+      ]
+    },
+    {
+      "tactic": "Introduced static inline wrapper layering around getColorMatAmb, including getColorMatAmb_inner and getColorMatAmb_noinline, likely to influence inline/call shape; evidence shows the tactic but not the author rationale.",
+      "evidence_refs": [
+        "raw_diff.diff: adds getColorMatAmb_inner and getColorMatAmb_noinline"
+      ]
+    },
+    {
+      "tactic": "Changed psDispParticles channel-state handling from the shown switch-style code to nested conditionals, suggesting control-flow shape was adjusted for matching.",
+      "evidence_refs": [
+        "raw_diff.diff: switch(chan_state) excerpt replaced by nested if checks"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "automated_report",
+      "text": "decomp-dev[bot] reported matched code +0.03% (+1048 bytes), matched data +16 bytes, 2 new matches, 4 improvements, and 1 unmatched data regression.",
+      "evidence_refs": [
+        "text_corpus.jsonl: decomp-dev[bot] issue comment created 2026-05-25T18:30:38Z"
+      ]
+    },
+    {
+      "kind": "missing_human_review",
+      "text": "No human review comments or review bodies are present in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata_json: counts.review_comments 0 and reviews 0",
+        "text_corpus.jsonl: only pr_body and decomp-dev[bot] issue_comment loaded"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2539",
+    "Jj/vi0501 and psdisp",
+    "jurrejelle",
+    "src/melee/vi/vi0501.c",
+    "src/sysdolphin/baselib/psdisp.c",
+    "target_funcs.txt",
+    "un_8031D9F8",
+    "un_804A2E98",
+    "particleSort",
+    "psDispParticles",
+    "psDispSubPoint",
+    "psDispSubPointTrail",
+    "getColorMatAmb_inner",
+    "getColorMatAmb_noinline",
+    "PAD_STACK",
+    "HSD_Particle",
+    "GXWGFifo",
+    "GX_POINTS",
+    "GX_LINES",
+    "GET_JOBJ",
+    "HSD_JObjReqAnimAll",
+    "HSD_JObjGetTranslation2",
+    "Player_SetPlayerCharacter",
+    "CKIND_KIRBY",
+    "PURA",
+    "decomp-dev bot report"
+  ],
+  "follow_up_queries": [
+    "Find later PRs touching src/sysdolphin/baselib/psdisp.c psDispParticles for cleanup of PAD_STACK, inline wrappers, nested conditionals, or .sdata2 regression.",
+    "Search for psDispSubPoint and psDispSubPointTrail to see whether they remained as static inline helpers or were later refactored.",
+    "Search un_8031D9F8 and un_804A2E98 for later semantic naming or type recovery in vi0501.",
+    "Search PRs mentioning particleSort 100.00% to confirm whether this remained stable after merge.",
+    "Search target_funcs.txt deletion PRs to understand whether temporary target checklist files are routinely removed after matching work."
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR identity, state, author, timestamps, changed files, counts",
+      "raw_diff.diff: local diff excerpts for vi0501.c, psdisp.c, and target_funcs.txt",
+      "text_corpus.jsonl: decomp-dev[bot] automated report with match/improvement/regression numbers"
+    ],
+    "notes": [
+      "PR body is empty and there are no human review comments, so author intent and reviewer rationale cannot be inferred.",
+      "The raw diff loaded in the prompt is truncated, but the available local raw diff and excerpts cover the changed files and key tactics used for this intake.",
+      "Automated bot results support reported matching progress, but the slice does not include explicit build logs, objdiff command output, or author-written validation notes.",
+      "The bot report includes one .sdata2 regression in main/sysdolphin/baselib/psdisp; the PR slice does not explain whether it was accepted knowingly or fixed elsewhere."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "title": "Fixed-bound loops can replace generated-looking bucket unrolls",
+        "text": "In psdisp particleSort, repeated bucket-stitching blocks over 16 buckets were replaced with two for loops over ranges 0-7 and 8-15, and the automated report marked particleSort as 100.00%. This is a concrete example supporting the existing natural-loops standard.",
+        "scope": [
+          "src/sysdolphin/baselib/psdisp.c",
+          "particleSort"
+        ],
+        "evidence_refs": [
+          "raw_diff.diff: particleSort loop replacement",
+          "text_corpus.jsonl: particleSort +75 bytes, 92.88% to 100.00%"
+        ]
+      },
+      {
+        "title": "Conservative names retained while local roles are clarified",
+        "text": "The vi0501 recovery kept unresolved address-style symbols while using local role names like jobj, pos, counts, and scale inside the recovered function.",
+        "scope": [
+          "src/melee/vi/vi0501.c",
+          "un_8031D9F8"
+        ],
+        "evidence_refs": [
+          "raw_diff.diff: un_8031D9F8 declarations and retained un_* symbols"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "PR 2539 psdisp matching progress",
+        "text": "PR 2539 touched src/sysdolphin/baselib/psdisp.c; decomp-dev[bot] reported particleSort as a new 100.00% match and psDispParticles improving from 39.03% to 58.06%, with a .sdata2 unmatched-item regression from 82.00% to 77.78%.",
+        "source_path": "src/sysdolphin/baselib/psdisp.c",
+        "scope": [
+          "main/sysdolphin/baselib/psdisp",
+          "particleSort",
+          "psDispParticles",
+          ".sdata2"
+        ],
+        "evidence_refs": [
+          "text_corpus.jsonl: decomp-dev[bot] report"
+        ],
+        "reason": "Potential path-level history for future psdisp matching work; curator should decide whether to record bot-reported match/regression facts."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "PR 2539 vi0501 un_8031D9F8 recovery",
+        "text": "PR 2539 replaced the un_8031D9F8 stub in src/melee/vi/vi0501.c with a full function body; decomp-dev[bot] reported un_8031D9F8 improving from 0.00% to 98.83% and vi0501 .sdata reaching 100.00%.",
+        "source_path": "src/melee/vi/vi0501.c",
+        "scope": [
+          "main/melee/vi/vi0501",
+          "un_8031D9F8",
+          ".sdata"
+        ],
+        "evidence_refs": [
+          "raw_diff.diff: un_8031D9F8 implementation",
+          "text_corpus.jsonl: decomp-dev[bot] report"
+        ],
+        "reason": "Potential path-level history for future vi0501 work; curator should verify whether later PRs completed or renamed the function."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Document narrow evidence for PAD_STACK and inline-wrapper tactics",
+        "text": "This PR shows PAD_STACK(4), explicit pad locals, local lifetime changes, and inline wrapper layering used in matching work, but the slice only has automated progress output and no explicit author rationale. If curated, use it as an example that such tactics need narrow evidence rather than as a blanket endorsement.",
+        "source_path": null,
+        "scope": [
+          "PAD_STACK",
+          "inline wrappers",
+          "local lifetime matching tactics",
+          "psdisp",
+          "vi0501"
+        ],
+        "evidence_refs": [
+          "raw_diff.diff: un_8031D9F8 PAD_STACK(4)",
+          "raw_diff.diff: getColorMatAmb_inner/getColorMatAmb_noinline",
+          "raw_diff.diff: new_var and cache lifetime changes",
+          "decomp_standards:matching-tactics-need-evidence"
+        ],
+        "reason": "The current standards already cover evidence requirements; this PR may be useful as an example but should not weaken the standard."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer human reviewer approval rationale; no human review comments are loaded.",
+      "Do not treat the .sdata2 regression as acceptable or intentional; the slice only reports that it occurred.",
+      "Do not promote the PAD_STACK, new_var, cache lifetime move, or inline wrapper layering as general style; they are matching tactics with limited evidence in this slice.",
+      "Do not rename un_8031D9F8, un_804A2E98, or other address-style symbols based only on this PR."
+    ]
+  },
+  "confidence": 0.79,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

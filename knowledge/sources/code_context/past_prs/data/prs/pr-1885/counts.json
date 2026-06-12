@@ -1,0 +1,17 @@
+{
+  "number": 1885,
+  "title": "Fix `gmadventure` data sections",
+  "state": "MERGED",
+  "createdAt": "2025-08-30T07:29:35Z",
+  "updatedAt": "2025-08-30T07:32:55Z",
+  "mergedAt": "2025-08-30T07:32:55Z",
+  "closedAt": "2025-08-30T07:32:55Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1885",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 6187
+  }
+}

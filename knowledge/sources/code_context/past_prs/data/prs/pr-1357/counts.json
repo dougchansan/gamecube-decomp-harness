@@ -1,0 +1,17 @@
+{
+  "number": 1357,
+  "title": "Match itbat",
+  "state": "MERGED",
+  "createdAt": "2024-02-29T09:22:42Z",
+  "updatedAt": "2024-02-29T09:35:18Z",
+  "mergedAt": "2024-02-29T09:35:14Z",
+  "closedAt": "2024-02-29T09:35:14Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/1357",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 27911
+  }
+}

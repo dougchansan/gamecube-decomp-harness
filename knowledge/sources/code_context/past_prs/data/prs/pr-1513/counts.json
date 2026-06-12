@@ -1,0 +1,17 @@
+{
+  "number": 1513,
+  "title": "lbsnap.c",
+  "state": "MERGED",
+  "createdAt": "2025-05-24T05:57:48Z",
+  "updatedAt": "2025-05-24T13:55:47Z",
+  "mergedAt": "2025-05-24T08:36:18Z",
+  "closedAt": "2025-05-24T08:36:18Z",
+  "author": "BR-",
+  "url": "https://github.com/doldecomp/melee/pull/1513",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 21042
+  }
+}

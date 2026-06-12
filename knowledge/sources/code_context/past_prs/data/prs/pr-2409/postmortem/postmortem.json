@@ -1,0 +1,521 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2409",
+  "pr": {
+    "number": 2409,
+    "title": ">50% fuzzy match on all remaining item TUs",
+    "url": "https://github.com/doldecomp/melee/pull/2409",
+    "state": "MERGED",
+    "author": "lukechampine",
+    "created_at": "2026-04-11T19:56:24Z",
+    "merged_at": "2026-04-13T14:54:09Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Large item-decomp progress PR targeting previously low-fuzzy item translation units, with header type recovery and many item source implementations. The author explicitly says Claude generated much of the initial work and that it required multi-day human cleanup. Bot report evidence claims +13772 matched-code bytes, +328 matched-data bytes, 54 new matches, and 47 unmatched-item improvements. Review feedback focused on include style and not deferring an sdata2 TODO.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "cleanup",
+      "headers",
+      "item-type-recovery",
+      "include-style-review"
+    ],
+    "systems": [
+      "item",
+      "fighter"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/it/items/itseakneedlethrown.c",
+      "role": "largest item implementation change; added many Sheik needle thrown functions and collision/event handlers",
+      "evidence_refs": [
+        "changed_files: added 416 deleted 29",
+        "bot_report: new matches include itseakneedlethrown reflected/shield bounced/damage events",
+        "review_comment r3071354118: include style comment"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itdosei.c",
+      "role": "large item implementation change with inline JObj/assert-style helpers and sdata2-related review note",
+      "evidence_refs": [
+        "changed_files: added 355 deleted 69",
+        "diff_excerpt: added itDosei_SetFacingAngle, itDosei_SetSpeed, HSD_JObjSetRotationZero, itDosei_SetRotX/Y",
+        "review_comment r3071310664: baseline/gobj include style",
+        "review_comment r3071313739: question on TODO for it_804DC878 .sdata2"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itmewtwoshadowball.c",
+      "role": "large item implementation change with bot-reported fuzzy improvements and new matches",
+      "evidence_refs": [
+        "changed_files: added 339 deleted 14",
+        "bot_report: itmewtwoshadowball functions listed in new matches and improvements"
+      ]
+    },
+    {
+      "path": "src/melee/it/itCharItems.h",
+      "role": "header type recovery for several character-item item vars and attributes",
+      "evidence_refs": [
+        "changed_files: added 59 deleted 2",
+        "diff_excerpt: added itCLinkMilk_ItemVars, itHitodemanAttributes, itKirby2F23_ItemVars, itClimbersString_ItemVars, expanded itPikachutJoltAir and itSeakNeedleThrown item vars"
+      ]
+    },
+    {
+      "path": "src/melee/it/itCommonItems.h",
+      "role": "header type recovery for common item vars and attributes",
+      "evidence_refs": [
+        "changed_files: added 44 deleted 13",
+        "diff_excerpt: expanded itKyasarin, itDosei, itMewtwoShadowball, itUnknown, and itGreatFoxLaser structs"
+      ]
+    },
+    {
+      "path": "src/melee/it/it_2725.c",
+      "role": "shared item logic table/signature cleanup used by item sources",
+      "evidence_refs": [
+        "changed_files: added 8 deleted 11",
+        "diff_excerpt: it_803F6F50 changed to it_803F6F50.states; it_80279C48 signature simplified and local cleanup"
+      ]
+    },
+    {
+      "path": "src/melee/it/it_2725.h",
+      "role": "header prototype updated to match simplified it_80279C48 body",
+      "evidence_refs": [
+        "changed_files: added 1 deleted 1",
+        "diff_excerpt: it_80279C48 prototype changed from Item_GObj*, Article* to Item_GObj*"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itchicorita.c",
+      "role": "callsite cleanup following it_80279C48 signature change",
+      "evidence_refs": [
+        "changed_files: added 3 deleted 5",
+        "diff_excerpt: removed Article local and now calls it_80279C48(item_gobj)"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itclimbersstring.c",
+      "role": "implemented climbers string item logic and switched item vars to typed climbersstring fields",
+      "evidence_refs": [
+        "changed_files: added 90 deleted 7",
+        "diff_excerpt: added it_802C27D4, it_802C3864, it_802C3950; replaced it_266F/bombhei union uses with climbersstring"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itclinkmilk.c",
+      "role": "implemented CLink milk spawn/animation helpers and used typed clinkmilk item vars",
+      "evidence_refs": [
+        "changed_files: added 100 deleted 3",
+        "diff_excerpt: added it_802C8B28 and itClinkmilk_UnkMotion1_Anim; replaced gamewatchchef union use with clinkmilk"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itlipstickspore.c",
+      "role": "item implementation progress with math include review",
+      "evidence_refs": [
+        "changed_files: added 97 deleted 8",
+        "bot_report: itlipstickspore new matches",
+        "review_comment r3071341073: should include <MSL/math.h>"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itpikachutjoltair.c",
+      "role": "item implementation progress with math include review",
+      "evidence_refs": [
+        "changed_files: added 169 deleted 4",
+        "bot_report: itpikachutjoltair new matches and high fuzzy improvement",
+        "review_comment r3071351505: explicit <MSL/math.h>"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itunknown.c",
+      "role": "item implementation progress with math include style review",
+      "evidence_refs": [
+        "changed_files: added 165 deleted 22",
+        "bot_report: itunknown fuzzy improvements",
+        "review_comment r3071356791: fix include style"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftSeak/ftSk_SpecialN.c",
+      "role": "small fighter callsite cleanup around thrown needle helper return value",
+      "evidence_refs": [
+        "changed_files: added 1 deleted 1",
+        "diff_excerpt: it_802AFEA8 result no longer assigned back to item_gobj"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ft_0C31.c",
+      "role": "small fighter comparison/codegen cleanup",
+      "evidence_refs": [
+        "changed_files: added 1 deleted 1",
+        "diff_excerpt: compared it_802EAF28 result to 0U instead of NULL"
+      ]
+    },
+    {
+      "path": "all changed files",
+      "role": "full changed-file set from PR metadata",
+      "evidence_refs": [
+        "changed_files.jsonl lists 38 changed files: src/melee/ft/chara/ftSeak/ftSk_SpecialN.c; src/melee/ft/ft_0C31.c; src/melee/it/itCharItems.h; src/melee/it/itCommonItems.h; src/melee/it/it_2725.c; src/melee/it/it_2725.h; src/melee/it/items/itchicorita.c; src/melee/it/items/itclimbersstring.c; src/melee/it/items/itclinkmilk.c; src/melee/it/items/itdosei.c; src/melee/it/items/itdosei.h; src/melee/it/items/itentei.c; src/melee/it/items/itgreatfoxlaser.c; src/melee/it/items/itgreatfoxlaser.h; src/melee/it/items/ithassam.c; src/melee/it/items/ithinoarashi.c; src/melee/it/items/ithitodeman.c; src/melee/it/items/ithitodeman.h; src/melee/it/items/itkamex.c; src/melee/it/items/itkirby_2F23.c; src/melee/it/items/itkirby_2F23.h; src/melee/it/items/itkirbycutterbeam.c; src/melee/it/items/itkirbycutterbeam.h; src/melee/it/items/itklap.c; src/melee/it/items/itklap.h; src/melee/it/items/itkyasarin.c; src/melee/it/items/itlipstickspore.c; src/melee/it/items/itlipstickspore.h; src/melee/it/items/itmewtwoshadowball.c; src/melee/it/items/itpatapata.c; src/melee/it/items/itpikachutjoltair.c; src/melee/it/items/itraikou.c; src/melee/it/items/itseakneedlethrown.c; src/melee/it/items/itseakneedlethrown.h; src/melee/it/items/itsuikun.c; src/melee/it/items/itunknown.c; src/melee/it/items/itzgshell.c; src/melee/it/types.h"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Added or improved implementations across many remaining low-fuzzy item TUs, especially itseakneedlethrown, itdosei, itmewtwoshadowball, itunknown, itpikachutjoltair, itkirbycutterbeam, ithitodeman, itzgshell, itgreatfoxlaser, itlipstickspore, itclinkmilk, itpatapata, itklap, itclimbersstring, and itkyasarin.",
+    "Recovered or refined item variable and attribute structs in itCharItems.h and itCommonItems.h, replacing some generic padding or unrelated union-arm access with more item-specific fields.",
+    "Updated it_80279C48 to take only Item_GObj*, updated its header declaration, and cleaned up a Chicorita callsite accordingly.",
+    "Changed two logic table entries to use it_803F6F50.states rather than it_803F6F50 directly.",
+    "Small fighter-side changes adjusted a Sheik needle helper call and a comparison against it_802EAF28.",
+    "Bot report claims 54 new matches and 47 improvements, with matched code increasing to 63.04% and matched data to 38.13%."
+  ],
+  "smart_moves": [
+    "Recovered typed item-var union arms for items such as climbersstring and clinkmilk instead of continuing to borrow unrelated arms such as bombhei, gamewatchchef, or it_266F.",
+    "Kept helper signature truthfulness aligned by changing it_80279C48 in both source and header, then updating at least one callsite.",
+    "Used header struct expansion to support multiple item implementations rather than relying only on raw offsets in each C file.",
+    "The author explicitly documented AI-assisted generation and human cleanup, which is useful context for reviewers and future curators assessing the risk profile of broad fuzzy-match PRs."
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "Broad AI-assisted fuzzy matching can produce substantial progress, but the PR evidence frames it as cleanup-heavy and reviewer-sensitive rather than a substitute for human decomp review.",
+      "evidence_refs": [
+        "human_pr_text: Claude was used on all <50% item TUs and then cleaned up over several days; human is still in the loop",
+        "review_comments: multiple include-style issues remained"
+      ],
+      "scope": [
+        "large decomp-matching PRs",
+        "AI-assisted item TU recovery"
+      ]
+    },
+    {
+      "lesson": "When recovering item code, update item-specific union arms and shared headers as soon as the body evidence supports the fields; this avoids borrowing unrelated item vars in implementation code.",
+      "evidence_refs": [
+        "diff_excerpt: itclimbersstring replaced it_266F and bombhei field accesses with climbersstring",
+        "diff_excerpt: itclinkmilk replaced gamewatchchef access with clinkmilk",
+        "diff_excerpt: itCharItems.h and itCommonItems.h added/expanded item-var structs"
+      ],
+      "scope": [
+        "src/melee/it/items",
+        "item variable union recovery"
+      ]
+    },
+    {
+      "lesson": "Function signature cleanup should propagate to the owning header and all affected callsites in the same PR slice.",
+      "evidence_refs": [
+        "diff_excerpt: it_80279C48 body changed to one argument",
+        "diff_excerpt: it_2725.h prototype updated",
+        "diff_excerpt: itchicorita.c callsite updated"
+      ],
+      "scope": [
+        "shared item helpers",
+        "headers"
+      ]
+    },
+    {
+      "lesson": "Reviewers may flag generated include forms even in otherwise matching-focused PRs; include paths and angle/quote style are reviewable source quality, not incidental formatting.",
+      "evidence_refs": [
+        "review_comment r3071310664: use #include <baseline/gobj.h>",
+        "review_comment r3071341073: use #include <MSL/math.h>",
+        "review_comment r3071356791: fix include style"
+      ],
+      "scope": [
+        "include cleanup",
+        "generated or AI-assisted source"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Item-var structs added in headers follow item-specific names such as itCLinkMilk_ItemVars, itClimbersString_ItemVars, itKirby2F23_ItemVars, and itMewtwoShadowball_DatAttrs.",
+      "evidence_refs": [
+        "diff_excerpt: itCharItems.h",
+        "diff_excerpt: itCommonItems.h"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "convention": "Some semantic helper names were introduced for local inline cleanup, such as itDosei_SetFacingAngle, itDosei_SetSpeed, itCLinkMilk_NotifyParent, and itCLinkMilk_Destroy.",
+      "evidence_refs": [
+        "diff_excerpt: itdosei.c",
+        "diff_excerpt: itclinkmilk.c"
+      ],
+      "confidence": 0.72
+    },
+    {
+      "convention": "Many unresolved functions retained address-style names such as it_802C27D4, it_802C3864, it_802C3950, and it_802C8B28 where stronger semantics were not shown in the PR slice.",
+      "evidence_refs": [
+        "diff_excerpt: itclimbersstring.c",
+        "diff_excerpt: itclinkmilk.c"
+      ],
+      "confidence": 0.8
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Used PAD_STACK in several recovered item functions to preserve stack/codegen shape.",
+      "evidence_refs": [
+        "diff_excerpt: itchicorita.c retained PAD_STACK(12)",
+        "diff_excerpt: itclimbersstring.c added PAD_STACK(20), PAD_STACK(8)",
+        "diff_excerpt: itclinkmilk.c added PAD_STACK(4), PAD_STACK(16)"
+      ],
+      "risk_note": "Loaded evidence shows tactic use but not narrow objdiff rationale per function."
+    },
+    {
+      "tactic": "Introduced small static inline helpers around repeated JObj/item operations, including rotation, speed, notification, and destroy helpers.",
+      "evidence_refs": [
+        "diff_excerpt: itdosei.c inline JObj helpers",
+        "diff_excerpt: itclinkmilk.c inline notify/destroy helpers"
+      ],
+      "risk_note": "Useful cleanup candidate, but PR slice does not prove which inline forms were required for exact matching."
+    },
+    {
+      "tactic": "Used typed item-var fields to express offsets in item-specific structs, including Vec3 and HSD_GObj fields.",
+      "evidence_refs": [
+        "diff_excerpt: itPikachutJoltAir_ItemVars expansion",
+        "diff_excerpt: itMewtwoShadowball_ItemVars Vec3 fields",
+        "diff_excerpt: itGreatFoxLaser_ItemVars s16 fields"
+      ],
+      "risk_note": "Type recovery is well evidenced by diff, but exact correctness of each field is not independently validated by loaded excerpts."
+    },
+    {
+      "tactic": "Adjusted source expressions for codegen/fuzzy matching, such as dropping an unused assignment result and using 0U instead of NULL in one comparison.",
+      "evidence_refs": [
+        "diff_excerpt: ftSk_SpecialN.c changed it_802AFEA8 call",
+        "diff_excerpt: ft_0C31.c changed comparison to 0U"
+      ],
+      "risk_note": "Evidence supports edits, but no reviewer explanation or local objdiff excerpt is loaded for these micro-tactics."
+    }
+  ],
+  "review_feedback": [
+    {
+      "reviewer": "PsiLupan",
+      "path": "src/melee/it/items/itdosei.c",
+      "feedback": "Use #include <baseline/gobj.h> rather than the added quoted baselib/gobj include form.",
+      "evidence_refs": [
+        "review_comment r3071310664"
+      ]
+    },
+    {
+      "reviewer": "PsiLupan",
+      "path": "src/melee/it/items/itdosei.c",
+      "feedback": "Questioned deferring an sdata2 placement TODO for it_804DC878: 'Is there a reason not to do it now?'",
+      "evidence_refs": [
+        "review_comment r3071313739"
+      ]
+    },
+    {
+      "reviewer": "PsiLupan",
+      "path": "src/melee/it/items/itkirby_2F23.c",
+      "feedback": "Same include-style issue for gobj include.",
+      "evidence_refs": [
+        "review_comment r3071328397"
+      ]
+    },
+    {
+      "reviewer": "PsiLupan",
+      "path": "src/melee/it/items/itlipstickspore.c",
+      "feedback": "Assuming the intended header is MSL/math.h, use #include <MSL/math.h>.",
+      "evidence_refs": [
+        "review_comment r3071341073"
+      ]
+    },
+    {
+      "reviewer": "PsiLupan",
+      "path": "src/melee/it/items/itpikachutjoltair.c",
+      "feedback": "Explicitly include <MSL/math.h>.",
+      "evidence_refs": [
+        "review_comment r3071351505"
+      ]
+    },
+    {
+      "reviewer": "PsiLupan",
+      "path": "src/melee/it/items/itseakneedlethrown.c",
+      "feedback": "Apply the same math include-style correction as prior comment.",
+      "evidence_refs": [
+        "review_comment r3071354118"
+      ]
+    },
+    {
+      "reviewer": "PsiLupan",
+      "path": "src/melee/it/items/itunknown.c",
+      "feedback": "Fix include style as in previous math include comment.",
+      "evidence_refs": [
+        "review_comment r3071356791"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2409",
+    "lukechampine",
+    "Claude",
+    "AI-assisted decomp",
+    "fuzzy match",
+    "remaining item TUs",
+    "itdosei",
+    "itseakneedlethrown",
+    "itmewtwoshadowball",
+    "itpikachutjoltair",
+    "itclimbersstring",
+    "itclinkmilk",
+    "itkirbycutterbeam",
+    "itunknown",
+    "it_80279C48",
+    "it_803F6F50.states",
+    "itCLinkMilk_ItemVars",
+    "itClimbersString_ItemVars",
+    "itKirby2F23_ItemVars",
+    "itMewtwoShadowball_DatAttrs",
+    "PAD_STACK",
+    "baseline/gobj.h",
+    "MSL/math.h",
+    "sdata2 TODO",
+    "include style"
+  ],
+  "follow_up_queries": [
+    "PR2409 include style baseline/gobj MSL/math",
+    "it_804DC878 sdata2 PR2409",
+    "it_80279C48 signature Item_GObj Article cleanup",
+    "itclimbersstring climbersstring itemVar bombhei it_266F",
+    "itclinkmilk gamewatchchef clinkmilk itemVar",
+    "Claude AI-assisted decomp fuzzy item TUs",
+    "it_803F6F50.states item logic table",
+    "PAD_STACK item PR2409"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR metadata, state, changed-file counts",
+      "human_pr_text: author rationale and AI-assistance disclosure",
+      "review_comments: seven concrete reviewer comments",
+      "diff_excerpt/raw_diff: representative code and header changes",
+      "text_corpus: bot report excerpt with match counts"
+    ],
+    "notes": [
+      "Raw diff is truncated, so detailed per-function changes for all 38 files are not fully visible in loaded evidence.",
+      "Bot report provides match/improvement counts, but loaded excerpts do not include per-function objdiff logs or build commands.",
+      "PR body admits uncertainty about whether every item TU crossed 50%, so the intake should not assert that all remaining item TUs actually exceeded 50%.",
+      "Review comments show requested include/style changes but loaded evidence does not show whether each comment was resolved before merge.",
+      "Field and struct additions are visible, but the loaded slice does not independently validate every recovered field type or offset beyond the diff."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "type": "decomp_lesson",
+        "title": "AI-assisted broad fuzzy matching needs explicit human cleanup and review scrutiny",
+        "text": "PR #2409 is useful historical evidence that AI-generated decomp output can move many item TUs but should be treated as cleanup-heavy; the author explicitly described Claude output as messy and emphasized human-in-the-loop cleanup.",
+        "scope": [
+          "large matching PRs",
+          "AI-assisted decomp"
+        ],
+        "evidence_refs": [
+          "human_pr_text",
+          "review_comments"
+        ]
+      },
+      {
+        "type": "decomp_lesson",
+        "title": "Recover item-specific union arms when item bodies expose fields",
+        "text": "This PR replaced unrelated item-var union arm usage with item-specific arms in visible item code and added corresponding header structs, supporting the practice of moving from borrowed fields to typed item vars during item decomp.",
+        "scope": [
+          "src/melee/it",
+          "item vars"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: itclimbersstring.c",
+          "diff_excerpt: itclinkmilk.c",
+          "diff_excerpt: itCharItems.h",
+          "diff_excerpt: itCommonItems.h"
+        ]
+      },
+      {
+        "type": "review_lesson",
+        "title": "Include style is reviewed even in matching-heavy item PRs",
+        "text": "Multiple PR #2409 review comments asked for specific include forms such as <baseline/gobj.h> and <MSL/math.h>, showing that generated include paths should be normalized during cleanup.",
+        "scope": [
+          "include cleanup",
+          "item sources"
+        ],
+        "evidence_refs": [
+          "review_comment r3071310664",
+          "review_comment r3071341073",
+          "review_comment r3071351505",
+          "review_comment r3071356791"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Normalize generated include paths during cleanup",
+        "text": "Consider adding or cross-linking a standard that generated includes should use project-preferred canonical include forms; PR #2409 reviewer feedback specifically requested <baseline/gobj.h> for gobj and <MSL/math.h> for math rather than quoted or generic math include forms.",
+        "source_path": null,
+        "scope": [
+          "include style",
+          "generated-source cleanup",
+          "item files"
+        ],
+        "evidence_refs": [
+          "review_comment r3071310664",
+          "review_comment r3071328397",
+          "review_comment r3071341073",
+          "review_comment r3071351505",
+          "review_comment r3071354118",
+          "review_comment r3071356791"
+        ],
+        "reason": "Current loaded standards mention established include style in truthful-headers-and-includes, but this PR provides concrete historical review evidence for canonical gobj/math include forms."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Do not leave obvious section-placement TODOs without justification",
+        "text": "Consider a small note under data-sections or verification standards: if a PR introduces a known section-placement issue such as a symbol marked 'TODO: needs to be in .sdata2', reviewers may expect it to be fixed or justified immediately.",
+        "source_path": null,
+        "scope": [
+          "data sections",
+          "sdata2",
+          "review readiness"
+        ],
+        "evidence_refs": [
+          "review_comment r3071313739"
+        ],
+        "reason": "Reviewer asked 'Is there a reason not to do it now?' on a new it_804DC878 .sdata2 TODO, but this is one comment and should be curator-reviewed before generalizing."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "Item item-var type recovery often lands in itCharItems.h and itCommonItems.h",
+        "text": "PR #2409 added or refined item variable and attribute structs in src/melee/it/itCharItems.h and src/melee/it/itCommonItems.h while implementing many src/melee/it/items/*.c functions.",
+        "source_path": "src/melee/it",
+        "scope": [
+          "src/melee/it/itCharItems.h",
+          "src/melee/it/itCommonItems.h",
+          "src/melee/it/items"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: itCharItems.h",
+          "diff_excerpt: itCommonItems.h",
+          "changed_files.jsonl"
+        ],
+        "reason": "Useful path-scope hint for future item decomp, but should be checked against current source organization before promotion."
+      }
+    ],
+    "rejection_notes": [
+      "Do not record that all remaining item TUs exceeded 50%; the author explicitly said they were not sure.",
+      "Do not record each bot-reported function as accepted matched ground truth from this intake alone; the slice includes a bot summary, not full objdiff/build logs.",
+      "Do not infer that Claude output is acceptable as-is; PR body says it required cleanup and review comments show remaining issues.",
+      "Do not promote every recovered struct field name/type as independently validated; the diff shows additions but not the full verification context."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

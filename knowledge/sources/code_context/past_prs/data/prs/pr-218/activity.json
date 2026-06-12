@@ -1,0 +1,10 @@
+{
+  "pr": 218,
+  "title": "Split the remainder of .data and move declarations into C where possible",
+  "url": "https://github.com/doldecomp/melee/pull/218",
+  "text_records_with_body": 0,
+  "review_comments": 0,
+  "changed_files": 57,
+  "added_lines": 46778,
+  "deleted_lines": 46825
+}

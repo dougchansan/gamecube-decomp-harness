@@ -1,0 +1,364 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2503",
+  "pr": {
+    "number": 2503,
+    "title": "lb: improve lbcollision matching",
+    "url": "https://github.com/doldecomp/melee/pull/2503",
+    "state": "MERGED",
+    "author": "itsgrimetime",
+    "created_at": "2026-05-15T18:04:56Z",
+    "merged_at": "2026-05-15T20:16:55Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2503 improved matching in src/melee/lb/lbcollision by matching lbColl_80005C44 and lbColl_80009DD4, improving several nearby collision/debug draw helpers, fixing lbColl_80006E58 argument ordering so collision distance is written through an explicit output parameter, and updating stale lbcollision.h prototypes. The bot report records +1016 matched-code bytes, 2 new matches, and 7 unmatched-item improvements.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "types-structs",
+      "collision",
+      "verification-reported"
+    ],
+    "systems": [
+      "library",
+      "lb",
+      "lbcollision"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/lb/lbcollision.c",
+      "role": "Primary decomp/matching edits for lbcollision functions, local helpers, data symbols, Vec3 temporary layout, PAD_STACK sizing, and lbColl_80006E58 output-parameter ordering.",
+      "evidence_refs": [
+        "changed_files: src/melee/lb/lbcollision.c added 243 deleted 219 hunks 46",
+        "diff_excerpt: lbColl_80005C44, lbColl_80006094, lbColl_800067F8, lbColl_80006E58 excerpts",
+        "pr_body: summary and remaining work",
+        "bot_report: 2 new matches and 7 improvements in main/melee/lb/lbcollision"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lbcollision.h",
+      "role": "Header prototype updates for matched helpers.",
+      "evidence_refs": [
+        "changed_files: src/melee/lb/lbcollision.h added 2 deleted 2 hunks 1",
+        "pr_body: 'Update stale lbcollision.h prototypes for matched helpers'"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Matched lbColl_80005C44 and lbColl_80009DD4 according to the PR body and bot report.",
+      "evidence_refs": [
+        "pr_body: Match `lbColl_80005C44` and `lbColl_80009DD4`",
+        "bot_report: lbColl_80005C44 94.77% to 100.00%, lbColl_80009DD4 99.11% to 100.00%"
+      ]
+    },
+    {
+      "text": "Improved lbColl_8000A78C, lbColl_80006E58, lbColl_80006094, lbColl_800067F8, .sdata, lbColl_8000A584, and lbColl_8000A95C without claiming all were fully matched.",
+      "evidence_refs": [
+        "bot_report: 7 improvements in unmatched items",
+        "pr_body: remaining work lists lbColl_80006094, lbColl_800067F8, lbColl_80006E58, lbColl_800077A0, lbColl_8000A244, lbColl_8000A584, lbColl_8000A78C, lbColl_8000A95C, lbColl_8000AB2C"
+      ]
+    },
+    {
+      "text": "Changed lbColl_80006E58's parameter order so float* arg8 comes after scl, arg10, and arg11; the PR body says this fixes collision distance being written through the explicit output parameter.",
+      "evidence_refs": [
+        "diff_excerpt: lbColl_80006E58 prototype/signature changed from float* arg8 before scl to float* arg8 after arg11",
+        "pr_body: Fix `lbColl_80006E58` so collision distance is written through the explicit output parameter"
+      ]
+    },
+    {
+      "text": "Reworked Vec3 temporaries in several functions from scalar spXXX slots or component-by-component assignments into Vec3 copies such as Vec3 a0 = *a, Vec3 a1 = a0, sp11C = *arg0, and sp110 = *arg2.",
+      "evidence_refs": [
+        "diff_excerpt: lbColl_800067F8 uses Vec3 a0 = *a and Vec3 a1 = a0",
+        "diff_excerpt: lbColl_80006E58 replaces scalar sp124/sp120/sp11C etc. with Vec3 sp11C, sp110, sp104",
+        "diff_excerpt: lbColl_80006094 uses Vec3 vec4 = *arg0 and Vec3 vec2 = *arg2"
+      ]
+    },
+    {
+      "text": "Adjusted stack padding in in-progress functions: lbColl_80006094 PAD_STACK changed 64 to 56, lbColl_800067F8 changed to PAD_STACK(24), and lbColl_80006E58 changed 144 to 112.",
+      "evidence_refs": [
+        "diff_excerpt: PAD_STACK changes in lbColl_80006094, lbColl_800067F8, lbColl_80006E58"
+      ]
+    },
+    {
+      "text": "Added local .sdata/.rodata-related symbols and a local inline lbColl_JObjGetMtxPtr that asserts jobj.h line 1144, calls HSD_JObjSetupMatrix, and returns jobj->mtx.",
+      "evidence_refs": [
+        "diff_excerpt: added lbColl_804D36C4, lbColl_804D36C8, lbColl_804D3700, lbColl_804D3708, and lbColl_JObjGetMtxPtr"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "The author explicitly separated completed matches from remaining drift, naming still-unmatched functions and the likely blocking shape issues.",
+      "evidence_refs": [
+        "pr_body: Remaining work section"
+      ]
+    },
+    {
+      "text": "Header prototypes were updated alongside recovered function signatures rather than leaving stale declarations.",
+      "evidence_refs": [
+        "pr_body: Update stale `lbcollision.h` prototypes for matched helpers",
+        "changed_files: lbcollision.h changed"
+      ]
+    },
+    {
+      "text": "Bot report was used to quantify matching impact and identify both full matches and partial improvements.",
+      "evidence_refs": [
+        "bot_report: +0.03%, +1016 bytes, 2 new matches, 7 improvements"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a recovered body proves a function's output parameter position, update both the C signature and header prototype so call semantics match the intended explicit out-parameter use.",
+      "scope": [
+        "lbcollision",
+        "function signatures",
+        "headers"
+      ],
+      "evidence_refs": [
+        "pr_body: Fix `lbColl_80006E58` so collision distance is written through the explicit output parameter",
+        "diff_excerpt: lbColl_80006E58 argument order changed",
+        "pr_body: Update stale `lbcollision.h` prototypes for matched helpers"
+      ]
+    },
+    {
+      "lesson": "For lbcollision geometry helpers, by-value Vec3 temporary layout can be a key matching dimension; preserving or changing Vec3 copies versus scalar component locals affects stack/register shape.",
+      "scope": [
+        "lbcollision",
+        "Vec3 temporaries",
+        "stack layout"
+      ],
+      "evidence_refs": [
+        "diff_excerpt: component locals changed to Vec3 temporaries in lbColl_800067F8 and lbColl_80006E58",
+        "pr_body: remaining work says several helpers still share a by-value `Vec3` temporary layout mismatch"
+      ]
+    },
+    {
+      "lesson": "Partial lbcollision improvements may still leave structural stack/FPR drift; record the drift instead of claiming a full match.",
+      "scope": [
+        "lbcollision",
+        "matching status",
+        "regression ledger"
+      ],
+      "evidence_refs": [
+        "pr_body: `lbColl_80006094`, `lbColl_800067F8`, and `lbColl_80006E58` still have structural stack/FPR drift",
+        "bot_report: these functions improved but remained below 100%"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "Address-style names were retained for uncertain symbols and data, e.g. lbColl_804D36C4, lbColl_804D36C8, lbColl_804D3700, lbColl_804D3708, lbColl_804D79F0, rather than inventing semantic names.",
+      "evidence_refs": [
+        "diff_excerpt: added address-style lbColl_804D36C4/lbColl_804D36C8/lbColl_804D3700/lbColl_804D3708",
+        "decomp_standards: conservative-naming"
+      ]
+    },
+    {
+      "text": "Local vector temporary names such as d1, d2_x/d2_y/d2_z, a0/a1, c0/c1, sp11C/sp110/sp104 were used to reflect local matching roles while preserving uncertainty.",
+      "evidence_refs": [
+        "diff_excerpt: lbColl_80005C44, lbColl_800067F8, lbColl_80006E58 local declarations"
+      ]
+    },
+    {
+      "text": "The helper name lbColl_JObjGetMtxPtr encodes the local operation of obtaining a JObj matrix pointer.",
+      "evidence_refs": [
+        "diff_excerpt: static inline MtxPtr lbColl_JObjGetMtxPtr(HSD_JObj* jobj)"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "text": "Used PAD_STACK changes to steer stack layout in partially matched functions, but the PR body records that structural stack/FPR drift remained for several of them.",
+      "evidence_refs": [
+        "diff_excerpt: PAD_STACK(56), PAD_STACK(24), PAD_STACK(112)",
+        "pr_body: remaining work lists structural stack/FPR drift"
+      ]
+    },
+    {
+      "text": "Used volatile const float/f64 loads from lbColl_804D79F0/lbColl_804D79F4/lbColl_804D79F8/lbColl_804D7A00/lbColl_804D7A08/lbColl_804D7A10 in nearzero/clamp-like comparisons, apparently to match literal/data access shape.",
+      "evidence_refs": [
+        "diff_excerpt: nearzero uses *(volatile const float*) &lbColl_804D79F0 and &lbColl_804D79F4",
+        "diff_excerpt: lbColl_80005C44 uses volatile loads for 0.0/1.0-style scale limits"
+      ]
+    },
+    {
+      "text": "Replaced a generic between helper with nearzero calls in several geometric degeneracy checks.",
+      "evidence_refs": [
+        "diff_excerpt: removed between helper",
+        "diff_excerpt: lbColl_80005C44, lbColl_80006094, lbColl_800067F8 use nearzero"
+      ]
+    },
+    {
+      "text": "Inlined simple axis-bound rejection checks in lbColl_80006094 instead of calling testPlusX/testMinusX in the shown hunk.",
+      "evidence_refs": [
+        "diff_excerpt: lbColl_80006094 replaces testPlusX/testMinusX calls with local float x comparisons"
+      ]
+    },
+    {
+      "text": "Restructured algebraic expressions with explicit numerator/denominator grouping and leading negation to affect floating-point evaluation order.",
+      "evidence_refs": [
+        "diff_excerpt: lbColl_80006094 var_f2_2 formula regrouped",
+        "diff_excerpt: lbColl_800067F8 temp_scl_f formula regrouped"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "text": "No human review comments were present in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata: review_comments 0, reviews 0"
+      ]
+    },
+    {
+      "text": "Automated bot feedback reported 67.14% matched code overall for GALE01, +0.03% and +1016 bytes for this PR, with 2 new matches and 7 improvements.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev[bot] issue_comment at 2026-05-15T18:08:39Z"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2503",
+    "lb: improve lbcollision matching",
+    "itsgrimetime",
+    "src/melee/lb/lbcollision.c",
+    "src/melee/lb/lbcollision.h",
+    "lbColl_80005C44",
+    "lbColl_80009DD4",
+    "lbColl_8000A78C",
+    "lbColl_80006E58",
+    "lbColl_80006094",
+    "lbColl_800067F8",
+    "lbColl_800077A0",
+    "lbColl_8000A244",
+    "lbColl_8000A584",
+    "lbColl_8000A95C",
+    "lbColl_8000AB2C",
+    "Vec3 temporary layout mismatch",
+    "structural stack/FPR drift",
+    "sqrt spill/register difference",
+    "PAD_STACK",
+    "nearzero",
+    "lbColl_JObjGetMtxPtr",
+    "HSD_JObjSetupMatrix",
+    "jobj.h",
+    "explicit output parameter",
+    "collision distance",
+    "lbcollision prototypes"
+  ],
+  "follow_up_queries": [
+    "lbColl_80006E58 explicit output parameter arg8 collision distance",
+    "lbcollision Vec3 by-value temporary layout mismatch",
+    "lbColl_80006094 structural stack FPR drift PAD_STACK",
+    "lbColl_800067F8 structural stack FPR drift Vec3",
+    "lbColl_800077A0 sqrt spill register difference",
+    "lbColl_8000A78C debug draw helpers by-value Vec3 temporary layout",
+    "lbColl_JObjGetMtxPtr jobj.h 1144 HSD_JObjSetupMatrix"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR identity, state, author, timestamps, changed files",
+      "human_pr_text: summary, verification, remaining work",
+      "text_corpus: bot report",
+      "diff_excerpt/raw_diff: partial code hunks, truncated original diff",
+      "changed_files: lbcollision.c and lbcollision.h metadata"
+    ],
+    "notes": [
+      "The PR body provides clear intent, verification commands, and remaining work, and the bot report quantifies match progress.",
+      "The raw diff is truncated in the loaded packet, so some claimed changes such as lbColl_80009DD4, lbColl_8000A78C, and exact lbcollision.h prototype edits are supported by PR body/bot metadata but not visible in the provided diff excerpt.",
+      "No human review comments were available, so reviewer intent or requested changes cannot be inferred.",
+      "Verification is reported by the author and bot report; no independent build or objdiff was run during intake.",
+      "Use of volatile literal/data loads and PAD_STACK is observed as a tactic, not promoted as a global standard."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "title": "lbcollision Vec3 temporary layout affects matching",
+        "text": "PR #2503 records that several lbcollision helpers still share a by-value Vec3 temporary layout mismatch, while the diff changes multiple functions from component scalars to Vec3 copies. For lbcollision geometry helpers, consider Vec3 copy layout a first-class matching variable before treating remaining stack drift as unrelated.",
+        "scope": [
+          "src/melee/lb/lbcollision.c",
+          "Vec3",
+          "stack layout",
+          "matching"
+        ],
+        "evidence_refs": [
+          "pr_body: by-value `Vec3` temporary layout mismatch remaining work",
+          "diff_excerpt: Vec3 a0 = *a; Vec3 a1 = a0; sp11C = *arg0; sp110 = *arg2"
+        ]
+      },
+      {
+        "title": "Record partial-match drift explicitly",
+        "text": "PR #2503 names functions that improved but still have structural stack/FPR drift or a sqrt spill/register difference. This is useful search evidence: do not convert bot score improvements into full-match claims unless the report reaches 100% or the PR explicitly claims a match.",
+        "scope": [
+          "lbcollision",
+          "matching status",
+          "regression ledger"
+        ],
+        "evidence_refs": [
+          "pr_body: remaining work section",
+          "bot_report: lbColl_80006094 78.74%, lbColl_800067F8 78.71%, lbColl_80006E58 81.05%"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Header prototype updates should accompany proven recovered signatures",
+        "text": "PR #2503 paired a recovered lbColl_80006E58 argument-order fix with stale lbcollision.h prototype updates. This supports the existing truthful-headers-and-includes standard: when a body proves an output-parameter or signature order, update the owning header rather than leaving stale prototypes.",
+        "source_path": null,
+        "scope": [
+          "headers",
+          "function signatures",
+          "output parameters"
+        ],
+        "evidence_refs": [
+          "pr_body: Fix `lbColl_80006E58` so collision distance is written through the explicit output parameter",
+          "pr_body: Update stale `lbcollision.h` prototypes for matched helpers",
+          "diff_excerpt: lbColl_80006E58 signature order changed"
+        ],
+        "reason": "Candidate reinforcement/example for an existing standard, not a new standalone rule."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Treat volatile literal/data loads as narrow matching tactics requiring evidence",
+        "text": "The diff uses volatile const float/f64 loads from lbColl data symbols for nearzero and scale limits. Because this can overlap with data/literal ownership risk, curator may want to cross-reference this PR under matching-tactics-need-evidence and literals-and-data-ownership rather than promoting it as normal style.",
+        "source_path": null,
+        "scope": [
+          "volatile constants",
+          "float literals",
+          "data ownership",
+          "matching tactics"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: nearzero uses volatile const float loads from lbColl_804D79F0/lbColl_804D79F4",
+          "diff_excerpt: lbColl_80005C44 uses volatile const float/f64 loads for scale bounds"
+        ],
+        "reason": "Observed tactic may be useful as a cautionary example; PR evidence does not prove it should be global style."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote PAD_STACK use from this PR as accepted style; the PR itself reports remaining structural stack/FPR drift.",
+      "Do not infer human reviewer approval details; loaded slice has no human review comments.",
+      "Do not treat added lbColl_804D36C4/lbColl_804D36C8/lbColl_804D3700/lbColl_804D3708 symbols as validated data ownership beyond the PR diff and bot .sdata improvement.",
+      "Do not claim lbColl_8000A78C or nearby debug draw helpers fully matched; the PR says restore/improve and the bot report shows lbColl_8000A78C at 99.86%."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 1073,
+  "title": "Synchronize `Makefile` and `configure.py` C flags",
+  "state": "MERGED",
+  "createdAt": "2024-01-17T18:20:48Z",
+  "updatedAt": "2024-01-17T18:41:39Z",
+  "mergedAt": "2024-01-17T18:41:38Z",
+  "closedAt": "2024-01-17T18:41:39Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1073",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 4446
+  }
+}

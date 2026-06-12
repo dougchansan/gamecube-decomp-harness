@@ -1,0 +1,17 @@
+{
+  "schema_version": "melee_pr_preship_review_v1",
+  "slice_id": "",
+  "slice_verdict": "approve | reject",
+  "findings": [
+    {
+      "file": "",
+      "line": 0,
+      "standard_id": "",
+      "verdict": "reject | warn",
+      "rationale": "",
+      "suggested_fix": ""
+    }
+  ],
+  "summary": "",
+  "confidence": 0.0
+}

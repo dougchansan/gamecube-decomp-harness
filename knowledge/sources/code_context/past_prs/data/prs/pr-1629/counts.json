@@ -1,0 +1,17 @@
+{
+  "number": 1629,
+  "title": "Camera matches",
+  "state": "MERGED",
+  "createdAt": "2025-06-23T23:39:40Z",
+  "updatedAt": "2025-06-24T00:21:19Z",
+  "mergedAt": "2025-06-24T00:21:19Z",
+  "closedAt": "2025-06-24T00:21:19Z",
+  "author": "sadkellz",
+  "url": "https://github.com/doldecomp/melee/pull/1629",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 14045
+  }
+}

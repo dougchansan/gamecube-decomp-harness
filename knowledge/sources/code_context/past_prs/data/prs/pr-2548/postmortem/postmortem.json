@@ -1,0 +1,159 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2548",
+  "pr": {
+    "number": 2548,
+    "title": "Remove target funcs",
+    "url": "https://github.com/doldecomp/melee/pull/2548",
+    "state": "MERGED",
+    "author": "jellejurre",
+    "created_at": "2026-05-27T23:08:53Z",
+    "merged_at": "2026-05-27T23:12:42Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2548 deleted the repository-root target_funcs.txt file, which listed eight already-checked grAnime functions in src/melee/gr/granime.c. The only recorded bot report says there were no changes for GALE01 between base 09511e2 and head bcc3bf5.",
+  "change_classification": {
+    "primary_type": "metadata-cleanup",
+    "categories": [
+      "code-change",
+      "target-list-cleanup"
+    ],
+    "systems": [
+      "repo-root",
+      "grAnime"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "target_funcs.txt",
+      "role": "deleted target-function tracking file",
+      "evidence_refs": [
+        "changed_files.jsonl: target_funcs.txt added 0 deleted 10 hunks 1",
+        "raw_diff: deleted file mode 100644 for target_funcs.txt"
+      ]
+    },
+    {
+      "path": "src/melee/gr/granime.c",
+      "role": "referenced by the removed target list; not changed by this PR slice",
+      "evidence_refs": [
+        "raw_diff: removed line 'File: src/melee/gr/granime.c'"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Deleted target_funcs.txt.",
+      "evidence_refs": [
+        "raw_diff: diff --git a/target_funcs.txt b/target_funcs.txt deleted file mode 100644",
+        "changed_files.jsonl: file target_funcs.txt, added 0, deleted 10"
+      ]
+    },
+    {
+      "text": "Removed a target list containing eight checked grAnime functions: grAnime_801C86D4, grAnime_801C84A4, grAnime_801C8578, grAnime_801C6A54, grAnime_801C752C, grAnime_801C6C0C, grAnime_801C7228, and grAnime_801C7C1C.",
+      "evidence_refs": [
+        "raw_diff: removed target_funcs.txt contents"
+      ]
+    },
+    {
+      "text": "The PR body was empty and there were no review comments in the loaded slice.",
+      "evidence_refs": [
+        "text_corpus.jsonl: pr_body body empty",
+        "metadata_json: review_comments 0, reviews 0"
+      ]
+    },
+    {
+      "text": "A decomp-dev bot issue comment reported 'No changes' for GALE01.",
+      "evidence_refs": [
+        "text_corpus.jsonl: issue_comment by decomp-dev[bot], body '### Report for GALE01 (09511e2 - bcc3bf5)\\n\\nNo changes'"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Kept the PR scoped to deleting a stale target-function list rather than mixing it with source changes.",
+      "evidence_refs": [
+        "changed_files.jsonl: only changed file is target_funcs.txt",
+        "raw_diff: only target_funcs.txt deletion shown"
+      ]
+    }
+  ],
+  "decomp_lessons": [],
+  "naming_conventions": [],
+  "assembly_or_matching_tactics": [],
+  "review_feedback": [],
+  "searchable_terms": [
+    "PR 2548",
+    "Remove target funcs",
+    "target_funcs.txt",
+    "src/melee/gr/granime.c",
+    "grAnime_801C86D4",
+    "grAnime_801C84A4",
+    "grAnime_801C8578",
+    "grAnime_801C6A54",
+    "grAnime_801C752C",
+    "grAnime_801C6C0C",
+    "grAnime_801C7228",
+    "grAnime_801C7C1C",
+    "GALE01",
+    "No changes",
+    "jellejurre"
+  ],
+  "follow_up_queries": [
+    "target_funcs.txt",
+    "grAnime_801C86D4 grAnime_801C84A4 grAnime_801C8578",
+    "grAnime_801C6A54 grAnime_801C752C grAnime_801C6C0C grAnime_801C7228 grAnime_801C7C1C",
+    "PRs deleting target lists after grAnime work",
+    "decomp-dev bot \"No changes\" target_funcs"
+  ],
+  "evidence_quality": {
+    "status": "strong",
+    "evidence_refs": [
+      "metadata_json: PR metadata, changed file counts, state MERGED",
+      "raw_diff: complete 387-byte diff",
+      "changed_files.jsonl: one changed file",
+      "text_corpus.jsonl: empty PR body and bot report"
+    ],
+    "notes": [
+      "Evidence is strong for the file deletion and exact removed target list.",
+      "Evidence is weak for any reusable decomp technique because the PR contains no source edits, review comments, or authored explanation beyond the title.",
+      "The bot report supports that its reported comparison had 'No changes', but this intake does not independently validate builds, objdiff, or regression status."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [],
+    "source_update_candidates": [
+      {
+        "target_source_id": "other",
+        "update_kind": "source_update",
+        "title": "Historical note: target_funcs.txt removed in PR 2548",
+        "text": "PR 2548 deleted target_funcs.txt, which listed eight checked grAnime functions under src/melee/gr/granime.c: grAnime_801C86D4, grAnime_801C84A4, grAnime_801C8578, grAnime_801C6A54, grAnime_801C752C, grAnime_801C6C0C, grAnime_801C7228, and grAnime_801C7C1C.",
+        "source_path": "target_funcs.txt",
+        "scope": [
+          "repo-root",
+          "historical target function tracking",
+          "src/melee/gr/granime.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: target_funcs.txt deleted file mode 100644",
+          "raw_diff: removed checked grAnime function list"
+        ],
+        "reason": "May be useful for a curator-maintained historical/index source about removed target tracking files; not a decomp standard."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that the listed grAnime functions were newly matched in this PR; the diff only shows removal of a checked target list.",
+      "Do not derive naming, control-flow, typing, or matching tactics from this PR because it contains no function-body changes.",
+      "Do not promote the bot 'No changes' line into independent validation beyond the loaded comment."
+    ]
+  },
+  "confidence": 0.93,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

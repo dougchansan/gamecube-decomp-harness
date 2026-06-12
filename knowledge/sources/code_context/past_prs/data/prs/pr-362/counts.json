@@ -1,0 +1,17 @@
+{
+  "number": 362,
+  "title": "Fighter.c cleanup commit 5",
+  "state": "MERGED",
+  "createdAt": "2022-04-27T04:49:02Z",
+  "updatedAt": "2022-04-27T16:39:30Z",
+  "mergedAt": "2022-04-27T16:39:26Z",
+  "closedAt": "2022-04-27T16:39:26Z",
+  "author": "snuffysasa",
+  "url": "https://github.com/doldecomp/melee/pull/362",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 72734
+  }
+}

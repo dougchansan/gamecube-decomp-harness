@@ -1,0 +1,17 @@
+{
+  "number": 1305,
+  "title": "Match `ft_8008521C` (148 bytes)",
+  "state": "MERGED",
+  "createdAt": "2024-02-22T14:59:13Z",
+  "updatedAt": "2024-02-22T15:01:25Z",
+  "mergedAt": "2024-02-22T15:01:25Z",
+  "closedAt": "2024-02-22T15:01:25Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1305",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 611
+  }
+}

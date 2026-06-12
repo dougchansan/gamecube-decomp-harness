@@ -1,0 +1,572 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2315",
+  "pr": {
+    "number": 2315,
+    "title": "Work in progress — pending matches",
+    "url": "https://github.com/doldecomp/melee/pull/2315",
+    "state": "CLOSED",
+    "author": "johnwinston",
+    "created_at": "2026-03-17T17:38:15Z",
+    "merged_at": null
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Draft, closed-unmerged WIP PR touching fighter, ground, item, library audio, and menu code. The PR body says 0 matched and 5 failed pending targets, while the bot report for commit range f50d7f6..1d8fa0d reports +2200 matched-code bytes, 13 new matches, and 18 unmatched-item improvements. The diff replaces many placeholder stubs with C bodies, updates several signatures/types/headers, introduces some data/type guesses, and uses narrow matching tactics such as pragmas and PAD_STACK.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "types",
+      "naming",
+      "matching-tactics",
+      "data-section-touch"
+    ],
+    "systems": [
+      "fighter",
+      "ground",
+      "item",
+      "library",
+      "menu"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gr/grhomerun.c",
+      "role": "Largest changed file; added grHr_804D6AE4 and four near-identical grHomeRun_* text-positioning function bodies reported as 100% matches.",
+      "evidence_refs": [
+        "changed_files: src/melee/gr/grhomerun.c +117/-4",
+        "diff: grHomeRun_8021DF50, grHomeRun_8021E0D4, grHomeRun_8021E258, grHomeRun_8021E3DC bodies",
+        "bot_report: four grhomerun functions 0.00% -> 100.00%; .sdata2 and .sbss improvements"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/ittools.c",
+      "role": "Item matching work with several reported high-percent unmatched-item improvements; loaded diff is truncated before details.",
+      "evidence_refs": [
+        "changed_files: src/melee/it/items/ittools.c +67/-5",
+        "bot_report: it_2725_Logic22_Absorbed 97.30%, Clanked 97.29%, HitShield 97.29%, it_802EF320 98.20%, it_802EF098 99.72%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grcorneria.c",
+      "role": "Added three ground-stage function bodies, all reported as new 100% matches.",
+      "evidence_refs": [
+        "changed_files: src/melee/gr/grcorneria.c +50/-3",
+        "diff: grCorneria_801E0D30, grCorneria_801E0F6C, grCorneria_801E2D90",
+        "bot_report: grCorneria_801E0F6C, grCorneria_801E2D90, grCorneria_801E0D30 0.00% -> 100.00%"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itmewtwoshadowball.c",
+      "role": "Added includes and item lifecycle/collision function bodies; one new 100% match and one near-match improvement reported.",
+      "evidence_refs": [
+        "changed_files: src/melee/it/items/itmewtwoshadowball.c +44/-2",
+        "diff: it_2725_Logic101_Destroyed body and start of it_2725_Logic101_ShieldBounced",
+        "bot_report: it_2725_Logic101_Destroyed 0.00% -> 100.00%; ShieldBounced 99.86%"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_Init.c",
+      "role": "Added nested-loop material diffuse update body for Kirby special-N-related function; reported as partial improvement, not a match.",
+      "evidence_refs": [
+        "changed_files: src/melee/ft/chara/ftKirby/ftKb_Init.c +30/-1",
+        "diff: ftKb_SpecialN_800F1420",
+        "bot_report: ftKb_SpecialN_800F1420 0.00% -> 95.54%"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnname.c",
+      "role": "Menu name-entry matching work; changed diff details not loaded, but bot reports high-percent improvement.",
+      "evidence_refs": [
+        "changed_files: src/melee/mn/mnname.c +30/-1",
+        "bot_report: mnName_8023749C 0.00% -> 97.84%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grinishie1.c",
+      "role": "Added function body using a loop over 19 blocks and PAD_STACK; reported as partial improvement.",
+      "evidence_refs": [
+        "changed_files: src/melee/gr/grinishie1.c +28/-1",
+        "diff: fn_801FBF6C",
+        "bot_report: fn_801FBF6C 0.00% -> 93.72%"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lbaudio_ax.c",
+      "role": "Library audio matching work; loaded diff details not shown, but one function reported as new 100% match and .bss improved.",
+      "evidence_refs": [
+        "changed_files: src/melee/lb/lbaudio_ax.c +23/-4",
+        "bot_report: lbAudioAx_80024DC4 0.00% -> 100.00%; .bss 0.24% -> 44.44%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/groldkongo.c",
+      "role": "Added struct-width changes, baselib includes, local random-range helper, and grOldKongo_8021005C body; near-match improvement reported.",
+      "evidence_refs": [
+        "changed_files: src/melee/gr/groldkongo.c +23/-2",
+        "diff: grOk_804D6A90 fields changed int to s16 pair; rand_inline; grOldKongo_8021005C",
+        "bot_report: grOldKongo_8021005C 0.00% -> 99.76%"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftcolanim.c",
+      "role": "Added ft_800C0098 body wrapped in auto_inline/global_optimizer pragmas; reported as new 100% match.",
+      "evidence_refs": [
+        "changed_files: src/melee/ft/ftcolanim.c +22/-1",
+        "diff: #pragma push, auto_inline off, global_optimizer off, ft_800C0098, #pragma pop",
+        "bot_report: ft_800C0098 0.00% -> 100.00%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grgreatbay.c",
+      "role": "Added local data table and grGreatBay_801F660C body; near-match and .data improvement reported.",
+      "evidence_refs": [
+        "changed_files: src/melee/gr/grgreatbay.c +18/-1",
+        "diff: grGb_803E4048 table and grGreatBay_801F660C",
+        "bot_report: grGreatBay_801F660C 0.00% -> 99.08%; .data 64.02% -> 70.26%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/groldpupupu.c",
+      "role": "Added baselib random include, struct-width changes, and grOldPupupu_80210C7C body; reported as new 100% match.",
+      "evidence_refs": [
+        "changed_files: src/melee/gr/groldpupupu.c +17/-2",
+        "diff: grOp_804D6A98 fields changed int to s16 pair; grOldPupupu_80210C7C",
+        "bot_report: grOldPupupu_80210C7C 0.00% -> 100.00%"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_Attack100.c",
+      "role": "Added fn_800DC070 fighter capture-jump transition body; reported as new 100% match.",
+      "evidence_refs": [
+        "changed_files: src/melee/ft/chara/ftCommon/ftCo_Attack100.c +12/-1",
+        "diff: fn_800DC070",
+        "bot_report: fn_800DC070 0.00% -> 100.00%"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCrazyHand/ftCh_Init.c",
+      "role": "Added ftCh_Init_80157170 body; reported as new 100% match.",
+      "evidence_refs": [
+        "changed_files: src/melee/ft/chara/ftCrazyHand/ftCh_Init.c +12/-1",
+        "diff: ftCh_Init_80157170",
+        "bot_report: ftCh_Init_80157170 0.00% -> 100.00%"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itklap.c",
+      "role": "Added it_802E1E94 body with random angle updates; near-match improvement reported.",
+      "evidence_refs": [
+        "changed_files: src/melee/it/items/itklap.c +11/-1",
+        "diff: it_802E1E94",
+        "bot_report: it_802E1E94 0.00% -> 98.42%; .sdata2 11.76% -> 31.58%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/types.h",
+      "role": "Added grHomeRun_GroundVars and union arm used by grhomerun code.",
+      "evidence_refs": [
+        "changed_files: src/melee/gr/types.h +8/-0",
+        "diff: struct grHomeRun_GroundVars; Ground union adds homerun"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lbaudio_ax.static.h",
+      "role": "Audio static header signature/type support; details not loaded.",
+      "evidence_refs": [
+        "changed_files: src/melee/lb/lbaudio_ax.static.h +7/-1"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grhomerun.h",
+      "role": "Header include and prototype update for grHomeRun_8021EC58.",
+      "evidence_refs": [
+        "changed_files: src/melee/gr/grhomerun.h +2/-1",
+        "diff: adds lb/forward.h; grHomeRun_8021EC58 becomes void* grHomeRun_8021EC58(u16)"
+      ]
+    },
+    {
+      "path": "src/melee/it/itCommonItems.h",
+      "role": "Refined Mewtwo Shadow Ball item vars layout to expose an HSD_GObj* owner-like field and smaller float array.",
+      "evidence_refs": [
+        "changed_files: src/melee/it/itCommonItems.h +2/-1",
+        "diff: itMewtwoShadowball_ItemVars x2C changed from f32[6] to HSD_GObj* x2C plus f32 x30[5]"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCrazyHand/types.h",
+      "role": "Changed ftCrazyHandAttributes x24 from s32 to float to support recovered code.",
+      "evidence_refs": [
+        "changed_files: src/melee/ft/chara/ftCrazyHand/types.h +1/-1",
+        "diff: x24 s32 -> float"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grgreatbay.h",
+      "role": "Updated grGreatBay_801F660C prototype from unknown to void with Ground_GObj*.",
+      "evidence_refs": [
+        "changed_files: src/melee/gr/grgreatbay.h +1/-1",
+        "diff: grGreatBay_801F660C prototype"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/ittools.h",
+      "role": "Header update for item tools; details not loaded.",
+      "evidence_refs": [
+        "changed_files: src/melee/it/items/ittools.h +1/-1"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnname.h",
+      "role": "Header update for menu name work; details not loaded.",
+      "evidence_refs": [
+        "changed_files: src/melee/mn/mnname.h +1/-1"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Replaced placeholder comments with recovered C bodies across fighter, ground, item, library, and menu translation units.",
+    "Bot report says 13 symbols became 100% matched, including grCorneria_801E0F6C, grCorneria_801E2D90, grCorneria_801E0D30, four grHomeRun functions, fn_800DC070, ft_800C0098, it_2725_Logic101_Destroyed, ftCh_Init_80157170, lbAudioAx_80024DC4, and grOldPupupu_80210C7C.",
+    "Several other functions improved but did not match according to the bot report, including ftKb_SpecialN_800F1420, fn_801FBF6C, grOldKongo_8021005C, grGreatBay_801F660C, it_802E1E94, it_2725_Logic101_ShieldBounced, ittools functions, and mnName_8023749C.",
+    "Updated prototypes and types in headers: grGreatBay_801F660C, grHomeRun_8021EC58, ftCrazyHandAttributes.x24, grHomeRun ground vars, and itMewtwoShadowball item vars.",
+    "Introduced or modified data/section-related source, including grGb_803E4048, grHr_804D6AE4, .sdata2/.sbss effects in grhomerun and itklap, .data changes in grgreatbay, and .bss changes in lbaudio_ax.",
+    "Used explicit matching tactics in some bodies: #pragma auto_inline off/global_optimizer off around ft_800C0098 and PAD_STACK(16) in fn_801FBF6C."
+  ],
+  "smart_moves": [
+    {
+      "text": "The PR updates owning headers when bodies recover signatures, e.g. grGreatBay_801F660C and grHomeRun_8021EC58, rather than only adding source-local declarations.",
+      "evidence_refs": [
+        "diff: src/melee/gr/grgreatbay.h",
+        "diff: src/melee/gr/grhomerun.h",
+        "decomp_standards: truthful-headers-and-includes"
+      ]
+    },
+    {
+      "text": "The PR recovers typed union/struct fields for some item and ground accesses, such as itMewtwoShadowball_ItemVars.x2C as HSD_GObj* and grHomeRun_GroundVars, instead of leaving all accesses through generic unknown storage.",
+      "evidence_refs": [
+        "diff: src/melee/it/itCommonItems.h",
+        "diff: src/melee/gr/types.h",
+        "decomp_standards: typed-fields-over-pointer-math"
+      ]
+    },
+    {
+      "text": "The nested loops in ftKb_SpecialN_800F1420 and the loop over Inishie blocks express repeated indexed traversal naturally rather than duplicating generated repeated blocks.",
+      "evidence_refs": [
+        "diff: ftKb_SpecialN_800F1420",
+        "diff: fn_801FBF6C",
+        "decomp_standards: natural-loops"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "A bot report can contradict or supersede stale WIP body text; preserve both. Here the PR body says 0 matched and 5 failed, while the bot reports 13 new matches and 18 improvements for the tested commit range.",
+      "evidence_refs": [
+        "human_pr_text: **0** matched, **5** failed",
+        "bot_report: ✅ 13 new matches; 📈 18 improvements; +2200 bytes"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "lesson": "Typed layout refinements can be part of matching progress when new bodies expose field roles, but in a draft closed-unmerged PR they should be treated as candidates requiring curator/source review.",
+      "evidence_refs": [
+        "diff: ftCrazyHandAttributes.x24 s32 -> float",
+        "diff: itMewtwoShadowball_ItemVars x2C as HSD_GObj*",
+        "diff: grHomeRun_GroundVars",
+        "pr_state: CLOSED, merged_at null"
+      ],
+      "confidence": 0.72
+    },
+    {
+      "lesson": "Pragmas and PAD_STACK appeared as narrow tactics tied to specific functions, not global style. They need verifier evidence and cleanup review before promotion.",
+      "evidence_refs": [
+        "diff: ft_800C0098 wrapped in #pragma auto_inline off and #pragma global_optimizer off",
+        "diff: fn_801FBF6C ends with PAD_STACK(16)",
+        "decomp_standards: matching-tactics-need-evidence",
+        "decomp_standards: avoid-pragmas-register-asm"
+      ],
+      "confidence": 0.86
+    },
+    {
+      "lesson": "Near-identical matched bodies, such as the four grHomeRun_* functions, are useful search targets for checking whether the original source used repeated authored copies, a helper, or a macro; the PR evidence shows repeated bodies but does not prove original intent.",
+      "evidence_refs": [
+        "diff: grHomeRun_8021DF50, grHomeRun_8021E0D4, grHomeRun_8021E258, grHomeRun_8021E3DC nearly identical",
+        "bot_report: all four grHomeRun functions 100%",
+        "decomp_standards: natural-loops"
+      ],
+      "confidence": 0.68
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "fp, gp, ip, gobj, jobj, dobj, mobj, mat",
+      "context": "Short local role names are used for Fighter, Ground, Item, GObj, JObj, DObj, MObj, and material variables.",
+      "evidence_refs": [
+        "diff: fn_800DC070 uses fp/victim",
+        "diff: grCorneria_801E0F6C uses gp/gobj5/gp5",
+        "diff: ftKb_SpecialN_800F1420 uses fp, dobj, mobj, mat",
+        "decomp_standards: conservative-naming"
+      ]
+    },
+    {
+      "name": "address-style function names retained",
+      "context": "Functions without proven semantic names remain as fn_*/module_address names, e.g. fn_800DC070, ft_800C0098, fn_801FBF6C, grOldKongo_8021005C.",
+      "evidence_refs": [
+        "diff: multiple recovered bodies retain address-style names",
+        "decomp_standards: conservative-naming"
+      ]
+    },
+    {
+      "name": "xNN unknown field names retained where semantics are unclear",
+      "context": "Recovered structs and vars mostly keep x-offset-style fields such as xC4, xC6, xC8, xCC, x24, x2C, preserving uncertainty.",
+      "evidence_refs": [
+        "diff: grHomeRun_GroundVars",
+        "diff: itMewtwoShadowball_ItemVars",
+        "diff: ftCrazyHandAttributes.x24"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Narrow pragma block around ft_800C0098",
+      "details": "The function is wrapped with #pragma push, #pragma auto_inline off, #pragma global_optimizer off, then #pragma pop. Bot reports ft_800C0098 as a 100% new match.",
+      "evidence_refs": [
+        "diff: src/melee/ft/ftcolanim.c",
+        "bot_report: ft_800C0098 0.00% -> 100.00%",
+        "decomp_standards: avoid-pragmas-register-asm"
+      ]
+    },
+    {
+      "tactic": "PAD_STACK in a high-percent but unmatched function",
+      "details": "fn_801FBF6C ends with PAD_STACK(16); bot reports 93.72%, so the tactic did not produce a full match in the loaded report.",
+      "evidence_refs": [
+        "diff: src/melee/gr/grinishie1.c",
+        "bot_report: fn_801FBF6C 0.00% -> 93.72%",
+        "decomp_standards: matching-tactics-need-evidence"
+      ]
+    },
+    {
+      "tactic": "Natural indexed loops",
+      "details": "ftKb_SpecialN_800F1420 uses nested for-loops over lookup entries and per-entry bytes; fn_801FBF6C uses a for-loop over 19 blocks; grGreatBay_801F660C loops over seven table rows.",
+      "evidence_refs": [
+        "diff: ftKb_SpecialN_800F1420",
+        "diff: fn_801FBF6C",
+        "diff: grGreatBay_801F660C",
+        "decomp_standards: natural-loops"
+      ]
+    },
+    {
+      "tactic": "Header prototype and type recovery",
+      "details": "The PR changes UNK_RET/UNK_PARAMS to concrete signatures for recovered functions and adjusts field types/union arms used by the new bodies.",
+      "evidence_refs": [
+        "diff: grGreatBay_801F660C prototype",
+        "diff: grHomeRun_8021EC58 prototype",
+        "diff: ftCrazyHandAttributes.x24",
+        "diff: itMewtwoShadowball_ItemVars.x2C",
+        "decomp_standards: truthful-headers-and-includes"
+      ]
+    },
+    {
+      "tactic": "Data/table introduction for partial match",
+      "details": "grGreatBay adds grGb_803E4048 and a loop over it; bot reports the function at 99.08% and .data improvement, so data ownership remains review-sensitive.",
+      "evidence_refs": [
+        "diff: grGb_803E4048",
+        "bot_report: grGreatBay_801F660C 99.08%; .data 64.02% -> 70.26%",
+        "decomp_standards: text-before-data-matching",
+        "decomp_standards: data-sections-and-tu-splits"
+      ]
+    }
+  ],
+  "review_feedback": [],
+  "searchable_terms": [
+    "pr-2315",
+    "johnwinston",
+    "Work in progress pending matches",
+    "Claude Code",
+    "fn_800DC070",
+    "ftCh_Init_80157170",
+    "ftKb_SpecialN_800F1420",
+    "ft_800C0098",
+    "grCorneria_801E0D30",
+    "grCorneria_801E0F6C",
+    "grCorneria_801E2D90",
+    "grGreatBay_801F660C",
+    "grHomeRun_8021DF50",
+    "grHomeRun_8021E0D4",
+    "grHomeRun_8021E258",
+    "grHomeRun_8021E3DC",
+    "fn_801FBF6C",
+    "grOldKongo_8021005C",
+    "grOldPupupu_80210C7C",
+    "it_802E1E94",
+    "it_2725_Logic101_Destroyed",
+    "it_2725_Logic101_ShieldBounced",
+    "ittools",
+    "lbAudioAx_80024DC4",
+    "mnName_8023749C",
+    "PAD_STACK",
+    "global_optimizer off",
+    "auto_inline off",
+    "grHomeRun_GroundVars",
+    "itMewtwoShadowball_ItemVars",
+    "grGb_803E4048",
+    "grHr_804D6AE4"
+  ],
+  "follow_up_queries": [
+    "PR 2315 ft_800C0098 global_optimizer off auto_inline off",
+    "PR 2315 grHomeRun_8021DF50 grHomeRun_8021E0D4 grHomeRun_8021E258 grHomeRun_8021E3DC repeated bodies",
+    "PR 2315 fn_801FBF6C PAD_STACK 16",
+    "PR 2315 grGreatBay_801F660C grGb_803E4048 data table",
+    "PR 2315 itMewtwoShadowball_ItemVars x2C HSD_GObj owner",
+    "PR 2315 lbaudio_ax lbAudioAx_80024DC4 bss improvement",
+    "PR 2315 bot report 13 new matches 18 improvements",
+    "PR 2315 closed unmerged draft stale body 0 matched"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR #2315 closed, merged_at null, draft true in raw_pr_json",
+      "human_pr_text: 0 matched, 5 failed",
+      "text_corpus: decomp-dev bot report with 13 new matches and 18 improvements",
+      "changed_files.jsonl: 23 changed files",
+      "raw_diff: truncated=true, original_chars=28000",
+      "review_comments count: 0; reviews count: 0"
+    ],
+    "notes": [
+      "No human review comments or review approvals are present in the loaded slice.",
+      "The PR was closed without merge according to metadata, so no change should be treated as accepted project history solely from this slice.",
+      "The PR body appears stale relative to the bot report: it claims 0 matched and lists failed pending targets, while the bot reports 13 new matches for the tested commit range.",
+      "The loaded raw diff is truncated, so details for later files such as ittools.c, lbaudio_ax.c, mnname.c, and some shadowball changes are incomplete.",
+      "Bot report is useful verifier evidence for the tested commit range but does not provide reviewer intent or prove long-term acceptance.",
+      "Some changes touch data sections and type layouts; the slice gives match/improvement numbers but not enough ownership evidence to promote those layouts as accepted facts."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "pr_evidence_pattern",
+        "title": "WIP PR body may be stale relative to bot match report",
+        "text": "In PR #2315, the author body reports 0 matched and 5 failed pending targets, but the decomp-dev bot report for f50d7f6..1d8fa0d reports 13 new 100% matches and 18 improvements. Intake records should preserve both sources and avoid treating the body as final validation.",
+        "scope": [
+          "past_pr_intake",
+          "bot_report_interpretation"
+        ],
+        "evidence_refs": [
+          "human_pr_text",
+          "text_corpus: decomp-dev bot report"
+        ],
+        "confidence": 0.9
+      },
+      {
+        "record_type": "matching_tactic_case",
+        "title": "Pragmas can appear in matched WIP bodies but remain review-sensitive",
+        "text": "PR #2315 reports ft_800C0098 as a 100% new match while the diff wraps it in #pragma auto_inline off and #pragma global_optimizer off. Because the PR is draft/closed-unmerged and standards treat pragmas as exceptions, this is evidence for a tactic case, not an accepted style rule.",
+        "scope": [
+          "src/melee/ft/ftcolanim.c",
+          "ft_800C0098"
+        ],
+        "evidence_refs": [
+          "diff: ft_800C0098",
+          "bot_report: ft_800C0098 100%",
+          "decomp_standards: avoid-pragmas-register-asm"
+        ],
+        "confidence": 0.84
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "Candidate grHomeRun ground vars layout from PR #2315",
+        "text": "PR #2315 adds struct grHomeRun_GroundVars with u16 xC4, u16 xC6, int xC8, int xCC and adds a homerun union arm in Ground. The new grHomeRun_* functions use gp->gv.homerun.xC6 while also accessing gp->gv.unk.xC8/xCC. Because the PR is closed-unmerged and the repeated bodies/data changes need review, treat this only as a candidate layout fact.",
+        "source_path": "src/melee/gr/types.h",
+        "scope": [
+          "src/melee/gr/grhomerun.c",
+          "src/melee/gr/types.h",
+          "grHomeRun_GroundVars"
+        ],
+        "evidence_refs": [
+          "diff: src/melee/gr/types.h",
+          "diff: src/melee/gr/grhomerun.c",
+          "metadata: merged_at null"
+        ],
+        "reason": "Potential typed-field recovery relevant to future grhomerun work, but not accepted by this unmerged PR."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "Candidate Mewtwo Shadow Ball item var x2C owner pointer",
+        "text": "PR #2315 changes itMewtwoShadowball_ItemVars at ip+E00 from f32 x2C[6] to HSD_GObj* x2C plus f32 x30[5]. The added Destroyed logic compares x2C to ip->owner and calls Mewtwo/Kirby special-N reset helpers before nulling x2C. Treat as a candidate item-var layout/role fact pending source review.",
+        "source_path": "src/melee/it/itCommonItems.h",
+        "scope": [
+          "src/melee/it/itCommonItems.h",
+          "src/melee/it/items/itmewtwoshadowball.c",
+          "itMewtwoShadowball_ItemVars"
+        ],
+        "evidence_refs": [
+          "diff: src/melee/it/itCommonItems.h",
+          "diff: it_2725_Logic101_Destroyed",
+          "bot_report: it_2725_Logic101_Destroyed 100%",
+          "metadata: merged_at null"
+        ],
+        "reason": "The code strongly suggests an owner/fighter GObj pointer role, but the PR was not merged."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "Candidate ftCrazyHandAttributes x24 float type",
+        "text": "PR #2315 changes ftCrazyHandAttributes.x24 from s32 to float and uses attrs->x24 as the y component in ftCh_Init_80157170, which the bot reports as a new 100% match. Treat as candidate type information only.",
+        "source_path": "src/melee/ft/chara/ftCrazyHand/types.h",
+        "scope": [
+          "src/melee/ft/chara/ftCrazyHand/types.h",
+          "src/melee/ft/chara/ftCrazyHand/ftCh_Init.c",
+          "ftCh_Init_80157170"
+        ],
+        "evidence_refs": [
+          "diff: ftCrazyHandAttributes.x24 s32 -> float",
+          "diff: ftCh_Init_80157170",
+          "bot_report: ftCh_Init_80157170 100%",
+          "metadata: merged_at null"
+        ],
+        "reason": "Verifier evidence supports the local function, but source acceptance is not shown."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "No new standard needed: PR #2315 reinforces existing pragma/PAD_STACK caution",
+        "text": "The slice contains #pragma auto_inline off/global_optimizer off around a reported 100% match and PAD_STACK in a 93.72% function. Existing standards already cover this under matching-tactics-need-evidence and avoid-pragmas-register-asm.",
+        "source_path": null,
+        "scope": [
+          "matching tactics",
+          "pragmas",
+          "PAD_STACK"
+        ],
+        "evidence_refs": [
+          "diff: ft_800C0098",
+          "diff: fn_801FBF6C",
+          "decomp_standards: matching-tactics-need-evidence",
+          "decomp_standards: avoid-pragmas-register-asm"
+        ],
+        "reason": "Route as a reinforcement/case example rather than a new rule."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote the PR body's 0-matched status as the final validation result without also recording the bot report that found 13 new matches.",
+      "Do not promote any changed type or data layout as accepted path fact; the PR is closed-unmerged and lacks human review evidence.",
+      "Do not infer reviewer intent or merge acceptability; no review comments or reviews are loaded.",
+      "Do not treat the repeated grHomeRun bodies as proof that the original source was intentionally copy-pasted; the evidence only shows repeated recovered bodies and bot match results.",
+      "Do not treat pragmas or PAD_STACK from this WIP slice as normal decomp style."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

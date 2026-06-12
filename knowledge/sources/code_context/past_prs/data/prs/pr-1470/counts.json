@@ -1,0 +1,17 @@
+{
+  "number": 1470,
+  "title": "Fix data progress badge",
+  "state": "MERGED",
+  "createdAt": "2024-09-26T01:12:31Z",
+  "updatedAt": "2024-09-26T01:14:43Z",
+  "mergedAt": "2024-09-26T01:14:42Z",
+  "closedAt": "2024-09-26T01:14:42Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1470",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 953
+  }
+}

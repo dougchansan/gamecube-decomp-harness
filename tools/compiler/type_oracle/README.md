@@ -1,7 +1,6 @@
 # Type Oracle Tool Suite
 
-This suite exposes the harness libclang type oracle as a standalone knowledge
-tool. It parses a source file with the real `compile_commands.json` flags and
+This suite exposes the tool-local libclang type oracle. It parses a source file with the real `compile_commands.json` flags and
 maps main-file expression byte spans to clang type spellings.
 
 Use it when a worker needs to extract a subexpression into a named temporary,

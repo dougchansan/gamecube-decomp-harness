@@ -1,0 +1,17 @@
+{
+  "number": 2161,
+  "title": "match Ittarucann",
+  "state": "MERGED",
+  "createdAt": "2026-02-08T22:20:48Z",
+  "updatedAt": "2026-02-10T21:15:46Z",
+  "mergedAt": "2026-02-08T22:28:59Z",
+  "closedAt": "2026-02-08T22:28:59Z",
+  "author": "sadkellz",
+  "url": "https://github.com/doldecomp/melee/pull/2161",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 23868
+  }
+}

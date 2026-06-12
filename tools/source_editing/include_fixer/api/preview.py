@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Preview include additions suggested by harness fix_includes.py logic."""
+"""Preview include additions suggested by tool-local fix_includes.py logic."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ import sys
 from typing import Any
 
 sys.path.append(str(Path(__file__).resolve().parents[3] / "_shared"))
-from harness import import_harness_module, print_json, resolve_repo_root
+from melee_tooling import import_tool_module, print_json, resolve_repo_root
 
 
 def main() -> None:
@@ -33,7 +33,7 @@ def main() -> None:
         return
 
     try:
-        fix_includes = import_harness_module("fix_includes", repo_root)
+        fix_includes = import_tool_module("fix_includes", repo_root)
         cc_args = fix_includes.load_compile_args(source_path)
         if not cc_args:
             payload.update({"status": "compile_commands_entry_missing"})
@@ -86,7 +86,7 @@ def main() -> None:
             }
         )
     except Exception as error:  # noqa: BLE001 - API boundary should report every preview failure.
-        payload.update({"status": "bridge_error", "error": str(error)})
+        payload.update({"status": "tool_impl_error", "error": str(error)})
     print_json(payload)
 
 

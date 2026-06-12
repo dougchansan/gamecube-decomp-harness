@@ -1,0 +1,503 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2374",
+  "pr": {
+    "number": 2374,
+    "title": "grzakogenerator work",
+    "url": "https://github.com/doldecomp/melee/pull/2374",
+    "state": "MERGED",
+    "author": "lukechampine",
+    "created_at": "2026-04-02T15:09:59Z",
+    "merged_at": "2026-04-03T04:35:43Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Sprawling stage/item decomp PR centered on grZakoGenerator. It implemented several previously stubbed grZakoGenerator functions, recovered shared zako generator data/config structs and item vars, updated many stage OnStart calls to pass NULL to the newly typed grZakoGenerator_801CAE04 pointer parameter, and added or improved several stage functions in grcorneria, grrcruise, groldkongo, grheal, grfigureget, granime, gronett, groldpupupu, and gricemt.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "types",
+      "stage",
+      "item"
+    ],
+    "systems": [
+      "grzakogenerator",
+      "ground/stage",
+      "item/zako"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gr/grzakogenerator.c",
+      "role": "Main implementation: replaced several stubs and raw offset accesses with typed grZakoGenerator functions, allocation, spawn/update, cleanup, and item traversal logic.",
+      "evidence_refs": [
+        "metadata.changed_files: added 321 deleted 42",
+        "raw_diff: grzakogenerator.c hunk implementing grZakoGenerator_801CA394, 801CA43C, 801CA67C, 801CA8B4, 801CAE04, 801CAF08",
+        "text_corpus: bot report lists multiple grzakogenerator new matches"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grzakogenerator.h",
+      "role": "Header prototype cleanup for recovered grZakoGenerator signatures and return types.",
+      "evidence_refs": [
+        "metadata.changed_files: added 12 deleted 9",
+        "raw_diff: grzakogenerator.h replaces UNK_RET/UNK_PARAMS and void* with grZakoGenerator_Config, SpawnDesc, Item_GObj, HSD_GObj signatures"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grzakogenerator.static.h",
+      "role": "Moved static/private grZakoGenerator state definitions to typed declarations using gr/types.h structs.",
+      "evidence_refs": [
+        "metadata.changed_files: added 5 deleted 24",
+        "raw_diff: grzakogenerator.static.h removes local struct definitions and types lbl_8049F030 fields"
+      ]
+    },
+    {
+      "path": "src/melee/gr/types.h",
+      "role": "Shared type recovery for grZakoGenerator structs and affected GroundVars layouts.",
+      "evidence_refs": [
+        "metadata.changed_files: added 52 deleted 5",
+        "raw_diff: types.h adds grZakoGenerator_SpawnDesc, Spawn, SpawnFunc, Config, Entry, Data and updates several GroundVars fields"
+      ]
+    },
+    {
+      "path": "src/melee/it/itCharItems.h",
+      "role": "Item variable typing for zako item index access.",
+      "evidence_refs": [
+        "metadata.changed_files: added 5 deleted 0",
+        "raw_diff: itCharItems.h adds itZako_ItemVars with idx field"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grcorneria.c",
+      "role": "Stage function matching and type cleanup around Corneria/zako/arwing data.",
+      "evidence_refs": [
+        "metadata.changed_files: added 56 deleted 28",
+        "raw_diff: implements grCorneria_801DD9A8; replaces pad pointer math in grCorneria_801DDDA8 with indices/positions fields",
+        "text_corpus: bot report lists grCorneria_801DD9A8 as new match and grCorneria_801DDDA8 as reaching 100%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grcorneria.h",
+      "role": "Prototype recovery for newly understood Corneria functions.",
+      "evidence_refs": [
+        "metadata.changed_files: added 6 deleted 6",
+        "raw_diff: grcorneria.h replaces UNK signatures for grCorneria_801E1348, 801E1970, 801E2110, 801E2228, 801E2454, 801E2480"
+      ]
+    },
+    {
+      "path": "src/melee/gr/gricemt.c",
+      "role": "Ice Mountain cleanup and near/exact matching around grIceMt_801F7080 and zako generator setup.",
+      "evidence_refs": [
+        "metadata.changed_files: added 15 deleted 27",
+        "raw_diff: gricemt.c adds rand_zero inline, compacts Ground_801C2BA4 checks, passes SpawnDesc pointer to grZakoGenerator_801CAE04",
+        "text_corpus: bot report lists grIceMt_801F7080 99.30% to 100%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/gricemt.h",
+      "role": "Typed IceMountainParams spawn descriptor field.",
+      "evidence_refs": [
+        "metadata.changed_files: added 5 deleted 1",
+        "raw_diff: gricemt.h changes xBC from bool to grZakoGenerator_SpawnDesc with padding"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grfigureget.c",
+      "role": "Implemented figure-get collision/item collection callback and added needed item/mp/lb includes.",
+      "evidence_refs": [
+        "metadata.changed_files: added 41 deleted 2",
+        "raw_diff: grFigureGet_80219B10 implemented with coin kind checks, duplicate filtering loop, and x-position bounds",
+        "text_corpus: bot report lists grFigureGet_80219B10 improvement to 99.18%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grfigureget.h",
+      "role": "Prototype recovery for grFigureGet_80219B10 callback signature.",
+      "evidence_refs": [
+        "metadata.changed_files: added 7 deleted 1",
+        "raw_diff: grfigureget.h replaces UNK_RET/UNK_PARAMS with Ground, CollData, mpLib_GroundEnum, f32 parameters"
+      ]
+    },
+    {
+      "path": "src/melee/gr/granime.c",
+      "role": "Implemented grAnime_801C84A4 partial/near match using HSD_ForeachAnim and AObj flags.",
+      "evidence_refs": [
+        "metadata.changed_files: added 33 deleted 3",
+        "raw_diff: grAnime_801C84A4 implementation",
+        "text_corpus: bot report lists grAnime_801C84A4 improvement to 97.92%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grheal.c",
+      "role": "Implemented grHeal_8021F0D8 and updated includes/externs.",
+      "evidence_refs": [
+        "metadata.changed_files: added 17 deleted 2",
+        "raw_diff: grHeal_8021F0D8 loops over gm_80473A18.x90 and calls grHeal_8021F79C",
+        "text_corpus: bot report lists grHeal_8021F0D8 as new match"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grrcruise.c",
+      "role": "Stage matching work not fully visible in excerpt; bot report credits new matches.",
+      "evidence_refs": [
+        "metadata.changed_files: added 54 deleted 5",
+        "text_corpus: bot report lists grRCruise_801FF5B4 and fn_80200460 as new matches"
+      ]
+    },
+    {
+      "path": "src/melee/gr/groldkongo.c",
+      "role": "Stage matching work not fully visible in excerpt; bot report credits a new match.",
+      "evidence_refs": [
+        "metadata.changed_files: added 44 deleted 13",
+        "text_corpus: bot report lists grOldKongo_8020F6E4 as new match"
+      ]
+    },
+    {
+      "path": "src/melee/gr/groldpupupu.c",
+      "role": "Stage matching improvement not fully visible in excerpt.",
+      "evidence_refs": [
+        "metadata.changed_files: added 36 deleted 1",
+        "text_corpus: bot report lists grOldPupupu_8021119C improvement to 79.22%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/gronett.c",
+      "role": "Stage callback implementation/improvement not fully visible in excerpt.",
+      "evidence_refs": [
+        "metadata.changed_files: added 28 deleted 1",
+        "raw_diff excerpt shows grOnett_801E40E4 with PAD_STACK(8)",
+        "text_corpus: bot report lists grOnett_801E40E4 improvement to 98.04%"
+      ]
+    },
+    {
+      "path": "many src/melee/gr/*.c and related item files",
+      "role": "Broad callsite/prototype fallout: many stage OnStart functions changed grZakoGenerator_801CAE04(0/false) to grZakoGenerator_801CAE04(NULL), plus small item header/source updates.",
+      "evidence_refs": [
+        "metadata.changed_files: 81 changed files",
+        "changed_files.jsonl lists all touched files",
+        "raw_diff repeated callsite changes from 0/false to NULL"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Implemented or improved several previously stubbed stage/zako functions, with bot-reported 14 new matches and 12 unmatched-item improvements.",
+    "Recovered grZakoGenerator shared structures in gr/types.h: SpawnDesc, Spawn, SpawnFunc, Config, Entry, and Data.",
+    "Updated grZakoGenerator APIs from void/int/UNK-style signatures to typed pointer and callback signatures, and propagated grZakoGenerator_801CAE04(NULL) across many stage OnStart callsites.",
+    "Replaced several raw offset or pad-array accesses with typed fields, including Corneria data indices/positions, grZakoGenerator_Data sentinel/entries, and Item itemVar.zako.idx.",
+    "Added or fixed includes needed for recovered signatures and field access in stage/item files.",
+    "Touched 81 files according to changed_files metadata, mostly under src/melee/gr plus a small set under src/melee/it."
+  ],
+  "smart_moves": [
+    {
+      "text": "Centralized recovered zako generator layouts in gr/types.h instead of leaving local raw structs or byte-offset accesses in grzakogenerator.c.",
+      "evidence_refs": [
+        "raw_diff: types.h adds grZakoGenerator_* typedefs",
+        "raw_diff: grzakogenerator.static.h imports gr/types.h and removes duplicate local struct definitions"
+      ]
+    },
+    {
+      "text": "Propagated the new pointer meaning of grZakoGenerator_801CAE04 by changing null callsites from 0/false to NULL across stages.",
+      "evidence_refs": [
+        "raw_diff: repeated grZakoGenerator_801CAE04(0/false) to grZakoGenerator_801CAE04(NULL)",
+        "raw_diff: grzakogenerator.h declares HSD_GObj* grZakoGenerator_801CAE04(grZakoGenerator_SpawnDesc*)"
+      ]
+    },
+    {
+      "text": "Updated owning headers when function bodies clarified signatures, rather than keeping source-local unknown declarations.",
+      "evidence_refs": [
+        "raw_diff: grzakogenerator.h prototype updates",
+        "raw_diff: grcorneria.h prototype updates",
+        "raw_diff: grfigureget.h prototype update"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When recovering a subsystem helper, expect broad callsite cleanup: a newly typed pointer parameter can require many 0/false callsites to become NULL for reviewable typed source.",
+      "scope": [
+        "src/melee/gr/grzakogenerator.h",
+        "src/melee/gr/*.c stage OnStart callsites"
+      ],
+      "evidence_refs": [
+        "raw_diff: grZakoGenerator_801CAE04 signature changes to grZakoGenerator_SpawnDesc*",
+        "raw_diff: repeated callsites changed to NULL"
+      ]
+    },
+    {
+      "lesson": "Recovered shared structs can unlock both the implementation and nearby users: grZakoGenerator_Data/Config/Entry typing coincides with cleanup in grzakogenerator.c, stage GroundVars, and item vars.",
+      "scope": [
+        "src/melee/gr/types.h",
+        "src/melee/gr/grzakogenerator.c",
+        "src/melee/it/itCharItems.h"
+      ],
+      "evidence_refs": [
+        "raw_diff: gr/types.h grZakoGenerator_* additions",
+        "raw_diff: grzakogenerator.c uses config->spawns, data->entries, sentinel, ip->xDD4_itemVar.zako.idx",
+        "text_corpus: bot report lists several grzakogenerator matches"
+      ]
+    },
+    {
+      "lesson": "Replacing pad arrays and casts with partial internal structs is useful even when names remain address/role-based; the Corneria data struct changed from a 0x4CC byte pad to indices and positions fields used directly.",
+      "scope": [
+        "src/melee/gr/grcorneria.c"
+      ],
+      "evidence_refs": [
+        "raw_diff: grCn_Data pad split into indices and positions",
+        "raw_diff: grCorneria_801DDDA8 replaces casts into data->pad with data->indices and data->positions"
+      ]
+    },
+    {
+      "lesson": "Small helper inlines can express source intent and reduce generated-looking branches when tied to a local pattern, as shown by gricemt rand_zero wrapping the zero-or-HSD_Randi check.",
+      "scope": [
+        "src/melee/gr/gricemt.c"
+      ],
+      "evidence_refs": [
+        "raw_diff: static inline bool rand_zero(s32 n)",
+        "raw_diff: grIceMt_801F7080 replaces explicit HSD_Randi conditional with rand_zero"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Use subsystem-prefixed recovered type names for shared stage/zako structures: grZakoGenerator_SpawnDesc, grZakoGenerator_Spawn, grZakoGenerator_Config, grZakoGenerator_Entry, grZakoGenerator_Data.",
+      "evidence_refs": [
+        "raw_diff: gr/types.h typedef additions"
+      ]
+    },
+    {
+      "convention": "Use NULL for pointer arguments after a function signature is recovered as a pointer, rather than 0 or false.",
+      "evidence_refs": [
+        "raw_diff: grZakoGenerator_801CAE04 callsites changed to NULL",
+        "raw_diff: grzakogenerator.h pointer signature"
+      ]
+    },
+    {
+      "convention": "Short local role names such as gp, ip, jobj, gobj, pos are used where roles are clear.",
+      "evidence_refs": [
+        "raw_diff: grzakogenerator.c uses Item* ip, Vec3 pos, HSD_GObj* gobj",
+        "raw_diff: grcorneria.c uses Ground* gp, HSD_JObj* jobj"
+      ]
+    },
+    {
+      "convention": "Unknown global/function names remain address-style when semantics are not established, e.g. lbl_8049F030 and grZakoGenerator_801CA8B4.",
+      "evidence_refs": [
+        "raw_diff: grzakogenerator.static.h keeps lbl_8049F030",
+        "raw_diff: grzakogenerator.h keeps address-style function names"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Used PAD_STACK in narrow functions where matching evidence is present or nearby bot results show progress; examples include grZakoGenerator_801CA43C, grZakoGenerator_801CA67C, grZakoGenerator_801CAF08, grOnett_801E40E4, and grRCruise callback excerpt.",
+      "evidence_refs": [
+        "raw_diff: PAD_STACK(4/8/16) occurrences",
+        "text_corpus: bot report lists matches/improvements for grZakoGenerator functions, grOnett_801E40E4, and grRCruise functions"
+      ],
+      "caveat": "The PR evidence does not include per-function objdiff logs beyond the bot summary, so PAD_STACK justification should remain tied to the reported match/improvement only."
+    },
+    {
+      "tactic": "Converted raw item variable offset access to a typed union arm field, ip->xDD4_itemVar.zako.idx, to stabilize item cleanup/spawn code.",
+      "evidence_refs": [
+        "raw_diff: itCharItems.h adds itZako_ItemVars",
+        "raw_diff: grzakogenerator.c replaces *(s32*)((u8*)ip + 0xDD8) with ip->xDD4_itemVar.zako.idx"
+      ]
+    },
+    {
+      "tactic": "Used natural loops for fixed-size initialization, duplicate checks, spawn descriptor transforms, and item traversal rather than keeping fully unrolled/generated-looking code.",
+      "evidence_refs": [
+        "raw_diff: grZakoGenerator_801CA67C initializes 80 entries and sentinel with for loops",
+        "raw_diff: grFigureGet_80219B10 loops over up to gp->gv.figureget.x8 entries",
+        "raw_diff: grZakoGenerator_801CAF08 traverses HSD_GObj_Entities->items with while"
+      ]
+    },
+    {
+      "tactic": "Matched generated callback signatures by adding unused parameters where required by callsites or callback tables, e.g. Vec3*, s32 spawn callbacks and grFigureGet collision callback.",
+      "evidence_refs": [
+        "raw_diff: grZakoGenerator_SpawnFunc typedef HSD_Generator* (*)(Vec3*, s32)",
+        "raw_diff: grCorneria_801E2454/801E2480 gain s32 arg1",
+        "raw_diff: grFigureGet_80219B10 signature includes Ground, CollData, mpLib_GroundEnum, f32"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "author": "decomp-dev[bot]",
+      "text": "Reported matched code 61.69% (+0.11%, +4212 bytes) and matched data 37.83% (+0.00%, +56 bytes). Listed 14 new matches including multiple grZakoGenerator functions, grOldKongo_8020F6E4, grCorneria_801DD9A8, grRCruise_801FF5B4, fn_80200460, grHeal_8021F0D8, grIceMt_801F7080, and grCorneria_801DDDA8.",
+      "evidence_refs": [
+        "text_corpus: issue_comment decomp-dev[bot] 2026-04-02T15:15:07Z"
+      ]
+    },
+    {
+      "kind": "bot_regression",
+      "author": "decomp-dev[bot]",
+      "text": "Reported one broken match: main/melee/gr/grcorneria grCorneria_801E2738 changed from 100.00% to 99.82% (-1 byte).",
+      "evidence_refs": [
+        "text_corpus: bot report broken match table"
+      ]
+    },
+    {
+      "kind": "absence",
+      "author": null,
+      "text": "No human review comments or review records are present in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata.counts: review_comments 0, reviews 0",
+        "loaded text_corpus contains PR body and one bot issue comment"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR 2374",
+    "grzakogenerator work",
+    "lukechampine",
+    "grZakoGenerator_801CA394",
+    "grZakoGenerator_801CA43C",
+    "grZakoGenerator_801CA67C",
+    "grZakoGenerator_801CA8B4",
+    "grZakoGenerator_801CAE04",
+    "grZakoGenerator_801CAF08",
+    "grZakoGenerator_SpawnDesc",
+    "grZakoGenerator_Config",
+    "grZakoGenerator_Data",
+    "itZako_ItemVars",
+    "grCorneria_801DD9A8",
+    "grCorneria_801DDDA8",
+    "grIceMt_801F7080",
+    "grFigureGet_80219B10",
+    "grAnime_801C84A4",
+    "grHeal_8021F0D8",
+    "grRCruise_801FF5B4",
+    "fn_80200460",
+    "grOldKongo_8020F6E4",
+    "grOnett_801E40E4",
+    "PAD_STACK",
+    "NULL callsites"
+  ],
+  "follow_up_queries": [
+    "grZakoGenerator_801CAE04 NULL 0 false callsites",
+    "grZakoGenerator_SpawnDesc gr/types.h stage spawn descriptor",
+    "itZako_ItemVars xDD4_itemVar.zako.idx",
+    "grCorneria_801E2738 broken match PR 2374",
+    "PAD_STACK grzakogenerator grOnett grRCruise",
+    "grCn_Data indices positions grCorneria_801DDDA8",
+    "Stage_80225194 76 grIceMt_801F7080 zako generator",
+    "grFigureGet_80219B10 coin CollData callback"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR identity, merge status, changed-file counts",
+      "changed_files.jsonl: complete changed file list",
+      "raw_diff: truncated in loaded context but targeted local slice read covered grzakogenerator and types sections",
+      "text_corpus: PR body and bot report"
+    ],
+    "notes": [
+      "The raw diff in loaded_files was truncated; targeted local reads were used for the grzakogenerator and types sections most relevant to the PR title.",
+      "The PR body is brief and does not explain author intent beyond 'slightly sprawling, but mostly zako stuff'.",
+      "No human review comments are available, so review intent cannot be inferred.",
+      "The bot report provides match/improvement/regression evidence but not detailed objdiff logs or build commands.",
+      "Some changed files are only represented by metadata or the bot report, not by full diff inspection in this intake."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "title": "PR 2374 grZakoGenerator type recovery enabled broad stage callsite cleanup",
+        "text": "In PR 2374, grZakoGenerator_801CAE04 was recovered as HSD_GObj* grZakoGenerator_801CAE04(grZakoGenerator_SpawnDesc*), and many stage OnStart callsites were updated from 0/false to NULL. The same PR added grZakoGenerator_* shared structs in gr/types.h and produced bot-reported new matches in grzakogenerator.",
+        "scope": [
+          "src/melee/gr/grzakogenerator.c",
+          "src/melee/gr/grzakogenerator.h",
+          "src/melee/gr/types.h",
+          "src/melee/gr/*.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: grzakogenerator.h signature update",
+          "raw_diff: repeated grZakoGenerator_801CAE04(NULL) callsites",
+          "text_corpus: bot report new grzakogenerator matches"
+        ]
+      },
+      {
+        "title": "PR 2374 shows partial struct recovery replacing pad/offset access in stage data",
+        "text": "The Corneria data helper changed from a large pad-array representation to named indices and positions fields, and grCorneria_801DDDA8 then used data->indices and data->positions instead of casts into byte offsets.",
+        "scope": [
+          "src/melee/gr/grcorneria.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: grCn_Data struct field split",
+          "raw_diff: grCorneria_801DDDA8 field access rewrite",
+          "text_corpus: bot report grCorneria_801DDDA8 99.46% to 100%"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "gr/types.h owns shared grZakoGenerator layout types after PR 2374",
+        "text": "PR 2374 added grZakoGenerator_SpawnDesc, grZakoGenerator_Spawn, grZakoGenerator_SpawnFunc, grZakoGenerator_Config, grZakoGenerator_Entry, and grZakoGenerator_Data to src/melee/gr/types.h, with grzakogenerator.c and stage GroundVars using these types.",
+        "source_path": "src/melee/gr/types.h",
+        "scope": [
+          "grZakoGenerator",
+          "stage ground vars",
+          "zako item spawning"
+        ],
+        "evidence_refs": [
+          "raw_diff: types.h grZakoGenerator typedef additions",
+          "raw_diff: grzakogenerator.c uses the added types"
+        ],
+        "reason": "This is a source/path ownership fact candidate rather than a decomp lesson; curator should verify against current source before adding."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Pointer-signature recovery should propagate NULL callsites",
+        "text": "When a recovered function signature proves an argument is a pointer, update null callsites to NULL rather than leaving 0 or false. PR 2374 does this for grZakoGenerator_801CAE04 after changing its parameter to grZakoGenerator_SpawnDesc*.",
+        "source_path": null,
+        "scope": [
+          "typed signatures",
+          "headers",
+          "callsite cleanup"
+        ],
+        "evidence_refs": [
+          "raw_diff: grzakogenerator.h pointer signature",
+          "raw_diff: many grZakoGenerator_801CAE04 callsites changed from 0/false to NULL"
+        ],
+        "reason": "This may already be covered by truthful headers/typed-source style, but the PR provides a concrete recurring example."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Keep PAD_STACK evidence tied to narrow match reports",
+        "text": "PR 2374 contains several PAD_STACK uses alongside bot-reported function matches/improvements. The evidence supports recording PAD_STACK only as a narrow matching tactic with verifier context, not as normal style.",
+        "source_path": null,
+        "scope": [
+          "matching tactics",
+          "stack padding"
+        ],
+        "evidence_refs": [
+          "raw_diff: PAD_STACK uses in grzakogenerator/gronett/grrcruise excerpts",
+          "text_corpus: bot report lists related matches/improvements"
+        ],
+        "reason": "This reinforces an existing standard; curator can decide whether the example should be indexed as supporting evidence rather than a new rule."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that all 81 changed files contain meaningful decomp work; many show only one-line NULL callsite fallout in the loaded metadata/diff excerpt.",
+      "Do not treat the bot-reported merge as proof that every PAD_STACK or partial type name is ideal long-term style.",
+      "Do not promote the grCorneria_801E2738 regression as accepted; the bot report explicitly lists it as a broken match.",
+      "Do not infer reviewer approval rationale; no human review comments are present."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

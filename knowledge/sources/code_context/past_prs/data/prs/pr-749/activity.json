@@ -1,0 +1,10 @@
+{
+  "pr": 749,
+  "title": "Use `github.ref` instead of `github.head_ref` [skip editorconfig]",
+  "url": "https://github.com/doldecomp/melee/pull/749",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 1,
+  "added_lines": 1,
+  "deleted_lines": 1
+}

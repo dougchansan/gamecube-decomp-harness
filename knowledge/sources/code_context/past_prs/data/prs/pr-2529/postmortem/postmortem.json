@@ -1,0 +1,373 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2529",
+  "pr": {
+    "number": 2529,
+    "title": "gm_1601",
+    "url": "https://github.com/doldecomp/melee/pull/2529",
+    "state": "MERGED",
+    "author": "jurrejelle",
+    "created_at": "2026-05-24T08:06:31Z",
+    "merged_at": "2026-05-27T22:13:30Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2529 implemented and/or improved many gm_1601.c stub functions, updated gm_1601.h prototypes from UNK_RET/UNK_PARAMS to recovered signatures, and added small struct field recoveries in gm/types.h. The bot report recorded 2 newly matched functions, 18 unmatched-item improvements, and one small unmatched regression.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "types-structs"
+    ],
+    "systems": [
+      "game-mode",
+      "gm_1601",
+      "match-end-stats"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gm/gm_1601.c",
+      "role": "Main decompilation body: replaces many stub markers with C implementations, adds includes, noinline-style wrapper helpers, match/stat/name-tag logic, and some typed field accesses.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gm/gm_1601.c +1205/-56 in 33 hunks",
+        "human_pr_text.md: implements/matches gm_1601.c stub functions",
+        "raw_diff: gm_1601.c hunks for fn_80160DE8, fn_80161C90, fn_80162170, gm_8016260C, fn_80164B48, fn_80165548, fn_801656A8, fn_8016588C, fn_80165AC0, fn_80165FA4, gm_8016AC44"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1601.h",
+      "role": "Prototype updates for recovered gm_1601 functions, replacing several unknown signatures.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gm/gm_1601.h +10/-10 in 5 hunks",
+        "raw_diff: fn_80161154, fn_80165548, fn_801656A8, fn_8016588C, fn_80165AC0, fn_80165FA4, fn_80169000, fn_80169C54, fn_8016A4C8, gm_8016AC44 prototype changes"
+      ]
+    },
+    {
+      "path": "src/melee/gm/types.h",
+      "role": "Type recovery for fields used by gm_1601 matching work.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gm/types.h +8/-3 in 2 hunks",
+        "raw_diff: lbl_8046B6A0_24C_t gains x8, x9, x1C fields; MatchPlayerData gains x38 and x3C fields"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Implemented or improved gm_1601.c functions named in the PR body, including fn_80165AC0, fn_80165FA4, gm_8016AC44, fn_80169A84, fn_80169C54, fn_80169000, fn_80167638, fn_80161C90, fn_80161154, fn_8016A4C8, gm_80166CCC, and fn_80164B48.",
+    "Added includes for placeholder.h, if/ifnametag.h, and pl/plbonus.h to support the new gm_1601.c code.",
+    "Removed a local #pragma dont_inline block around gm_801603B0 and introduced wrapper helpers such as gm_801601C4_noinline and gm_80160244_noinline.",
+    "Collapsed gm_80160C90 language/name selection into calls through gm_80160980_noinline3 and fn_801609E0_noinline3.",
+    "Added fn_80160DE8 text/name rendering logic using lbLang_IsSavedLanguageUS, HSD_SisLib_803A70A0, and HSD_SisLib_803A7548.",
+    "Added a local struct gm_stats used by fn_80161C90 for saturated accumulation of player match statistics.",
+    "Updated gm_80162574 from raw byte-offset pointer arithmetic on gmMainLib_8015EDBC() to field access through x18.",
+    "Updated gm_1601.h prototypes for recovered return types and parameters, including replacements for UNK_RET/UNK_PARAMS.",
+    "Added fields in gm/types.h for lbl_8046B6A0_24C_t and MatchPlayerData that the new implementations access."
+  ],
+  "smart_moves": [
+    {
+      "text": "Header prototypes were updated alongside body recovery instead of leaving UNK_RET/UNK_PARAMS behind.",
+      "evidence_refs": [
+        "human_pr_text.md: corresponding prototype updates in gm_1601.h",
+        "raw_diff: gm_1601.h signature changes"
+      ]
+    },
+    {
+      "text": "At least one raw offset expression was converted into a named struct field access, improving reviewability.",
+      "evidence_refs": [
+        "raw_diff: gm_80162574 changes (u8*) gmMainLib_8015EDBC() + ... + 0x18 to &gmMainLib_8015EDBC()->x18[...]"
+      ]
+    },
+    {
+      "text": "The PR split focused gm_1601 work out of a larger branch, which made the slice reviewable as gm_1601-specific progress.",
+      "evidence_refs": [
+        "human_pr_text.md: Split out from jj/the-big-gm-pr"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a recovered body proves a signature, update the owning header in the same PR so call sites and prototypes do not retain UNK_RET/UNK_PARAMS.",
+      "scope": [
+        "src/melee/gm/gm_1601.h",
+        "game-mode headers"
+      ],
+      "evidence_refs": [
+        "raw_diff: gm_1601.h converts several UNK_RET/UNK_PARAMS declarations to concrete s32, u32, void, bool, and typed-parameter signatures"
+      ]
+    },
+    {
+      "lesson": "For large stats/update functions, introducing narrow recovered fields or a temporary local struct can make repeated offset updates readable, but unknown field names should remain conservative until semantics are proven.",
+      "scope": [
+        "src/melee/gm/gm_1601.c",
+        "src/melee/gm/types.h"
+      ],
+      "evidence_refs": [
+        "raw_diff: local struct gm_stats with unk-offset fields in fn_80161C90",
+        "raw_diff: types.h adds x8, x9, x1C, x38, x3C fields"
+      ]
+    },
+    {
+      "lesson": "Use project macros for saturating arithmetic when they express the recovered operation; this PR repeatedly uses MIN for capped counters.",
+      "scope": [
+        "gm_1601 match counters",
+        "match-end statistics"
+      ],
+      "evidence_refs": [
+        "raw_diff: fn_80161C90, fn_80162170, gm_8016260C use MIN or explicit 0xFFFF caps"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "pattern": "Address-style function names were preserved for functions without proven semantic names.",
+      "examples": [
+        "fn_80165AC0",
+        "fn_80165FA4",
+        "gm_8016AC44",
+        "fn_80164B48"
+      ],
+      "evidence_refs": [
+        "human_pr_text.md: function list keeps address-style names",
+        "raw_diff: implemented functions retain address-style names"
+      ]
+    },
+    {
+      "pattern": "Recovered but not semantically understood struct fields use offset-like xNN or unkNN names rather than guessed names.",
+      "examples": [
+        "x38",
+        "x3C",
+        "x1C",
+        "unk24",
+        "unk40"
+      ],
+      "evidence_refs": [
+        "raw_diff: gm/types.h field additions",
+        "raw_diff: local struct gm_stats"
+      ]
+    },
+    {
+      "pattern": "Matching helper wrappers in this PR use suffixes such as _inner, _noinline, _noinline2, and _noinline3.",
+      "examples": [
+        "gm_801601C4_noinline",
+        "gm_80160244_noinline",
+        "gm_80160980_noinline3",
+        "fn_801609E0_noinline3"
+      ],
+      "evidence_refs": [
+        "raw_diff: wrapper helper additions in gm_1601.c"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "No-inline steering was attempted by wrapper call chains after removing a scoped #pragma dont_inline block.",
+      "evidence_refs": [
+        "raw_diff: removes #pragma push/#pragma dont_inline on/#pragma pop around gm_801603B0",
+        "raw_diff: adds gm_801601C4_inner/noinline and gm_80160244_inner/noinline wrappers"
+      ],
+      "caution": "The loaded evidence shows the tactic existed, but does not prove it should be a general standard. Current standards require narrow verifier evidence for such steering."
+    },
+    {
+      "tactic": "Ternary selection replaced a nested language/name branch ladder in gm_80160C90.",
+      "evidence_refs": [
+        "raw_diff: gm_80160C90 nested if block replaced by ternary calls to fn_801609E0_noinline3 or gm_80160980_noinline3"
+      ]
+    },
+    {
+      "tactic": "Field recovery was used to replace at least one raw pointer offset while preserving indexed access shape.",
+      "evidence_refs": [
+        "raw_diff: gm_80162574 x18 indexed field access"
+      ]
+    },
+    {
+      "tactic": "Nested natural loops were used for player/team ranking and persistent name-tag stat updates.",
+      "evidence_refs": [
+        "raw_diff: fn_80162170 loops over players and opponents",
+        "raw_diff: fn_80165AC0 loops over player_standings",
+        "raw_diff: fn_80165FA4 loops over team_standings"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "automated_report",
+      "author": "decomp-dev[bot]",
+      "summary": "Bot reported matched code 68.85% (+0.04%, +1624 bytes), with 2 new matches: gm_80166CCC and fn_801656A8.",
+      "evidence_refs": [
+        "text_corpus.jsonl issue_comment 2026-05-24T08:10:13Z"
+      ]
+    },
+    {
+      "kind": "automated_report",
+      "author": "decomp-dev[bot]",
+      "summary": "Bot reported 18 improvements in unmatched gm_1601 items, including fn_8016A4C8, fn_80161C90, fn_80164B48, fn_80169C54, fn_80165AC0, fn_80165FA4, fn_80169000, fn_80162170, fn_8016588C, gm_8016260C, gm_80168710, fn_80167638, gm_8016AC44, fn_80169A84, fn_80165548, fn_80160DE8, gm_80160C90, and .sdata2.",
+      "evidence_refs": [
+        "text_corpus.jsonl issue_comment 2026-05-24T08:10:13Z"
+      ]
+    },
+    {
+      "kind": "automated_report",
+      "author": "decomp-dev[bot]",
+      "summary": "Bot reported one unmatched-item regression: gm_8016A22C -4 bytes, 75.44% to 74.75%.",
+      "evidence_refs": [
+        "text_corpus.jsonl issue_comment 2026-05-24T08:10:13Z"
+      ]
+    },
+    {
+      "kind": "human_review",
+      "author": null,
+      "summary": "No human review comments were present in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata_json: review_comments 0, reviews 0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2529",
+    "gm_1601",
+    "jurrejelle",
+    "jj/gm_1601_claude",
+    "jj/the-big-gm-pr",
+    "src/melee/gm/gm_1601.c",
+    "src/melee/gm/gm_1601.h",
+    "src/melee/gm/types.h",
+    "fn_80165AC0",
+    "fn_80165FA4",
+    "gm_8016AC44",
+    "fn_80169A84",
+    "fn_80169C54",
+    "fn_80169000",
+    "fn_80167638",
+    "fn_80161C90",
+    "fn_80161154",
+    "fn_8016A4C8",
+    "gm_80166CCC",
+    "fn_80164B48",
+    "fn_801656A8",
+    "fn_80162170",
+    "gm_8016260C",
+    "fn_80160DE8",
+    "gm_80160C90",
+    "MatchEnd",
+    "MatchPlayerData",
+    "NameTagData",
+    "GetPersistentNameData",
+    "gm_stats",
+    "gmMainLib_8015EDBC",
+    "x18",
+    "noinline",
+    "MIN",
+    "saturating counters"
+  ],
+  "follow_up_queries": [
+    "gm_1601 noinline wrapper chain _noinline3 matching tactic",
+    "gm_8016A22C regression PR 2529",
+    "gm_1601 MatchEnd stats fn_80161C90 gm_stats",
+    "gmMainLib_8015EDBC x18 field recovery",
+    "fn_801656A8 gm_80166CCC new matches PR 2529",
+    "gm_1601.h UNK_RET prototype cleanup PR 2529"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR identity, changed files, counts, merge time",
+      "human_pr_text.md: PR body",
+      "raw_diff: diff excerpt and local diff reads",
+      "text_corpus.jsonl: bot report",
+      "changed_files.jsonl: file list and churn"
+    ],
+    "notes": [
+      "The raw diff loaded in the prompt was truncated, but targeted local reads provided the header and types.h changes.",
+      "There are no human review comments in the loaded slice, so reviewer intent and acceptance rationale are not inferred.",
+      "The bot report gives matching/progress evidence, but not detailed objdiff rationale for each tactic.",
+      "Several implemented functions remained partial improvements rather than complete matches according to the bot report; only gm_80166CCC and fn_801656A8 are reported as new 100% matches."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "pr_postmortem_fact",
+        "title": "PR #2529 gm_1601 matching progress",
+        "text": "PR #2529 implemented/matched gm_1601.c stubs with prototype and type updates; automated report showed 2 new matches, 18 unmatched-item improvements, and 1 small unmatched regression.",
+        "scope": [
+          "pr-2529",
+          "src/melee/gm/gm_1601.c",
+          "src/melee/gm/gm_1601.h",
+          "src/melee/gm/types.h"
+        ],
+        "evidence_refs": [
+          "human_pr_text.md",
+          "text_corpus.jsonl issue_comment",
+          "changed_files.jsonl"
+        ]
+      },
+      {
+        "record_type": "localized_decomp_lesson",
+        "title": "Prototype cleanup accompanied gm_1601 body recovery",
+        "text": "In this PR, recovered gm_1601 function bodies were paired with gm_1601.h signature updates, replacing several UNK_RET/UNK_PARAMS entries with typed prototypes.",
+        "scope": [
+          "src/melee/gm/gm_1601.h"
+        ],
+        "evidence_refs": [
+          "raw_diff: gm_1601.h prototype changes"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "gm_1601.c contains match-end/stat/name-tag game-mode logic",
+        "text": "PR #2529 evidence shows src/melee/gm/gm_1601.c work around MatchEnd, MatchPlayerData, ranking/winner selection, persistent NameTagData stat updates, language-specific fighter-name text, and game-mode match counters.",
+        "source_path": "src/melee/gm/gm_1601.c",
+        "scope": [
+          "game-mode",
+          "match-end",
+          "stats",
+          "name-tags"
+        ],
+        "evidence_refs": [
+          "raw_diff: fn_80160DE8",
+          "raw_diff: fn_80161C90",
+          "raw_diff: fn_80162170",
+          "raw_diff: gm_8016260C",
+          "raw_diff: fn_80165AC0",
+          "raw_diff: fn_80165FA4"
+        ],
+        "reason": "Useful path-scope fact for future gm_1601 searches; should be curated against current source before acceptance."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "source_update",
+        "title": "Document noinline wrapper chains as a cautionary matching tactic if more PRs support it",
+        "text": "This PR used wrapper chains named _inner/_noinline/_noinline2/_noinline3 and removed a local #pragma dont_inline block. The evidence supports recording the tactic as present in this PR, but not as a general accepted standard without additional verifier and review evidence.",
+        "source_path": null,
+        "scope": [
+          "matching tactics",
+          "avoid-pragmas-register-asm",
+          "matching-tactics-need-evidence"
+        ],
+        "evidence_refs": [
+          "raw_diff: gm_801603B0 pragma removal and noinline wrapper calls",
+          "raw_diff: gm_80160980_noinline3 and fn_801609E0_noinline3 wrapper chains"
+        ],
+        "reason": "Potential standards note or caution, but current evidence is too narrow to promote automatically."
+      }
+    ],
+    "rejection_notes": [
+      "Do not treat the noinline wrapper chain pattern as an accepted global style from this PR alone; the loaded evidence lacks function-by-function objdiff proof and human review rationale.",
+      "Do not infer semantic names for xNN or unkNN fields; the PR preserves conservative names and the evidence does not prove full field meanings.",
+      "Do not claim all PR-body functions fully matched; the bot report only lists gm_80166CCC and fn_801656A8 as new 100% matches, with many others as partial improvements."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

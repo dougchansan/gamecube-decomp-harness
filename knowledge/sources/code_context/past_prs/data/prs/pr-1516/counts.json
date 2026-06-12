@@ -1,0 +1,17 @@
+{
+  "number": 1516,
+  "title": "match most of `DevText`",
+  "state": "MERGED",
+  "createdAt": "2025-05-24T11:17:50Z",
+  "updatedAt": "2025-05-25T10:17:49Z",
+  "mergedAt": "2025-05-24T16:39:36Z",
+  "closedAt": "2025-05-24T16:39:36Z",
+  "author": "BR-",
+  "url": "https://github.com/doldecomp/melee/pull/1516",
+  "counts": {
+    "issue_comments": 2,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 33923
+  }
+}

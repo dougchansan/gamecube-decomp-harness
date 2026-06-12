@@ -1,0 +1,17 @@
+{
+  "number": 887,
+  "title": "Match `ftCo_CliffWait`",
+  "state": "MERGED",
+  "createdAt": "2023-05-28T14:04:22Z",
+  "updatedAt": "2023-05-28T14:12:42Z",
+  "mergedAt": "2023-05-28T14:12:41Z",
+  "closedAt": "2023-05-28T14:12:41Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/887",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 28224
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "pr": 435,
+  "title": "Rename `func_someCalcAngle_80022C30` to `atan2f`",
+  "url": "https://github.com/doldecomp/melee/pull/435",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 52,
+  "added_lines": 296,
+  "deleted_lines": 271
+}

@@ -1,0 +1,17 @@
+diff --git a/src/sysdolphin/baselib/debug.h b/src/sysdolphin/baselib/debug.h
+index 5555555..6666666 100644
+--- a/src/sysdolphin/baselib/debug.h
++++ b/src/sysdolphin/baselib/debug.h
+@@ -16,6 +16,12 @@
+
+ /* macro definitions: raw __assert here is the idiom source, not a violation */
+
++#define HSD_ASSERT(line, cond)                                                \
++    ((cond) ? ((void) 0) : __assert(__FILE__, line, #cond))
++
++#define HSD_ASSERTMSG(line, cond, msg)                                        \
++    ((cond) ? ((void) 0) : __assert(__FILE__, line, msg))
++
+ void HSD_Panic(char* file, int line, char* msg);
+
+ #endif

@@ -1,0 +1,10 @@
+{
+  "pr": 1107,
+  "title": "Assume that `data:float` means size 4 in `symbols.txt`",
+  "url": "https://github.com/doldecomp/melee/pull/1107",
+  "text_records_with_body": 0,
+  "review_comments": 0,
+  "changed_files": 1,
+  "added_lines": 195,
+  "deleted_lines": 195
+}

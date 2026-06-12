@@ -1,0 +1,329 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2452",
+  "pr": {
+    "number": 2452,
+    "title": "Match Yoshi SpecialHi functions",
+    "url": "https://github.com/doldecomp/melee/pull/2452",
+    "state": "MERGED",
+    "author": "dberweger2017",
+    "created_at": "2026-05-01T15:16:14Z",
+    "merged_at": "2026-05-01T17:23:29Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Matched the two remaining Yoshi SpecialHi functions in ftYs_SpecialHi.c by reshaping a stick-magnitude clamp, removing an unnecessary PAD_STACK, and introducing a scoped float temporary to reuse the egg throw frame counter value.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "fighter-source-cleanup",
+      "stack-layout-adjustment"
+    ],
+    "systems": [
+      "fighter",
+      "Yoshi",
+      "SpecialHi"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/ft/chara/ftYoshi/ftYs_SpecialHi.c",
+      "role": "Only changed source file; edits affected ftYs_SpecialS_8012DF8C and fn_8012E110.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff",
+        "human_pr_text"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "path": "src/melee/ft/chara/ftYoshi/ftYs_SpecialHi.c",
+      "symbol": "ftYs_SpecialS_8012DF8C",
+      "change": "Replaced `mag = MAX(temp, 1.0f) * da->xF0` with explicit assignment, cap branch `if (mag > 1.0f) { mag = 1.0f; }`, then multiplication by `da->xF0`.",
+      "evidence_refs": [
+        "raw_diff",
+        "human_pr_text"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftYoshi/ftYs_SpecialHi.c",
+      "symbol": "fn_8012E110",
+      "change": "Removed `PAD_STACK(4)` before `Vec3 sp30` to restore the target stack slot layout described by the PR body.",
+      "evidence_refs": [
+        "raw_diff",
+        "human_pr_text"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftYoshi/ftYs_SpecialHi.c",
+      "symbol": "fn_8012E110",
+      "change": "Introduced a scoped `float x4 = fp->mv.ys.specialhi.x4;` temporary and reused it for both arguments to `it_802B28C8`.",
+      "evidence_refs": [
+        "raw_diff",
+        "human_pr_text"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "The author documented the specific codegen reason for each small source change: branch shape for the clamp, single float conversion/reuse for `x4`, and stack slot restoration after removing `PAD_STACK(4)`.",
+      "evidence_refs": [
+        "human_pr_text"
+      ]
+    },
+    {
+      "text": "The PR kept the match focused to one fighter translation unit and reported narrow verification for `ftYs_SpecialHi` reaching 14/14 functions and 1836/1836 code bytes.",
+      "evidence_refs": [
+        "human_pr_text",
+        "text_corpus issue_comment"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a macro expression such as `MAX` does not produce the target branch shape for a capped value, an explicit `if` cap can be the better source hypothesis, but the exact comparison direction and behavior must be verified.",
+      "scope": [
+        "matching",
+        "control-flow",
+        "fighter source"
+      ],
+      "evidence_refs": [
+        "human_pr_text Notes",
+        "raw_diff hunk ftYs_SpecialS_8012DF8C"
+      ]
+    },
+    {
+      "lesson": "For call arguments that use the same float value more than once, introducing a scoped temporary may match codegen by converting once and reusing the result.",
+      "scope": [
+        "matching",
+        "float temporaries",
+        "call arguments"
+      ],
+      "evidence_refs": [
+        "human_pr_text Notes",
+        "raw_diff hunk fn_8012E110"
+      ]
+    },
+    {
+      "lesson": "PAD_STACK should be removed when it is no longer justified and shifts a local stack object away from the target slot.",
+      "scope": [
+        "matching",
+        "stack layout",
+        "PAD_STACK"
+      ],
+      "evidence_refs": [
+        "human_pr_text Notes",
+        "raw_diff hunk fn_8012E110"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "x4",
+      "context": "Scoped local copy of `fp->mv.ys.specialhi.x4` used for `it_802B28C8` arguments.",
+      "convention": "The PR used the existing field-style name `x4` for a narrow temporary rather than inventing a semantic name for the frame counter.",
+      "evidence_refs": [
+        "raw_diff",
+        "human_pr_text"
+      ]
+    },
+    {
+      "name": "sp30, sp24, sp18",
+      "context": "Stack Vec3 locals in `fn_8012E110`.",
+      "convention": "Existing stack-slot-style local names were retained; the PR did not attempt semantic renames.",
+      "evidence_refs": [
+        "raw_diff"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Replace a compact macro expression with explicit control flow when the target needs a specific branch shape.",
+      "symbols": [
+        "ftYs_SpecialS_8012DF8C"
+      ],
+      "evidence_refs": [
+        "human_pr_text",
+        "raw_diff"
+      ]
+    },
+    {
+      "tactic": "Use a scoped temporary to force one float conversion and reuse the converted value across multiple call arguments.",
+      "symbols": [
+        "fn_8012E110",
+        "it_802B28C8"
+      ],
+      "evidence_refs": [
+        "human_pr_text",
+        "raw_diff"
+      ]
+    },
+    {
+      "tactic": "Remove stale `PAD_STACK(4)` when it causes an incorrect stack offset for a following local.",
+      "symbols": [
+        "fn_8012E110"
+      ],
+      "evidence_refs": [
+        "human_pr_text",
+        "raw_diff"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "type": "bot_report",
+      "author": "decomp-dev[bot]",
+      "text": "Report listed 2 new matches in `main/melee/ft/chara/ftYoshi/ftYs_SpecialHi`: `fn_8012E110` and `ftYs_SpecialS_8012DF8C`, with matched code increasing by 740 bytes overall.",
+      "evidence_refs": [
+        "text_corpus issue_comment"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2452",
+    "Match Yoshi SpecialHi functions",
+    "src/melee/ft/chara/ftYoshi/ftYs_SpecialHi.c",
+    "main/melee/ft/chara/ftYoshi/ftYs_SpecialHi",
+    "ftYs_SpecialS_8012DF8C",
+    "fn_8012E110",
+    "Yoshi SpecialHi",
+    "stick-derived magnitude",
+    "MAX(temp, 1.0f)",
+    "explicit clamp",
+    "cap-at-one",
+    "PAD_STACK(4)",
+    "Vec3 sp30",
+    "r1+0x30",
+    "r1+0x34",
+    "it_802B28C8",
+    "it_802B2A10",
+    "fp->mv.ys.specialhi.x4",
+    "float x4",
+    "egg throw frame counter",
+    "single float conversion",
+    "ftYs_SpecialS_8012DF8C_outline",
+    "x1984_heldItemSpec",
+    "fv.ys.x2238"
+  ],
+  "follow_up_queries": [
+    "ftYs_SpecialS_8012DF8C MAX temp 1.0 explicit if mag > 1.0",
+    "fn_8012E110 PAD_STACK Vec3 sp30 r1+0x30",
+    "it_802B28C8 x4 float temporary double conversion",
+    "Yoshi SpecialHi egg throw frame counter x4",
+    "ftYs_SpecialHi 14/14 1836/1836"
+  ],
+  "evidence_quality": {
+    "status": "strong",
+    "evidence_refs": [
+      "metadata_json",
+      "human_pr_text",
+      "raw_diff",
+      "changed_files.jsonl",
+      "text_corpus issue_comment"
+    ],
+    "notes": [
+      "PR body gives explicit rationale and verification commands.",
+      "Diff directly supports all described code changes.",
+      "Bot report independently records two new matches, but no human review comments were present.",
+      "The intake does not independently rerun verification; match and regression results are recorded as PR-authored/bot evidence only."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "pr_specific_decomp_lesson",
+        "title": "Explicit clamp branch can beat MAX macro for matching branch shape",
+        "text": "In PR #2452, `ftYs_SpecialS_8012DF8C` matched after replacing `MAX(temp, 1.0f)` with an explicit `if (mag > 1.0f) { mag = 1.0f; }` cap, because the macro expression did not match target control flow.",
+        "scope": [
+          "src/melee/ft/chara/ftYoshi/ftYs_SpecialHi.c",
+          "ftYs_SpecialS_8012DF8C",
+          "control-flow matching"
+        ],
+        "evidence_refs": [
+          "human_pr_text",
+          "raw_diff"
+        ]
+      },
+      {
+        "record_type": "pr_specific_decomp_lesson",
+        "title": "Scoped float temp reused across call args can match single conversion",
+        "text": "In PR #2452, `fn_8012E110` matched after introducing a scoped `float x4` temporary for `fp->mv.ys.specialhi.x4`, so the value was converted once and reused in the `it_802B28C8` call.",
+        "scope": [
+          "src/melee/ft/chara/ftYoshi/ftYs_SpecialHi.c",
+          "fn_8012E110",
+          "float codegen"
+        ],
+        "evidence_refs": [
+          "human_pr_text",
+          "raw_diff"
+        ]
+      },
+      {
+        "record_type": "pr_specific_decomp_lesson",
+        "title": "Remove unjustified PAD_STACK when it moves locals off target offsets",
+        "text": "In PR #2452, removing `PAD_STACK(4)` before the first `Vec3` in `fn_8012E110` restored the target stack layout described as `r1+0x30` instead of `r1+0x34`.",
+        "scope": [
+          "src/melee/ft/chara/ftYoshi/ftYs_SpecialHi.c",
+          "fn_8012E110",
+          "stack layout"
+        ],
+        "evidence_refs": [
+          "human_pr_text",
+          "raw_diff"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Mention explicit cap branches as a control-flow alternative to MIN/MAX macros",
+        "text": "Consider extending `canonical-control-flow-and-macros` with a caution that project macros such as MAX/MIN should not be forced when an explicit branch is the verified target shape for a cap or clamp.",
+        "source_path": null,
+        "scope": [
+          "canonical-control-flow-and-macros",
+          "matching",
+          "clamp/cap expressions"
+        ],
+        "evidence_refs": [
+          "PR #2452 human_pr_text Notes",
+          "PR #2452 raw_diff ftYs_SpecialS_8012DF8C"
+        ],
+        "reason": "The PR provides a concrete case where replacing `MAX` with explicit `if` control flow closed a match."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Document scoped temporaries for avoiding duplicate float conversions",
+        "text": "Consider adding a narrow matching tactic note that a scoped temporary can be appropriate when objdiff evidence shows the target converts a value once and reuses it across call arguments.",
+        "source_path": null,
+        "scope": [
+          "matching-tactics-need-evidence",
+          "float conversion",
+          "call argument codegen"
+        ],
+        "evidence_refs": [
+          "PR #2452 human_pr_text Notes",
+          "PR #2452 raw_diff fn_8012E110"
+        ],
+        "reason": "The PR explicitly attributes the `fn_8012E110` match to converting `x4` once and reusing the value."
+      }
+    ],
+    "rejection_notes": [
+      "Do not generalize from this PR that `MAX` is usually wrong for clamps; the evidence only supports this Yoshi SpecialHi target branch-shape case.",
+      "Do not treat `x4` as a semantic naming convention beyond this local field-derived temporary.",
+      "No reviewer intent or human review feedback was available; only PR body, diff, and bot issue comment were loaded."
+    ]
+  },
+  "confidence": 0.91,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

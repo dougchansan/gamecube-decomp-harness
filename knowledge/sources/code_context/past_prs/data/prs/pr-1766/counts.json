@@ -1,0 +1,17 @@
+{
+  "number": 1766,
+  "title": "Match OSReport initialization functions",
+  "state": "MERGED",
+  "createdAt": "2025-07-29T07:26:15Z",
+  "updatedAt": "2025-07-29T07:31:20Z",
+  "mergedAt": "2025-07-29T07:31:18Z",
+  "closedAt": "2025-07-29T07:31:18Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1766",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 3675
+  }
+}

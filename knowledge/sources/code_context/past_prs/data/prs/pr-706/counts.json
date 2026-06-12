@@ -1,0 +1,17 @@
+{
+  "number": 706,
+  "title": "Fix typo in `Makefile`",
+  "state": "MERGED",
+  "createdAt": "2023-01-18T12:32:52Z",
+  "updatedAt": "2023-01-19T09:37:10Z",
+  "mergedAt": "2023-01-19T09:37:09Z",
+  "closedAt": "2023-01-19T09:37:09Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/706",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 1,
+    "diff_bytes": 16007
+  }
+}

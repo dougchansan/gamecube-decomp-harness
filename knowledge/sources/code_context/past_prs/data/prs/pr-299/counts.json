@@ -1,0 +1,17 @@
+{
+  "number": 299,
+  "title": "decompile rumble.s",
+  "state": "MERGED",
+  "createdAt": "2022-02-21T20:29:46Z",
+  "updatedAt": "2022-02-21T20:35:57Z",
+  "mergedAt": "2022-02-21T20:35:56Z",
+  "closedAt": "2022-02-21T20:35:57Z",
+  "author": "camthesaxman",
+  "url": "https://github.com/doldecomp/melee/pull/299",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 10424
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "pr": 678,
+  "title": "Replace GEKKO define with MWCC __PPCGEKKO__",
+  "url": "https://github.com/doldecomp/melee/pull/678",
+  "text_records_with_body": 4,
+  "review_comments": 4,
+  "changed_files": 7,
+  "added_lines": 6,
+  "deleted_lines": 8
+}

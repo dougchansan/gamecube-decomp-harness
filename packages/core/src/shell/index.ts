@@ -1,2 +1,2 @@
 export { runNinja } from "./ninja.js";
-export { runCommand, type CommandResult } from "./run-command.js";
+export { runCommand, runCommandStreaming, type CommandResult } from "./run-command.js";

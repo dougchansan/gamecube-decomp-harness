@@ -1,0 +1,17 @@
+{
+  "number": 1586,
+  "title": " Split and match gm_1AED",
+  "state": "MERGED",
+  "createdAt": "2025-06-09T02:18:19Z",
+  "updatedAt": "2025-06-09T02:28:34Z",
+  "mergedAt": "2025-06-09T02:28:31Z",
+  "closedAt": "2025-06-09T02:28:31Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1586",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 90749
+  }
+}

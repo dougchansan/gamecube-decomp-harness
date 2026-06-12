@@ -1,0 +1,17 @@
+{
+  "number": 735,
+  "title": "Port `replace_symbol` to Python",
+  "state": "CLOSED",
+  "createdAt": "2023-01-30T12:56:21Z",
+  "updatedAt": "2023-03-18T13:14:03Z",
+  "mergedAt": null,
+  "closedAt": "2023-02-25T19:55:13Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/735",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 53866
+  }
+}

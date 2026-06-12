@@ -1,0 +1,17 @@
+{
+  "number": 186,
+  "title": "Fix Makefile and fmod declaration",
+  "state": "MERGED",
+  "createdAt": "2021-12-13T21:20:58Z",
+  "updatedAt": "2021-12-13T21:22:03Z",
+  "mergedAt": "2021-12-13T21:21:05Z",
+  "closedAt": "2021-12-13T21:21:05Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/186",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 1551
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 1160,
+  "title": "Add missing README section on diffing",
+  "state": "MERGED",
+  "createdAt": "2024-01-31T19:39:15Z",
+  "updatedAt": "2024-01-31T19:40:18Z",
+  "mergedAt": "2024-01-31T19:40:18Z",
+  "closedAt": "2024-01-31T19:40:18Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1160",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 1550
+  }
+}

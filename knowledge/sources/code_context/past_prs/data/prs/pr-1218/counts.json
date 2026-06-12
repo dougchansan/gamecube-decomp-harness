@@ -1,0 +1,17 @@
+{
+  "number": 1218,
+  "title": "Match `lbColl_80007DD8`",
+  "state": "MERGED",
+  "createdAt": "2024-02-14T09:53:22Z",
+  "updatedAt": "2024-02-14T17:59:25Z",
+  "mergedAt": "2024-02-14T17:59:25Z",
+  "closedAt": "2024-02-14T17:59:25Z",
+  "author": "rjeli",
+  "url": "https://github.com/doldecomp/melee/pull/1218",
+  "counts": {
+    "issue_comments": 4,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 5544
+  }
+}

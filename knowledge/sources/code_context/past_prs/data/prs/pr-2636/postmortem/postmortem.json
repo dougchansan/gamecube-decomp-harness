@@ -1,0 +1,487 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2636",
+  "pr": {
+    "number": 2636,
+    "title": "Split-up improvements across common, GM/MN, TY, and baselib",
+    "url": "https://github.com/doldecomp/melee/pull/2636",
+    "state": "MERGED",
+    "author": "fjooord",
+    "created_at": "2026-06-08T21:19:05Z",
+    "merged_at": "2026-06-09T01:13:29Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2636 made small split-up matching improvements across camera, common fighter bury code, GM/MN menu code, TY display, map collision, and sysdolphin/baselib. The PR body and bot regression report claim 5 new exact matches, 8 unmatched-item improvements, +1608 matched code bytes, +24 matched data bytes, and no broken, fuzzy, or metric regressions.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "cleanup",
+      "decomp-matching",
+      "naming",
+      "stack-local-shape",
+      "data-literal-placement"
+    ],
+    "systems": [
+      "camera",
+      "common-fighter",
+      "game-mode",
+      "menus",
+      "map-collision",
+      "ty-display",
+      "sysdolphin-baselib"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/cm/camera.c",
+      "role": "Camera_80030CFC exact-match stack/local layout adjustment: added explicit 12-byte local pad and reduced PAD_STACK.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/cm/camera.c added 2 deleted 1",
+        "raw_diff: Camera_80030CFC hunk",
+        "human_pr_text: listed as new exact match"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_Bury.c",
+      "role": "Added tightly scoped force_active .sdata2 literals and removed dummy 8-byte local from ftCo_800C0D0C; PR claims .sdata2 and ftCo_800C0D0C exact matches.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/ft/chara/ftCommon/ftCo_Bury.c added 7 deleted 1",
+        "raw_diff: force_active literals ftCo_804D8C28/30/38/3C and ftCo_800C0D0C hunk",
+        "human_pr_text: reviewer notes on split-owned .sdata2 range and new exact matches"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1832.c",
+      "role": "Added PAD_STACK in fn_8018325C and used local int pointer indexing into lbl_80473700 for fn_801884F8 exact match.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gm/gm_1832.c added 7 deleted 4",
+        "raw_diff: fn_8018325C and fn_801884F8 hunks",
+        "human_pr_text: reviewer note says pointer indexing mirrors nearby fn_8018846C; fn_801884F8 listed as new exact match"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mncount.c",
+      "role": "Reshaped mnCount_8025092C stack/local scope with an added PAD_STACK and inner block around CountEntry locals; bot report lists it as an unmatched-item improvement.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mncount.c added 49 deleted 46",
+        "raw_diff: mnCount_8025092C hunk",
+        "text_corpus: bot report lists mnCount_8025092C improvement 99.92% to 99.94%"
+      ]
+    },
+    {
+      "path": "src/melee/mp/mplib.c",
+      "role": "Changed mpCheckFloor distance calculation to reuse a loop-scoped dist2 local and SQ macro expressions, with a small pad local.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mp/mplib.c added 4 deleted 10",
+        "raw_diff: mpCheckFloor hunks",
+        "text_corpus: bot report lists mpCheckFloor improvement 99.68% to 99.88%"
+      ]
+    },
+    {
+      "path": "src/melee/ty/tydisplay.c",
+      "role": "Adjusted un_8031BC54 declaration order and category/archive indexing locals; PR claims exact match and notes earlier string-base/assert reshaping was dropped.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/ty/tydisplay.c added 6 deleted 4",
+        "raw_diff: un_8031BC54 hunk",
+        "human_pr_text: tdisplay string literals/HSD_ASSERT note and un_8031BC54 exact match"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/axdriver.c",
+      "role": "Changed AXDriver_8038BF6C intermediate float expression ordering/products; bot report lists unmatched-item improvement.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/sysdolphin/baselib/axdriver.c added 2 deleted 2",
+        "raw_diff: AXDriver_8038BF6C hunk",
+        "text_corpus: bot report lists AXDriver_8038BF6C improvement 99.62% to 99.84%"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/particle.c",
+      "role": "Changed hsd_80393DA0 memset size to exclude x24 field before setting buffer fields; bot report lists unmatched-item improvement.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/sysdolphin/baselib/particle.c added 2 deleted 1",
+        "raw_diff: hsd_80393DA0 hunk",
+        "text_corpus: bot report lists hsd_80393DA0 improvement 99.78% to 99.81%"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Added or rearranged stack padding and local declarations in Camera_80030CFC, fn_8018325C, mnCount_8025092C, mnItemSw_8023453C, mn_8022B3A0, fn_8017F2A4, and gm_801AC6D8_OnEnter.",
+    "Added force_active .sdata2 constants ftCo_804D8C28, ftCo_804D8C30, ftCo_804D8C38, and ftCo_804D8C3C in ftCo_Bury.c, with PR body stating they correspond to existing symbols.txt entries and the split-owned .sdata2 range.",
+    "Changed fn_801884F8 from struct-field result_cache accesses to int pointer indexing through &lbl_80473700 at indices 65 and 66.",
+    "Changed mpCheckFloor to compute squared distance with SQ(px_sp54 - ax) + SQ(py_sp50 - ay) and a reused dist2 local instead of separate dx/dy/dx2/dy2 temporaries.",
+    "Changed tdisplay un_8031BC54 to keep separate c2 and cat locals so archive indexing uses c2 while matanim category can be remapped when the signed category is -1.",
+    "Changed AXDriver_8038BF6C float product expressions around left/right sqrt and inverse-sqrt intermediates.",
+    "Changed hsd_80393DA0 to memset hsd_804CF7E8 only through sizeof(hsd_804CF7E8) - sizeof(hsd_804CF7E8.x24), then set out_buf and buf_size."
+  ],
+  "smart_moves": [
+    {
+      "text": "The PR explicitly dropped an earlier tdisplay string-base/assert reshaping and kept source string literals plus HSD_ASSERT form, avoiding data/string churn in a matching PR.",
+      "evidence_refs": [
+        "human_pr_text: Reviewer Notes first bullet"
+      ]
+    },
+    {
+      "text": "The ftCo_Bury .sdata2 literals were scoped with force_active on/reset and justified in the PR body as matching existing symbols.txt entries and the ftCo_Bury.c split-owned .sdata2 range.",
+      "evidence_refs": [
+        "raw_diff: ftCo_Bury force_active block",
+        "human_pr_text: Reviewer Notes second bullet"
+      ]
+    },
+    {
+      "text": "The author documented that gm_1832 pointer indexing was a local codegen tactic mirrored from a nearby function, instead of presenting it as a broad style preference.",
+      "evidence_refs": [
+        "raw_diff: fn_801884F8 pointer-indexing hunk",
+        "human_pr_text: Reviewer Notes third bullet"
+      ]
+    },
+    {
+      "text": "Stack/local-shape tactics were tied to a regression report with exact-match and no-regression claims.",
+      "evidence_refs": [
+        "human_pr_text: Reviewer Notes fourth bullet and Verification section",
+        "text_corpus: decomp-dev bot report"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a matching PR touches ordinary string literals or assert forms, prefer leaving literals and existing HSD_ASSERT-style source intact unless the PR has explicit data-ownership evidence for reshaping them.",
+      "scope": [
+        "tydisplay",
+        "matching PRs with strings/asserts"
+      ],
+      "evidence_refs": [
+        "human_pr_text: earlier tdisplay string-base/assert reshaping was dropped; source string literals and HSD_ASSERT kept"
+      ],
+      "confidence": 0.86
+    },
+    {
+      "lesson": "For local stack/codegen closure, declaration order, explicit small pad locals, inner block scoping, and narrow PAD_STACK changes can be useful tactics, but the PR evidence frames them as narrow and regression-backed rather than general style.",
+      "scope": [
+        "MWCC stack/local matching",
+        "camera",
+        "GM/MN",
+        "map collision"
+      ],
+      "evidence_refs": [
+        "raw_diff: Camera_80030CFC, mnCount_8025092C, mnItemSw_8023453C, mn_8022B3A0, gmregclear, gmstaffroll, mplib hunks",
+        "human_pr_text: stack/local-shape tweaks kept narrow and backed by regression report"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "lesson": "When local codegen requires non-struct indexing into a global object, cite nearby matched pointer-style access as local evidence and keep the tactic localized to the affected function.",
+      "scope": [
+        "gm_1832",
+        "fn_801884F8",
+        "global struct access matching"
+      ],
+      "evidence_refs": [
+        "raw_diff: fn_801884F8 changed result_cache fields to ptr[65]/ptr[66]",
+        "human_pr_text: pointer indexing mirrors nearby fn_8018846C"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "Project macros can improve both readability and codegen when they express the operation: mpCheckFloor replaced expanded squared-distance temporaries with SQ macro expressions and improved the unmatched item.",
+      "scope": [
+        "map collision",
+        "mpCheckFloor",
+        "expression cleanup"
+      ],
+      "evidence_refs": [
+        "raw_diff: mpCheckFloor SQ(px_sp54 - ax) + SQ(py_sp50 - ay)",
+        "text_corpus: bot report mpCheckFloor improved 99.68% to 99.88%"
+      ],
+      "confidence": 0.76
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Address-style names such as fn_801884F8, mn_8022B3A0, hsd_80393DA0, and ftCo_804D8C28 were retained; this PR did not attempt speculative semantic renames.",
+      "evidence_refs": [
+        "raw_diff: changed symbols retain address-style names",
+        "human_pr_text: match/improvement list uses existing address-style names"
+      ],
+      "confidence": 0.8
+    },
+    {
+      "convention": "Short role locals remain common where roles are obvious, such as gobj, cobj, jobj, fp, src, top, data, tbl, cat, and id.",
+      "evidence_refs": [
+        "raw_diff: mnmain, gmstaffroll, ftCo_Bury, tdisplay hunks"
+      ],
+      "confidence": 0.7
+    },
+    {
+      "convention": "Temporary matching locals may use suffixes or stack-style names when needed for codegen, as seen with arg1_, arg2_, c2, sp44, sp3C, and _PAD, but the PR evidence supports these only as local matching tactics.",
+      "evidence_refs": [
+        "raw_diff: mnitemsw arg1_/arg2_, tdisplay c2, camera _PAD"
+      ],
+      "confidence": 0.68
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Use explicit pad locals plus reduced or added PAD_STACK to tune stack layout for exact or near matches.",
+      "examples": [
+        "Camera_80030CFC added u8 _PAD[12] and changed PAD_STACK(14) to PAD_STACK(2)",
+        "fn_8018325C added PAD_STACK(4)",
+        "mnCount_8025092C added PAD_STACK(4) and inner block scoping",
+        "mpCheckFloor added u8 pad[4]"
+      ],
+      "evidence_refs": [
+        "raw_diff: camera.c, gm_1832.c, mncount.c, mplib.c"
+      ]
+    },
+    {
+      "tactic": "Use local block scope to constrain lifetime and stack layout of large arrays and temporaries.",
+      "examples": [
+        "mnCount_8025092C wraps CountEntry entries, tmp, and loop locals in an inner block after PAD_STACK(4)"
+      ],
+      "evidence_refs": [
+        "raw_diff: mncount.c hunk"
+      ]
+    },
+    {
+      "tactic": "Use pointer indexing as a narrow codegen tactic when nearby local code supports that access shape.",
+      "examples": [
+        "fn_801884F8 uses int* ptr = (int*) &lbl_80473700 and ptr[65]/ptr[66] instead of lbl_80473700.result_cache fields"
+      ],
+      "evidence_refs": [
+        "raw_diff: gm_1832.c fn_801884F8 hunk",
+        "human_pr_text: pointer indexing mirrors nearby fn_8018846C"
+      ]
+    },
+    {
+      "tactic": "Prefer canonical expression macros when they match the operation and improve codegen.",
+      "examples": [
+        "mpCheckFloor uses SQ(px_sp54 - ax) + SQ(py_sp50 - ay) instead of separate dx/dy/dx2/dy2 locals"
+      ],
+      "evidence_refs": [
+        "raw_diff: mplib.c mpCheckFloor hunk",
+        "text_corpus: bot report improvement"
+      ]
+    },
+    {
+      "tactic": "For split-owned data literals, force_active can be tightly scoped around the specific constants when symbol and split ownership evidence is documented.",
+      "examples": [
+        "ftCo_Bury.c force_active on/reset around four ftCo_804D8Cxx .sdata2 constants"
+      ],
+      "evidence_refs": [
+        "raw_diff: ftCo_Bury.c force_active block",
+        "human_pr_text: constants correspond to symbols.txt entries and ftCo_Bury.c split-owned .sdata2 range"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "author_reviewer_note",
+      "text": "Earlier tdisplay string-base/assert reshaping for un_8031B1FC was dropped; this PR keeps source string literals and HSD_ASSERT form.",
+      "evidence_refs": [
+        "human_pr_text: Reviewer Notes"
+      ]
+    },
+    {
+      "kind": "author_reviewer_note",
+      "text": "ftCo_Bury force_active .sdata2 literals are described as tightly scoped and corresponding to existing symbols.txt entries plus the ftCo_Bury.c split-owned .sdata2 range.",
+      "evidence_refs": [
+        "human_pr_text: Reviewer Notes",
+        "raw_diff: ftCo_Bury.c"
+      ]
+    },
+    {
+      "kind": "author_reviewer_note",
+      "text": "gm_1832 pointer indexing for fn_801884F8 is described as matching codegen and mirroring nearby pointer-style access in fn_8018846C.",
+      "evidence_refs": [
+        "human_pr_text: Reviewer Notes",
+        "raw_diff: gm_1832.c"
+      ]
+    },
+    {
+      "kind": "absence",
+      "text": "No loaded review comments or formal reviews were present in this PR slice; review feedback is limited to PR body reviewer notes and the bot regression report.",
+      "evidence_refs": [
+        "metadata_json: review_comments 0, reviews 0",
+        "text_corpus: one issue_comment from decomp-dev[bot]"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2636",
+    "fjooord",
+    "split-up matching",
+    "Camera_80030CFC",
+    "ftCo_Bury",
+    "ftCo_800C0D0C",
+    "ftCo_804D8C28",
+    "ftCo_804D8C30",
+    "ftCo_804D8C38",
+    "ftCo_804D8C3C",
+    "force_active",
+    ".sdata2",
+    "fn_801884F8",
+    "fn_8018846C",
+    "lbl_80473700",
+    "ptr[65]",
+    "ptr[66]",
+    "mnCount_8025092C",
+    "mnItemSw_8023453C",
+    "mn_8022B3A0",
+    "mpCheckFloor",
+    "SQ macro",
+    "un_8031BC54",
+    "un_8031B1FC",
+    "HSD_ASSERT",
+    "string literals",
+    "AXDriver_8038BF6C",
+    "hsd_80393DA0",
+    "PAD_STACK",
+    "stack local shape"
+  ],
+  "follow_up_queries": [
+    "Find PRs that dropped string-literal-to-symbol or assert reshaping during tdisplay matching.",
+    "Search gm_1832 for fn_8018846C and fn_801884F8 pointer-style access patterns around lbl_80473700.",
+    "Search ftCo_Bury .sdata2 symbols ftCo_804D8C28 ftCo_804D8C30 ftCo_804D8C38 ftCo_804D8C3C and split ownership evidence.",
+    "Find other exact-match PRs where inner block scoping of large local arrays changed MWCC stack layout.",
+    "Search mpCheckFloor and other map collision functions for SQ macro substitutions replacing expanded dx/dy squared-distance temporaries.",
+    "Find PAD_STACK adjustments tied to exact matches in camera, MN, GM, and baselib files."
+  ],
+  "evidence_quality": {
+    "status": "strong",
+    "evidence_refs": [
+      "metadata_json: PR identity, state, counts, changed files",
+      "human_pr_text: PR summary, reviewer notes, verification claims",
+      "raw_diff: complete diff excerpt for 12 files",
+      "changed_files.jsonl: changed-file list",
+      "text_corpus: decomp-dev bot regression report"
+    ],
+    "notes": [
+      "The PR slice includes full changed-file metadata, full raw diff, PR body, and bot regression report.",
+      "No human review comments are loaded; reviewer intent cannot be inferred beyond the author's Reviewer Notes.",
+      "Verification claims are from the PR body and decomp-dev bot report; no independent build or objdiff was run during intake.",
+      "The statement that ftCo_Bury .sdata2 constants correspond to symbols.txt entries and split-owned range is PR-body evidence, not independently revalidated here."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "matching_lesson",
+        "title": "Avoid string/assert reshaping without data ownership evidence",
+        "text": "In PR #2636, an earlier tdisplay string-base/assert reshaping for un_8031B1FC was dropped; the landed PR kept source string literals and HSD_ASSERT form while still achieving other matching improvements. This supports preserving ordinary literals/assert macros during code matching unless explicit data-ownership evidence justifies the change.",
+        "scope": [
+          "tydisplay",
+          "matching PRs",
+          "string literals",
+          "assert macros"
+        ],
+        "evidence_refs": [
+          "human_pr_text: Reviewer Notes first bullet"
+        ],
+        "confidence": 0.86
+      },
+      {
+        "record_type": "matching_tactic",
+        "title": "Keep stack/local-shape tactics narrow and regression-backed",
+        "text": "PR #2636 used declaration order, explicit pad locals, inner block scoping, and PAD_STACK changes across several functions. The PR body states these stack/local-shape tweaks were narrow and backed by regression results, and the bot report recorded 5 new matches, 8 improvements, and no regressions.",
+        "scope": [
+          "MWCC stack layout",
+          "PAD_STACK",
+          "local declaration order",
+          "inner block scoping"
+        ],
+        "evidence_refs": [
+          "raw_diff: camera.c, mncount.c, mnitemsw.c, mnmain.c, gmregclear.c, gmstaffroll.c, mplib.c",
+          "human_pr_text: Reviewer Notes and Verification",
+          "text_corpus: decomp-dev bot report"
+        ],
+        "confidence": 0.82
+      },
+      {
+        "record_type": "matching_tactic",
+        "title": "Use nearby local style to justify pointer indexing tactics",
+        "text": "PR #2636 changed fn_801884F8 to use int pointer indexing into lbl_80473700. The PR body says this was to match codegen and mirrored nearby pointer-style access in fn_8018846C, supporting localized use of pointer indexing when nearby matched code provides evidence.",
+        "scope": [
+          "gm_1832",
+          "global access shape",
+          "pointer indexing"
+        ],
+        "evidence_refs": [
+          "raw_diff: gm_1832.c fn_801884F8 hunk",
+          "human_pr_text: Reviewer Notes third bullet"
+        ],
+        "confidence": 0.78
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "ftCo_Bury.c owns specific .sdata2 constants used in PR #2636",
+        "text": "PR #2636 states that ftCo_Bury added tightly scoped force_active .sdata2 literals ftCo_804D8C28, ftCo_804D8C30, ftCo_804D8C38, and ftCo_804D8C3C, corresponding to existing symbols.txt entries and the ftCo_Bury.c split-owned .sdata2 range. Curator should verify symbols/split ownership before promoting as a path fact.",
+        "source_path": "src/melee/ft/chara/ftCommon/ftCo_Bury.c",
+        "scope": [
+          "ftCo_Bury",
+          ".sdata2",
+          "force_active",
+          "symbols.txt"
+        ],
+        "evidence_refs": [
+          "human_pr_text: Reviewer Notes second bullet",
+          "raw_diff: ftCo_Bury.c force_active block"
+        ],
+        "reason": "This is a source/path ownership claim from the PR body and should be verified against symbols and splits before becoming a path fact."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "String literal/assert cleanup should be considered before data reshaping in matching PRs",
+        "text": "PR #2636 provides historical evidence for keeping source string literals and HSD_ASSERT form after dropping earlier tdisplay string-base/assert reshaping. This may reinforce existing standards around no string-literal symbol regression, assert-report macros, and text-before-data matching.",
+        "source_path": null,
+        "scope": [
+          "string literals",
+          "HSD_ASSERT",
+          "tdisplay",
+          "code matching before data matching"
+        ],
+        "evidence_refs": [
+          "human_pr_text: Reviewer Notes first bullet"
+        ],
+        "reason": "The existing loaded standards already cover this pattern; curator may want to add PR #2636 as supporting historical evidence rather than a new rule."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Force_active for data literals requires tight scope and ownership evidence",
+        "text": "PR #2636 used a force_active on/reset block only around four ftCo_Bury .sdata2 literals and documented symbols.txt plus split-range ownership evidence. This could be cited as an example for tightly scoped pragma exceptions when data ownership is verified.",
+        "source_path": null,
+        "scope": [
+          "force_active",
+          ".sdata2",
+          "data ownership",
+          "pragma exceptions"
+        ],
+        "evidence_refs": [
+          "raw_diff: ftCo_Bury.c force_active block",
+          "human_pr_text: Reviewer Notes second bullet"
+        ],
+        "reason": "This is compatible with existing standards but should not be promoted without curator verification of the symbol/split evidence."
+      }
+    ],
+    "rejection_notes": [
+      "Do not generalize fn_801884F8 ptr[65]/ptr[66] into a preference for raw pointer indexing over typed fields; the PR frames it as local codegen matching evidence only.",
+      "Do not promote PAD_STACK, dummy pad locals, or declaration-order churn as accepted style without narrow regression evidence; this PR says the tweaks were backed by its report, not that they are broadly preferred.",
+      "Do not infer that force_active pragmas are generally acceptable for matching; this PR's evidence is limited to a tight ftCo_Bury .sdata2 block with claimed symbol and split ownership.",
+      "Do not claim human reviewer approval details beyond merge state; the loaded slice has no human review comments."
+    ]
+  },
+  "confidence": 0.88,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

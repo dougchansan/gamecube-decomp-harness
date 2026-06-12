@@ -1,0 +1,17 @@
+{
+  "number": 2002,
+  "title": "fix m2ctx context for decomp.me",
+  "state": "MERGED",
+  "createdAt": "2025-12-22T22:15:29Z",
+  "updatedAt": "2025-12-22T22:42:33Z",
+  "mergedAt": "2025-12-22T22:42:16Z",
+  "closedAt": "2025-12-22T22:42:16Z",
+  "author": "BR-",
+  "url": "https://github.com/doldecomp/melee/pull/2002",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 929
+  }
+}

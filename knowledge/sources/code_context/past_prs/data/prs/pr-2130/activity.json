@@ -1,0 +1,10 @@
+{
+  "pr": 2130,
+  "title": "Match all remaining functions in itbox.c",
+  "url": "https://github.com/doldecomp/melee/pull/2130",
+  "text_records_with_body": 29,
+  "review_comments": 25,
+  "changed_files": 4,
+  "added_lines": 492,
+  "deleted_lines": 37
+}

@@ -1,0 +1,17 @@
+{
+  "number": 1993,
+  "title": "collision related cleanup, renames, and more",
+  "state": "MERGED",
+  "createdAt": "2025-12-01T19:20:33Z",
+  "updatedAt": "2026-01-19T14:25:24Z",
+  "mergedAt": "2025-12-06T00:21:01Z",
+  "closedAt": "2025-12-06T00:21:02Z",
+  "author": "Giga-Bowser",
+  "url": "https://github.com/doldecomp/melee/pull/1993",
+  "counts": {
+    "issue_comments": 2,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 639315
+  }
+}

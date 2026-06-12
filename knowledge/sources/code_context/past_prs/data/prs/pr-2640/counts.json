@@ -1,0 +1,17 @@
+{
+  "number": 2640,
+  "title": "Improve mnDiagram matches",
+  "state": "MERGED",
+  "createdAt": "2026-06-09T23:51:27Z",
+  "updatedAt": "2026-06-10T01:19:09Z",
+  "mergedAt": "2026-06-10T01:19:09Z",
+  "closedAt": "2026-06-10T01:19:09Z",
+  "author": "itsgrimetime",
+  "url": "https://github.com/doldecomp/melee/pull/2640",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 47695
+  }
+}

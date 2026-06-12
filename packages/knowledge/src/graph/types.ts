@@ -1,6 +1,28 @@
-export type SourceKind = "code_graph" | "pr_corpus" | "document" | "csv_corpus" | "external_mirror" | "tool_output";
+export type SourceKind = "code_graph" | "pr_corpus" | "document" | "csv_corpus" | "external_mirror";
 
 export type TrustTier = "canonical" | "local" | "reference" | "historical" | "external_hint" | "tool_evidence";
+
+export type SourceSection = "injectable" | "rag_search" | "code_context";
+
+export type SourceAccessMode =
+  | "address_lookup"
+  | "editability"
+  | "file_card"
+  | "file_edges"
+  | "global_injection"
+  | "graph_search"
+  | "instruction_lookup"
+  | "offset_lookup"
+  | "path_scoped_injection"
+  | "proposal_listing"
+  | "rank_features"
+  | "refreshable_corpus"
+  | "resolve_for_path"
+  | "review_risks"
+  | "source_search"
+  | "symbol_lookup"
+  | "topic_lookup"
+  | "worker_bootstrap";
 
 export interface SourceDescriptor {
   id: string;
@@ -8,12 +30,28 @@ export interface SourceDescriptor {
   title: string;
   trust_tier: TrustTier;
   freshness: "current_checkout" | "generated" | "snapshot" | "refreshable" | "live";
+  section?: SourceSection;
+  access_modes?: SourceAccessMode[];
+  active?: boolean;
+  path?: string;
   data_paths: string[];
   index_outputs: string[];
   commands: Record<string, string>;
   capabilities?: string[];
   description?: string;
 }
+
+export interface SourceRegistryObject {
+  id: string;
+  path?: string;
+  section?: SourceSection;
+  active?: boolean;
+  access_modes?: SourceAccessMode[];
+  reason?: string;
+  [key: string]: unknown;
+}
+
+export type SourceRegistryEntry = string | SourceRegistryObject;
 
 export interface ToolDescriptor {
   id: string;
@@ -110,6 +148,7 @@ export interface FileGraphCard {
     tactics: Array<Record<string, unknown>>;
   };
   resource_hits: Array<Record<string, unknown>>;
+  mismatch_patterns: Array<Record<string, unknown>>;
   tool_hits: Array<Record<string, unknown>>;
   scheduling_signals: GraphRankFeature;
 }
@@ -132,7 +171,6 @@ export interface GraphRankFeature {
   connected_incomplete_function_count: number;
   connected_matched_reference_count: number;
   resource_evidence_count: number;
-  tool_finding_count: number;
   path_fact_count: number;
   historical_lesson_count: number;
   curated_signal_count: number;

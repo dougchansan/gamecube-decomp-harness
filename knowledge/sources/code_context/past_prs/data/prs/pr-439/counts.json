@@ -1,0 +1,17 @@
+{
+  "number": 439,
+  "title": "Match `gx`, pass 1",
+  "state": "MERGED",
+  "createdAt": "2022-08-06T12:37:54Z",
+  "updatedAt": "2022-08-11T12:45:33Z",
+  "mergedAt": "2022-08-06T13:44:45Z",
+  "closedAt": "2022-08-06T13:44:45Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/439",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 81803
+  }
+}

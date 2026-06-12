@@ -1,0 +1,17 @@
+{
+  "number": 426,
+  "title": "ftLuigi complete - matching",
+  "state": "MERGED",
+  "createdAt": "2022-07-20T20:47:23Z",
+  "updatedAt": "2022-07-20T20:51:56Z",
+  "mergedAt": "2022-07-20T20:51:55Z",
+  "closedAt": "2022-07-20T20:51:55Z",
+  "author": "VetriTheRetri",
+  "url": "https://github.com/doldecomp/melee/pull/426",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 1174979
+  }
+}

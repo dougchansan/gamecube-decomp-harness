@@ -1,0 +1,330 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2234",
+  "pr": {
+    "number": 2234,
+    "title": "ftCo_Attack100: fixes",
+    "url": "https://github.com/doldecomp/melee/pull/2234",
+    "state": "MERGED",
+    "author": "stephenjayakar",
+    "created_at": "2026-03-07T23:14:44Z",
+    "merged_at": "2026-03-07T23:24:09Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2234 made focused matching fixes in ftCo_Attack100.c around CaptureDamageLw functions. The diff replaces a broad dont_inline pragma block with static inline helper bodies plus exported wrapper functions, cleans up generated temp_r30-style locals in one path, preserves a narrow PAD_STACK(4) in fn_800DC624, and the bot report records three new matches in the ftCo_Attack100 unit.",
+  "change_classification": {
+    "primary_type": "decomp-matching fix",
+    "categories": [
+      "decomp-matching",
+      "fix",
+      "source-cleanup",
+      "pragma-reduction"
+    ],
+    "systems": [
+      "fighter",
+      "ftCommon",
+      "ftCo_Attack100"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_Attack100.c",
+      "role": "Only changed source file; updates CaptureDamageLw Phys/Coll-related matching code and fn_800DC624.",
+      "evidence_refs": [
+        "metadata_json.changed_files[0]",
+        "loaded_files.raw_diff",
+        "evidence_excerpts.diff_excerpt"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Removed the local #pragma push / #pragma dont_inline on / #pragma pop block that previously surrounded ftCo_CaptureDamageLw_IASA, ftCo_CaptureDamageLw_Phys, and fn_800DC624.",
+      "evidence_refs": [
+        "loaded_files.raw_diff"
+      ]
+    },
+    {
+      "text": "Converted ftCo_CaptureDamageLw_Phys into a wrapper that calls static inline ftCo_CaptureDamageLw_Phys_inline.",
+      "evidence_refs": [
+        "loaded_files.raw_diff"
+      ]
+    },
+    {
+      "text": "Reworked ftCo_CaptureDamageLw_Phys internals from temp_r30/temp_r31 temporaries to direct gobj usage plus fp/fp2 locals, while keeping calls to fn_800DAD18, Fighter_ChangeMotionState, fn_800DB5D8, fn_800DAA40, ft_80083C00, and HSD_JObjSetTranslate.",
+      "evidence_refs": [
+        "loaded_files.raw_diff"
+      ]
+    },
+    {
+      "text": "Converted fn_800DC624 into a wrapper that uses PAD_STACK(4) and calls static inline fn_800DC624_inline.",
+      "evidence_refs": [
+        "loaded_files.raw_diff"
+      ]
+    },
+    {
+      "text": "Simplified fn_800DC624_inline by using gobj directly and passing &temp_r31->cur_pos directly to HSD_JObjSetTranslate instead of storing a separate Vec3* local.",
+      "evidence_refs": [
+        "loaded_files.raw_diff"
+      ]
+    },
+    {
+      "text": "The decomp bot report recorded 3 new matches: fn_800DC624, ftCo_CaptureDamageLw_Phys, and ftCo_CaptureDamageLw_Coll in main/melee/ft/chara/ftCommon/ftCo_Attack100.",
+      "evidence_refs": [
+        "loaded_files.text_corpus.jsonl issue_comment decomp-dev[bot]"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "The PR narrowed codegen steering by removing a broad dont_inline pragma region and using explicit inline helper/wrapper structure around only the affected functions.",
+      "evidence_refs": [
+        "loaded_files.raw_diff"
+      ]
+    },
+    {
+      "text": "The source cleanup replaced unclear generated-looking temp_r30 usage in ftCo_CaptureDamageLw_Phys with direct gobj usage and role-style Fighter* locals.",
+      "evidence_refs": [
+        "loaded_files.raw_diff"
+      ]
+    },
+    {
+      "text": "The remaining PAD_STACK tactic was scoped to fn_800DC624's wrapper, and the bot report provides narrow evidence that fn_800DC624 reached 100%.",
+      "evidence_refs": [
+        "loaded_files.raw_diff",
+        "loaded_files.text_corpus.jsonl issue_comment decomp-dev[bot]"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a dont_inline pragma block is only being used to shape a small cluster, consider replacing it with static inline helper bodies plus thin exported wrappers so codegen steering is scoped to the functions that need it.",
+      "scope": [
+        "matching fixes",
+        "MWCC inline/control-flow steering",
+        "fighter source"
+      ],
+      "evidence_refs": [
+        "loaded_files.raw_diff",
+        "loaded_files.text_corpus.jsonl issue_comment decomp-dev[bot]"
+      ],
+      "confidence": 0.72
+    },
+    {
+      "lesson": "Generated temp_rXX locals can sometimes be cleaned into direct parameter usage and clear role locals without losing the match; in this PR ftCo_CaptureDamageLw_Phys still reached 100%.",
+      "scope": [
+        "local variable cleanup",
+        "fighter functions"
+      ],
+      "evidence_refs": [
+        "loaded_files.raw_diff",
+        "loaded_files.text_corpus.jsonl issue_comment decomp-dev[bot]"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "lesson": "If PAD_STACK is required, keep it narrow and pair it with match evidence for the exact symbol rather than hiding it inside a broad pragma region.",
+      "scope": [
+        "PAD_STACK",
+        "matching tactics"
+      ],
+      "evidence_refs": [
+        "loaded_files.raw_diff",
+        "loaded_files.text_corpus.jsonl issue_comment decomp-dev[bot]",
+        "decomp_standards.matching-tactics-need-evidence"
+      ],
+      "confidence": 0.68
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "The diff moves one function away from temp_r30/temp_r31 locals toward direct gobj usage and short Fighter* locals named fp/fp2, consistent with conservative role naming when local roles are clear.",
+      "evidence_refs": [
+        "loaded_files.raw_diff",
+        "decomp_standards.conservative-naming"
+      ]
+    },
+    {
+      "text": "The static helper names use the existing function name plus an _inline suffix: ftCo_CaptureDamageLw_Phys_inline and fn_800DC624_inline.",
+      "evidence_refs": [
+        "loaded_files.raw_diff"
+      ]
+    },
+    {
+      "text": "The address-style symbol fn_800DC624 was not semantically renamed; the PR only introduced fn_800DC624_inline for its helper.",
+      "evidence_refs": [
+        "loaded_files.raw_diff",
+        "decomp_standards.conservative-naming"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Replace a broad dont_inline pragma block with static inline helpers plus non-inline wrappers.",
+      "symbols": [
+        "ftCo_CaptureDamageLw_Phys",
+        "fn_800DC624"
+      ],
+      "evidence_refs": [
+        "loaded_files.raw_diff"
+      ]
+    },
+    {
+      "tactic": "Use PAD_STACK(4) only in fn_800DC624's wrapper before calling fn_800DC624_inline.",
+      "symbols": [
+        "fn_800DC624"
+      ],
+      "evidence_refs": [
+        "loaded_files.raw_diff"
+      ]
+    },
+    {
+      "tactic": "Adjust local lifetime/access shape by using direct gobj calls, separate Fighter* fp/fp2 reads, and direct &temp_r31->cur_pos passing where appropriate.",
+      "symbols": [
+        "ftCo_CaptureDamageLw_Phys",
+        "fn_800DC624"
+      ],
+      "evidence_refs": [
+        "loaded_files.raw_diff"
+      ]
+    },
+    {
+      "tactic": "Use bot-reported per-symbol match results as the narrow verification ledger for the touched functions.",
+      "symbols": [
+        "fn_800DC624",
+        "ftCo_CaptureDamageLw_Phys",
+        "ftCo_CaptureDamageLw_Coll"
+      ],
+      "evidence_refs": [
+        "loaded_files.text_corpus.jsonl issue_comment decomp-dev[bot]"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "text": "decomp-dev[bot] reported matched code 55.46% (+0.02%, +672 bytes) and 3 new matches: fn_800DC624 (+200 bytes, 33.64% to 100.00%), ftCo_CaptureDamageLw_Phys (+185 bytes, 41.59% to 100.00%), and ftCo_CaptureDamageLw_Coll (+20 bytes, 65.86% to 100.00%).",
+      "evidence_refs": [
+        "loaded_files.text_corpus.jsonl issue_comment decomp-dev[bot]"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2234",
+    "ftCo_Attack100",
+    "ftCo_CaptureDamageLw_Phys",
+    "ftCo_CaptureDamageLw_Phys_inline",
+    "ftCo_CaptureDamageLw_Coll",
+    "fn_800DC624",
+    "fn_800DC624_inline",
+    "CaptureDamageLw",
+    "ftCo_MS_CaptureDamageHi",
+    "Fighter_ChangeMotionState",
+    "Ft_MF_UpdateCmd",
+    "fn_800DAD18",
+    "fn_800DB5D8",
+    "fn_800DAA40",
+    "fn_800DC384",
+    "ft_80083C00",
+    "GET_FIGHTER",
+    "GET_JOBJ",
+    "HSD_JObjSetTranslate",
+    "PAD_STACK",
+    "dont_inline",
+    "temp_r30",
+    "temp_r31",
+    "cur_anim_frame",
+    "victim_gobj",
+    "cur_pos",
+    "x2226_b2"
+  ],
+  "follow_up_queries": [
+    "ftCo_CaptureDamageLw_Phys_inline static inline wrapper dont_inline",
+    "fn_800DC624 PAD_STACK(4) inline wrapper",
+    "ftCo_Attack100 CaptureDamageLw new matches PR 2234",
+    "GET_FIGHTER fp fp2 local lifetime matching",
+    "remove dont_inline pragma static inline helper melee decomp"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json",
+      "loaded_files.raw_diff",
+      "loaded_files.changed_files",
+      "loaded_files.text_corpus.jsonl"
+    ],
+    "notes": [
+      "The changed file list and full diff are available and untruncated.",
+      "The PR body is empty and there are no human review comments in the loaded slice.",
+      "The bot report gives concrete match results, but no compiler command, local objdiff output, or author explanation is included.",
+      "Intent behind the inline-wrapper shape and PAD_STACK use is inferred from the diff plus match report, not explicitly stated by the author or reviewer."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson_candidate",
+        "title": "Scope inline/codegen tactics with helper wrappers instead of broad pragmas",
+        "text": "PR 2234 shows a focused matching fix where a broad #pragma dont_inline region was removed and replaced with static inline helper bodies plus thin wrappers for ftCo_CaptureDamageLw_Phys and fn_800DC624. The bot report recorded those symbols as new 100% matches.",
+        "scope": [
+          "matching tactics",
+          "pragma reduction",
+          "fighter source"
+        ],
+        "evidence_refs": [
+          "loaded_files.raw_diff",
+          "loaded_files.text_corpus.jsonl issue_comment decomp-dev[bot]"
+        ],
+        "confidence": 0.72
+      },
+      {
+        "record_type": "decomp_lesson_candidate",
+        "title": "Keep PAD_STACK narrow and tied to symbol-level match evidence",
+        "text": "PR 2234 keeps PAD_STACK(4) only in the fn_800DC624 wrapper before calling fn_800DC624_inline, and the bot report records fn_800DC624 moving to 100%. This supports the existing principle that stack-shaping tactics need narrow verification evidence.",
+        "scope": [
+          "PAD_STACK",
+          "matching tactics"
+        ],
+        "evidence_refs": [
+          "loaded_files.raw_diff",
+          "loaded_files.text_corpus.jsonl issue_comment decomp-dev[bot]",
+          "decomp_standards.matching-tactics-need-evidence"
+        ],
+        "confidence": 0.68
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Consider documenting inline-helper wrappers as a narrow alternative to broad pragma regions",
+        "text": "Possible standards addition: when removing a broad dont_inline pragma would otherwise disturb matching, try static inline helper bodies plus thin exported wrappers before keeping a broad pragma scope. PR 2234 is supporting evidence, but the slice lacks author explanation and full objdiff logs.",
+        "source_path": null,
+        "scope": [
+          "avoid-pragmas-register-asm",
+          "matching-tactics-need-evidence"
+        ],
+        "evidence_refs": [
+          "loaded_files.raw_diff",
+          "loaded_files.text_corpus.jsonl issue_comment decomp-dev[bot]"
+        ],
+        "reason": "The diff demonstrates this pattern with bot-reported new matches, but it should be curator-reviewed before becoming a global standard."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that PAD_STACK(4) is generally required for fn_800DC624-like functions; this slice only supports its use in this specific wrapper with this bot report.",
+      "Do not infer human reviewer approval rationale; no human reviews or review comments are present.",
+      "Do not promote ftCo_CaptureDamageLw_Coll source details beyond the bot-reported match because the diff excerpt only shows nearby context, not a substantive Coll body edit."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

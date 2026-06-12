@@ -1,0 +1,17 @@
+{
+  "number": 946,
+  "title": "Match itstar",
+  "state": "MERGED",
+  "createdAt": "2023-06-30T22:03:49Z",
+  "updatedAt": "2023-06-30T22:17:00Z",
+  "mergedAt": "2023-06-30T22:13:12Z",
+  "closedAt": "2023-06-30T22:13:12Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/946",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 1,
+    "diff_bytes": 13476
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 1091,
+  "title": "Run `fix-labels`",
+  "state": "MERGED",
+  "createdAt": "2024-01-21T11:02:22Z",
+  "updatedAt": "2024-01-21T11:12:35Z",
+  "mergedAt": "2024-01-21T11:12:35Z",
+  "closedAt": "2024-01-21T11:12:35Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1091",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 410721
+  }
+}

@@ -1,6 +1,8 @@
 import { immediateTransaction, withBusyRetry, writeSetHash, now, type StateStore } from "./db.js";
 import { randomUUID } from "node:crypto";
 
+export const DEFAULT_WORKER_TTL_SECONDS = 4 * 60 * 60;
+
 export interface LeasedTarget {
   leaseId: string;
   queueId: string;
@@ -145,7 +147,7 @@ export function leaseNextQueuedTarget(params: {
     const queueId = String(target.queue_id);
     const targetId = String(target.target_id);
     const leaseId = randomUUID();
-    const ttl = new Date(Date.now() + (params.ttlSeconds ?? 60 * 60) * 1000).toISOString();
+    const ttl = new Date(Date.now() + (params.ttlSeconds ?? DEFAULT_WORKER_TTL_SECONDS) * 1000).toISOString();
     const createdAt = now();
 
     params.store.db

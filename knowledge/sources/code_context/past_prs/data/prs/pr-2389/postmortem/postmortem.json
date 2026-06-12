@@ -1,0 +1,300 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2389",
+  "pr": {
+    "number": 2389,
+    "title": "Jj/mnitemsw",
+    "url": "https://github.com/doldecomp/melee/pull/2389",
+    "state": "MERGED",
+    "author": "jurrejelle",
+    "created_at": "2026-04-06T18:54:19Z",
+    "merged_at": "2026-04-07T10:08:26Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Large mnitemsw decomp/matching PR adding substantial C implementation and header updates for the menu item switch unit. Bot report credits three new 100% matches and several near-matches/improvements in main/melee/mn/mnitemsw, including code and data section progress.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "menu-code",
+      "data-tables"
+    ],
+    "systems": [
+      "melee-core",
+      "mn",
+      "mnitemsw"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/mn/mnitemsw.c",
+      "role": "Primary decomp source change; adds includes, externs, static table data, helper functions, menu input handling, cursor/item animation updates, and matching tactics.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mnitemsw.c added 812 deleted 0 hunks 2",
+        "raw_diff: mnitemsw.c adds MnItemSwTable, mnItemSw_803ED340, mnItemSw_804D4BA0, mnItemSw_80233A98, mnItemSw_80233B68, fn_80233E10, mnItemSw_80234104, mnItemSw_8023453C, fn_80234C24 excerpt",
+        "text_corpus.jsonl bot report: main/melee/mn/mnitemsw received 3 new matches and 8 improvements"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnitemsw.h",
+      "role": "Header updated alongside source work; exact declarations not visible in loaded diff excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mnitemsw.h added 7 deleted 6 hunks 1"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Added many dependencies to mnitemsw.c, including gobj/gobjplink/sislib/debug/memory, gm, lb, language, mnmainrule, and sc type headers.",
+    "Introduced extern declarations for MenMainCursorIs_Top, MenMainConIs_Top, mnItemSw_804D6BE8, and mn_804D6BB5 in the source excerpt.",
+    "Added struct MnItemSwTable with x00, x30, items, and item_order arrays, plus static table mnItemSw_803ED340 and small f32 table mnItemSw_804D4BA0.",
+    "Implemented mnItemSw_80233A98 with JP/non-JP language-dependent item animation/id remapping for cases 17 and 19.",
+    "Implemented mnItemSw_80233B68 to update hovered_selection and confirmed_selection for directional inputs, including special entries 0x1F and 0x20.",
+    "Implemented fn_80233E10 to process back/A/start/buttons, persist item settings through mn_8022E978 and gmMainLib_8015CC58()->item_freq, play menu SFX, and transition/close menu objects.",
+    "Added animation/cursor update routines including mnItemSw_80234104 and mnItemSw_8023453C using JObj flag, animation, translation, and TOBJ loop helpers.",
+    "Bot report says new 100% matches: mnItemSw_80233B68 (+680 bytes), mnItemSw_80235020 (+384 bytes), and mnItemSw_80233A98 (+208 bytes).",
+    "Bot report says near-match/improvement progress for mnItemSw_802351A0, mnItemSw_8023453C, mnItemSw_80234104, fn_80234C24, fn_80233E10, .data, .sdata2, and .sdata."
+  ],
+  "smart_moves": [
+    "Grouped related animation/item order constants into a local MnItemSwTable instead of scattering raw arrays through the functions.",
+    "Used natural loops for repeated item application and JObj updates, especially 0x1F item loops over item_order and data->items.",
+    "Preserved special cursor states 0x1F and 0x20 explicitly, making the all-items/frequency-style selection paths searchable and reviewable.",
+    "Kept still-unknown functions with address-style names such as fn_80233E10 and fn_80234C24 rather than inventing semantics unsupported by the excerpt.",
+    "Used existing JObj and menu helpers such as HSD_JObjReqAnimAll, HSD_JObjAnimAll, HSD_JObjSetFlagsAll, HSD_JObjClearFlagsAll, lb_80011E24, mn_8022F3D8, and mn_8022ED6C instead of raw pointer operations in the shown code."
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For menu tables, a temporary local struct can make clustered animation constants, item ids, and item ordering easier to use consistently across multiple recovered functions.",
+      "evidence_refs": [
+        "raw_diff: struct MnItemSwTable with x00, x30, items, item_order",
+        "raw_diff: mnItemSw_80234104 and mnItemSw_8023453C access tbl->x30, tbl->item_order, and tbl->items"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "Directional menu navigation often needs explicit edge/sentinel cases before the default increment/decrement path; here 0, 15, 16, 30, 31, and 32 receive special handling.",
+      "evidence_refs": [
+        "raw_diff: mnItemSw_80233B68 switch cases for left/right and special handling for 0x1F/0x20"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "lesson": "Repeated menu setting persistence is naturally expressed as a for loop over the item_order table and data->items, matching the loaded natural-loops standard.",
+      "evidence_refs": [
+        "raw_diff: fn_80233E10 repeats for (i = 0; i < 0x1F; i++) mn_8022E978(mnItemSw_803ED340.item_order[i], data->items[i])",
+        "decomp_standards:natural-loops"
+      ],
+      "confidence": 0.76
+    },
+    {
+      "lesson": "Keep language-region behavior local and explicit when it changes item animation/id mapping; mnItemSw_80233A98 branches on lbLang_IsSettingJP for selected cases.",
+      "evidence_refs": [
+        "raw_diff: mnItemSw_80233A98 cases 17 and 19 use lbLang_IsSettingJP and return non-JP constants 0x28/0x27"
+      ],
+      "confidence": 0.74
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Observed use of address-style global/function names for unresolved symbols: mnItemSw_803ED340, mnItemSw_804D4BA0, mnItemSw_804D6BE8, fn_80233E10, fn_80234C24.",
+      "evidence_refs": [
+        "raw_diff: added extern/static/function declarations with address-style names"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "convention": "Observed short role locals where roles are clear, such as data, buttons, hovered, sel, cursor, old_cursor, new_cursor, cjobj, jobj, text, menu_changed, hovered_changed, confirmed_changed.",
+      "evidence_refs": [
+        "raw_diff: local variable declarations in mnItemSw_80233B68, fn_80233E10, mnItemSw_80234104, mnItemSw_8023453C, fn_80234C24"
+      ],
+      "confidence": 0.8
+    },
+    {
+      "convention": "Unclear struct fields remain address/offset-style, such as x00, x30, x21, x23, instead of guessed semantic names.",
+      "evidence_refs": [
+        "raw_diff: struct MnItemSwTable fields x00/x30 and MnItemSwData field accesses x21/x23"
+      ],
+      "confidence": 0.84
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Scoped #pragma dont_inline around mnItemSw_80233A98.",
+      "evidence_refs": [
+        "raw_diff: #pragma dont_inline on before mnItemSw_80233A98 and #pragma dont_inline reset after it",
+        "text_corpus.jsonl bot report: mnItemSw_80233A98 is a new 100% match"
+      ],
+      "notes": "Use is supported by the bot match report for this PR slice, but no direct objdiff log or reviewer rationale is loaded."
+    },
+    {
+      "tactic": "PAD_STACK used in fn_80233E10 and fn_80234C24.",
+      "evidence_refs": [
+        "raw_diff: PAD_STACK(0x20) in fn_80233E10",
+        "raw_diff: PAD_STACK(0x18) in fn_80234C24",
+        "text_corpus.jsonl bot report: fn_80233E10 improved to 93.41%; fn_80234C24 improved to 97.57%"
+      ],
+      "notes": "Loaded evidence shows improvement but not full match or explicit rationale; keep as a tactic candidate needing narrow verifier evidence in future work."
+    },
+    {
+      "tactic": "Pointer increment loop over item_order in mnItemSw_80234104.",
+      "evidence_refs": [
+        "raw_diff: order = mnItemSw_803ED340.item_order; for (i = 0; i < 0x1F; i++, order++)"
+      ],
+      "notes": "May reflect MWCC codegen sensitivity for table iteration; no reviewer explanation loaded."
+    },
+    {
+      "tactic": "Casts table float data to AnimLoopSettings for mn_8022ED6C calls.",
+      "evidence_refs": [
+        "raw_diff: mn_8022ED6C(sp44, (AnimLoopSettings*) &tbl->x30[3]) and &tbl->x30[0]"
+      ],
+      "notes": "Evidence supports the code shape only; no type-ownership conclusion should be promoted from this PR alone."
+    }
+  ],
+  "review_feedback": [],
+  "searchable_terms": [
+    "pr-2389",
+    "Jj/mnitemsw",
+    "jurrejelle",
+    "src/melee/mn/mnitemsw.c",
+    "src/melee/mn/mnitemsw.h",
+    "main/melee/mn/mnitemsw",
+    "mnItemSw_80233A98",
+    "mnItemSw_80233B68",
+    "fn_80233E10",
+    "mnItemSw_80234104",
+    "mnItemSw_8023453C",
+    "fn_80234C24",
+    "mnItemSw_80235020",
+    "mnItemSw_802351A0",
+    "MnItemSwTable",
+    "mnItemSw_803ED340",
+    "mnItemSw_804D4BA0",
+    "mnItemSw_804D6BE8",
+    "mn_804D6BB5",
+    "item_order",
+    "hovered_selection",
+    "confirmed_selection",
+    "MenuInput_Back",
+    "MenuInput_AButton",
+    "MenuInput_StartButton",
+    "lbLang_IsSettingJP",
+    "HSD_JObjReqAnimAll",
+    "HSD_JObjSetFlagsAll",
+    "HSD_SisLib_803A5ACC",
+    "PAD_STACK",
+    "dont_inline"
+  ],
+  "follow_up_queries": [
+    "mnitemsw PAD_STACK fn_80233E10 fn_80234C24",
+    "mnItemSw_80233A98 dont_inline",
+    "mnitemsw MnItemSwTable item_order",
+    "mnitemsw 0x1F 0x20 hovered_selection confirmed_selection",
+    "mnItemSw_80235020 100% match",
+    "mnItemSw_802351A0 98.18%",
+    "mnitemsw .data .sdata .sdata2 progress",
+    "src/melee/mn/mnitemsw.h PR 2389 declarations"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR #2389 merged, author jurrejelle, title Jj/mnitemsw, changed files and counts",
+      "human_pr_text.md: body only says Tracking PR as usual",
+      "changed_files.jsonl: two changed files",
+      "raw_diff: large mnitemsw.c excerpt, truncated before full PR diff and before visible header hunk",
+      "text_corpus.jsonl: decomp-dev bot report with match/improvement table",
+      "metadata_json: review_comments 0, reviews 0, issue_comments 1"
+    ],
+    "notes": [
+      "No human review comments are loaded, so reviewer intent and requested changes are unknown.",
+      "Raw diff is truncated; later mnitemsw.c code, mnItemSw_80235020 details, mnItemSw_802351A0 details, and the mnitemsw.h hunk are not visible in loaded excerpts.",
+      "Bot report provides match/improvement evidence, but no local objdiff details, build logs, or adjacent regression checks are loaded.",
+      "PR body is minimal and does not explain intent beyond tracking."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "pr_match_progress",
+        "title": "PR 2389 mnitemsw new matches and near-matches",
+        "text": "Bot report for PR 2389 credits main/melee/mn/mnitemsw with 3 new 100% matches: mnItemSw_80233B68 (+680), mnItemSw_80235020 (+384), and mnItemSw_80233A98 (+208), plus improvements for mnItemSw_802351A0, mnItemSw_8023453C, mnItemSw_80234104, fn_80234C24, fn_80233E10, .data, .sdata2, and .sdata.",
+        "scope": [
+          "main/melee/mn/mnitemsw",
+          "src/melee/mn/mnitemsw.c"
+        ],
+        "evidence_refs": [
+          "text_corpus.jsonl decomp-dev bot report"
+        ],
+        "confidence": 0.86
+      },
+      {
+        "record_type": "decomp_lesson_candidate",
+        "title": "Use table structs and natural loops for mn menu item lists",
+        "text": "This PR groups mnitemsw animation/item constants into MnItemSwTable and uses loops over item_order/data->items for repeated menu persistence and animation setup, aligning with the natural-loops standard.",
+        "scope": [
+          "mnitemsw",
+          "menu item switch",
+          "data-table driven menu UI"
+        ],
+        "evidence_refs": [
+          "raw_diff: struct MnItemSwTable",
+          "raw_diff: for loops over 0x1F item_order entries",
+          "decomp_standards:natural-loops"
+        ],
+        "confidence": 0.78
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "mnitemsw PR 2389 match-progress fact",
+        "text": "PR 2389 changed src/melee/mn/mnitemsw.c and src/melee/mn/mnitemsw.h. Bot report says main/melee/mn/mnitemsw gained 3 new matches: mnItemSw_80233B68, mnItemSw_80235020, and mnItemSw_80233A98, and improved several other mnitemsw functions/data sections.",
+        "source_path": "src/melee/mn/mnitemsw.c",
+        "scope": [
+          "main/melee/mn/mnitemsw",
+          "src/melee/mn/mnitemsw.c",
+          "src/melee/mn/mnitemsw.h"
+        ],
+        "evidence_refs": [
+          "changed_files.jsonl",
+          "text_corpus.jsonl bot report"
+        ],
+        "reason": "Possible path-scoped historical progress record for curator review; should not be promoted without source-corpus policy approval."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Cautionary example: pragma/PAD_STACK tactics need narrow evidence",
+        "text": "PR 2389 contains scoped dont_inline around a newly matched function and PAD_STACK in improved-but-not-fully-matched functions. It can serve as an example that such tactics should stay narrow and be tied to bot/objdiff evidence rather than treated as ordinary style.",
+        "source_path": null,
+        "scope": [
+          "matching tactics",
+          "pragma dont_inline",
+          "PAD_STACK"
+        ],
+        "evidence_refs": [
+          "raw_diff: #pragma dont_inline around mnItemSw_80233A98",
+          "raw_diff: PAD_STACK in fn_80233E10 and fn_80234C24",
+          "text_corpus.jsonl bot report"
+        ],
+        "reason": "This reinforces existing matching-tactics/pragma standards, but loaded evidence is insufficient for a new global rule."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that #pragma dont_inline or PAD_STACK are generally acceptable style from this PR; only narrow PR-local match/improvement evidence is loaded.",
+      "Do not claim mnItemSw_8023453C, mnItemSw_80234104, fn_80234C24, fn_80233E10, or mnItemSw_802351A0 fully matched; bot report lists them as improvements below 100%.",
+      "Do not promote exact mnitemsw.h declaration facts from this slice; the header hunk is not visible in loaded excerpts.",
+      "Do not infer reviewer approval rationale; no human reviews or review comments are loaded."
+    ]
+  },
+  "confidence": 0.76,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

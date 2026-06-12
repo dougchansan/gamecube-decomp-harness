@@ -1,0 +1,471 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2408",
+  "pr": {
+    "number": 2408,
+    "title": "Jj/ft 0 d31",
+    "url": "https://github.com/doldecomp/melee/pull/2408",
+    "state": "MERGED",
+    "author": "jurrejelle",
+    "created_at": "2026-04-11T13:38:55Z",
+    "merged_at": "2026-04-14T15:10:01Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2408 decompiled and matched the ft_0D31/ft_0D4D fighter slice, splitting the former ft_0D31 text/data range at 0x800D4DD4 into a new ft_0D4D translation unit, updating splits/symbols/configure, moving includes/prototypes to ft_0D4D.h, and adjusting shared ftCommon motion-vars typing from scalar/UNK slots to a Vec3-backed x4 field. The bot report records +6896 matched-code bytes and 34 new matches, while old ft_0D31 rebirth symbols appear as broken matches because they moved into the new ft_0D4D unit.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "translation-unit-split",
+      "headers",
+      "type-recovery",
+      "symbols-and-splits"
+    ],
+    "systems": [
+      "fighter",
+      "ftCommon",
+      "effect",
+      "player",
+      "config"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/ft/ft_0D31.c",
+      "role": "Main existing fighter source; gained matched death-related functions and was shortened to end before the new ft_0D4D unit.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/ft/ft_0D31.c +529/-313",
+        "raw_diff: ft_0D31.c includes cleanup, lbl_803B7500 quaternion, ftCo_800D3680 rewrite, ftCo_800D3950 and ftCo_800D3BC8 implementations",
+        "bot_report: ft_0D31 new matches including ftCo_DeadUpFall_Anim, ftCo_DeadUpStar_Anim, ftCo_800D3950, ftCo_800D3BC8, ftCo_800D3E40"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ft_0D4D.c",
+      "role": "New fighter source file for the 0x800D4DD4-0x800D5AEC range, including rebirth-related matches.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/ft/ft_0D4D.c +385/-0",
+        "raw_diff: splits.txt adds melee/ft/ft_0D4D.c text/sdata/sdata2 ranges",
+        "bot_report: ft_0D4D new matches including ftCo_800D4FF4, ftCo_RebirthWait_IASA, ftCo_Rebirth_Phys, ftCo_RebirthWait_Phys"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ft_0D4D.h",
+      "role": "New header for functions moved or introduced in ft_0D4D.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/ft/ft_0D4D.h +25/-0",
+        "raw_diff: several includes changed from ft/ft_0D31.h to ft/ft_0D4D.h"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ft_0D31.h",
+      "role": "Existing header reduced after ft_0D4D declarations moved out.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/ft/ft_0D31.h +1/-18"
+      ]
+    },
+    {
+      "path": "config/GALE01/splits.txt",
+      "role": "Updated section ownership for ft_0D31, new ft_0D4D, and shifted ftCo_Attack100 rodata/sdata starts.",
+      "evidence_refs": [
+        "raw_diff: ft_0D31 text end changed to 0x800D4DD4 and ft_0D4D text start/end added",
+        "raw_diff: ft_0D31 gains rodata/sdata/sdata2 ranges and ftCo_Attack100 rodata/sdata starts shift"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Updated local sdata/sdata2 labels around the new split and data ownership.",
+      "evidence_refs": [
+        "raw_diff: ftCo_804D3CE8..ftCo_804D3D00 renamed to local @ labels",
+        "raw_diff: ftCo_804D8FA8..ftCo_804D8FD8 renamed to local @ labels"
+      ]
+    },
+    {
+      "path": "configure.py",
+      "role": "Build configuration marks ft_0D31 and new ft_0D4D objects as Matching.",
+      "evidence_refs": [
+        "raw_diff: Object(NonMatching, melee/ft/ft_0D31.c) changed to Object(Matching, melee/ft/ft_0D31.c) and Object(Matching, melee/ft/ft_0D4D.c)"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCommon/types.h",
+      "role": "Type recovery for ftCommon motion vars: x4/x8/xC replaced by Vec3 x4.",
+      "evidence_refs": [
+        "raw_diff: union ftCommon_MotionVars common struct changes f32 x4, UNK_T x8, UNK_T xC to Vec3 x4"
+      ]
+    },
+    {
+      "path": "src/melee/ef/eflib.c",
+      "role": "Adjusted effect callbacks to use the recovered Vec3 field layout.",
+      "evidence_refs": [
+        "raw_diff: fighter->mv.co.common.x4 becomes fighter->mv.co.common.x4.x",
+        "raw_diff: fighter->mv.co.common.xC test becomes *(s32*) &fighter->mv.co.common.x4.z"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ft_0C31.c",
+      "role": "Adjusted common motion-var access to the recovered Vec3 field.",
+      "evidence_refs": [
+        "raw_diff: fp->mv.co.common.x4 = fp->cur_pos.y changed to fp->mv.co.common.x4.x = fp->cur_pos.y"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCrazyHand/ftCh_Init.c",
+      "role": "Include updated from ft_0D31.h to ft_0D4D.h.",
+      "evidence_refs": [
+        "raw_diff: include change"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftMasterHand/ftMh_Damage_0.c",
+      "role": "Include updated from ft_0D31.h to ft_0D4D.h.",
+      "evidence_refs": [
+        "raw_diff: include change"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ft_0C8C.c",
+      "role": "Include updated from ft_0D31.h to ft_0D4D.h.",
+      "evidence_refs": [
+        "raw_diff: include change"
+      ]
+    },
+    {
+      "path": "src/melee/pl/player.c",
+      "role": "Minor player-side updates in changed-file metadata; exact hunk not loaded in excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/pl/player.c +2/-2"
+      ]
+    },
+    {
+      "path": "src/melee/pl/player.h",
+      "role": "Minor player header update in changed-file metadata; exact hunk not loaded in excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/pl/player.h +1/-1"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftdata.c",
+      "role": "Minor include/reference update in changed-file metadata; exact hunk not loaded in excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/ft/ftdata.c +1/-1"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftlib.c",
+      "role": "Minor include/reference update in changed-file metadata; exact hunk not loaded in excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/ft/ftlib.c +1/-1"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftmaterial.c",
+      "role": "Minor include/reference update in changed-file metadata; exact hunk not loaded in excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/ft/ftmaterial.c +1/-1"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftmotionstates.c",
+      "role": "Minor update in changed-file metadata; exact hunk not loaded in excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/ft/ftmotionstates.c +1/-0"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Split the former ft_0D31 range so ft_0D31 now covers text 0x800D3158-0x800D4DD4 and new ft_0D4D covers text 0x800D4DD4-0x800D5AEC.",
+    "Marked both melee/ft/ft_0D31.c and melee/ft/ft_0D4D.c as Matching objects in configure.py.",
+    "Added ft_0D4D.c and ft_0D4D.h, with rebirth-related functions reported as newly matched in ft_0D4D.",
+    "Moved dependent includes from ft_0D31.h to ft_0D4D.h in several fighter files.",
+    "Recovered ftCommon motion-vars storage at fp+2344 as Vec3 x4 and updated users to access x4.x or x4.z-address where needed.",
+    "Updated local symbols and split section ranges for rodata, sdata, and sdata2 around ft_0D31, ft_0D4D, and adjacent ftCo_Attack100."
+  ],
+  "smart_moves": [
+    {
+      "text": "The PR paired source splitting with config/splits/symbols updates and build-object status changes, avoiding a source-only move that would leave section ownership inconsistent.",
+      "evidence_refs": [
+        "raw_diff: splits.txt adds ft_0D4D ranges",
+        "raw_diff: symbols.txt relabels sdata/sdata2 locals",
+        "raw_diff: configure.py marks both ft_0D31 and ft_0D4D Matching"
+      ]
+    },
+    {
+      "text": "The PR updated downstream include users to include ft_0D4D.h after declarations moved, rather than leaving consumers on the old ft_0D31 header.",
+      "evidence_refs": [
+        "raw_diff: ftCh_Init.c, ftMh_Damage_0.c, ft_0C8C.c include ft/ft_0D4D.h"
+      ]
+    },
+    {
+      "text": "The PR used a typed Vec3 for a recovered motion-var region and propagated field access changes to eflib and ft_0C31 users.",
+      "evidence_refs": [
+        "raw_diff: ftCommon/types.h Vec3 x4",
+        "raw_diff: eflib.c x4.x and &x4.z access",
+        "raw_diff: ft_0C31.c x4.x assignment"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a contiguous nonmatching source range naturally splits into a new translation unit, update the source file, header ownership, splits, symbols, and configure object status together; bot reports may show old-unit broken matches that are actually moved into the new unit.",
+      "scope": [
+        "fighter translation-unit splits",
+        "GALE01 splits/symbols",
+        "matching reports"
+      ],
+      "evidence_refs": [
+        "raw_diff: ft_0D31 text end changed and ft_0D4D text added",
+        "raw_diff: configure.py adds ft_0D4D Matching",
+        "bot_report: ft_0D31 rebirth symbols broken while corresponding ft_0D4D symbols are new matches"
+      ],
+      "confidence": 0.86
+    },
+    {
+      "lesson": "Type recovery in shared fighter motion vars can require coordinated touch-ups in effect callbacks and earlier fighter states; a recovered Vec3 may replace several scalar/unknown slots but individual accesses may still need exact component or address-cast forms for matching.",
+      "scope": [
+        "ftCommon_MotionVars",
+        "eflib callbacks",
+        "fighter common states"
+      ],
+      "evidence_refs": [
+        "raw_diff: ftCommon/types.h replaces x4/x8/xC with Vec3 x4",
+        "raw_diff: eflib.c uses x4.x and *(s32*) &x4.z",
+        "raw_diff: ft_0C31.c writes x4.x"
+      ],
+      "confidence": 0.78
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "New file/header names follow address-range style: ft_0D4D.c and ft_0D4D.h for code beginning at 0x800D4DD4.",
+      "evidence_refs": [
+        "raw_diff: splits.txt adds melee/ft/ft_0D4D.c at text start 0x800D4DD4",
+        "changed_files.jsonl: src/melee/ft/ft_0D4D.c and src/melee/ft/ft_0D4D.h added"
+      ]
+    },
+    {
+      "convention": "Unproven functions retain address-style names such as fn_800D4DD4, fn_800D54A4, and fn_800D55B4, while known common-state functions use ftCo_* names.",
+      "evidence_refs": [
+        "bot_report: ft_0D4D new matches include fn_800D4DD4, fn_800D54A4, fn_800D55B4 and ftCo_Rebirth* symbols"
+      ]
+    },
+    {
+      "convention": "Local data labels in symbols.txt were changed from semantic-looking ftCo_804D* names to compiler-style local @ labels for the split-owned strings/floats.",
+      "evidence_refs": [
+        "raw_diff: symbols.txt ftCo_804D3CE8..ftCo_804D3D00 to @403/@404/@250/@251",
+        "raw_diff: symbols.txt ftCo_804D8FA8..ftCo_804D8FD8 to @ labels"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Scoped #pragma push / #pragma dont_inline on / #pragma pop was used around newly implemented ftCo_800D3950 and ftCo_800D3BC8 in ft_0D31.c.",
+      "evidence_refs": [
+        "raw_diff: ft_0D31.c shows #pragma dont_inline on around ftCo_800D3950 and ftCo_800D3BC8"
+      ],
+      "risk_note": "Loaded evidence shows bot-reported matches, but no review discussion explaining why dont_inline was required; this remains a narrow matching tactic rather than a general style."
+    },
+    {
+      "tactic": "Packed RGB color values were reconstructed with an index shifted by 2, two base pointers, and byte shifts/or operations before efSync_Spawn.",
+      "evidence_refs": [
+        "raw_diff: ft_0D31.c computes offset = Player_GetUnk45(player_id) << 2, base1/base2, color1/color2"
+      ],
+      "risk_note": "This is supported as PR-local code shape only; no broader color-table convention is proven."
+    },
+    {
+      "tactic": "Comma expression casts such as ftCo_800D38B8(temp_r27_2, (0, temp_r28_2->x4)) and padding locals such as u8 _[24] appear in matched functions.",
+      "evidence_refs": [
+        "raw_diff: ft_0D31.c ftCo_800D3680, ftCo_800D3950, ftCo_800D3BC8"
+      ],
+      "risk_note": "These are matching artifacts with bot match evidence, not a recommended source style."
+    },
+    {
+      "tactic": "Section-range and local-label updates were used to assign rodata/sdata/sdata2 ownership to the split files instead of compensating only in C source.",
+      "evidence_refs": [
+        "raw_diff: splits.txt ft_0D31 and ft_0D4D section ranges",
+        "raw_diff: symbols.txt local @ label updates"
+      ],
+      "risk_note": "Consistent with data-section/TU-split standards, but exact ownership rationale is inferred from diff and bot report rather than explained in PR body."
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "author": "decomp-dev[bot]",
+      "created_at": "2026-04-11T13:42:30Z",
+      "text": "GALE01 report showed matched code 63.28% (+0.18%, +6896 bytes), linked code 34.36% (+0.27%, +10644 bytes), matched data 38.14% (+0.01%, +104 bytes), linked data 32.43% (+0.01%, +104 bytes), with 34 new matches.",
+      "evidence_refs": [
+        "text_corpus.jsonl: issue_comment decomp-dev[bot]"
+      ]
+    },
+    {
+      "kind": "bot_report_warning",
+      "author": "decomp-dev[bot]",
+      "created_at": "2026-04-11T13:42:30Z",
+      "text": "Bot report listed 15 broken matches under old unit main/melee/ft/ft_0D31, mostly rebirth functions that appear as new ft_0D4D matches after the split.",
+      "evidence_refs": [
+        "text_corpus.jsonl: broken matches list",
+        "text_corpus.jsonl: new ft_0D4D matches list"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2408",
+    "Jj/ft 0 d31",
+    "jurrejelle",
+    "ft_0D31",
+    "ft_0D4D",
+    "0x800D4DD4",
+    "ftCo_800D3680",
+    "ftCo_800D3950",
+    "ftCo_800D3BC8",
+    "ftCo_DeadUpFall_Anim",
+    "ftCo_DeadUpStar_Anim",
+    "ftCo_RebirthWait_IASA",
+    "ftCo_Rebirth_Phys",
+    "ftCo_RebirthWait_Phys",
+    "ftCo_800D4FF4",
+    "fn_800D4DD4",
+    "ftCommon_MotionVars",
+    "Vec3 x4",
+    "fighter->mv.co.common.x4.x",
+    "fighter->mv.co.common.x4.z",
+    "Player_GetUnk45",
+    "Fighter_804D650C",
+    "Fighter_804D6508",
+    "efSync_Spawn",
+    "pragma dont_inline",
+    "splits.txt",
+    "symbols.txt",
+    "configure.py Matching"
+  ],
+  "follow_up_queries": [
+    "Search later PRs touching ft_0D31.c or ft_0D4D.c for removal of #pragma dont_inline or cleanup of padding/comma-expression matching artifacts.",
+    "Search for subsequent renames or type refinements of ftCommon_MotionVars.common.x4 Vec3 and accesses to &x4.z.",
+    "Search for path facts around ft_0D31/ft_0D4D split ownership at 0x800D4DD4 and associated sdata/sdata2 labels.",
+    "Search for review or later source updates explaining the Player_GetUnk45 color-table indexing pattern with Fighter_804D650C/Fighter_804D6508."
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR identity, state, author, changed files, counts",
+      "raw_diff: truncated but includes key split/config/type/source excerpts",
+      "changed_files.jsonl: full changed-file list",
+      "text_corpus.jsonl: PR body empty and one bot report comment"
+    ],
+    "notes": [
+      "PR body is empty and there are no loaded human review comments.",
+      "Diff is truncated, so exact contents of ft_0D4D.c, ft_0D4D.h, ft_0D31.h, player.c/player.h, ftdata.c, ftlib.c, ftmaterial.c, and ftmotionstates.c are only partially or not directly visible.",
+      "Bot report provides match/regression evidence but not author intent or rationale for tactics such as dont_inline, padding locals, or comma expressions.",
+      "The apparent broken matches in ft_0D31 are interpreted cautiously as likely relocation to ft_0D4D because the bot also reports corresponding new ft_0D4D matches and the diff adds a split at 0x800D4DD4."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "lesson",
+        "title": "Interpret bot broken matches carefully after translation-unit splits",
+        "text": "When a PR splits a source range into a new translation unit and updates splits/configure, bot-reported broken matches in the old unit can correspond to new matches in the new unit rather than true source regressions. Compare symbol names and new object ranges before classifying them.",
+        "scope": [
+          "matching reports",
+          "translation-unit split PRs",
+          "fighter source"
+        ],
+        "evidence_refs": [
+          "raw_diff: ft_0D31 text end changed to 0x800D4DD4 and ft_0D4D added",
+          "raw_diff: configure.py marks ft_0D4D Matching",
+          "text_corpus.jsonl: ft_0D31 broken rebirth matches and ft_0D4D new rebirth matches"
+        ],
+        "confidence": 0.86
+      },
+      {
+        "record_type": "lesson",
+        "title": "Shared fighter type recovery requires coordinated access updates",
+        "text": "Recovering shared ftCommon motion-var layout can require changing both the union definition and all affected access sites; this PR replaced scalar/unknown common.x4/x8/xC slots with Vec3 x4 and adjusted eflib/ft_0C31 users to component or address-cast accesses.",
+        "scope": [
+          "ftCommon_MotionVars",
+          "type recovery",
+          "fighter/effect integration"
+        ],
+        "evidence_refs": [
+          "raw_diff: ftCommon/types.h Vec3 x4",
+          "raw_diff: eflib.c x4.x and &x4.z access",
+          "raw_diff: ft_0C31.c x4.x assignment"
+        ],
+        "confidence": 0.78
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "ft_0D31 split produced new ft_0D4D translation unit",
+        "text": "PR 2408 split melee/ft/ft_0D31.c at text address 0x800D4DD4. After the split, ft_0D31 covers 0x800D3158-0x800D4DD4 and new ft_0D4D covers 0x800D4DD4-0x800D5AEC, with separate sdata/sdata2 ranges and matching object entries.",
+        "source_path": "src/melee/ft/ft_0D4D.c",
+        "scope": [
+          "src/melee/ft/ft_0D31.c",
+          "src/melee/ft/ft_0D4D.c",
+          "config/GALE01/splits.txt",
+          "configure.py"
+        ],
+        "evidence_refs": [
+          "raw_diff: splits.txt ft_0D31/ft_0D4D ranges",
+          "raw_diff: configure.py Matching entries",
+          "changed_files.jsonl: ft_0D4D.c and ft_0D4D.h added"
+        ],
+        "reason": "Useful durable path fact for future PRs touching the ft_0D31/ft_0D4D boundary."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "ftCommon_MotionVars common.x4 recovered as Vec3 in PR 2408",
+        "text": "PR 2408 changed ftCommon_MotionVars common storage at fp+2344 from separate x4/x8/xC slots to Vec3 x4, with observed users accessing x4.x and, for one flag-like test, casting the address of x4.z to s32*.",
+        "source_path": "src/melee/ft/chara/ftCommon/types.h",
+        "scope": [
+          "src/melee/ft/chara/ftCommon/types.h",
+          "src/melee/ef/eflib.c",
+          "src/melee/ft/ft_0C31.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: ftCommon/types.h field change",
+          "raw_diff: eflib.c access changes",
+          "raw_diff: ft_0C31.c access change"
+        ],
+        "reason": "Potentially useful local type-history fact; curator should verify against current source before promoting."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Document bot-report interpretation for TU splits",
+        "text": "For PRs that split a translation unit, compare old-unit broken matches with new-unit matches before treating the bot's broken-match list as regressions. A split can legitimately move matched functions between object units when splits/configure/symbols are updated together.",
+        "source_path": null,
+        "scope": [
+          "matching reports",
+          "translation-unit splits",
+          "decomp review"
+        ],
+        "evidence_refs": [
+          "text_corpus.jsonl: 15 ft_0D31 broken matches",
+          "text_corpus.jsonl: corresponding ft_0D4D new matches",
+          "raw_diff: ft_0D4D split and configure additions"
+        ],
+        "reason": "This PR is a concrete example that could refine verification/report-reading guidance, but it should be curated against broader evidence before becoming a global standard."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote #pragma dont_inline, padding locals, comma expressions, or pointer casts from this PR as general style; the loaded evidence only supports that they appeared in this matching slice.",
+      "Do not infer human reviewer approval or rationale; no human review comments are loaded.",
+      "Do not claim all 34 new matches were manually inspected here; only the bot report and truncated diff are available.",
+      "Do not treat the local @ label changes as a broad naming rule beyond this split without additional symbol/split evidence."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

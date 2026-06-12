@@ -1,0 +1,17 @@
+{
+  "number": 2151,
+  "title": "gm_18A5: Tournament mode functions",
+  "state": "MERGED",
+  "createdAt": "2026-01-30T19:18:19Z",
+  "updatedAt": "2026-01-31T16:42:32Z",
+  "mergedAt": "2026-01-31T16:40:40Z",
+  "closedAt": "2026-01-31T16:40:40Z",
+  "author": "malvarezcastillo",
+  "url": "https://github.com/doldecomp/melee/pull/2151",
+  "counts": {
+    "issue_comments": 3,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 66399
+  }
+}

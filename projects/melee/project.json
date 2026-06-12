@@ -9,7 +9,7 @@
   "baseRef": "origin/master",
   "localEnv": "./local.env",
   "validation": {
-    "qaTarget": "build/GALE01",
+    "qaTarget": "changes_all",
     "reportPath": "build/GALE01/report.json",
     "reportChangesPath": "build/GALE01/report_changes.json",
     "objdiffPath": "objdiff.json"
@@ -18,29 +18,28 @@
     "candidateLimit": 64,
     "queueTargetSize": 64,
     "queueLowWatermark": 16,
-    "candidateWindow": 64,
+    "candidateWindow": 1024,
     "goalValue": 100
   },
   "pr": {
     "groupMode": "melee-subsystem",
     "titlePrefix": "Melee decomp",
     "branchPrefix": "decomp",
-    "maxFilesPerPr": 8
+    "maxFilesPerPr": 8,
+    "improvementMinGainPoints": 2.0,
+    "improvementMinMatchedBytes": 64
   },
   "knowledge": {
     "globalSources": [
       "past_prs",
       "decomp_standards",
-      "resource_guides",
       "ssbm_data_sheet",
       "powerpc_docs",
       "external_mirrors",
-      "reference_docs",
       "path_facts"
     ],
     "projectSources": [
-      "code_graph",
-      "tool_outputs"
+      "code_graph"
     ]
   }
 }

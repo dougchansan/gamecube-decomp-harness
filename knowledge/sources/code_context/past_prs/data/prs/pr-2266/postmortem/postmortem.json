@@ -1,0 +1,228 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2266",
+  "pr": {
+    "number": 2266,
+    "title": "Bring back lbArchive_LoadSections",
+    "url": "https://github.com/doldecomp/melee/pull/2266",
+    "state": "MERGED",
+    "author": "PsiLupan",
+    "created_at": "2026-03-10T21:19:14Z",
+    "merged_at": "2026-03-10T21:22:53Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2266 restored/added lbArchive_LoadSections in src/melee/lb/lbarchive.c. The new helper iterates over varargs as symbol-output pointer/name pairs until a NULL symbol pointer sentinel, clears each output pointer, loads it through HSD_ArchiveGetPublicAddress, and reports missing symbols with OSReport.",
+  "change_classification": {
+    "primary_type": "code-change",
+    "categories": [
+      "library-helper",
+      "archive-loading",
+      "varargs-api"
+    ],
+    "systems": [
+      "library",
+      "lbarchive"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/lb/lbarchive.c",
+      "role": "Restores/adds lbArchive_LoadSections helper near lbArchive_InitializeDAT and lbArchive_LoadArchive_inline.",
+      "evidence_refs": [
+        "metadata.changed_files[0]",
+        "raw_diff",
+        "diff_excerpt"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Added void lbArchive_LoadSections(HSD_Archive* archive, void** symbol, ...) to src/melee/lb/lbarchive.c.",
+      "evidence_refs": [
+        "raw_diff"
+      ]
+    },
+    {
+      "text": "The helper uses va_start(symbols, symbol), loops while symbol != NULL, reads a const char* symbol_name from the varargs, and advances to the next void** symbol with va_arg(symbols, void**).",
+      "evidence_refs": [
+        "raw_diff"
+      ]
+    },
+    {
+      "text": "For each symbol output pointer, the function sets *symbol to NULL, then assigns HSD_ArchiveGetPublicAddress(archive, symbol_name).",
+      "evidence_refs": [
+        "raw_diff"
+      ]
+    },
+    {
+      "text": "If lookup returns NULL, the helper reports \"Cannot find symbol %s.\\n\" via OSReport using the symbol name.",
+      "evidence_refs": [
+        "raw_diff"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "The function explicitly initializes each output slot to NULL before attempting the archive lookup, preserving a safe failure state if HSD_ArchiveGetPublicAddress cannot resolve the symbol.",
+      "evidence_refs": [
+        "raw_diff"
+      ]
+    },
+    {
+      "text": "The varargs API uses a NULL symbol pointer sentinel to terminate the section-loading list, keeping a compact call pattern for loading multiple archive public symbols.",
+      "evidence_refs": [
+        "raw_diff"
+      ]
+    },
+    {
+      "text": "Missing archive public symbols are reported immediately with the requested symbol name, which makes archive content issues searchable at runtime.",
+      "evidence_refs": [
+        "raw_diff"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When restoring archive-loading helpers, preserve observable varargs contract details such as pointer/name argument ordering, NULL sentinel termination, and failure reporting strings; these details are part of the helper's caller-facing behavior.",
+      "scope": [
+        "src/melee/lb/lbarchive.c",
+        "lbArchive_LoadSections",
+        "archive public-symbol loading helpers"
+      ],
+      "evidence_refs": [
+        "raw_diff",
+        "pr.title"
+      ],
+      "confidence": 0.72
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "The restored helper follows the existing lbArchive_ function prefix used by nearby archive helpers.",
+      "examples": [
+        "lbArchive_LoadSections",
+        "lbArchive_InitializeDAT",
+        "lbArchive_LoadArchive_inline"
+      ],
+      "evidence_refs": [
+        "raw_diff"
+      ]
+    },
+    {
+      "text": "Local names reflect the varargs roles directly: symbol for the current output pointer, symbol_name for the archive public symbol name, and symbols for the va_list.",
+      "examples": [
+        "symbol",
+        "symbol_name",
+        "symbols"
+      ],
+      "evidence_refs": [
+        "raw_diff"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "text": "No explicit matching tactic such as pragma changes, PAD_STACK, register steering, inline assembly, or data-section manipulation is evidenced in this PR slice.",
+      "evidence_refs": [
+        "raw_diff",
+        "metadata.counts"
+      ]
+    }
+  ],
+  "review_feedback": [],
+  "searchable_terms": [
+    "pr-2266",
+    "Bring back lbArchive_LoadSections",
+    "PsiLupan",
+    "src/melee/lb/lbarchive.c",
+    "lbArchive_LoadSections",
+    "lbArchive_InitializeDAT",
+    "lbArchive_LoadArchive_inline",
+    "HSD_Archive",
+    "HSD_ArchiveGetPublicAddress",
+    "OSReport",
+    "Cannot find symbol %s",
+    "va_list",
+    "va_start",
+    "va_arg",
+    "va_end",
+    "symbol_name",
+    "void** symbol",
+    "archive public address",
+    "NULL sentinel"
+  ],
+  "follow_up_queries": [
+    "lbArchive_LoadSections callers varargs NULL sentinel",
+    "HSD_ArchiveGetPublicAddress lbarchive helper",
+    "\"Cannot find symbol %s\" OSReport",
+    "src/melee/lb/lbarchive.c va_list symbol_name",
+    "archive section loading public symbols"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json",
+      "raw_diff",
+      "changed_files",
+      "text_corpus"
+    ],
+    "notes": [
+      "The changed file and full diff for the single hunk are available and directly support the code-change summary.",
+      "The PR body is empty and there are no issue comments, review comments, or reviews in the loaded slice, so intent beyond the title and diff is not evidenced.",
+      "No build, objdiff, regression, or caller evidence is present in the slice; no validation result is claimed.",
+      "raw_pr_json is truncated, but the provided metadata and untruncated raw_diff/changed_files/text_corpus are sufficient for the compact intake record."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson_candidate",
+        "title": "Preserve lbArchive_LoadSections varargs contract when touching archive section loading",
+        "text": "PR 2266 restores lbArchive_LoadSections as a varargs helper that takes output pointer/name pairs, terminates on a NULL output pointer, clears each output slot, resolves the public address through HSD_ArchiveGetPublicAddress, and OSReports missing symbols. Future decomp work around this helper should avoid changing this caller-facing contract without caller evidence.",
+        "scope": [
+          "src/melee/lb/lbarchive.c",
+          "lbArchive_LoadSections"
+        ],
+        "evidence_refs": [
+          "raw_diff",
+          "pr.title"
+        ],
+        "confidence": 0.72
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "src/melee/lb/lbarchive.c contains lbArchive_LoadSections",
+        "text": "PR 2266 added/restored lbArchive_LoadSections in src/melee/lb/lbarchive.c. The helper loads archive public symbols using HSD_ArchiveGetPublicAddress and reports missing symbols with OSReport.",
+        "source_path": "src/melee/lb/lbarchive.c",
+        "scope": [
+          "library",
+          "lbarchive",
+          "archive public-symbol loading"
+        ],
+        "evidence_refs": [
+          "metadata.changed_files[0]",
+          "raw_diff"
+        ],
+        "reason": "Potential path fact for future lookup; should be checked against current source before promotion."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that this PR matched a function or improved an objdiff score; the slice contains no validation output.",
+      "Do not infer reviewer intent or review-requested changes; there are no loaded reviews or comments.",
+      "Do not generalize this small helper restoration into a global varargs naming standard without broader source evidence."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

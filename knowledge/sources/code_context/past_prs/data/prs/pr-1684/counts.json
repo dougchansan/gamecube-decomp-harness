@@ -1,0 +1,17 @@
+{
+  "number": 1684,
+  "title": "gmvsmelee matches",
+  "state": "MERGED",
+  "createdAt": "2025-07-12T18:11:51Z",
+  "updatedAt": "2025-07-14T01:07:35Z",
+  "mergedAt": "2025-07-13T00:15:03Z",
+  "closedAt": "2025-07-13T00:15:03Z",
+  "author": "sadkellz",
+  "url": "https://github.com/doldecomp/melee/pull/1684",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 18367
+  }
+}

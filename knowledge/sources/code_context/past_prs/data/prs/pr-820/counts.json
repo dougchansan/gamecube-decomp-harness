@@ -1,0 +1,17 @@
+{
+  "number": 820,
+  "title": "Sync motion callback names with motion enum names",
+  "state": "MERGED",
+  "createdAt": "2023-04-28T02:11:28Z",
+  "updatedAt": "2023-04-28T02:20:20Z",
+  "mergedAt": "2023-04-28T02:20:19Z",
+  "closedAt": "2023-04-28T02:20:19Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/820",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 0
+  }
+}

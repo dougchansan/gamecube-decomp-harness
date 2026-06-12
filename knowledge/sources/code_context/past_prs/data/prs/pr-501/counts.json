@@ -1,0 +1,17 @@
+{
+  "number": 501,
+  "title": "Use symbol names from Zoids VS debug elf",
+  "state": "MERGED",
+  "createdAt": "2022-08-27T06:23:04Z",
+  "updatedAt": "2022-08-27T06:29:21Z",
+  "mergedAt": "2022-08-27T06:26:52Z",
+  "closedAt": "2022-08-27T06:26:52Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/501",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 221852
+  }
+}

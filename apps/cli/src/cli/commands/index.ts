@@ -1,5 +1,6 @@
 export { babysit } from "./babysit.js";
 export { checkpointRun } from "./checkpoint-run.js";
+export { epochRun } from "./epoch-run.js";
 export { initRun } from "./init-run.js";
 export {
   kgCurate,
@@ -14,8 +15,11 @@ export {
   kgStatus,
   runKnowledgeMaintenance,
 } from "./kg.js";
+export { reconcile } from "./reconcile.js";
 export { recoverLeases } from "./recover-leases.js";
 export { reportRun } from "./report-run.js";
+export { savePoint } from "./save-point.js";
+export { prPreshipReview } from "./pr-preship-review.js";
 export { prSplitPlan } from "./pr-split-plan.js";
 export { regressionCheck } from "./regression-check.js";
 export { status } from "./status.js";

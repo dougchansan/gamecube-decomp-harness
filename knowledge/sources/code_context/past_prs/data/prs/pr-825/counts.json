@@ -1,0 +1,17 @@
+{
+  "number": 825,
+  "title": "Tweak `Makefile` to be more convenient with `objdiff`",
+  "state": "MERGED",
+  "createdAt": "2023-04-29T21:04:58Z",
+  "updatedAt": "2023-04-29T21:12:48Z",
+  "mergedAt": "2023-04-29T21:12:47Z",
+  "closedAt": "2023-04-29T21:12:47Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/825",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 1347
+  }
+}

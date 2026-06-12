@@ -1,0 +1,17 @@
+{
+  "number": 1979,
+  "title": "ftaction work",
+  "state": "MERGED",
+  "createdAt": "2025-11-09T21:48:42Z",
+  "updatedAt": "2025-11-13T04:21:23Z",
+  "mergedAt": "2025-11-13T03:36:15Z",
+  "closedAt": "2025-11-13T03:36:15Z",
+  "author": "sadkellz",
+  "url": "https://github.com/doldecomp/melee/pull/1979",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 72440
+  }
+}

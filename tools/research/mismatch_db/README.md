@@ -11,10 +11,6 @@ and writes:
 - `cache/objdiff_<symbol>.json`
 - `indexes/objdiff_mismatches.jsonl`
 
-`build_tool_indexes.py` still generates `indexes/patterns.jsonl` from imported
-mismatch/MWCC reference docs, so `api/search.py` returns both live objdiff
-evidence and supplemental local pattern notes.
-
-Reference material:
-
-- `reference/SKILL.md`
+`build_tool_indexes.py` still keeps `indexes/patterns.jsonl` present for
+compatibility, so `api/search.py` can return live objdiff evidence alongside
+any supplemental local pattern notes.

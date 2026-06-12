@@ -1,0 +1,334 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2325",
+  "pr": {
+    "number": 2325,
+    "title": "gr: decompile grIceMt_801F91EC, grKongo_801D8078",
+    "url": "https://github.com/doldecomp/melee/pull/2325",
+    "state": "MERGED",
+    "author": "johnwinston",
+    "created_at": "2026-03-19T14:22:32Z",
+    "merged_at": "2026-03-20T00:27:15Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2325 decompiled or improved two Ground stage functions: grIceMt_801F91EC in Ice Mountain and grKongo_801D8078 in Kongo. It also updated gricemt.h to replace an UNK_RET placeholder with the recovered grIceMt_801F91EC signature and added an item header include needed by grkongo.c. The automated report records grIceMt_801F91EC as a new 100% match and grKongo_801D8078 as an unmatched-item improvement to 98.43%. The PR body text appears unrelated to the actual changed files and title, so the diff and report are stronger evidence than the body summary.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "naming"
+    ],
+    "systems": [
+      "stage",
+      "ground",
+      "items"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gr/gricemt.c",
+      "role": "Renamed/decompiled grIceMt_801F91EC from FUN_801f91ec, removed the decomp marker, set up a Ground pointer via GET_GROUND, initialized a s16 parameter array, called grAnime_801C7A04 with 0 as the final argument, and installed an mpJoint callback.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gr/gricemt.c added 9 deleted 10 hunks 3",
+        "raw_diff: gricemt.c hunk around declaration and function body",
+        "issue_comment: report lists grIceMt_801F91EC as 176 bytes, 0.00% to 100.00%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/gricemt.h",
+      "role": "Updated the public declaration for grIceMt_801F91EC from UNK_RET grIceMt_801F91EC(HSD_GObj*) to the recovered void signature with HSD_GObj*, s16*, integer parameters, and mpLib_Callback.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gr/gricemt.h added 2 deleted 1 hunks 1",
+        "raw_diff: gricemt.h prototype hunk"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grkongo.c",
+      "role": "Implemented grKongo_801D8078 as an item scan over HSD_GObj_Entities->items, selecting item kind 0xDA and returning the first item within a squared radius from a Ground_801C4DA0 position. Added include \"it/it_26B1.h\" for item helpers.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gr/grkongo.c added 32 deleted 1 hunks 2",
+        "raw_diff: grkongo.c include hunk and grKongo_801D8078 body",
+        "issue_comment: report lists grKongo_801D8078 as 185 bytes, 0.00% to 98.43%"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "grIceMt_801F91EC was promoted from a placeholder/commented decomp target and local FUN_801f91ec-style name to a named function body matching the title symbol.",
+      "evidence_refs": [
+        "raw_diff: removed /// #grIceMt_801F91EC and renamed FUN_801f91ec to grIceMt_801F91EC"
+      ]
+    },
+    {
+      "text": "The grIceMt_801F91EC header prototype was made truthful for the recovered body, replacing UNK_RET and incomplete parameters.",
+      "evidence_refs": [
+        "raw_diff: gricemt.h UNK_RET grIceMt_801F91EC(HSD_GObj*) changed to void grIceMt_801F91EC(HSD_GObj*, s16*, int, int, int, int, int, mpLib_Callback)"
+      ]
+    },
+    {
+      "text": "grIceMt_801F91EC now calls grAnime_801C7A04 with final argument 0 instead of -20 for both animation calls in the recovered body.",
+      "evidence_refs": [
+        "raw_diff: grAnime_801C7A04(param_1, param_3, 7, -20) changed to final argument 0; same for param_4 branch"
+      ]
+    },
+    {
+      "text": "grKongo_801D8078 was implemented as a loop over item GObjs, filters by itGetKind(cur) == 0xDA, computes squared distance to a stage/ground position, and returns the first item within grKg_804D6980->unk28 radius.",
+      "evidence_refs": [
+        "raw_diff: grKongo_801D8078 function body"
+      ]
+    },
+    {
+      "text": "The automated report recorded one new full match for grIceMt_801F91EC and one partial improvement for grKongo_801D8078.",
+      "evidence_refs": [
+        "text_corpus.jsonl issue_comment by encounter: grIceMt_801F91EC 0.00% to 100.00%; grKongo_801D8078 0.00% to 98.43%"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "The PR paired the recovered grIceMt_801F91EC body with the owning header prototype update instead of leaving an UNK_RET/incomplete declaration behind.",
+      "evidence_refs": [
+        "raw_diff: gricemt.c recovered body",
+        "raw_diff: gricemt.h prototype replacement"
+      ]
+    },
+    {
+      "text": "The grKongo implementation uses squared-distance comparison against r * r, avoiding an unnecessary square root while matching the likely assembly shape for radius checks.",
+      "evidence_refs": [
+        "raw_diff: dx2 + dy2 + dz2 < r * r"
+      ]
+    },
+    {
+      "text": "The item scan is expressed as a natural for loop over cur = cur->next rather than a generated-looking branch ladder.",
+      "evidence_refs": [
+        "raw_diff: for (cur = HSD_GObj_Entities->items; cur != NULL; cur = cur->next)"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a recovered function body proves the actual signature, update the owning header at the same time so UNK_RET and incomplete parameters do not survive the decomp.",
+      "scope": [
+        "src/melee/gr/gricemt.c",
+        "src/melee/gr/gricemt.h"
+      ],
+      "evidence_refs": [
+        "raw_diff: grIceMt_801F91EC body signature",
+        "raw_diff: gricemt.h prototype changed from UNK_RET to full signature"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "lesson": "For stage logic that searches active item objects, a natural loop over HSD_GObj_Entities->items with helper calls such as itGetKind and it_8026B294 can be reviewable and close to the recovered behavior.",
+      "scope": [
+        "src/melee/gr/grkongo.c"
+      ],
+      "evidence_refs": [
+        "raw_diff: grKongo_801D8078 item loop",
+        "issue_comment: grKongo_801D8078 improved from 0.00% to 98.43%"
+      ],
+      "confidence": 0.74
+    },
+    {
+      "lesson": "Distance/radius checks can often be expressed as squared component sums compared with r * r when the source computes dx, dy, dz and avoids sqrt-like behavior.",
+      "scope": [
+        "src/melee/gr/grkongo.c"
+      ],
+      "evidence_refs": [
+        "raw_diff: dx/dy/dz, dx2/dy2/dz2, r, and comparison dx2 + dy2 + dz2 < r * r"
+      ],
+      "confidence": 0.78
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "Recovered stage functions keep the subsystem/address symbol form, e.g. grIceMt_801F91EC and grKongo_801D8078, rather than retaining generated FUN_801f91ec naming.",
+      "evidence_refs": [
+        "raw_diff: FUN_801f91ec renamed to grIceMt_801F91EC",
+        "raw_diff: grKongo_801D8078 body added at former decomp marker"
+      ]
+    },
+    {
+      "text": "Clear local role names were used where evident: gp for Ground*, pos for the reference position, item_pos for item position, and cur for the current item GObj.",
+      "evidence_refs": [
+        "raw_diff: Ground* gp = GET_GROUND(param_1)",
+        "raw_diff: Vec3 pos; Vec3 item_pos; HSD_GObj* cur"
+      ]
+    },
+    {
+      "text": "Some parameters remained param_N where the PR slice does not prove semantic roles, consistent with conservative naming.",
+      "evidence_refs": [
+        "raw_diff: grIceMt_801F91EC parameter names param_1 through param_8"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "text": "Use a for loop over HSD_GObj_Entities->items with cur = cur->next for list traversal.",
+      "evidence_refs": [
+        "raw_diff: grKongo_801D8078 for loop"
+      ]
+    },
+    {
+      "text": "Compute dx, dy, dz and separate squared temporary variables before the radius comparison, preserving a source shape that produced a 98.43% improvement for grKongo_801D8078.",
+      "evidence_refs": [
+        "raw_diff: f32 dx, dy, dz, dx2, dy2, dz2, r",
+        "text_corpus.jsonl issue_comment: grKongo_801D8078 0.00% to 98.43%"
+      ]
+    },
+    {
+      "text": "Use the real item helper prototypes by adding the relevant include rather than relying on implicit or local declarations.",
+      "evidence_refs": [
+        "raw_diff: added #include \"it/it_26B1.h\"",
+        "raw_diff: calls itGetKind and it_8026B294"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "text": "No inline review comments or formal reviews were present in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata_json: counts.review_comments 0 and reviews 0"
+      ]
+    },
+    {
+      "text": "The available issue comment is an automated match report, not reviewer feedback: grIceMt_801F91EC reached 100.00%, grKongo_801D8078 improved to 98.43%, and gricemt .sdata2 improved to 62.12%.",
+      "evidence_refs": [
+        "text_corpus.jsonl issue_comment by encounter"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2325",
+    "johnwinston",
+    "grIceMt_801F91EC",
+    "grKongo_801D8078",
+    "FUN_801f91ec",
+    "src/melee/gr/gricemt.c",
+    "src/melee/gr/gricemt.h",
+    "src/melee/gr/grkongo.c",
+    "Ground_801C4DA0",
+    "HSD_GObj_Entities",
+    "itGetKind",
+    "it_8026B294",
+    "it/it_26B1.h",
+    "grKg_804D6980",
+    "mpJointSetCb1",
+    "mpLib_Callback",
+    "grAnime_801C7A04",
+    "UNK_RET",
+    "squared distance",
+    "item kind 0xDA"
+  ],
+  "follow_up_queries": [
+    "grKongo_801D8078 98.43 remaining mismatch",
+    "grIceMt_801F91EC grAnime_801C7A04 final argument 0",
+    "gricemt .sdata2 improvement PR 2325",
+    "itGetKind 0xDA Kongo stage item",
+    "grKg_804D6980 unk28 radius",
+    "Ground_801C4DA0 position radius item search"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR title, author, merge state, changed files",
+      "raw_diff: complete 3853-byte diff",
+      "text_corpus.jsonl: PR body and issue comment",
+      "human_pr_text: automated report"
+    ],
+    "notes": [
+      "The PR title, changed files, and automated report consistently concern grIceMt_801F91EC and grKongo_801D8078.",
+      "The PR body summary appears unrelated, naming IsNameUnique in mnname.c and un_80305D00 in toy.c; those files are not in the changed-file list or diff.",
+      "The PR body claims fuzzy_match_percent 100.0 for all functions, but the issue report says grKongo_801D8078 improved only to 98.43%. The issue report is treated as stronger evidence for match status because it names the actual changed stage units.",
+      "No review comments are available, so reviewer intent and requested changes cannot be inferred.",
+      "The diff supports what source changed, but does not by itself prove all semantic names or remaining mismatch causes."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "kind": "decomp_lesson",
+        "title": "Update owning headers when a decompiled body proves a signature",
+        "text": "In PR 2325, grIceMt_801F91EC was decompiled in gricemt.c and gricemt.h was updated from UNK_RET grIceMt_801F91EC(HSD_GObj*) to the recovered void signature with all parameters. This is a concrete example of pairing body recovery with truthful header cleanup.",
+        "scope": [
+          "stage",
+          "headers",
+          "src/melee/gr/gricemt.c",
+          "src/melee/gr/gricemt.h"
+        ],
+        "evidence_refs": [
+          "raw_diff: gricemt.c grIceMt_801F91EC body",
+          "raw_diff: gricemt.h prototype update"
+        ]
+      },
+      {
+        "kind": "matching_tactic",
+        "title": "Stage item search as natural GObj list loop with squared-radius comparison",
+        "text": "PR 2325 implemented grKongo_801D8078 as a natural loop over HSD_GObj_Entities->items, filtering item kind 0xDA, reading each item position, and comparing squared distance against r * r. The report shows this raised grKongo_801D8078 from 0.00% to 98.43%.",
+        "scope": [
+          "stage",
+          "items",
+          "src/melee/gr/grkongo.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: grKongo_801D8078 body",
+          "text_corpus.jsonl issue_comment: grKongo_801D8078 report row"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Header prototype cleanup example for truthful-headers standard",
+        "text": "PR 2325 can serve as an example for the existing truthful-headers-and-includes standard: after recovering grIceMt_801F91EC, the PR updated gricemt.h to replace UNK_RET and incomplete parameters with the recovered signature.",
+        "source_path": null,
+        "scope": [
+          "truthful-headers-and-includes",
+          "stage headers",
+          "src/melee/gr/gricemt.h"
+        ],
+        "evidence_refs": [
+          "raw_diff: gricemt.h prototype changed from UNK_RET to full signature"
+        ],
+        "reason": "This is not a new standard, but it is a concise supporting example for an existing accepted standard."
+      },
+      {
+        "target_source_id": "other",
+        "update_kind": "source_update",
+        "title": "PR body mismatch should not be used as semantic evidence for PR 2325",
+        "text": "The loaded PR body discusses IsNameUnique in mnname.c and un_80305D00 in toy.c, while the title, changed files, diff, and report are about grIceMt_801F91EC and grKongo_801D8078. Curated records for this PR should prefer the diff and automated report over the body summary.",
+        "source_path": "knowledge/sources/code_context/past_prs/data/prs/pr-2325/extracted/human_pr_text.md",
+        "scope": [
+          "pr-2325",
+          "intake metadata",
+          "evidence hygiene"
+        ],
+        "evidence_refs": [
+          "text_corpus.jsonl pr_body",
+          "changed_files.jsonl",
+          "raw_diff",
+          "text_corpus.jsonl issue_comment"
+        ],
+        "reason": "Prevents unrelated PR-body claims from being promoted into knowledge about this stage decomp PR."
+      }
+    ],
+    "rejection_notes": [
+      "Do not record IsNameUnique, mnname.c, un_80305D00, toy.c, name entry, or trophy viewer input as facts about PR 2325's changed code; those appear only in the mismatched PR body and are contradicted by title, changed files, and diff.",
+      "Do not claim grKongo_801D8078 fully matched; the automated report says it improved from 0.00% to 98.43%, not 100.00%.",
+      "Do not infer reviewer approval rationale or requested changes; no review comments or formal reviews are present in the loaded slice.",
+      "Do not promote item kind 0xDA or grKg_804D6980->unk28 semantic meaning beyond what the diff shows; the slice does not name the item or field."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

@@ -1,0 +1,337 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2378",
+  "pr": {
+    "number": 2378,
+    "title": "Link Ftpickupitem",
+    "url": "https://github.com/doldecomp/melee/pull/2378",
+    "state": "MERGED",
+    "author": "jellejurre",
+    "created_at": "2026-04-02T22:16:13Z",
+    "merged_at": "2026-04-03T05:38:20Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2378 linked the ftCommon fttpickupitem object by marking it Matching, adding a small inline accessor for Fighter.x294_itPickup used by fttpickupitem_800942A0, and adjusting symbols for local strings/floats and a local data label. The bot report records one new match: main/melee/ft/chara/ftCommon/ftpickupitem fttpickupitem_800942A0 reaching 100.00%.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "object-linking",
+      "function-match",
+      "symbol-metadata"
+    ],
+    "systems": [
+      "fighter",
+      "ftCommon",
+      "config",
+      "build-config"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftpickupitem.c",
+      "role": "Source change: added inline itPickup accessor fttpickupitem_800942A0_inline(Fighter* fp) returning &fp->x294_itPickup, then used it in fttpickupitem_800942A0.",
+      "evidence_refs": [
+        "raw_diff:src/melee/ft/chara/ftCommon/ftpickupitem.c",
+        "changed_files:src/melee/ft/chara/ftCommon/ftpickupitem.c"
+      ]
+    },
+    {
+      "path": "configure.py",
+      "role": "Build/config change: changed melee/ft/chara/ftCommon/ftpickupitem.c from Object(NonMatching, ...) to Object(Matching, ...).",
+      "evidence_refs": [
+        "raw_diff:configure.py",
+        "changed_files:configure.py"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Symbol metadata change: renamed several ftpickupitem-associated .data and .sdata2 entries from semantic/global-looking names to local @ labels and added a local ...data.0 label at 0x803C5580.",
+      "evidence_refs": [
+        "raw_diff:config/GALE01/symbols.txt",
+        "changed_files:config/GALE01/symbols.txt"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Marked `melee/ft/chara/ftCommon/ftpickupitem.c` as Matching in `configure.py`.",
+      "evidence_refs": [
+        "raw_diff:configure.py"
+      ]
+    },
+    {
+      "text": "Added `inline itPickup* fttpickupitem_800942A0_inline(Fighter* fp)` returning `&fp->x294_itPickup`.",
+      "evidence_refs": [
+        "raw_diff:src/melee/ft/chara/ftCommon/ftpickupitem.c"
+      ]
+    },
+    {
+      "text": "Changed `ftpickupitem_800942A0` to initialize `pickup` through the new inline helper instead of directly taking `&fp->x294_itPickup`.",
+      "evidence_refs": [
+        "raw_diff:src/melee/ft/chara/ftCommon/ftpickupitem.c"
+      ]
+    },
+    {
+      "text": "Adjusted `config/GALE01/symbols.txt` entries around `.data:0x803C5580` through `.data:0x803C55B4`, replacing `ftItemPickup_803C5580`, `assert_msg1`, and `assert_msg2` with local `@273`, `@274`, `@275` labels and adding local label `...data.0`.",
+      "evidence_refs": [
+        "raw_diff:config/GALE01/symbols.txt"
+      ]
+    },
+    {
+      "text": "Adjusted `.sdata2` entries at `0x804D8580`, `0x804D8584`, and `0x804D8588` from global `ftCo_804D8580/8584/8588` names to local `@253`, `@293`, and `@294` float labels.",
+      "evidence_refs": [
+        "raw_diff:config/GALE01/symbols.txt"
+      ]
+    },
+    {
+      "text": "Bot report recorded matched code +476 bytes, linked code +3332 bytes, linked data +80 bytes, and one new match: `ftpickupitem_800942A0` from 99.54% to 100.00%.",
+      "evidence_refs": [
+        "text_corpus:issue_comment:decomp-dev[bot]:2026-04-02T22:19:49Z"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Kept the source change narrow: only introduced a small inline accessor and changed one assignment in the matched function before linking the whole object as Matching.",
+      "evidence_refs": [
+        "raw_diff:src/melee/ft/chara/ftCommon/ftpickupitem.c",
+        "raw_diff:configure.py"
+      ]
+    },
+    {
+      "text": "Updated symbol metadata in the same PR as object linking, including localizing nearby string and float symbols and adding a local data label where the diff indicates it was needed for the linked object.",
+      "evidence_refs": [
+        "raw_diff:config/GALE01/symbols.txt"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "A trivial inline accessor for a struct subobject can be a matching tactic when direct field address-taking produces the wrong code shape; in this PR, routing `&fp->x294_itPickup` through `ftpickupitem_800942A0_inline` coincided with `ftpickupitem_800942A0` reaching 100.00%.",
+      "scope": [
+        "src/melee/ft/chara/ftCommon/ftpickupitem.c",
+        "fighter ftCommon item pickup logic"
+      ],
+      "evidence_refs": [
+        "raw_diff:src/melee/ft/chara/ftCommon/ftpickupitem.c",
+        "text_corpus:issue_comment:decomp-dev[bot]:2026-04-02T22:19:49Z"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "lesson": "Object-linking PRs may require symbol metadata cleanup alongside source changes; here the linked object change included local string/float labels and a local `.data` label in `config/GALE01/symbols.txt`.",
+      "scope": [
+        "config/GALE01/symbols.txt",
+        "ftCommon fttpickupitem object"
+      ],
+      "evidence_refs": [
+        "raw_diff:config/GALE01/symbols.txt",
+        "raw_diff:configure.py"
+      ],
+      "confidence": "medium"
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "The new helper name follows the local address-style function naming pattern with a descriptive `_inline` suffix: `ftpickupitem_800942A0_inline`.",
+      "evidence_refs": [
+        "raw_diff:src/melee/ft/chara/ftCommon/ftpickupitem.c"
+      ]
+    },
+    {
+      "text": "Symbol file changes prefer anonymous/local labels (`@273`, `@274`, `@275`, `@253`, `@293`, `@294`) over the previous global-looking names for these local strings/floats.",
+      "evidence_refs": [
+        "raw_diff:config/GALE01/symbols.txt"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Use a narrow inline helper to alter or preserve MWCC codegen for taking the address of a fighter substructure.",
+      "evidence_refs": [
+        "raw_diff:src/melee/ft/chara/ftCommon/ftpickupitem.c",
+        "text_corpus:issue_comment:decomp-dev[bot]:2026-04-02T22:19:49Z"
+      ],
+      "caveat": "The PR evidence shows the helper was added and the bot reported a match, but does not include objdiff details proving this helper alone caused the match."
+    },
+    {
+      "tactic": "Flip the object from NonMatching to Matching only after the bot report shows `ftpickupitem_800942A0` at 100.00% and linked-code progress.",
+      "evidence_refs": [
+        "raw_diff:configure.py",
+        "text_corpus:issue_comment:decomp-dev[bot]:2026-04-02T22:19:49Z"
+      ],
+      "caveat": "The report is a PR bot summary, not a full local build/objdiff ledger."
+    },
+    {
+      "tactic": "Correct symbol scope/name metadata for data and sdata2 entries near the linked object, changing several apparent globals to local labels.",
+      "evidence_refs": [
+        "raw_diff:config/GALE01/symbols.txt"
+      ],
+      "caveat": "The slice does not include explanatory comments tying each metadata change to a specific relocation or diff requirement."
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "author": "decomp-dev[bot]",
+      "text": "Report for GALE01 showed matched code 61.71% (+0.01%, +476 bytes), linked code 33.88% (+0.09%, +3332 bytes), linked data 32.34% (+0.01%, +80 bytes), and one new match for `main/melee/ft/chara/ftCommon/ftpickupitem` item `ftpickupitem_800942A0` from 99.54% to 100.00%.",
+      "evidence_refs": [
+        "text_corpus:issue_comment:decomp-dev[bot]:2026-04-02T22:19:49Z"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2378",
+    "Link Ftpickupitem",
+    "jellejurre",
+    "ftpickupitem",
+    "ftpickupitem_800942A0",
+    "ftpickupitem_800942A0_inline",
+    "ftpickupitem_80094150",
+    "Fighter",
+    "Fighter_GObj",
+    "Item_GObj",
+    "itPickup",
+    "x294_itPickup",
+    "ground_or_air",
+    "GA_Ground",
+    "gr_light_offset",
+    "air_light_offset",
+    "ftCo_800A2040",
+    "x1A88",
+    "configure.py",
+    "Object(Matching)",
+    "config/GALE01/symbols.txt",
+    "ftItemPickup_803C5580",
+    "assert_msg1",
+    "assert_msg2",
+    "ftCo_804D8580",
+    "ftCo_804D8584",
+    "ftCo_804D8588",
+    "...data.0",
+    "main/melee/ft/chara/ftCommon/ftpickupitem"
+  ],
+  "follow_up_queries": [
+    "ftpickupitem_800942A0_inline x294_itPickup",
+    "ftpickupitem_800942A0 100.00% inline helper",
+    "config/GALE01/symbols.txt 803C5580 ...data.0",
+    "ftCo_804D8580 @253 @293 @294",
+    "Object(Matching) fttpickupitem.c"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json:pr-2378",
+      "raw_diff:knowledge/sources/code_context/past_prs/data/prs/pr-2378/raw/diff.diff",
+      "changed_files:knowledge/sources/code_context/past_prs/data/prs/pr-2378/extracted/changed_files.jsonl",
+      "text_corpus:knowledge/sources/code_context/past_prs/data/prs/pr-2378/extracted/text_corpus.jsonl"
+    ],
+    "notes": [
+      "The diff and bot report are complete enough to identify files changed, concrete source edits, symbol metadata edits, and reported match progress.",
+      "The PR body is empty and there are no human review comments in the loaded slice.",
+      "The bot report supports the claim of one new match for `ftpickupitem_800942A0`, but the slice does not include full objdiff output, local build logs, or author explanation for why the inline helper and symbol changes were necessary.",
+      "Merged state and timestamps are present in metadata, but merge acceptance should not be interpreted as a general standard beyond this PR."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "kind": "pr_lesson_candidate",
+        "title": "Tiny inline subobject accessor can unblock a function match",
+        "text": "In PR 2378, `ftpickupitem_800942A0` changed from directly assigning `pickup = &fp->x294_itPickup;` to assigning through a newly added inline helper returning the same address. The bot report then recorded `ftpickupitem_800942A0` at 100.00%. Preserve as a narrow matching tactic candidate, not a blanket style rule.",
+        "scope": [
+          "ftCommon fttpickupitem",
+          "MWCC inline/codegen matching"
+        ],
+        "evidence_refs": [
+          "raw_diff:src/melee/ft/chara/ftCommon/ftpickupitem.c",
+          "text_corpus:issue_comment:decomp-dev[bot]:2026-04-02T22:19:49Z"
+        ],
+        "confidence": "medium"
+      },
+      {
+        "kind": "pr_lesson_candidate",
+        "title": "Linking a matched object can require symbol metadata locality fixes",
+        "text": "PR 2378 linked `ftpickupitem.c` and also changed several `.data`/`.sdata2` entries in `config/GALE01/symbols.txt` from named global-looking symbols to local labels, plus added a local data label. Treat as evidence that object-linking work may include symbol scope/name cleanup when section metadata requires it.",
+        "scope": [
+          "config/GALE01/symbols.txt",
+          "object linking",
+          "data symbol metadata"
+        ],
+        "evidence_refs": [
+          "raw_diff:config/GALE01/symbols.txt",
+          "raw_diff:configure.py"
+        ],
+        "confidence": "medium"
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Document inline helper as a narrow matching tactic only with verifier evidence",
+        "text": "Consider adding a note under matching tactics that introducing a tiny inline helper for an otherwise equivalent field/subobject access can be valid when supported by objdiff/build evidence, but should remain narrow and should not obscure real types. PR 2378 is a supporting example: `ftpickupitem_800942A0_inline` returned `&fp->x294_itPickup` and the bot reported the target function as newly 100.00%.",
+        "source_path": null,
+        "scope": [
+          "matching tactics",
+          "inline helpers",
+          "MWCC codegen"
+        ],
+        "evidence_refs": [
+          "raw_diff:src/melee/ft/chara/ftCommon/ftpickupitem.c",
+          "text_corpus:issue_comment:decomp-dev[bot]:2026-04-02T22:19:49Z"
+        ],
+        "reason": "The loaded standards discuss matching tactics needing evidence, but do not explicitly mention equivalent inline accessor helpers as a possible narrow tactic."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "ftCommon fttpickupitem linked as Matching in PR 2378",
+        "text": "`melee/ft/chara/ftCommon/ftpickupitem.c` was changed from `Object(NonMatching, ...)` to `Object(Matching, ...)` in `configure.py`; bot report listed one new match for `main/melee/ft/chara/ftCommon/ftpickupitem` item `ftpickupitem_800942A0` at 100.00%.",
+        "source_path": "src/melee/ft/chara/ftCommon/ftpickupitem.c",
+        "scope": [
+          "fighter",
+          "ftCommon",
+          "ftpickupitem"
+        ],
+        "evidence_refs": [
+          "raw_diff:configure.py",
+          "text_corpus:issue_comment:decomp-dev[bot]:2026-04-02T22:19:49Z"
+        ],
+        "reason": "Potential path-level historical fact for future searches about ftCommon matching progress."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "ftpickupitem symbol metadata used local labels for strings/floats",
+        "text": "In PR 2378, `config/GALE01/symbols.txt` changed `ftItemPickup_803C5580`, `assert_msg1`, `assert_msg2`, and `ftCo_804D8580/8584/8588` to local `@` labels, and added local label `...data.0` at `.data:0x803C5580`.",
+        "source_path": "config/GALE01/symbols.txt",
+        "scope": [
+          "GALE01 symbols",
+          "ftCommon fttpickupitem",
+          "data metadata"
+        ],
+        "evidence_refs": [
+          "raw_diff:config/GALE01/symbols.txt"
+        ],
+        "reason": "Could help future curation of data/symbol ownership around the linked fttpickupitem object."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote a global rule that direct field address-taking should be replaced by inline helpers; this PR only supports one narrow matching instance.",
+      "Do not infer human reviewer intent or rationale; the slice has no review comments and an empty PR body.",
+      "Do not claim full local validation beyond the bot report; no full build log or objdiff details are present in the loaded evidence.",
+      "Do not treat the symbol renames as proof of semantic meaning for the affected strings/floats; the diff only proves metadata/name/scope changes."
+    ]
+  },
+  "confidence": 0.83,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

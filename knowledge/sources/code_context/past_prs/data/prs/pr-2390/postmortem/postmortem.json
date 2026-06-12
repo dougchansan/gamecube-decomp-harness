@@ -1,0 +1,450 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2390",
+  "pr": {
+    "number": 2390,
+    "title": "Jj/gm 19 ef",
+    "url": "https://github.com/doldecomp/melee/pull/2390",
+    "state": "MERGED",
+    "author": "jurrejelle",
+    "created_at": "2026-04-07T12:16:06Z",
+    "merged_at": "2026-04-07T14:16:59Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2390 decompiled and partially matched game-mode code in src/melee/gm/gm_19EF.c, adding several helper functions and expanding state/static data for the Go/Gover-related scene flow. It also changed fn_80168F2C in gm_1601.c/.h to accept an s8 parameter used by new gm_19EF.c call sites. Bot report records 5 new matches and 6 unmatched-item improvements, with one unmatched .sdata regression.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "game-mode-scene-code",
+      "static-data-layout"
+    ],
+    "systems": [
+      "game-mode",
+      "gm_19EF",
+      "gm_1601",
+      "baselib-jobj",
+      "baselib-mobj",
+      "audio",
+      "sislib"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gm/gm_19EF.c",
+      "role": "Main decompilation target; expands the file from stubs/comments into helpers and scene setup/update code, adds includes, statics, state fields, JObj/MObj animation calls, input handling, archive loads, text rendering, and PAD_STACK use.",
+      "evidence_refs": [
+        "changed_files.jsonl: gm_19EF.c +634/-5",
+        "raw_diff: gm_19EF.c include additions and static data expansion",
+        "raw_diff: added fn_8019EFC4, fn_8019F1D0, fn_8019F2D4, fn_8019F6EC, fn_8019F810, fn_8019F9C4 excerpt",
+        "text_corpus.jsonl: bot report new matches/improvements for main/melee/gm/gm_19EF"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1601.c",
+      "role": "Signature adjusted for fn_80168F2C so new call site can pass an s8 argument; implementation names parameter ignored.",
+      "evidence_refs": [
+        "raw_diff: fn_80168F2C(void) changed to fn_80168F2C(s8 ignored)",
+        "raw_diff: gm_19EF.c calls fn_80168F2C(0)"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1601.h",
+      "role": "Header prototype updated to match recovered/used fn_80168F2C signature.",
+      "evidence_refs": [
+        "raw_diff: prototype changed from void fn_80168F2C(void) to void fn_80168F2C(s8)"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_19EF.h",
+      "role": "Changed header listed by metadata, but exact diff content was not present in loaded excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl: gm_19EF.h +1/-1"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "gm_19EF.c added many previously absent includes for related game-mode headers, item inlines, baselib controller/dobj/mobj/sislib, lb helpers, and toy headers.",
+      "evidence_refs": [
+        "raw_diff: gm_19EF.c include block"
+      ]
+    },
+    {
+      "text": "gm_19EF.c replaced placeholder comments for fn_8019F9C4 and gm_801A0A10_OnEnter area with substantial C code, including static helpers fn_8019EFC4, fn_8019F1D0, fn_8019F2D4, fn_8019F6EC, fn_8019F810 and a large fn_8019F9C4 implementation excerpt.",
+      "evidence_refs": [
+        "raw_diff: removed comments /// #fn_8019F9C4 and /// #gm_801A0A10_OnEnter",
+        "raw_diff: added function bodies in gm_19EF.c"
+      ]
+    },
+    {
+      "text": "Static globals and the lbl_80479A98 state struct were expanded from padding to typed fields such as HSD_Text*, HSD_GObj*, HSD_JObj* arrays, counters, flags, and frame/state values.",
+      "evidence_refs": [
+        "raw_diff: lbl_804D669C through lbl_804D66E8 additions",
+        "raw_diff: lbl_80479A98 struct field expansion"
+      ]
+    },
+    {
+      "text": "The new code uses natural loops for repeated JObj flag updates and JObj pointer collection rather than spelling out each repeated child/object operation.",
+      "evidence_refs": [
+        "raw_diff: for (i = 10; i > 0; i--) flag loops",
+        "raw_diff: for (i = 0; i < 10; i++) lbl_80479A98.x2C[i] = node loop"
+      ]
+    },
+    {
+      "text": "The new code uses a switch over gm_801A4310() to select MJ_CLASSIC, MJ_ADVENTURE, or MJ_ALLSTAR handling.",
+      "evidence_refs": [
+        "raw_diff: switch (gm_801A4310()) in fn_8019F9C4"
+      ]
+    },
+    {
+      "text": "fn_80168F2C was changed from no-argument to one s8 argument in both source and header, with the source parameter named ignored.",
+      "evidence_refs": [
+        "raw_diff: gm_1601.c signature change",
+        "raw_diff: gm_1601.h prototype change"
+      ]
+    },
+    {
+      "text": "Bot report records matched-code progress of +1252 bytes and matched-data progress of +120 bytes, with 5 new matches: fn_8019F810, fn_8019F6EC, gm_801A0A10_OnEnter, fn_8019F1D0, and .bss.",
+      "evidence_refs": [
+        "text_corpus.jsonl: decomp-dev[bot] report"
+      ]
+    },
+    {
+      "text": "Bot report records unmatched improvements for fn_8019F9C4, fn_8019F2D4, fn_8019EFC4, .data, .sbss, and .sdata2, plus one .sdata regression.",
+      "evidence_refs": [
+        "text_corpus.jsonl: decomp-dev[bot] report"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Updated the owning header and implementation together for fn_80168F2C instead of hiding the new argument behind a local declaration.",
+      "evidence_refs": [
+        "raw_diff: gm_1601.c and gm_1601.h both updated",
+        "decomp_standards: truthful-headers-and-includes"
+      ]
+    },
+    {
+      "text": "Used address-style labels and x-offset field names for unresolved globals/struct fields rather than inventing semantic names beyond what the diff proves.",
+      "evidence_refs": [
+        "raw_diff: lbl_804D66C8, lbl_80479A98.x0/x4/x8/etc.",
+        "decomp_standards: conservative-naming"
+      ]
+    },
+    {
+      "text": "Used loops and switch constructs in places where repeated object traversal/flag operations and mode dispatch are evident in the recovered source.",
+      "evidence_refs": [
+        "raw_diff: for loops over 10 JObjs",
+        "raw_diff: switch on gm_801A4310()",
+        "decomp_standards: natural-loops",
+        "decomp_standards: canonical-control-flow-and-macros"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a newly decompiled function reveals that an existing function is called with an argument, update the real source and header signature together; if the callee does not use the value, naming it ignored documents the current evidence without inventing behavior.",
+      "scope": [
+        "function signatures",
+        "headers",
+        "game-mode code"
+      ],
+      "evidence_refs": [
+        "raw_diff: fn_80168F2C(s8 ignored)",
+        "raw_diff: gm_1601.h prototype changed to fn_80168F2C(s8)",
+        "raw_diff: gm_19EF.c calls fn_80168F2C(0)"
+      ]
+    },
+    {
+      "lesson": "For partially understood static game-mode state, typed fields and address-style/x-offset names can improve code structure while preserving uncertainty about semantics.",
+      "scope": [
+        "static state structs",
+        "gm_19EF.c"
+      ],
+      "evidence_refs": [
+        "raw_diff: lbl_80479A98 padding replaced with typed x0/x4/x8 fields, HSD_Text*, HSD_GObj*, and HSD_JObj* fields",
+        "decomp_standards: conservative-naming",
+        "decomp_standards: typed-fields-over-pointer-math"
+      ]
+    },
+    {
+      "lesson": "Repeated child/JObj operations in UI or scene setup code are good candidates for natural counted loops when the source varies only by index or next pointer.",
+      "scope": [
+        "JObj traversal",
+        "animation setup",
+        "flag updates"
+      ],
+      "evidence_refs": [
+        "raw_diff: for (i = 0; i < 10; i++) stores node into lbl_80479A98.x2C",
+        "raw_diff: for (i = 10; i > 0; i--) sets or clears JObj flags",
+        "decomp_standards: natural-loops"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "Unresolved file statics and globals remained address-style, such as lbl_804D6698, lbl_804D66C8, and lbl_80479A98.",
+      "evidence_refs": [
+        "raw_diff: static declarations in gm_19EF.c"
+      ]
+    },
+    {
+      "text": "Partially understood struct fields used offset-like xNN names and explicit pad_NN fields rather than speculative semantic names.",
+      "evidence_refs": [
+        "raw_diff: lbl_80479A98.x0/x4/x8/xC/x10 and pad_01/pad_17/pad_21/pad_61/pad_74"
+      ]
+    },
+    {
+      "text": "The added unused parameter in fn_80168F2C was named ignored, marking the signature requirement without asserting a role for the argument.",
+      "evidence_refs": [
+        "raw_diff: void fn_80168F2C(s8 ignored)"
+      ]
+    },
+    {
+      "text": "Local object variables use short role names such as jobj, mobj, gobj, cobj, child, next, node, and trigger where the pointer role is clear.",
+      "evidence_refs": [
+        "raw_diff: local declarations in fn_8019F2D4, fn_8019F6EC, fn_8019F810, fn_8019F9C4"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "text": "PAD_STACK was used narrowly in fn_8019F810 and fn_8019F9C4.",
+      "evidence_refs": [
+        "raw_diff: PAD_STACK(16) in fn_8019F810",
+        "raw_diff: PAD_STACK(8) in fn_8019F9C4",
+        "decomp_standards: matching-tactics-need-evidence"
+      ],
+      "notes": "Bot report supports match/improvement progress for this PR, but loaded evidence does not isolate whether PAD_STACK was required for those specific functions."
+    },
+    {
+      "text": "GET_JOBJ(gobj) was used in fn_8019F6EC before HSD_JObjReqAnimAll/HSD_JObjAnimAll.",
+      "evidence_refs": [
+        "raw_diff: HSD_JObj* jobj = GET_JOBJ(gobj);",
+        "decomp_standards: header-inlines"
+      ],
+      "notes": "No review discussion is loaded explaining why GET_JOBJ was selected."
+    },
+    {
+      "text": "The code uses explicit HSD_JObjReqAnimAll/HSD_JObjAnimAll and HSD_MObjReqAnim/HSD_MObjAnim sequences to drive frame/state-dependent animation matching.",
+      "evidence_refs": [
+        "raw_diff: fn_8019F2D4 animation sequences",
+        "raw_diff: fn_8019F6EC animation sequence",
+        "raw_diff: fn_8019F810 animation sequence"
+      ]
+    },
+    {
+      "text": "A ternary expression clamps lbl_80479A98.x8 down toward lbl_80479A98.xC after calling fn_80168F2C(0).",
+      "evidence_refs": [
+        "raw_diff: lbl_80479A98.x8 = ((lbl_80479A98.x8 - lbl_80479A98.x10) < lbl_80479A98.xC) ? lbl_80479A98.xC : ..."
+      ]
+    },
+    {
+      "text": "The PR includes text-section matches and data-section movement together; bot report shows .bss matched and .data/.sbss/.sdata2 improvements, but also a .sdata regression.",
+      "evidence_refs": [
+        "text_corpus.jsonl: .bss new match",
+        "text_corpus.jsonl: .data/.sbss/.sdata2 improvements",
+        "text_corpus.jsonl: .sdata regression"
+      ],
+      "notes": "This is useful intake evidence for curator review, not proof that data changes are broadly safe."
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "author": "decomp-dev[bot]",
+      "text": "Report for GALE01 recorded matched code 62.24% (+0.03%, +1252 bytes) and matched data 37.89% (+0.01%, +120 bytes), with 5 new matches, 6 unmatched-item improvements, and 1 unmatched .sdata regression.",
+      "evidence_refs": [
+        "text_corpus.jsonl: issue_comment by decomp-dev[bot] at 2026-04-07T12:19:52Z"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2390",
+    "Jj/gm 19 ef",
+    "jurrejelle",
+    "gm_19EF",
+    "gm_1601",
+    "fn_8019F810",
+    "fn_8019F6EC",
+    "gm_801A0A10_OnEnter",
+    "fn_8019F1D0",
+    "fn_8019F9C4",
+    "fn_8019F2D4",
+    "fn_8019EFC4",
+    "fn_80168F2C",
+    "fn_80168F7C",
+    "lbl_80479A98",
+    "lbl_804D6698",
+    "lbl_804D66C8",
+    "lbl_804D66C0",
+    "lbl_804D66E0",
+    "GmGover.dat",
+    "GmGoCoin.dat",
+    "GmGoAnim.dat",
+    "GmRgStnd.dat",
+    "ScGamRegGover_scene_data",
+    "standScene",
+    "HSD_JObjReqAnimAll",
+    "HSD_JObjAnimAll",
+    "HSD_MObjReqAnim",
+    "HSD_MObjAnim",
+    "GET_JOBJ",
+    "PAD_STACK",
+    "HSD_PadCopyStatus",
+    "HSD_SisLib_803A7664",
+    "HSD_SisLib_803A6B98",
+    "lbArchive_80016DBC",
+    "lbArchive_LoadSymbols",
+    "lbAudioAx_80024030",
+    "lbAudioAx_80023F28",
+    "lbAudioAx_800237A8"
+  ],
+  "follow_up_queries": [
+    "gm_19EF PAD_STACK fn_8019F810 fn_8019F9C4",
+    "gm_19EF .sdata regression PR 2390",
+    "fn_80168F2C s8 ignored signature call sites",
+    "gm_19EF lbl_80479A98 struct field recovery",
+    "GmGover.dat GmGoCoin.dat GmGoAnim.dat ScGamRegGover_scene_data",
+    "gm_19EF GET_JOBJ fn_8019F6EC",
+    "gm_19EF fn_8019F9C4 97.19%",
+    "gm_19EF gm_801A0A10_OnEnter match"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR identity, merged state, changed files, counts",
+      "human_pr_text.md: body only says Tracking PR as usual",
+      "raw_diff: truncated but includes main changed hunk excerpt",
+      "changed_files.jsonl: complete changed-file list",
+      "text_corpus.jsonl: bot report with match/regression summary"
+    ],
+    "notes": [
+      "PR body has almost no explanation, and there are no human review comments in the loaded slice.",
+      "raw_diff is truncated, so exact tail changes in gm_19EF.c and the gm_19EF.h one-line change are not visible in loaded evidence.",
+      "Bot report gives useful match/regression evidence, but no loaded objdiff/build log beyond the automated summary.",
+      "No reviewer intent or rationale for PAD_STACK, GET_JOBJ, data-section changes, or the fn_80168F2C signature adjustment is available beyond the diff."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "lesson_candidate",
+        "title": "Update real headers when a decompiled call site proves a signature surface",
+        "text": "PR #2390 changed fn_80168F2C from void(void) to void(s8) in both gm_1601.c and gm_1601.h after gm_19EF.c introduced a call fn_80168F2C(0). The implementation names the parameter ignored, preserving uncertainty about its purpose.",
+        "scope": [
+          "headers",
+          "function signatures",
+          "game-mode decomp"
+        ],
+        "evidence_refs": [
+          "raw_diff: gm_1601.c signature change",
+          "raw_diff: gm_1601.h prototype change",
+          "raw_diff: gm_19EF.c call fn_80168F2C(0)"
+        ]
+      },
+      {
+        "record_type": "lesson_candidate",
+        "title": "Use typed offset fields for partially recovered static state without overnaming",
+        "text": "PR #2390 expanded lbl_80479A98 from padding into typed fields including HSD_Text*, HSD_GObj*, HSD_JObj* array entries, counters, and flags, while retaining xNN/pad_NN names where semantics were not proven.",
+        "scope": [
+          "static state recovery",
+          "conservative naming",
+          "gm_19EF.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: lbl_80479A98 struct expansion"
+        ]
+      },
+      {
+        "record_type": "lesson_candidate",
+        "title": "Natural loops fit repeated JObj array/flag work in scene setup code",
+        "text": "PR #2390 uses counted loops for collecting ten JObj nodes and for setting/clearing flags across lbl_80479A98.x2C entries, matching the natural repeated shape of the scene UI data.",
+        "scope": [
+          "loops",
+          "JObj traversal",
+          "scene setup"
+        ],
+        "evidence_refs": [
+          "raw_diff: for (i = 0; i < 10; i++) node collection",
+          "raw_diff: for (i = 10; i > 0; i--) JObj flag updates"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "gm_19EF.c contains Go/Gover scene code using GmGover/GmGo assets",
+        "text": "PR #2390 evidence shows src/melee/gm/gm_19EF.c loading assets such as GmGover.dat, GmGoCoin.dat, GmGoAnim.dat, and GmRgStnd.dat, and the pre-existing nearby comment says the file seems to handle \"Go!\" animations based on .dat filenames. Consider whether path facts should describe gm_19EF.c as game-mode Go/Gover scene/animation setup code.",
+        "source_path": "src/melee/gm/gm_19EF.c",
+        "scope": [
+          "game-mode",
+          "gm_19EF",
+          "asset-loading",
+          "scene setup"
+        ],
+        "evidence_refs": [
+          "raw_diff: comment says seems to handle Go animations based on .dat filenames",
+          "raw_diff: lbArchive_80016DBC(\"GmGover.dat\", ...)",
+          "raw_diff: lbArchive_80016DBC(\"GmGoCoin.dat\", ...)",
+          "raw_diff: lbArchive_LoadSymbols(\"GmGoAnim.dat\", ...)",
+          "raw_diff: lbArchive_LoadSymbols(\"GmRgStnd.dat\", ...)"
+        ],
+        "reason": "Path classification could improve search, but exact subsystem semantics should be curator-reviewed because PR body does not explain intent."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Unused recovered parameters may be named ignored when signature evidence exists but role does not",
+        "text": "PR #2390 changed fn_80168F2C to accept s8 ignored while the body does not use the parameter, and updated the header to match. Consider adding or cross-linking a naming/signature note that ignored is acceptable for a required but semantically unknown parameter when call/signature evidence exists.",
+        "source_path": null,
+        "scope": [
+          "function signatures",
+          "conservative naming",
+          "headers"
+        ],
+        "evidence_refs": [
+          "raw_diff: void fn_80168F2C(s8 ignored)",
+          "raw_diff: gm_1601.h fn_80168F2C(s8)"
+        ],
+        "reason": "This is a potential convention, not an accepted global standard from one PR alone."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Track data-section regressions when code-matching PRs also touch static layout",
+        "text": "PR #2390 gained code and data match progress but bot report also recorded one unmatched .sdata regression. Consider whether intake/curation should flag such cases for follow-up when text progress and data movement are mixed.",
+        "source_path": null,
+        "scope": [
+          "verification ledger",
+          "data sections",
+          "code matching"
+        ],
+        "evidence_refs": [
+          "text_corpus.jsonl: matched code +1252 bytes and matched data +120 bytes",
+          "text_corpus.jsonl: .sdata regression -2 bytes"
+        ],
+        "reason": "Loaded evidence supports the presence of the regression, but not whether it was accepted intentionally or later resolved."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer exact semantics for lbl_80479A98 fields from xNN names alone; the diff preserves uncertainty.",
+      "Do not claim gm_19EF.c was fully matched; bot report says fn_8019F9C4, fn_8019F2D4, and fn_8019EFC4 were still unmatched improvements, not full matches.",
+      "Do not claim PAD_STACK or GET_JOBJ were required tactics; loaded evidence shows they were used, but not the specific verifier rationale.",
+      "Do not infer human reviewer approval rationale; no human review comments are loaded."
+    ]
+  },
+  "confidence": 0.76,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

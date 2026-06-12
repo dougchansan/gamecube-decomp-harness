@@ -1,0 +1,17 @@
+{
+  "number": 2617,
+  "title": "Improvements to split up",
+  "state": "CLOSED",
+  "createdAt": "2026-06-08T14:10:20Z",
+  "updatedAt": "2026-06-08T14:33:26Z",
+  "mergedAt": null,
+  "closedAt": "2026-06-08T14:33:26Z",
+  "author": "fjooord",
+  "url": "https://github.com/doldecomp/melee/pull/2617",
+  "counts": {
+    "issue_comments": 3,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 148551
+  }
+}

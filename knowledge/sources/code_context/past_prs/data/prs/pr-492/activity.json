@@ -1,0 +1,10 @@
+{
+  "pr": 492,
+  "title": "Fix trailing newlines",
+  "url": "https://github.com/doldecomp/melee/pull/492",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 139,
+  "added_lines": 143,
+  "deleted_lines": 134
+}

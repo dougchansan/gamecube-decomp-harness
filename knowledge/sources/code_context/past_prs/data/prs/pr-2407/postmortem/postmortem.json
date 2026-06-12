@@ -1,0 +1,339 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2407",
+  "pr": {
+    "number": 2407,
+    "title": "Jj/ftafterimage",
+    "url": "https://github.com/doldecomp/melee/pull/2407",
+    "state": "MERGED",
+    "author": "jurrejelle",
+    "created_at": "2026-04-11T09:13:32Z",
+    "merged_at": "2026-04-13T20:44:32Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Implemented most of ftCo_800C2600 afterimage rendering and completed ftCo_800C2FD8 in src/melee/ft/ftafterimage.c, with supporting type refinements for sword afterimage parameters in Mars and item headers. Bot report recorded ftCo_800C2FD8 reaching 100% and ftCo_800C2600 improving to 88.71%; no human review comments were present in the loaded slice.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "type-recovery",
+      "rendering"
+    ],
+    "systems": [
+      "fighter",
+      "item",
+      "GX rendering",
+      "afterimage"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/ft/ftafterimage.c",
+      "role": "Main decompilation target; replaced NOT_IMPLEMENTED in ftCo_800C2600 with afterimage vertex generation, GX state setup, fighter/item parameter selection, vector math, and draw submission; also changed ftCo_800C2FD8 sword-item handling to a switch and HSD_ASSERTREPORT.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/ft/ftafterimage.c added 398 deleted 5 hunks 2",
+        "raw_diff: ftCo_800C2600 NOT_IMPLEMENTED replaced by full function body",
+        "raw_diff: ftCo_800C2FD8 if/else item-kind check replaced with switch and HSD_ASSERTREPORT",
+        "text_corpus issue_comment decomp-dev[bot]: ftCo_800C2600 0.22% to 88.71%; ftCo_800C2FD8 98.99% to 100.00%"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftMars/types.h",
+      "role": "Recovered fields in struct SwordAttrs from an opaque 0x14-byte pad into two f32 fields, color/alpha byte fields, and residual padding.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/ft/chara/ftMars/types.h added 12 deleted 1 hunks 1",
+        "raw_diff: SwordAttrs pad_x0[0x14] replaced by x0, x4, x8-x10, pad_x11[3]"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/types.h",
+      "role": "Refined struct itSword_UnkBytes so offsets +0 and +4 are f32 instead of individual u8 bytes, matching use as afterimage scale parameters.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/it/items/types.h added 2 deleted 8 hunks 1",
+        "raw_diff: itSword_UnkBytes x0/x4 changed from byte fields to f32 fields"
+      ]
+    }
+  ],
+  "what_changed": [
+    "ftCo_800C2600 was implemented with early exits for arg1 != 2 and insufficient afterimage history, GX blend/alpha/Z/TEV/channel/cull setup, afterimage parameter selection from sword items or Link/Mars fighter attributes, path-distance accumulation, interpolated vertex generation, optional angular subdivision using lbVector_CrossprodNormalized/lbVector_Angle/lbVector_RotateAboutUnitAxis, GX triangle-strip emission, and HSD_StateInvalidate(-1).",
+    "ftCo_800C2FD8 was adjusted so sword item handling uses switch (itGetKind(...)) with It_Kind_Sword and default HSD_ASSERTREPORT(0x16D, 0, \"no afterimage item!\\n\") instead of OSReport plus raw __assert.",
+    "Sword-related afterimage parameter types were refined: Mars SwordAttrs now exposes f32 x0, f32 x4, byte fields x8 through x10, and padding at x11; itSword_UnkBytes now exposes f32 x0 and f32 x4 before byte fields at x8 and beyond.",
+    "The file gained includes for GX, MTX, baselib debug/cobj/state, Link and Mars types, lbvector, math_ppc, plus a local AfterimageVtx struct and AFTERIMAGE_ANGLE_STEP constant.",
+    "The bot report recorded one new match, ftCo_800C2FD8 at 100.00%, and two improvements: ftCo_800C2600 to 88.71% and .sdata2 to 87.50%."
+  ],
+  "smart_moves": [
+    "Recovered a small local vertex struct, AfterimageVtx, to express packed position and RGBA data used for GX emission instead of leaving raw buffer arithmetic.",
+    "Moved sword afterimage parameter accesses onto typed struct fields at offsets x0, x4, and x8-x10, supporting the implementation without raw byte offsets for those fields.",
+    "Used existing library/vector helpers and GX APIs directly, making the afterimage pipeline readable: lbVector_* helpers for interpolation and GX* calls for render-state and vertex submission.",
+    "Converted a raw OSReport plus __assert sequence in ftCo_800C2FD8 to HSD_ASSERTREPORT, consistent with the loaded assert/report macro standard when message/report behavior is represented."
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a rendering function consumes structured parameter blobs, recovering just the fields proven by use can unlock readable code while leaving unknown tails or gaps as padding/address-style fields.",
+      "evidence_refs": [
+        "raw_diff: itSword_UnkBytes x0/x4 changed to f32 and x8-x10 remain byte fields",
+        "raw_diff: SwordAttrs pad_x0[0x14] split into f32 and u8 fields with pad_x11[3]",
+        "raw_diff: ftCo_800C2600 uses params->x0, x4, x8, x9, xA, xB, xC, xE, xF, x10"
+      ],
+      "standard_refs": [
+        "typed-fields-over-pointer-math",
+        "conservative-naming"
+      ]
+    },
+    {
+      "lesson": "For partially matched graphics code, a local vertex struct can clarify GXPosition/GXColor submission and intermediate vertex-buffer construction without inventing high-level semantic names for every unknown parameter.",
+      "evidence_refs": [
+        "raw_diff: typedef struct AfterimageVtx { f32 x,y,z; u8 r,g,b,a; }",
+        "raw_diff: vtx_buf[152] populated then emitted via GXPosition3f32 and GXColor4u8"
+      ],
+      "standard_refs": [
+        "infer-authored-source-style",
+        "conservative-naming"
+      ]
+    },
+    {
+      "lesson": "Assert/report cleanup can be part of a matching change when the macro preserves the file-line/message behavior visible in generated code.",
+      "evidence_refs": [
+        "raw_diff: OSReport(\"no afterimage item!\\n\") and __assert(\"ftafterimage.c\", 0x16D, \"0\") replaced by HSD_ASSERTREPORT(0x16D, 0, \"no afterimage item!\\n\")"
+      ],
+      "standard_refs": [
+        "assert-report-macros"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "AfterimageVtx",
+      "kind": "local typedef",
+      "evidence": "Introduced in ftafterimage.c for position plus RGBA vertices used by afterimage GX drawing.",
+      "evidence_refs": [
+        "raw_diff: typedef struct AfterimageVtx"
+      ]
+    },
+    {
+      "name": "AFTERIMAGE_ANGLE_STEP",
+      "kind": "macro constant",
+      "evidence": "Introduced for the angle subdivision divisor 0.0872664600610733f in ftCo_800C2600.",
+      "evidence_refs": [
+        "raw_diff: #define AFTERIMAGE_ANGLE_STEP 0.0872664600610733f",
+        "raw_diff: angle / AFTERIMAGE_ANGLE_STEP"
+      ]
+    },
+    {
+      "name": "x0, x4, x8-x10",
+      "kind": "address-style recovered fields",
+      "evidence": "The PR preserves offset-style names for recovered but still semantically unnamed fields in SwordAttrs and itSword_UnkBytes.",
+      "evidence_refs": [
+        "raw_diff: struct SwordAttrs field additions",
+        "raw_diff: struct itSword_UnkBytes field changes"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Use nested scopes and tightly controlled local declarations to shape lifetimes in a large MWCC-matched function.",
+      "evidence_refs": [
+        "raw_diff: ftCo_800C2600 has multiple nested blocks introducing ringIdx, totalDist, curIdx2, distPtr, vp, and subdivision locals"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "tactic": "Express cyclic ring-buffer traversal explicitly with index wrap from 0 to 2 while iterating afterimage history.",
+      "evidence_refs": [
+        "raw_diff: repeated curIdx/curIdx2 handling chooses idx - 1 or 2, and nextRingIdx wraps to 2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "tactic": "Retain an unrolled-by-4 GX vertex emission loop with a remainder label/goto shape where the diff shows this was the chosen matching form.",
+      "evidence_refs": [
+        "raw_diff: GX emission loop uses n4 = count >> 2, p[0]..p[3], count &= 3, goto remainder"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "tactic": "Switch form can replace an if/default item-kind check when it matches and leaves room for item-kind dispatch.",
+      "evidence_refs": [
+        "raw_diff: ftCo_800C2FD8 changed from if (itGetKind == It_Kind_Sword) else to switch with default"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "author": "decomp-dev[bot]",
+      "summary": "GALE01 report showed matched code +0.01% (+436 bytes), one new match ftCo_800C2FD8 at 100.00%, ftCo_800C2600 improved to 88.71%, and .sdata2 improved to 87.50%.",
+      "evidence_refs": [
+        "text_corpus issue_comment 2026-04-11T09:18:18Z"
+      ]
+    },
+    {
+      "kind": "human_review",
+      "author": null,
+      "summary": "No human review comments or review records were present in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata_json counts.review_comments=0",
+        "metadata_json counts.reviews=0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2407",
+    "Jj/ftafterimage",
+    "jurrejelle",
+    "ftafterimage",
+    "ftCo_800C2600",
+    "ftCo_800C2FD8",
+    "AfterimageVtx",
+    "AFTERIMAGE_ANGLE_STEP",
+    "itSword_UnkBytes",
+    "SwordAttrs",
+    "MarsAttributes",
+    "ftLk_DatAttrs",
+    "x2100",
+    "x2101_bits_8",
+    "x2101_bits_0to6",
+    "x20B0",
+    "x20F8",
+    "x20FC",
+    "It_Kind_Sword",
+    "it_80285300",
+    "it_802852B8",
+    "it_80285314",
+    "HSD_ASSERTREPORT",
+    "GX_TRIANGLESTRIP",
+    "GXPosition3f32",
+    "GXColor4u8",
+    "lbVector_CrossprodNormalized",
+    "lbVector_Angle",
+    "lbVector_RotateAboutUnitAxis"
+  ],
+  "follow_up_queries": [
+    "ftCo_800C2600 afterimage 88.71% remaining mismatch",
+    "AfterimageVtx ftafterimage GX_TRIANGLESTRIP",
+    "itSword_UnkBytes x0 x4 f32 afterimage params",
+    "SwordAttrs x0 x4 x8 x10 MarsAttributes x78",
+    "ftafterimage HSD_ASSERTREPORT no afterimage item",
+    "GX vertex emission unrolled remainder goto MWCC"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json for PR identity, state, changed files, counts",
+      "raw_diff full diff for code and header changes",
+      "changed_files.jsonl for file list and line counts",
+      "text_corpus.jsonl for PR body and bot report"
+    ],
+    "notes": [
+      "The loaded diff is complete and supports changed-file and code-change extraction.",
+      "The PR body is empty and there are no human review comments, so reviewer intent and rationale are not available.",
+      "Bot report supports specific matching/improvement numbers for ftCo_800C2FD8, ftCo_800C2600, and .sdata2, but no local build command, objdiff invocation, or final regression ledger is included beyond that report.",
+      "Type field meanings remain mostly address-style; the PR evidence supports offsets and primitive types, not semantic names for each parameter.",
+      "The implementation contains matching-shaped control flow such as nested scopes and a goto remainder; evidence supports that these were present in the merged diff, but not that all alternatives were tested."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "pr_lesson_candidate",
+        "title": "Typed afterimage parameter fields enabled readable ftafterimage code",
+        "text": "PR 2407 recovered sword afterimage parameter blobs enough to use f32 fields at +0/+4 and byte color/alpha fields at +8 and beyond in ftCo_800C2600, replacing opaque padding while keeping conservative offset-style field names.",
+        "scope": [
+          "src/melee/ft/ftafterimage.c",
+          "src/melee/ft/chara/ftMars/types.h",
+          "src/melee/it/items/types.h"
+        ],
+        "evidence_refs": [
+          "raw_diff: SwordAttrs pad split",
+          "raw_diff: itSword_UnkBytes x0/x4 f32",
+          "raw_diff: ftCo_800C2600 params field use"
+        ]
+      },
+      {
+        "record_type": "pr_lesson_candidate",
+        "title": "Assert/report macro cleanup coincided with ftafterimage match",
+        "text": "In ftCo_800C2FD8, a raw OSReport plus __assert path for a missing afterimage item was replaced by HSD_ASSERTREPORT with the same line number and message context, and the bot report marked ftCo_800C2FD8 as 100.00%.",
+        "scope": [
+          "src/melee/ft/ftafterimage.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: ftCo_800C2FD8 assert/report replacement",
+          "text_corpus issue_comment: ftCo_800C2FD8 98.99% to 100.00%"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "ftafterimage.c owns afterimage rendering implementation work for ftCo_800C2600 and ftCo_800C2FD8",
+        "text": "PR 2407 changed src/melee/ft/ftafterimage.c, implementing ftCo_800C2600 afterimage rendering logic and completing ftCo_800C2FD8 according to the bot report.",
+        "source_path": "src/melee/ft/ftafterimage.c",
+        "scope": [
+          "fighter",
+          "afterimage",
+          "GX rendering"
+        ],
+        "evidence_refs": [
+          "changed_files.jsonl: src/melee/ft/ftafterimage.c",
+          "raw_diff: ftCo_800C2600 implementation",
+          "text_corpus issue_comment: ftCo_800C2FD8 100.00%, ftCo_800C2600 88.71%"
+        ],
+        "reason": "Potential path fact for future workers looking for fighter afterimage rendering and matching history."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "Sword afterimage parameter fields appear in Mars and item type headers",
+        "text": "PR 2407 refined struct SwordAttrs in src/melee/ft/chara/ftMars/types.h and struct itSword_UnkBytes in src/melee/it/items/types.h with f32 fields at +0/+4 and byte fields at later offsets used by ftCo_800C2600.",
+        "source_path": null,
+        "scope": [
+          "src/melee/ft/chara/ftMars/types.h",
+          "src/melee/it/items/types.h",
+          "afterimage params",
+          "type recovery"
+        ],
+        "evidence_refs": [
+          "raw_diff: SwordAttrs field additions",
+          "raw_diff: itSword_UnkBytes field changes",
+          "raw_diff: ftCo_800C2600 casts Link/Mars attrs to itSword_UnkBytes"
+        ],
+        "reason": "Could help future type-recovery work, but should be curated as source/path knowledge rather than treated as a global decomp standard."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Consider documenting assert/report macro cleanup with match evidence",
+        "text": "This PR provides another example where OSReport plus raw __assert was represented as HSD_ASSERTREPORT while preserving the missing-afterimage-item message and line number and producing a bot-reported 100% function match for ftCo_800C2FD8.",
+        "source_path": "src/melee/ft/ftafterimage.c",
+        "scope": [
+          "assert-report cleanup",
+          "HSD_ASSERTREPORT"
+        ],
+        "evidence_refs": [
+          "raw_diff: ftCo_800C2FD8 HSD_ASSERTREPORT replacement",
+          "text_corpus issue_comment: ftCo_800C2FD8 new match"
+        ],
+        "reason": "Existing assert-report-macros standard already covers this; curator may use as an example rather than a new rule."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer semantic names for SwordAttrs or itSword_UnkBytes fields beyond the address-style names shown; the PR does not prove meanings such as inner radius, outer radius, or color role names.",
+      "Do not claim ftCo_800C2600 fully matched; the bot report only shows improvement to 88.71%.",
+      "Do not infer human reviewer approval rationale; no human review comments were loaded.",
+      "Do not promote the unrolled GX emission loop with goto remainder as a general preferred style; it is only evidenced as the shape used in this PR."
+    ]
+  },
+  "confidence": 0.83,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

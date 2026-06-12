@@ -1,0 +1,17 @@
+{
+  "number": 1673,
+  "title": "Minor changes",
+  "state": "MERGED",
+  "createdAt": "2025-07-09T15:30:19Z",
+  "updatedAt": "2025-07-10T03:31:45Z",
+  "mergedAt": "2025-07-10T03:31:44Z",
+  "closedAt": "2025-07-10T03:31:45Z",
+  "author": "AaronB-Hub",
+  "url": "https://github.com/doldecomp/melee/pull/1673",
+  "counts": {
+    "issue_comments": 3,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 11840
+  }
+}

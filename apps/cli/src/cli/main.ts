@@ -2,6 +2,7 @@ import { parse } from "./args.js";
 import {
   babysit,
   checkpointRun,
+  epochRun,
   initRun,
   kgFileCard,
   kgCurate,
@@ -13,10 +14,13 @@ import {
   kgSmoke,
   kgSources,
   kgStatus,
+  prPreshipReview,
   prSplitPlan,
+  reconcile,
   recoverLeases,
   regressionCheck,
   reportRun,
+  savePoint,
   status,
   tick,
   triggerAgent,
@@ -37,9 +41,13 @@ export async function main(argv = process.argv.slice(2)): Promise<void> {
   else if (command === "babysit") await babysit(globals, args);
   else if (command === "checkpoint-run") await checkpointRun(globals, args);
   else if (command === "recover-leases") await recoverLeases(globals, args);
+  else if (command === "epoch-run") await epochRun(globals, args);
   else if (command === "report-run") await reportRun(globals, args);
+  else if (command === "save-point") await savePoint(globals, args);
   else if (command === "regression-check") await regressionCheck(globals, args);
+  else if (command === "reconcile") await reconcile(globals, args);
   else if (command === "pr-split-plan") await prSplitPlan(globals, args);
+  else if (command === "pr-preship-review") await prPreshipReview(globals, args);
   else if (command === "kg-sources") await kgSources();
   else if (command === "kg-status") await kgStatus(globals, args);
   else if (command === "kg-import-agent-state") await kgImportAgentState(args);

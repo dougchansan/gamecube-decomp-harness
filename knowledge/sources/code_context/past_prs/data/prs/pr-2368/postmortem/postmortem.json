@@ -1,0 +1,348 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2368",
+  "pr": {
+    "number": 2368,
+    "title": "Match spline",
+    "url": "https://github.com/doldecomp/melee/pull/2368",
+    "state": "CLOSED",
+    "author": "mchen91",
+    "created_at": "2026-03-29T19:18:31Z",
+    "merged_at": null
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2368 attempted to match sysdolphin/baselib/spline.c by changing spline helper storage classes, adding a small arc-length dx helper, adjusting local variable shape in splArcLengthGetParameter, changing related .sdata2 symbol labels, removing one now-static header prototype, and marking spline.c as Matching in configure.py. The bot report claimed splArcLengthGetParameter and spline .sdata2 reached 100%, but the PR body and review discussion are absent and the PR is closed with no merged_at timestamp.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "symbol-metadata",
+      "build-config"
+    ],
+    "systems": [
+      "sysdolphin/baselib",
+      "config/GALE01",
+      "repo-config"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/sysdolphin/baselib/spline.c",
+      "role": "Main decomp source change: helper linkage/inline adjustments, new spl_GetArcLengthDx helper, and local/control-expression reshaping in splArcLengthGetParameter.",
+      "evidence_refs": [
+        "raw_diff:spline.c",
+        "changed_files:src/sysdolphin/baselib/spline.c"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/spline.h",
+      "role": "Header cleanup: removed splGetBSplinePoint prototype after the function was made static in spline.c.",
+      "evidence_refs": [
+        "raw_diff:spline.h",
+        "changed_files:src/sysdolphin/baselib/spline.h"
+      ]
+    },
+    {
+      "path": "configure.py",
+      "role": "Build configuration change: changed sysdolphin/baselib/spline.c from NonMatching to Matching.",
+      "evidence_refs": [
+        "raw_diff:configure.py",
+        "changed_files:configure.py"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Symbol metadata change: renamed spline .sdata2 float/double symbols from HSD_Spline_804DE620-style globals to @number labels at the same addresses.",
+      "evidence_refs": [
+        "raw_diff:symbols.txt",
+        "changed_files:config/GALE01/symbols.txt"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Marked Object(Matching, \"sysdolphin/baselib/spline.c\") in configure.py, replacing Object(NonMatching, ...).",
+      "evidence_refs": [
+        "raw_diff:configure.py"
+      ]
+    },
+    {
+      "text": "Changed splGetCardinalPoint and splGetBezierPoint from plain void functions to inline void functions.",
+      "evidence_refs": [
+        "raw_diff:spline.c"
+      ]
+    },
+    {
+      "text": "Changed splGetBSplinePoint to static void and removed its public prototype from spline.h.",
+      "evidence_refs": [
+        "raw_diff:spline.c",
+        "raw_diff:spline.h"
+      ]
+    },
+    {
+      "text": "Changed splArcLengthPolynomial from inline f32 to static f32.",
+      "evidence_refs": [
+        "raw_diff:spline.c"
+      ]
+    },
+    {
+      "text": "Added static f32 spl_GetArcLengthDx(f32 start, f32 midpoint), returning (midpoint - start) / 8.0F.",
+      "evidence_refs": [
+        "raw_diff:spline.c"
+      ]
+    },
+    {
+      "text": "In splArcLengthGetParameter, moved result declaration after start/end, replaced const midpoint with result, split dx and middle declarations from initializers, and used spl_GetArcLengthDx for dx calculation.",
+      "evidence_refs": [
+        "raw_diff:spline.c"
+      ]
+    },
+    {
+      "text": "Changed twelve .sdata2 labels at 0x804DE620 through 0x804DE654 from HSD_Spline_804DE620-style names to @13, @14, @15, @17, @18, @19, @80, @82, @91, @101, @178, and @179.",
+      "evidence_refs": [
+        "raw_diff:symbols.txt"
+      ]
+    },
+    {
+      "text": "Bot report claimed +912 matched-code bytes, +2268 linked-code bytes, +56 matched-data bytes, and two new matches: splArcLengthGetParameter and main/sysdolphin/baselib/spline .sdata2.",
+      "evidence_refs": [
+        "text_corpus:issue_comment:decomp-dev[bot]:2026-03-29T19:24:39Z"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Kept header surface consistent with function linkage by removing splGetBSplinePoint from spline.h when the function became static.",
+      "evidence_refs": [
+        "raw_diff:spline.c",
+        "raw_diff:spline.h"
+      ]
+    },
+    {
+      "text": "Used a narrow helper, spl_GetArcLengthDx, for one repeated arithmetic expression instead of broad rewrites across spline.c.",
+      "evidence_refs": [
+        "raw_diff:spline.c"
+      ]
+    },
+    {
+      "text": "Limited source edits to spline.c/spline.h while pairing the claimed match with configure.py and symbols.txt metadata updates.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For a nearly matched function, storage-class and inline decisions on nearby helpers can be part of the matching surface; synchronize headers when a helper becomes file-local.",
+      "scope": [
+        "src/sysdolphin/baselib/spline.c",
+        "src/sysdolphin/baselib/spline.h"
+      ],
+      "evidence_refs": [
+        "raw_diff:spline.c",
+        "raw_diff:spline.h"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "Small expression extraction and local declaration reshaping can affect MWCC output for numeric search/integration code; in this PR, extracting dx calculation and reusing result replaced a const midpoint local in splArcLengthGetParameter.",
+      "scope": [
+        "splArcLengthGetParameter",
+        "spl_GetArcLengthDx"
+      ],
+      "evidence_refs": [
+        "raw_diff:spline.c",
+        "text_corpus:issue_comment:decomp-dev[bot]:2026-03-29T19:24:39Z"
+      ],
+      "confidence": 0.72
+    },
+    {
+      "lesson": "When symbol metadata for anonymous float/double constants is part of a match, labels may need to reflect local @number constants rather than speculative semantic HSD_Spline_ address names; verify section ownership before promoting such renames.",
+      "scope": [
+        "config/GALE01/symbols.txt",
+        ".sdata2",
+        "sysdolphin/baselib/spline"
+      ],
+      "evidence_refs": [
+        "raw_diff:symbols.txt",
+        "text_corpus:issue_comment:decomp-dev[bot]:2026-03-29T19:24:39Z"
+      ],
+      "confidence": 0.68
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "This diff used numeric @ labels for spline .sdata2 constants at fixed addresses instead of HSD_Spline_804DE620-style semantic/address names.",
+      "evidence_refs": [
+        "raw_diff:symbols.txt"
+      ]
+    },
+    {
+      "text": "The added helper name spl_GetArcLengthDx follows the existing spline-local spl_ prefix style visible near spl_IterateSimpsonsMiddle and spl_GetCoeffs references in the diff.",
+      "evidence_refs": [
+        "raw_diff:spline.c"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Toggle helper linkage/inline qualifiers to influence emitted code: inline for splGetCardinalPoint and splGetBezierPoint, static for splGetBSplinePoint and splArcLengthPolynomial.",
+      "evidence_refs": [
+        "raw_diff:spline.c"
+      ]
+    },
+    {
+      "tactic": "Introduce a tiny static helper for dx calculation to alter call/expression shape around Simpson integration code.",
+      "evidence_refs": [
+        "raw_diff:spline.c"
+      ]
+    },
+    {
+      "tactic": "Adjust local declaration order and const-ness in splArcLengthGetParameter, including replacing midpoint with result and delaying dx/middle initialization.",
+      "evidence_refs": [
+        "raw_diff:spline.c"
+      ]
+    },
+    {
+      "tactic": "Update .sdata2 symbol labels alongside code matching work; bot report tied spline .sdata2 to a new 100% match.",
+      "evidence_refs": [
+        "raw_diff:symbols.txt",
+        "text_corpus:issue_comment:decomp-dev[bot]:2026-03-29T19:24:39Z"
+      ]
+    }
+  ],
+  "review_feedback": [],
+  "searchable_terms": [
+    "PR2368",
+    "Match spline",
+    "mchen91",
+    "sysdolphin/baselib/spline.c",
+    "spline.h",
+    "configure.py",
+    "symbols.txt",
+    "splArcLengthGetParameter",
+    "spl_GetArcLengthDx",
+    "splArcLengthPolynomial",
+    "spl_IterateSimpsonsMiddle",
+    "spl_GetCoeffs",
+    "splGetCardinalPoint",
+    "splGetBSplinePoint",
+    "splGetBezierPoint",
+    "HSD_Spline",
+    ".sdata2",
+    "804DE620",
+    "804DE654",
+    "Object(Matching)",
+    "NonMatching"
+  ],
+  "follow_up_queries": [
+    "PR 2368 splArcLengthGetParameter spl_GetArcLengthDx",
+    "sysdolphin baselib spline.c Matching configure.py",
+    "HSD_Spline_804DE620 @13 symbols.txt sdata2",
+    "splGetBSplinePoint static header prototype removed",
+    "spline .sdata2 100.00% bot report"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json",
+      "raw_diff",
+      "changed_files.jsonl",
+      "text_corpus:issue_comment:decomp-dev[bot]:2026-03-29T19:24:39Z"
+    ],
+    "notes": [
+      "Diff evidence is complete and directly supports changed files and code/symbol edits.",
+      "PR body is empty and there are no review comments or reviews in the loaded slice.",
+      "Bot report provides verification-like evidence for new matches, but no local build log, objdiff output, reviewer acceptance, or merge record is present.",
+      "PR state is CLOSED with merged_at null, so intake must not treat the configure.py Matching status or symbol-label changes as accepted current-source facts."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "type": "decomp_lesson_candidate",
+        "title": "File-local helper changes should be reflected in headers",
+        "text": "PR 2368 made splGetBSplinePoint static in spline.c and removed its prototype from spline.h, showing a narrow header cleanup paired with recovered file-local linkage.",
+        "scope": [
+          "headers",
+          "static helpers",
+          "sysdolphin/baselib"
+        ],
+        "evidence_refs": [
+          "raw_diff:spline.c",
+          "raw_diff:spline.h"
+        ],
+        "confidence": 0.8
+      },
+      {
+        "type": "matching_tactic_candidate",
+        "title": "Tiny helper extraction and local-shape edits for MWCC numeric code",
+        "text": "In splArcLengthGetParameter, this PR replaced a const midpoint local with result, split dx/middle declarations, and introduced spl_GetArcLengthDx; the bot report then claimed splArcLengthGetParameter reached 100%. Treat as a tactic candidate requiring objdiff-level corroboration before generalization.",
+        "scope": [
+          "splArcLengthGetParameter",
+          "numeric integration",
+          "MWCC local shape"
+        ],
+        "evidence_refs": [
+          "raw_diff:spline.c",
+          "text_corpus:issue_comment:decomp-dev[bot]:2026-03-29T19:24:39Z"
+        ],
+        "confidence": 0.7
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "Verify whether sysdolphin/baselib/spline.c became Matching",
+        "text": "The PR diff changes configure.py from Object(NonMatching, \"sysdolphin/baselib/spline.c\") to Object(Matching, \"sysdolphin/baselib/spline.c\"), and the bot report claims splArcLengthGetParameter and spline .sdata2 reached 100%. Because the PR is closed with merged_at null, curator should verify current source before recording this as a path fact.",
+        "source_path": "configure.py",
+        "scope": [
+          "sysdolphin/baselib/spline.c",
+          "MatchingFor",
+          "GALE01"
+        ],
+        "evidence_refs": [
+          "raw_diff:configure.py",
+          "text_corpus:issue_comment:decomp-dev[bot]:2026-03-29T19:24:39Z",
+          "metadata_json:pr.merged_at"
+        ],
+        "reason": "Potential path status update is directly visible in the diff, but merge/acceptance is not established."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "Verify spline .sdata2 symbol-label ownership",
+        "text": "The PR replaced HSD_Spline_804DE620-style global names with @number labels for twelve .sdata2 constants from 0x804DE620 to 0x804DE654, and the bot report claims spline .sdata2 reached 100%. Curator should verify current symbols and section ownership before recording these labels as accepted metadata.",
+        "source_path": "config/GALE01/symbols.txt",
+        "scope": [
+          ".sdata2",
+          "sysdolphin/baselib/spline",
+          "HSD_Spline constants"
+        ],
+        "evidence_refs": [
+          "raw_diff:symbols.txt",
+          "text_corpus:issue_comment:decomp-dev[bot]:2026-03-29T19:24:39Z"
+        ],
+        "reason": "Symbol metadata changed as part of a closed, apparently unmerged PR; source verification is needed."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer reviewer approval or merge acceptance; no reviews are loaded and merged_at is null.",
+      "Do not promote the bot report alone into a global standard that helper extraction or inline/static changes are generally preferred.",
+      "Do not treat the @number .sdata2 labels as current canonical names without checking current symbols.txt."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

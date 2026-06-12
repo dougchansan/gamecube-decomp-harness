@@ -1,0 +1,17 @@
+{
+  "number": 1077,
+  "title": "Rename pl_0371 to plstale",
+  "state": "MERGED",
+  "createdAt": "2024-01-18T01:47:16Z",
+  "updatedAt": "2024-01-18T02:13:41Z",
+  "mergedAt": "2024-01-18T01:57:41Z",
+  "closedAt": "2024-01-18T01:57:41Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/1077",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 587
+  }
+}

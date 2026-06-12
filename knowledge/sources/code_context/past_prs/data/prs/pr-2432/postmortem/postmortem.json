@@ -1,0 +1,498 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2432",
+  "pr": {
+    "number": 2432,
+    "title": "All item TUs >90% matching",
+    "url": "https://github.com/doldecomp/melee/pull/2432",
+    "state": "MERGED",
+    "author": "lukechampine",
+    "created_at": "2026-04-25T18:22:26Z",
+    "merged_at": "2026-04-27T20:51:22Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Large item-system matching PR touching 28 files. It converted several item object files from NonMatching to Matching in configure.py, made extensive item C/source cleanup and header/type updates, and adjusted symbol metadata for local/global data, sdata, and sdata2 objects. The bot report records +0.31% matched code, 43 new matches, 30 unmatched-item improvements, and one small unmatched .data regression in main/melee/it/it_2725.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "type-recovery",
+      "symbol-metadata",
+      "configuration"
+    ],
+    "systems": [
+      "item",
+      "fighter",
+      "config",
+      "repo-root"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "configure.py",
+      "role": "Marked item objects as Matching, including itsamuschargeshot, itgamewatchchef, itkamex, itunknown, ithouou, and itwhitebea.",
+      "evidence_refs": [
+        "diff_excerpt:configure.py MatchingFor NonMatching->Matching hunks",
+        "changed_files.jsonl:configure.py"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Adjusted item-area data/sdata/sdata2 symbol scope, local labels, and sizes, including multiple global address-style symbols converted to local @ labels.",
+      "evidence_refs": [
+        "diff_excerpt:config/GALE01/symbols.txt",
+        "changed_files.jsonl:config/GALE01/symbols.txt"
+      ]
+    },
+    {
+      "path": "src/melee/it/it_2725.c",
+      "role": "Largest source matching target; bot report lists many new matches and improvements in main/melee/it/it_2725, plus one small .data regression.",
+      "evidence_refs": [
+        "changed_files.jsonl:src/melee/it/it_2725.c 642 added 991 deleted",
+        "text_corpus:decomp-dev bot report new matches and improvements for main/melee/it/it_2725"
+      ]
+    },
+    {
+      "path": "src/melee/it/itcoll.c",
+      "role": "Large item collision matching update; bot report lists multiple itcoll functions and .data reaching or improving toward 100%.",
+      "evidence_refs": [
+        "changed_files.jsonl:src/melee/it/itcoll.c 311 added 494 deleted",
+        "text_corpus:decomp-dev bot report itcoll entries"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itlinkboomerang.c",
+      "role": "Item source matching work with improved functions and data/sdata2 entries.",
+      "evidence_refs": [
+        "changed_files.jsonl:src/melee/it/items/itlinkboomerang.c",
+        "text_corpus:decomp-dev bot report itlinkboomerang entries"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itsamuschargeshot.c",
+      "role": "Item source matching work; configure.py promoted the object to Matching and bot report shows function and .data matches.",
+      "evidence_refs": [
+        "diff_excerpt:configure.py itsamuschargeshot NonMatching->Matching",
+        "text_corpus:decomp-dev bot report itsamuschargeshot entries"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itwhitebea.c",
+      "role": "Item source matching work; configure.py promoted the object to Matching and bot report shows several new matches.",
+      "evidence_refs": [
+        "diff_excerpt:configure.py itwhitebea NonMatching->Matching",
+        "text_corpus:decomp-dev bot report itwhitebea entries"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itunknown.c",
+      "role": "Item source matching work; configure.py promoted the object to Matching and headers gained union-typed item vars/attributes.",
+      "evidence_refs": [
+        "diff_excerpt:configure.py itunknown NonMatching->Matching",
+        "raw_diff:src/melee/it/itCommonItems.h itUnknown_ItemVars and itUnknownAttributes union fields"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itsscope.c",
+      "role": "Item source matching work with bot-reported function and .data progress.",
+      "evidence_refs": [
+        "changed_files.jsonl:src/melee/it/items/itsscope.c",
+        "text_corpus:decomp-dev bot report itsscope entries"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/ithouou.c",
+      "role": "Item source matching work; configure.py promoted the object to Matching and common item header gained itHouou_ItemVars.",
+      "evidence_refs": [
+        "diff_excerpt:configure.py ithouou NonMatching->Matching",
+        "raw_diff:src/melee/it/itCommonItems.h itHouou_ItemVars"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itkamex.c",
+      "role": "Item source matching work; configure.py promoted the object to Matching and common item attributes were retuned.",
+      "evidence_refs": [
+        "diff_excerpt:configure.py itkamex NonMatching->Matching",
+        "raw_diff:src/melee/it/itCommonItems.h itKamexAttributes"
+      ]
+    },
+    {
+      "path": "src/melee/it/types.h",
+      "role": "Item type definitions changed in support of source matching.",
+      "evidence_refs": [
+        "changed_files.jsonl:src/melee/it/types.h"
+      ]
+    },
+    {
+      "path": "src/melee/it/itCommonItems.h",
+      "role": "Recovered or refined item variable and attribute types, including Houou, Kamex, WhiteBea, Oldottosea, and Unknown fields.",
+      "evidence_refs": [
+        "raw_diff:src/melee/it/itCommonItems.h"
+      ]
+    },
+    {
+      "path": "src/melee/it/itCharItems.h",
+      "role": "Refined Link boomerang item vars and attributes, replacing padding and generic numeric fields with arrays, integer fields, and animation pointer fields.",
+      "evidence_refs": [
+        "raw_diff:src/melee/it/itCharItems.h"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_DownAttack.c",
+      "role": "Fighter-side signature/type update from HSD_ObjAllocUnk2 to Item_FtTrack and field rename to x150_count.",
+      "evidence_refs": [
+        "diff_excerpt:ftCo_DownAttack.c Item_FtTrack and x150_count"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_DownAttack.h",
+      "role": "Header prototype updated to match recovered Item_FtTrack signature.",
+      "evidence_refs": [
+        "diff_excerpt:ftCo_DownAttack.h Item_FtTrack prototype"
+      ]
+    },
+    {
+      "path": "src/melee/it/forward.h",
+      "role": "Forward declaration renamed from HSD_ObjAllocUnk2 to Item_FtTrack.",
+      "evidence_refs": [
+        "raw_diff:src/melee/it/forward.h"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftLink/ftLk_SpecialS.c",
+      "role": "Small fighter callsite/source adjustment connected to item matching work.",
+      "evidence_refs": [
+        "changed_files.jsonl:src/melee/ft/chara/ftLink/ftLk_SpecialS.c"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftcoll.h",
+      "role": "Small fighter collision header adjustment connected to item/fighter type surfaces.",
+      "evidence_refs": [
+        "changed_files.jsonl:src/melee/ft/ftcoll.h"
+      ]
+    },
+    {
+      "path": "src/melee/it/it_266F.c",
+      "role": "Changed Quaternion data symbol storage from static to global.",
+      "evidence_refs": [
+        "raw_diff:src/melee/it/it_266F.c it_803B8560 static removal"
+      ]
+    },
+    {
+      "path": "src/melee/it/item.c",
+      "role": "Small core item source adjustment.",
+      "evidence_refs": [
+        "changed_files.jsonl:src/melee/it/item.c"
+      ]
+    },
+    {
+      "path": "src/melee/it/itcoll.h",
+      "role": "Small item collision header adjustment.",
+      "evidence_refs": [
+        "changed_files.jsonl:src/melee/it/itcoll.h"
+      ]
+    },
+    {
+      "path": "src/melee/it/item.h",
+      "role": "Small item header adjustment.",
+      "evidence_refs": [
+        "changed_files.jsonl:src/melee/it/item.h"
+      ]
+    },
+    {
+      "path": "src/melee/it/item.dox",
+      "role": "Small item documentation adjustment.",
+      "evidence_refs": [
+        "changed_files.jsonl:src/melee/it/item.dox"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itgamewatchchef.c",
+      "role": "Item source matching work; configure.py promoted the object to Matching and bot report shows animation and .data matches.",
+      "evidence_refs": [
+        "diff_excerpt:configure.py itgamewatchchef NonMatching->Matching",
+        "text_corpus:decomp-dev bot report itgamewatchchef entries"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/ithouou.h",
+      "role": "Small item header adjustment.",
+      "evidence_refs": [
+        "changed_files.jsonl:src/melee/it/items/ithouou.h"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itlinkboomerang.h",
+      "role": "Small item header adjustment.",
+      "evidence_refs": [
+        "changed_files.jsonl:src/melee/it/items/itlinkboomerang.h"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itsamuschargeshot.h",
+      "role": "Small item header adjustment.",
+      "evidence_refs": [
+        "changed_files.jsonl:src/melee/it/items/itsamuschargeshot.h"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Converted six item source objects in configure.py from NonMatching to Matching: itsamuschargeshot, itgamewatchchef, itkamex, itunknown, ithouou, and itwhitebea.",
+    "Performed large source matching edits in item TUs, especially it_2725.c, itcoll.c, itlinkboomerang.c, itsamuschargeshot.c, itwhitebea.c, itunknown.c, itsscope.c, ithouou.c, itkamex.c, and itgamewatchchef.c.",
+    "Refined item and fighter-facing types, including replacing HSD_ObjAllocUnk2 with Item_FtTrack, adding x150_count, adding itHouou_ItemVars, and changing item attribute fields from padding or generic scalar types into typed fields, arrays, pointers, and unions.",
+    "Adjusted config/GALE01/symbols.txt local/global symbol metadata for item-related .data, .sdata, and .sdata2 entries, including many address-style global float/string symbols becoming local @ labels.",
+    "The decomp-dev bot reported 43 new matches, 30 improvements in unmatched items, +12020 matched-code bytes, +20644 linked-code bytes, and one small .data regression in main/melee/it/it_2725."
+  ],
+  "smart_moves": [
+    "The PR updated configure.py only for item objects whose status the bot report supports as newly matching or complete enough for the PR goal.",
+    "Header/type work accompanied source changes instead of leaving all recovered knowledge as local casts or unknown object types.",
+    "Symbol metadata was adjusted in the same PR as item data/text matching, making local label and scope changes visible for review rather than hidden in source-only edits.",
+    "The bot report quantified both wins and the one .data regression, giving reviewers a compact ledger of text/data impact."
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When item matching reveals a cross-subsystem structure, update the owning forward declarations and prototypes together; this PR changed HSD_ObjAllocUnk2 to Item_FtTrack in forward.h, ftCo_DownAttack.c, and ftCo_DownAttack.h.",
+      "evidence_refs": [
+        "diff_excerpt:ftCo_DownAttack.c",
+        "diff_excerpt:ftCo_DownAttack.h",
+        "raw_diff:src/melee/it/forward.h"
+      ]
+    },
+    {
+      "lesson": "Typed item variables and attributes can replace padding, UNK_T, and overly generic scalar fields during matching; examples include itHouou_ItemVars, itWhiteBea_ItemVars.x20 as Item_GObj*, and itUnknown union fields.",
+      "evidence_refs": [
+        "raw_diff:src/melee/it/itCommonItems.h"
+      ]
+    },
+    {
+      "lesson": "Source matching may require symbol metadata review for data/sdata/sdata2 ownership, but the evidence should distinguish code progress from data regressions; this PR had broad code gains and one reported it_2725 .data regression.",
+      "evidence_refs": [
+        "diff_excerpt:config/GALE01/symbols.txt",
+        "text_corpus:decomp-dev bot report regression in main/melee/it/it_2725 .data"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "Item_FtTrack",
+      "convention": "Recovered semantic type name replacing HSD_ObjAllocUnk2 for a fighter/item tracking structure.",
+      "evidence_refs": [
+        "diff_excerpt:ftCo_DownAttack.c",
+        "raw_diff:src/melee/it/forward.h"
+      ]
+    },
+    {
+      "name": "x150_count",
+      "convention": "Field name retained offset-style prefix while adding a supported role suffix for a count field.",
+      "evidence_refs": [
+        "diff_excerpt:ftCo_DownAttack.c"
+      ]
+    },
+    {
+      "name": "itHouou_ItemVars, itKamexAttributes, itWhiteBea_ItemVars, itUnknownAttributes",
+      "convention": "Item-specific structs follow existing item-name plus role suffix style for item variables and attributes.",
+      "evidence_refs": [
+        "raw_diff:src/melee/it/itCommonItems.h"
+      ]
+    },
+    {
+      "name": "@NNN local labels",
+      "convention": "symbols.txt uses local @ labels for some local string/float/double data entries instead of global address-style it_ symbols when metadata is changed to local scope.",
+      "evidence_refs": [
+        "diff_excerpt:config/GALE01/symbols.txt"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Promote objects from NonMatching to Matching in configure.py only alongside reported object/function match evidence.",
+      "evidence_refs": [
+        "diff_excerpt:configure.py",
+        "text_corpus:decomp-dev bot report"
+      ]
+    },
+    {
+      "tactic": "Use recovered struct fields, arrays, unions, and pointer types to drive codegen rather than keeping raw padding or opaque object alloc types.",
+      "evidence_refs": [
+        "raw_diff:src/melee/it/itCharItems.h",
+        "raw_diff:src/melee/it/itCommonItems.h",
+        "diff_excerpt:ftCo_DownAttack.c"
+      ]
+    },
+    {
+      "tactic": "Several source hunks used matching steering constructs such as PAD_STACK, #pragma dont_inline push/pop blocks, GET_JOBJ cleanup, and ABS macro expressions.",
+      "evidence_refs": [
+        "grep:raw_diff PAD_STACK/#pragma/GET_JOBJ/ABS matches"
+      ],
+      "caveat": "The slice shows tactic use and a successful aggregate bot report, but not per-tactic objdiff justification for each instance."
+    },
+    {
+      "tactic": "Adjust symbol scope, label, and size metadata for data sections when text/data matching evidence points at local literals or data ownership changes.",
+      "evidence_refs": [
+        "diff_excerpt:config/GALE01/symbols.txt"
+      ],
+      "caveat": "One .data regression was reported, so broad symbol edits should remain review-scoped rather than treated as universally safe."
+    }
+  ],
+  "review_feedback": [],
+  "searchable_terms": [
+    "pr-2432",
+    "All item TUs >90% matching",
+    "lukechampine",
+    "item TUs",
+    "configure.py MatchingFor",
+    "NonMatching to Matching",
+    "itsamuschargeshot",
+    "itgamewatchchef",
+    "itkamex",
+    "itunknown",
+    "ithouou",
+    "itwhitebea",
+    "it_2725",
+    "itcoll",
+    "itlinkboomerang",
+    "itsscope",
+    "Item_FtTrack",
+    "HSD_ObjAllocUnk2",
+    "x150_count",
+    "itHouou_ItemVars",
+    "itUnknownAttributes",
+    "symbols.txt local labels",
+    "sdata2 floats",
+    "PAD_STACK",
+    "pragma dont_inline",
+    "GET_JOBJ",
+    "ABS"
+  ],
+  "follow_up_queries": [
+    "PR 2432 Item_FtTrack HSD_ObjAllocUnk2 x150_count",
+    "PR 2432 configure.py itsamuschargeshot itgamewatchchef itkamex itunknown ithouou itwhitebea Matching",
+    "PR 2432 symbols.txt @ local labels sdata2 floats item",
+    "PR 2432 it_2725 .data regression",
+    "PR 2432 PAD_STACK pragma dont_inline item matching",
+    "PR 2432 itCommonItems.h itUnknownAttributes union fields",
+    "PR 2432 itCharItems.h itLinkBoomerangAttributes anim matanim shapeanim"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json:PR metadata and changed_files",
+      "loaded_files:changed_files.jsonl",
+      "loaded_files:text_corpus.jsonl decomp-dev bot report",
+      "diff_excerpt and raw_diff excerpts"
+    ],
+    "notes": [
+      "PR body is empty and there are no review comments or reviews in the supplied slice, so reviewer intent and author rationale are not available.",
+      "The raw diff is truncated in loaded_files but the changed-file list, key diff excerpts, and bot report are available.",
+      "Bot report provides aggregate verification-style evidence for matches and regressions, but the slice does not include per-function objdiff commands or per-tactic validation notes.",
+      "Source and symbol metadata changes are evident, but the intake does not independently validate whether each data scope change was required."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "type": "lesson",
+        "title": "Cross-subsystem type recovery should update all visible signatures together",
+        "text": "PR 2432 replaced HSD_ObjAllocUnk2 with Item_FtTrack across forward.h, ftCo_DownAttack.c, and ftCo_DownAttack.h, preserving consistency between recovered source type and public prototype.",
+        "scope": [
+          "src/melee/it/forward.h",
+          "src/melee/ft/chara/ftCommon/ftCo_DownAttack.c",
+          "src/melee/ft/chara/ftCommon/ftCo_DownAttack.h"
+        ],
+        "evidence_refs": [
+          "diff_excerpt:ftCo_DownAttack.c",
+          "diff_excerpt:ftCo_DownAttack.h",
+          "raw_diff:src/melee/it/forward.h"
+        ]
+      },
+      {
+        "type": "lesson",
+        "title": "Header field recovery can unlock item matching",
+        "text": "PR 2432 refined item headers by replacing padding, UNK_T, and generic scalars with typed arrays, item pointers, animation pointers, and unions in item vars/attributes while advancing many item matches.",
+        "scope": [
+          "src/melee/it/itCommonItems.h",
+          "src/melee/it/itCharItems.h"
+        ],
+        "evidence_refs": [
+          "raw_diff:src/melee/it/itCommonItems.h",
+          "raw_diff:src/melee/it/itCharItems.h",
+          "text_corpus:decomp-dev bot report"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "configure.py MatchingFor controls item object Matching/NonMatching status",
+        "text": "PR 2432 changed six item object entries in configure.py from Object(NonMatching, ...) to Object(Matching, ...) for item TUs after source matching work.",
+        "source_path": "configure.py",
+        "scope": [
+          "melee/it/items/itsamuschargeshot.c",
+          "melee/it/items/itgamewatchchef.c",
+          "melee/it/items/itkamex.c",
+          "melee/it/items/itunknown.c",
+          "melee/it/items/ithouou.c",
+          "melee/it/items/itwhitebea.c"
+        ],
+        "evidence_refs": [
+          "diff_excerpt:configure.py"
+        ],
+        "reason": "Potential path fact about where Matching/NonMatching status is declared; curator should verify against current build configuration."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Record per-tactic justification when PAD_STACK or pragmas remain in item matching code",
+        "text": "PR 2432 contains PAD_STACK and #pragma dont_inline usage in item matching source, while the loaded slice only provides aggregate bot report evidence. A source-corpus note could remind contributors to pair such tactics with narrow objdiff/build evidence.",
+        "source_path": null,
+        "scope": [
+          "item matching",
+          "PAD_STACK",
+          "#pragma dont_inline"
+        ],
+        "evidence_refs": [
+          "grep:raw_diff PAD_STACK/#pragma matches",
+          "text_corpus:decomp-dev bot report"
+        ],
+        "reason": "This is already broadly covered by loaded standards, but this PR is a concrete historical example candidate rather than a new accepted rule."
+      },
+      {
+        "target_source_id": "ssbm_data_sheet",
+        "update_kind": "source_update",
+        "title": "Review item data/sdata/sdata2 local label ownership changes from PR 2432",
+        "text": "PR 2432 changed many item-area symbols from global address-style names to local @ labels and adjusted one .data object size/local label, while the bot report recorded broad data gains and one small it_2725 .data regression.",
+        "source_path": "config/GALE01/symbols.txt",
+        "scope": [
+          ".data",
+          ".sdata",
+          ".sdata2",
+          "item symbols"
+        ],
+        "evidence_refs": [
+          "diff_excerpt:config/GALE01/symbols.txt",
+          "text_corpus:decomp-dev bot report"
+        ],
+        "reason": "Potential data ownership/symbol metadata example; curator should not promote all local-label changes as generally correct without current symbol/source verification."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that all item TUs became fully matched; the PR title says >90%, configure.py promotes six objects, and the bot report still lists unmatched-item improvements and a .data regression.",
+      "Do not claim reviewer approval details beyond merge status; the slice has zero review comments and zero reviews.",
+      "Do not treat every PAD_STACK or #pragma use in this PR as accepted style; the slice lacks per-instance validation evidence.",
+      "Do not generalize the symbols.txt global-to-local conversions into a blanket rule for item data; they are PR-specific metadata edits with one reported data regression."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

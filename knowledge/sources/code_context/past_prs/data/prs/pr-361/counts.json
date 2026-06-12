@@ -1,0 +1,17 @@
+{
+  "number": 361,
+  "title": "Fighter.c cleanup commit 4 + merge with masterhand",
+  "state": "MERGED",
+  "createdAt": "2022-04-26T20:03:36Z",
+  "updatedAt": "2022-04-26T20:06:17Z",
+  "mergedAt": "2022-04-26T20:06:17Z",
+  "closedAt": "2022-04-26T20:06:17Z",
+  "author": "snuffysasa",
+  "url": "https://github.com/doldecomp/melee/pull/361",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 181785
+  }
+}

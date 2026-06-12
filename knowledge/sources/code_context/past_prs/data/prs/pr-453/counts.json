@@ -1,0 +1,17 @@
+{
+  "number": 453,
+  "title": "Add line breaks to `obj_files.mk`",
+  "state": "MERGED",
+  "createdAt": "2022-08-11T15:07:24Z",
+  "updatedAt": "2022-08-13T07:53:33Z",
+  "mergedAt": "2022-08-11T17:05:05Z",
+  "closedAt": "2022-08-11T17:05:05Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/453",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 14136
+  }
+}

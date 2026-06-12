@@ -1,0 +1,17 @@
+{
+  "number": 2068,
+  "title": "mncharsel switch case enum, improve naming of some associated functions",
+  "state": "MERGED",
+  "createdAt": "2026-01-07T23:03:25Z",
+  "updatedAt": "2026-01-07T23:17:03Z",
+  "mergedAt": "2026-01-07T23:08:25Z",
+  "closedAt": "2026-01-07T23:08:25Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/2068",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 14236
+  }
+}

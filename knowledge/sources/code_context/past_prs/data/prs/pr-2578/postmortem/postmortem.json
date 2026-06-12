@@ -1,0 +1,511 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2578",
+  "pr": {
+    "number": 2578,
+    "title": "Match several ft, pl, and if functions",
+    "url": "https://github.com/doldecomp/melee/pull/2578",
+    "state": "MERGED",
+    "author": "itsgrimetime",
+    "created_at": "2026-06-04T09:13:46Z",
+    "merged_at": "2026-06-05T17:33:48Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2578 matched several functions across ftCo guard, plattack, and if_2FC93. The PR body claims five matched functions: ftCo_80091BC4, ftCo_80092158, ftCo_80093790, plAttack_8003759C, and un_802FE260, plus an improvement to fn_802FDA78 using the same file-local struct typing. The bot report corroborates six new matches including those five plus if_2FC93 .sdata, and reports fn_802FDA78 improved to 99.25%.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "types-structs",
+      "cleanup",
+      "verification-reported"
+    ],
+    "systems": [
+      "fighter",
+      "player-stats",
+      "interface-ui",
+      "melee-core"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_Guard.c",
+      "role": "Matched or improved ftCo guard functions: rewrote ftCo_80091BC4 angle smoothing, cleaned ftCo_80092158 color packing, and simplified ftCo_80093790 call sequence with a narrow stack padding local.",
+      "evidence_refs": [
+        "changed_files: ftCo_Guard.c +44/-59, 3 hunks",
+        "diff: ftCo_80091BC4 rewrite",
+        "diff: ftCo_80092158 M2C_FIELD/M2C_BITWISE removal",
+        "diff: ftCo_80093790 adds u8 _[8] and simplifies body",
+        "bot_report: ftCo_80093790, ftCo_80092158, ftCo_80091BC4 new 100% matches"
+      ]
+    },
+    {
+      "path": "src/melee/if/if_2FC93.c",
+      "role": "Matched un_802FE260 and improved fn_802FDA78 by using a file-local struct pointer, signed sentinel storage, const slot data, explicit material color component writes, and narrower counter types.",
+      "evidence_refs": [
+        "changed_files: if_2FC93.c +52/-38, 4 hunks",
+        "diff: un_804A1F10.x31 changed from unsigned char to signed char",
+        "diff: un_804DDBA8 changed to static char const",
+        "diff: fn_802FDA78 adds struct un_804A1F10_t* p and component diffuse writes",
+        "diff: un_802FE260 adds struct pointer p",
+        "bot_report: un_802FE260 new 100% match; fn_802FDA78 improved 82.48% to 99.25%; .sdata new 100% match"
+      ]
+    },
+    {
+      "path": "src/melee/pl/plattack.c",
+      "role": "Matched plAttack_8003759C by factoring repeated attack-stat clearing into a static inline helper and using full-range zeroing loops.",
+      "evidence_refs": [
+        "changed_files: plattack.c +20/-34, 1 hunk",
+        "diff: clearAttackStats helper added",
+        "diff: plAttack_8003759C calls helper for attacks, hits, and x358_hits",
+        "bot_report: plAttack_8003759C new 100% match"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Matched five named functions according to the PR body: ftCo_80091BC4, ftCo_80092158, ftCo_80093790, plAttack_8003759C, and un_802FE260.",
+      "evidence_refs": [
+        "human_pr_text: matched-function list",
+        "bot_report: corresponding new 100% matches"
+      ]
+    },
+    {
+      "text": "ftCo_80091BC4 was rewritten from helper-based normalizeAngle180/normalizeAngle0 code into explicit local calculations for stick angle, guard angle delta, smoothed guard angle, and stick magnitude.",
+      "evidence_refs": [
+        "diff: ftCo_80091BC4 hunk"
+      ]
+    },
+    {
+      "text": "ftCo_80092158 replaced M2C_FIELD and M2C_BITWISE-based generated-looking accesses with indexed color bytes from Fighter_804D650C and direct RGB packing for efSync_Spawn.",
+      "evidence_refs": [
+        "diff: ftCo_80092158 hunk"
+      ]
+    },
+    {
+      "text": "ftCo_80093790 removed an extra nested scope and temporary jobj local, calling ftCo_80092158 directly with the parts joint expression; it also introduced an 8-byte zeroed local array likely as a stack-shape tactic.",
+      "evidence_refs": [
+        "diff: ftCo_80093790 hunk"
+      ]
+    },
+    {
+      "text": "if_2FC93 changed un_804A1F10.x31 to signed char so -1 can be used directly as the sentinel instead of 0xFF, made un_804DDBA8 const, and used a local struct pointer p for repeated accesses in fn_802FDA78 and un_802FE260.",
+      "evidence_refs": [
+        "diff: if_2FC93 struct/data hunk",
+        "diff: fn_802FDA78 hunk",
+        "diff: un_802FE260 hunk"
+      ]
+    },
+    {
+      "text": "fn_802FDA78 changed material diffuse assignment from whole-struct assignment to explicit r/g/b/a component writes through HSD_MObj locals and improved substantially but did not fully match according to the bot report.",
+      "evidence_refs": [
+        "diff: fn_802FDA78 diffuse writes",
+        "bot_report: fn_802FDA78 82.48% to 99.25%"
+      ]
+    },
+    {
+      "text": "plAttack_8003759C factored three repeated stat-reset blocks into clearAttackStats and changed loops over StatsAttack_Count to begin at 0 in the helper and x504 reset loop.",
+      "evidence_refs": [
+        "diff: plattack.c hunk",
+        "bot_report: plAttack_8003759C 100% match"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Factoring the three repeated plAttack stat-reset blocks into a static inline helper reduced duplication and produced a reported 100% match for plAttack_8003759C.",
+      "evidence_refs": [
+        "diff: clearAttackStats helper",
+        "bot_report: plAttack_8003759C new 100% match"
+      ]
+    },
+    {
+      "text": "Using a local pointer to the file-local un_804A1F10 struct reduced repeated global-looking accesses and was explicitly called out in the PR body as the typing approach used for un_802FE260 and fn_802FDA78.",
+      "evidence_refs": [
+        "human_pr_text: same file-local struct typing",
+        "diff: struct un_804A1F10_t* p in fn_802FDA78 and un_802FE260"
+      ]
+    },
+    {
+      "text": "Changing x31 to signed char made the sentinel value readable as -1 and aligned the code with direct signed comparisons in fn_802FDA78.",
+      "evidence_refs": [
+        "diff: x31 signed char",
+        "diff: p->x31 == -1 and p->x31 = -1"
+      ]
+    },
+    {
+      "text": "Replacing generated M2C_FIELD byte loads with array indexing in ftCo_80092158 made the color packing source clearer while still corresponding to a reported new 100% match.",
+      "evidence_refs": [
+        "diff: ftCo_80092158",
+        "bot_report: ftCo_80092158 new 100% match"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When several adjacent struct instances or fields are reset the same way, try a small static inline helper before keeping copied reset blocks; in this PR, clearAttackStats replaced three repeated blocks and plAttack_8003759C reached a reported 100% match.",
+      "scope": [
+        "src/melee/pl/plattack.c",
+        "repeated struct reset code"
+      ],
+      "evidence_refs": [
+        "diff: clearAttackStats helper",
+        "bot_report: plAttack_8003759C new 100% match"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "lesson": "For file-local aggregate state, introducing a local pointer to the struct can improve codegen and readability when many accesses target the same object; this PR used struct un_804A1F10_t* p in both un_802FE260 and fn_802FDA78.",
+      "scope": [
+        "src/melee/if/if_2FC93.c",
+        "file-local struct state"
+      ],
+      "evidence_refs": [
+        "human_pr_text: file-local struct typing",
+        "diff: p = &un_804A1F10 in fn_802FDA78 and un_802FE260",
+        "bot_report: un_802FE260 new 100% match; fn_802FDA78 improved"
+      ],
+      "confidence": 0.85
+    },
+    {
+      "lesson": "If a byte field uses -1 as a sentinel, recovering signedness can make the source form clearer and may be important to matching; here x31 changed from unsigned char to signed char and comparisons became p->x31 == -1.",
+      "scope": [
+        "src/melee/if/if_2FC93.c",
+        "sentinel byte fields"
+      ],
+      "evidence_refs": [
+        "diff: x31 signed char",
+        "diff: p->x31 == -1"
+      ],
+      "confidence": 0.8
+    },
+    {
+      "lesson": "Generated M2C_FIELD byte extraction can often be replaced by ordinary indexed byte access when the base object and stride are understood; ftCo_80092158 used Fighter_804D650C + offset and color[0..2] RGB packing instead of M2C_FIELD.",
+      "scope": [
+        "src/melee/ft/chara/ftCommon/ftCo_Guard.c",
+        "byte table access",
+        "color packing"
+      ],
+      "evidence_refs": [
+        "diff: ftCo_80092158",
+        "bot_report: ftCo_80092158 new 100% match"
+      ],
+      "confidence": 0.85
+    },
+    {
+      "lesson": "A near-matching function may require explicit scalar field writes instead of whole-struct assignment; fn_802FDA78 writes diffuse.r/g/b/a separately for each material and improved from 82.48% to 99.25%.",
+      "scope": [
+        "src/melee/if/if_2FC93.c",
+        "HSD_MObj material color assignments"
+      ],
+      "evidence_refs": [
+        "diff: fn_802FDA78 diffuse component writes",
+        "bot_report: fn_802FDA78 improvement"
+      ],
+      "confidence": 0.75
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "clearAttackStats",
+      "kind": "static inline helper",
+      "convention": "Use a short verb-object helper name for a repeated local reset operation when the role is evident from the containing type and callsites.",
+      "evidence_refs": [
+        "diff: static inline void clearAttackStats(struct plAttackStats* s)"
+      ],
+      "confidence": 0.8
+    },
+    {
+      "name": "p",
+      "kind": "local pointer",
+      "convention": "A very short local pointer name was used for repeated access to a file-local singleton struct; this is observed in the PR, not a global naming rule.",
+      "evidence_refs": [
+        "diff: struct un_804A1F10_t* p = &un_804A1F10"
+      ],
+      "confidence": 0.65
+    },
+    {
+      "name": "color",
+      "kind": "local pointer",
+      "convention": "Use a semantic local name for a byte-table pointer when its role is clear from use as RGB color data.",
+      "evidence_refs": [
+        "diff: u8* color = Fighter_804D650C + offset",
+        "diff: RGB packing with color[0], color[1], color[2]"
+      ],
+      "confidence": 0.8
+    },
+    {
+      "name": "stick_rad, stick_deg, deg_delta, guard_deg, smoothed_deg, stick_mag",
+      "kind": "locals",
+      "convention": "For angle smoothing math, locals named by unit and role improved readability versus temporary or reused names.",
+      "evidence_refs": [
+        "diff: ftCo_80091BC4 local declarations"
+      ],
+      "confidence": 0.75
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Use a small static inline helper to recover repeated source structure while preserving callsite inlining.",
+      "applied_in": [
+        "plAttack_8003759C",
+        "clearAttackStats"
+      ],
+      "evidence_refs": [
+        "diff: clearAttackStats added and called three times",
+        "bot_report: plAttack_8003759C new 100% match"
+      ],
+      "risk_or_note": "Grounded by bot-reported match for this PR; do not assume all repeated blocks should be helperized without local style and objdiff evidence."
+    },
+    {
+      "tactic": "Recover byte-table indexing and bit packing instead of keeping M2C_FIELD/M2C_BITWISE generated output.",
+      "applied_in": [
+        "ftCo_80092158"
+      ],
+      "evidence_refs": [
+        "diff: ftCo_80092158",
+        "bot_report: ftCo_80092158 new 100% match"
+      ],
+      "risk_or_note": "Requires evidence for stride and element layout; this PR uses offset = Player_GetUnk45(...) << 2 and color[0..2]."
+    },
+    {
+      "tactic": "Use an explicitly typed file-local struct pointer for repeated singleton state access.",
+      "applied_in": [
+        "fn_802FDA78",
+        "un_802FE260"
+      ],
+      "evidence_refs": [
+        "human_pr_text: same file-local struct typing",
+        "diff: struct un_804A1F10_t* p"
+      ],
+      "risk_or_note": "fn_802FDA78 improved but did not fully match in bot report, so this tactic is supported as useful here but not proven sufficient alone."
+    },
+    {
+      "tactic": "Adjust signedness of a byte field to express a -1 sentinel directly.",
+      "applied_in": [
+        "fn_802FDA78",
+        "un_802FE260",
+        "un_804A1F10.x31"
+      ],
+      "evidence_refs": [
+        "diff: unsigned char x31 to signed char x31",
+        "diff: p->x31 == -1"
+      ],
+      "risk_or_note": "Signedness changes are type facts and should be backed by use sites or matching evidence."
+    },
+    {
+      "tactic": "Introduce a narrow dummy stack local for stack shape.",
+      "applied_in": [
+        "ftCo_80093790"
+      ],
+      "evidence_refs": [
+        "diff: u8 _[8] = { 0 }",
+        "bot_report: ftCo_80093790 new 100% match"
+      ],
+      "risk_or_note": "This is a matching tactic, not style guidance. Existing standards require explicit verifier evidence and narrow scope for PAD_STACK/dummy-local-like tactics."
+    },
+    {
+      "tactic": "Use explicit component assignments where whole-struct assignment does not produce the desired codegen.",
+      "applied_in": [
+        "fn_802FDA78"
+      ],
+      "evidence_refs": [
+        "diff: m->mat->diffuse.r/g/b/a assignments",
+        "bot_report: fn_802FDA78 improved to 99.25%"
+      ],
+      "risk_or_note": "Evidence shows improvement, not full function match."
+    }
+  ],
+  "review_feedback": [
+    {
+      "type": "approval",
+      "author": "jurrejelle",
+      "text": "The loaded review record shows an APPROVED review with an empty body and no inline review comments.",
+      "evidence_refs": [
+        "text_corpus: review by jurrejelle state APPROVED",
+        "metadata: review_comments 0"
+      ]
+    },
+    {
+      "type": "bot_report",
+      "author": "decomp-dev[bot]",
+      "text": "Bot report recorded +2420 matched-code bytes, +16 matched-data bytes, six new matches, and six improvements in unmatched items.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev[bot] issue_comment"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2578",
+    "itsgrimetime",
+    "ftCo_80091BC4",
+    "ftCo_80092158",
+    "ftCo_80093790",
+    "plAttack_8003759C",
+    "un_802FE260",
+    "fn_802FDA78",
+    "ftCo_Guard.c",
+    "if_2FC93.c",
+    "plattack.c",
+    "clearAttackStats",
+    "plAttackStats",
+    "StatsAttack_Count",
+    "un_804A1F10",
+    "un_804DDBA8",
+    "signed char x31",
+    "file-local struct typing",
+    "Fighter_804D650C",
+    "color[0]",
+    "efSync_Spawn",
+    "M2C_FIELD",
+    "M2C_BITWISE",
+    "HSD_MObj",
+    "diffuse.r",
+    "HSD_JObjSetTranslateZ",
+    "HSD_JObjSetRotationZ",
+    "lbAudioAx_80024030",
+    "dummy stack local",
+    "u8 _[8]"
+  ],
+  "follow_up_queries": [
+    "Find later PRs touching ftCo_80092158 or Fighter_804D650C color table typing to see whether the byte table gained a real struct or named color type.",
+    "Search for later if_2FC93 work on un_804A1F10_t, fn_802FDA78, x31 signedness, and un_804DDBA8 const ownership.",
+    "Search for clearAttackStats or plAttackStats reset helpers to see whether this helper pattern stayed local or was generalized.",
+    "Search for dummy stack locals named '_' or u8 _[8] in matched functions and collect verifier-backed examples versus rejected uses.",
+    "Search for material diffuse component-write changes in HSD_MObj/HSD_Material codegen matches."
+  ],
+  "evidence_quality": {
+    "status": "strong",
+    "evidence_refs": [
+      "metadata_json: PR identity, state, author, changed files, counts",
+      "human_pr_text: matched function claims and verification commands",
+      "raw_diff: complete diff excerpt for three changed files",
+      "text_corpus: bot report and approval review",
+      "changed_files: file list and line counts"
+    ],
+    "notes": [
+      "The bot report corroborates function match outcomes and score changes, but the loaded evidence does not include raw objdiff output.",
+      "The PR body lists verification commands, but loaded evidence does not prove command logs beyond the bot report.",
+      "No inline reviewer comments are available; review feedback is limited to an empty approved review and bot report.",
+      "The dummy u8 _[8] local in ftCo_80093790 is interpreted only as a likely stack-shape tactic because the diff shows no semantic use; this should not be promoted as accepted style."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "kind": "decomp_lesson",
+        "title": "Helperize repeated stat reset blocks when local evidence supports it",
+        "text": "In PR #2578, plAttack_8003759C reached a reported 100% match after three repeated plAttackStats reset blocks were replaced with a static inline clearAttackStats helper and called for attacks, hits, and x358_hits.",
+        "scope": [
+          "src/melee/pl/plattack.c",
+          "plAttack_8003759C",
+          "clearAttackStats"
+        ],
+        "evidence_refs": [
+          "diff: plattack.c hunk",
+          "bot_report: plAttack_8003759C new 100% match"
+        ],
+        "confidence": 0.9
+      },
+      {
+        "kind": "decomp_lesson",
+        "title": "Use typed byte-table indexing instead of M2C_FIELD when layout is evident",
+        "text": "In PR #2578, ftCo_80092158 replaced M2C_FIELD/M2C_BITWISE output with an offset into Fighter_804D650C and explicit color[0..2] RGB packing, producing a reported 100% match.",
+        "scope": [
+          "src/melee/ft/chara/ftCommon/ftCo_Guard.c",
+          "ftCo_80092158"
+        ],
+        "evidence_refs": [
+          "diff: ftCo_80092158",
+          "bot_report: ftCo_80092158 new 100% match"
+        ],
+        "confidence": 0.85
+      },
+      {
+        "kind": "decomp_lesson",
+        "title": "Signed sentinel fields can unlock clearer matching source",
+        "text": "In PR #2578, if_2FC93 changed un_804A1F10.x31 from unsigned char to signed char so code could compare and assign -1 directly in fn_802FDA78 and un_802FE260.",
+        "scope": [
+          "src/melee/if/if_2FC93.c",
+          "un_804A1F10.x31"
+        ],
+        "evidence_refs": [
+          "diff: x31 signed char",
+          "diff: p->x31 == -1"
+        ],
+        "confidence": 0.8
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "if_2FC93 uses file-local un_804A1F10_t state for UI object setup/update",
+        "text": "PR #2578 provides evidence that src/melee/if/if_2FC93.c has a file-local un_804A1F10_t aggregate used by un_802FE260 and fn_802FDA78; a local pointer to this struct was used to match/improve these functions, and x31 acts as a signed -1 sentinel in this slice.",
+        "source_path": "src/melee/if/if_2FC93.c",
+        "scope": [
+          "un_804A1F10_t",
+          "un_804A1F10.x31",
+          "fn_802FDA78",
+          "un_802FE260"
+        ],
+        "evidence_refs": [
+          "human_pr_text: file-local struct typing",
+          "diff: if_2FC93.c",
+          "bot_report: un_802FE260 new 100% match; fn_802FDA78 improved"
+        ],
+        "reason": "Potential path-specific fact for future if_2FC93 work; curator should verify against current source before adding."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "Fighter_804D650C is indexed as 4-byte color entries in ftCo_80092158",
+        "text": "PR #2578's ftCo_80092158 computes offset = Player_GetUnk45(player_id) << 2, points color at Fighter_804D650C + offset, and packs color[0], color[1], and color[2] into an RGB integer for efSync_Spawn.",
+        "source_path": "src/melee/ft/chara/ftCommon/ftCo_Guard.c",
+        "scope": [
+          "ftCo_80092158",
+          "Fighter_804D650C",
+          "efSync_Spawn"
+        ],
+        "evidence_refs": [
+          "diff: ftCo_80092158",
+          "bot_report: ftCo_80092158 new 100% match"
+        ],
+        "reason": "May be useful for future typing of Fighter_804D650C, but the PR does not introduce a named struct or global data type."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Document narrow handling of dummy stack locals",
+        "text": "PR #2578 includes u8 _[8] = { 0 } in ftCo_80093790 alongside a reported 100% match. If not already covered, standards could remind contributors that dummy stack locals require narrow verifier evidence and should be treated as matching tactics, not source style.",
+        "source_path": "src/melee/ft/chara/ftCommon/ftCo_Guard.c",
+        "scope": [
+          "ftCo_80093790",
+          "stack-shape tactics",
+          "dummy locals"
+        ],
+        "evidence_refs": [
+          "diff: ftCo_80093790 u8 _[8]",
+          "bot_report: ftCo_80093790 new 100% match"
+        ],
+        "reason": "Existing matching-tactics standard already covers dummy locals broadly; curator may decide no update is needed or add this as an example."
+      }
+    ],
+    "rejection_notes": [
+      "Do not generalize the u8 _[8] local into accepted style; evidence supports only that it appeared in this matched PR.",
+      "Do not claim fn_802FDA78 matched; bot report says it improved to 99.25%, not 100%.",
+      "Do not infer semantic names for un_804A1F10 fields beyond x31 signed sentinel behavior shown in the diff.",
+      "Do not treat .sdata/.sdata2 score changes as broad data ownership guidance; the PR was primarily code matching and only small data changes are shown."
+    ]
+  },
+  "confidence": 0.88,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

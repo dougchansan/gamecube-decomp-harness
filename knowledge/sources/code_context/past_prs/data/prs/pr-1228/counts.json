@@ -1,0 +1,17 @@
+{
+  "number": 1228,
+  "title": "Match `ftAnim_8006EBE8` (488 bytes)",
+  "state": "MERGED",
+  "createdAt": "2024-02-15T01:35:03Z",
+  "updatedAt": "2024-02-15T01:36:06Z",
+  "mergedAt": "2024-02-15T01:36:05Z",
+  "closedAt": "2024-02-15T01:36:05Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1228",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 76420
+  }
+}

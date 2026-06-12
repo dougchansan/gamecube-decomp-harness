@@ -1,0 +1,17 @@
+{
+  "number": 107,
+  "title": "Finishing labeling of Character Data pointers",
+  "state": "MERGED",
+  "createdAt": "2021-11-16T21:47:28Z",
+  "updatedAt": "2021-11-16T21:47:36Z",
+  "mergedAt": "2021-11-16T21:47:33Z",
+  "closedAt": "2021-11-16T21:47:33Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/107",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 4130
+  }
+}

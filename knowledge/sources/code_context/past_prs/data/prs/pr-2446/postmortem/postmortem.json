@@ -1,0 +1,394 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2446",
+  "pr": {
+    "number": 2446,
+    "title": "Jj/mnsoundtest",
+    "url": "https://github.com/doldecomp/melee/pull/2446",
+    "state": "MERGED",
+    "author": "jurrejelle",
+    "created_at": "2026-04-30T19:54:09Z",
+    "merged_at": "2026-05-08T18:32:09Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2446 focused on mnsoundtest decomp/matching progress with related header signature updates and small formatting/include churn in neighboring mn menu files. The automated report recorded six new matches in main/melee/mn/mnsoundtest and five additional improvements, including large progress on fn_8024B2B0 and several mnsoundtest functions.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "menu",
+      "data-section-touch",
+      "formatting"
+    ],
+    "systems": [
+      "melee-core",
+      "mn",
+      "mnsoundtest",
+      "menu-ui",
+      "audio"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/mn/mnsoundtest.c",
+      "role": "Primary decomp target; adds/updates mnsoundtest logic, model descriptor, animation settings typing, text/object setup, sound input handling, and asset section loading.",
+      "evidence_refs": [
+        "changed_files: src/melee/mn/mnsoundtest.c +439/-53",
+        "raw_diff: mnsoundtest.c adds SoundTestModelDesc, AnimLoopSettings vec_0..vec_5, fn_8024B2B0, fn_8024B8B4, fn_8024BAF0, mnSoundTest_8024BCA0, mnSoundTest_8024BEE0",
+        "issue_comment: decomp-dev report lists new matches and improvements for main/melee/mn/mnsoundtest"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnsoundtest.h",
+      "role": "Header truthing for recovered mnsoundtest types and prototypes.",
+      "evidence_refs": [
+        "changed_files: src/melee/mn/mnsoundtest.h +5/-5",
+        "raw_diff: unk10 changed from UNK_T to HSD_Text*",
+        "raw_diff: fn_8024B8B4, fn_8024BAF0, mnSoundTest_8024BCA0, mnSoundTest_8024BEE0 prototypes replace UNK_RET/UNK_PARAMS"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnmainrule.c",
+      "role": "Neighboring menu source touched mostly for include ordering and formatting of existing animation-setting/pointer expressions.",
+      "evidence_refs": [
+        "changed_files: src/melee/mn/mnmainrule.c +35/-40",
+        "raw_diff: debug.h include reordered; AnimLoopSettings initializers and HSD_JObj calls reformatted"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnmainrule.h",
+      "role": "Header formatting cleanup for padding array expressions.",
+      "evidence_refs": [
+        "changed_files: src/melee/mn/mnmainrule.h +2/-2",
+        "raw_diff: x7_pad and xB_pad expressions spaced as 0x009 - 0x007 and 0x00C - 0x00B"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnstagesw.c",
+      "role": "Neighboring menu source touched for include ordering and formatting/layout changes.",
+      "evidence_refs": [
+        "changed_files: src/melee/mn/mnstagesw.c +18/-15",
+        "raw_diff: debug.h include reordered; HSD_SisLib_803A5ACC, confirmed_selection assignment, label indentation, and HSD_JObjSetTranslateX formatting changed"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Added substantial mnsoundtest code, including fn_8024B2B0 input/update handling, object/text setup paths, transition/proc code, archive section loading, and sound/audio calls.",
+      "evidence_refs": [
+        "raw_diff: mnsoundtest.c adds fn_8024B2B0 and later functions through mnSoundTest_8024BEE0",
+        "issue_comment: fn_8024B2B0 improved +1031 bytes to 77.42%"
+      ]
+    },
+    {
+      "text": "Recovered or improved several mnsoundtest functions according to the automated match report: fn_8024B8B4, fn_8024BAF0, fn_8024B7E4, mnSoundTest_8024AA70, plus .sdata2 and .bss new matches; fn_8024B2B0, mnSoundTest_8024BCA0, mnSoundTest_8024BEE0, .data, and mnSoundTest_8024A958 improved.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev issue_comment report for GALE01"
+      ]
+    },
+    {
+      "text": "Changed mnsoundtest animation constants vec_0 through vec_5 from Vec3-shaped data to AnimLoopSettings and updated call sites to use start_frame/end_frame fields.",
+      "evidence_refs": [
+        "raw_diff: Vec3 vec_0..vec_5 changed to AnimLoopSettings",
+        "raw_diff: HSD_JObjReqAnimAll calls changed from vec_N.x/y to vec_N.start_frame/end_frame"
+      ]
+    },
+    {
+      "text": "Updated mnsoundtest.h to replace unknown signatures with concrete prototypes and changed soundtest_user_data.unk10 from UNK_T to HSD_Text*.",
+      "evidence_refs": [
+        "raw_diff: mnsoundtest.h prototype hunk",
+        "raw_diff: mnsoundtest.h struct field hunk"
+      ]
+    },
+    {
+      "text": "Added static strings for mnsoundtest assert/report and archive section names and uses them in OSReport, __assert, and lbArchive_LoadSections.",
+      "evidence_refs": [
+        "raw_diff: static char mnSoundTest_803EF4F4..mnSoundTest_803EF57C added",
+        "raw_diff: OSReport/__assert in mnSoundTest_8024BCA0",
+        "raw_diff: lbArchive_LoadSections in mnSoundTest_8024BEE0"
+      ]
+    },
+    {
+      "text": "Made mostly formatting/include-order changes in mnmainrule.c, mnmainrule.h, and mnstagesw.c while preserving existing logic shape in the excerpted hunks.",
+      "evidence_refs": [
+        "raw_diff: mnmainrule.c include/order and formatting hunks",
+        "raw_diff: mnmainrule.h padding spacing hunk",
+        "raw_diff: mnstagesw.c formatting hunks"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "When recovered function bodies proved interfaces, the PR updated the public header rather than leaving UNK_RET/UNK_PARAMS in place.",
+      "evidence_refs": [
+        "raw_diff: mnsoundtest.h replaces UNK_RET/UNK_PARAMS for fn_8024B8B4, fn_8024BAF0, mnSoundTest_8024BCA0, mnSoundTest_8024BEE0"
+      ]
+    },
+    {
+      "text": "Using AnimLoopSettings for start/end frame data made animation intent clearer at call sites than treating those records as generic Vec3 x/y fields.",
+      "evidence_refs": [
+        "raw_diff: AnimLoopSettings vec_0..vec_5",
+        "raw_diff: call sites use .start_frame and .end_frame"
+      ]
+    },
+    {
+      "text": "The PR typed soundtest_user_data.unk10 as HSD_Text*, aligning the field with its actual HSD_SisLib text lifecycle use in mnsoundtest.c.",
+      "evidence_refs": [
+        "raw_diff: mnsoundtest.h HSD_Text* unk10",
+        "raw_diff: user_data->unk10 assigned HSD_SisLib_803A5ACC result and freed with HSD_SisLib_803A5CC4"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For menu animation tables, prefer a domain-specific struct with named start_frame/end_frame fields once call sites prove frame semantics; it improves readability and reduces misleading Vec3-style field access.",
+      "scope": [
+        "src/melee/mn/mnsoundtest.c",
+        "mn menu animation settings"
+      ],
+      "evidence_refs": [
+        "raw_diff: vec_0..vec_5 changed from Vec3 to AnimLoopSettings",
+        "raw_diff: HSD_JObjReqAnimAll uses vec_2.start_frame, vec_3.end_frame, vec_4.start_frame, vec_5.end_frame"
+      ],
+      "confidence": 0.86
+    },
+    {
+      "lesson": "After recovering mnsoundtest bodies, update the owning header signatures and field types instead of leaving unknown prototypes or UNK_T fields.",
+      "scope": [
+        "src/melee/mn/mnsoundtest.h"
+      ],
+      "evidence_refs": [
+        "raw_diff: mnsoundtest.h concrete prototypes and HSD_Text* unk10"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "lesson": "Automated match reports are useful for scoping postmortem evidence, but they should be cited as report evidence rather than converted into unsupported author intent or human review conclusions.",
+      "scope": [
+        "PR intake",
+        "decomp report comments"
+      ],
+      "evidence_refs": [
+        "text_corpus: decomp-dev bot report is the only comment with match metrics",
+        "metadata_json: review_comments=0, reviews=0"
+      ],
+      "confidence": 0.8
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "New local type name SoundTestModelDesc describes a group of joint/animjoint/matanim_joint/shapeanim_joint asset pointers for soundtest model loading.",
+      "evidence_refs": [
+        "raw_diff: typedef struct SoundTestModelDesc with joint, animjoint, matanim_joint, shapeanim_joint",
+        "raw_diff: static SoundTestModelDesc mnSoundTest_804A08C8"
+      ]
+    },
+    {
+      "text": "Recovered functions retain address-style names such as fn_8024B2B0, fn_8024B8B4, and mnSoundTest_8024BCA0 where semantic function names are not evidenced in the slice.",
+      "evidence_refs": [
+        "raw_diff: added function definitions and mnsoundtest.h prototypes"
+      ]
+    },
+    {
+      "text": "Several locals use role names such as user_data, menu_data, inputs, state, sound_id, audio_id, and sound_kind in fn_8024B2B0, while some uncertain fields remain unk-prefixed.",
+      "evidence_refs": [
+        "raw_diff: fn_8024B2B0 local declarations and user_data->unk fields"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "text": "The PR uses narrow local-shape steering in mnsoundtest.c, including PAD_STACK(24), explicit unused/pad locals, and temporary pointer aliases such as new_var, apparently to preserve stack/register/codegen shape.",
+      "evidence_refs": [
+        "raw_diff: mnSoundTest_8024A790 retains PAD_STACK(24)",
+        "raw_diff: mnSoundTest_8024A958 adds unused1/unused2/unused3 and new_var",
+        "raw_diff: mnSoundTest_8024AA70 adds pad1/pad2/pad5 and new_var"
+      ]
+    },
+    {
+      "text": "The PR changes expression grouping and temporary variables in volume/text update code, for example combining temp_f1 multiplications and accessing vec_7.x/y directly.",
+      "evidence_refs": [
+        "raw_diff: mnSoundTest_8024A790 expression regrouping",
+        "raw_diff: mnSoundTest_8024A958 and mnSoundTest_8024AA70 vec_7 direct field access"
+      ]
+    },
+    {
+      "text": "The PR includes direct __assert plus OSReport in the recovered allocation failure path rather than macro-cleaning it in the shown slice.",
+      "evidence_refs": [
+        "raw_diff: mnSoundTest_8024BCA0 uses OSReport(mnSoundTest_803EF4F4) and __assert(mnSoundTest_803EF50C, 0x5F4U, mnSoundTest_803EF51C)"
+      ]
+    },
+    {
+      "text": "Model asset loading is represented with a small descriptor struct and lbArchive_LoadSections arguments for joint, animjoint, matanim_joint, and shapeanim_joint.",
+      "evidence_refs": [
+        "raw_diff: SoundTestModelDesc definition",
+        "raw_diff: mnSoundTest_8024BEE0 lbArchive_LoadSections call"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "automated_report",
+      "author": "decomp-dev[bot]",
+      "text": "Automated GALE01 report recorded matched code 66.38% (+0.04%, +1604 bytes) and matched data 38.72% (+0.01%, +96 bytes), with six new matches and five improvements in main/melee/mn/mnsoundtest.",
+      "evidence_refs": [
+        "text_corpus: issue_comment by decomp-dev[bot] at 2026-04-30T19:57:45Z"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2446",
+    "Jj/mnsoundtest",
+    "jurrejelle",
+    "mnsoundtest",
+    "src/melee/mn/mnsoundtest.c",
+    "src/melee/mn/mnsoundtest.h",
+    "fn_8024B2B0",
+    "fn_8024B7E4",
+    "fn_8024B8B4",
+    "fn_8024BAF0",
+    "mnSoundTest_8024BCA0",
+    "mnSoundTest_8024BEE0",
+    "mnSoundTest_8024AA70",
+    "mnSoundTest_8024A958",
+    "SoundTestModelDesc",
+    "soundtest_user_data",
+    "AnimLoopSettings",
+    "HSD_Text",
+    "HSD_SisLib_803A5ACC",
+    "HSD_SisLib_803A5CC4",
+    "lbArchive_LoadSections",
+    "MenMainConTs_Top_joint",
+    "MenMainConTs_Top_animjoint",
+    "MenMainConTs_Top_matanim_joint",
+    "MenMainConTs_Top_shapeanim_joint",
+    "PAD_STACK",
+    "UNK_RET",
+    "UNK_PARAMS"
+  ],
+  "follow_up_queries": [
+    "pr 2446 mnsoundtest SoundTestModelDesc lbArchive_LoadSections",
+    "mnsoundtest AnimLoopSettings vec_0 vec_5 start_frame end_frame",
+    "mnsoundtest.h fn_8024B8B4 fn_8024BAF0 mnSoundTest_8024BCA0 mnSoundTest_8024BEE0 signatures",
+    "mnsoundtest PAD_STACK unused locals new_var matching tactic",
+    "mnsoundtest OSReport __assert mnsoundtest.c user_data",
+    "main/melee/mn/mnsoundtest fn_8024B2B0 77.42 decomp-dev report"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR 2446 merged, 5 changed files, +499/-115",
+      "loaded_files: raw_diff truncated but targeted diff lookups recovered relevant mnsoundtest.h and mnstagesw.c hunks",
+      "text_corpus: only PR body is empty and only issue comment is decomp-dev bot report",
+      "metadata_json: review_comments=0 and reviews=0"
+    ],
+    "notes": [
+      "Evidence is strong for changed files, diff-visible code edits, and automated match metrics.",
+      "There is no human review feedback in the loaded slice, so reviewer intent and acceptance rationale are not inferred.",
+      "The raw diff excerpt was truncated in the prompt; local raw diff lookup was used only to recover exact hunks for mnsoundtest.h, mnstagesw.c, and later mnsoundtest functions.",
+      "No independent build, objdiff, or regression validation was run during intake; match status is cited only from the decomp-dev automated report.",
+      "Some code-shape tactics such as PAD_STACK, unused locals, and explicit static strings are observed, but the slice does not prove why each was necessary."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson",
+        "title": "Use domain animation-setting fields once frame semantics are proven",
+        "text": "In mnsoundtest, replacing Vec3-shaped animation records with AnimLoopSettings and using start_frame/end_frame made call sites clearer while the automated report still showed matching progress.",
+        "scope": [
+          "src/melee/mn/mnsoundtest.c",
+          "mn animation/menu code"
+        ],
+        "evidence_refs": [
+          "raw_diff: Vec3 vec_0..vec_5 changed to AnimLoopSettings",
+          "raw_diff: call sites use start_frame/end_frame",
+          "text_corpus: decomp-dev report"
+        ]
+      },
+      {
+        "record_type": "decomp_lesson",
+        "title": "Header signatures should follow recovered bodies",
+        "text": "This PR replaced mnsoundtest UNK_RET/UNK_PARAMS declarations and an UNK_T text field with concrete signatures and HSD_Text* after body evidence existed.",
+        "scope": [
+          "src/melee/mn/mnsoundtest.h"
+        ],
+        "evidence_refs": [
+          "raw_diff: mnsoundtest.h prototype and field updates"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "mnsoundtest user data text fields",
+        "text": "src/melee/mn/mnsoundtest.h changed soundtest_user_data.unk10 from UNK_T to HSD_Text*, matching use as an HSD_SisLib text pointer in mnsoundtest.c.",
+        "source_path": "src/melee/mn/mnsoundtest.h",
+        "scope": [
+          "src/melee/mn/mnsoundtest.h",
+          "src/melee/mn/mnsoundtest.c",
+          "soundtest_user_data"
+        ],
+        "evidence_refs": [
+          "raw_diff: mnsoundtest.h HSD_Text* unk10",
+          "raw_diff: user_data->unk10 assigned/freed as HSD_Text"
+        ],
+        "reason": "Potential path-specific type fact for curator review; intake does not promote it directly."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "mnsoundtest model asset descriptor layout",
+        "text": "mnsoundtest.c introduced SoundTestModelDesc with joint, animjoint, matanim_joint, and shapeanim_joint pointers, loaded through lbArchive_LoadSections using MenMainConTs_Top asset names.",
+        "source_path": "src/melee/mn/mnsoundtest.c",
+        "scope": [
+          "src/melee/mn/mnsoundtest.c",
+          "SoundTestModelDesc",
+          "mnSoundTest_804A08C8"
+        ],
+        "evidence_refs": [
+          "raw_diff: SoundTestModelDesc typedef",
+          "raw_diff: lbArchive_LoadSections in mnSoundTest_8024BEE0"
+        ],
+        "reason": "Potential source/path fact about mnsoundtest asset descriptor structure."
+      },
+      {
+        "target_source_id": "other",
+        "update_kind": "source_update",
+        "title": "Review static string symbols in mnsoundtest for data ownership",
+        "text": "The PR added static char symbols for report/assert text and archive section names. Curator may want to compare this with current literal/data ownership guidance before extracting any broader lesson.",
+        "source_path": "src/melee/mn/mnsoundtest.c",
+        "scope": [
+          "src/melee/mn/mnsoundtest.c",
+          "mnSoundTest_803EF4F4",
+          "mnSoundTest_803EF50C",
+          "mnSoundTest_803EF528"
+        ],
+        "evidence_refs": [
+          "raw_diff: static char string symbols added",
+          "decomp_standards: literals-and-data-ownership",
+          "decomp_standards: no-string-literal-symbol-regression"
+        ],
+        "reason": "Observed PR evidence touches string/data ownership, but intake should not promote a general standard from this single historical slice."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer human reviewer approval rationale; no reviews or review comments are present in the loaded slice.",
+      "Do not generalize that PAD_STACK, unused locals, or dummy pad locals are accepted style; this PR only shows they were present alongside automated match progress.",
+      "Do not promote the added static string symbols as a recommended pattern without separate section ownership evidence and curator review.",
+      "Do not claim fn_8024B2B0 fully matched; the bot report only shows improvement to 77.42%."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

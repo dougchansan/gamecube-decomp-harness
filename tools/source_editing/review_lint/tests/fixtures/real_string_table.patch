@@ -1,0 +1,19 @@
+diff --git a/src/melee/gm/gm_1832.c b/src/melee/gm/gm_1832.c
+index 3333333..4444444 100644
+--- a/src/melee/gm/gm_1832.c
++++ b/src/melee/gm/gm_1832.c
+@@ -200,6 +200,14 @@ static TrainingModeState lbl_80473700;
+
+ /* legitimate string table: pointers to inline literals, no packing */
+
++static char* const stage_names[] = {
++    "Battlefield",
++    "Final Destination",
++    "Yoshi's Story",
++};
++
++static char status_buffer[64] = "ready";
++
+ int gm_80188460(int idx)
+ {
+     return idx;

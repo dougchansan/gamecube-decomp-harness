@@ -1,0 +1,17 @@
+{
+  "number": 643,
+  "title": "Add editorconfig and github action check",
+  "state": "MERGED",
+  "createdAt": "2023-01-04T05:13:50Z",
+  "updatedAt": "2023-01-05T09:43:46Z",
+  "mergedAt": "2023-01-05T09:43:43Z",
+  "closedAt": "2023-01-05T09:43:43Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/643",
+  "counts": {
+    "issue_comments": 3,
+    "review_comments": 6,
+    "reviews": 8,
+    "diff_bytes": 4025
+  }
+}

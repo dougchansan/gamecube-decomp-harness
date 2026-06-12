@@ -1,0 +1,17 @@
+{
+  "number": 1671,
+  "title": "Match several grFourside functions",
+  "state": "MERGED",
+  "createdAt": "2025-07-08T19:59:26Z",
+  "updatedAt": "2025-07-08T20:05:58Z",
+  "mergedAt": "2025-07-08T20:05:53Z",
+  "closedAt": "2025-07-08T20:05:53Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/1671",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 6228
+  }
+}

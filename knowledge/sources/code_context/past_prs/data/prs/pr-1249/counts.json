@@ -1,0 +1,17 @@
+{
+  "number": 1249,
+  "title": "Add back the CI badges to `README`",
+  "state": "MERGED",
+  "createdAt": "2024-02-18T10:17:16Z",
+  "updatedAt": "2024-02-18T10:19:41Z",
+  "mergedAt": "2024-02-18T10:19:40Z",
+  "closedAt": "2024-02-18T10:19:40Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1249",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 1505
+  }
+}

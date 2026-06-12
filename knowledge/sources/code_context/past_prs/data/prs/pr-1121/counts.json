@@ -1,0 +1,17 @@
+{
+  "number": 1121,
+  "title": "Run `make format`",
+  "state": "MERGED",
+  "createdAt": "2024-01-25T18:21:58Z",
+  "updatedAt": "2024-01-25T18:23:09Z",
+  "mergedAt": "2024-01-25T18:23:08Z",
+  "closedAt": "2024-01-25T18:23:08Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1121",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 16542
+  }
+}

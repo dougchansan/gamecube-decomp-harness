@@ -1,0 +1,10 @@
+{
+  "pr": 627,
+  "title": "Use AT_ADDRESS macro for fixed-address declarations",
+  "url": "https://github.com/doldecomp/melee/pull/627",
+  "text_records_with_body": 2,
+  "review_comments": 0,
+  "changed_files": 15,
+  "added_lines": 34,
+  "deleted_lines": 51
+}

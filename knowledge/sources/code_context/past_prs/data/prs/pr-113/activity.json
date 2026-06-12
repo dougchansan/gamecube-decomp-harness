@@ -1,0 +1,10 @@
+{
+  "pr": 113,
+  "title": "Work through data labels and fix lwzu cases that were preventing shiftability",
+  "url": "https://github.com/doldecomp/melee/pull/113",
+  "text_records_with_body": 0,
+  "review_comments": 0,
+  "changed_files": 17,
+  "added_lines": 589,
+  "deleted_lines": 319
+}

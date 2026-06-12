@@ -1,0 +1,17 @@
+{
+  "number": 303,
+  "title": "calcprogress now compatible with devkitPPC r40",
+  "state": "MERGED",
+  "createdAt": "2022-02-22T14:58:36Z",
+  "updatedAt": "2022-02-22T15:04:52Z",
+  "mergedAt": "2022-02-22T15:04:51Z",
+  "closedAt": "2022-02-22T15:04:51Z",
+  "author": "camthesaxman",
+  "url": "https://github.com/doldecomp/melee/pull/303",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 49265
+  }
+}

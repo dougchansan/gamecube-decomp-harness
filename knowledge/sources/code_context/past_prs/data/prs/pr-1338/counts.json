@@ -1,0 +1,17 @@
+{
+  "number": 1338,
+  "title": "Match ftCo_DamageSong",
+  "state": "MERGED",
+  "createdAt": "2024-02-27T15:30:41Z",
+  "updatedAt": "2024-02-27T15:33:09Z",
+  "mergedAt": "2024-02-27T15:33:06Z",
+  "closedAt": "2024-02-27T15:33:06Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/1338",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 17973
+  }
+}

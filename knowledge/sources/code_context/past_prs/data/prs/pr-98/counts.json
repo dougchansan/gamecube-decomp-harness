@@ -1,0 +1,17 @@
+{
+  "number": 98,
+  "title": "Clean some ascii and pointers in .data",
+  "state": "MERGED",
+  "createdAt": "2021-11-10T16:15:56Z",
+  "updatedAt": "2021-11-10T16:16:05Z",
+  "mergedAt": "2021-11-10T16:16:03Z",
+  "closedAt": "2021-11-10T16:16:03Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/98",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 3983
+  }
+}

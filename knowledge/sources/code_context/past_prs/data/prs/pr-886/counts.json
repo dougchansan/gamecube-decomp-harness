@@ -1,0 +1,17 @@
+{
+  "number": 886,
+  "title": "Match `ftCo_Ottotto`",
+  "state": "MERGED",
+  "createdAt": "2023-05-28T13:01:40Z",
+  "updatedAt": "2023-05-28T13:08:07Z",
+  "mergedAt": "2023-05-28T13:08:06Z",
+  "closedAt": "2023-05-28T13:08:06Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/886",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 26326
+  }
+}

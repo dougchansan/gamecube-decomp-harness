@@ -1,0 +1,17 @@
+{
+  "number": 248,
+  "title": "Enable inline_auto, fix FObj match, and mark GObj_GXReorder as dont_inline",
+  "state": "MERGED",
+  "createdAt": "2022-02-02T19:20:41Z",
+  "updatedAt": "2022-02-02T19:20:52Z",
+  "mergedAt": "2022-02-02T19:20:49Z",
+  "closedAt": "2022-02-02T19:20:49Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/248",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 2569
+  }
+}

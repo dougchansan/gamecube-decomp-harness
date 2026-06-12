@@ -2,18 +2,31 @@ import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import {
   directorPrompt,
+  agentToolProfileSummary,
   knowledgeCuratorPrompt,
+  prContextPromptXml,
   prReviewPrompt,
   targetPacketTarget,
   workerPacket,
   workerPrompt,
+  workerPromptInputXml,
 } from "@decomp-orchestrator/agents";
 import { stableJson } from "@decomp-orchestrator/agents/runtime";
+import { availableToolsPromptXml, type AgentToolRuntimeContext } from "@decomp-orchestrator/agents/tools";
 import { listProjects, projectToSummary, resolveProject, type ProjectSummary, type ResolvedProject } from "@decomp-orchestrator/core";
-import { activeLeasesForRun, activeWorkerCount, getLatestRun, nextUnhandledEvent, openState, queueStatsSnapshot } from "@decomp-orchestrator/core/state";
+import {
+  activeLeasesForRun,
+  activeWorkerCount,
+  DEFAULT_WORKER_TTL_SECONDS,
+  getLatestRun,
+  nextUnhandledEvent,
+  openState,
+  queueStatsSnapshot,
+} from "@decomp-orchestrator/core/state";
 import type { BoardSnapshot, PiPromptBundle, RunProjectMetadata, RunRecord } from "@decomp-orchestrator/core/types";
-import { loadKnowledgeBoardSnapshot } from "@decomp-orchestrator/knowledge";
-import type { PromptPreviewAgentId, PromptPreviewSource, PromptPreviewStats } from "@decomp-orchestrator/ui-contract";
+import { globalStandardsPromptXml, loadKnowledgeBoardSnapshot } from "@decomp-orchestrator/knowledge";
+import type { PromptPreviewAgentId, PromptPreviewSource } from "@decomp-orchestrator/ui-contract";
+import { promptStats } from "./lib/promptStats.js";
 
 type JsonObject = Record<string, unknown>;
 
@@ -40,6 +53,7 @@ const packageRoot = resolve(import.meta.dir, "../../..");
 const defaultRepoRoot = packageRoot;
 const defaultStateDir = resolve(packageRoot, ".decomp-orchestrator-state");
 const builtStaticRoot = resolve(packageRoot, "apps/agent-viewer/dist");
+const sampleRepoRoot = resolve(packageRoot, "testdata/smoke_repo");
 const port = Number(Bun.env.AGENT_VIEWER_PORT ?? Bun.env.PROMPT_VIEWER_PORT ?? Bun.env.ORCH_PROMPT_VIEWER_PORT ?? 8797);
 const promptPreviewAgents: PromptPreviewAgentId[] = ["director", "worker", "pr-review", "knowledge-curator"];
 
@@ -242,16 +256,43 @@ function sampleBoardSnapshot(paths: PromptProjectContext): BoardSnapshot {
   };
 }
 
-function promptStats(prompt: string): PromptPreviewStats {
-  const unresolved = new Set<string>();
-  for (const match of prompt.matchAll(/\{\{\s*[A-Z0-9_]+\s*\}\}|\{(?:pr_context_json|curator_context_json)\}/g)) {
-    unresolved.add(match[0] ?? "");
-  }
+interface PromptPreviewPlaceholders {
+  availableToolsXml?: string;
+  baselineXml?: string;
+  curatorContextJson?: string;
+  curatorOutputSchemaJson?: string;
+  prContextJson?: string;
+  prContextXml?: string;
+  prOutputSchemaJson?: string;
+  targetGraphFileCardXml?: string;
+  targetXml?: string;
+}
+
+interface PromptPreviewRendered {
+  bundle: PiPromptBundle;
+  context: JsonObject;
+  contextSource: PromptPreviewSource;
+  placeholders?: PromptPreviewPlaceholders;
+}
+
+function hydratePromptPreviewPlaceholders(bundle: PiPromptBundle, placeholders: PromptPreviewPlaceholders = {}): PiPromptBundle {
+  const standardsXml = globalStandardsPromptXml();
+  const hydrate = (prompt: string) =>
+    prompt
+      .replace(/\{\{\s*AVAILABLE_TOOLS_XML\s*\}\}/g, () => placeholders.availableToolsXml ?? "")
+      .replace(/\{\{\s*BASELINE_XML\s*\}\}/g, () => placeholders.baselineXml ?? "")
+      .replace(/\{\{\s*CURATOR_CONTEXT_JSON\s*\}\}/g, () => placeholders.curatorContextJson ?? "")
+      .replace(/\{\{\s*CURATOR_OUTPUT_SCHEMA_JSON\s*\}\}/g, () => placeholders.curatorOutputSchemaJson ?? "")
+      .replace(/\{\{\s*DECOMP_STANDARDS_XML\s*\}\}/g, () => standardsXml)
+      .replace(/\{\{\s*PR_CONTEXT_JSON\s*\}\}/g, () => placeholders.prContextJson ?? "")
+      .replace(/\{\{\s*PR_CONTEXT_XML\s*\}\}/g, () => placeholders.prContextXml ?? "")
+      .replace(/\{\{\s*PR_OUTPUT_SCHEMA_JSON\s*\}\}/g, () => placeholders.prOutputSchemaJson ?? "")
+      .replace(/\{\{\s*TARGET_GRAPH_FILE_CARD_XML\s*\}\}/g, () => placeholders.targetGraphFileCardXml ?? "")
+      .replace(/\{\{\s*TARGET_XML\s*\}\}/g, () => placeholders.targetXml ?? "");
   return {
-    characters: prompt.length,
-    lines: prompt ? prompt.split(/\r\n|\r|\n/).length : 0,
-    words: prompt.match(/\S+/g)?.length ?? 0,
-    unresolvedPlaceholders: [...unresolved].filter(Boolean).sort(),
+    ...bundle,
+    systemPrompt: hydrate(bundle.systemPrompt),
+    userPrompt: hydrate(bundle.userPrompt),
   };
 }
 
@@ -319,7 +360,7 @@ function directorPromptPreview(
   paths: PromptProjectContext,
   requestedSource: PromptPreviewSource,
   warnings: string[],
-): { bundle: PiPromptBundle; context: JsonObject; contextSource: PromptPreviewSource } {
+): PromptPreviewRendered {
   const project = projectMetadataForPrompt(paths);
   const liveRun = requestedSource === "latest" ? latestRunForPrompt(paths.stateDir, warnings) : null;
   const contextSource: PromptPreviewSource = liveRun ? "latest" : "sample";
@@ -399,10 +440,10 @@ function sampleWorkerLease(): PromptLease {
   const target = {
     target_id: "agent-viewer-sample-target",
     unit: "GALE01:ftDemo",
-    symbol: "ftDemo_Update",
+    symbol: "ftDemo_Unmatched",
     source_path: sourcePath,
-    size: 184,
-    fuzzy: 96.42,
+    size: 128,
+    fuzzy: 82.5,
     priority: 900_000,
     reason: "agent viewer sample worker lease",
   };
@@ -413,8 +454,192 @@ function sampleWorkerLease(): PromptLease {
     targetId: String(target.target_id),
     target,
     writeSet: [sourcePath],
-    ttl: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+    ttl: new Date(Date.now() + DEFAULT_WORKER_TTL_SECONDS * 1000).toISOString(),
     selectionSource: "sample_target",
+  };
+}
+
+function sampleWorkerFileCard(sourcePath: string): JsonObject {
+  return {
+    entity_id: `file:${sourcePath}`,
+    source_path: sourcePath,
+    editability: {
+      mode: "editable",
+      reason: "1 unmatched function remains in this source file.",
+    },
+    match_status: {
+      source_path: sourcePath,
+      units: ["GALE01:ftDemo"],
+      function_count: 5,
+      matched_function_count: 4,
+      unmatched_function_count: 1,
+      editability: {
+        mode: "editable",
+        reason: "1 unmatched function remains in this source file.",
+      },
+      functions: [
+        { address: "0x80000000", symbol: "ftDemo_Setup", unit: "GALE01:ftDemo", size: 96, fuzzy: 100 },
+        { address: "0x80000060", symbol: "ftDemo_AlreadyMatched", unit: "GALE01:ftDemo", size: 64, fuzzy: 100 },
+        { address: "0x800000A0", symbol: "ftDemo_Unmatched", unit: "GALE01:ftDemo", size: 128, fuzzy: 82.5 },
+        { address: "0x80000120", symbol: "ftDemo_Cleanup", unit: "GALE01:ftDemo", size: 80, fuzzy: 100 },
+        { address: "0x80000170", symbol: "ftDemo_TableDispatch", unit: "GALE01:ftDemo", size: 148, fuzzy: 100 },
+      ],
+      unmatched_functions: [{ address: "0x800000A0", symbol: "ftDemo_Unmatched", unit: "GALE01:ftDemo", size: 128, fuzzy: 82.5 }],
+    },
+    units: [{ unit: "GALE01:ftDemo" }],
+    functions: [
+      { address: "0x80000000", symbol: "ftDemo_Setup", unit: "GALE01:ftDemo", size: 96, fuzzy: 100 },
+      { address: "0x80000060", symbol: "ftDemo_AlreadyMatched", unit: "GALE01:ftDemo", size: 64, fuzzy: 100 },
+      { address: "0x800000A0", symbol: "ftDemo_Unmatched", unit: "GALE01:ftDemo", size: 128, fuzzy: 82.5 },
+      { address: "0x80000120", symbol: "ftDemo_Cleanup", unit: "GALE01:ftDemo", size: 80, fuzzy: 100 },
+      { address: "0x80000170", symbol: "ftDemo_TableDispatch", unit: "GALE01:ftDemo", size: 148, fuzzy: 100 },
+    ],
+    pr_history: {
+      touching_prs: [
+        {
+          pr: 2515,
+          title: "lb: improve lbcollision capsule-collision matching",
+          author: "itsgrimetime",
+          state: "MERGED",
+          merged_at: "2026-05-19T21:57:50Z",
+        },
+        {
+          pr: 2503,
+          title: "lb: improve lbcollision matching",
+          author: "itsgrimetime",
+          state: "MERGED",
+          merged_at: "2026-05-15T20:16:55Z",
+        },
+        {
+          pr: 724,
+          title: "Match `lbcollision`, pass 2",
+          author: "ribbanya",
+          state: "MERGED",
+          merged_at: "2023-02-01T19:53:12Z",
+        },
+      ],
+      review_risks: [
+        { value: "Stack frame and register lifetime changes can improve target score while hurting nearby same-file functions." },
+        { value: "Keep macro/helper style consistent with matched siblings before trusting permuter-shaped code." },
+      ],
+      tactics: [
+        { value: "Compare the unmatched block against matched same-file helpers before changing declarations." },
+        { value: "Try preserving the original base pointer when later code still needs the address." },
+      ],
+    },
+    resource_hits: [
+      {
+        source_id: "past_prs",
+        title: "Past PRs for src/melee/lb/lbcollision.c",
+        evidence_ref: "knowledge/sources/code_context/past_prs/data/aggregate/changed_files.jsonl",
+      },
+      {
+        source_id: "code_graph",
+        title: "Code graph: src/melee/ft/chara/ftDemo.c",
+        evidence_ref: "testdata/smoke_repo/build/GALE01/report.json",
+      },
+      {
+        source_id: "agent_shared_state",
+        title: "fixture stack frame mismatch lesson",
+        evidence_ref: "legacy-agent-state:tool_issue:1",
+      },
+    ],
+    mismatch_patterns: [
+      {
+        pattern_id: "stack-frame-layout",
+        title: "Stack/frame layout mismatch",
+        category: "codegen",
+        symptoms: ["stack frame", "local array", "stwu offset", "PAD_STACK"],
+        tactics: ["Preserve caller-visible stack slot lifetimes.", "Check local temporary ordering against matched siblings."],
+        evidence_count: 3,
+        linked_evidence_refs: ["postmortem:pr-2515", "postmortem:pr-2503"],
+        linked_evidence: [
+          {
+            title: "lbcollision capsule matching",
+            kind: "past_pr_postmortem",
+            evidence_ref: "knowledge/sources/past_prs/data/prs/pr-2515/postmortem.json",
+            unit: "main/melee/lb/lbcollision",
+            symbol: "lbColl_800077A0",
+            pr: 2515,
+          },
+        ],
+      },
+      {
+        pattern_id: "register-lifetime",
+        title: "Register allocation or lifetime mismatch",
+        category: "codegen",
+        symptoms: ["register allocation", "base pointer lifetime", "copy propagation"],
+        tactics: ["Keep the original base pointer live if later address arithmetic depends on it.", "Prefer source shapes that match local authored style before permuting."],
+        evidence_count: 2,
+        linked_evidence_refs: ["postmortem:pr-2515", "postmortem:pr-2503"],
+      },
+      {
+        pattern_id: "inline-helper-boundary",
+        title: "Inline/helper boundary mismatch",
+        category: "source-shape",
+        symptoms: ["helper boundary", "inlined accessor", "macro shape"],
+        tactics: ["Check whether a nearby helper or macro is expected to inline at this call site."],
+        evidence_count: 1,
+        linked_evidence_refs: ["postmortem:pr-2515"],
+      },
+    ],
+    tool_hits: [],
+    scheduling_signals: {
+      source_path: sourcePath,
+      editability: "editable",
+      graph_degree: 18,
+      function_graph_degree: 7,
+      fresh_edges_since_last_attempt: 2,
+      relevant_pr_count: 3,
+      review_risk_count: 2,
+      duplicate_reference_count: 1,
+      linked_unlock_potential: 0,
+      connected_incomplete_function_count: 1,
+      connected_matched_reference_count: 4,
+      resource_evidence_count: 3,
+      path_fact_count: 2,
+      historical_lesson_count: 1,
+      curated_signal_count: 0,
+      proposal_fact_count: 0,
+      stale_fact_count: 0,
+      information_gain_score: 9.8,
+      unlock_score: 1.2,
+      context_quality_score: 7.6,
+      completion_readiness_score: 5.4,
+      information_value_score: 11.1,
+      risk_penalty: 1.4,
+      priority_bonus: 15.1,
+      explanation: ["graph_degree=18", "editability=editable", "relevant_pr_count=3", "resource_evidence_count=3", "historical_lesson_count=1"],
+    },
+  };
+}
+
+function sampleWorkerPathFacts(sourcePath: string): JsonObject {
+  return {
+    status: "ready",
+    source: "path_facts",
+    facts: [
+      {
+        id: "path_fact:src/melee/ft/chara",
+        title: "Fighter character source style",
+        directory: "src/melee/ft/chara",
+        strength: "bounded",
+        summary: "Character source files usually keep state-machine helpers, action callbacks, and table dispatch helpers in the same file; compare matched sibling functions before changing shared declarations.",
+        evidence_refs: ["path_facts:fighter-character-style", "postmortem:pr-2515"],
+        watched_paths: [sourcePath, "src/melee/ft/chara/*.c", "src/melee/ft/ft*.h"],
+        slice_ref: "knowledge/sources/injectable/path_facts/data/path_facts/fighter.jsonl",
+      },
+      {
+        id: "path_fact:src/melee/ft",
+        title: "Fighter macro/helper boundaries",
+        directory: "src/melee/ft",
+        strength: "reviewed",
+        summary: "When a fuzzy mismatch is mostly register lifetime or stack shape, inspect nearby matched helpers and headers before introducing new casts or temporary storage.",
+        evidence_refs: ["path_facts:fighter-helper-boundaries", "mismatch_patterns:register-lifetime"],
+        watched_paths: [sourcePath, "src/melee/ft/*.h"],
+        slice_ref: "knowledge/sources/injectable/path_facts/data/path_facts/fighter.jsonl",
+      },
+    ],
   };
 }
 
@@ -451,7 +676,7 @@ function liveWorkerLeaseForPrompt(paths: PromptProjectContext, run: RunRecord, w
         targetId: stringValue(queued.target_id, "agent-viewer-queued-target"),
         target,
         writeSet: sourcePath ? [sourcePath] : [],
-        ttl: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+        ttl: new Date(Date.now() + DEFAULT_WORKER_TTL_SECONDS * 1000).toISOString(),
         selectionSource: "queued_target",
       };
     }
@@ -467,7 +692,7 @@ function workerPromptPreview(
   paths: PromptProjectContext,
   requestedSource: PromptPreviewSource,
   warnings: string[],
-): { bundle: PiPromptBundle; context: JsonObject; contextSource: PromptPreviewSource } {
+): PromptPreviewRendered {
   const project = projectMetadataForPrompt(paths);
   const liveRun = requestedSource === "latest" ? latestRunForPrompt(paths.stateDir, warnings) : null;
   const contextSource: PromptPreviewSource = liveRun ? "latest" : "sample";
@@ -477,35 +702,76 @@ function workerPromptPreview(
   const initialSnapshot = contextSource === "latest" ? latestInitialSnapshot(paths.stateDir, run.id) : {};
   const baselineMeasures = Object.keys(initialSnapshot).length ? measuresFromSnapshot(initialSnapshot) : sampleBoardSnapshot(paths).measures;
   const target = targetPacketTarget(lease.target);
+  const repoRootForPrompt = contextSource === "sample" || lease.selectionSource === "sample_target" ? sampleRepoRoot : paths.repoRoot;
   const packet = workerPacket({
     run,
     leased: lease,
     target,
     baselineMeasures,
-    knowledgeContext: {
-      status: "prompt_viewer",
-      source: lease.selectionSource ?? contextSource,
-      note: "Rendered for prompt inspection; live worker runners may add richer graph context before launch.",
-    },
+    knowledgeContext:
+      contextSource === "sample" || lease.selectionSource === "sample_target"
+        ? {
+            status: "ready",
+            graph_db: "agent-viewer-sample-graph",
+            generated_at: new Date().toISOString(),
+            source: lease.selectionSource ?? contextSource,
+            note: "Rendered for prompt inspection with a realistic fixture graph file card based on the live graph card shape.",
+            file_card: sampleWorkerFileCard(String(target.source_path ?? "")),
+            path_facts: sampleWorkerPathFacts(String(target.source_path ?? "")),
+          }
+        : {
+            status: "prompt_viewer",
+            source: lease.selectionSource ?? contextSource,
+            note: "Rendered for prompt inspection; live worker runners may add richer graph context before launch.",
+          },
   });
   const initialBoardPath = resolve(paths.stateDir, "runs", run.id, "snapshots", "initial_board.json");
   const workerLogDir = resolve(paths.stateDir, "runs", run.id, "worker_logs", lease.leaseId);
+  const toolContext: AgentToolRuntimeContext = {
+    role: "worker",
+    cwd: repoRootForPrompt,
+    repoRoot: repoRootForPrompt,
+    stateDir: paths.stateDir,
+    project,
+    packet,
+    initialBoardPath,
+    workerLogDir,
+  };
   const options = {
     packet,
-    repoRoot: paths.repoRoot,
+    repoRoot: repoRootForPrompt,
     stateDir: paths.stateDir,
     project,
     initialBoardPath,
     workerLogDir,
   };
+  const inputXml = workerPromptInputXml({ packet, repoRoot: repoRootForPrompt, project });
+  const targetGraphFileCard = sampleWorkerFileCard(String(target.source_path ?? ""));
   return {
     bundle: workerPrompt(options),
     context: {
-      options,
-      leaseSelectionSource: lease.selectionSource ?? contextSource,
-      baselineMeasures,
+      target,
+      run_goal: {
+        kind: run.goalKind,
+        value: run.goalValue,
+      },
+      write_set: lease.writeSet,
+      worker_log_dir: workerLogDir,
+      initial_board_path: initialBoardPath,
+      prompt_repo_root: repoRootForPrompt,
+      lease_selection_source: lease.selectionSource ?? contextSource,
+      baseline_current_scores: baselineMeasures,
+      baseline_measures: baselineMeasures,
+      target_graph_file_card: contextSource === "sample" || lease.selectionSource === "sample_target" ? targetGraphFileCard : undefined,
+      attached_tools: agentToolProfileSummary("worker"),
     },
     contextSource,
+    placeholders: {
+      availableToolsXml: availableToolsPromptXml(toolContext),
+      baselineXml: inputXml.baselineXml,
+      targetGraphFileCardXml: inputXml.targetGraphFileCardXml,
+      targetXml: inputXml.targetXml,
+    },
   };
 }
 
@@ -513,28 +779,114 @@ function prReviewPromptPreview(
   paths: PromptProjectContext,
   requestedSource: PromptPreviewSource,
   warnings: string[],
-): { bundle: PiPromptBundle; context: JsonObject; contextSource: PromptPreviewSource } {
-  if (requestedSource === "latest") warnings.push("The agent viewer does not keep a single current PR-review context; rendered a deterministic sample PR context.");
+): PromptPreviewRendered {
+  if (requestedSource === "latest") warnings.push("The agent viewer does not keep a single current PR intake context; rendered a deterministic sample PR context.");
+  const project = projectMetadataForPrompt(paths);
+  const toolContext: AgentToolRuntimeContext = {
+    role: "pr-review",
+    cwd: paths.repoRoot,
+    repoRoot: paths.repoRoot,
+    stateDir: paths.stateDir,
+    project,
+  };
   const prContext = {
-    source: "agent-viewer-sample",
-    project: projectMetadataForPrompt(paths) ?? null,
+    schema_version: "melee_pr_context_v1",
+    object_id: "pr-0",
+    context_source: "agent-viewer-sample",
+    project: project ?? null,
     pr: {
       number: 0,
-      title: "Agent viewer sample PR review",
+      title: "Agent viewer sample PR intake",
+      url: "https://github.com/doldecomp/melee/pull/0",
+      state: "MERGED",
       author: "agent-viewer",
+      created_at: "2026-06-01T00:00:00Z",
+      merged_at: "2026-06-02T00:00:00Z",
       base_ref: paths.project?.baseRef ?? "origin/master",
-      changed_files: ["src/melee/ft/chara/ftDemo.c"],
     },
+    source: {
+      dump_root: "knowledge/sources/code_context/past_prs/data",
+      slice_dir: "knowledge/sources/code_context/past_prs/data/prs/pr-0",
+      library_root: "knowledge/sources/code_context/past_prs/data/library",
+    },
+    counts: {
+      changed_files: 1,
+      review_comments: 1,
+    },
+    initial_classification: {
+      categories: ["decomp-matching", "types-structs"],
+      systems: ["fighter"],
+      search_terms: ["ftDemo", "JObj", "inline helper", "review lint"],
+    },
+    changed_files: [
+      {
+        file: "src/melee/ft/chara/ftDemo.c",
+        added: 24,
+        deleted: 11,
+        hunks: 3,
+      },
+    ],
+    human_text_excerpt: "Matches ftDemo helper by reusing the existing JObj inline shape and preserving callback naming.",
+    review_comments_excerpt: "src/melee/ft/chara/ftDemo.c: Prefer the existing helper name and avoid type-erasing casts in the matched callback.",
+    review_feedback_examples: ["src/melee/ft/chara/ftDemo.c: Prefer the existing helper name and avoid type-erasing casts."],
+    diff_excerpt: [
+      "diff --git a/src/melee/ft/chara/ftDemo.c b/src/melee/ft/chara/ftDemo.c",
+      "+    HSD_JObjSetFlags(jobj, flags);",
+      "-    ((void (*)(void*))callback)(obj);",
+    ].join("\n"),
     local_slice_paths: {
-      pr_dump: resolve(paths.repoRoot, "knowledge/sources/past_prs/data/sample_pr.json"),
-      patch: resolve(paths.repoRoot, "knowledge/sources/past_prs/data/sample_pr.diff"),
+      pr_dump: resolve(paths.repoRoot, "knowledge/sources/code_context/past_prs/data/prs/pr-0/raw/pr.json"),
+      patch: resolve(paths.repoRoot, "knowledge/sources/code_context/past_prs/data/prs/pr-0/raw/diff.diff"),
     },
-    review_focus: ["extract reusable source-shape facts", "preserve evidence paths", "avoid promoting speculative lessons"],
+    loaded_files: [
+      {
+        label: "human_pr_text",
+        path: "knowledge/sources/code_context/past_prs/data/prs/pr-0/extracted/human_pr_text.md",
+        media_type: "text/markdown",
+        original_chars: 98,
+        truncated: false,
+        content: "Matches ftDemo helper by reusing the existing JObj inline shape and preserving callback naming.",
+      },
+      {
+        label: "review_comments",
+        path: "knowledge/sources/code_context/past_prs/data/prs/pr-0/extracted/review_comments.md",
+        media_type: "text/markdown",
+        original_chars: 115,
+        truncated: false,
+        content: "src/melee/ft/chara/ftDemo.c: Prefer the existing helper name and avoid type-erasing casts in the matched callback.",
+      },
+      {
+        label: "raw_diff",
+        path: "knowledge/sources/code_context/past_prs/data/prs/pr-0/raw/diff.diff",
+        media_type: "text/x-diff",
+        original_chars: 147,
+        truncated: false,
+        content: [
+          "diff --git a/src/melee/ft/chara/ftDemo.c b/src/melee/ft/chara/ftDemo.c",
+          "+    HSD_JObjSetFlags(jobj, flags);",
+          "-    ((void (*)(void*))callback)(obj);",
+        ].join("\n"),
+      },
+    ],
+    intake_focus: ["extract reusable source-shape facts", "preserve evidence paths", "handoff proposal-only source updates to the curator"],
   };
+  const outputSchema = readJsonObject(resolve(packageRoot, "packages/agents/src/pr-review/schema.json"));
   return {
-    bundle: prReviewPrompt({ prContext }),
-    context: { prContext },
+    bundle: prReviewPrompt({ prContext, repoRoot: paths.repoRoot, stateDir: paths.stateDir, project }),
+    context: {
+      prContext,
+      pr_context_xml: prContextPromptXml({ prContext, repoRoot: paths.repoRoot }),
+      output_schema: outputSchema,
+      attached_tools: agentToolProfileSummary("pr-review"),
+      available_tools_xml: availableToolsPromptXml(toolContext),
+    },
     contextSource: "sample",
+    placeholders: {
+      availableToolsXml: availableToolsPromptXml(toolContext),
+      prContextJson: stableJson(prContext),
+      prContextXml: prContextPromptXml({ prContext, repoRoot: paths.repoRoot }),
+      prOutputSchemaJson: stableJson(outputSchema),
+    },
   };
 }
 
@@ -542,28 +894,74 @@ function knowledgeCuratorPromptPreview(
   paths: PromptProjectContext,
   requestedSource: PromptPreviewSource,
   warnings: string[],
-): { bundle: PiPromptBundle; context: JsonObject; contextSource: PromptPreviewSource } {
+): PromptPreviewRendered {
   if (requestedSource === "latest") warnings.push("The agent viewer does not keep a single current curator batch context; rendered a deterministic sample curator context.");
+  const project = projectMetadataForPrompt(paths);
+  const toolContext: AgentToolRuntimeContext = {
+    role: "knowledge-curator",
+    cwd: paths.repoRoot,
+    repoRoot: paths.repoRoot,
+    stateDir: paths.stateDir,
+    project,
+  };
   const curatorContext = {
     source: "agent-viewer-sample",
-    project: projectMetadataForPrompt(paths) ?? null,
+    project: project ?? null,
     graph_db_path: paths.graphDbPath,
-    candidate_records: [
+    enrichment_path: "knowledge/resource_graph/enrichments/knowledge_curator_updates.jsonl",
+    deterministic_record_count: 2,
+    batch_index: 1,
+    batch_count: 1,
+    sampled_records: [
       {
         id: "agent-viewer-record-1",
-        kind: "worker_fact",
+        kind: "pr_lesson",
+        status: "accepted",
+        trust_tier: "historical",
         source_path: "src/melee/ft/chara/ftDemo.c",
-        lesson: "Prefer existing JObj/header inlines when assert line numbers identify them.",
-        evidence: ["worker_report.json", "runner_validation/final_summary.json"],
-        confidence: "sample",
+        title: "PR intake lesson for fighter helper naming",
+        text: "Review feedback preferred existing helper names and rejected type-erasing casts in a matched callback.",
+        evidence_ref: "knowledge/sources/code_context/past_prs/data/prs/pr-0/postmortem/postmortem.json",
+        confidence: 0.72,
+        payload: {
+          pr: 0,
+          agent_status: "agent_completed",
+        },
+      },
+      {
+        id: "agent-viewer-record-2",
+        kind: "source_update_proposal",
+        status: "proposal",
+        trust_tier: "local",
+        source_path: "src/melee/ft/chara/ftDemo.c",
+        title: "Path fact candidate for fighter callback helper names",
+        text: "Fighter callback matches should prefer existing helper names in the local source path before introducing new wrappers.",
+        evidence_ref: "worker_report.json",
+        confidence: 0.4,
+        payload: {
+          target_source_id: "path_facts",
+          update_kind: "path_fact",
+          mutation_policy: "proposal_only",
+        },
       },
     ],
-    requested_decisions: ["promote_safe_records", "leave source-specific updates as proposals"],
+    requested_decisions: ["promote_safe_records", "leave source-specific updates as proposals", "reject unsupported broad rules"],
   };
+  const outputSchema = readJsonObject(resolve(packageRoot, "packages/agents/src/knowledge-curator/schema.json"));
   return {
-    bundle: knowledgeCuratorPrompt({ curatorContext }),
-    context: { curatorContext },
+    bundle: knowledgeCuratorPrompt({ curatorContext, repoRoot: paths.repoRoot, stateDir: paths.stateDir, project }),
+    context: {
+      curatorContext,
+      output_schema: outputSchema,
+      attached_tools: agentToolProfileSummary("knowledge-curator"),
+      available_tools_xml: availableToolsPromptXml(toolContext),
+    },
     contextSource: "sample",
+    placeholders: {
+      availableToolsXml: availableToolsPromptXml(toolContext),
+      curatorContextJson: stableJson(curatorContext),
+      curatorOutputSchemaJson: stableJson(outputSchema),
+    },
   };
 }
 
@@ -577,7 +975,8 @@ function renderPromptPreview(paths: PromptProjectContext, agent: PromptPreviewAg
         : agent === "pr-review"
           ? prReviewPromptPreview(paths, requestedSource, warnings)
           : knowledgeCuratorPromptPreview(paths, requestedSource, warnings);
-  const { bundle, context, contextSource } = rendered;
+  const { context, contextSource } = rendered;
+  const bundle = hydratePromptPreviewPlaceholders(rendered.bundle, rendered.placeholders);
   return {
     agent,
     requestedSource,

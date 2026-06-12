@@ -1,0 +1,495 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2369",
+  "pr": {
+    "number": 2369,
+    "title": "Merge #2366, #2367, #2368",
+    "url": "https://github.com/doldecomp/melee/pull/2369",
+    "state": "MERGED",
+    "author": "ribbanya",
+    "created_at": "2026-03-29T20:28:27Z",
+    "merged_at": "2026-03-29T20:33:19Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Merge-bundle PR that lands several decompiled functions across fighter, menu, library, toy, audio, THP, ARQ, and baselib spline areas; updates related structs, prototypes, includes, symbols, and marks sysdolphin/baselib/spline.c as Matching. The slice has no PR body, issue comments, review comments, or explicit build/objdiff evidence.",
+  "change_classification": {
+    "primary_type": "multi-system decompilation merge",
+    "categories": [
+      "code match",
+      "headers",
+      "struct recovery",
+      "prototype cleanup",
+      "symbol metadata",
+      "matching-status update"
+    ],
+    "systems": [
+      "config",
+      "fighter",
+      "game-mode",
+      "library",
+      "menu",
+      "toy",
+      "sysdolphin/baselib",
+      "repo-config"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Renamed spline .sdata2 symbols from HSD_Spline_804DE62x-style names to @number local-label-style names for addresses 0x804DE620 through 0x804DE654.",
+      "evidence_refs": [
+        "diff_excerpt:config/GALE01/symbols.txt",
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "configure.py",
+      "role": "Changed sysdolphin/baselib/spline.c object classification from NonMatching to Matching.",
+      "evidence_refs": [
+        "diff_excerpt:configure.py",
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCommon/types.h",
+      "role": "Recovered fields in ftCommon_MotionVars.unk_deadup: x4C float, x50 Vec3, x5C Vec3.",
+      "evidence_refs": [
+        "diff_excerpt:src/melee/ft/chara/ftCommon/types.h",
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_Init.c",
+      "role": "Implemented Kirby special-N functions ftKb_SpecialN_800F10D4, ftKb_SpecialN_800F19AC, and ftKb_SpecialN_800F1A8C; one implementation uses a scoped dont_inline pragma and PAD_STACK.",
+      "evidence_refs": [
+        "diff_excerpt:src/melee/ft/chara/ftKirby/ftKb_Init.c",
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ft_0D31.c",
+      "role": "Implemented ftCo_DeadUpFall_Phys and ftCo_800D5600; added includes for ftanim, lbvector, and mpcoll.",
+      "evidence_refs": [
+        "diff_excerpt:src/melee/ft/ft_0D31.c",
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ft_0D31.h",
+      "role": "Added prototype for fn_800D54A4.",
+      "evidence_refs": [
+        "diff_excerpt:src/melee/ft/ft_0D31.h",
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1601.c",
+      "role": "Implemented gm_80164504 stage-unlock/notification logic using stage lookup tables and gmMainLib calls.",
+      "evidence_refs": [
+        "diff_excerpt:src/melee/gm/gm_1601.c",
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lbarq.c",
+      "role": "Implemented lbArq_80014D2C initialization for lbArq global lists and nodes, with PAD_STACK.",
+      "evidence_refs": [
+        "diff_excerpt:src/melee/lb/lbarq.c",
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lbaudio_ax.c",
+      "role": "Implemented fn_800244F4 audio-global reset routine and added gm_1601 include.",
+      "evidence_refs": [
+        "diff_excerpt:src/melee/lb/lbaudio_ax.c",
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lbaudio_ax.h",
+      "role": "Updated fn_800244F4 prototype from UNK_RET/UNK_PARAMS to void fn_800244F4(void).",
+      "evidence_refs": [
+        "diff_excerpt:src/melee/lb/lbaudio_ax.h",
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lbaudio_ax.static.h",
+      "role": "Added static/extern audio globals used by fn_800244F4.",
+      "evidence_refs": [
+        "diff_excerpt:src/melee/lb/lbaudio_ax.static.h",
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lbmthp.c",
+      "role": "Implemented fn_8001EB14 THP init/header-read routine, including THPInit, DVDConvertPathToEntrynum, lbFile read, OSReport warnings, and state-field initialization.",
+      "evidence_refs": [
+        "diff_excerpt:src/melee/lb/lbmthp.c",
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lbmthp.h",
+      "role": "Expanded THPDecComp layout, declared THPInit, and updated fn_8001EB14 prototype to s32 fn_8001EB14(THPDecComp*, const char*).",
+      "evidence_refs": [
+        "diff_excerpt:src/melee/lb/lbmthp.h",
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mndatadel.c",
+      "role": "Implemented fn_8024FC48 data-delete menu logic and added mnmainrule include.",
+      "evidence_refs": [
+        "raw/diff.diff:src/melee/mn/mndatadel.c",
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnmainrule.c",
+      "role": "Implemented mn_802307F8 rule-menu text update logic and declared local externs.",
+      "evidence_refs": [
+        "raw/diff.diff:src/melee/mn/mnmainrule.c",
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnmainrule.h",
+      "role": "Added struct mn_802307F8_t and updated mn_802307F8 prototype.",
+      "evidence_refs": [
+        "raw/diff.diff:src/melee/mn/mnmainrule.h",
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnnamenew.c",
+      "role": "Implemented mnNameNew_8023B224 name-entry exit/transition routine and added relevant includes/extern.",
+      "evidence_refs": [
+        "raw/diff.diff:src/melee/mn/mnnamenew.c",
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnnamenew.h",
+      "role": "Updated mnNameNew_8023B224 prototype to void mnNameNew_8023B224(u8).",
+      "evidence_refs": [
+        "raw/diff.diff:src/melee/mn/mnnamenew.h",
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/ty/toy.c",
+      "role": "Expanded TyCameraData_ fields and implemented un_80307828 camera/light reset logic, using HSD_CObjSetInterest and PAD_STACK.",
+      "evidence_refs": [
+        "raw/diff.diff:src/melee/ty/toy.c",
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/melee/ty/toy.h",
+      "role": "Updated un_80307828 prototype return type to void.",
+      "evidence_refs": [
+        "raw/diff.diff:src/melee/ty/toy.h",
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/spline.c",
+      "role": "Adjusted helper linkage/inlining and refactored splArcLengthGetParameter with a static spl_GetArcLengthDx helper; associated with spline.c becoming Matching.",
+      "evidence_refs": [
+        "raw/diff.diff:src/sysdolphin/baselib/spline.c",
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/spline.h",
+      "role": "Removed splGetBSplinePoint declaration after making it static in spline.c.",
+      "evidence_refs": [
+        "raw/diff.diff:src/sysdolphin/baselib/spline.h",
+        "changed_files.jsonl"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Replaced multiple placeholder comments of the form /// #symbol with C implementations in fighter, game-mode, lb, menu, toy, and baselib code.",
+    "Updated headers to expose recovered function signatures and structs instead of UNK_RET/UNK_PARAMS for several functions.",
+    "Recovered typed struct/union fields where implementations needed named offsets, including ftCommon_MotionVars.unk_deadup, THPDecComp, TyCameraData_, and mn_802307F8_t.",
+    "Adjusted includes to use functions/types required by the new bodies, such as ftanim, lbvector, mpcoll, lbfile, dvd, menu, and gm headers.",
+    "Changed sysdolphin/baselib/spline.c from NonMatching to Matching in configure.py and changed related spline helper linkage/inlining and sdata2 symbol names."
+  ],
+  "smart_moves": [
+    {
+      "text": "Function bodies were paired with header prototype cleanup where the recovered signatures were visible, reducing reliance on UNK_RET/UNK_PARAMS.",
+      "evidence_refs": [
+        "diff_excerpt:src/melee/lb/lbaudio_ax.h",
+        "diff_excerpt:src/melee/lb/lbmthp.h",
+        "raw/diff.diff:src/melee/mn/mnnamenew.h",
+        "raw/diff.diff:src/melee/ty/toy.h"
+      ]
+    },
+    {
+      "text": "Recovered fields replaced larger opaque padding regions in structs/unions when new implementations accessed those offsets.",
+      "evidence_refs": [
+        "diff_excerpt:src/melee/ft/chara/ftCommon/types.h",
+        "diff_excerpt:src/melee/lb/lbmthp.h",
+        "raw/diff.diff:src/melee/ty/toy.c",
+        "raw/diff.diff:src/melee/mn/mnmainrule.h"
+      ]
+    },
+    {
+      "text": "The spline matching-status change was accompanied by source/linkage changes and symbols.txt metadata updates rather than only flipping configure.py.",
+      "evidence_refs": [
+        "diff_excerpt:configure.py",
+        "diff_excerpt:config/GALE01/symbols.txt",
+        "raw/diff.diff:src/sysdolphin/baselib/spline.c",
+        "raw/diff.diff:src/sysdolphin/baselib/spline.h"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a recovered body proves a function signature, update the owning header at the same time so callers no longer depend on UNK_RET/UNK_PARAMS.",
+      "evidence_refs": [
+        "diff_excerpt:src/melee/lb/lbaudio_ax.c",
+        "diff_excerpt:src/melee/lb/lbaudio_ax.h",
+        "diff_excerpt:src/melee/lb/lbmthp.c",
+        "diff_excerpt:src/melee/lb/lbmthp.h",
+        "raw/diff.diff:src/melee/mnnamenew.h",
+        "raw/diff.diff:src/melee/ty/toy.h"
+      ],
+      "scope": [
+        "headers",
+        "prototype recovery"
+      ]
+    },
+    {
+      "lesson": "Adding named fields to local structs/unions can make recovered bodies express offset accesses more directly than leaving broad padding, but field semantics remain provisional when names are still xNN/unk_NN.",
+      "evidence_refs": [
+        "diff_excerpt:src/melee/ft/chara/ftCommon/types.h",
+        "diff_excerpt:src/melee/lb/lbmthp.h",
+        "raw/diff.diff:src/melee/ty/toy.c",
+        "raw/diff.diff:src/melee/mn/mnmainrule.h"
+      ],
+      "scope": [
+        "struct recovery",
+        "typed fields"
+      ]
+    },
+    {
+      "lesson": "For file-local helper recovery, adjust header visibility when a helper becomes static; spline.c makes splGetBSplinePoint static and removes its public declaration.",
+      "evidence_refs": [
+        "raw/diff.diff:src/sysdolphin/baselib/spline.c",
+        "raw/diff.diff:src/sysdolphin/baselib/spline.h"
+      ],
+      "scope": [
+        "linkage",
+        "headers"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "Unproven functions and fields retain address-style or xNN/unk_NN names, e.g. fn_800244F4, fn_8001EB14, mn_802307F8_t, x4C, x50, and unk_128.",
+      "evidence_refs": [
+        "diff_excerpt:src/melee/lbaudio_ax.h",
+        "diff_excerpt:src/melee/lbmthp.h",
+        "raw/diff.diff:src/melee/mn/mnmainrule.h"
+      ]
+    },
+    {
+      "text": "Clear local role names are used for common object pointers such as fp, gobj, jobj, text, data, global, nodes, and node.",
+      "evidence_refs": [
+        "diff_excerpt:src/melee/ft/ft_0D31.c",
+        "diff_excerpt:src/melee/lb/lbarq.c",
+        "raw/diff.diff:src/melee/mndatadel.c",
+        "raw/diff.diff:src/melee/mnmainrule.c"
+      ]
+    },
+    {
+      "text": "Spline sdata2 symbols were reverted from semantic HSD_Spline_804DE62x names to @number labels, suggesting the slice did not retain semantic names for those constants.",
+      "evidence_refs": [
+        "diff_excerpt:config/GALE01/symbols.txt"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "text": "A scoped #pragma push / #pragma dont_inline on / #pragma pop block was used around ftKb_SpecialN_800F10D4.",
+      "evidence_refs": [
+        "diff_excerpt:src/melee/ft/chara/ftKirby/ftKb_Init.c"
+      ],
+      "caution": "The PR slice contains no objdiff/build explanation for why dont_inline was required."
+    },
+    {
+      "text": "PAD_STACK appears in ftKb_SpecialN_800F10D4, lbArq_80014D2C, mnNameNew_8023B224, and un_80307828.",
+      "evidence_refs": [
+        "diff_excerpt:src/melee/ft/chara/ftKirby/ftKb_Init.c",
+        "diff_excerpt:src/melee/lb/lbarq.c",
+        "raw/diff.diff:src/melee/mnnamenew.c",
+        "raw/diff.diff:src/melee/ty/toy.c"
+      ],
+      "caution": "The slice shows tactic use but no verifier evidence; keep as PR-specific observation, not a general endorsement."
+    },
+    {
+      "text": "spline.c matching involved linkage/inlining edits, including inline splGetCardinalPoint/splGetBezierPoint, static splGetBSplinePoint/splArcLengthPolynomial, and adding static spl_GetArcLengthDx.",
+      "evidence_refs": [
+        "raw/diff.diff:src/sysdolphin/baselib/spline.c",
+        "raw/diff.diff:src/sysdolphin/baselib/spline.h",
+        "diff_excerpt:configure.py"
+      ]
+    },
+    {
+      "text": "gm_80164504 uses goto labels found_stage and found_notify to structure two lookup loops before setting unlock state and notifications.",
+      "evidence_refs": [
+        "diff_excerpt:src/melee/gm/gm_1601.c"
+      ]
+    }
+  ],
+  "review_feedback": [],
+  "searchable_terms": [
+    "PR2369",
+    "Merge #2366 #2367 #2368",
+    "ribbanya",
+    "sysdolphin/baselib/spline.c Matching",
+    "splArcLengthGetParameter",
+    "spl_GetArcLengthDx",
+    "splGetBSplinePoint static",
+    "HSD_Spline_804DE620",
+    "@13 .sdata2 804DE620",
+    "ftKb_SpecialN_800F10D4 dont_inline PAD_STACK",
+    "ftKb_SpecialN_800F19AC",
+    "ftKb_SpecialN_800F1A8C",
+    "ftCo_DeadUpFall_Phys",
+    "ftCo_800D5600",
+    "gm_80164504",
+    "lbArq_80014D2C",
+    "fn_800244F4",
+    "lbAudioAx reset globals",
+    "fn_8001EB14 THPDecComp",
+    "mnDataDel fn_8024FC48",
+    "mn_802307F8",
+    "mnNameNew_8023B224",
+    "un_80307828",
+    "PAD_STACK",
+    "UNK_RET cleanup",
+    "THPInit",
+    "DVDConvertPathToEntrynum",
+    "HSD_CObjSetInterest"
+  ],
+  "follow_up_queries": [
+    "PR #2366 source slice for individual rationale and verification evidence",
+    "PR #2367 source slice for individual rationale and verification evidence",
+    "PR #2368 source slice for individual rationale and verification evidence",
+    "sysdolphin/baselib/spline.c Matching configure.py PR2369",
+    "ftKb_SpecialN_800F10D4 dont_inline PAD_STACK objdiff",
+    "HSD_Spline_804DE620 @13 symbols.txt rationale",
+    "fn_8001EB14 THPDecComp field recovery",
+    "mn_802307F8_t struct recovery",
+    "un_80307828 TyCameraData_ field recovery"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json",
+      "changed_files.jsonl",
+      "diff_excerpt",
+      "raw/diff.diff",
+      "text_corpus.jsonl"
+    ],
+    "notes": [
+      "Strong evidence for file list, changed-line counts, and exact diff content.",
+      "No PR body text is available beyond an empty body.",
+      "No review comments, issue comments, or review records are present in the slice.",
+      "No explicit build, objdiff, checkdiff, or CI validation output is included, so match status is only evidenced by configure.py changing spline.c to Matching and by the merged PR metadata.",
+      "This PR is a merge bundle for #2366, #2367, and #2368; individual rationale may exist in those source PRs but is not present in this slice."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "type": "decomp_lesson",
+        "title": "Recovered bodies should drive owning-header prototype cleanup",
+        "text": "This PR repeatedly pairs new function bodies with header signature updates from UNK_RET/UNK_PARAMS to concrete signatures, e.g. fn_800244F4(void), fn_8001EB14(THPDecComp*, const char*), mnNameNew_8023B224(u8), and un_80307828(int).",
+        "scope": [
+          "headers",
+          "prototype recovery"
+        ],
+        "evidence_refs": [
+          "diff_excerpt:src/melee/lb/lbaudio_ax.h",
+          "diff_excerpt:src/melee/lb/lbmthp.h",
+          "raw/diff.diff:src/melee/mnnamenew.h",
+          "raw/diff.diff:src/melee/ty/toy.h"
+        ]
+      },
+      {
+        "type": "decomp_lesson",
+        "title": "Use recovered struct fields to support matched bodies, but keep uncertain field names conservative",
+        "text": "The PR recovers fields in ftCommon_MotionVars.unk_deadup, THPDecComp, TyCameraData_, and mn_802307F8_t while retaining xNN/unk_NN names where semantics are not proven.",
+        "scope": [
+          "struct recovery",
+          "conservative naming"
+        ],
+        "evidence_refs": [
+          "diff_excerpt:src/melee/ft/chara/ftCommon/types.h",
+          "diff_excerpt:src/melee/lb/lbmthp.h",
+          "raw/diff.diff:src/melee/ty/toy.c",
+          "raw/diff.diff:src/melee/mn/mnmainrule.h"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "sysdolphin/baselib/spline.c became Matching in PR #2369",
+        "text": "configure.py changes Object(NonMatching, \"sysdolphin/baselib/spline.c\") to Object(Matching, \"sysdolphin/baselib/spline.c\") in this merged PR. The slice also includes spline.c and spline.h source/linkage changes plus symbols.txt changes around spline sdata2 constants.",
+        "source_path": "src/sysdolphin/baselib/spline.c",
+        "scope": [
+          "sysdolphin/baselib",
+          "matching status"
+        ],
+        "evidence_refs": [
+          "diff_excerpt:configure.py",
+          "raw/diff.diff:src/sysdolphin/baselib/spline.c",
+          "raw/diff.diff:src/sysdolphin/baselib/spline.h",
+          "diff_excerpt:config/GALE01/symbols.txt"
+        ],
+        "reason": "Path fact candidate because the configure.py diff directly changes the matching classification; curator should verify against current source/path-fact policy before promoting."
+      },
+      {
+        "target_source_id": "other",
+        "update_kind": "source_update",
+        "title": "Investigate whether source PRs #2366/#2367/#2368 contain missing verification evidence",
+        "text": "PR #2369 is titled \"Merge #2366, #2367, #2368\" and has no body or review comments in this slice. Individual source PRs may contain rationale, review feedback, or build/objdiff evidence absent here.",
+        "source_path": null,
+        "scope": [
+          "past PR evidence",
+          "curation completeness"
+        ],
+        "evidence_refs": [
+          "metadata_json:pr.title",
+          "text_corpus.jsonl",
+          "metadata_json:counts.review_comments=0"
+        ],
+        "reason": "Avoid treating this merge-bundle slice as complete rationale for all included decomp work."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote PAD_STACK or dont_inline use from this PR as an accepted tactic; the slice shows uses but contains no objdiff/build evidence explaining necessity.",
+      "Do not infer reviewer approval rationale or requested changes; there are no review comments or review records in the slice.",
+      "Do not claim every implemented function matched individually; only spline.c has an explicit configure.py Matching status change in the loaded evidence.",
+      "Do not treat the HSD_Spline_804DE62x-to-@number symbols.txt change as a global naming rule without additional symbol/source ownership evidence."
+    ]
+  },
+  "confidence": 0.72,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

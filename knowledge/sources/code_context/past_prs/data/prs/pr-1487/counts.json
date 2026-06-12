@@ -1,0 +1,17 @@
+{
+  "number": 1487,
+  "title": "some `mn` work",
+  "state": "MERGED",
+  "createdAt": "2025-01-12T19:51:31Z",
+  "updatedAt": "2025-01-14T21:40:55Z",
+  "mergedAt": "2025-01-14T21:40:54Z",
+  "closedAt": "2025-01-14T21:40:55Z",
+  "author": "thefoxcam",
+  "url": "https://github.com/doldecomp/melee/pull/1487",
+  "counts": {
+    "issue_comments": 2,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 43532
+  }
+}

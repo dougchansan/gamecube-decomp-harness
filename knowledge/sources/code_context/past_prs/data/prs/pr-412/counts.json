@@ -1,0 +1,17 @@
+{
+  "number": 412,
+  "title": "Match ftbosslib",
+  "state": "MERGED",
+  "createdAt": "2022-07-11T10:40:37Z",
+  "updatedAt": "2022-07-11T10:42:26Z",
+  "mergedAt": "2022-07-11T10:41:36Z",
+  "closedAt": "2022-07-11T10:41:36Z",
+  "author": "BR-",
+  "url": "https://github.com/doldecomp/melee/pull/412",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 74195
+  }
+}

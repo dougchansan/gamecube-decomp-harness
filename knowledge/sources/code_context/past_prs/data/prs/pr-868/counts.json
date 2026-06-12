@@ -1,0 +1,17 @@
+{
+  "number": 868,
+  "title": "Partially match `ftaction`",
+  "state": "MERGED",
+  "createdAt": "2023-05-26T06:48:23Z",
+  "updatedAt": "2023-05-26T06:58:46Z",
+  "mergedAt": "2023-05-26T06:58:44Z",
+  "closedAt": "2023-05-26T06:58:45Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/868",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 195161
+  }
+}

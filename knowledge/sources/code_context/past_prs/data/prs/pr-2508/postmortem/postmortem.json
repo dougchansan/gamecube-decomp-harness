@@ -1,0 +1,441 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2508",
+  "pr": {
+    "number": 2508,
+    "title": "lb: implement lb_80019628; improve four lbbgflash functions",
+    "url": "https://github.com/doldecomp/melee/pull/2508",
+    "state": "MERGED",
+    "author": "itsgrimetime",
+    "created_at": "2026-05-16T21:39:38Z",
+    "merged_at": "2026-05-16T22:27:08Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Implemented a C body for lb_80019628 in lb_0192.c and made focused source-shape changes in lbbgflash.c to improve fuzzy matching for several library/background-flash functions. The PR explicitly reported no 100% matches, a green configure+ninja build, and unchanged sibling functions in both touched TUs.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "partial-function-implementation",
+      "matching-tactics",
+      "source-shape-cleanup",
+      "types-structs"
+    ],
+    "systems": [
+      "library",
+      "lb",
+      "lbbgflash",
+      "pad-sampling",
+      "background-flash"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/lb/lb_0192.c",
+      "role": "Adds C implementation of lb_80019628 for pad sampling rate/alarm period maintenance.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/lb/lb_0192.c added 60 deleted 0 hunks 1",
+        "human_pr_text.md: lb_0192.c summary for lb_80019628",
+        "raw_diff.diff: added void lb_80019628(void)"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lbbgflash.c",
+      "role": "Adjusts source forms for per-channel saturation, vector squared-component ordering, quaternion rotation pointer handling, and reportedly parent ternary control flow.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/lb/lbbgflash.c added 55 deleted 38 hunks 3",
+        "human_pr_text.md: lbbgflash.c summaries for fn_8001FC08, lbBgFlash_80020E38, fn_8002113C, fn_80020AEC",
+        "raw_diff.diff: hunks for fn_8001FC08, lbBgFlash_80020E38, fn_8002113C"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "path": "src/melee/lb/lb_0192.c",
+      "symbols": [
+        "lb_80019628",
+        "fn_800195FC",
+        "lb_804329F0",
+        "PADSetSamplingRate",
+        "OSCancelAlarm",
+        "OSCreateAlarm",
+        "OSSetPeriodicAlarm"
+      ],
+      "change": "Added lb_80019628 as C code. The function snapshots lb_804329F0.x38, updates x0[0].x0, resets x0[0].x8 when needed, chooses a period bounded by OS_TIMER_CLOCK, x0[0].x0, x0[1].x0, and an approximately 1/60-second fps_period, caps the PAD sampling rate at 11 ms, conditionally calls PADSetSamplingRate, and recreates/reschedules the periodic alarm using fn_800195FC.",
+      "evidence_refs": [
+        "raw_diff.diff: lb_80019628 body",
+        "human_pr_text.md: lb_80019628 summary"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lbbgflash.c",
+      "symbols": [
+        "fn_8001FC08"
+      ],
+      "change": "Reworked four repeated RGBA saturation blocks to introduce branch-local u8 target and f32* cur locals before updating data->x10[i] toward data->x8 channel targets.",
+      "evidence_refs": [
+        "raw_diff.diff: fn_8001FC08 hunk",
+        "human_pr_text.md: fn_8001FC08 summary"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lbbgflash.c",
+      "symbols": [
+        "lbBgFlash_80020E38"
+      ],
+      "change": "Reordered squared component local declarations from dz2/dx2/dy2 to dx2/dy2/dz2 and changed the zero-vector sum order from dz2 + dy2 + dx2 to dx2 + dy2 + dz2.",
+      "evidence_refs": [
+        "raw_diff.diff: lbBgFlash_80020E38 hunk",
+        "human_pr_text.md: lbBgFlash_80020E38 summary"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lbbgflash.c",
+      "symbols": [
+        "fn_8002113C",
+        "Fake_HSD_JObjGetRotation",
+        "FakeHSD_JObjSetRotation",
+        "HSD_MkRotationMtx",
+        "HSD_QuatLib_8037EB28"
+      ],
+      "change": "Introduced Quaternion* volatile rot_ptr = &rot in the non-quaternion path and passed rot_ptr through get/matrix/quat/set calls instead of directly using &rot.",
+      "evidence_refs": [
+        "raw_diff.diff: fn_8002113C hunk",
+        "human_pr_text.md: fn_8002113C summary"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lbbgflash.c",
+      "symbols": [
+        "fn_80020AEC"
+      ],
+      "change": "PR body says parent = jobj ? jobj->parent : NULL was expanded to explicit if/else to match original branch scheduling, but the loaded diff excerpt does not include this hunk.",
+      "evidence_refs": [
+        "human_pr_text.md: fn_80020AEC summary"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "The PR body explicitly framed all changes as fuzzy-score improvements rather than claiming full matches, which avoids overstating validation.",
+      "evidence_refs": [
+        "human_pr_text.md: Functions matched: No 100% matches"
+      ]
+    },
+    {
+      "text": "For fn_8001FC08, the branch-local target and cur locals are narrow and tied to the stated MWCC register-retention goal rather than broad source churn.",
+      "evidence_refs": [
+        "human_pr_text.md: MWCC keeps byte target and x10[i] pointer in r5/r4",
+        "raw_diff.diff: fn_8001FC08 target/cur locals"
+      ]
+    },
+    {
+      "text": "For fn_8002113C, the volatile pointer tactic is documented with a specific compiler effect: preserving inline-substituted jobj.h assert calls that direct &rot allowed MWCC to prove away.",
+      "evidence_refs": [
+        "human_pr_text.md: Quaternion* volatile local keeps jobj.h:699/700 asserts",
+        "raw_diff.diff: Quaternion* volatile rot_ptr = &rot"
+      ]
+    },
+    {
+      "text": "The PR recorded build/regression scope as python configure.py && ninja with build/GALE01/main.dol OK and sibling functions unchanged.",
+      "evidence_refs": [
+        "human_pr_text.md: Verification section"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a repeated per-channel update needs specific MWCC register allocation, branch-local typed temporaries for the byte target and current-value pointer can improve matching without changing the high-level operation.",
+      "scope": [
+        "src/melee/lb/lbbgflash.c",
+        "fn_8001FC08",
+        "RGBA saturation blocks"
+      ],
+      "evidence_refs": [
+        "human_pr_text.md: fn_8001FC08 summary",
+        "raw_diff.diff: u8 target and f32* cur introduced in each branch"
+      ],
+      "confidence": 0.83
+    },
+    {
+      "lesson": "Local declaration and expression order for squared vector components can affect MWCC floating-point scheduling; try the original-looking dx/dy/dz order when matching lfs/fmuls/fadds pipelines.",
+      "scope": [
+        "src/melee/lb/lbbgflash.c",
+        "lbBgFlash_80020E38",
+        "Vec3 math"
+      ],
+      "evidence_refs": [
+        "human_pr_text.md: lbBgFlash_80020E38 summary",
+        "raw_diff.diff: dx2/dy2/dz2 declaration and sum order"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "A volatile pointer to an otherwise obvious local address can prevent MWCC from proving away null-related checks in an inline-expanded helper, but this is a narrow matching tactic that needs explicit objdiff/build evidence.",
+      "scope": [
+        "src/melee/lb/lbbgflash.c",
+        "fn_8002113C",
+        "Fake_HSD_JObjGetRotation",
+        "jobj.h inline asserts"
+      ],
+      "evidence_refs": [
+        "human_pr_text.md: fn_8002113C summary",
+        "raw_diff.diff: Quaternion* volatile rot_ptr"
+      ],
+      "confidence": 0.76
+    },
+    {
+      "lesson": "Replacing a ternary with explicit if/else may be useful when the target assembly schedules the non-null branch first, but this PR slice only supports that claim from the PR body, not the loaded diff hunk.",
+      "scope": [
+        "src/melee/lb/lbbgflash.c",
+        "fn_80020AEC",
+        "parent selection control flow"
+      ],
+      "evidence_refs": [
+        "human_pr_text.md: fn_80020AEC summary"
+      ],
+      "confidence": 0.52
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Used short local role names for matching-oriented temporaries: target for the channel byte, cur for the current f32 channel pointer, period/fps_period for timer intervals, rate for PAD sampling rate, and rot_ptr for a pointer to rot.",
+      "evidence_refs": [
+        "raw_diff.diff: lb_80019628 locals",
+        "raw_diff.diff: fn_8001FC08 locals",
+        "raw_diff.diff: fn_8002113C rot_ptr"
+      ]
+    },
+    {
+      "convention": "Kept address-style and existing symbol names such as lb_80019628, fn_8001FC08, lb_804329F0, and x0/x4/x38/x40/x48 rather than inventing semantic global or field names.",
+      "evidence_refs": [
+        "raw_diff.diff: added and edited code uses existing address-style/offset-style names"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Introduce branch-local u8 target and f32* cur locals in each saturation branch to keep the byte target and x10[i] pointer in desired registers across rising/falling logic.",
+      "symbols": [
+        "fn_8001FC08"
+      ],
+      "evidence_refs": [
+        "human_pr_text.md: fn_8001FC08 summary",
+        "raw_diff.diff: target/cur locals"
+      ]
+    },
+    {
+      "tactic": "Change floating-point declaration and addition order to dx2/dy2/dz2 and dx2 + dy2 + dz2 to better match original lfs/fmuls/fadds scheduling.",
+      "symbols": [
+        "lbBgFlash_80020E38"
+      ],
+      "evidence_refs": [
+        "human_pr_text.md: lbBgFlash_80020E38 summary",
+        "raw_diff.diff: component-order hunk"
+      ]
+    },
+    {
+      "tactic": "Route &rot through Quaternion* volatile rot_ptr so MWCC cannot elide inline-substituted assert calls in the Fake_HSD_JObjGetRotation path.",
+      "symbols": [
+        "fn_8002113C",
+        "Fake_HSD_JObjGetRotation"
+      ],
+      "evidence_refs": [
+        "human_pr_text.md: fn_8002113C summary",
+        "raw_diff.diff: rot_ptr hunk"
+      ]
+    },
+    {
+      "tactic": "Use explicit if/else instead of a ternary for parent selection when branch order matters.",
+      "symbols": [
+        "fn_80020AEC"
+      ],
+      "evidence_refs": [
+        "human_pr_text.md: fn_80020AEC summary"
+      ],
+      "notes": "Loaded diff does not show this hunk, so keep as lower-confidence PR-body evidence."
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot-report",
+      "author": "decomp-dev[bot]",
+      "text": "GALE01 report recorded 5 improvements in unmatched items: lb_80019628 0.00% to 82.58%, fn_8001FC08 89.68% to 91.77%, fn_8002113C 93.17% to 94.72%, lbbgflash .sdata 50.00% to 65.71%, and lbBgFlash_80020E38 98.46% to 98.52%.",
+      "evidence_refs": [
+        "text_corpus.jsonl: issue_comment by decomp-dev[bot]"
+      ]
+    },
+    {
+      "kind": "absence",
+      "author": null,
+      "text": "No human review comments or review records were present in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata_json: review_comments 0, reviews 0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2508",
+    "itsgrimetime",
+    "lb_80019628",
+    "lb_0192.c",
+    "lbbgflash.c",
+    "fn_8001FC08",
+    "lbBgFlash_80020E38",
+    "fn_8002113C",
+    "fn_80020AEC",
+    "lb_804329F0",
+    "PADSetSamplingRate",
+    "OS_TIMER_CLOCK",
+    "OSAlarm",
+    "OSCancelAlarm",
+    "OSCreateAlarm",
+    "OSSetPeriodicAlarm",
+    "fn_800195FC",
+    "lbSnap_8001D2BC",
+    "u8 target",
+    "f32* cur",
+    "dx2 dy2 dz2",
+    "lfs fmuls fadds",
+    "Quaternion* volatile",
+    "rot_ptr",
+    "Fake_HSD_JObjGetRotation",
+    "FakeHSD_JObjSetRotation",
+    "jobj.h:699",
+    "jobj.h:700",
+    "JOBJ_USE_QUATERNION",
+    "explicit if else parent",
+    "fuzzy match improvement",
+    "GALE01 main.dol OK"
+  ],
+  "follow_up_queries": [
+    "PR 2508 fn_80020AEC explicit if else parent diff hunk",
+    "fn_8001FC08 branch-local target cur MWCC r5 r4",
+    "fn_8002113C Quaternion volatile rot_ptr jobj.h asserts",
+    "lbBgFlash_80020E38 dx2 dy2 dz2 scheduling",
+    "lb_80019628 PADSetSamplingRate OSSetPeriodicAlarm lb_804329F0",
+    "lbbgflash .sdata improvement PR 2508"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR identity, merge state, changed files, counts",
+      "human_pr_text.md: author summary, claimed fuzzy improvements, verification",
+      "raw_diff.diff: concrete hunks for lb_80019628, fn_8001FC08, lbBgFlash_80020E38, fn_8002113C",
+      "text_corpus.jsonl: decomp-dev[bot] GALE01 report"
+    ],
+    "notes": [
+      "Strong evidence for PR identity, changed files, lb_80019628 implementation, and three lbbgflash hunks visible in the loaded diff.",
+      "PR body claims a fn_80020AEC if/else change and an 88.27% to 88.77% fuzzy improvement, but the loaded raw_diff excerpt does not include a fn_80020AEC hunk and the bot report lists .sdata as the fifth improved item instead.",
+      "The PR body reports python configure.py && ninja green and sibling functions unchanged; no independent build logs beyond the PR text were loaded.",
+      "No human review comments were loaded, so reviewer intent or acceptance rationale beyond merge state should not be inferred.",
+      "The raw PR JSON file is marked truncated, but the relevant PR body, diff, changed files, and text corpus are present separately."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "kind": "matching_lesson",
+        "title": "Branch-local typed temporaries can steer MWCC register retention in repeated channel blocks",
+        "text": "In fn_8001FC08, each RGBA saturation branch was rewritten to use branch-local u8 target and f32* cur locals. The PR body says this kept the byte target and x10[i] pointer in r5/r4 across rising/falling logic and improved fuzzy score from about 89.6% to 91.77%.",
+        "scope": [
+          "src/melee/lb/lbbgflash.c",
+          "fn_8001FC08",
+          "MWCC register allocation",
+          "per-channel saturation"
+        ],
+        "evidence_refs": [
+          "human_pr_text.md: fn_8001FC08 summary",
+          "raw_diff.diff: fn_8001FC08 target/cur hunk",
+          "text_corpus.jsonl: decomp-dev[bot] fn_8001FC08 score"
+        ]
+      },
+      {
+        "kind": "matching_lesson",
+        "title": "Floating-point local and sum order can affect vector math scheduling",
+        "text": "In lbBgFlash_80020E38, reordering dz2/dx2/dy2 to dx2/dy2/dz2 and using dx2 + dy2 + dz2 was tied to matching lfs/fmuls/fadds scheduling and produced a small fuzzy-score improvement.",
+        "scope": [
+          "src/melee/lb/lbbgflash.c",
+          "lbBgFlash_80020E38",
+          "floating-point scheduling"
+        ],
+        "evidence_refs": [
+          "human_pr_text.md: lbBgFlash_80020E38 summary",
+          "raw_diff.diff: component-order hunk",
+          "text_corpus.jsonl: decomp-dev[bot] lbBgFlash_80020E38 score"
+        ]
+      },
+      {
+        "kind": "matching_lesson",
+        "title": "Volatile pointer locals can preserve inline-expanded assert paths but require narrow evidence",
+        "text": "In fn_8002113C, routing &rot through Quaternion* volatile rot_ptr kept MWCC from proving the pointer non-null and eliding Fake_HSD_JObjGetRotation inline-substituted asserts at jobj.h:699/700, improving fuzzy score. This should remain a narrow matching tactic, not a default style.",
+        "scope": [
+          "src/melee/lb/lbbgflash.c",
+          "fn_8002113C",
+          "Fake_HSD_JObjGetRotation",
+          "jobj.h inline asserts",
+          "volatile local tactic"
+        ],
+        "evidence_refs": [
+          "human_pr_text.md: fn_8002113C summary",
+          "raw_diff.diff: Quaternion* volatile rot_ptr hunk",
+          "text_corpus.jsonl: decomp-dev[bot] fn_8002113C score"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Document volatile pointer locals as a rare assert-preservation matching tactic",
+        "text": "A PR-specific example used Quaternion* volatile rot_ptr = &rot to prevent MWCC from eliding inline-substituted jobj.h asserts in Fake_HSD_JObjGetRotation. Consider adding this as an example under matching tactics only if accompanied by narrow objdiff/build evidence, because volatile locals are already high-risk steering tactics.",
+        "source_path": null,
+        "scope": [
+          "matching-tactics-need-evidence",
+          "header-inlines",
+          "src/melee/lb/lbbgflash.c",
+          "fn_8002113C"
+        ],
+        "evidence_refs": [
+          "human_pr_text.md: fn_8002113C summary",
+          "raw_diff.diff: Quaternion* volatile rot_ptr hunk"
+        ],
+        "reason": "The loaded standards already warn that volatile locals need evidence; this PR provides a concrete historical example involving inline assert preservation."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Add floating-point declaration/order scheduling example",
+        "text": "Consider documenting that for MWCC vector math, local declaration order and expression sum order can affect lfs/fmuls/fadds scheduling, as shown by lbBgFlash_80020E38 changing dz2/dx2/dy2 to dx2/dy2/dz2 and dz2 + dy2 + dx2 to dx2 + dy2 + dz2.",
+        "source_path": null,
+        "scope": [
+          "canonical-control-flow-and-macros",
+          "matching-tactics-need-evidence",
+          "src/melee/lb/lbbgflash.c",
+          "lbBgFlash_80020E38"
+        ],
+        "evidence_refs": [
+          "human_pr_text.md: lbBgFlash_80020E38 summary",
+          "raw_diff.diff: component-order hunk"
+        ],
+        "reason": "This is a reusable matching observation, but it should be curated as an example rather than promoted broadly without more cases."
+      }
+    ],
+    "rejection_notes": [
+      "Do not record PR 2508 as containing 100% matched functions; the PR body explicitly says no 100% matches.",
+      "Do not infer human reviewer feedback or rationale; loaded slice has zero review comments and zero reviews.",
+      "Do not promote the fn_80020AEC if/else tactic as strongly evidenced from this slice; it appears in the PR body, but not in the loaded raw diff, and the bot report does not list fn_80020AEC as an improved item.",
+      "Do not treat the lbbgflash .sdata bot improvement as intentional data work; no diff evidence or PR body explanation for a data-section edit was loaded."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

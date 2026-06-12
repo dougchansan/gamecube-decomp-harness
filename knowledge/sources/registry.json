@@ -1,15 +1,72 @@
 {
+  "sections": {
+    "injectable": {
+      "title": "Injected Context",
+      "description": "Compact facts selected before or during worker boot. These sources are not treated as broad RAG stores."
+    },
+    "rag_search": {
+      "title": "Searchable Knowledge Bases",
+      "description": "Standalone corpora that workers query with source-local APIs or graph search."
+    },
+    "code_context": {
+      "title": "Code-Connected Evidence",
+      "description": "Sources that attach to files, symbols, graph cards, PR history, data-sheet rows, or mirrored reference edges."
+    }
+  },
   "sources": [
-    "code_graph",
-    "past_prs",
-    "discord_knowledge",
-    "ssbm_data_sheet",
-    "powerpc_docs",
-    "external_mirrors",
-    "resource_guides",
-    "reference_docs",
-    "tool_outputs",
-    "decomp_standards",
-    "path_facts"
+    {
+      "id": "decomp_standards",
+      "section": "injectable",
+      "path": "injectable/decomp_standards",
+      "access_modes": ["global_injection", "worker_bootstrap", "proposal_listing"]
+    },
+    {
+      "id": "path_facts",
+      "section": "injectable",
+      "path": "injectable/path_facts",
+      "access_modes": ["path_scoped_injection", "worker_bootstrap", "resolve_for_path", "proposal_listing"]
+    },
+    {
+      "id": "banned_patterns",
+      "section": "injectable",
+      "path": "injectable/banned_patterns",
+      "access_modes": ["global_injection", "worker_bootstrap", "proposal_listing"]
+    },
+    {
+      "id": "discord_knowledge",
+      "section": "rag_search",
+      "path": "rag_search/discord_knowledge",
+      "access_modes": ["source_search", "topic_lookup", "graph_search"]
+    },
+    {
+      "id": "powerpc_docs",
+      "section": "rag_search",
+      "path": "rag_search/powerpc_docs",
+      "access_modes": ["source_search", "instruction_lookup", "graph_search"]
+    },
+    {
+      "id": "ssbm_data_sheet",
+      "section": "code_context",
+      "path": "code_context/ssbm_data_sheet",
+      "access_modes": ["source_search", "address_lookup", "offset_lookup", "graph_search"]
+    },
+    {
+      "id": "external_mirrors",
+      "section": "code_context",
+      "path": "code_context/external_mirrors",
+      "access_modes": ["source_search", "symbol_lookup", "graph_search"]
+    },
+    {
+      "id": "code_graph",
+      "section": "code_context",
+      "path": "code_context/code_graph",
+      "access_modes": ["file_card", "rank_features", "editability", "graph_search"]
+    },
+    {
+      "id": "past_prs",
+      "section": "code_context",
+      "path": "code_context/past_prs",
+      "access_modes": ["refreshable_corpus", "file_edges", "review_risks", "graph_search", "source_search"]
+    }
   ]
 }

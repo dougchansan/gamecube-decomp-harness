@@ -1,0 +1,17 @@
+{
+  "number": 1796,
+  "title": "Table typer: StageCallbacks",
+  "state": "MERGED",
+  "createdAt": "2025-08-05T22:14:04Z",
+  "updatedAt": "2025-08-06T00:04:59Z",
+  "mergedAt": "2025-08-06T00:04:59Z",
+  "closedAt": "2025-08-06T00:04:59Z",
+  "author": "lukechampine",
+  "url": "https://github.com/doldecomp/melee/pull/1796",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 219824
+  }
+}

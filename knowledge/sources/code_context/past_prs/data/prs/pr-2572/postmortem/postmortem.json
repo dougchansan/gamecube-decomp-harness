@@ -1,0 +1,375 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2572",
+  "pr": {
+    "number": 2572,
+    "title": "Match some duplicates",
+    "url": "https://github.com/doldecomp/melee/pull/2572",
+    "state": "MERGED",
+    "author": "lukechampine",
+    "created_at": "2026-06-02T20:21:39Z",
+    "merged_at": "2026-06-02T21:58:44Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2572 applied duplicate-driven matching work produced by re-running `table-typer dups`, touching fighter, game-mode, ground, and item files. The bot report records +2020 matched-code bytes, five newly matched functions, and three unmatched-item improvements.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "duplicate-function cleanup",
+      "types-structs",
+      "control-flow cleanup",
+      "matching-tactic cleanup"
+    ],
+    "systems": [
+      "fighter",
+      "game-mode",
+      "ground",
+      "item"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/it/itcoll.c",
+      "role": "Large item-collision matching cleanup; bot reports `it_802703E8` newly matched and `it_802706D0` improved.",
+      "evidence_refs": [
+        "changed_files.jsonl: itcoll.c +229/-297, 4 hunks",
+        "raw_diff: it_802703E8 rewritten with early return, for loops, continues, typed locals",
+        "text_corpus issue_comment: it_802703E8 95.20% -> 100.00%; it_802706D0 93.39% -> 95.89%"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_SpecialN.c",
+      "role": "Formatting and local expression reshaping around Kirby special-N/Lw duplicate-adjacent code.",
+      "evidence_refs": [
+        "changed_files.jsonl: ftKb_SpecialN.c +41/-35, 14 hunks",
+        "raw_diff: Fighter_ChangeMotionState, lb_8000B1CC, ftWalkCommon_800DFCA4 call formatting and conditional brace layout changes"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftdynamics.c",
+      "role": "Fighter dynamics duplicate match for `ftCo_8009D81C` using local renaming, PAD_STACK expression, and direct array indexing.",
+      "evidence_refs": [
+        "changed_files.jsonl: ftdynamics.c +11/-11, 2 hunks",
+        "raw_diff: `data` renamed `hat`, `PAD_STACK(8)` changed to `PAD_STACK(2 * 4)`, `bone_id` local introduced",
+        "text_corpus issue_comment: ftCo_8009D81C 92.98% -> 100.00%"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1601.c",
+      "role": "Game-mode timer function `gm_80163B9C` matched by changing loop semantics to accumulate all 0x19 frame counters and fail on missing entries.",
+      "evidence_refs": [
+        "changed_files.jsonl: gm_1601.c +25/-22, 1 hunk",
+        "raw_diff: `gm_80163B9C` now initializes `total_frames`, loops `i < 0x19`, accumulates `*gmMainLib_8015D6F8`, and returns false on missing entry",
+        "text_corpus issue_comment: gm_80163B9C 78.60% -> 100.00%"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmmain_lib.c",
+      "role": "Small local-name adjustment in game main library.",
+      "evidence_refs": [
+        "changed_files.jsonl: gmmain_lib.c +2/-2, 1 hunk",
+        "raw_diff: pointer local renamed from `qwe` to `temp_r31` in `gmMainLib_8015D984`"
+      ]
+    },
+    {
+      "path": "src/melee/gr/granime.c",
+      "role": "Ground animation duplicate match by replacing expanded helper body with existing helper call plus stack padding.",
+      "evidence_refs": [
+        "changed_files.jsonl: granime.c +3/-26, 1 hunk",
+        "raw_diff: `grAnime_801C84A4` now calls `grAnime_801C8318(gobj, arg1, arg2)`, adds `PAD_STACK(8)`, and tests `HSD_AObjGetFlags(aobj)`",
+        "text_corpus issue_comment: grAnime_801C84A4 97.92% -> 100.00%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grkongo.c",
+      "role": "Ground Kongo match using stack padding and replacing random helper calls with `rand_range` forms.",
+      "evidence_refs": [
+        "changed_files.jsonl: grkongo.c +3/-2, 2 hunks",
+        "raw_diff: `PAD_STACK(8)` added; `random_adder_f/random_adder` changed to `rand_range` expressions",
+        "text_corpus issue_comment: grKongo_801D55D8 99.02% -> 100.00%"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itlinkbomb.c",
+      "role": "Small item function improvement reported for Link bomb animation.",
+      "evidence_refs": [
+        "changed_files.jsonl: itlinkbomb.c +5/-7, 2 hunks",
+        "text_corpus issue_comment: itLinkbomb_UnkMotion3_Anim 98.80% -> 99.60%"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itlinkhookshot.c",
+      "role": "Small item function improvement reported for Link hookshot.",
+      "evidence_refs": [
+        "changed_files.jsonl: itlinkhookshot.c +29/-10, 2 hunks",
+        "text_corpus issue_comment: it_802A4BFC 99.90% -> 99.99%"
+      ]
+    }
+  ],
+  "what_changed": [
+    "The author says the work came from re-running `table-typer dups` after more functions had matched.",
+    "The bot report records matched code increasing to 69.90%, +0.05%, +2020 bytes.",
+    "Five functions reached 100% according to the bot report: `gm_80163B9C`, `it_802703E8`, `ftCo_8009D81C`, `grAnime_801C84A4`, and `grKongo_801D55D8`.",
+    "Three additional unmatched items improved according to the bot report: `it_802706D0`, `itLinkbomb_UnkMotion3_Anim`, and `it_802A4BFC`.",
+    "`it_802703E8` was substantially reshaped from nested while/goto-style control flow into early returns, `for` loops, and `continue` filters while retaining typed item/fighter/hit/hurtbox accesses.",
+    "`grAnime_801C84A4` collapsed an expanded animation-search implementation into a call to existing helper `grAnime_801C8318`, plus a `PAD_STACK(8)`.",
+    "`gm_80163B9C` changed from returning on the first present timer entry to accumulating frame totals across 0x19 entries and returning false if any queried entry is absent."
+  ],
+  "smart_moves": [
+    {
+      "text": "Re-running duplicate detection after prior match progress exposed additional small but real matching wins across unrelated subsystems.",
+      "evidence_refs": [
+        "human_pr_text: author says Jelle suggested re-running `table-typer dups` now that more functions matched",
+        "text_corpus issue_comment: +2020 matched-code bytes and five new matches"
+      ]
+    },
+    {
+      "text": "Replacing duplicated expanded code with an existing helper in `grAnime_801C84A4` reduced source size and reached a bot-reported match.",
+      "evidence_refs": [
+        "raw_diff: `grAnime_801C84A4` changed from manual `HSD_ForeachAnim` logic to `grAnime_801C8318`",
+        "text_corpus issue_comment: grAnime_801C84A4 97.92% -> 100.00%"
+      ]
+    },
+    {
+      "text": "The item-collision rewrite used structured loops and early `continue` filters instead of nested generated-looking control flow.",
+      "evidence_refs": [
+        "raw_diff: `it_802703E8` early returns when no hurtboxes, iterates fighters/hits/hurtboxes with `for` loops",
+        "text_corpus issue_comment: it_802703E8 95.20% -> 100.00%"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "Duplicate-search tooling can be useful after nearby functions have matched, but the resulting edits still need narrow match evidence per touched symbol.",
+      "evidence_refs": [
+        "human_pr_text: `table-typer dups` rerun after more functions matched",
+        "text_corpus issue_comment: bot lists exact matched and improved symbols"
+      ],
+      "confidence": 0.86
+    },
+    {
+      "lesson": "When a function duplicates an existing helper's behavior, replacing the expanded body with the helper call can be the matching source form.",
+      "evidence_refs": [
+        "raw_diff: `grAnime_801C84A4` replaced expanded `Ground_801C3FA4`/mask/`HSD_ForeachAnim` body with `grAnime_801C8318`",
+        "text_corpus issue_comment: grAnime_801C84A4 reached 100%"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "lesson": "Generated-looking nested collision checks may match better as ordinary structured loops with early exits/continues when the repeated access pattern is over fighters, hit capsules, and hurtboxes.",
+      "evidence_refs": [
+        "raw_diff: `it_802703E8` converted to fighter/hit/hurtbox `for` loops with early `continue` conditions",
+        "text_corpus issue_comment: it_802703E8 reached 100%"
+      ],
+      "confidence": 0.8
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "`hat` for a `KirbyHatStruct*` selected from `ft_80459B88.hats[...]`",
+      "scope": [
+        "src/melee/ft/ftdynamics.c",
+        "ftCo_8009D81C"
+      ],
+      "evidence_refs": [
+        "raw_diff: `KirbyHatStruct* data` changed to `KirbyHatStruct* hat`"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "name": "`aobj` for an `HSD_AObj*` returned by a ground-animation helper",
+      "scope": [
+        "src/melee/gr/granime.c",
+        "grAnime_801C84A4"
+      ],
+      "evidence_refs": [
+        "raw_diff: `HSD_AObj* aobj = grAnime_801C8318(...)`"
+      ],
+      "confidence": 0.74
+    },
+    {
+      "name": "`temp_r31` retained for a pointer local when semantics are not clarified",
+      "scope": [
+        "src/melee/gm/gmmain_lib.c",
+        "gmMainLib_8015D984"
+      ],
+      "evidence_refs": [
+        "raw_diff: `qwe` changed to `temp_r31`"
+      ],
+      "confidence": 0.62
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Use `PAD_STACK` narrowly where needed for matched duplicate shapes.",
+      "examples": [
+        "`ftCo_8009D81C`: `PAD_STACK(8)` changed to `PAD_STACK(2 * 4)`",
+        "`grAnime_801C84A4`: `PAD_STACK(8)` added",
+        "`grKongo_801D55D8`: `PAD_STACK(8)` added"
+      ],
+      "evidence_refs": [
+        "raw_diff: PAD_STACK changes in ftdynamics.c, granime.c, grkongo.c",
+        "text_corpus issue_comment: those functions reached 100%"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "tactic": "Prefer existing helper calls over manually expanded equivalent logic when duplicate matching indicates shared source shape.",
+      "examples": [
+        "`grAnime_801C84A4` calls `grAnime_801C8318` and then checks `HSD_AObjGetFlags`"
+      ],
+      "evidence_refs": [
+        "raw_diff: grAnime_801C84A4 helper-call replacement",
+        "text_corpus issue_comment: grAnime_801C84A4 100%"
+      ],
+      "confidence": 0.84
+    },
+    {
+      "tactic": "Use loop restructuring and early `continue` filters to reduce generated-looking collision code.",
+      "examples": [
+        "`it_802703E8` iterates `HSD_GObj_Entities->fighters`, hit capsules, and item hurtboxes using `for` loops"
+      ],
+      "evidence_refs": [
+        "raw_diff: it_802703E8 control-flow rewrite",
+        "text_corpus issue_comment: it_802703E8 100%"
+      ],
+      "confidence": 0.81
+    },
+    {
+      "tactic": "Small expression substitutions can matter for near-matches, such as using `rand_range` in place of random-adder helpers in `grKongo_801D55D8`.",
+      "examples": [
+        "`random_adder_f(...)` changed to `rand_range((s32) ..., (s32) ...)`",
+        "`random_adder(...)` changed to `rand_range(...)`"
+      ],
+      "evidence_refs": [
+        "raw_diff: grkongo.c random helper changes",
+        "text_corpus issue_comment: grKongo_801D55D8 100%"
+      ],
+      "confidence": 0.7
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "text": "decomp-dev[bot] reported +2020 matched-code bytes, five new matches, and three improvements in unmatched items.",
+      "evidence_refs": [
+        "text_corpus issue_comment by decomp-dev[bot] at 2026-06-02T20:28:12Z"
+      ]
+    },
+    {
+      "kind": "human_review",
+      "text": "No review comments or formal review records are present in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata_json counts: review_comments 0, reviews 0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2572",
+    "Match some duplicates",
+    "table-typer dups",
+    "duplicate metric",
+    "gm_80163B9C",
+    "it_802703E8",
+    "it_802706D0",
+    "ftCo_8009D81C",
+    "grAnime_801C84A4",
+    "grAnime_801C8318",
+    "grKongo_801D55D8",
+    "itLinkbomb_UnkMotion3_Anim",
+    "it_802A4BFC",
+    "PAD_STACK",
+    "rand_range",
+    "KirbyHatStruct",
+    "HitCapsule",
+    "HurtCapsule",
+    "HSD_AObjGetFlags"
+  ],
+  "follow_up_queries": [
+    "table-typer dups duplicate matching PR",
+    "grAnime_801C84A4 grAnime_801C8318 PAD_STACK",
+    "it_802703E8 HitCapsule HurtCapsule collision loop",
+    "ftCo_8009D81C KirbyHatStruct hat_dynamics bone_id",
+    "gm_80163B9C total_frames 0x19 gmMainLib_8015D6F8",
+    "grKongo_801D55D8 rand_range random_adder_f"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR identity, changed files, merged status, counts",
+      "human_pr_text: author rationale and duplicate-tooling context",
+      "raw_diff: concrete excerpts for 7 of 9 changed files, but diff content is truncated before full item-file coverage",
+      "changed_files.jsonl: complete changed-file list",
+      "text_corpus issue_comment: bot match report"
+    ],
+    "notes": [
+      "The loaded raw diff is truncated, so details for `itlinkbomb.c`, `itlinkhookshot.c`, and later `itcoll.c` hunks are only partially represented by changed-file metadata and bot report.",
+      "No human review comments are available; do not infer reviewer intent or acceptance rationale beyond merge metadata and the bot report.",
+      "The bot report provides match/improvement percentages, but no full objdiff logs or local build commands are included in the slice."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson",
+        "title": "Duplicate-tool reruns can reveal small match wins after prior progress",
+        "text": "In PR #2572, the author reports re-running `table-typer dups` after more functions had matched; the bot then reported +2020 matched-code bytes, five new matches, and three additional improvements. Treat duplicate-tool output as a candidate generator that still needs per-symbol match evidence.",
+        "scope": [
+          "decomp-matching",
+          "duplicate matching workflow"
+        ],
+        "evidence_refs": [
+          "human_pr_text",
+          "text_corpus issue_comment"
+        ]
+      },
+      {
+        "record_type": "matching_tactic",
+        "title": "Expanded duplicate bodies may collapse to existing helpers",
+        "text": "`grAnime_801C84A4` matched by replacing a manually expanded animation-search body with `grAnime_801C8318(gobj, arg1, arg2)`, plus a narrow stack pad, then checking `HSD_AObjGetFlags`.",
+        "scope": [
+          "src/melee/gr/granime.c",
+          "grAnime_801C84A4"
+        ],
+        "evidence_refs": [
+          "raw_diff: grAnime_801C84A4",
+          "text_corpus issue_comment"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Duplicate-search tooling as candidate discovery",
+        "text": "Consider documenting `table-typer dups` as a candidate-discovery workflow after related functions have matched. PR #2572 suggests it can produce modest real gains, but the output should remain subject to ordinary per-function match verification and review.",
+        "source_path": null,
+        "scope": [
+          "matching workflow",
+          "duplicate functions"
+        ],
+        "evidence_refs": [
+          "human_pr_text: author says the PR resulted from re-running `table-typer dups`",
+          "text_corpus issue_comment: +2020 bytes and listed matches/improvements"
+        ],
+        "reason": "This is workflow guidance supported by the PR body and bot report, but should be curated before becoming a global standard."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote `PAD_STACK` use from this PR as a general style rule; the slice shows narrow uses associated with matches, and existing standards require explicit evidence.",
+      "Do not infer that `rand_range` should always replace `random_adder` helpers; the evidence is limited to `grKongo_801D55D8` in this PR.",
+      "Do not treat `temp_r31` as a preferred semantic name; it appears to be a conservative/matching local name in one small hunk."
+    ]
+  },
+  "confidence": 0.84,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "pr": 729,
+  "title": "Port `build.sh` to Python",
+  "url": "https://github.com/doldecomp/melee/pull/729",
+  "text_records_with_body": 3,
+  "review_comments": 1,
+  "changed_files": 17,
+  "added_lines": 1020,
+  "deleted_lines": 21
+}

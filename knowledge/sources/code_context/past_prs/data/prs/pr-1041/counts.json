@@ -1,0 +1,17 @@
+{
+  "number": 1041,
+  "title": "Match sysdolphin's video.c",
+  "state": "MERGED",
+  "createdAt": "2023-12-22T00:29:26Z",
+  "updatedAt": "2023-12-22T02:37:50Z",
+  "mergedAt": "2023-12-22T02:37:46Z",
+  "closedAt": "2023-12-22T02:37:46Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/1041",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 95114
+  }
+}

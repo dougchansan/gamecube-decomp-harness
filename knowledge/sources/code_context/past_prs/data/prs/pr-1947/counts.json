@@ -1,0 +1,17 @@
+{
+  "number": 1947,
+  "title": "Match CaptureDamage callbacks in ftCo_Attack100",
+  "state": "MERGED",
+  "createdAt": "2025-09-27T07:54:26Z",
+  "updatedAt": "2025-09-27T08:00:14Z",
+  "mergedAt": "2025-09-27T08:00:08Z",
+  "closedAt": "2025-09-27T08:00:08Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1947",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 10714
+  }
+}

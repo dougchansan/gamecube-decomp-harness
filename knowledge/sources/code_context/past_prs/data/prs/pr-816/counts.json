@@ -1,0 +1,17 @@
+{
+  "number": 816,
+  "title": "Add animation IDs",
+  "state": "MERGED",
+  "createdAt": "2023-04-25T02:43:39Z",
+  "updatedAt": "2023-04-25T03:02:28Z",
+  "mergedAt": "2023-04-25T03:02:27Z",
+  "closedAt": "2023-04-25T03:02:27Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/816",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 402549
+  }
+}

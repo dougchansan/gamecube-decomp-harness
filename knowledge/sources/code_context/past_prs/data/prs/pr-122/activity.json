@@ -1,0 +1,10 @@
+{
+  "pr": 122,
+  "title": "Match Melee's version of __start.c to fix splitting issue",
+  "url": "https://github.com/doldecomp/melee/pull/122",
+  "text_records_with_body": 0,
+  "review_comments": 0,
+  "changed_files": 44,
+  "added_lines": 398,
+  "deleted_lines": 441
+}

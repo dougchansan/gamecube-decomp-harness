@@ -1,0 +1,17 @@
+{
+  "number": 1952,
+  "title": "Match most Popo side-B callbacks",
+  "state": "MERGED",
+  "createdAt": "2025-09-28T04:44:42Z",
+  "updatedAt": "2025-09-28T04:51:23Z",
+  "mergedAt": "2025-09-28T04:51:19Z",
+  "closedAt": "2025-09-28T04:51:19Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1952",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 25348
+  }
+}

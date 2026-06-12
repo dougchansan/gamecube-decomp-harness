@@ -1,0 +1,17 @@
+{
+  "number": 420,
+  "title": "Print bytes to the next trophy.",
+  "state": "MERGED",
+  "createdAt": "2022-07-16T21:10:40Z",
+  "updatedAt": "2022-07-16T21:10:50Z",
+  "mergedAt": "2022-07-16T21:10:50Z",
+  "closedAt": "2022-07-16T21:10:50Z",
+  "author": "RevoSucks",
+  "url": "https://github.com/doldecomp/melee/pull/420",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 830
+  }
+}

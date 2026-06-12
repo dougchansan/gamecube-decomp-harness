@@ -1,0 +1,17 @@
+{
+  "number": 2118,
+  "title": "Match and link itgamewatchgreenhouse",
+  "state": "MERGED",
+  "createdAt": "2026-01-22T16:33:49Z",
+  "updatedAt": "2026-01-22T16:48:03Z",
+  "mergedAt": "2026-01-22T16:47:55Z",
+  "closedAt": "2026-01-22T16:47:55Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/2118",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 17170
+  }
+}

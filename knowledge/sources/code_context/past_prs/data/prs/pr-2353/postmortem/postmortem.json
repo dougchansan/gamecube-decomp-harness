@@ -1,0 +1,291 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2353",
+  "pr": {
+    "number": 2353,
+    "title": "ftKb_SpecialNNs.c matches",
+    "url": "https://github.com/doldecomp/melee/pull/2353",
+    "state": "MERGED",
+    "author": "lukechampine",
+    "created_at": "2026-03-25T17:14:24Z",
+    "merged_at": "2026-03-25T18:39:15Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2353 decompiled and matched a large slice of Kirby neutral-special copy functions in ftKb_SpecialNNs.c, with supporting header/type updates. The bot report records +0.50% matched code, +19284 bytes, 42 new matches in main/melee/ft/chara/ftKirby/ftKb_SpecialNNs, plus a .sdata2 improvement.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "types"
+    ],
+    "systems": [
+      "fighter",
+      "Kirby",
+      "copy ability special-N"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_SpecialNNs.c",
+      "role": "Primary decompilation target; replaces many placeholder functions with C implementations and adds local helpers, includes, constants, and matching tactics.",
+      "evidence_refs": [
+        "changed_files.jsonl: ftKb_SpecialNNs.c +1349/-181, 15 hunks",
+        "raw_diff: added ftKb_JObj* helpers, ftKb_AirScaleAnimStep, ftKb_NsSpecialAirNStart_Anim, ftKb_NsSpecialAirNHold_Anim, ftKb_SpecialNDk_800FF8EC, ftKb_SpecialNDk_800FFA10, fn_80100E0C, ftKb_SpecialNPr_* functions",
+        "text_corpus: bot report lists 42 new matches in main/melee/ft/chara/ftKirby/ftKb_SpecialNNs"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/types.h",
+      "role": "Type refinement for Kirby fighter vars: three adjacent floats at x8C/x90/x94 become a Vec3 x8C.",
+      "evidence_refs": [
+        "raw_diff: types.h changes ftKb_FighterVars fields x8C/x90/x94 from float,float,float to Vec3 x8C"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_Init.c",
+      "role": "Initializer adjusted to write x8C.x/y/z after the Vec3 type change.",
+      "evidence_refs": [
+        "diff_excerpt: ftKb_SpecialN_800F190C writes fp->fv.kb.x8C.x/y/z = 1.0F"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_Init.h",
+      "role": "Prototype update for ftKb_SpecialNPr_8010140C to include a bool argument.",
+      "evidence_refs": [
+        "diff_excerpt: ftKb_SpecialNPr_8010140C(Fighter_GObj* gobj, bool arg1)"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_Init.dox",
+      "role": "Doxygen declaration updated to mirror the ftKb_SpecialNPr_8010140C bool argument.",
+      "evidence_refs": [
+        "diff_excerpt: ftKb_Init.dox prototype changed to include bool arg1"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Added numerous C implementations in ftKb_SpecialNNs.c for Kirby copied neutral specials, especially Ness, Donkey Kong, and Jigglypuff/Purin-related SpecialN routines.",
+    "Added local inline helpers for repeated animation/setup behavior, including ftKb_NsSpecialNStart_Anim_inline, ftKb_AirScaleAnimStep, ftKb_PrScaleAnimStep, ftKb_PrRestoreScale, and ftKb_PrSetCallbacks.",
+    "Added local HSD_JObj helper wrappers for scale/rotation/dirty-matrix operations, using raw assert strings and line numbers from jobj.h-style evidence in the diff.",
+    "Changed ftKb_FighterVars x8C/x90/x94 from three floats to a single Vec3 x8C and updated initialization sites to assign x/y/z fields.",
+    "Updated the ftKb_SpecialNPr_8010140C prototype in both ftKb_Init.h and ftKb_Init.dox to take a bool argument.",
+    "Added includes required by the new implementations, including camera, landing, ft_0877, cliff common, mplib, and MSL trigf headers.",
+    "The bot report records 42 new matched functions/items for ftKb_SpecialNNs and one .sdata2 improvement."
+  ],
+  "smart_moves": [
+    "The PR used a Vec3 for the three adjacent Kirby fighter-var scale slots, making subsequent scale logic use typed x/y/z field accesses instead of separate scalar fields.",
+    "Shared inline helpers captured duplicated setup paths, such as spawning the Ness PK Flash item and setting callbacks from both ground and air start animations.",
+    "Several air physics functions were reduced to a shared implementation call plus narrow PAD_STACK use, replacing earlier fake comma-operator regalloc comments shown in the diff.",
+    "Header and dox prototypes were kept in sync for ftKb_SpecialNPr_8010140C when the recovered body required an extra bool parameter."
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When adjacent fighter-var scalar slots are consistently consumed as a vector, a temporary or recovered Vec3 field can simplify scale code and make initialization/source access more truthful.",
+      "evidence_refs": [
+        "raw_diff: types.h x8C/x90/x94 -> Vec3 x8C",
+        "diff_excerpt: ftKb_SpecialN_800F190C initializes x8C.x/y/z",
+        "raw_diff: ftKb_PrScaleAnimStep and ftKb_AirScaleAnimStep read fp->fv.kb.x8C.x/y/z"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "lesson": "For repeated ground/air animation setup, a local static inline can preserve one source shape while avoiding duplicated generated-looking blocks.",
+      "evidence_refs": [
+        "raw_diff: ftKb_NsSpecialNStart_Anim_inline used by ftKb_NsSpecialNStart_Anim and ftKb_NsSpecialAirNStart_Anim"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "Recovered function signatures should be propagated to owning declarations, including dox declarations when present.",
+      "evidence_refs": [
+        "diff_excerpt: ftKb_Init.h and ftKb_Init.dox both update ftKb_SpecialNPr_8010140C to include bool arg1"
+      ],
+      "confidence": 0.9
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Kirby copy-special helper names use the ftKb_ prefix and include copied-character abbreviations such as Ns, Dk, and Pr in function names.",
+      "evidence_refs": [
+        "raw_diff: ftKb_NsSpecialAirNHold_Anim, ftKb_SpecialNDk_800FF8EC, ftKb_PrSpecialN_Anim-related names"
+      ]
+    },
+    {
+      "convention": "Local extracted helpers in this PR use a descriptive ftKb_* name and sometimes an _inline suffix when the helper is intended to inline into callers.",
+      "evidence_refs": [
+        "raw_diff: ftKb_NsSpecialNStart_Anim_inline, ftKb_DkSpecialNStart_Coll_inline"
+      ]
+    },
+    {
+      "convention": "Address-style names were retained where semantics were not clarified, e.g. fn_80100E0C and fn_80105978.",
+      "evidence_refs": [
+        "raw_diff: fn_80100E0C body added while retaining address-style name; fn_80105978 retained"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Narrow PAD_STACK use was added in multiple recovered functions to preserve stack/code shape.",
+      "evidence_refs": [
+        "raw_diff: PAD_STACK(20) in Ness start animations; PAD_STACK(4) in air physics and fn_80100E0C; PAD_STACK(8) in Donkey Kong and Purin routines"
+      ],
+      "risk_note": "Loaded evidence shows bot match results but no detailed objdiff excerpt explaining each PAD_STACK requirement."
+    },
+    {
+      "tactic": "A static const motion-flags bitmask was used in fn_80100E0C for a large Fighter_ChangeMotionState flag argument.",
+      "evidence_refs": [
+        "raw_diff: static u32 const mf = bitmask in fn_80100E0C"
+      ],
+      "risk_note": "Supported as PR evidence, but not enough evidence to generalize beyond this function."
+    },
+    {
+      "tactic": "Raw assert-backed local JObj helper wrappers were used to match operations such as get/set scale, set rotation Y, and dirty-matrix propagation.",
+      "evidence_refs": [
+        "raw_diff: comment 'fake HSD_JObj helpers' and ftKb_JObjGetScale, ftKb_JObjSetScale, ftKb_JObjSetRotationY"
+      ],
+      "risk_note": "This is notable because current standards prefer existing header inlines/macros when identifiable; curator should not promote fake helpers as a preferred standard without more evidence."
+    },
+    {
+      "tactic": "The ABS macro was used for velocity magnitude when computing hitbox state/damage.",
+      "evidence_refs": [
+        "raw_diff: ftKb_SpecialNPr_80100F94 computes abs_vel and damage with ABS(fp->self_vel.x)/ABS(fp->gr_vel)"
+      ],
+      "risk_note": "Consistent with canonical macro cleanup, but only local evidence is present."
+    }
+  ],
+  "review_feedback": [],
+  "searchable_terms": [
+    "pr-2353",
+    "ftKb_SpecialNNs.c matches",
+    "lukechampine",
+    "ftKb_SpecialNNs",
+    "ftKb_FighterVars",
+    "Vec3 x8C",
+    "ftKb_NsSpecialNStart_Anim_inline",
+    "ftKb_NsSpecialAirNHold_Anim",
+    "ftKb_SpecialNDk_800FF8EC",
+    "ftKb_SpecialNDk_800FFA10",
+    "fn_80100E0C",
+    "ftKb_SpecialNPr_80100F94",
+    "ftKb_SpecialNPr_801010D4",
+    "ftKb_SpecialNPr_8010140C",
+    "ftKb_PrScaleAnimStep",
+    "ftKb_AirScaleAnimStep",
+    "ftKb_JObjSetScale",
+    "ftKb_JObjSetRotationY",
+    "PAD_STACK",
+    "ABS",
+    "jobj.h assert",
+    "Kirby copy ability",
+    "Purin SpecialN",
+    "Ness PK Flash",
+    "Donkey Kong SpecialN"
+  ],
+  "follow_up_queries": [
+    "Search later PRs for ftKb_JObjGetScale or 'fake HSD_JObj helpers' to see whether these helpers were replaced with canonical HSD_JObj inline/helper usage.",
+    "Search for later edits to src/melee/ft/chara/ftKirby/types.h ftKb_FighterVars x8C to confirm whether Vec3 x8C remained the accepted field model.",
+    "Search for ftKb_SpecialNPr_8010140C call sites after PR 2353 to see how the bool argument was named or semantically clarified.",
+    "Search for remaining PAD_STACK in ftKb_SpecialNNs.c to identify cleanup opportunities or documented objdiff requirements."
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR identity, merge state, changed files, counts",
+      "raw_diff and diff_excerpt: concrete code/type/header changes",
+      "text_corpus: decomp-dev bot matched-code report with 42 new matches and +19284 bytes",
+      "text_corpus: PR body is empty",
+      "metadata_json: review_comments=0, reviews=0"
+    ],
+    "notes": [
+      "Strong evidence exists for changed files, code edits, type/header changes, and bot-reported matching results.",
+      "No human review comments or PR body rationale were loaded, so reviewer intent and author reasoning are unavailable.",
+      "The raw diff is truncated in the loaded context, so function list and tactics are summarized from visible excerpts and bot report rather than the full patch.",
+      "Bot report supports match counts, but no detailed local objdiff logs are loaded for individual tactics such as PAD_STACK or fake JObj helpers."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson",
+        "title": "Model adjacent scale slots as Vec3 when local use proves vector semantics",
+        "text": "PR 2353 changed Kirby fighter vars x8C/x90/x94 from separate floats to Vec3 x8C, then used x/y/z accesses in initialization and scale animation helpers. This is a candidate lesson for typed-fields-over-pointer/scalar cleanup when adjacent fields are repeatedly consumed as a vector.",
+        "scope": [
+          "src/melee/ft/chara/ftKirby/types.h",
+          "src/melee/ft/chara/ftKirby/ftKb_SpecialNNs.c",
+          "src/melee/ft/chara/ftKirby/ftKb_Init.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: types.h x8C/x90/x94 -> Vec3 x8C",
+          "diff_excerpt: ftKb_SpecialN_800F190C initializes x8C.x/y/z",
+          "raw_diff: ftKb_PrScaleAnimStep and ftKb_AirScaleAnimStep consume x8C.x/y/z"
+        ],
+        "confidence": 0.82
+      },
+      {
+        "record_type": "decomp_lesson",
+        "title": "Use local static inline helpers to share duplicated ground/air setup when they preserve match shape",
+        "text": "PR 2353 extracted shared Kirby Ness start-animation setup into ftKb_NsSpecialNStart_Anim_inline and used it from both ground and air start animation functions.",
+        "scope": [
+          "src/melee/ft/chara/ftKirby/ftKb_SpecialNNs.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: ftKb_NsSpecialNStart_Anim_inline and calls from ftKb_NsSpecialNStart_Anim and ftKb_NsSpecialAirNStart_Anim"
+        ],
+        "confidence": 0.78
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "ftKb_FighterVars x8C modeled as Vec3 in PR 2353",
+        "text": "In PR 2353, src/melee/ft/chara/ftKirby/types.h changed ftKb_FighterVars fields at fp+22B8/fp+22BC/fp+22C0 from three float fields x8C/x90/x94 into a single Vec3 x8C; ftKb_Init.c initializes x8C.x/y/z.",
+        "source_path": "src/melee/ft/chara/ftKirby/types.h",
+        "scope": [
+          "ftKb_FighterVars",
+          "Kirby fighter vars",
+          "copy ability scale fields"
+        ],
+        "evidence_refs": [
+          "raw_diff: types.h hunk at ftKb_FighterVars",
+          "diff_excerpt: ftKb_Init.c x8C.x/y/z initialization"
+        ],
+        "reason": "Useful path fact for future decomp work touching Kirby fighter vars; route to curator because path facts are source-owned."
+      },
+      {
+        "target_source_id": "other",
+        "update_kind": "source_update",
+        "title": "Audit fake HSD_JObj helpers in ftKb_SpecialNNs.c",
+        "text": "PR 2353 added local helpers labeled 'fake HSD_JObj helpers' that manually expand assert-backed JObj operations. Current standards prefer existing HSD_JObj inline/helper forms when line-number evidence identifies them, so this may be a future cleanup/audit target rather than a style to promote.",
+        "source_path": "src/melee/ft/chara/ftKirby/ftKb_SpecialNNs.c",
+        "scope": [
+          "ftKb_JObjGetScale",
+          "ftKb_JObjSetScale",
+          "ftKb_JObjSetRotationY",
+          "ftKb_JObjMtxIsDirty"
+        ],
+        "evidence_refs": [
+          "raw_diff: comment 'fake HSD_JObj helpers'",
+          "raw_diff: raw __assert calls with ftKb_Init_804D3DD0/804D3DD8/804D3DE0 and jobj.h-like line numbers"
+        ],
+        "reason": "Potential standards/path cleanup candidate; evidence does not justify promoting fake local JObj wrappers as accepted style."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer human reviewer approval details; no review comments or reviews were loaded.",
+      "Do not promote PAD_STACK usage from this PR as a general tactic without narrower objdiff evidence for each function.",
+      "Do not promote raw assert-backed fake HSD_JObj helpers as preferred style; current standards point toward header inlines/helpers when identifiable."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

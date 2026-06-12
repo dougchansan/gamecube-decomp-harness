@@ -1,0 +1,17 @@
+{
+  "number": 489,
+  "title": "Ignore VS Code's files properly and fix `.clang-format` to be proper YAML",
+  "state": "MERGED",
+  "createdAt": "2022-08-24T21:50:31Z",
+  "updatedAt": "2022-08-25T14:09:24Z",
+  "mergedAt": "2022-08-24T21:50:38Z",
+  "closedAt": "2022-08-24T21:50:38Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/489",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 2621
+  }
+}

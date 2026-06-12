@@ -1,0 +1,17 @@
+{
+  "number": 2083,
+  "title": "mncharsel: Update match_type checks with enum, variable renaming",
+  "state": "MERGED",
+  "createdAt": "2026-01-11T00:56:12Z",
+  "updatedAt": "2026-01-11T01:00:38Z",
+  "mergedAt": "2026-01-11T01:00:34Z",
+  "closedAt": "2026-01-11T01:00:34Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/2083",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 5320
+  }
+}

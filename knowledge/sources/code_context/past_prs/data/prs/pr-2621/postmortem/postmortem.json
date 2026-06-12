@@ -1,0 +1,399 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2621",
+  "pr": {
+    "number": 2621,
+    "title": "Improvements to split up: GM",
+    "url": "https://github.com/doldecomp/melee/pull/2621",
+    "state": "MERGED",
+    "author": "fjooord",
+    "created_at": "2026-06-08T14:30:30Z",
+    "merged_at": "2026-06-08T16:21:37Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "GM subsystem matching slice split from #2617. The PR touched seven loaded src/melee/gm files with small code-shape, declaration-order, typed-field, and JObj API adjustments. The decomp-dev report recorded 2 new matches, gm_80164330 and fn_80185E34, plus 11 unmatched-item improvements in GM functions.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "matching-improvement",
+      "code-shape-cleanup",
+      "typed-field-recovery",
+      "local-declaration-order"
+    ],
+    "systems": [
+      "game-mode",
+      "gm",
+      "tournament",
+      "classic"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gm/gm_1601.c",
+      "role": "Matched gm_80164330 and improved gm_80164910 by simplifying stage-mask access, ternary return, and replacing an inline unlock-character search/goto with fn_801605EC.",
+      "evidence_refs": [
+        "changed_files.jsonl: gm_1601.c added 3 deleted 15",
+        "raw_diff: gm_80164330 and gm_80164910 hunks",
+        "text_corpus: decomp-dev report lists gm_80164330 as new 100% match and gm_80164910 as improvement"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_16AE.c",
+      "role": "Adjusted local u8 declaration order in gm_8016EDDC while retaining PAD_STACK.",
+      "evidence_refs": [
+        "changed_files.jsonl: gm_16AE.c added 1 deleted 1",
+        "raw_diff: gm_8016EDDC declaration-order hunk"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_16F1.c",
+      "role": "Improved fn_8016FFD4, fn_801701C0, and gm_80173EEC with direct calls, natural indexed loops over six entries, and an index cast for x18 access.",
+      "evidence_refs": [
+        "changed_files.jsonl: gm_16F1.c added 19 deleted 49",
+        "raw_diff: fn_8016FFD4, fn_801701C0, gm_80173EEC hunks",
+        "text_corpus: decomp-dev report lists fn_801701C0 and gm_80173EEC as improvements"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1832.c",
+      "role": "Recovered fields in gm_1832_8047368C_t, separated position and scale Vec3 temporaries, and changed fn_80185E34 to access lbl_8047368C fields; reviewer objected to replacing constants with a non-constant global in the same hunk.",
+      "evidence_refs": [
+        "changed_files.jsonl: gm_1832.c added 20 deleted 8",
+        "raw_diff: gm_1832_8047368C_t, fn_8018325C, fn_80185E34 hunks",
+        "text_corpus: decomp-dev report lists fn_80185E34 as new 100% match",
+        "review_comments.md: PsiLupan comment on constant use"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_18A5.c",
+      "role": "Multiple tournament/menu matching improvements: temporary sign handling, declaration ordering, for-loop initialization shape, scale API corrections, HSD_GObj to HSD_JObj access cleanup, branch condition inversion, and pointer iteration over bounce_y.",
+      "evidence_refs": [
+        "changed_files.jsonl: gm_18A5.c added 26 deleted 22",
+        "raw_diff: fn_8018E46C, fn_8018E85C, gm_801905F0, fn_80198824, fn_80198EBC hunks",
+        "text_corpus: decomp-dev report lists five gm_18A5 improvements"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1A4C.c",
+      "role": "Removed a temporary float by inlining JObj translate expressions and changed loop counter declaration type/order in gm_801A9630.",
+      "evidence_refs": [
+        "changed_files.jsonl: gm_1A4C.c added 10 deleted 14",
+        "raw_diff: gm_801A85E4 and gm_801A9630 hunks",
+        "text_corpus: decomp-dev report lists gm_801A85E4 and gm_801A9630 improvements"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmtou.c",
+      "role": "Adjusted local declaration ordering and used a separate j loop counter for audio-mask accumulation in gm_8019ECAC_OnEnter.",
+      "evidence_refs": [
+        "changed_files.jsonl: gmtou.c added 5 deleted 4",
+        "raw_diff: gm_8019ECAC_OnEnter hunk",
+        "text_corpus: decomp-dev report lists gm_8019ECAC_OnEnter as improvement"
+      ]
+    }
+  ],
+  "what_changed": [
+    "The PR was scoped to src/melee/gm as a directory/subsystem split from #2617 for easier review.",
+    "Loaded changed-file metadata shows seven changed files, although the PR body's file list also names gmregclear.c, gmresult.c, and gmresultplayer.c, which are not present in the loaded diff/changed_files slice.",
+    "Two functions reached 100% in the decomp-dev report: main/melee/gm/gm_1601 gm_80164330 and main/melee/gm/gm_1832 fn_80185E34.",
+    "Several generated-looking pointer/local-variable patterns were replaced with array-indexed loops or direct expressions, especially in fn_801701C0 and fn_80198EBC.",
+    "gm_1832_8047368C_t changed from a padding blob after game_type to explicit u8 fields and arrays while preserving sizeof 0x24.",
+    "JObj operations were clarified in several places, including using separate Vec3 scale storage in fn_8018325C, scale setters instead of translate setters in fn_8018E85C, and direct gobj->hsd_obj assignment in fn_80198824."
+  ],
+  "smart_moves": [
+    {
+      "text": "Collapsed fn_801701C0's hand-specialized first-entry logic and pointer walkers into two simple indexed loops over six entries, reducing duplicated code while keeping the ranking comparison semantics visible.",
+      "evidence_refs": [
+        "raw_diff: fn_801701C0 hunk in src/melee/gm/gm_16F1.c"
+      ]
+    },
+    {
+      "text": "Recovered a small local struct layout in gm_1832_8047368C_t instead of continuing to use a single pad array for offsets that are accessed later as fields.",
+      "evidence_refs": [
+        "raw_diff: gm_1832_8047368C_t hunk in src/melee/gm/gm_1832.c"
+      ]
+    },
+    {
+      "text": "Separated translation and scale temporaries in fn_8018325C, making HSD_JObjGetTranslation/HSD_JObjSetTranslate and HSD_JObjGetScale/HSD_JObjSetScale roles clearer.",
+      "evidence_refs": [
+        "raw_diff: fn_8018325C hunk in src/melee/gm/gm_1832.c"
+      ]
+    },
+    {
+      "text": "In fn_80198EBC, changed repeated da0d0->bounce_y[j] indexed stores to a pointer increment loop, a narrow codegen tactic backed by the PR's reported improvement for the function.",
+      "evidence_refs": [
+        "raw_diff: fn_80198EBC hunk in src/melee/gm/gm_18A5.c",
+        "text_corpus: decomp-dev report lists fn_80198EBC improvement"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For repeated per-player/per-slot calculations, try a natural indexed loop before preserving first-element special cases plus pointer walkers.",
+      "scope": [
+        "src/melee/gm/gm_16F1.c",
+        "small fixed-count GM arrays"
+      ],
+      "evidence_refs": [
+        "raw_diff: fn_801701C0 changed from x58[0] special case plus pointer loops to for k=0..5 and for j=0..5 loops"
+      ],
+      "related_standard_ids": [
+        "natural-loops",
+        "infer-authored-source-style"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "lesson": "When an offset blob is used by nearby code as individual bytes and fixed-size arrays, a temporary explicit struct layout can improve reviewability while retaining the static size assertion.",
+      "scope": [
+        "src/melee/gm/gm_1832.c",
+        "local GM data structs"
+      ],
+      "evidence_refs": [
+        "raw_diff: gm_1832_8047368C_t pad_8[0x1C] replaced by xEC/xED/xEE/xEF/xF0/xF1/xF4/xF7/xFA/xFD/x100/pad_1F fields",
+        "raw_diff: STATIC_ASSERT(sizeof(gm_1832_8047368C_t) == 0x24) remains"
+      ],
+      "related_standard_ids": [
+        "typed-fields-over-pointer-math",
+        "conservative-naming"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "JObj helper names matter for both semantics and matching: use scale setters for scale values and translation setters for translation values when the diff evidence shows that distinction.",
+      "scope": [
+        "src/melee/gm/gm_18A5.c",
+        "src/melee/gm/gm_1832.c",
+        "HSD_JObj transforms"
+      ],
+      "evidence_refs": [
+        "raw_diff: fn_8018E85C changes HSD_JObjSetTranslateX/Y to HSD_JObjSetScaleX/Y",
+        "raw_diff: fn_8018325C uses separate pos and scale Vec3 variables"
+      ],
+      "related_standard_ids": [
+        "typed-fields-over-pointer-math",
+        "infer-authored-source-style"
+      ],
+      "confidence": 0.8
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "Recovered struct fields in this slice remain address/offset-style names such as xEF, xF1, xF7, xFD, and x100 rather than semantic names, consistent with conservative naming where meaning is not proven.",
+      "evidence_refs": [
+        "raw_diff: gm_1832_8047368C_t field additions"
+      ],
+      "related_standard_ids": [
+        "conservative-naming"
+      ]
+    },
+    {
+      "text": "Short local role names were introduced only where the role is immediate, such as scale for a Vec3 used with HSD_JObjGetScale/SetScale and bounce_y for a pointer into da0d0->bounce_y.",
+      "evidence_refs": [
+        "raw_diff: fn_8018325C adds Vec3 scale",
+        "raw_diff: fn_80198EBC adds f32* bounce_y"
+      ],
+      "related_standard_ids": [
+        "conservative-naming"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Declaration order and lifetime steering were used in several functions, including u8 temp_r29/temp_r30 order, TmData initialization placement, float declaration splits, and local loop-counter type/order changes.",
+      "evidence_refs": [
+        "raw_diff: gm_8016EDDC declaration order",
+        "raw_diff: gm_801905F0 TmData* tm initialized at declaration",
+        "raw_diff: fn_80198EBC hide_z/show_z declaration split",
+        "raw_diff: gm_801A9630 changes s32 i to int i and moves declaration"
+      ],
+      "related_standard_ids": [
+        "matching-tactics-need-evidence"
+      ]
+    },
+    {
+      "tactic": "A pointer-increment loop was used for bounce_y writes in fn_80198EBC instead of repeated indexed stores.",
+      "evidence_refs": [
+        "raw_diff: fn_80198EBC bounce_y pointer loop"
+      ],
+      "related_standard_ids": [
+        "natural-loops",
+        "matching-tactics-need-evidence"
+      ]
+    },
+    {
+      "tactic": "A ternary return was used in gm_80164330 to collapse an if/return true/false pattern while preserving bool result from a stage_mask test.",
+      "evidence_refs": [
+        "raw_diff: gm_80164330 return hunk"
+      ],
+      "related_standard_ids": [
+        "canonical-control-flow-and-macros"
+      ]
+    },
+    {
+      "tactic": "A helper call replaced a local search-and-goto sequence in gm_80164910, reducing duplicate control flow around NUM_UNLOCKABLE_CHARACTERS.",
+      "evidence_refs": [
+        "raw_diff: gm_80164910 replaces loop/goto found_char with fn_801605EC(internal_id)"
+      ],
+      "related_standard_ids": [
+        "infer-authored-source-style",
+        "canonical-control-flow-and-macros"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "path": "src/melee/gm/gm_1832.c",
+      "author": "PsiLupan",
+      "feedback": "Reviewer said to stick with using the constant in the fn_80185E34 hunk.",
+      "evidence_refs": [
+        "review_comments.md: 'As noted on another PR, should stick with using the constant here.'",
+        "review_comments.md: hunk shows Player_SetFacingDirection/Player_SetModelScale constants changed in context"
+      ],
+      "interpretation_limits": "The loaded review comment does not identify the exact replacement line beyond the hunk context, so do not infer broader reviewer intent beyond preferring the existing constant form here."
+    }
+  ],
+  "searchable_terms": [
+    "pr-2621",
+    "Improvements to split up: GM",
+    "fjooord",
+    "src/melee/gm",
+    "gm_1601",
+    "gm_16AE",
+    "gm_16F1",
+    "gm_1832",
+    "gm_18A5",
+    "gm_1A4C",
+    "gmtou",
+    "gm_80164330",
+    "gm_80164910",
+    "fn_8016FFD4",
+    "fn_801701C0",
+    "gm_80173EEC",
+    "gm_1832_8047368C_t",
+    "fn_8018325C",
+    "fn_80185E34",
+    "fn_8018E46C",
+    "fn_8018E85C",
+    "gm_801905F0",
+    "fn_80198824",
+    "fn_80198EBC",
+    "gm_801A85E4",
+    "gm_801A9630",
+    "gm_8019ECAC_OnEnter",
+    "stage_mask",
+    "RandomStageSwitch",
+    "NUM_UNLOCKABLE_CHARACTERS",
+    "HSD_JObjSetScaleX",
+    "HSD_JObjSetScaleY",
+    "bounce_y",
+    "PAD_STACK"
+  ],
+  "follow_up_queries": [
+    "PR 2621 gm_1832 constant review comment fn_80185E34 lbl_804DA540 0.0f 1.0f",
+    "gm_16F1 fn_801701C0 natural indexed loop rankings scores x58",
+    "gm_18A5 fn_8018E85C HSD_JObjSetScaleX SetScaleY tournament bracket",
+    "gm_1832_8047368C_t xEF xF1 xF7 xFD layout",
+    "gm_1601 gm_80164330 stage_mask RandomStageSwitch match",
+    "gm_18A5 fn_80198EBC bounce_y pointer loop"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR identity, state, changed files, counts",
+      "human_pr_text.md: scope, preliminary report, local checks, body file list",
+      "raw_diff: complete loaded diff for seven changed files",
+      "changed_files.jsonl: seven loaded changed files and added/deleted counts",
+      "text_corpus.jsonl: decomp-dev report and review comment",
+      "review_comments.md: reviewer feedback"
+    ],
+    "notes": [
+      "The raw diff and changed_files list are complete for the loaded slice and support file-level change extraction.",
+      "The PR body lists ten files, but loaded changed-file metadata and diff show seven changed files; this record treats the seven diff-backed files as changed and records the discrepancy.",
+      "The PR body's preliminary full-branch report is explicitly not authoritative for this slice; the decomp-dev issue comment provides the slice-level report used here.",
+      "No build logs, objdiff details, or commit discussion beyond the bot report were loaded, so matching-tactic conclusions are based on diff shape plus reported score changes, not independent verification.",
+      "The single review comment is terse and should not be generalized beyond its hunk."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson",
+        "title": "Try natural indexed loops before preserving first-entry plus pointer-walker shapes",
+        "text": "In PR #2621, fn_801701C0 in src/melee/gm/gm_16F1.c improved by replacing a special x58[0] case and pointer-walking loops with straightforward indexed loops over the same six slots. This supports using natural fixed-count loops for repeated GM slot/ranking logic when the repeated blocks differ only by index.",
+        "scope": [
+          "src/melee/gm",
+          "fixed-count player or ranking arrays"
+        ],
+        "evidence_refs": [
+          "raw_diff: fn_801701C0 hunk",
+          "text_corpus: decomp-dev report lists fn_801701C0 improvement"
+        ],
+        "confidence": 0.82
+      },
+      {
+        "record_type": "decomp_lesson",
+        "title": "Keep uncertain recovered fields offset-style while replacing opaque pads",
+        "text": "PR #2621 replaced gm_1832_8047368C_t's pad_8[0x1C] with explicit offset-style byte fields and arrays while keeping the 0x24 size assert. This is a reviewable middle ground when offsets are proven but semantic names are not.",
+        "scope": [
+          "src/melee/gm/gm_1832.c",
+          "temporary recovered structs"
+        ],
+        "evidence_refs": [
+          "raw_diff: gm_1832_8047368C_t hunk"
+        ],
+        "confidence": 0.78
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Prefer existing constants over equivalent globals or literals when reviewer/local evidence identifies the constant form",
+        "text": "A reviewer on PR #2621 objected in src/melee/gm/gm_1832.c that the code should 'stick with using the constant here' in a hunk where constant-looking calls such as Player_SetFacingDirection(..., 0.0f) and Player_SetModelScale(..., 1.0f) were in context. Curator may consider whether existing standards should explicitly mention preserving local named or literal constants when they are the accepted source form.",
+        "source_path": null,
+        "scope": [
+          "review feedback",
+          "constants",
+          "GM matching"
+        ],
+        "evidence_refs": [
+          "review_comments.md: PsiLupan comment on src/melee/gm/gm_1832.c",
+          "raw_diff: fn_80185E34 hunk"
+        ],
+        "reason": "Potential standards refinement, but evidence is a single terse review comment and should be curated cautiously."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "PR #2621 was a GM subsystem split from #2617",
+        "text": "PR #2621 states it was split from #2617 by directory/subsystem with scope src/melee/gm. Loaded diff-backed changes are in gm_1601.c, gm_16AE.c, gm_16F1.c, gm_1832.c, gm_18A5.c, gm_1A4C.c, and gmtou.c.",
+        "source_path": "src/melee/gm",
+        "scope": [
+          "src/melee/gm"
+        ],
+        "evidence_refs": [
+          "human_pr_text.md: scope and split statement",
+          "changed_files.jsonl: seven loaded changed files"
+        ],
+        "reason": "Could help future PR-slice/path-scope search, but the body-vs-diff file-list discrepancy should be preserved."
+      }
+    ],
+    "rejection_notes": [
+      "Do not record the PR body's ten-file list as the changed-file truth for this slice; only seven files have loaded changed-file and diff evidence.",
+      "Do not promote the preliminary full-branch score as this PR slice's validation result; the PR body says per-PR CI/decomp-dev reporting is authoritative, and the loaded bot report gives smaller slice-specific numbers.",
+      "Do not infer that all declaration-order changes or PAD_STACK retention are desirable global style; they are matching tactics here and lack detailed objdiff justification in the loaded evidence.",
+      "Do not infer semantic meanings for xEC/xEF/xF1/xF7/xFD/x100 fields beyond their recovered offsets and uses."
+    ]
+  },
+  "confidence": 0.84,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

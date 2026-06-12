@@ -1,0 +1,17 @@
+{
+  "number": 2043,
+  "title": "lb: Match audio, snap, and refract functions",
+  "state": "CLOSED",
+  "createdAt": "2025-12-30T17:16:53Z",
+  "updatedAt": "2025-12-30T18:13:55Z",
+  "mergedAt": null,
+  "closedAt": "2025-12-30T18:13:55Z",
+  "author": "itsgrimetime",
+  "url": "https://github.com/doldecomp/melee/pull/2043",
+  "counts": {
+    "issue_comments": 2,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 12921
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 580,
+  "title": "Implement dump (`-d`) flag in `build.sh`",
+  "state": "MERGED",
+  "createdAt": "2022-10-26T15:44:05Z",
+  "updatedAt": "2022-10-27T00:13:53Z",
+  "mergedAt": "2022-10-27T00:13:53Z",
+  "closedAt": "2022-10-27T00:13:53Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/580",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 1,
+    "diff_bytes": 2914
+  }
+}

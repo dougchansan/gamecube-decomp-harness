@@ -1,0 +1,371 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2522",
+  "pr": {
+    "number": 2522,
+    "title": "Link Crazy Hand",
+    "url": "https://github.com/doldecomp/melee/pull/2522",
+    "state": "MERGED",
+    "author": "jellejurre",
+    "created_at": "2026-05-23T12:11:35Z",
+    "merged_at": "2026-05-23T12:35:48Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2522 split the previous Crazy Hand ftCh_Init translation unit into many separate ftCrazyHand source/header files, marked the new objects Matching in configure.py, updated GALE01 split ranges for the carved objects, and added a few includes/references in neighboring fighter files. The bot report shows linked-code and matched-data gains with 293 new matches, while also showing many broken matches under the old ftCh_Init unit because symbols moved into the new split units.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "translation-unit-splitting",
+      "headers",
+      "build-config",
+      "split-metadata"
+    ],
+    "systems": [
+      "fighter",
+      "ftCrazyHand",
+      "ftMasterHand",
+      "ftCommon",
+      "config",
+      "repo-root"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/ft/chara/ftCrazyHand/ftCh_Init.c",
+      "role": "Reduced original Crazy Hand monolith from the full 0x80155E18-0x8015BD20 range to the initial 0x80155E18-0x80155FCC object.",
+      "evidence_refs": [
+        "metadata_json.changed_files: ftCh_Init.c added 30 deleted 2767",
+        "diff_excerpt: splits.txt changes ftCh_Init text/data/sdata2 ranges"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCrazyHand/*.c",
+      "role": "New per-action Crazy Hand source units for Wait, Entry, Damage, Sweep, Walk, Drill, RockCrush, Poke, FingerBeam, BackAirplane, grab/capture/tag, and related action logic.",
+      "evidence_refs": [
+        "metadata_json.changed_files: many new ftCrazyHand .c files",
+        "diff_excerpt: new ftCh_BackAirplane1.c/2.c/3.c/BackCrush.c examples"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCrazyHand/*.h",
+      "role": "New per-action headers exposing function prototypes with address comments and GALE01 address-based include guards.",
+      "evidence_refs": [
+        "metadata_json.changed_files: many new ftCrazyHand .h files",
+        "diff_excerpt: ftCh_BackAirplane1.h, ftCh_BackAirplane2.h, ftCh_BackAirplane3.h, ftCh_BackCrush.h"
+      ]
+    },
+    {
+      "path": "config/GALE01/splits.txt",
+      "role": "Split metadata changed from one ftCh_Init object to many ftCrazyHand objects with individual .text and data-section ranges.",
+      "evidence_refs": [
+        "diff_excerpt: config/GALE01/splits.txt adds separate ftCrazyHand object ranges"
+      ]
+    },
+    {
+      "path": "configure.py",
+      "role": "Build configuration changed Crazy Hand from one NonMatching object to many Matching objects.",
+      "evidence_refs": [
+        "diff_excerpt: configure.py replaces Object(NonMatching, ftCh_Init.c) with many Object(Matching, ftCrazyHand files)"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_Fall.c",
+      "role": "Neighboring fighter file added include for ftCrazyHand/ftCh_TagCancel.h.",
+      "evidence_refs": [
+        "diff_excerpt: ftCo_Fall.c include addition"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftmotionstates.c",
+      "role": "Small fighter motion-state update associated with linked Crazy Hand changes; exact lines not loaded.",
+      "evidence_refs": [
+        "metadata_json.changed_files: ftmotionstates.c added 5"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "type": "changed_files",
+      "text": "80 files changed: config/GALE01/splits.txt; configure.py; ftCo_Fall.c; 35 ftCrazyHand .c files; 35 ftCrazyHand .h files; small one-line changes in ftMh_Slam.c, ftMh_TagApplaud.c, ftMh_TagCrush.c, fighter.c, ft_0892.c, ft_0C8C.c; and a 5-line change in ftmotionstates.c.",
+      "evidence_refs": [
+        "metadata_json.changed_files",
+        "loaded_files.changed_files"
+      ]
+    },
+    {
+      "type": "tu_split",
+      "text": "The previous ftCrazyHand/ftCh_Init.c span was carved into separate objects such as ftCh_Wait1_0, ftCh_Entry, ftCh_Damage_0, ftCh_Sweep, ftCh_SweepWait, ftCh_Walk, ftCh_Drill, ftCh_RockCrush_0/1, ftCh_Poke, ftCh_FingerBeam_0, ftCh_FingerBeam, BackAirplane1/2/3, BackCrush, BackDisappear, Wait1_1, Grab, Cancel, Squeezing, Squeeze, Throw, Slam, TagRockPaper, FingerGun2, TagGrab, GrabUnk1_B174, Capture*, ThrownCrazyHand, and TagCancel.",
+      "evidence_refs": [
+        "diff_excerpt: splits.txt ftCrazyHand object list"
+      ]
+    },
+    {
+      "type": "matching_config",
+      "text": "configure.py changed Crazy Hand from one NonMatching ftCh_Init object to many Matching ftCrazyHand objects.",
+      "evidence_refs": [
+        "diff_excerpt: configure.py Crazy Hand block"
+      ]
+    },
+    {
+      "type": "reported_results",
+      "text": "Bot report: matched code +1172 bytes, linked code +24328 bytes, matched data +2416 bytes, linked data +2432 bytes, with 293 new matches. The same report lists 254 broken matches in the old ftCh_Init unit and one unmatched regression for ftCh_Init_80156AD8, consistent with symbols moving out of the former monolithic unit.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev[bot] report 2026-05-23T12:16:08Z"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Carving the large Crazy Hand monolith into action-sized translation units made many functions independently linkable/matching and reduced review scope per action file.",
+      "evidence_refs": [
+        "diff_excerpt: splits.txt per-action ranges",
+        "diff_excerpt: configure.py many Object(Matching) entries",
+        "text_corpus: bot report 293 new matches"
+      ]
+    },
+    {
+      "text": "The PR kept split metadata and build configuration in sync: every new split in splits.txt has a corresponding Matching object entry in configure.py in the loaded excerpt.",
+      "evidence_refs": [
+        "diff_excerpt: splits.txt Crazy Hand block",
+        "diff_excerpt: configure.py Crazy Hand block"
+      ]
+    },
+    {
+      "text": "Function prototypes were moved into per-action headers, reducing the old ftCh_Init.h surface after the monolith split.",
+      "evidence_refs": [
+        "metadata_json.changed_files: ftCh_Init.h added 1 deleted 228",
+        "metadata_json.changed_files: many new ftCrazyHand headers"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "text": "When a formerly monolithic object is split into many translation units, report dashboards may show many 'broken matches' in the old unit even as the new units gain matches; interpret those as relocation/split effects unless there is separate evidence of real regressions.",
+      "evidence_refs": [
+        "text_corpus: bot report shows 293 new matches and 254 broken matches under ftCh_Init",
+        "diff_excerpt: ftCh_Init split into many objects"
+      ]
+    },
+    {
+      "text": "For large boss/fighter action files, action-state boundaries can be a practical split axis: each action file pairs init and Anim/IASA/Phys/Coll handlers and gets its own split/config entry.",
+      "evidence_refs": [
+        "diff_excerpt: ftCh_BackAirplane1.c and .h",
+        "diff_excerpt: ftCh_BackAirplane2.c and .h",
+        "diff_excerpt: ftCh_BackCrush.c and .h",
+        "diff_excerpt: splits.txt per-action ftCrazyHand entries"
+      ]
+    },
+    {
+      "text": "Header ownership should follow the new translation-unit split: callsites add the specific action header they need rather than relying on the former umbrella ftCh_Init.h.",
+      "evidence_refs": [
+        "diff_excerpt: ftCo_Fall.c adds ftCrazyHand/ftCh_TagCancel.h",
+        "metadata_json.changed_files: ftCh_Init.h shrinks and many per-action headers are added"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "Crazy Hand action files use the ftCh_<Action>.c and ftCh_<Action>.h pattern, for example ftCh_BackAirplane1.c/.h and ftCh_TagCancel.c/.h.",
+      "evidence_refs": [
+        "loaded_files.changed_files",
+        "diff_excerpt: new ftCh_BackAirplane1 files"
+      ]
+    },
+    {
+      "text": "Handler names follow the action-handler suffix pattern _Anim, _IASA, _Phys, and _Coll, with init functions often retaining address-suffixed names like ftCh_Init_801592D4 when fuller semantics are not proven.",
+      "evidence_refs": [
+        "diff_excerpt: ftCh_BackAirplane1.h prototypes",
+        "diff_excerpt: ftCh_BackAirplane2.h prototypes",
+        "diff_excerpt: ftCh_BackCrush.h prototypes"
+      ]
+    },
+    {
+      "text": "New headers in the excerpt use address-based include guards such as GALE01_1592D4 and retain address comments on prototypes.",
+      "evidence_refs": [
+        "diff_excerpt: ftCh_BackAirplane1.h",
+        "diff_excerpt: ftCh_BackAirplane2.h",
+        "diff_excerpt: ftCh_BackCrush.h"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "text": "Use splits.txt to assign exact .text/.data/.sdata/.sdata2 ownership for each carved object before marking the object Matching in configure.py.",
+      "evidence_refs": [
+        "diff_excerpt: splits.txt exact ranges",
+        "diff_excerpt: configure.py Matching object list"
+      ]
+    },
+    {
+      "text": "Preserve unknown semantic names as address-style or fn_ names during broad linking work; the bot report includes matched symbols such as fn_801588B8 and ftCh_Init_80156AD8, indicating not every linked function was semantically renamed.",
+      "evidence_refs": [
+        "text_corpus: bot report new matches list"
+      ]
+    },
+    {
+      "text": "A local stack padding tactic appears in ftCh_BackAirplane3_Anim as `u8 _[8];`; the PR evidence does not explain why it was required, so it should be treated as a narrow matching artifact rather than a general style.",
+      "evidence_refs": [
+        "diff_excerpt: ftCh_BackAirplane3.c contains `u8 _[8];`"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "type": "bot_report",
+      "text": "decomp-dev[bot] reported GALE01 progress: matched code 67.77% (+0.03%, +1172 bytes), linked code 39.86% (+0.63%, +24328 bytes), matched data 39.65% (+0.20%, +2416 bytes), linked data 33.46% (+0.20%, +2432 bytes), 293 new matches, 254 broken matches, and one unmatched regression item.",
+      "evidence_refs": [
+        "text_corpus: issue_comment by decomp-dev[bot]"
+      ]
+    },
+    {
+      "type": "approval",
+      "text": "Review by jurrejelle was APPROVED with no review body in the loaded evidence.",
+      "evidence_refs": [
+        "text_corpus: review state APPROVED"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2522",
+    "Link Crazy Hand",
+    "ftCrazyHand",
+    "ftCh_Init",
+    "ftCh_Wait1_0",
+    "ftCh_FingerBeam",
+    "ftCh_BackAirplane1",
+    "ftCh_BackAirplane2",
+    "ftCh_BackAirplane3",
+    "ftCh_TagCancel",
+    "ftCh_GrabUnk1_B174",
+    "ftCh_TagGrab",
+    "ftCh_RockCrush_0",
+    "ftCh_RockCrush_1",
+    "ftCh_Slam",
+    "ftCh_Damage_0",
+    "GALE01 splits",
+    "Object(Matching)",
+    "translation unit split",
+    "linked code",
+    "broken matches after split",
+    "Crazy Hand boss",
+    "Anim IASA Phys Coll"
+  ],
+  "follow_up_queries": [
+    "PR 2522 ftCrazyHand split broken matches old ftCh_Init new matches",
+    "ftCrazyHand Object(Matching) configure.py splits.txt",
+    "ftCh_BackAirplane3 u8 _[8] stack padding",
+    "ftCh_Init.h deleted prototypes per-action headers",
+    "Crazy Hand fn_801588B8 fn_80159AA4 ftCh_GrabUnk1_8015B174"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json",
+      "diff_excerpt",
+      "loaded_files.changed_files",
+      "loaded_files.text_corpus"
+    ],
+    "notes": [
+      "Strong evidence for PR identity, merge state, changed files, split/config changes, and bot-reported match/link deltas.",
+      "Diff excerpt is truncated, so only representative new source bodies were inspected directly; many file-specific code details are known only from changed-file metadata and split/config excerpts.",
+      "No PR body and no human review comments were provided; reviewer intent beyond approval is unsupported.",
+      "Bot report provides aggregate matching evidence but not per-edit objdiff reasoning or why individual tactics such as stack padding were necessary."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "title": "Interpret broken matches carefully after TU splitting",
+        "text": "If a PR splits a monolithic object into multiple translation units, dashboard 'broken matches' in the old unit may be expected relocation noise when corresponding new split units gain matches. Check split/config changes before treating the old-unit losses as regressions.",
+        "scope": [
+          "decomp-matching",
+          "translation-unit-splitting",
+          "report-interpretation"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: ftCh_Init split into many ftCrazyHand objects",
+          "text_corpus: bot report 293 new matches and 254 broken matches"
+        ]
+      },
+      {
+        "title": "Per-action boss/fighter splits can reduce monolith review scope",
+        "text": "For large fighter/boss action files, splitting by action-state files with matching init and Anim/IASA/Phys/Coll handlers can make matching progress and header ownership easier to review.",
+        "scope": [
+          "fighter",
+          "ftCrazyHand",
+          "translation-unit-splitting"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: ftCh_BackAirplane1/2/3 and ftCh_BackCrush examples",
+          "diff_excerpt: splits.txt per-action ftCrazyHand entries"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "Crazy Hand split units added under src/melee/ft/chara/ftCrazyHand",
+        "text": "PR 2522 split the former ftCrazyHand/ftCh_Init.c range into many per-action Crazy Hand source/header files and corresponding GALE01 split entries, including Wait1_0, Entry, Damage_0, Sweep, SweepWait, Walk, Drill, RockCrush_0/1, Poke, FingerBeam_0, FingerBeam, BackAirplane1/2/3, BackCrush, BackDisappear, Wait1_1, Grab, Cancel, Squeezing_0/1, Squeeze, Throw, Slam, TagRockPaper, FingerGun2, TagGrab, GrabUnk1_B174, Capture*, ThrownCrazyHand, and TagCancel.",
+        "source_path": "src/melee/ft/chara/ftCrazyHand",
+        "scope": [
+          "ftCrazyHand",
+          "GALE01",
+          "splits"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: config/GALE01/splits.txt Crazy Hand block",
+          "loaded_files.changed_files"
+        ],
+        "reason": "Useful path/split ownership fact, but should be curated against current source before promotion."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Report interpretation for large TU splits",
+        "text": "When a PR carves a monolithic object into new split units, compare new-unit matches against old-unit broken matches before calling the old-unit losses regressions.",
+        "source_path": null,
+        "scope": [
+          "report interpretation",
+          "translation unit splits"
+        ],
+        "evidence_refs": [
+          "text_corpus: bot report new matches and broken old ftCh_Init matches",
+          "diff_excerpt: splits/config changed from one object to many"
+        ],
+        "reason": "This is a reusable intake lesson supported by this PR, but broader standard wording should be curator-reviewed."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Do not generalize stack padding from isolated matching artifacts",
+        "text": "A local `u8 _[8];` padding variable appears in ftCh_BackAirplane3_Anim, but the PR does not explain why it was required. Treat such padding as evidence-requiring narrow matching work, not a naming or style convention.",
+        "source_path": "src/melee/ft/chara/ftCrazyHand/ftCh_BackAirplane3.c",
+        "scope": [
+          "matching tactics",
+          "stack padding"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: ftCh_BackAirplane3.c"
+        ],
+        "reason": "Candidate reinforces existing matching-tactics caution; evidence is narrow and should not become a new broad rule without more cases."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that all 254 broken matches were harmless; the loaded evidence only supports that many losses are associated with the old ftCh_Init unit after a split, while the bot also reports one unmatched regression item.",
+      "Do not infer reviewer rationale from the empty approval.",
+      "Do not promote all address-style function names as final semantics; the evidence only shows they were accepted in this PR."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

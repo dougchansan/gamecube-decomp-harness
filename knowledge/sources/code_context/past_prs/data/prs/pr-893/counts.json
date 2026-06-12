@@ -1,0 +1,17 @@
+{
+  "number": 893,
+  "title": "Match `ftCo_CargoWait`",
+  "state": "MERGED",
+  "createdAt": "2023-05-29T03:11:31Z",
+  "updatedAt": "2023-05-29T03:22:05Z",
+  "mergedAt": "2023-05-29T03:22:04Z",
+  "closedAt": "2023-05-29T03:22:04Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/893",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 0
+  }
+}

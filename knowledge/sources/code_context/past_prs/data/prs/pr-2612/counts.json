@@ -1,0 +1,17 @@
+{
+  "number": 2612,
+  "title": "itdosei: Remove unnecessary stack pad, remove unnecessary const, cleanup function names and add GET_* usage",
+  "state": "MERGED",
+  "createdAt": "2026-06-08T05:22:19Z",
+  "updatedAt": "2026-06-08T05:28:46Z",
+  "mergedAt": "2026-06-08T05:28:43Z",
+  "closedAt": "2026-06-08T05:28:43Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/2612",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 23341
+  }
+}

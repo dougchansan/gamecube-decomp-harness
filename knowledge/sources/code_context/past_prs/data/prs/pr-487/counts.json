@@ -1,0 +1,17 @@
+{
+  "number": 487,
+  "title": "Codify literal stylization in `CONTRIBUTING.md`",
+  "state": "MERGED",
+  "createdAt": "2022-08-24T05:01:40Z",
+  "updatedAt": "2022-08-25T14:09:38Z",
+  "mergedAt": "2022-08-24T23:48:50Z",
+  "closedAt": "2022-08-24T23:48:50Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/487",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 740
+  }
+}

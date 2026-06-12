@@ -1,0 +1,10 @@
+{
+  "pr": 1079,
+  "title": "Port `obj_files.mk` to `configure.py`",
+  "url": "https://github.com/doldecomp/melee/pull/1079",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 1,
+  "added_lines": 1108,
+  "deleted_lines": 13
+}

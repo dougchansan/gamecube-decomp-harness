@@ -8,7 +8,7 @@ from pathlib import Path
 import sys
 
 sys.path.append(str(Path(__file__).resolve().parents[3] / "_shared"))
-from harness import print_json
+from melee_tooling import print_json
 
 
 def main() -> None:

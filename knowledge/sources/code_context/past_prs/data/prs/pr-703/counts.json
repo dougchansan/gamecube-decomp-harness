@@ -1,0 +1,17 @@
+{
+  "number": 703,
+  "title": "Rename `Map` to `Ground`",
+  "state": "MERGED",
+  "createdAt": "2023-01-18T09:14:37Z",
+  "updatedAt": "2023-01-19T09:18:38Z",
+  "mergedAt": "2023-01-19T09:18:36Z",
+  "closedAt": "2023-01-19T09:18:36Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/703",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 1,
+    "diff_bytes": 35822
+  }
+}

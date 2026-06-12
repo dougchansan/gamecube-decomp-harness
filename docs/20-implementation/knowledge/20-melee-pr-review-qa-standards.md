@@ -1,7 +1,7 @@
 ---
 covers: Melee decomp PR coding standards and QA rules
 concepts: [past-prs, review-standards, decomp-quality, matching-standards, qa-checklist]
-code-ref: knowledge/sources/past_prs/data/current, knowledge/sources/past_prs/data/prs
+code-ref: knowledge/sources/code_context/past_prs/data
 ---
 
 # Melee PR Review QA Standards

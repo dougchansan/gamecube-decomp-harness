@@ -1,0 +1,17 @@
+{
+  "number": 363,
+  "title": "LinkMap Visualizer",
+  "state": "CLOSED",
+  "createdAt": "2022-04-28T20:55:04Z",
+  "updatedAt": "2022-04-28T20:55:27Z",
+  "mergedAt": null,
+  "closedAt": "2022-04-28T20:55:27Z",
+  "author": "sv4u",
+  "url": "https://github.com/doldecomp/melee/pull/363",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 3057
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 567,
+  "title": "Minor LObj cleanup",
+  "state": "MERGED",
+  "createdAt": "2022-09-16T07:38:43Z",
+  "updatedAt": "2022-09-17T21:09:57Z",
+  "mergedAt": "2022-09-17T21:09:54Z",
+  "closedAt": "2022-09-17T21:09:54Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/567",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 1,
+    "reviews": 1,
+    "diff_bytes": 2950
+  }
+}

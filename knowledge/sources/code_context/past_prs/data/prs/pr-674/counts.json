@@ -1,0 +1,17 @@
+{
+  "number": 674,
+  "title": "Fix `item.h`, pass 1",
+  "state": "MERGED",
+  "createdAt": "2023-01-13T09:08:00Z",
+  "updatedAt": "2023-01-13T09:18:13Z",
+  "mergedAt": "2023-01-13T09:18:12Z",
+  "closedAt": "2023-01-13T09:18:12Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/674",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 1,
+    "reviews": 2,
+    "diff_bytes": 70652
+  }
+}

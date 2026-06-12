@@ -1,0 +1,17 @@
+{
+  "number": 1123,
+  "title": "Match 87.77% of `dvderror` (344 bytes)",
+  "state": "MERGED",
+  "createdAt": "2024-01-25T21:14:39Z",
+  "updatedAt": "2024-01-25T21:15:56Z",
+  "mergedAt": "2024-01-25T21:15:55Z",
+  "closedAt": "2024-01-25T21:15:55Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1123",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 1307
+  }
+}

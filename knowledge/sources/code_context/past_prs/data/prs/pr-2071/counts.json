@@ -1,0 +1,17 @@
+{
+  "number": 2071,
+  "title": "feat(cm): match camera module functions",
+  "state": "MERGED",
+  "createdAt": "2026-01-09T09:31:54Z",
+  "updatedAt": "2026-05-16T08:46:16Z",
+  "mergedAt": "2026-01-09T11:12:32Z",
+  "closedAt": "2026-01-09T11:12:32Z",
+  "author": "itsgrimetime",
+  "url": "https://github.com/doldecomp/melee/pull/2071",
+  "counts": {
+    "issue_comments": 2,
+    "review_comments": 3,
+    "reviews": 5,
+    "diff_bytes": 20928
+  }
+}

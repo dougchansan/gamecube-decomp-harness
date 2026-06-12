@@ -14,7 +14,3 @@ Homebrew Ghidra/OpenJDK install, runs `analyzeHeadless` against
 `build_tool_indexes.py` also generates `indexes/symbol_lookup.jsonl` from local
 code-graph/source-symbol evidence for symbol/address/file lookup. Those rows
 are supplemental; live readiness comes from the headless runner smoke.
-
-Reference material:
-
-- `reference/SKILL.md`

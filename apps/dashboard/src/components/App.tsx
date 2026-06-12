@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, type CSSProperties } from "react";
 import { fetchRunDetails, formBody, loadConfig, postJson } from "../lib/api";
-import { asObject, type Dashboard, type FormState, type RunDetails, type UiConfig } from "@decomp-orchestrator/ui-contract";
+import { asArray, asObject, text, type Dashboard, type FormState, type RunDetails, type UiConfig } from "@decomp-orchestrator/ui-contract";
 import { useDashboardStream } from "../hooks/useDashboardStream";
 import { DetailsRail } from "./DetailsRail";
 import { ProgressPanel } from "./ProgressPanel";
@@ -19,6 +19,52 @@ function schedulingForWorkers(workers: number) {
   };
 }
 
+const RUN_SETTINGS_KEY = "runSettings.v1";
+
+// Run settings the operator tunes per run (pool size, thinking levels, model)
+// are remembered across page loads so the next run starts how the last one did.
+type SavedRunSettings = Pick<FormState, "maxWorkers" | "idleSleepMs" | "provider" | "model" | "thinkingLevel" | "workerThinkingLevel">;
+
+function loadRunSettings(): Partial<SavedRunSettings> {
+  try {
+    const raw = localStorage.getItem(RUN_SETTINGS_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
+    const settings: Partial<SavedRunSettings> = {};
+    if (typeof parsed.maxWorkers === "number" && parsed.maxWorkers > 0) settings.maxWorkers = Math.trunc(parsed.maxWorkers);
+    if (typeof parsed.idleSleepMs === "number" && parsed.idleSleepMs >= 100) settings.idleSleepMs = Math.trunc(parsed.idleSleepMs);
+    if (typeof parsed.provider === "string" && parsed.provider) settings.provider = parsed.provider;
+    if (typeof parsed.model === "string" && parsed.model) settings.model = parsed.model;
+    if (typeof parsed.thinkingLevel === "string" && parsed.thinkingLevel) settings.thinkingLevel = parsed.thinkingLevel;
+    if (typeof parsed.workerThinkingLevel === "string" && parsed.workerThinkingLevel) settings.workerThinkingLevel = parsed.workerThinkingLevel;
+    return settings;
+  } catch {
+    return {};
+  }
+}
+
+function saveRunSettings(form: FormState) {
+  try {
+    const settings: SavedRunSettings = {
+      maxWorkers: form.maxWorkers,
+      idleSleepMs: form.idleSleepMs,
+      provider: form.provider,
+      model: form.model,
+      thinkingLevel: form.thinkingLevel,
+      workerThinkingLevel: form.workerThinkingLevel,
+    };
+    localStorage.setItem(RUN_SETTINGS_KEY, JSON.stringify(settings));
+  } catch {
+    // Settings still apply for this session if storage is unavailable.
+  }
+}
+
+function initialForm(): FormState {
+  const saved = loadRunSettings();
+  const merged = { ...defaultForm, ...saved };
+  return { ...merged, ...schedulingForWorkers(merged.maxWorkers) };
+}
+
 const defaultForm: FormState = {
   projectId: "",
   usePathOverrides: false,
@@ -33,40 +79,34 @@ const defaultForm: FormState = {
   model: "gpt-5.5",
   thinkingLevel: "medium",
   workerThinkingLevel: "medium",
-  dryRunAgents: false,
-  checkpointBeforeFresh: true,
-  pauseBeforeHandoff: true,
-  qaTarget: "changes_all",
-  qaReportMaxRows: 300,
-  requirePrPromotion: true,
-  prBaseRef: "origin/master",
-  prGroupMode: "melee-subsystem",
-  prMaxFilesPerPr: 30,
-  prBranchPrefix: "pr-split",
-  prTitlePrefix: "Melee decomp",
-  prCommittedOnly: false,
-  prIncludeUntracked: true,
-  refreshPrLibrary: true,
-  resetReportBaseline: true,
 };
 
-type Action = "refresh" | "sync" | "init" | "fresh" | "report" | "start" | "stop" | "forceStop" | "pausePr" | "resumePr" | "checkpoint" | "qa" | "splitPlan" | "preparePr";
+type Action = "refresh" | "sync" | "init" | "fresh" | "start" | "startWork" | "stop" | "forceStop" | "pausePr" | "resumePr" | "checkpoint" | "qa" | "reconcile" | "splitPlan" | "preparePr" | "syncPrs" | "openPr" | "openAllPrs";
+
+// Multi-step server operations tracked by process.operation. Triggering one
+// auto-opens the details rail on the Logs tab so the activity card and live
+// output are in view the moment the work starts.
+const operationActions: ReadonlySet<Action> = new Set(["sync", "fresh", "checkpoint", "qa", "reconcile", "splitPlan", "preparePr", "openPr", "openAllPrs"]);
 
 const actionLabels: Record<Action, string> = {
   refresh: "Refreshing dashboard...",
   sync: "Syncing code, intaking newly merged PRs, and rebuilding knowledge...",
   init: "Initializing run and seeding targets...",
   fresh: "Checkpointing current run, resetting report start, initializing a new run, and refreshing PRs...",
-  report: "Generating a fresh report against the run start...",
   start: "Starting babysit process...",
+  startWork: "Resuming or initializing the run and starting workers...",
   stop: "Draining managed process...",
-  forceStop: "Force stopping managed process and recovering leases...",
-  pausePr: "Pausing intake for PR handoff...",
+  forceStop: "Killing workers and recovering leases...",
+  pausePr: "Draining workers and pausing the run...",
   resumePr: "Resuming intake for this run...",
   checkpoint: "Checkpointing run for PR handoff...",
   qa: "Running PR QA gate...",
+  reconcile: "Running reconcile agent to fix regressions before handoff...",
   splitPlan: "Building PR split plan...",
   preparePr: "Pausing, checkpointing, running QA, and planning PRs...",
+  syncPrs: "Syncing PR status from GitHub...",
+  openPr: "Opening draft PR (verify slice, branch, push, create)...",
+  openAllPrs: "Opening all planned draft PRs, one slice at a time...",
 };
 
 function useHotReload(config: UiConfig | null) {
@@ -91,6 +131,8 @@ function useHotReload(config: UiConfig | null) {
 
 function loadDetailsCollapsed(): boolean {
   try {
+    // ?details=logs|run|agents deep-links into an open rail tab.
+    if (new URLSearchParams(window.location.search).has("details")) return false;
     const stored = localStorage.getItem("detailsCollapsed");
     return stored === null ? true : stored === "1";
   } catch {
@@ -115,6 +157,33 @@ function loadSidebarCollapsed(): boolean {
   }
 }
 
+export const DETAILS_RAIL_MIN_WIDTH = 400;
+export const DETAILS_RAIL_MAX_WIDTH = 860;
+const DETAILS_RAIL_DEFAULT_WIDTH = 600;
+
+function clampDetailsWidth(width: number): number {
+  if (!Number.isFinite(width)) return DETAILS_RAIL_DEFAULT_WIDTH;
+  return Math.min(DETAILS_RAIL_MAX_WIDTH, Math.max(DETAILS_RAIL_MIN_WIDTH, Math.round(width)));
+}
+
+function loadDetailsWidth(): number {
+  try {
+    const stored = localStorage.getItem("detailsWidth");
+    if (stored === null) return DETAILS_RAIL_DEFAULT_WIDTH;
+    return clampDetailsWidth(Number(stored));
+  } catch {
+    return DETAILS_RAIL_DEFAULT_WIDTH;
+  }
+}
+
+function saveDetailsWidth(width: number) {
+  try {
+    localStorage.setItem("detailsWidth", String(width));
+  } catch {
+    // The rail still works if storage is unavailable.
+  }
+}
+
 function saveSidebarCollapsed(collapsed: boolean) {
   try {
     localStorage.setItem("sidebarCollapsed", collapsed ? "1" : "0");
@@ -123,18 +192,43 @@ function saveSidebarCollapsed(collapsed: boolean) {
   }
 }
 
+/**
+ * Error-only banner over the center column: client-triggered actions that
+ * fail without a process.operation record (start, stop, init) have no other
+ * surface. Live operation progress belongs to the Logs tab's activity card
+ * (auto-opened when an operation starts), never to the center column — the
+ * center is the run, not a status ticker.
+ */
+function ErrorStrip({ error, onDismiss }: { error: string; onDismiss: () => void }) {
+  if (!error) return null;
+  return (
+    <div className="flex w-full items-center gap-2.5 border-b border-down/40 bg-down/10 px-3 py-1.5 text-xs text-down">
+      <span>✕</span>
+      <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap" title={error}>
+        {error}
+      </span>
+      <button className="ml-auto whitespace-nowrap text-down/80 hover:text-down" onClick={onDismiss} type="button">
+        dismiss
+      </button>
+    </div>
+  );
+}
+
 export function App() {
   const [config, setConfig] = useState<UiConfig | null>(null);
-  const [form, setFormState] = useState<FormState>(defaultForm);
+  const [form, setFormState] = useState<FormState>(initialForm);
   const [action, setAction] = useState<Action | null>(null);
-  const [statusMessage, setStatusMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   const [sidebarCollapsed, setSidebarCollapsedState] = useState(loadSidebarCollapsed);
   const [detailsCollapsed, setDetailsCollapsedState] = useState(loadDetailsCollapsed);
-  const [improvedMode, setImprovedMode] = useState<ImprovedMode>("matches");
+  const [detailsWidth, setDetailsWidthState] = useState(loadDetailsWidth);
+  const [detailsResizing, setDetailsResizing] = useState(false);
+  const [improvedMode, setImprovedMode] = useState<ImprovedMode>("confirmed");
   const [improvedPage, setImprovedPage] = useState(0);
   const [workMode, setWorkMode] = useState<WorkMode>("active");
   const [runDetails, setRunDetails] = useState<RunDetails | null>(null);
   const [loadingRunDetails, setLoadingRunDetails] = useState(false);
+  const [detailsTabRequest, setDetailsTabRequest] = useState<{ nonce: number; tab: "agents" | "logs" | "run" } | null>(null);
 
   const setForm = useCallback((updates: Partial<FormState>) => {
     setFormState((current) => ({ ...current, ...updates }));
@@ -142,7 +236,7 @@ export function App() {
 
   const showError = useCallback((error: Error) => {
     console.error(error);
-    setStatusMessage(error.message);
+    setErrorMessage(error.message);
   }, []);
 
   const { dashboard, manualRefresh, streamState } = useDashboardStream({
@@ -155,12 +249,14 @@ export function App() {
   useHotReload(config);
 
   useEffect(() => {
+    saveRunSettings(form);
+  }, [form]);
+
+  useEffect(() => {
     void loadConfig()
       .then((loaded) => {
         const projectDefaults = asObject(loaded.projectDefaults);
         const dashboardDefaults = asObject(projectDefaults.dashboard);
-        const validationDefaults = asObject(projectDefaults.validation);
-        const prDefaults = asObject(projectDefaults.pr);
         setConfig(loaded);
         setFormState((current) => ({
           ...current,
@@ -172,12 +268,6 @@ export function App() {
           graphDbPath: loaded.defaultGraphDbPath,
           processName: String(projectDefaults.processName || current.processName),
           goalValue: Number(dashboardDefaults.goalValue || current.goalValue),
-          qaTarget: String(validationDefaults.qaTarget || current.qaTarget),
-          prBaseRef: String(projectDefaults.baseRef || current.prBaseRef),
-          prGroupMode: String(prDefaults.groupMode || current.prGroupMode),
-          prMaxFilesPerPr: Number(prDefaults.maxFilesPerPr || current.prMaxFilesPerPr),
-          prBranchPrefix: String(prDefaults.branchPrefix || current.prBranchPrefix),
-          prTitlePrefix: String(prDefaults.titlePrefix || current.prTitlePrefix),
         }));
       })
       .catch(showError);
@@ -192,6 +282,18 @@ export function App() {
     setSidebarCollapsedState(collapsed);
     saveSidebarCollapsed(collapsed);
   }
+
+  const setDetailsWidth = useCallback((width: number) => {
+    setDetailsWidthState(clampDetailsWidth(width));
+  }, []);
+
+  const finishDetailsResize = useCallback(() => {
+    setDetailsResizing(false);
+    setDetailsWidthState((width) => {
+      saveDetailsWidth(width);
+      return width;
+    });
+  }, []);
 
   const currentDashboard = dashboard as Dashboard | null;
   const busy = action !== null;
@@ -210,18 +312,33 @@ export function App() {
     }
   }, [currentDashboard, form, loadingRunDetails, showError]);
 
+  const openLogsView = useCallback(() => {
+    setDetailsCollapsedState(false);
+    saveDetailsCollapsed(false);
+    setDetailsTabRequest((current) => ({ nonce: (current?.nonce ?? 0) + 1, tab: "logs" }));
+  }, []);
+
   const runAction = useCallback(
-    async (nextAction: Action) => {
+    async (nextAction: Action, payload?: Record<string, unknown>) => {
+      if (nextAction === "forceStop" && !window.confirm("Kill all workers immediately?\n\nIn-flight worker output is discarded and their leases are recovered back to the queue. Committed work is not affected.")) return;
       setAction(nextAction);
-      setStatusMessage(actionLabels[nextAction]);
+      setErrorMessage("");
+      if (operationActions.has(nextAction)) openLogsView();
       try {
-        const body = formBody(form, currentDashboard);
+        const body = { ...formBody(form, currentDashboard), ...payload };
         if (nextAction === "refresh") {
           await manualRefresh();
         } else if (nextAction === "sync") {
           await postJson("/api/project/sync", body);
           await manualRefresh();
         } else if (nextAction === "start") {
+          await postJson("/api/process/start", body);
+          await manualRefresh();
+        } else if (nextAction === "startWork") {
+          const run = asObject(currentDashboard?.status?.run);
+          const runStatus = String(run.status || "");
+          if (runStatus === "paused") await postJson("/api/pr/resume", body);
+          else if (runStatus !== "active") await postJson("/api/run/init", body);
           await postJson("/api/process/start", body);
           await manualRefresh();
         } else if (nextAction === "stop") {
@@ -237,9 +354,6 @@ export function App() {
           await postJson("/api/run/fresh", body);
           setRunDetails(null);
           await manualRefresh();
-        } else if (nextAction === "report") {
-          await postJson("/api/report/run", body);
-          await manualRefresh();
         } else if (nextAction === "pausePr") {
           await postJson("/api/pr/pause", body);
           await manualRefresh();
@@ -252,46 +366,54 @@ export function App() {
         } else if (nextAction === "qa") {
           await postJson("/api/pr/qa", body);
           await manualRefresh();
+        } else if (nextAction === "reconcile") {
+          await postJson("/api/pr/reconcile", body);
+          await manualRefresh();
         } else if (nextAction === "splitPlan") {
           await postJson("/api/pr/split-plan", body);
           await manualRefresh();
         } else if (nextAction === "preparePr") {
           await postJson("/api/pr/prepare", body);
           await manualRefresh();
+        } else if (nextAction === "syncPrs") {
+          await postJson("/api/prs/sync", body);
+          await manualRefresh();
+        } else if (nextAction === "openPr") {
+          await postJson("/api/prs/open", body);
+          await manualRefresh();
+        } else if (nextAction === "openAllPrs") {
+          await postJson("/api/prs/open-all", body);
+          await manualRefresh();
         }
-        setStatusMessage("");
       } catch (error) {
         showError(error instanceof Error ? error : new Error(String(error)));
       } finally {
         setAction(null);
       }
     },
-    [currentDashboard, form, manualRefresh, showError],
+    [currentDashboard, form, manualRefresh, openLogsView, showError],
   );
 
+  // Fixed-length rail tracks (min() resolves to a length) so the
+  // grid-template-columns transition can interpolate; minmax() tracks cannot.
+  const railWidth = "min(425px, 30vw)";
+  const detailsRailWidth = `min(${detailsWidth}px, 56vw)`;
   const gridColumns = {
-    desktop:
-      sidebarCollapsed && detailsCollapsed
-        ? "44px minmax(620px, 1fr) 44px"
-        : sidebarCollapsed
-          ? "44px minmax(620px, 1fr) minmax(440px, 560px)"
-          : detailsCollapsed
-            ? "minmax(440px, 560px) minmax(520px, 1fr) 44px"
-            : "minmax(440px, 560px) minmax(0, 1fr) minmax(440px, 560px)",
-    medium:
-      sidebarCollapsed
-        ? "44px 1fr"
-        : "minmax(440px, 560px) 1fr",
+    desktop: `${sidebarCollapsed ? "44px" : railWidth} minmax(0, 1fr) ${detailsCollapsed ? "44px" : detailsRailWidth}`,
+    medium: `${sidebarCollapsed ? "44px" : "min(425px, 42vw)"} minmax(0, 1fr)`,
   };
   const shellStyle = {
     "--app-grid-columns": gridColumns.desktop,
     "--app-grid-columns-medium": gridColumns.medium,
+    "--details-rail-width": detailsRailWidth,
   } as CSSProperties;
 
   return (
-    <main className="app-shell grid h-screen min-h-[620px] bg-[#171817] text-[#e2e5e2] max-[1180px]:h-auto max-[780px]:block max-[780px]:min-h-0" style={shellStyle}>
+    <main
+      className={`app-shell ${detailsResizing ? "app-shell-resizing" : ""} grid h-screen min-h-[620px] bg-ink text-fg max-[1180px]:h-auto max-[780px]:block max-[780px]:min-h-0`}
+      style={shellStyle}
+    >
       <Sidebar
-        activityMessage={action ? actionLabels[action] : statusMessage}
         busy={busy}
         collapsed={sidebarCollapsed}
         config={config}
@@ -299,10 +421,12 @@ export function App() {
         form={form}
         onAction={(nextAction) => void runAction(nextAction)}
         onCollapsedChange={setSidebarCollapsed}
+        onOpenPr={(branch) => void runAction("openPr", { prBranch: branch })}
         setForm={setForm}
       />
-      <section className="min-w-0 overflow-auto bg-[#191b1a]">
-        <ProgressPanel dashboard={currentDashboard} statusMessage={action ? actionLabels[action] : statusMessage} streamState={streamState} />
+      <section className="min-w-0 overflow-auto bg-panel">
+        <ErrorStrip error={errorMessage} onDismiss={() => setErrorMessage("")} />
+        <ProgressPanel dashboard={currentDashboard} streamState={streamState} />
         <WorkTables
           dashboard={currentDashboard}
           improvedMode={improvedMode}
@@ -319,7 +443,11 @@ export function App() {
         loadRunDetails={() => void loadRunDetails()}
         loadingRunDetails={loadingRunDetails}
         onCollapsedChange={setDetailsCollapsed}
+        onResizeEnd={finishDetailsResize}
+        onResizeStart={() => setDetailsResizing(true)}
+        onWidthChange={setDetailsWidth}
         runDetails={runDetails}
+        tabRequest={detailsTabRequest}
       />
     </main>
   );

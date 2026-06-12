@@ -1,0 +1,17 @@
+{
+  "number": 1856,
+  "title": "Link `ftCo_BarrelWait`",
+  "state": "MERGED",
+  "createdAt": "2025-08-20T01:50:24Z",
+  "updatedAt": "2025-08-20T01:54:06Z",
+  "mergedAt": "2025-08-20T01:54:05Z",
+  "closedAt": "2025-08-20T01:54:05Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1856",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 5285
+  }
+}

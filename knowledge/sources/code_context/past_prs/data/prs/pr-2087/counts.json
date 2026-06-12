@@ -1,0 +1,17 @@
+{
+  "number": 2087,
+  "title": "Link itwhispyapple",
+  "state": "MERGED",
+  "createdAt": "2026-01-12T04:11:46Z",
+  "updatedAt": "2026-01-12T04:29:18Z",
+  "mergedAt": "2026-01-12T04:29:15Z",
+  "closedAt": "2026-01-12T04:29:15Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/2087",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 61965
+  }
+}

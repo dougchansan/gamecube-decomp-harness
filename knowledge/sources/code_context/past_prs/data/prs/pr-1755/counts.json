@@ -1,0 +1,17 @@
+{
+  "number": 1755,
+  "title": "ZeldaDinFirexplode work",
+  "state": "MERGED",
+  "createdAt": "2025-07-28T04:40:02Z",
+  "updatedAt": "2025-07-28T14:33:24Z",
+  "mergedAt": "2025-07-28T08:49:05Z",
+  "closedAt": "2025-07-28T08:49:05Z",
+  "author": "lukechampine",
+  "url": "https://github.com/doldecomp/melee/pull/1755",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 6049
+  }
+}

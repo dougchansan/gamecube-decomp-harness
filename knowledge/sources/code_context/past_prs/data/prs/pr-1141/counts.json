@@ -1,0 +1,17 @@
+{
+  "number": 1141,
+  "title": "Match 25.66% of `ft_0C31` (8.13 KB)",
+  "state": "MERGED",
+  "createdAt": "2024-01-28T01:59:25Z",
+  "updatedAt": "2024-01-28T02:00:28Z",
+  "mergedAt": "2024-01-28T02:00:27Z",
+  "closedAt": "2024-01-28T02:00:27Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1141",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 15723
+  }
+}

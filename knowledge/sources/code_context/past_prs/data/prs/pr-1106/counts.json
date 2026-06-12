@@ -1,0 +1,17 @@
+{
+  "number": 1106,
+  "title": "Fix `NOT_IMPLEMENTED` codegen in objdiff",
+  "state": "MERGED",
+  "createdAt": "2024-01-24T16:08:57Z",
+  "updatedAt": "2024-01-24T16:12:45Z",
+  "mergedAt": "2024-01-24T16:12:44Z",
+  "closedAt": "2024-01-24T16:12:44Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1106",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 565
+  }
+}

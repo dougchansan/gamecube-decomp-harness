@@ -1,0 +1,172 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2400",
+  "pr": {
+    "number": 2400,
+    "title": "Fix renaming of HSD_AudioGetAuxHeapSize",
+    "url": "https://github.com/doldecomp/melee/pull/2400",
+    "state": "MERGED",
+    "author": "jellejurre",
+    "created_at": "2026-04-09T20:51:29Z",
+    "merged_at": "2026-04-09T20:55:04Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2400 is a one-line symbol metadata fix in config/GALE01/symbols.txt, renaming the global function symbol at .text:0x8038E034 from AXDriver_8038E034 to HSD_AudioGetAuxHeapSize while preserving its address, type, size, and scope.",
+  "change_classification": {
+    "primary_type": "symbol_metadata_rename",
+    "categories": [
+      "fix",
+      "config",
+      "symbol_rename"
+    ],
+    "systems": [
+      "GALE01 symbols",
+      "HSD audio",
+      "AXDriver"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Symbol table entry updated for the function at .text:0x8038E034.",
+      "evidence_refs": [
+        "changed_files.jsonl: config/GALE01/symbols.txt added 1 deleted 1 hunks 1",
+        "raw_diff: AXDriver_8038E034 replaced with HSD_AudioGetAuxHeapSize at .text:0x8038E034"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Changed the symbol name at .text:0x8038E034 from AXDriver_8038E034 to HSD_AudioGetAuxHeapSize.",
+      "evidence_refs": [
+        "raw_diff"
+      ]
+    },
+    {
+      "text": "Kept the symbol metadata unchanged: type:function, size:0x2D8, scope:global.",
+      "evidence_refs": [
+        "raw_diff"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "The rename was made in the central GALE01 symbols file rather than through a source-level alias or duplicate declaration.",
+      "evidence_refs": [
+        "raw_diff",
+        "decomp_standards:no-define-alias-global-renames"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a function's canonical name is known, update the symbol metadata entry directly while preserving address, size, type, and scope unless there is evidence those fields are also wrong.",
+      "scope": [
+        "config/GALE01/symbols.txt",
+        "function symbol renames"
+      ],
+      "evidence_refs": [
+        "raw_diff",
+        "decomp_standards:no-define-alias-global-renames",
+        "decomp_standards:conservative-naming"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "For the function at .text:0x8038E034, this PR uses HSD_AudioGetAuxHeapSize as the symbol name instead of the address-style AXDriver_8038E034 placeholder.",
+      "evidence_refs": [
+        "raw_diff"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [],
+  "review_feedback": [],
+  "searchable_terms": [
+    "pr-2400",
+    "HSD_AudioGetAuxHeapSize",
+    "AXDriver_8038E034",
+    "0x8038E034",
+    ".text:0x8038E034",
+    "config/GALE01/symbols.txt",
+    "GALE01 symbols",
+    "AXDriverSetupAux",
+    "AXDriver_8038E30C",
+    "symbol rename",
+    "HSD audio"
+  ],
+  "follow_up_queries": [
+    "HSD_AudioGetAuxHeapSize",
+    "AXDriver_8038E034",
+    "\".text:0x8038E034\"",
+    "\"config/GALE01/symbols.txt\" \"HSD_AudioGetAuxHeapSize\"",
+    "\"HSD_Audio\" \"AuxHeapSize\""
+  ],
+  "evidence_quality": {
+    "status": "strong",
+    "evidence_refs": [
+      "metadata_json",
+      "raw_diff",
+      "changed_files.jsonl",
+      "text_corpus.jsonl"
+    ],
+    "notes": [
+      "The file-level change is fully visible and limited to one symbol rename.",
+      "No PR body, review comments, or issue comments were present, so the rationale for the canonical name is not available from this slice.",
+      "No build, objdiff, or regression evidence is included; this intake therefore does not claim validation beyond the symbol-table edit shown in the diff."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "kind": "decomp_lesson",
+        "title": "Prefer direct symbol metadata renames over aliases for known canonical function names",
+        "text": "This PR corrected a function's canonical name by changing the config/GALE01/symbols.txt entry at .text:0x8038E034 from AXDriver_8038E034 to HSD_AudioGetAuxHeapSize, preserving the same address, type, size, and scope. It is a small example consistent with keeping one canonical symbol name rather than adding aliases or duplicate declarations.",
+        "scope": [
+          "symbol metadata",
+          "function renames",
+          "config/GALE01/symbols.txt"
+        ],
+        "evidence_refs": [
+          "raw_diff",
+          "decomp_standards:no-define-alias-global-renames"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "GALE01 symbol at .text:0x8038E034 named HSD_AudioGetAuxHeapSize",
+        "text": "PR 2400 changed config/GALE01/symbols.txt so the global function at .text:0x8038E034, size 0x2D8, is named HSD_AudioGetAuxHeapSize instead of AXDriver_8038E034.",
+        "source_path": "config/GALE01/symbols.txt",
+        "scope": [
+          "GALE01",
+          "symbols",
+          "HSD_AudioGetAuxHeapSize",
+          "0x8038E034"
+        ],
+        "evidence_refs": [
+          "raw_diff",
+          "changed_files.jsonl"
+        ],
+        "reason": "This is a source-owned symbol-table fact and should be reviewed by the curator before promotion."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer from this slice why HSD_AudioGetAuxHeapSize is the correct semantic name; the PR body and comments provide no rationale.",
+      "Do not claim a code match, build pass, objdiff result, or regression result; none are present in the loaded evidence.",
+      "Do not generalize remaining nearby AXDriver_8038E30C, AXDriver_8038E37C, or AXDriver_8038E498 names as incorrect based on this PR alone."
+    ]
+  },
+  "confidence": 0.88,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

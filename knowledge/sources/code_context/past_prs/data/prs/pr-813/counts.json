@@ -1,0 +1,17 @@
+{
+  "number": 813,
+  "title": "Clean up `ftCommon` motion definitions",
+  "state": "MERGED",
+  "createdAt": "2023-04-24T02:15:36Z",
+  "updatedAt": "2023-04-24T02:59:24Z",
+  "mergedAt": "2023-04-24T02:59:23Z",
+  "closedAt": "2023-04-24T02:59:23Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/813",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 153540
+  }
+}

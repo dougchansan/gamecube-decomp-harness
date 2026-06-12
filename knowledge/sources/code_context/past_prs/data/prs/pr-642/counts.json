@@ -1,0 +1,17 @@
+{
+  "number": 642,
+  "title": "Divide `functions.h` into Doxygen modules",
+  "state": "MERGED",
+  "createdAt": "2023-01-03T13:28:56Z",
+  "updatedAt": "2023-01-04T06:08:49Z",
+  "mergedAt": "2023-01-04T06:08:49Z",
+  "closedAt": "2023-01-04T06:08:49Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/642",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 1,
+    "diff_bytes": 29525
+  }
+}

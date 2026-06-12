@@ -1,0 +1,17 @@
+{
+  "number": 2033,
+  "title": "ft: Match Popo (ftPp) and Kirby (ftKb) functions",
+  "state": "MERGED",
+  "createdAt": "2025-12-30T01:43:22Z",
+  "updatedAt": "2026-01-06T16:42:51Z",
+  "mergedAt": "2026-01-05T22:01:46Z",
+  "closedAt": "2026-01-05T22:01:46Z",
+  "author": "itsgrimetime",
+  "url": "https://github.com/doldecomp/melee/pull/2033",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 1,
+    "reviews": 1,
+    "diff_bytes": 6230
+  }
+}

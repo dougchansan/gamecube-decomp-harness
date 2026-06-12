@@ -1,0 +1,17 @@
+{
+  "number": 549,
+  "title": "Add shared PyCharm metadata",
+  "state": "MERGED",
+  "createdAt": "2022-09-04T15:51:04Z",
+  "updatedAt": "2022-09-04T15:53:04Z",
+  "mergedAt": "2022-09-04T15:53:03Z",
+  "closedAt": "2022-09-04T15:53:03Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/549",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 2674
+  }
+}

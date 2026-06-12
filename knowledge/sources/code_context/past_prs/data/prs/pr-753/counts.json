@@ -1,0 +1,17 @@
+{
+  "number": 753,
+  "title": "Clean up fighter vars union",
+  "state": "MERGED",
+  "createdAt": "2023-03-06T04:47:55Z",
+  "updatedAt": "2023-03-06T08:38:21Z",
+  "mergedAt": "2023-03-06T08:38:18Z",
+  "closedAt": "2023-03-06T08:38:18Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/753",
+  "counts": {
+    "issue_comments": 7,
+    "review_comments": 0,
+    "reviews": 2,
+    "diff_bytes": 184934
+  }
+}

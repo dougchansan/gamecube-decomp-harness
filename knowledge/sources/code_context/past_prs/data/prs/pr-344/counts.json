@@ -1,0 +1,17 @@
+{
+  "number": 344,
+  "title": "Ftmario",
+  "state": "MERGED",
+  "createdAt": "2022-04-04T00:50:26Z",
+  "updatedAt": "2022-04-06T19:21:55Z",
+  "mergedAt": "2022-04-04T23:11:32Z",
+  "closedAt": "2022-04-04T23:11:32Z",
+  "author": "nicolasrmerz",
+  "url": "https://github.com/doldecomp/melee/pull/344",
+  "counts": {
+    "issue_comments": 2,
+    "review_comments": 2,
+    "reviews": 2,
+    "diff_bytes": 21078
+  }
+}

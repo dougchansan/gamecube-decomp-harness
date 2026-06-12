@@ -1,0 +1,338 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2332",
+  "pr": {
+    "number": 2332,
+    "title": "Link grkraid",
+    "url": "https://github.com/doldecomp/melee/pull/2332",
+    "state": "MERGED",
+    "author": "jellejurre",
+    "created_at": "2026-03-20T12:24:43Z",
+    "merged_at": "2026-03-20T14:51:26Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2332 linked and marked src/melee/gr/grkraid.c as Matching, with targeted C reshaping in grKraid_801FE6D8 and grKraid_801FE818 plus symbols.txt metadata edits for grkraid data, rodata, sdata, sbss, and sdata2 placement. The PR body highlights data offset and padding issues, later marked fixed, and the bot report records 4 new matches including grKraid_801FE818, grKraid_801FE6D8, .sdata2, and .rodata.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "data-symbol-metadata",
+      "stage-ground",
+      "build-config"
+    ],
+    "systems": [
+      "stage",
+      "ground",
+      "grkraid",
+      "config/GALE01",
+      "configure.py"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gr/grkraid.c",
+      "role": "Kraid stage source updated to close matching gaps; include cleanup, rodata Vec introduction/use, inlining/removal of getMapRotation helper, local ordering/lifetime changes, and small cast/assignment reshaping in grKraid_801FE818.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gr/grkraid.c added 20 deleted 36 hunks 12",
+        "raw_diff: src/melee/gr/grkraid.c include block changes",
+        "raw_diff: const Vec grKr_803B8278 added and Vec pos changed from inline zero initializer to grKr_803B8278",
+        "raw_diff: getMapRotation removed; grKraid_801FE6D8 computes max/min/rot inline and includes self-assignment to map_rot_spd_min",
+        "raw_diff: grKraid_801FE818 local declarations and zeroing reshaped"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Symbol metadata adjusted for Kraid-related rodata/data/sdata/sbss/sdata2 sizes, scopes, local labels, and alignments to support data placement and matching.",
+      "evidence_refs": [
+        "changed_files.jsonl: config/GALE01/symbols.txt added 27 deleted 24 hunks 6",
+        "raw_diff: grKr_803B8278 size changed from 0x10 to 0xC; grRc_803B8288 align:8 added",
+        "raw_diff: grKr data strings changed to local labels @147, @170, @171, @198, @287; @171 placed at .data:0x803E4D64",
+        "raw_diff: grRc_803E4DA8 align:8 added",
+        "raw_diff: grKr sdata strings changed to local @189 and @190; grRc_804D4780 align:8 added",
+        "raw_diff: grKr sbss symbols changed from global to local scope",
+        "raw_diff: grKr sdata2 float/double globals changed to local @ labels"
+      ]
+    },
+    {
+      "path": "configure.py",
+      "role": "Build configuration changed grkraid object from NonMatching to Matching.",
+      "evidence_refs": [
+        "changed_files.jsonl: configure.py added 1 deleted 1 hunks 1",
+        "raw_diff: Object(NonMatching, \"melee/gr/grkraid.c\") changed to Object(Matching, \"melee/gr/grkraid.c\")"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Marked melee/gr/grkraid.c as Matching in configure.py.",
+      "evidence_refs": [
+        "raw_diff: configure.py Object(NonMatching, \"melee/gr/grkraid.c\") -> Object(Matching, \"melee/gr/grkraid.c\")"
+      ]
+    },
+    {
+      "text": "Adjusted symbols.txt metadata around grkraid, including object sizes, local/global scopes, local labels, and align:8 annotations to address data, sdata, rodata, sbss, and sdata2 placement.",
+      "evidence_refs": [
+        "raw_diff: symbols.txt rodata/data/sdata/sbss/sdata2 hunks",
+        "human_pr_text: author described .data string offset, .sdata zero padding, and rodata issues"
+      ]
+    },
+    {
+      "text": "Added const Vec grKr_803B8278 and changed grKraid_801FE440 to initialize pos from that object rather than an inline zero Vec initializer.",
+      "evidence_refs": [
+        "raw_diff: +const Vec grKr_803B8278 = { 0.0f, 0.0f, 0.0f };",
+        "raw_diff: Vec pos = { 0.0f, 0.0f, 0.0f }; -> Vec pos = grKr_803B8278;"
+      ]
+    },
+    {
+      "text": "Removed static helper getMapRotation and expanded its computation directly in grKraid_801FE6D8 with separate max/min locals and an apparent self-assignment to grKr_804D6A08->map_rot_spd_min.",
+      "evidence_refs": [
+        "raw_diff: static f32 getMapRotation() removed",
+        "raw_diff: grKraid_801FE6D8 adds f32 min/max, computes rot in steps, and adds grKr_804D6A08->map_rot_spd_min self-assignment"
+      ]
+    },
+    {
+      "text": "Reshaped grKraid_801FE818 local declaration order, fVar1/fVar3 initialization, repeated else branches, and zero assignment to x2/x1 via s8 iVar.",
+      "evidence_refs": [
+        "raw_diff: grKraid_801FE818 declaration order and fVar1 = (fVar3 = 0.0f)",
+        "raw_diff: repeated fVar3 = fVar1 removals",
+        "raw_diff: fVar2 = 0; iVar = (u8) fVar2; gp->gv.kraid2.x2/x1 = iVar"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Kept the final configuration change narrow: only grkraid.c was switched from NonMatching to Matching.",
+      "evidence_refs": [
+        "raw_diff: configure.py single-object status change"
+      ]
+    },
+    {
+      "text": "Resolved offset/padding issues primarily in symbols.txt metadata instead of broad source churn, using local labels and align annotations where the diff shows section placement changes.",
+      "evidence_refs": [
+        "human_pr_text: author asked how to place offset string and padded .sdata/.rodata",
+        "raw_diff: symbols.txt local labels and align:8 changes"
+      ]
+    },
+    {
+      "text": "Used bot-reported narrow match results as evidence before landing the Matching status.",
+      "evidence_refs": [
+        "text_corpus.jsonl issue_comment decomp-dev[bot]: 4 new matches; grKraid_801FE818, .sdata2, .rodata, grKraid_801FE6D8 at 100.00%"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For a stage file that is almost matched but blocked by section placement, inspect symbols.txt metadata for size, scope, local-label, and alignment corrections before inventing broader C-side storage.",
+      "scope": [
+        "stage ground files",
+        "symbols.txt metadata",
+        "data/rodata/sdata/sdata2 placement"
+      ],
+      "evidence_refs": [
+        "human_pr_text: .data offset, .sdata padding, and rodata issues were blockers",
+        "raw_diff: symbols.txt size/scope/local-label/align changes",
+        "text_corpus.jsonl bot report: .sdata2 and .rodata became 100.00%"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "When linking a file as Matching, keep configure.py status changes paired with local bot/build evidence for the specific unit and matched items.",
+      "scope": [
+        "configure.py",
+        "MatchingFor object status",
+        "matched-code reporting"
+      ],
+      "evidence_refs": [
+        "raw_diff: configure.py marks grkraid.c Matching",
+        "text_corpus.jsonl bot report: main/melee/gr/grkraid includes 4 new matches and linked-code increase"
+      ],
+      "confidence": 0.82
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "Kraid stage globals in this slice use the grKr_ prefix with address suffixes when kept global, e.g. grKr_803E4C78, grKr_803E4C9C, grKr_803E4D0C, grKr_803B8278.",
+      "evidence_refs": [
+        "raw_diff: symbols.txt grKr_* entries",
+        "raw_diff: src/melee/gr/grkraid.c const Vec grKr_803B8278"
+      ]
+    },
+    {
+      "text": "Unowned/local data in symbols.txt is represented with @number local labels in this PR, replacing several former grKr_* global string/float/double symbols.",
+      "evidence_refs": [
+        "raw_diff: @147, @170, @171, @198, @287 data string labels",
+        "raw_diff: @189 and @190 sdata string labels",
+        "raw_diff: @224, @225, @286, @304, @306, @430, @431 sdata2 labels"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Use symbols.txt align annotations to account for section padding/alignment where section placement is the blocker.",
+      "evidence_refs": [
+        "human_pr_text: author asked about zero-byte padding in .sdata and same issue in rodata",
+        "raw_diff: grRc_803B8288 align:8, grRc_803E4DA8 align:8, grRc_804D4780 align:8"
+      ],
+      "caution": "The PR does not explain a general alignment rule; treat this as a case-specific metadata tactic."
+    },
+    {
+      "tactic": "Convert generated/global-looking data symbols to local @ labels when the data is local to the translation unit and symbol ownership requires it.",
+      "evidence_refs": [
+        "raw_diff: grKr_803E4D00/grKr_803E4D70/grKr_803E4D8C replaced by @ local labels",
+        "raw_diff: grKr_804DB620..grKr_804DB63C replaced by @ local sdata2 labels"
+      ],
+      "caution": "The evidence supports this PR's grkraid symbols only; it should not be generalized without section ownership evidence."
+    },
+    {
+      "tactic": "Small source-shape changes such as removing a helper, introducing temporaries, changing local declaration order, and using casts/temporary assignment can close final function deltas.",
+      "evidence_refs": [
+        "raw_diff: getMapRotation removed and computation expanded in grKraid_801FE6D8",
+        "raw_diff: grKraid_801FE818 local declaration/order and s8 iVar assignment changes",
+        "text_corpus.jsonl bot report: grKraid_801FE6D8 and grKraid_801FE818 reached 100.00%"
+      ],
+      "caution": "Some shapes are visibly hacky, including the PR author's 'Janky hack' note and the map_rot_spd_min self-assignment; do not promote as style without objdiff need."
+    },
+    {
+      "tactic": "A named const Vec in rodata can be used instead of an inline Vec initializer when section placement/matching evidence requires it.",
+      "evidence_refs": [
+        "raw_diff: const Vec grKr_803B8278 added",
+        "raw_diff: Vec pos changed to grKr_803B8278",
+        "raw_diff: symbols.txt grKr_803B8278 size changed to 0xC"
+      ],
+      "caution": "This is high-risk under literal/data ownership standards; retain only with metadata and match evidence."
+    }
+  ],
+  "review_feedback": [
+    {
+      "type": "bot_report",
+      "text": "decomp-dev[bot] reported GALE01 progress: matched code +800 bytes, linked code +4460 bytes, matched data +48 bytes, linked data +376 bytes, and 4 new matches for grkraid including grKraid_801FE818, grKraid_801FE6D8, .sdata2, and .rodata.",
+      "evidence_refs": [
+        "text_corpus.jsonl issue_comment by decomp-dev[bot] at 2026-03-20T12:28:28Z"
+      ]
+    },
+    {
+      "type": "human_context",
+      "text": "PR body says data offset/padding issues were fixed with help from 桜 in Discord and calls one solution a 'Janky hack for the 4 byte offset'. No loaded review comments are present.",
+      "evidence_refs": [
+        "human_pr_text",
+        "metadata_json: review_comments 0, reviews 0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2332",
+    "Link grkraid",
+    "grkraid",
+    "grKraid_801FE6D8",
+    "grKraid_801FE818",
+    "getMapRotation",
+    "grKr_803B8278",
+    "grKr_803E4D64",
+    "grKr_804D6A08",
+    "map_rot_spd_min",
+    "map_rot_spd_max",
+    "Kraid Hand Pos",
+    "symbols.txt align:8",
+    "local @ labels",
+    ".data offset",
+    ".sdata padding",
+    ".rodata matching",
+    ".sdata2 matching",
+    "Object(Matching, \"melee/gr/grkraid.c\")"
+  ],
+  "follow_up_queries": [
+    "grkraid symbols.txt align:8 padding .data .sdata .rodata",
+    "grKr_803E4D64 offset local label @171",
+    "grKraid_801FE6D8 map_rot_spd_min self assignment",
+    "grKraid_801FE818 fVar1 fVar3 iVar matching",
+    "stage ground files local @ labels sdata2 floats doubles",
+    "configure.py Object Matching melee/gr/grkraid.c"
+  ],
+  "evidence_quality": {
+    "status": "strong",
+    "evidence_refs": [
+      "metadata_json: PR #2332 merged, changed_files count 3, added 48 deleted 61",
+      "human_pr_text: author describes blockers and fixed state",
+      "raw_diff: full diff not truncated",
+      "changed_files.jsonl: changed file list with line counts",
+      "text_corpus.jsonl: bot report with match results"
+    ],
+    "notes": [
+      "No human review comments were loaded; review feedback is limited to the PR body and bot report.",
+      "The PR body references Discord help and screenshots, but their contents are not loaded beyond the author's text.",
+      "The exact reason each source-shape change was required is not documented; tactics involving self-assignment, local lifetime/order, and named rodata should be treated as case-specific matching moves, not accepted style.",
+      "Merged state and bot report support that the slice landed and improved matching, but this intake does not independently rerun builds or objdiff."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "type": "decomp_lesson",
+        "title": "Fix data placement blockers with symbol metadata before broad C churn",
+        "text": "In PR #2332, grkraid was linked by pairing source tweaks with symbols.txt size/scope/local-label/alignment fixes for .data, .rodata, .sdata, .sbss, and .sdata2. The PR body explicitly identified offset and padding issues, and the bot report showed .rodata and .sdata2 reaching 100%.",
+        "scope": [
+          "grkraid",
+          "stage ground files",
+          "symbols.txt",
+          "section placement"
+        ],
+        "evidence_refs": [
+          "human_pr_text",
+          "raw_diff: symbols.txt hunks",
+          "text_corpus.jsonl bot report"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "grkraid.c was marked Matching by PR #2332",
+        "text": "configure.py changed melee/gr/grkraid.c from NonMatching to Matching in PR #2332, with bot-reported new matches for grKraid_801FE818, grKraid_801FE6D8, .sdata2, and .rodata.",
+        "source_path": "src/melee/gr/grkraid.c",
+        "scope": [
+          "configure.py",
+          "src/melee/gr/grkraid.c",
+          "main/melee/gr/grkraid"
+        ],
+        "evidence_refs": [
+          "raw_diff: configure.py Matching change",
+          "text_corpus.jsonl decomp-dev[bot] report"
+        ],
+        "reason": "Potential source-owned path fact about matching status and affected unit; curator should verify against current source before recording."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Document case-specific use of symbols.txt local labels and align metadata for section padding blockers",
+        "text": "PR #2332 suggests that when section placement blocks a match, local @ labels, scope changes, size corrections, and align metadata in symbols.txt can resolve .data/.sdata/.rodata/.sdata2 layout issues. This should be framed as metadata correction requiring section ownership evidence, not as permission to add fake C storage or broad data churn.",
+        "source_path": null,
+        "scope": [
+          "symbols.txt",
+          "data-sections-and-tu-splits",
+          "text-before-data-matching"
+        ],
+        "evidence_refs": [
+          "human_pr_text: data offset and padding blockers",
+          "raw_diff: symbols.txt local label, scope, size, align changes"
+        ],
+        "reason": "May be worth curating as an example under existing data-section standards; current standards already cover related principles, so avoid duplicating or overgeneralizing."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote the grKr_803B8278 named const Vec or the grKr_804D6A08->map_rot_spd_min self-assignment as general style; the PR body calls the offset solution janky and the evidence only supports a local matching tactic.",
+      "Do not infer reviewer intent or Discord guidance beyond the PR body's statement that issues were fixed with help from 桜.",
+      "Do not treat all grKr_* symbols as needing local @ labels; the diff preserves some grKr globals and changes only specific symbols."
+    ]
+  },
+  "confidence": 0.86,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

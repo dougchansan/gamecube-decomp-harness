@@ -134,6 +134,12 @@ decompilation decisions.
   decomp resources, and past PR evidence.
 - [Score integration and PR handoff](60-score-and-pr-handoff.md) covers the
   validation gate and the boundary between run output and human-facing review.
+- [Operator flow and PR tracking](65-operator-flow-and-pr-tracking.md) covers
+  the canonical session lifecycle, the pipeline-rail sidebar, and PRs as
+  first-class tracked state.
+- [Campaign and save points](70-save-points.md) covers the canonical campaign
+  timeline, commit-anchored save points, and the where-we-are staleness
+  contract.
 
 ## Design Source
 

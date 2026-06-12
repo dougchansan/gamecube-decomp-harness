@@ -1,0 +1,17 @@
+{
+  "number": 1997,
+  "title": "Wip",
+  "state": "CLOSED",
+  "createdAt": "2025-12-17T01:06:06Z",
+  "updatedAt": "2025-12-17T01:06:37Z",
+  "mergedAt": null,
+  "closedAt": "2025-12-17T01:06:37Z",
+  "author": "Savestate2A03",
+  "url": "https://github.com/doldecomp/melee/pull/1997",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 36500
+  }
+}

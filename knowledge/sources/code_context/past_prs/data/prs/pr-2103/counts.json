@@ -1,0 +1,17 @@
+{
+  "number": 2103,
+  "title": "Gr*Route matches",
+  "state": "MERGED",
+  "createdAt": "2026-01-18T20:44:27Z",
+  "updatedAt": "2026-01-18T20:52:08Z",
+  "mergedAt": "2026-01-18T20:52:00Z",
+  "closedAt": "2026-01-18T20:52:00Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/2103",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 17959
+  }
+}

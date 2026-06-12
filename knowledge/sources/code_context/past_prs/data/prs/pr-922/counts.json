@@ -1,0 +1,17 @@
+{
+  "number": 922,
+  "title": "Match `ftCo_CaptureWaitKoopa`",
+  "state": "MERGED",
+  "createdAt": "2023-06-04T16:14:28Z",
+  "updatedAt": "2023-06-04T17:08:25Z",
+  "mergedAt": "2023-06-04T17:08:24Z",
+  "closedAt": "2023-06-04T17:08:24Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/922",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 11188
+  }
+}

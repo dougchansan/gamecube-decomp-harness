@@ -1,0 +1,330 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2301",
+  "pr": {
+    "number": 2301,
+    "title": "ftKb_SpecialN: match 3 functions",
+    "url": "https://github.com/doldecomp/melee/pull/2301",
+    "state": "MERGED",
+    "author": "johnwinston",
+    "created_at": "2026-03-15T23:03:45Z",
+    "merged_at": "2026-03-15T23:49:18Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Matched three Kirby ftKb_SpecialN callbacks in src/melee/ft/chara/ftKirby/ftKb_SpecialN.c: ftKb_SpecialHi1_Anim, ftKb_SpecialAirS_Enter, and ftKb_EatJump1_Anim. The PR body claims all three were verified as 100% objdiff matches and ninja built cleanly; the bot report confirms 3 new 100% matches totaling +416 matched-code bytes.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "fighter-callbacks",
+      "code-match"
+    ],
+    "systems": [
+      "fighter",
+      "Kirby",
+      "ftKb_SpecialN"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_SpecialN.c",
+      "role": "Only changed source file; replaces three placeholder function markers with matched Kirby special-move callback implementations.",
+      "evidence_refs": [
+        "changed_files: src/melee/ft/chara/ftKirby/ftKb_SpecialN.c added 42 deleted 3 hunks 3",
+        "raw_diff: ftKb_SpecialHi1_Anim implementation added",
+        "raw_diff: ftKb_SpecialAirS_Enter implementation added",
+        "raw_diff: ftKb_EatJump1_Anim implementation added"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "symbol": "ftKb_SpecialHi1_Anim",
+      "path": "src/melee/ft/chara/ftKirby/ftKb_SpecialN.c",
+      "change": "Replaced a placeholder with a callback that checks animation completion, calls ftCommon_8007D5D4, changes motion state to ftKb_MS_SpecialAirHi2 with flags 0xA, installs efLib pause/resume hitlag callbacks, and clears fp->mv.kb.specialhi.x0.",
+      "evidence_refs": [
+        "raw_diff: hunk near line 170",
+        "human_pr_text: Summary lists ftKb_SpecialHi1_Anim",
+        "human_pr_text: describes Final Cutter transition to SpecialAirHi2 when animation ends"
+      ]
+    },
+    {
+      "symbol": "ftKb_SpecialAirS_Enter",
+      "path": "src/melee/ft/chara/ftKirby/ftKb_SpecialN.c",
+      "change": "Replaced a placeholder with an aerial Hammer enter callback that initializes cmd_vars[0], applies specials_aerial_vertical_momentum once when fp->fv.kb.x64 is false, changes motion state to ftKb_MS_SpecialAirS, calls ftAnim_8006EBA4, and sets accessory4_cb to fn_800F53AC.",
+      "evidence_refs": [
+        "raw_diff: hunk near line 1212",
+        "human_pr_text: Summary lists ftKb_SpecialAirS_Enter",
+        "human_pr_text: describes Hammer in air and one-time vertical momentum boost"
+      ]
+    },
+    {
+      "symbol": "ftKb_EatJump1_Anim",
+      "path": "src/melee/ft/chara/ftKirby/ftKb_SpecialN.c",
+      "change": "Replaced a placeholder with an animation callback that, when animation frames are exhausted, gets Fighter and Kirby dat_attrs, calls ftCommon_8007D5D4, changes motion state to ftKb_MS_EatJump2 with flags 0x92, calls ftKb_SpecialN_800F9070 and ftAnim_8006EBA4, then calls ftCo_800CB110 with da->specialn_jump_height.",
+      "evidence_refs": [
+        "raw_diff: hunk near line 2068",
+        "human_pr_text: Summary lists ftKb_EatJump1_Anim",
+        "human_pr_text: describes Kirby floaty jump while holding a swallowed opponent"
+      ]
+    },
+    {
+      "symbol": "match report",
+      "path": null,
+      "change": "decomp-dev bot reported 3 new matches in main/melee/ft/chara/ftKirby/ftKb_SpecialN: ftKb_SpecialAirS_Enter +144 bytes, ftKb_SpecialHi1_Anim +136 bytes, and ftKb_EatJump1_Anim +136 bytes, each moving from 0.00% to 100.00%.",
+      "evidence_refs": [
+        "text_corpus: issue_comment by decomp-dev[bot] at 2026-03-15T23:07:25Z"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "The PR kept the match focused to one fighter translation unit and three placeholder callbacks, making the bot-reported matched-code gain easy to attribute.",
+      "evidence_refs": [
+        "changed_files: one changed file",
+        "raw_diff: three placeholder replacements",
+        "text_corpus: bot report lists exactly 3 new matches in ftKb_SpecialN"
+      ]
+    },
+    {
+      "text": "The implementations use typed Fighter access and Kirby data attributes rather than raw pointer arithmetic for the shown state, velocity, callback, and attribute accesses.",
+      "evidence_refs": [
+        "raw_diff: Fighter* fp = GET_FIGHTER(gobj)",
+        "raw_diff: ftKb_DatAttrs* da = fp->dat_attrs",
+        "raw_diff: fp->self_vel.y = da->specials_aerial_vertical_momentum",
+        "raw_diff: ftCo_800CB110(gobj, true, da->specialn_jump_height)"
+      ]
+    },
+    {
+      "text": "The PR body supplied narrow verification claims, and the bot report independently recorded the same three symbols as 100% matches.",
+      "evidence_refs": [
+        "human_pr_text: Verification says all functions verified 100% match via objdiff and ninja builds cleanly",
+        "text_corpus: decomp-dev bot report lists 3 new matches at 100.00%"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For small fighter callback matches, a focused PR that replaces only placeholder functions in one translation unit produces clean attribution in automated match reports.",
+      "scope": [
+        "fighter callbacks",
+        "single-translation-unit matching",
+        "ftKirby"
+      ],
+      "evidence_refs": [
+        "changed_files: one changed file",
+        "raw_diff: three placeholder replacements",
+        "text_corpus: bot report lists 3 new matches in one unit"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "lesson": "When recovering fighter callbacks, typed local roles such as Fighter* fp and dat_attrs can express gameplay state and attribute reads directly, consistent with typed-fields-over-pointer-math standards.",
+      "scope": [
+        "fighter source",
+        "typed field recovery"
+      ],
+      "evidence_refs": [
+        "raw_diff: Fighter* fp = GET_FIGHTER(gobj)",
+        "raw_diff: fp->cmd_vars[0], fp->fv.kb.x64, fp->self_vel.y, fp->mv.kb.specialhi.x0",
+        "raw_diff: ftKb_DatAttrs* da = fp->dat_attrs"
+      ],
+      "confidence": 0.76
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "fp",
+      "meaning": "Local Fighter* obtained from GET_FIGHTER(gobj).",
+      "scope": "src/melee/ft/chara/ftKirby/ftKb_SpecialN.c callbacks in this PR",
+      "evidence_refs": [
+        "raw_diff: Fighter* fp = GET_FIGHTER(gobj)"
+      ]
+    },
+    {
+      "name": "da",
+      "meaning": "Local ftKb_DatAttrs* from fp->dat_attrs.",
+      "scope": "ftKb_SpecialAirS_Enter and ftKb_EatJump1_Anim in this PR",
+      "evidence_refs": [
+        "raw_diff: ftKb_DatAttrs* da = fp->dat_attrs"
+      ]
+    },
+    {
+      "name": "ftKb_* callback names",
+      "meaning": "Function names encode Kirby action/callback roles such as SpecialHi1_Anim, SpecialAirS_Enter, and EatJump1_Anim.",
+      "scope": "Symbols changed by PR #2301",
+      "evidence_refs": [
+        "human_pr_text: Summary lists ftKb_SpecialHi1_Anim, ftKb_SpecialAirS_Enter, ftKb_EatJump1_Anim",
+        "raw_diff: implementations use those symbol names"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Narrow PAD_STACK usage remained in two matched functions.",
+      "details": "ftKb_SpecialAirS_Enter uses PAD_STACK(8), and ftKb_EatJump1_Anim uses PAD_STACK(24). The PR body claims objdiff 100% matches and the bot report confirms both functions at 100%, but no deeper rationale for the stack padding is included.",
+      "evidence_refs": [
+        "raw_diff: PAD_STACK(8) in ftKb_SpecialAirS_Enter",
+        "raw_diff: PAD_STACK(24) in ftKb_EatJump1_Anim",
+        "human_pr_text: all functions verified 100% match via objdiff",
+        "text_corpus: bot report lists ftKb_SpecialAirS_Enter and ftKb_EatJump1_Anim at 100.00%"
+      ],
+      "confidence": 0.74
+    },
+    {
+      "tactic": "Animation-end guard drives motion-state transition callbacks.",
+      "details": "Two recovered Anim callbacks use if (!ftAnim_IsFramesRemaining(gobj)) before changing state and doing transition-side effects.",
+      "evidence_refs": [
+        "raw_diff: ftKb_SpecialHi1_Anim checks !ftAnim_IsFramesRemaining(gobj)",
+        "raw_diff: ftKb_EatJump1_Anim checks !ftAnim_IsFramesRemaining(gobj)"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "tactic": "Use exact motion-state constants and flag immediates visible in the matched source.",
+      "details": "The recovered functions call Fighter_ChangeMotionState with ftKb_MS_SpecialAirHi2 and flags 0xA, ftKb_MS_SpecialAirS and flags 0, and ftKb_MS_EatJump2 and flags 0x92.",
+      "evidence_refs": [
+        "raw_diff: Fighter_ChangeMotionState(gobj, ftKb_MS_SpecialAirHi2, 0xA, ...)",
+        "raw_diff: Fighter_ChangeMotionState(gobj, ftKb_MS_SpecialAirS, 0, ...)",
+        "raw_diff: Fighter_ChangeMotionState(gobj, ftKb_MS_EatJump2, 0x92, ...)"
+      ],
+      "confidence": 0.8
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "automated_report",
+      "author": "decomp-dev[bot]",
+      "text": "Reported +416 matched-code bytes and 3 new 100.00% matches for ftKb_SpecialAirS_Enter, ftKb_SpecialHi1_Anim, and ftKb_EatJump1_Anim in main/melee/ft/chara/ftKirby/ftKb_SpecialN.",
+      "evidence_refs": [
+        "text_corpus: issue_comment by decomp-dev[bot]"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2301",
+    "ftKb_SpecialN",
+    "ftKb_SpecialHi1_Anim",
+    "ftKb_SpecialAirS_Enter",
+    "ftKb_EatJump1_Anim",
+    "src/melee/ft/chara/ftKirby/ftKb_SpecialN.c",
+    "Kirby",
+    "Final Cutter",
+    "SpecialAirHi2",
+    "Hammer",
+    "EatJump1",
+    "ftKb_MS_SpecialAirHi2",
+    "ftKb_MS_SpecialAirS",
+    "ftKb_MS_EatJump2",
+    "specials_aerial_vertical_momentum",
+    "specialn_jump_height",
+    "PAD_STACK(8)",
+    "PAD_STACK(24)",
+    "GET_FIGHTER",
+    "ftAnim_IsFramesRemaining",
+    "Fighter_ChangeMotionState",
+    "efLib_PauseAll",
+    "efLib_ResumeAll",
+    "fn_800F53AC",
+    "ftCo_800CB110",
+    "objdiff 100%",
+    "ninja builds cleanly"
+  ],
+  "follow_up_queries": [
+    "ftKb_SpecialAirS_Enter PAD_STACK",
+    "ftKb_EatJump1_Anim PAD_STACK",
+    "ftKb_SpecialHi1_Anim efLib_PauseAll efLib_ResumeAll",
+    "ftKb_MS_EatJump2 0x92",
+    "specials_aerial_vertical_momentum fp->fv.kb.x64",
+    "ftKb_SpecialN_800F9070 ftCo_800CB110 specialn_jump_height",
+    "main/melee/ft/chara/ftKirby/ftKb_SpecialN 3 new matches"
+  ],
+  "evidence_quality": {
+    "status": "strong",
+    "evidence_refs": [
+      "metadata_json: PR #2301 title, author, state, URL, timestamps, changed-file counts",
+      "human_pr_text: summary, verification, and function descriptions",
+      "raw_diff: complete 2198-byte diff for the single changed file",
+      "changed_files: one changed file with added/deleted line counts",
+      "text_corpus: decomp-dev bot report with 3 new 100.00% matches"
+    ],
+    "notes": [
+      "No human review comments were present in the loaded slice.",
+      "The PR body says objdiff and ninja succeeded; the bot report corroborates 100% matches but does not mention ninja.",
+      "The PR body includes Claude Code generation/co-author text; this is evidence about authorship metadata, not proof of source quality or reviewer intent.",
+      "PAD_STACK usage is visible and match-supported, but the slice does not explain why those padding amounts were necessary."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "pr_match_result",
+        "title": "PR #2301 matched three ftKb_SpecialN Kirby callbacks",
+        "text": "In PR #2301, src/melee/ft/chara/ftKirby/ftKb_SpecialN.c replaced placeholders for ftKb_SpecialHi1_Anim, ftKb_SpecialAirS_Enter, and ftKb_EatJump1_Anim. The PR body claims objdiff 100% matches for all three, and the decomp-dev bot report lists all three as new 100.00% matches totaling +416 bytes.",
+        "scope": [
+          "src/melee/ft/chara/ftKirby/ftKb_SpecialN.c",
+          "ftKb_SpecialHi1_Anim",
+          "ftKb_SpecialAirS_Enter",
+          "ftKb_EatJump1_Anim"
+        ],
+        "evidence_refs": [
+          "raw_diff",
+          "human_pr_text",
+          "text_corpus: decomp-dev bot report"
+        ],
+        "confidence": 0.9
+      },
+      {
+        "record_type": "matching_tactic_observation",
+        "title": "PAD_STACK used narrowly in two matched ftKb_SpecialN callbacks",
+        "text": "PR #2301 used PAD_STACK(8) in ftKb_SpecialAirS_Enter and PAD_STACK(24) in ftKb_EatJump1_Anim. The functions were reported as 100.00% matches, but the slice does not explain the padding rationale.",
+        "scope": [
+          "ftKb_SpecialAirS_Enter",
+          "ftKb_EatJump1_Anim",
+          "PAD_STACK"
+        ],
+        "evidence_refs": [
+          "raw_diff: PAD_STACK(8)",
+          "raw_diff: PAD_STACK(24)",
+          "text_corpus: bot report 100.00% matches"
+        ],
+        "confidence": 0.76
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "ftKb_SpecialN.c contains Kirby special-move callbacks matched in PR #2301",
+        "text": "PR #2301 changed src/melee/ft/chara/ftKirby/ftKb_SpecialN.c to implement ftKb_SpecialHi1_Anim, ftKb_SpecialAirS_Enter, and ftKb_EatJump1_Anim, described as Kirby Final Cutter, aerial Hammer, and EatJump1/swallowed-opponent jump callbacks.",
+        "source_path": "src/melee/ft/chara/ftKirby/ftKb_SpecialN.c",
+        "scope": [
+          "ftKirby",
+          "ftKb_SpecialN",
+          "Kirby special callbacks"
+        ],
+        "evidence_refs": [
+          "human_pr_text: What these functions do",
+          "raw_diff: implementations added",
+          "changed_files: src/melee/ft/chara/ftKirby/ftKb_SpecialN.c"
+        ],
+        "reason": "Could improve path-level search for Kirby special callback ownership; curator should verify against current source before adding."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote a general rule that PAD_STACK is acceptable for these patterns; the PR only shows narrow uses with match reports and no rationale.",
+      "Do not infer human reviewer approval details; no review comments or reviews were loaded.",
+      "Do not treat the PR body's gameplay descriptions as complete engine documentation beyond the three functions named in this PR."
+    ]
+  },
+  "confidence": 0.88,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

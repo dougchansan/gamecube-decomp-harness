@@ -6,4 +6,5 @@ Planned normalized outputs:
 - `source_shapes.jsonl`
 - `reviewed_fixes.jsonl`
 
-These records can feed `knowledge/sources/tool_outputs`.
+These records are tool-local cache/index evidence consumed by the mismatch_db
+API. They are not registered as a knowledge source.

@@ -1,0 +1,17 @@
+{
+  "number": 2159,
+  "title": "Additional matches in gr / gm",
+  "state": "MERGED",
+  "createdAt": "2026-02-08T07:07:06Z",
+  "updatedAt": "2026-02-08T15:35:17Z",
+  "mergedAt": "2026-02-08T15:35:16Z",
+  "closedAt": "2026-02-08T15:35:17Z",
+  "author": "stephenjayakar",
+  "url": "https://github.com/doldecomp/melee/pull/2159",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 12572
+  }
+}

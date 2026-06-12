@@ -1,0 +1,17 @@
+{
+  "number": 1868,
+  "title": "Simplify ftFox code",
+  "state": "MERGED",
+  "createdAt": "2025-08-24T19:26:34Z",
+  "updatedAt": "2025-08-24T19:30:47Z",
+  "mergedAt": "2025-08-24T19:30:43Z",
+  "closedAt": "2025-08-24T19:30:43Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1868",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 26492
+  }
+}

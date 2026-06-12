@@ -1,0 +1,17 @@
+{
+  "number": 408,
+  "title": "special function callback renaming",
+  "state": "CLOSED",
+  "createdAt": "2022-07-10T01:42:49Z",
+  "updatedAt": "2022-07-10T02:06:21Z",
+  "mergedAt": null,
+  "closedAt": "2022-07-10T02:06:21Z",
+  "author": "snuffysasa",
+  "url": "https://github.com/doldecomp/melee/pull/408",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 60889
+  }
+}

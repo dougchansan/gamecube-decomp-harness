@@ -1,0 +1,17 @@
+{
+  "number": 1839,
+  "title": "Partially match `lb_00F9`",
+  "state": "MERGED",
+  "createdAt": "2025-08-13T21:58:42Z",
+  "updatedAt": "2025-08-13T22:20:47Z",
+  "mergedAt": "2025-08-13T22:20:45Z",
+  "closedAt": "2025-08-13T22:20:45Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1839",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 24394
+  }
+}

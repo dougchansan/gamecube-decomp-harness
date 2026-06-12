@@ -1,0 +1,17 @@
+{
+  "number": 700,
+  "title": "Match `grtluigi`",
+  "state": "MERGED",
+  "createdAt": "2023-01-17T19:48:10Z",
+  "updatedAt": "2023-01-18T09:09:09Z",
+  "mergedAt": "2023-01-18T09:09:08Z",
+  "closedAt": "2023-01-18T09:09:08Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/700",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 5,
+    "reviews": 6,
+    "diff_bytes": 17890
+  }
+}

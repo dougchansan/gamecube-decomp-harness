@@ -1,0 +1,10 @@
+{
+  "pr": 526,
+  "title": "Migrate `ft/code_*.s` to C",
+  "url": "https://github.com/doldecomp/melee/pull/526",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 41,
+  "added_lines": 812,
+  "deleted_lines": 453
+}

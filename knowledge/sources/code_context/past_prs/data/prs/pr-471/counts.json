@@ -1,0 +1,17 @@
+{
+  "number": 471,
+  "title": "Fix match for func_80080174",
+  "state": "MERGED",
+  "createdAt": "2022-08-21T15:39:53Z",
+  "updatedAt": "2022-08-22T14:43:09Z",
+  "mergedAt": "2022-08-22T10:37:31Z",
+  "closedAt": "2022-08-22T10:37:31Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/471",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 1,
+    "diff_bytes": 3522
+  }
+}

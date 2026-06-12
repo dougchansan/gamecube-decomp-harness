@@ -4,7 +4,32 @@ import { resolve } from "node:path";
 import type { WorkerReportType } from "../types/index.js";
 import { immediateTransaction, now, withBusyRetry, type StateStore } from "../state/db.js";
 
-export type CheckpointDisposition = "pr_candidate" | "deferred_patch" | "needs_fact" | "stalled" | "tool_error" | "review_required";
+export type CheckpointDisposition =
+  | "pr_candidate"
+  | "improvement_candidate"
+  | "deferred_patch"
+  | "needs_fact"
+  | "stalled"
+  | "needs_rework"
+  | "tool_error"
+  | "review_required";
+
+export interface ImprovementPromotionPolicy {
+  minGainPoints: number;
+  minMatchedBytes: number;
+}
+
+export const defaultImprovementPromotion: ImprovementPromotionPolicy = {
+  minGainPoints: 2,
+  minMatchedBytes: 64,
+};
+
+// Only exact matches ship. Improvement candidates are the notable local
+// improvements (above the promotion floors) — tracked so the operator can see
+// what is close, but they stay on the local branch until they become matches.
+export function shipsInPr(disposition: CheckpointDisposition | string): boolean {
+  return disposition === "pr_candidate";
+}
 
 export interface RunCheckpointItem {
   id: string;
@@ -65,7 +90,14 @@ interface CreateRunCheckpointOptions {
   allowActiveLeases?: boolean;
   artifactDir?: string;
   checkpointType?: string;
+  improvementPromotion?: Partial<ImprovementPromotionPolicy>;
   now?: string;
+  /**
+   * Symbols that broke or regressed against the freshly rebuilt production
+   * baseline. Items for these symbols are pulled out of the shipping lanes and
+   * recorded as needs_rework instead.
+   */
+  reworkSymbols?: string[];
   title?: string;
 }
 
@@ -156,21 +188,103 @@ function reportCleanEnoughForPr(summary: Record<string, unknown>, reportType: st
   return acceptanceGate.accepted !== false && stringValue(runnerValidation.status) === "passed" && repairAttempts.exhausted !== true;
 }
 
-function dispositionForReport(params: { exactMatch: boolean; reportType: string; summary: Record<string, unknown> }): CheckpointDisposition {
+export interface ImprovementPromotionEvaluation {
+  promoted: boolean;
+  gain_points: number | null;
+  target_before: number | null;
+  target_after: number | null;
+  function_size_bytes: number | null;
+  estimated_matched_bytes: number | null;
+  min_gain_points: number;
+  min_matched_bytes: number;
+  reasons: string[];
+}
+
+function baselineFunctionSize(runnerValidation: Record<string, unknown>, symbol: string): number | null {
+  const snapshot = readJsonObject(stringValue(runnerValidation.baselinePath));
+  for (const row of asArray(snapshot.functions).map(asObject)) {
+    if (stringValue(row.name) !== symbol) continue;
+    const size = numberValue(row.size, NaN);
+    return Number.isFinite(size) && size > 0 ? size : null;
+  }
+  return null;
+}
+
+// Improvements only ship when the runner-measured gain clears both floors:
+// the gain floor keeps near-99% noise local (a >=2pt gain cannot exist above
+// 98%, where pseudo-positive score wiggle is most common), and the byte floor
+// keeps one-instruction wins on tiny functions local. Missing measurements
+// never promote; the reasons make every hold auditable in the evidence.
+function evaluateImprovementPromotion(summary: Record<string, unknown>, symbol: string, policy: ImprovementPromotionPolicy): ImprovementPromotionEvaluation {
+  const runnerValidation = asObject(summary.runner_validation);
+  const target = asObject(runnerValidation.target);
+  const before = numberValue(target.before, NaN);
+  const after = numberValue(target.after, NaN);
+  const reasons: string[] = [];
+  const evaluation: ImprovementPromotionEvaluation = {
+    promoted: false,
+    gain_points: null,
+    target_before: Number.isFinite(before) ? before : null,
+    target_after: Number.isFinite(after) ? after : null,
+    function_size_bytes: null,
+    estimated_matched_bytes: null,
+    min_gain_points: policy.minGainPoints,
+    min_matched_bytes: policy.minMatchedBytes,
+    reasons,
+  };
+  if (!Number.isFinite(before) || !Number.isFinite(after)) {
+    reasons.push("runner validation target scores are unavailable");
+    return evaluation;
+  }
+  const gain = Number((after - before).toFixed(6));
+  evaluation.gain_points = gain;
+  if (gain < policy.minGainPoints) {
+    reasons.push(`gain ${gain >= 0 ? "+" : ""}${gain} is below the ${policy.minGainPoints}pt promotion floor`);
+  }
+  const size = baselineFunctionSize(runnerValidation, symbol);
+  evaluation.function_size_bytes = size;
+  if (size === null) {
+    reasons.push("target function size is unavailable in the baseline snapshot; promotion requires a measurable byte delta");
+  } else {
+    const estimatedBytes = Math.round((size * gain) / 100);
+    evaluation.estimated_matched_bytes = estimatedBytes;
+    if (estimatedBytes < policy.minMatchedBytes) {
+      reasons.push(`estimated matched-byte delta ${estimatedBytes} is below the ${policy.minMatchedBytes}-byte promotion floor`);
+    }
+  }
+  evaluation.promoted = reasons.length === 0;
+  if (evaluation.promoted) {
+    reasons.push(`gain +${gain}pts and ~${evaluation.estimated_matched_bytes} matched bytes clear the promotion floors`);
+  }
+  return evaluation;
+}
+
+function dispositionForReport(params: {
+  exactMatch: boolean;
+  improvement: ImprovementPromotionEvaluation | null;
+  regressedAgainstBaseline: boolean;
+  reportType: string;
+  summary: Record<string, unknown>;
+}): CheckpointDisposition {
   if (params.reportType === "needs_fact") return "needs_fact";
+  if (params.reportType === "needs_rework") return "needs_rework";
   if (params.reportType === "tool_error") return "tool_error";
   if (params.reportType === "stalled_no_useful_guess") return "stalled";
   if (!reportCleanEnoughForPr(params.summary, params.reportType)) return "review_required";
-  return params.exactMatch ? "pr_candidate" : "deferred_patch";
+  if (params.regressedAgainstBaseline) return "needs_rework";
+  if (params.exactMatch) return "pr_candidate";
+  return params.improvement?.promoted ? "improvement_candidate" : "deferred_patch";
 }
 
 function checkpointCounts(items: RunCheckpointItem[]): Record<string, number> {
   const counts: Record<string, number> = {
     total: items.length,
     pr_candidate: 0,
+    improvement_candidate: 0,
     deferred_patch: 0,
     needs_fact: 0,
     stalled: 0,
+    needs_rework: 0,
     tool_error: 0,
     review_required: 0,
     exact_match: 0,
@@ -179,7 +293,7 @@ function checkpointCounts(items: RunCheckpointItem[]): Record<string, number> {
   for (const item of items) {
     counts[item.disposition] = numberValue(counts[item.disposition]) + 1;
     if (item.exactMatch) counts.exact_match += 1;
-    if (item.disposition !== "pr_candidate") counts.carry_forward += 1;
+    if (!shipsInPr(item.disposition)) counts.carry_forward += 1;
   }
   return counts;
 }
@@ -188,7 +302,7 @@ function targetKey(unit: string, symbol: string): string {
   return `${unit || "unknown"}::${symbol || "unknown"}`;
 }
 
-function itemFromRow(row: WorkerReportRow, checkpointId: string, runId: string, createdAt: string): RunCheckpointItem {
+function itemFromRow(row: WorkerReportRow, checkpointId: string, runId: string, createdAt: string, policy: ImprovementPromotionPolicy, reworkSymbols: Set<string>): RunCheckpointItem {
   const summaryPath = stringValue(row.summary_path);
   const summary = readJsonObject(summaryPath);
   const agentReport = asObject(summary.agent_report);
@@ -199,7 +313,9 @@ function itemFromRow(row: WorkerReportRow, checkpointId: string, runId: string, 
   const reportType = stringValue(row.report_type);
   const exactEvidence = exactMatchAttempts(summary);
   const exactMatch = exactEvidence.length > 0 && runnerValidatedExact(summary);
-  const disposition = dispositionForReport({ exactMatch, reportType, summary });
+  const improvement = exactMatch ? null : evaluateImprovementPromotion(summary, symbol, policy);
+  const regressedAgainstBaseline = Boolean(symbol) && reworkSymbols.has(symbol);
+  const disposition = dispositionForReport({ exactMatch, improvement, regressedAgainstBaseline, reportType, summary });
   const patchPath = stringValue(row.patch_path, stringValue(agentReport.patch_path));
   const reportSummary = stringValue(summary.summary, "Worker report was persisted without a summary.");
   const evidence = {
@@ -219,6 +335,10 @@ function itemFromRow(row: WorkerReportRow, checkpointId: string, runId: string, 
       delta: numberValue(attempt.delta, NaN),
       artifact_path: stringValue(attempt.artifact_path),
     })),
+    ...(improvement ? { improvement_promotion: improvement } : {}),
+    ...(regressedAgainstBaseline
+      ? { baseline_regression: { reason: "symbol broke or regressed against the rebuilt production baseline; pulled from shipping lanes for rework" } }
+      : {}),
   };
   return {
     id: randomUUID(),
@@ -298,7 +418,12 @@ function markdownTable(items: RunCheckpointItem[]): string[] {
   if (items.length === 0) return ["No items."];
   const lines = ["| Disposition | Symbol | Source | Report | Patch | Evidence |", "| - | - | - | - | - | - |"];
   for (const item of items) {
-    const evidence = item.exactMatch ? "exact percent attempt" : item.disposition.replace(/_/g, " ");
+    const promotion = asObject(item.evidence.improvement_promotion);
+    const evidence = item.exactMatch
+      ? "exact percent attempt"
+      : item.disposition === "improvement_candidate"
+        ? `${numberValue(promotion.target_before, NaN)} -> ${numberValue(promotion.target_after, NaN)} (+${numberValue(promotion.gain_points, NaN)}pts, ~${numberValue(promotion.estimated_matched_bytes, NaN)} bytes)`
+        : item.disposition.replace(/_/g, " ");
     lines.push(
       `| ${item.disposition} | \`${item.symbol || "-"}\` | \`${item.sourcePath || "-"}\` | ${item.reportId || "-"} | ${
         item.patchPath ? `\`${item.patchPath}\`` : "-"
@@ -320,11 +445,13 @@ function writeArtifacts(params: {
 }): void {
   mkdirSync(params.artifactDir, { recursive: true });
   const prCandidates = params.items.filter((item) => item.disposition === "pr_candidate");
-  const carryForward = params.items.filter((item) => item.disposition !== "pr_candidate");
+  const improvementCandidates = params.items.filter((item) => item.disposition === "improvement_candidate");
+  const carryForward = params.items.filter((item) => !shipsInPr(item.disposition));
   const payload = {
     checkpoint: params.checkpoint,
     counts: params.counts,
     pr_candidates: prCandidates,
+    improvement_candidates: improvementCandidates,
     carry_forward: carryForward,
     items: params.items,
   };
@@ -337,7 +464,7 @@ function writeArtifacts(params: {
       `Run: \`${params.checkpoint.runId}\``,
       `Checkpoint: \`${params.checkpoint.id}\``,
       "",
-      `${prCandidates.length} exact-match candidate(s) should be considered for PR packaging.`,
+      `${prCandidates.length} exact-match candidate(s) ship. Only matches that survive the full build and regression gate go into PRs; everything else stays on the local branch.`,
       "",
       ...markdownTable(prCandidates),
       "",
@@ -352,9 +479,17 @@ function writeArtifacts(params: {
       `Run: \`${params.checkpoint.runId}\``,
       `Checkpoint: \`${params.checkpoint.id}\``,
       "",
-      `${carryForward.length} item(s) remain local evidence, deferred patches, fact requests, tool errors, or stalls.`,
+      `${carryForward.length} item(s) stay local: notable improvements, deferred patches, fact requests, rework, tool errors, and stalls.`,
       "",
-      ...markdownTable(carryForward),
+      "## Notable improvements (closest to matching)",
+      "",
+      `${improvementCandidates.length} validated improvement(s) cleared the promotion floors. They do not ship; they are the best next targets.`,
+      "",
+      ...markdownTable(improvementCandidates),
+      "",
+      "## Everything else",
+      "",
+      ...markdownTable(carryForward.filter((item) => item.disposition !== "improvement_candidate")),
       "",
     ].join("\n"),
     "utf8",
@@ -438,7 +573,12 @@ export function createRunCheckpoint(store: StateStore, runId: string, options: C
     carryForwardPath,
     createdAt,
   };
-  const items = workerReportRows(store, runId).map((row) => itemFromRow(row, checkpointId, runId, createdAt));
+  const policy: ImprovementPromotionPolicy = {
+    minGainPoints: options.improvementPromotion?.minGainPoints ?? defaultImprovementPromotion.minGainPoints,
+    minMatchedBytes: options.improvementPromotion?.minMatchedBytes ?? defaultImprovementPromotion.minMatchedBytes,
+  };
+  const reworkSymbols = new Set((options.reworkSymbols ?? []).filter(Boolean));
+  const items = workerReportRows(store, runId).map((row) => itemFromRow(row, checkpointId, runId, createdAt, policy, reworkSymbols));
   const counts = checkpointCounts(items);
   const result = { checkpoint, counts, items };
   writeArtifacts({

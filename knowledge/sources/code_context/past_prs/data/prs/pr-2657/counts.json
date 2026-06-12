@@ -1,0 +1,17 @@
+{
+  "number": 2657,
+  "title": "Melee decomp: GR",
+  "state": "OPEN",
+  "createdAt": "2026-06-11T20:06:01Z",
+  "updatedAt": "2026-06-11T20:25:48Z",
+  "mergedAt": null,
+  "closedAt": null,
+  "author": "fjooord",
+  "url": "https://github.com/doldecomp/melee/pull/2657",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 20896
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 1115,
+  "title": "Re-link `dolphin/dvd`",
+  "state": "MERGED",
+  "createdAt": "2024-01-25T15:41:48Z",
+  "updatedAt": "2024-01-25T15:43:00Z",
+  "mergedAt": "2024-01-25T15:42:59Z",
+  "closedAt": "2024-01-25T15:42:59Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1115",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 2573
+  }
+}

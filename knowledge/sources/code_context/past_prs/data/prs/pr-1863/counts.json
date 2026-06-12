@@ -1,0 +1,17 @@
+{
+  "number": 1863,
+  "title": "gm_1BA8 matches",
+  "state": "MERGED",
+  "createdAt": "2025-08-22T17:43:37Z",
+  "updatedAt": "2025-08-22T17:50:46Z",
+  "mergedAt": "2025-08-22T17:50:43Z",
+  "closedAt": "2025-08-22T17:50:43Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1863",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 22525
+  }
+}

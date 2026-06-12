@@ -1,0 +1,17 @@
+{
+  "number": 1101,
+  "title": "fix encoding and path issues on Windows in tools/decomp.py",
+  "state": "MERGED",
+  "createdAt": "2024-01-24T13:20:10Z",
+  "updatedAt": "2024-01-24T14:12:35Z",
+  "mergedAt": "2024-01-24T14:12:35Z",
+  "closedAt": "2024-01-24T14:12:35Z",
+  "author": "BR-",
+  "url": "https://github.com/doldecomp/melee/pull/1101",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 1,
+    "diff_bytes": 1950
+  }
+}

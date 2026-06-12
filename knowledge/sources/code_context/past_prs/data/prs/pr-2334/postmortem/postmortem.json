@@ -1,0 +1,250 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2334",
+  "pr": {
+    "number": 2334,
+    "title": "ft/ftCommon: match fn_800DC070",
+    "url": "https://github.com/doldecomp/melee/pull/2334",
+    "state": "CLOSED",
+    "author": "Pizzahutt",
+    "created_at": "2026-03-20T14:41:08Z",
+    "merged_at": null
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2334 replaces the placeholder for `fn_800DC070` in `src/melee/ft/chara/ftCommon/ftCo_Attack100.c` with a small ftCommon CaptureJump enter function. The implementation gets the fighter, saves `fp->victim_gobj`, resets common state, sets self velocity from `p_ftCommonData->x374/x378`, clears `mv.co.buryjump.x0`, calls `ftCo_800DC920`, and transitions to `ftCo_MS_CaptureJump`. The PR body claims `fuzzy_match_percent: 100.0`, but no objdiff/checkdiff/build log or review comments are present in the slice.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "function-implementation",
+      "placeholder-replacement"
+    ],
+    "systems": [
+      "fighter",
+      "ftCommon",
+      "CaptureJump",
+      "Attack100"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_Attack100.c",
+      "role": "Only changed source file; replaces `/// #fn_800DC070` with the recovered CaptureJump enter function.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/ft/chara/ftCommon/ftCo_Attack100.c added 16 deleted 1 hunks 1",
+        "raw_diff: hunk near fn_800DC044 / ftCo_CaptureJump_Anim",
+        "human_pr_text: Summary and What this function does"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Removed the `/// #fn_800DC070` placeholder and added `void fn_800DC070(Fighter_GObj* gobj)`.",
+      "evidence_refs": [
+        "raw_diff"
+      ]
+    },
+    {
+      "text": "Introduced local `Fighter* fp = GET_FIGHTER(gobj)` and `Fighter_GObj* victim = fp->victim_gobj` before calling `ftCommon_8007D5D4(fp)`.",
+      "evidence_refs": [
+        "raw_diff",
+        "human_pr_text: What this function does items 1-2"
+      ]
+    },
+    {
+      "text": "Set `fp->self_vel.x` to `-fp->facing_dir * p_ftCommonData->x374`, `fp->self_vel.y` to `p_ftCommonData->x378`, and reset `fp->mv.co.buryjump.x0` to `0.0F`.",
+      "evidence_refs": [
+        "raw_diff",
+        "human_pr_text: What this function does items 3-4"
+      ]
+    },
+    {
+      "text": "Called `ftCo_800DC920(victim, gobj)` and then `Fighter_ChangeMotionState(gobj, ftCo_MS_CaptureJump, 0, 0.0F, 1.0F, 0.0F, NULL)`.",
+      "evidence_refs": [
+        "raw_diff",
+        "human_pr_text: What this function does items 5-6"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Saved `fp->victim_gobj` into a local `victim` before the common-state reset call, preserving the object needed by the later `ftCo_800DC920(victim, gobj)` call.",
+      "evidence_refs": [
+        "raw_diff"
+      ]
+    },
+    {
+      "text": "Used existing typed fighter fields and symbols (`self_vel`, `facing_dir`, `mv.co.buryjump.x0`, `p_ftCommonData`, `ftCo_MS_CaptureJump`) rather than raw offset access.",
+      "evidence_refs": [
+        "raw_diff"
+      ]
+    },
+    {
+      "text": "Kept the implementation as direct C with existing project helpers and no visible pragmas, inline assembly, padding, or dummy storage tactics.",
+      "evidence_refs": [
+        "raw_diff"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For small enter-state fighter functions, a reviewable match can often be expressed as the natural call/field sequence: get `Fighter`, preserve any object pointer needed after state-reset helpers, update velocity/state fields, then call the motion-state transition helper.",
+      "scope": [
+        "fighter",
+        "ftCommon enter-state functions"
+      ],
+      "evidence_refs": [
+        "raw_diff",
+        "human_pr_text: What this function does"
+      ],
+      "confidence": 0.72
+    },
+    {
+      "lesson": "When a later helper needs a field value that may be conceptually tied to the pre-reset state, store it in a named local before calling the reset/helper function.",
+      "scope": [
+        "fighter state transitions"
+      ],
+      "evidence_refs": [
+        "raw_diff: `Fighter_GObj* victim = fp->victim_gobj;` before `ftCommon_8007D5D4(fp)` and later `ftCo_800DC920(victim, gobj)`"
+      ],
+      "confidence": 0.68
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "Used conventional short fighter local `fp` for `Fighter*` returned by `GET_FIGHTER(gobj)`.",
+      "evidence_refs": [
+        "raw_diff"
+      ]
+    },
+    {
+      "text": "Used semantic local name `victim` for `fp->victim_gobj`, matching the PR body's explanation that this object is the escaping fighter.",
+      "evidence_refs": [
+        "raw_diff",
+        "human_pr_text: What this function does item 1"
+      ]
+    },
+    {
+      "text": "Kept the function's address-style name `fn_800DC070`; the slice does not include evidence for a more semantic symbol rename.",
+      "evidence_refs": [
+        "PR title",
+        "raw_diff"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "text": "No exceptional matching tactics are visible: no `PAD_STACK`, register steering, pragmas, inline assembly, dummy locals, or manual data anchors appear in the diff.",
+      "evidence_refs": [
+        "raw_diff"
+      ]
+    },
+    {
+      "text": "The matching shape uses typed field access and existing helpers/macros (`GET_FIGHTER`, `ftCommon_8007D5D4`, `ftCo_800DC920`, `Fighter_ChangeMotionState`) rather than `M2C_FIELD` or raw pointer arithmetic.",
+      "evidence_refs": [
+        "raw_diff"
+      ]
+    },
+    {
+      "text": "The PR body reports `fuzzy_match_percent: 100.0`, but the loaded evidence does not include objdiff/checkdiff output or a build log.",
+      "evidence_refs": [
+        "human_pr_text: Verification"
+      ]
+    }
+  ],
+  "review_feedback": [],
+  "searchable_terms": [
+    "pr-2334",
+    "Pizzahutt",
+    "ft/ftCommon",
+    "ftCo_Attack100.c",
+    "fn_800DC070",
+    "CaptureJump",
+    "ftCo_MS_CaptureJump",
+    "ftCo_CaptureJump_Anim",
+    "fn_800DC044",
+    "GET_FIGHTER",
+    "victim_gobj",
+    "ftCommon_8007D5D4",
+    "ftCo_800DC920",
+    "Fighter_ChangeMotionState",
+    "p_ftCommonData",
+    "x374",
+    "x378",
+    "self_vel",
+    "facing_dir",
+    "buryjump",
+    "fuzzy_match_percent"
+  ],
+  "follow_up_queries": [
+    "fn_800DC070 ftCo_Attack100 CaptureJump",
+    "ftCommon_8007D5D4 victim_gobj ftCo_800DC920",
+    "ftCo_MS_CaptureJump Fighter_ChangeMotionState",
+    "p_ftCommonData x374 x378 self_vel facing_dir",
+    "mv.co.buryjump.x0"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR number/title/state/author/timestamps/changed_files",
+      "human_pr_text: PR body with summary, behavior description, and fuzzy percent claim",
+      "raw_diff: single hunk implementing fn_800DC070",
+      "changed_files.jsonl: one changed file, 16 additions, 1 deletion",
+      "metadata_json: review_comments 0, reviews 0, issue_comments 0"
+    ],
+    "notes": [
+      "The code change itself is well evidenced by the diff and changed-files metadata.",
+      "The semantic explanation of CaptureJump behavior comes from the PR body and aligns with visible field/call names, but the slice does not include independent runtime or source corroboration.",
+      "Verification evidence is weak: only a PR-body `fuzzy_match_percent: 100.0` claim is present, with no objdiff/checkdiff/build output loaded.",
+      "There are no review comments or reviews in the slice, so reviewer feedback and acceptance reasoning cannot be inferred.",
+      "PR state is closed with `merged_at: null`; do not infer merge or acceptance."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson_candidate",
+        "title": "Preserve needed fighter object fields before reset helpers",
+        "text": "In `fn_800DC070`, the implementation copies `fp->victim_gobj` into `victim` before `ftCommon_8007D5D4(fp)` and then uses that saved object in `ftCo_800DC920(victim, gobj)`. This is a narrow candidate lesson for fighter state-transition functions where a reset/helper call precedes later use of an object pointer from the original fighter state.",
+        "scope": [
+          "src/melee/ft/chara/ftCommon/ftCo_Attack100.c",
+          "fighter state transitions"
+        ],
+        "evidence_refs": [
+          "raw_diff"
+        ],
+        "confidence": 0.68
+      },
+      {
+        "record_type": "naming_candidate",
+        "title": "Use `fp` and semantic object locals when directly supported",
+        "text": "The diff uses `fp` for the `Fighter*` from `GET_FIGHTER(gobj)` and `victim` for `fp->victim_gobj`; the latter is supported by both the field name and PR body description.",
+        "scope": [
+          "fighter functions"
+        ],
+        "evidence_refs": [
+          "raw_diff",
+          "human_pr_text"
+        ],
+        "confidence": 0.75
+      }
+    ],
+    "source_update_candidates": [],
+    "rejection_notes": [
+      "Do not promote the PR-body `fuzzy_match_percent: 100.0` claim into a verified match standard; no objdiff/checkdiff/build artifact is present.",
+      "Do not infer that PR #2334 was merged or accepted; metadata says closed and `merged_at` is null.",
+      "Do not rename `fn_800DC070` from this slice alone; no evidence for a canonical semantic symbol name is provided.",
+      "Do not infer reviewer intent or requested changes; the slice contains zero review comments and zero reviews."
+    ]
+  },
+  "confidence": 0.76,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

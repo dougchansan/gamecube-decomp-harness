@@ -1,0 +1,17 @@
+{
+  "number": 602,
+  "title": "Match most of gobjproc",
+  "state": "MERGED",
+  "createdAt": "2022-12-09T06:28:55Z",
+  "updatedAt": "2022-12-09T06:53:33Z",
+  "mergedAt": "2022-12-09T06:53:30Z",
+  "closedAt": "2022-12-09T06:53:30Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/602",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 1,
+    "diff_bytes": 16933
+  }
+}

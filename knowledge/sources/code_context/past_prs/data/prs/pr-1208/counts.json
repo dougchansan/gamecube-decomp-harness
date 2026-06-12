@@ -1,0 +1,17 @@
+{
+  "number": 1208,
+  "title": "Match `lbSnap_8001D2BC` (124 bytes)",
+  "state": "MERGED",
+  "createdAt": "2024-02-12T22:51:14Z",
+  "updatedAt": "2024-02-12T22:52:19Z",
+  "mergedAt": "2024-02-12T22:52:19Z",
+  "closedAt": "2024-02-12T22:52:19Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1208",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 61893
+  }
+}

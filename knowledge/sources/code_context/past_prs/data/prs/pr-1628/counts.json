@@ -1,0 +1,17 @@
+{
+  "number": 1628,
+  "title": "Split out gmresult, gmresultplayer, gmregcommon",
+  "state": "MERGED",
+  "createdAt": "2025-06-23T08:09:19Z",
+  "updatedAt": "2025-06-23T08:16:35Z",
+  "mergedAt": "2025-06-23T08:16:32Z",
+  "closedAt": "2025-06-23T08:16:32Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1628",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 57481
+  }
+}

@@ -1,0 +1,518 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2575",
+  "pr": {
+    "number": 2575,
+    "title": "Match and improve several functions",
+    "url": "https://github.com/doldecomp/melee/pull/2575",
+    "state": "MERGED",
+    "author": "itsgrimetime",
+    "created_at": "2026-06-03T19:36:52Z",
+    "merged_at": "2026-06-03T21:16:05Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Batch decomp PR matching six functions and improving twelve unmatched items across camera, fighter, game-mode, ground, interface, menu, and toy/display/list code. The PR body names verification with require-protos, ninja, and a GALE01 report; the bot report confirms six new 100% matches and listed score improvements.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "prototype-cleanup",
+      "score-improvement"
+    ],
+    "systems": [
+      "camera",
+      "fighter",
+      "game-mode",
+      "ground",
+      "interface",
+      "menu",
+      "toy"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/cm/camera.c",
+      "role": "Matched Camera_80030E44 by changing cm_80452C68 access shape from a local Camera* alias to direct global field accesses.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff: Camera_80030E44 hunk",
+        "text_corpus: GALE01 6 new matches"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftaction.c",
+      "role": "Matched ftAction_80073008 by removing PAD_STACK/todo, changing local types/order, computing dmg_mult, and casting color_anim at the callsite.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff: ftAction_80073008 hunk",
+        "text_corpus: GALE01 6 new matches"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmresultplayer.c",
+      "role": "Matched fn_8017A9B4 by introducing a small static inline helper for repeated HSD_ImageDesc initialization and lb_800121FC calls.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff: fn_8017A9B4 hunk",
+        "text_corpus: GALE01 6 new matches"
+      ]
+    },
+    {
+      "path": "src/melee/ty/tydisplay.c",
+      "role": "Changed file for matched un_80318B1C and .sdata2 improvement; exact diff details were not present in the loaded excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "human_pr_text: Matches list",
+        "text_corpus: GALE01 6 new matches and .sdata2 improvement"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftNana/ftNn_Init.c",
+      "role": "Matched ftNn_Init_80123954 with local declaration/lifetime changes, removal of PAD_STACK, extracted dxsq/dysq temporaries, explicit cast in distance comparison, and adjusted Ice Climbers transition calls.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff: ftNn_Init_80123954 hunk",
+        "text_corpus: GALE01 6 new matches and .sdata2 improvement"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmopening.c",
+      "role": "Matched gm_801A9DD0 by changing the third parameter to u16, reshaping local initialization, using Scissor-compatible viewport fields with a cast to HSD_RectS16*, and naming projection constants as locals.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff: gm_801A9DD0 hunk",
+        "text_corpus: GALE01 6 new matches"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmopening.h",
+      "role": "Updated gm_801A9DD0 prototype to match the recovered body signature, changing the third parameter from int to u16.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff: gmopening.h hunk",
+        "human_pr_text: Verification require-protos"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmcamera.c",
+      "role": "Improved gmCamera_801A292C by using gmCameraUnkStruct*, a table pointer, gmCamera_801A25C8 helper call, and MIN macro for x44 clamping.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff: gmCamera_801A292C hunk",
+        "text_corpus: GALE01 12 improvements"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmresult.c",
+      "role": "Improved fn_80175A94 with changed result display field/index accesses, if/else control flow in place of switch, and call argument reshaping; bot report shows 8.25% to 99.66%.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff: fn_80175A94 hunk",
+        "text_corpus: GALE01 12 improvements"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grinishie2.c",
+      "role": "Improved grInishie2_801FD9EC with local ordering changes, GET_GROUND access, temp_vec reuse, and HSD_JObj translation helper calls.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff: grInishie2_801FD9EC hunk",
+        "text_corpus: GALE01 12 improvements"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_Init.c",
+      "role": "Improved ftKb_SpecialN_800EED50 by casting ftKb_Init_803CB46C[arg0] to u8 for efAsync_LoadSync.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff: ftKb_SpecialN_800EED50 hunk",
+        "text_corpus: GALE01 12 improvements"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ft_0852.c",
+      "role": "Improved ft_800852B0 by changing costume-list iteration/indexing, using derived ftData_UnkCountStruct pointers, and introducing a zero-valued local used in loop and reset call.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff: ft_800852B0 hunk",
+        "text_corpus: GALE01 12 improvements"
+      ]
+    },
+    {
+      "path": "src/melee/if/ifcoget.c",
+      "role": "Changed file for improved un_802FF570; exact diff details were not present in the loaded excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "human_pr_text: Additional improvements list",
+        "text_corpus: GALE01 12 improvements"
+      ]
+    },
+    {
+      "path": "src/melee/if/ifstock.c",
+      "role": "Changed file for improved fn_802FA6C4; exact diff details were not present in the loaded excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "human_pr_text: Additional improvements list",
+        "text_corpus: GALE01 12 improvements"
+      ]
+    },
+    {
+      "path": "src/melee/if/textlib.c",
+      "role": "Changed file for improved un_80303FD4; exact diff details were not present in the loaded excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "human_pr_text: Additional improvements list",
+        "text_corpus: GALE01 12 improvements"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnmainrule.c",
+      "role": "Changed file for improved mn_8022FB88; exact diff details were not present in the loaded excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "human_pr_text: Additional improvements list",
+        "text_corpus: GALE01 12 improvements"
+      ]
+    },
+    {
+      "path": "src/melee/ty/tylist.c",
+      "role": "Changed file for improved un_803147C4; exact diff details were not present in the loaded excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "human_pr_text: Additional improvements list",
+        "text_corpus: GALE01 12 improvements"
+      ]
+    },
+    {
+      "path": "src/melee/ty/toy.h",
+      "role": "Header changed alongside ty files; exact symbol-level intent was not present in the loaded excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    }
+  ],
+  "what_changed": [
+    "PR body claims six matches: Camera_80030E44, ftAction_80073008, fn_8017A9B4, un_80318B1C, ftNn_Init_80123954, and gm_801A9DD0.",
+    "Bot report confirms six new 100.00% matches and overall matched code increase of +2216 bytes.",
+    "PR body claims additional improvements for mn_8022FB88, grInishie2_801FD9EC, un_803147C4, un_80303FD4, un_802FF570, gmCamera_801A292C, ftKb_SpecialN_800EED50, fn_802FA6C4, ft_800852B0, and fn_80175A94.",
+    "Bot report lists twelve improved unmatched items, including .sdata2 score movement in ftNana and tydisplay.",
+    "gm_801A9DD0 body and gmopening.h prototype were updated together so the recovered u16 third parameter is reflected in the header.",
+    "Several diffs are match-shaping cleanups: removing PAD_STACK from matched functions, changing local lifetimes/order/types, adding casts, replacing a manual clamp with MIN, using helper/inline forms, and adjusting access paths."
+  ],
+  "smart_moves": [
+    "Kept the header synchronized with the recovered gm_801A9DD0 signature and explicitly listed python configure.py --require-protos in verification.",
+    "Removed PAD_STACK from ftAction_80073008 and ftNn_Init_80123954 as part of reaching 100% matches rather than leaving stack padding as permanent source.",
+    "Introduced a small static inline helper in gmresultplayer.c to express two repeated image descriptor setup sequences for fn_8017A9B4.",
+    "Used the existing MIN macro in gmCamera_801A292C instead of preserving a manual if-clamp ladder.",
+    "Preserved address-style names such as fn_*/un_* for unknown functions while still landing matches and score improvements."
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a recovered body proves a narrower parameter type, update the owning header in the same PR and run require-protos.",
+      "scope": [
+        "src/melee/gm/gmopening.c",
+        "src/melee/gm/gmopening.h"
+      ],
+      "evidence_refs": [
+        "raw_diff: gm_801A9DD0 signature int->u16",
+        "raw_diff: gmopening.h prototype int->u16",
+        "human_pr_text: Verification require-protos"
+      ],
+      "confidence": 0.92
+    },
+    {
+      "lesson": "Stack padding is not always required for matched output; in this PR, local type/order/lifetime changes removed PAD_STACK in two functions that the report says reached 100%.",
+      "scope": [
+        "src/melee/ft/ftaction.c",
+        "src/melee/ft/chara/ftNana/ftNn_Init.c"
+      ],
+      "evidence_refs": [
+        "raw_diff: ftAction_80073008 removes PAD_STACK(20)",
+        "raw_diff: ftNn_Init_80123954 removes PAD_STACK(24)",
+        "text_corpus: GALE01 6 new matches"
+      ],
+      "confidence": 0.86
+    },
+    {
+      "lesson": "Repeated setup sequences can sometimes be expressed as a small static inline helper and still match.",
+      "scope": [
+        "src/melee/gm/gmresultplayer.c"
+      ],
+      "evidence_refs": [
+        "raw_diff: static inline inline1 and two calls",
+        "text_corpus: fn_8017A9B4 57.18% to 100.00%"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "lesson": "Common macros can improve both readability and match shape when they express the source operation; gmCamera_801A292C replaced a manual clamp with MIN and improved from 73.24% to 93.02%.",
+      "scope": [
+        "src/melee/gm/gmcamera.c"
+      ],
+      "evidence_refs": [
+        "raw_diff: unk->x44 = MIN(unk->x30, unk->x40)",
+        "text_corpus: gmCamera_801A292C improvement"
+      ],
+      "confidence": 0.78
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Keep address-style fn_/un_ names when the PR evidence does not establish semantics.",
+      "examples": [
+        "fn_8017A9B4",
+        "un_80318B1C",
+        "fn_80175A94",
+        "un_80303FD4"
+      ],
+      "evidence_refs": [
+        "human_pr_text: match and improvement symbol lists",
+        "text_corpus: bot report symbol lists"
+      ],
+      "confidence": 0.8
+    },
+    {
+      "convention": "Use short role locals where the role is clear, such as nana_fp, popo_fp, attrs, gp, jobj, text, and tbl.",
+      "examples": [
+        "nana_fp",
+        "popo_fp",
+        "attrs",
+        "gp",
+        "jobj",
+        "tbl"
+      ],
+      "evidence_refs": [
+        "raw_diff: ftNn_Init_80123954 hunk",
+        "raw_diff: grInishie2_801FD9EC hunk",
+        "raw_diff: gmCamera_801A292C hunk"
+      ],
+      "confidence": 0.73
+    },
+    {
+      "convention": "Some temporary match-shaping locals remained generic, such as new_var/new_var2/new_var3/new_var4; the PR evidence supports that they were part of a score improvement, not that they are preferred naming style.",
+      "examples": [
+        "new_var",
+        "new_var2",
+        "new_var3",
+        "new_var4"
+      ],
+      "evidence_refs": [
+        "raw_diff: gmresult.c fn_80175A94 hunk",
+        "raw_diff: ft_0852.c ft_800852B0 hunk"
+      ],
+      "confidence": 0.7
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Adjust access path from a local struct pointer alias to direct global field access for codegen.",
+      "example": "Camera_80030E44 changed Camera* camera = &cm_80452C68 uses to cm_80452C68.xA0/_8C/_B0 direct accesses.",
+      "evidence_refs": [
+        "raw_diff: Camera_80030E44 hunk",
+        "text_corpus: Camera_80030E44 93.01% to 100.00%"
+      ],
+      "confidence": 0.83
+    },
+    {
+      "tactic": "Use explicit casts at callsites or comparisons to shape conversions.",
+      "example": "ftKb_SpecialN_800EED50 casts table entry to u8 for efAsync_LoadSync; ftAction_80073008 casts color_anim to s32; ftNn_Init_80123954 casts a float product to s32 in the distance comparison.",
+      "evidence_refs": [
+        "raw_diff: ftKb_SpecialN_800EED50 hunk",
+        "raw_diff: ftAction_80073008 hunk",
+        "raw_diff: ftNn_Init_80123954 hunk"
+      ],
+      "confidence": 0.8
+    },
+    {
+      "tactic": "Change local declaration order, lifetimes, and temporary extraction to influence register/stack allocation.",
+      "example": "ftNn_Init_80123954 hoists nana_fp and attrs, extracts dxsq/dysq, and removes PAD_STACK; gm_801A9DD0 names roll/near/far/top/bottom locals.",
+      "evidence_refs": [
+        "raw_diff: ftNn_Init_80123954 hunk",
+        "raw_diff: gm_801A9DD0 hunk",
+        "text_corpus: matched item report"
+      ],
+      "confidence": 0.76
+    },
+    {
+      "tactic": "Replace repeated source blocks with a helper/inline when the repeated operation has matching structure.",
+      "example": "fn_8017A9B4 introduces inline1 for player_img1/player_img2 image descriptor setup.",
+      "evidence_refs": [
+        "raw_diff: gmresultplayer.c inline1",
+        "text_corpus: fn_8017A9B4 100.00%"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "tactic": "Use project macros for canonical expressions instead of branch ladders.",
+      "example": "gmCamera_801A292C replaces manual x44 clamp with unk->x44 = MIN(unk->x30, unk->x40).",
+      "evidence_refs": [
+        "raw_diff: gmCamera_801A292C hunk",
+        "decomp_standards: canonical-control-flow-and-macros"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "tactic": "Use helper/accessor macros where the diff shows they produce better code shape.",
+      "example": "grInishie2_801FD9EC changes selected gobj->user_data/gp field reads to GET_GROUND(gobj) and reuses temp_vec for HSD_JObjSetTranslate/GetTranslation.",
+      "evidence_refs": [
+        "raw_diff: grInishie2_801FD9EC hunk",
+        "text_corpus: grInishie2_801FD9EC improvement"
+      ],
+      "confidence": 0.74
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "author": "decomp-dev[bot]",
+      "feedback": "GALE01 report recorded 6 new matches, 12 improvements in unmatched items, and matched code +0.06% / +2216 bytes.",
+      "evidence_refs": [
+        "text_corpus: issue_comment by decomp-dev[bot]"
+      ]
+    },
+    {
+      "kind": "missing_human_review",
+      "author": null,
+      "feedback": "No review comments or reviews were present in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata_json: counts.review_comments=0, reviews=0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2575",
+    "itsgrimetime",
+    "Match and improve several functions",
+    "Camera_80030E44",
+    "ftAction_80073008",
+    "fn_8017A9B4",
+    "un_80318B1C",
+    "ftNn_Init_80123954",
+    "gm_801A9DD0",
+    "mn_8022FB88",
+    "grInishie2_801FD9EC",
+    "un_803147C4",
+    "un_80303FD4",
+    "un_802FF570",
+    "gmCamera_801A292C",
+    "ftKb_SpecialN_800EED50",
+    "fn_802FA6C4",
+    "ft_800852B0",
+    "fn_80175A94",
+    "require-protos",
+    "GALE01",
+    "PAD_STACK removal",
+    "MIN macro",
+    "gmopening.h prototype",
+    "cm_80452C68",
+    "GET_GROUND",
+    "HSD_JObjSetTranslate",
+    "HSD_CObjSetViewport",
+    "efAsync_LoadSync",
+    "ftIceClimberAttributes"
+  ],
+  "follow_up_queries": [
+    "PR2575 Camera_80030E44 direct cm_80452C68 global access",
+    "PR2575 ftAction_80073008 PAD_STACK removal color_anim cast",
+    "PR2575 gm_801A9DD0 u16 prototype gmopening.h require-protos",
+    "PR2575 fn_8017A9B4 static inline image descriptor setup",
+    "PR2575 gmCamera_801A292C MIN clamp gmCamera_801A25C8",
+    "PR2575 ftNn_Init_80123954 Ice Climbers dxsq dysq distance cast",
+    "PR2575 grInishie2_801FD9EC GET_GROUND temp_vec HSD_JObj translation",
+    "PR2575 ty un_80318B1C exact diff",
+    "PR2575 if textlib ifstock ifcoget exact diffs",
+    "PR2575 toy.h header change exact diff"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json",
+      "human_pr_text.md",
+      "changed_files.jsonl",
+      "text_corpus.jsonl",
+      "raw_diff.diff truncated excerpt"
+    ],
+    "notes": [
+      "PR identity, changed-file list, PR body, bot report, merge time, and verification claims are fully loaded.",
+      "Raw diff is truncated in the loaded slice; detailed symbol-level changes are visible for many key files but not for all changed files, especially ifcoget.c, ifstock.c, textlib.c, mnmainrule.c, tydisplay.c, tylist.c, and toy.h.",
+      "The PR body says python configure.py --require-protos and ninja were run; the bot issue comment provides GALE01 score evidence. No independent build logs beyond the PR text and bot report are loaded.",
+      "No human review comments or reviews are present in the loaded evidence, so reviewer intent cannot be inferred."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson",
+        "title": "Header prototypes should follow recovered body signatures",
+        "text": "In PR #2575, gm_801A9DD0 changed its third parameter from int to u16 in both gmopening.c and gmopening.h, and the PR body listed python configure.py --require-protos as verification.",
+        "scope": [
+          "src/melee/gm/gmopening.c",
+          "src/melee/gm/gmopening.h"
+        ],
+        "evidence_refs": [
+          "raw_diff: gm_801A9DD0 signature",
+          "raw_diff: gmopening.h prototype",
+          "human_pr_text: Verification"
+        ],
+        "confidence": 0.92
+      },
+      {
+        "record_type": "matching_tactic",
+        "title": "Try local type/order/lifetime fixes before preserving PAD_STACK",
+        "text": "PR #2575 removed PAD_STACK from ftAction_80073008 and ftNn_Init_80123954 while changing locals and reached 100% for both functions in the GALE01 report.",
+        "scope": [
+          "src/melee/ft/ftaction.c",
+          "src/melee/ft/chara/ftNana/ftNn_Init.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: PAD_STACK removals",
+          "text_corpus: GALE01 6 new matches"
+        ],
+        "confidence": 0.86
+      },
+      {
+        "record_type": "matching_tactic",
+        "title": "Small static inline helpers can express repeated setup and still match",
+        "text": "PR #2575 matched fn_8017A9B4 by introducing inline1 for two repeated HSD_ImageDesc initialization/lb_800121FC sequences.",
+        "scope": [
+          "src/melee/gm/gmresultplayer.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: gmresultplayer.c inline1",
+          "text_corpus: fn_8017A9B4 100.00%"
+        ],
+        "confidence": 0.82
+      },
+      {
+        "record_type": "matching_tactic",
+        "title": "Use canonical macros when they fit the operation",
+        "text": "PR #2575 improved gmCamera_801A292C by replacing a manual clamp with MIN(unk->x30, unk->x40).",
+        "scope": [
+          "src/melee/gm/gmcamera.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: gmCamera_801A292C MIN",
+          "text_corpus: gmCamera_801A292C score improvement"
+        ],
+        "confidence": 0.78
+      }
+    ],
+    "source_update_candidates": [],
+    "rejection_notes": [
+      "Do not promote generic locals named new_var/new_var2/etc. as a naming convention; they appear in the diff as match-shaping temporaries, not supported style guidance.",
+      "Do not infer semantic names or behavior for fn_/un_ symbols beyond the PR's listed match/improvement status.",
+      "Do not claim exact tactics for files whose diffs were not loaded in full; use follow-up queries for if, mn, ty, and toy details."
+    ]
+  },
+  "confidence": 0.84,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

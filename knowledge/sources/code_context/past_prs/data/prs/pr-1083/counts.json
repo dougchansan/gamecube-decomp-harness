@@ -1,0 +1,17 @@
+{
+  "number": 1083,
+  "title": "Improve symbol handling in `config-dtk`",
+  "state": "MERGED",
+  "createdAt": "2024-01-18T23:15:01Z",
+  "updatedAt": "2024-01-18T23:38:15Z",
+  "mergedAt": "2024-01-18T23:38:14Z",
+  "closedAt": "2024-01-18T23:38:14Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1083",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 15259
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 46,
+  "title": "Splits all the remaining character sections up to their large .o chunk",
+  "state": "MERGED",
+  "createdAt": "2020-08-08T03:16:45Z",
+  "updatedAt": "2020-08-10T18:56:53Z",
+  "mergedAt": "2020-08-08T03:16:53Z",
+  "closedAt": "2020-08-08T03:16:53Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/46",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 8230038
+  }
+}

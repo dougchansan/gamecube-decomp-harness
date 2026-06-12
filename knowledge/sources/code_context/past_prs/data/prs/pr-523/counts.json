@@ -1,0 +1,17 @@
+{
+  "number": 523,
+  "title": "Match more of HSD LObj",
+  "state": "MERGED",
+  "createdAt": "2022-09-01T06:26:53Z",
+  "updatedAt": "2022-09-01T07:06:07Z",
+  "mergedAt": "2022-09-01T07:04:05Z",
+  "closedAt": "2022-09-01T07:04:05Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/523",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 11,
+    "reviews": 10,
+    "diff_bytes": 164684
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "pr": 2612,
+  "title": "itdosei: Remove unnecessary stack pad, remove unnecessary const, cleanup function names and add GET_* usage",
+  "url": "https://github.com/doldecomp/melee/pull/2612",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 4,
+  "added_lines": 99,
+  "deleted_lines": 111
+}

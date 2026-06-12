@@ -1,0 +1,17 @@
+{
+  "number": 1683,
+  "title": "Misc HSD match progress",
+  "state": "MERGED",
+  "createdAt": "2025-07-12T01:33:16Z",
+  "updatedAt": "2025-07-12T01:42:55Z",
+  "mergedAt": "2025-07-12T01:42:52Z",
+  "closedAt": "2025-07-12T01:42:52Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1683",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 11934
+  }
+}

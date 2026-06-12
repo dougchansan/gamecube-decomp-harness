@@ -1,0 +1,17 @@
+{
+  "number": 1830,
+  "title": "Run `clang-format` on all src files",
+  "state": "MERGED",
+  "createdAt": "2025-08-12T15:35:10Z",
+  "updatedAt": "2025-08-12T15:46:40Z",
+  "mergedAt": "2025-08-12T15:46:39Z",
+  "closedAt": "2025-08-12T15:46:39Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1830",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 0
+  }
+}

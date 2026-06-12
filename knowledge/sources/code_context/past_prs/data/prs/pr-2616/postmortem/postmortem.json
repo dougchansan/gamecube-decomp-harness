@@ -1,0 +1,357 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2616",
+  "pr": {
+    "number": 2616,
+    "title": "Split and link `ftkirbyattackdash`",
+    "url": "https://github.com/doldecomp/melee/pull/2616",
+    "state": "MERGED",
+    "author": "ribbanya",
+    "created_at": "2026-06-08T14:05:36Z",
+    "merged_at": "2026-06-08T14:10:03Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2616 split Kirby attack-dash code out of ftkirby.c/ftkirbyspecialn.c into a new ftkirbyattackdash.c/.h translation unit, linked it as Matching in configure.py, and adjusted GALE01 split ranges plus includes that referenced the moved declarations.",
+  "change_classification": {
+    "primary_type": "translation_unit_split_and_link",
+    "categories": [
+      "headers",
+      "splits",
+      "configure",
+      "fighter_code_reorganization"
+    ],
+    "systems": [
+      "config",
+      "fighter",
+      "Kirby",
+      "ftCommon",
+      "item"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftkirbyattackdash.c",
+      "role": "New split source file containing ftKb_SpecialN_800F1F68 and Kirby attack-dash/attack-dash-air callbacks formerly in adjacent Kirby files.",
+      "evidence_refs": [
+        "raw_diff:new file src/melee/ft/chara/ftKirby/ftkirbyattackdash.c",
+        "changed_files:ftkirbyattackdash.c added 102 lines"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftkirbyattackdash.h",
+      "role": "New public header for exported ftkirbyattackdash functions; internal callback helpers are not exported.",
+      "evidence_refs": [
+        "raw_diff:new file src/melee/ft/chara/ftKirby/ftkirbyattackdash.h",
+        "raw_diff:ftkirby.h removed attackdash prototypes"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftkirbyspecialn.c",
+      "role": "Removed attack-dash functions from special-N file and retained special-N-local callback inline; added default breaks in two switch statements.",
+      "evidence_refs": [
+        "raw_diff:ftkirbyspecialn.c removed fn_800F1FDC through ftKb_AttackDashAir_800F21C0",
+        "raw_diff:ftkirbyspecialn.c added ftKirby/inlines.h and default break cases"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftkirby.c",
+      "role": "Removed ftKb_SpecialN_800F1F68 implementation and added include of the new attackdash header.",
+      "evidence_refs": [
+        "raw_diff:ftkirby.c removes ftKb_SpecialN_800F1F68 and float externs",
+        "raw_diff:ftkirby.c adds #include \"ftkirbyattackdash.h\""
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftkirby.h",
+      "role": "No longer owns ftkirbyattackdash declarations.",
+      "evidence_refs": [
+        "raw_diff:ftkirby.h deleted 12 attackdash-related declarations"
+      ]
+    },
+    {
+      "path": "config/GALE01/splits.txt",
+      "role": "Adjusted text/sdata2 ownership boundaries and inserted ftkirbyattackdash split range.",
+      "evidence_refs": [
+        "raw_diff:splits.txt adds melee/ft/chara/ftKirby/ftkirbyattackdash.c text 0x800F1F68-0x800F21E8 and sdata2 0x804D9368-0x804D9370"
+      ]
+    },
+    {
+      "path": "configure.py",
+      "role": "Links the new ftkirbyattackdash object as Matching.",
+      "evidence_refs": [
+        "raw_diff:configure.py adds Object(Matching, \"melee/ft/chara/ftKirby/ftkirbyattackdash.c\")"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_AttackDash.c",
+      "role": "Updates include dependency from broad ftkirby.h to ftkirbyattackdash.h.",
+      "evidence_refs": [
+        "raw_diff:ftCo_AttackDash.c include replacement"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itkirbycutterbeam.c",
+      "role": "Updates include dependency to ftkirbyattackdash.h and adjusts item include set.",
+      "evidence_refs": [
+        "raw_diff:itkirbycutterbeam.c include replacement and itgroundcoll include"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Created src/melee/ft/chara/ftKirby/ftkirbyattackdash.c with attack-dash entry/callback functions spanning addresses 0F1F68 through 0F21C0.",
+    "Created src/melee/ft/chara/ftKirby/ftkirbyattackdash.h with declarations for exported attack-dash functions while leaving fn_800F1FDC and fn_800F20C4 static inside the new C file.",
+    "Moved attack-dash functions out of ftkirbyspecialn.c and moved ftKb_SpecialN_800F1F68 out of ftkirby.c.",
+    "Changed GALE01 split ranges so ftkirby.c ends at 0x800F1F68, ftkirbyattackdash.c owns 0x800F1F68-0x800F21E8, and ftkirbyspecialn.c starts at 0x800F21E8.",
+    "Added ftkirbyattackdash.c to configure.py as Object(Matching, ...).",
+    "Updated dependent includes in ftCo_AttackDash.c, ftkirby.c, and itkirbycutterbeam.c to reference the new focused header.",
+    "Replaced ftkirby.c extern float symbols used in ftKb_SpecialN_800F1F68 with inline float literals 0.0f and 1.0f in the moved function.",
+    "Added default: break cases to two switch statements in ftKb_CaSpecialN_Phys and ftKb_CaSpecialAirN_Phys."
+  ],
+  "smart_moves": [
+    {
+      "text": "The split kept the new object narrowly scoped by moving only the 0x800F1F68-0x800F21E8 attack-dash range and updating split boundaries on both neighboring Kirby translation units.",
+      "evidence_refs": [
+        "raw_diff:splits.txt"
+      ]
+    },
+    {
+      "text": "Public declarations were moved from the broad ftkirby.h header into ftkirbyattackdash.h, while local transition callbacks fn_800F1FDC and fn_800F20C4 became static declarations in the new C file.",
+      "evidence_refs": [
+        "raw_diff:ftkirby.h deletions",
+        "raw_diff:ftkirbyattackdash.c static declarations",
+        "raw_diff:ftkirbyattackdash.h declarations"
+      ]
+    },
+    {
+      "text": "Dependent files were changed to include ftkirbyattackdash.h instead of ftkirby.h where the moved attack-dash API was the apparent dependency.",
+      "evidence_refs": [
+        "raw_diff:ftCo_AttackDash.c include replacement",
+        "raw_diff:itkirbycutterbeam.c include replacement"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When splitting a newly matched fighter subrange, update all three surfaces together: split ownership in config/GALE01/splits.txt, object classification in configure.py, and the owning header for moved declarations.",
+      "scope": [
+        "fighter translation unit splits",
+        "configure.py Matching objects",
+        "GALE01 split ranges"
+      ],
+      "evidence_refs": [
+        "raw_diff:splits.txt adds ftkirbyattackdash.c",
+        "raw_diff:configure.py adds Object(Matching, \"melee/ft/chara/ftKirby/ftkirbyattackdash.c\")",
+        "raw_diff:ftkirbyattackdash.h added and ftkirby.h declarations removed"
+      ]
+    },
+    {
+      "lesson": "A split can reduce header coupling by moving only the declarations needed by outside users into the new focused header and updating includes to that header.",
+      "scope": [
+        "headers",
+        "include hygiene",
+        "fighter/item dependencies"
+      ],
+      "evidence_refs": [
+        "raw_diff:ftCo_AttackDash.c include replacement",
+        "raw_diff:itkirbycutterbeam.c include replacement",
+        "raw_diff:ftkirbyattackdash.h added"
+      ]
+    },
+    {
+      "lesson": "For moved code, helper functions that are only used inside the new translation unit can be made static instead of remaining exported through the old aggregate header.",
+      "scope": [
+        "static helpers",
+        "translation unit split"
+      ],
+      "evidence_refs": [
+        "raw_diff:ftkirbyattackdash.c declares static fn_800F1FDC and fn_800F20C4",
+        "raw_diff:ftkirby.h removes fn_800F1FDC and fn_800F20C4 declarations"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name_pattern": "ftKb_AttackDash_* and ftKb_AttackDashAir_*",
+      "observation": "The new file and header preserve existing Kirby attack-dash function names with address comments for unresolved or partially semantic functions.",
+      "evidence_refs": [
+        "raw_diff:ftkirbyattackdash.c function definitions",
+        "raw_diff:ftkirbyattackdash.h declarations"
+      ]
+    },
+    {
+      "name_pattern": "fn_800F1FDC / fn_800F20C4",
+      "observation": "Address-style names were kept for helpers without proven semantics and scoped static in the new file.",
+      "evidence_refs": [
+        "raw_diff:ftkirbyattackdash.c static declarations"
+      ]
+    },
+    {
+      "name_pattern": "ftkirbyattackdash.c / ftkirbyattackdash.h",
+      "observation": "The split file name follows the lowercase ftKirby file naming style and matches the PR title's target component.",
+      "evidence_refs": [
+        "pr:title Split and link `ftkirbyattackdash`",
+        "raw_diff:new ftkirbyattackdash.c and ftkirbyattackdash.h"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Link the split file as Matching after assigning it an exact text and sdata2 range.",
+      "evidence_refs": [
+        "raw_diff:configure.py Object(Matching, \"melee/ft/chara/ftKirby/ftkirbyattackdash.c\")",
+        "raw_diff:splits.txt ftkirbyattackdash.c text and sdata2 ranges"
+      ],
+      "notes": "The PR evidence shows Matching classification but does not include objdiff or build logs."
+    },
+    {
+      "tactic": "Use literals 0.0f and 1.0f in the moved ftKb_SpecialN_800F1F68 instead of carrying over address-named float externs from ftkirby.c.",
+      "evidence_refs": [
+        "raw_diff:ftkirby.c removed ftKb_Init_804D9368/ftKb_Init_804D936C externs",
+        "raw_diff:ftkirbyattackdash.c Fighter_ChangeMotionState call uses 0.0f, 1.0f, 0.0f"
+      ],
+      "notes": "This aligns with avoiding unnecessary named literal storage, but the slice does not provide explicit author explanation."
+    },
+    {
+      "tactic": "Add default: break cases in two switch statements near the remaining special-N code.",
+      "evidence_refs": [
+        "raw_diff:ftkirbyspecialn.c adds default break in ftKb_CaSpecialN_Phys",
+        "raw_diff:ftkirbyspecialn.c adds default break in ftKb_CaSpecialAirN_Phys"
+      ],
+      "notes": "Likely codegen or warning/include fallout, but no comment or verifier evidence explains the purpose."
+    }
+  ],
+  "review_feedback": [],
+  "searchable_terms": [
+    "pr-2616",
+    "Split and link ftkirbyattackdash",
+    "ribbanya",
+    "ftkirbyattackdash.c",
+    "ftkirbyattackdash.h",
+    "ftKb_SpecialN_800F1F68",
+    "fn_800F1FDC",
+    "fn_800F20C4",
+    "ftKb_AttackDash_Anim",
+    "ftKb_AttackDashAir_800F21C0",
+    "ftKb_MS_AttackDash",
+    "ftKb_MS_AttackDashAir",
+    "Object(Matching)",
+    "GALE01 splits",
+    "0x800F1F68",
+    "0x800F21E8",
+    "0x804D9368",
+    "0x804D9370",
+    "ftCo_AttackDash.c",
+    "itkirbycutterbeam.c"
+  ],
+  "follow_up_queries": [
+    "ftkirbyattackdash.c Matching split",
+    "ftKb_SpecialN_800F1F68 0.0f 1.0f",
+    "fn_800F1FDC static ftkirbyattackdash",
+    "ftKb_AttackDashAir_800F21C0 ftPartGetRotX",
+    "GALE01 ftkirbyattackdash 800F1F68 800F21E8",
+    "itkirbycutterbeam ftkirbyattackdash include"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json:PR 2616 title/state/author/timestamps",
+      "changed_files:9 changed files, 143 added, 112 deleted",
+      "raw_diff:complete diff excerpt loaded",
+      "text_corpus:empty PR body",
+      "metadata_json:0 review comments, 0 issue comments, 0 reviews"
+    ],
+    "notes": [
+      "Changed files and code movements are strongly evidenced by the full raw diff.",
+      "The PR body is empty and there are no review or issue comments, so reviewer intent and author rationale are not evidenced.",
+      "configure.py labels the new object Matching, but the slice does not include build, objdiff, or regression output; do not promote a verified-match claim beyond the configure classification.",
+      "Some edits, such as added default breaks and include-set adjustments, are visible but not explained by comments."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "type": "decomp_lesson",
+        "title": "Split/link changes need synchronized split, configure, and header updates",
+        "text": "PR 2616 shows a focused fighter subrange split where config/GALE01/splits.txt, configure.py Matching object registration, and public header ownership were updated together for ftkirbyattackdash.",
+        "scope": [
+          "fighter splits",
+          "configure.py",
+          "headers"
+        ],
+        "evidence_refs": [
+          "raw_diff:splits.txt",
+          "raw_diff:configure.py",
+          "raw_diff:ftkirbyattackdash.h",
+          "raw_diff:ftkirby.h"
+        ]
+      },
+      {
+        "type": "decomp_lesson",
+        "title": "Keep internal moved callbacks static after a TU split",
+        "text": "PR 2616 moved attack-dash callbacks into ftkirbyattackdash.c and left fn_800F1FDC/fn_800F20C4 as file-local static helpers instead of exporting them from ftkirby.h.",
+        "scope": [
+          "translation unit split",
+          "static helper scoping"
+        ],
+        "evidence_refs": [
+          "raw_diff:ftkirbyattackdash.c static declarations",
+          "raw_diff:ftkirby.h removed helper declarations"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "ftkirbyattackdash split file ownership",
+        "text": "src/melee/ft/chara/ftKirby/ftkirbyattackdash.c was introduced as a Kirby attack-dash split owning text 0x800F1F68-0x800F21E8 and sdata2 0x804D9368-0x804D9370 in config/GALE01/splits.txt, and was added to configure.py as Object(Matching, ...).",
+        "source_path": "src/melee/ft/chara/ftKirby/ftkirbyattackdash.c",
+        "scope": [
+          "Kirby",
+          "fighter",
+          "splits",
+          "configure"
+        ],
+        "evidence_refs": [
+          "raw_diff:splits.txt",
+          "raw_diff:configure.py"
+        ],
+        "reason": "Useful path/split fact for future Kirby attack-dash lookups; curator should verify against current source before promoting."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Focused headers for split translation units",
+        "text": "When splitting a translation unit, consider moving the exported declarations into a focused header and updating dependent includes to avoid retaining broad aggregate header dependencies.",
+        "source_path": null,
+        "scope": [
+          "headers",
+          "translation unit split",
+          "include hygiene"
+        ],
+        "evidence_refs": [
+          "raw_diff:ftkirbyattackdash.h added",
+          "raw_diff:ftkirby.h declarations removed",
+          "raw_diff:ftCo_AttackDash.c include replacement",
+          "raw_diff:itkirbycutterbeam.c include replacement"
+        ],
+        "reason": "This is supported as a candidate pattern by the PR diff, but should be curated against broader project header practice before becoming a global standard."
+      }
+    ],
+    "rejection_notes": [
+      "Do not claim objdiff/build verification from this slice; only configure.py's Matching classification is visible.",
+      "Do not infer reviewer approval rationale; there are no review comments or reviews in the loaded metadata.",
+      "Do not generalize the added default: break cases into a standard without additional matching evidence."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

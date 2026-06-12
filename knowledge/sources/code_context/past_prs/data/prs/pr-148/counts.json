@@ -1,0 +1,17 @@
+{
+  "number": 148,
+  "title": "More data section labels being moved to respective files",
+  "state": "MERGED",
+  "createdAt": "2021-12-04T22:24:28Z",
+  "updatedAt": "2021-12-04T22:24:37Z",
+  "mergedAt": "2021-12-04T22:24:35Z",
+  "closedAt": "2021-12-04T22:24:35Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/148",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 16223
+  }
+}

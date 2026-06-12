@@ -1,0 +1,10 @@
+{
+  "pr": 1703,
+  "title": "Match duplicated IASA and Phys functions in ftCrazyhand",
+  "url": "https://github.com/doldecomp/melee/pull/1703",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 1,
+  "added_lines": 404,
+  "deleted_lines": 68
+}

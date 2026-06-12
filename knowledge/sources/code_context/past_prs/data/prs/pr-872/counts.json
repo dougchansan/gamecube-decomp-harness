@@ -1,0 +1,17 @@
+{
+  "number": 872,
+  "title": "Match `ftCo_Down`",
+  "state": "MERGED",
+  "createdAt": "2023-05-27T07:21:39Z",
+  "updatedAt": "2023-05-27T07:27:23Z",
+  "mergedAt": "2023-05-27T07:27:22Z",
+  "closedAt": "2023-05-27T07:27:22Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/872",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 22891
+  }
+}

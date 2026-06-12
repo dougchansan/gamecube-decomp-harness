@@ -1,0 +1,17 @@
+{
+  "number": 1942,
+  "title": "Remove redundant S_TEMP1 type",
+  "state": "MERGED",
+  "createdAt": "2025-09-25T04:21:50Z",
+  "updatedAt": "2025-09-25T04:33:15Z",
+  "mergedAt": "2025-09-25T04:33:12Z",
+  "closedAt": "2025-09-25T04:33:12Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1942",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 7981
+  }
+}

@@ -28,6 +28,8 @@ Runtime code resolves tool paths through
 | `tools/data_conversion` | Assembly/data conversion previews. |
 | `tools/operations` | Human/operator scripts that are not Pi suite ids. |
 | `tools/recipes` | Optional bundles, such as attempt evaluation feedback. |
+| `tools/_impl` | Tool-owned implementation code shared by public suite APIs. |
+| `tools/_shared` | Small API support helpers used by tool suites. |
 
 ## Suite Roles
 
@@ -60,6 +62,7 @@ what is right, wrong, or still unknown about a specific source-edit attempt.
 Research tools are not workflow steps; they are affordances the agent can pull
 when its hypothesis needs more evidence.
 
-The graph still indexes generated `indexes/*.jsonl` rows through the
-`tool_outputs` source. That gives agents searchable cached evidence without
-making the cache location part of the prompt.
+Generated `cache/` and `indexes/*.jsonl` rows stay with the owning tool suite.
+Agents reach them through first-class tool APIs, so each tool can decide whether
+a cached row is still fresh for the current binary, build artifact, source file,
+or query.

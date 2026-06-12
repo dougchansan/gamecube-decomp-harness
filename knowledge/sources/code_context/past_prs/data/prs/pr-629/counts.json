@@ -1,0 +1,17 @@
+{
+  "number": 629,
+  "title": "Create auto-publishing documentation using Doxygen",
+  "state": "MERGED",
+  "createdAt": "2022-12-27T16:15:50Z",
+  "updatedAt": "2022-12-28T03:24:25Z",
+  "mergedAt": "2022-12-28T03:24:24Z",
+  "closedAt": "2022-12-28T03:24:24Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/629",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 1,
+    "reviews": 2,
+    "diff_bytes": 120918
+  }
+}

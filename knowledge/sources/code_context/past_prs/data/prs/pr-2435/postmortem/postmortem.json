@@ -1,0 +1,412 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2435",
+  "pr": {
+    "number": 2435,
+    "title": "Jj/grkinokoroute",
+    "url": "https://github.com/doldecomp/melee/pull/2435",
+    "state": "MERGED",
+    "author": "jurrejelle",
+    "created_at": "2026-04-28T13:58:22Z",
+    "merged_at": "2026-04-28T18:56:45Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Decompiled and improved multiple Kinoko Route ground/stage functions, added Kinoko Route GroundVars structs and a recovered prototype, and added StageData/static data needed by grkinokoroute. Bot report shows 4 new matches, including grKinokoRoute_8020836C at 100%, plus several partial function and data-section improvements.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "typed-struct-recovery",
+      "stage-data"
+    ],
+    "systems": [
+      "stage",
+      "ground",
+      "Kinoko Route"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gr/grkinokoroute.c",
+      "role": "Main decompilation work: added includes/static data/StageData and implemented or improved Kinoko Route ground callbacks and helpers.",
+      "evidence_refs": [
+        "changed_files: src/melee/gr/grkinokoroute.c +337 -12",
+        "raw_diff: grKinokoRoute_80207634, 802078F0, 80207B5C, 80207C88, 8020836C implemented",
+        "text_corpus: bot report lists new matches and improvements for main/melee/gr/grkinokoroute"
+      ]
+    },
+    {
+      "path": "src/melee/gr/types.h",
+      "role": "Added typed Ground union arms for Kinoko Route state instead of accessing anonymous/raw state.",
+      "evidence_refs": [
+        "changed_files: src/melee/gr/types.h +22 -0",
+        "raw_diff: added grKinokoRoute_GroundVars_Entry, grKinokoRoute_GroundVars, grKinokoRoute_GroundVars2 and Ground union entries"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grkinokoroute.h",
+      "role": "Recovered function signature for grKinokoRoute_8020836C.",
+      "evidence_refs": [
+        "changed_files: src/melee/gr/grkinokoroute.h +1 -1",
+        "raw_diff: UNK_RET/UNK_PARAMS replaced with void grKinokoRoute_8020836C(HSD_GObj*, s32)"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Added Kinoko Route static data declarations, including grNKr_Depths, zero Vec3 grNKr_803B82E8, depths table grNKr_803B82F4, asset path /GrNKr.dat, and StageData grNKr_803E584C.",
+      "evidence_refs": [
+        "raw_diff: additions near StageCallbacks in src/melee/gr/grkinokoroute.c"
+      ]
+    },
+    {
+      "text": "Implemented grKinokoRoute_80207634 to collect route JObjs 0x7F-0x82 relative to origin JObj 0x94 and update camera bounds using Stage_GetCamBounds*Offset helpers.",
+      "evidence_refs": [
+        "raw_diff: grKinokoRoute_80207634 body"
+      ]
+    },
+    {
+      "text": "Implemented grKinokoRoute_802078F0 using typed kinokoroute entries, current fighter position, inverse ground scale, and a loop over four entries to update JObj translation X/Y.",
+      "evidence_refs": [
+        "raw_diff: grKinokoRoute_802078F0 body"
+      ]
+    },
+    {
+      "text": "Implemented grKinokoRoute_80207B5C stage setup, initializing callbacks, flags, phase/zone/timer/spawn state, material setup, and saving reb0_pos with HSD_ASSERT.",
+      "evidence_refs": [
+        "raw_diff: grKinokoRoute_80207B5C body"
+      ]
+    },
+    {
+      "text": "Implemented a large partial grKinokoRoute_80207C88 camera/zone/transition routine using fighter position, ground points, stage_info.x6DC, camera target smoothing, item/material toggling helper calls, and mpLib update.",
+      "evidence_refs": [
+        "raw_diff: grKinokoRoute_80207C88 body",
+        "text_corpus: bot report shows grKinokoRoute_80207C88 improved from 0.00% to 85.48%"
+      ]
+    },
+    {
+      "text": "Implemented grKinokoRoute_8020836C to toggle JObj flags, add/remove collision joints, and iterate item entities to update material for items of kind 0xA0.",
+      "evidence_refs": [
+        "raw_diff: grKinokoRoute_8020836C body",
+        "text_corpus: bot report shows grKinokoRoute_8020836C 0.00% to 100.00%, +276 bytes"
+      ]
+    },
+    {
+      "text": "Adjusted grKinokoRoute_80208564 to use GET_GROUND and copy depths from static grNKr_803B82F4 via a typed grNKr_Depths object.",
+      "evidence_refs": [
+        "raw_diff: grKinokoRoute_80208564 hunk",
+        "text_corpus: bot report shows grKinokoRoute_80208564 99.97% to 100.00%"
+      ]
+    },
+    {
+      "text": "Updated grkinokoroute.h from unknown signature to void grKinokoRoute_8020836C(HSD_GObj*, s32).",
+      "evidence_refs": [
+        "raw_diff: grkinokoroute.h hunk"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Recovered Kinoko Route-specific GroundVars structs before implementing state-heavy callbacks, making phase, spawn_idx, zone_idx, cam_timer, flags, entry positions, and JObj pointers explicit.",
+      "evidence_refs": [
+        "raw_diff: types.h additions",
+        "raw_diff: accesses through gp->gv.kinokoroute and gp->gv.kinokoroute2"
+      ]
+    },
+    {
+      "text": "Used a natural loop for the four route entries in grKinokoRoute_802078F0 instead of repeating four nearly identical translation updates.",
+      "evidence_refs": [
+        "raw_diff: for (i = 0; i < 4; i++, entry++) in grKinokoRoute_802078F0"
+      ]
+    },
+    {
+      "text": "Promoted a recovered function body signature into the owning header for grKinokoRoute_8020836C.",
+      "evidence_refs": [
+        "raw_diff: grkinokoroute.h signature update",
+        "raw_diff: grKinokoRoute_8020836C implementation takes HSD_GObj* and s32"
+      ]
+    },
+    {
+      "text": "Used project helpers/macros such as GET_GROUND, HSD_ASSERT, HSD_JObjSetTranslate*, lbVector_* helpers, and Stage_* camera helpers rather than raw pointer math in the visible diff.",
+      "evidence_refs": [
+        "raw_diff: grkinokoroute.c implementations"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For stage callbacks with persistent per-stage state, recover a typed GroundVars union arm early; it makes later callback logic reviewable and avoids raw gp+offset access.",
+      "scope": [
+        "src/melee/gr/types.h",
+        "src/melee/gr/grkinokoroute.c",
+        "stage ground callbacks"
+      ],
+      "evidence_refs": [
+        "raw_diff: added grKinokoRoute_GroundVars and grKinokoRoute_GroundVars2",
+        "raw_diff: grKinokoRoute_80207634/802078F0/80207B5C/80207C88 use gp->gv.kinokoroute* fields"
+      ]
+    },
+    {
+      "lesson": "When a callback updates a fixed array of similar JObjs, a pointer-plus-counter loop can express the source cleanly and still make substantial matching progress.",
+      "scope": [
+        "grKinokoRoute_802078F0",
+        "stage JObj update callbacks"
+      ],
+      "evidence_refs": [
+        "raw_diff: entry loop in grKinokoRoute_802078F0",
+        "text_corpus: bot report shows grKinokoRoute_802078F0 improved from 0.00% to 95.98%"
+      ]
+    },
+    {
+      "lesson": "Recovered function bodies should be paired with header prototype cleanup when the argument and return types are visible.",
+      "scope": [
+        "src/melee/gr/grkinokoroute.h",
+        "grKinokoRoute_8020836C"
+      ],
+      "evidence_refs": [
+        "raw_diff: header changed UNK_RET/UNK_PARAMS to void grKinokoRoute_8020836C(HSD_GObj*, s32)",
+        "raw_diff: matching implementation signature"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "Kinoko Route local GroundVars types use the stage prefix and descriptive suffixes: grKinokoRoute_GroundVars_Entry, grKinokoRoute_GroundVars, grKinokoRoute_GroundVars2.",
+      "evidence_refs": [
+        "raw_diff: types.h additions"
+      ]
+    },
+    {
+      "text": "Local variables use short project-role names where roles are clear, such as gp for Ground*, jobj/reb0_jobj for HSD_JObj*, fighter for HSD_GObj*, and cam_offset/cam_target for camera vectors.",
+      "evidence_refs": [
+        "raw_diff: grkinokoroute.c function bodies"
+      ]
+    },
+    {
+      "text": "Unrecovered global/static data kept address-style names such as grNKr_803B82E8, grNKr_803B82F4, grNKr_803E5840, and grNKr_803E584C rather than speculative semantic names.",
+      "evidence_refs": [
+        "raw_diff: static data additions in grkinokoroute.c"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "text": "Used a static const struct-wrapped depths table and copied it into a local grNKr_Depths in grKinokoRoute_80208564, replacing an inline local s16 array.",
+      "evidence_refs": [
+        "raw_diff: grNKr_Depths and grNKr_803B82F4 additions",
+        "raw_diff: grKinokoRoute_80208564 depths = grNKr_803B82F4",
+        "text_corpus: bot report shows .rodata improvement and grKinokoRoute_80208564 reaching 100%"
+      ]
+    },
+    {
+      "text": "Used PAD_STACK(16) inside grKinokoRoute_8020836C; bot report indicates the function matched 100%, but the slice does not explain why this padding was required.",
+      "evidence_refs": [
+        "raw_diff: PAD_STACK(16) in grKinokoRoute_8020836C",
+        "text_corpus: bot report shows grKinokoRoute_8020836C 100.00%"
+      ]
+    },
+    {
+      "text": "Used HSD_ASSERT for recovered assert sites at lines 467, 617, and 654 rather than leaving expanded assert code.",
+      "evidence_refs": [
+        "raw_diff: HSD_ASSERT uses in grKinokoRoute_80207B5C and grKinokoRoute_80207C88"
+      ]
+    },
+    {
+      "text": "Matched data progress accompanied text progress: bot reports .sdata reached 100% and .data/.sdata2/.rodata improved, but the PR body does not separately justify data ownership decisions.",
+      "evidence_refs": [
+        "raw_diff: added grNKr_803E5840, grNKr_803E584C, grNKr_803B82E8, grNKr_803B82F4",
+        "text_corpus: bot report .sdata +16 to 100%, .data to 88.68%, .sdata2 to 71.79%, .rodata to 97.44%"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "text": "No human review comments were present in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata_json: review_comments 0, reviews 0"
+      ]
+    },
+    {
+      "text": "Automated bot reported matched-code gain of +760 bytes, matched-data gain of +16 bytes, 4 new matches, and 7 improvements in unmatched items.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev[bot] issue comment"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2435",
+    "Jj/grkinokoroute",
+    "jurrejelle",
+    "src/melee/gr/grkinokoroute.c",
+    "src/melee/gr/grkinokoroute.h",
+    "src/melee/gr/types.h",
+    "grKinokoRoute_80207634",
+    "grKinokoRoute_802078F0",
+    "grKinokoRoute_80207B5C",
+    "grKinokoRoute_80207C88",
+    "grKinokoRoute_8020836C",
+    "grKinokoRoute_80208564",
+    "grKinokoRoute_GroundVars",
+    "grKinokoRoute_GroundVars2",
+    "grKinokoRoute_GroundVars_Entry",
+    "grNKr_803B82E8",
+    "grNKr_803B82F4",
+    "grNKr_803E5840",
+    "grNKr_803E584C",
+    "StageData",
+    "KINOKOROUTE",
+    "GroundVars",
+    "PAD_STACK",
+    "HSD_ASSERT",
+    "GET_GROUND",
+    "Ground_801C2CF4",
+    "Ground_801C3FA4",
+    "Stage_UnkSetVec3TCam_Offset",
+    "stage_info.x6DC",
+    "mpJointListAdd",
+    "mpLib_80057BC0",
+    "grMaterial_801C8E08",
+    "grMaterial_801C8E28"
+  ],
+  "follow_up_queries": [
+    "Find later PRs touching grKinokoRoute_80207C88 to see how the remaining 85.48% partial match was completed.",
+    "Search for PAD_STACK(16) in grKinokoRoute_8020836C or related stage helpers to determine whether the padding was later removed or documented.",
+    "Search for later renames of grNKr_803B82E8, grNKr_803B82F4, grNKr_803E5840, or grNKr_803E584C.",
+    "Search Kinoko Route GroundVars2 fields phase, spawn_idx, zone_idx, cam_timer, reb0_pos for later field-name refinements.",
+    "Search later grkinokoroute data-section PRs for explicit ownership evidence for /GrNKr.dat, grNKr_Depths, StageData, .sdata, .sdata2, and .rodata changes."
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR metadata, changed files, merge state",
+      "raw_diff: full diff for three changed files",
+      "text_corpus: empty PR body and one decomp-dev bot report",
+      "metadata_json: no review comments/reviews"
+    ],
+    "notes": [
+      "Diff evidence is strong for changed files, symbols, struct additions, signatures, and source forms.",
+      "Automated report provides matching percentages and byte deltas, including 100% matches for grKinokoRoute_8020836C, .sdata, grKinokoRoute_8020754C, and grKinokoRoute_80208564.",
+      "There is no PR body explanation and no human review feedback, so author intent, rationale for PAD_STACK, and data ownership decisions cannot be inferred beyond the diff and bot report.",
+      "Several functions are reported as partial improvements, not accepted full matches, so lessons should not claim full closure for grKinokoRoute_80207C88, 80207634, 802078F0, or 80207B5C."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "kind": "decomp_lesson",
+        "title": "Recover typed GroundVars for state-heavy stage callbacks",
+        "text": "PR 2435 shows Kinoko Route callback decomp using newly added grKinokoRoute_GroundVars and grKinokoRoute_GroundVars2 union arms, making route entries, phase, spawn index, zone index, camera timer, flags, and saved JObj position explicit in callback source.",
+        "scope": [
+          "stage",
+          "ground",
+          "src/melee/gr/types.h",
+          "src/melee/gr/grkinokoroute.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: types.h additions",
+          "raw_diff: gp->gv.kinokoroute and gp->gv.kinokoroute2 uses"
+        ]
+      },
+      {
+        "kind": "decomp_lesson",
+        "title": "Update owning headers when a recovered body proves a signature",
+        "text": "PR 2435 replaced grKinokoRoute_8020836C's unknown header declaration with void grKinokoRoute_8020836C(HSD_GObj*, s32), matching the recovered implementation.",
+        "scope": [
+          "headers",
+          "src/melee/gr/grkinokoroute.h"
+        ],
+        "evidence_refs": [
+          "raw_diff: grkinokoroute.h signature update",
+          "raw_diff: grKinokoRoute_8020836C implementation"
+        ]
+      },
+      {
+        "kind": "matching_tactic",
+        "title": "Fixed-entry JObj updates can use natural pointer/counter loops",
+        "text": "grKinokoRoute_802078F0 loops over four typed entries to update JObj translations, and the bot reports the function improved from 0.00% to 95.98%.",
+        "scope": [
+          "stage callbacks",
+          "JObj translation updates"
+        ],
+        "evidence_refs": [
+          "raw_diff: for-loop over entries in grKinokoRoute_802078F0",
+          "text_corpus: bot report for grKinokoRoute_802078F0"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "Kinoko Route ground source owns stage callback and GroundVars work",
+        "text": "PR 2435 changed src/melee/gr/grkinokoroute.c, src/melee/gr/grkinokoroute.h, and src/melee/gr/types.h for Kinoko Route stage callback decomp and typed GroundVars recovery.",
+        "source_path": "src/melee/gr/grkinokoroute.c",
+        "scope": [
+          "Kinoko Route",
+          "stage",
+          "ground"
+        ],
+        "evidence_refs": [
+          "changed_files.jsonl",
+          "raw_diff"
+        ],
+        "reason": "Useful path-scope fact for routing later Kinoko Route stage/ground decomp work; curator should verify against current source before adding."
+      },
+      {
+        "target_source_id": "ssbm_data_sheet",
+        "update_kind": "source_update",
+        "title": "Potential Kinoko Route data symbols and asset path",
+        "text": "The diff adds grNKr_803E5840 as \"/GrNKr.dat\", StageData grNKr_803E584C, zero Vec3 grNKr_803B82E8, and depths table grNKr_803B82F4; bot report shows .sdata matched and data/rodata/sdata2 improvements.",
+        "source_path": "src/melee/gr/grkinokoroute.c",
+        "scope": [
+          "Kinoko Route",
+          "StageData",
+          "stage data",
+          ".sdata",
+          ".data",
+          ".rodata",
+          ".sdata2"
+        ],
+        "evidence_refs": [
+          "raw_diff: static data additions",
+          "text_corpus: bot report data-section changes"
+        ],
+        "reason": "Possible data-sheet update, but PR evidence does not include explicit data ownership rationale; curator should verify symbols, sections, and current source."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "PAD_STACK usages need explicit rationale even when a function matches",
+        "text": "PR 2435 uses PAD_STACK(16) in grKinokoRoute_8020836C and the bot reports the function as 100% matched, but the loaded slice does not explain the necessity or blast radius of the padding.",
+        "source_path": "src/melee/gr/grkinokoroute.c",
+        "scope": [
+          "matching tactics",
+          "stack padding",
+          "stage decomp"
+        ],
+        "evidence_refs": [
+          "raw_diff: PAD_STACK(16) in grKinokoRoute_8020836C",
+          "text_corpus: bot report grKinokoRoute_8020836C 100.00%"
+        ],
+        "reason": "This aligns with the existing matching-tactics-need-evidence standard; curator may want a searchable example, not a new accepted rule."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer human reviewer approval rationale; no human reviews or review comments are present.",
+      "Do not claim grKinokoRoute_80207C88, grKinokoRoute_80207634, grKinokoRoute_802078F0, or grKinokoRoute_80207B5C fully matched; the bot report lists them as partial improvements.",
+      "Do not promote the static data names or section ownership as final beyond the diff; the PR body provides no data ownership explanation.",
+      "Do not treat PAD_STACK(16) as generally acceptable style from this PR alone; evidence only shows it existed in a function the bot reported as matched."
+    ]
+  },
+  "confidence": 0.86,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

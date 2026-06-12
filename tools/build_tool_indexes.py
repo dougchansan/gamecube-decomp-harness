@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -13,7 +12,6 @@ from typing import Any, Iterable
 SCRIPT_PATH = Path(__file__).resolve()
 TOOLS_ROOT = SCRIPT_PATH.parent
 PACKAGE_ROOT = TOOLS_ROOT.parent
-REFERENCE_DOCS_ROOT = PACKAGE_ROOT / "knowledge" / "sources" / "reference_docs" / "data" / "docs"
 TOOL_PATHS = {
     "ghidra": TOOLS_ROOT / "research" / "ghidra",
     "opseq": TOOLS_ROOT / "research" / "opseq",
@@ -91,7 +89,7 @@ def report_functions(repo_root: Path) -> list[dict[str, Any]]:
 def indexed_code_graph_functions() -> list[dict[str, Any]]:
     """Read fallback function metadata from the orchestrator code graph."""
 
-    index_path = PACKAGE_ROOT / "knowledge" / "sources" / "code_graph" / "indexes" / "functions.jsonl"
+    index_path = PACKAGE_ROOT / "knowledge" / "sources" / "code_context" / "code_graph" / "indexes" / "functions.jsonl"
     functions: list[dict[str, Any]] = []
     if not index_path.exists():
         return functions
@@ -183,70 +181,13 @@ def build_opseq_index(repo_root: Path) -> int:
     return write_jsonl(TOOL_PATHS["opseq"] / "indexes" / "function_shapes.jsonl", rows)
 
 
-def build_mismatch_index() -> int:
-    """Build the reference-note mismatch-pattern index."""
+def write_removed_reference_indexes() -> dict[str, int]:
+    """Clear indexes that previously mirrored the deleted legacy-doc archive."""
 
-    docs = [
-        path
-        for path in sorted(REFERENCE_DOCS_ROOT.glob("*.md"))
-        if re.search(r"(mwcc|pattern|mismatch|checkdiff|permuter|allocator|stack|register)", path.name, re.I)
-    ]
-    return write_jsonl(TOOL_PATHS["mismatch_db"] / "indexes" / "patterns.jsonl", doc_rows("mismatch_pattern", docs))
-
-
-def build_mwcc_debug_index() -> int:
-    """Build the reference-note compiler/debug index."""
-
-    docs = [path for path in sorted(REFERENCE_DOCS_ROOT.glob("*.md")) if re.search(r"(mwcc|compiler|pcdump|allocator)", path.name, re.I)]
-    return write_jsonl(TOOL_PATHS["mwcc_debug"] / "indexes" / "dumps.jsonl", doc_rows("mwcc_debug_note", docs))
-
-
-def doc_rows(kind: str, docs: list[Path]) -> Iterable[dict[str, Any]]:
-    """Yield searchable document chunks as tool index rows."""
-
-    for path in docs:
-        text = path.read_text(encoding="utf-8", errors="replace")
-        for index, chunk in enumerate(split_text(text, 2600), start=1):
-            heading = first_heading(chunk)
-            yield {
-                "id": f"{kind}:{path.name}:{index}",
-                "kind": kind,
-                "title": f"{path.stem}{': ' + heading if heading else ''}",
-                "text": chunk,
-                "evidence_ref": str(path),
-                "payload": {"path": str(path), "chunk": index, "heading": heading},
-            }
-
-
-def split_text(text: str, max_chars: int) -> list[str]:
-    """Split markdown-ish text into bounded chunks."""
-
-    text = text.strip()
-    if not text:
-        return []
-    chunks: list[str] = []
-    current = ""
-    for part in re.split(r"(\n#{1,6}\s+[^\n]+|\n\s*\n)", text):
-        if not part:
-            continue
-        if current and len(current) + len(part) > max_chars:
-            chunks.append(current.strip())
-            current = ""
-        if len(part) > max_chars:
-            for index in range(0, len(part), max_chars):
-                chunks.append(part[index : index + max_chars].strip())
-        else:
-            current += part
-    if current.strip():
-        chunks.append(current.strip())
-    return chunks
-
-
-def first_heading(text: str) -> str:
-    """Return the first markdown heading in a chunk, if present."""
-
-    match = re.search(r"^#{1,6}\s+(.+)$", text, flags=re.M)
-    return match.group(1).strip() if match else ""
+    return {
+        "mismatch_db": write_jsonl(TOOL_PATHS["mismatch_db"] / "indexes" / "patterns.jsonl", []),
+        "mwcc_debug": write_jsonl(TOOL_PATHS["mwcc_debug"] / "indexes" / "dumps.jsonl", []),
+    }
 
 
 def safe_int(value: Any) -> int:
@@ -275,8 +216,7 @@ def main() -> int:
     stats = {
         "ghidra": build_ghidra_index(repo_root),
         "opseq": build_opseq_index(repo_root),
-        "mismatch_db": build_mismatch_index(),
-        "mwcc_debug": build_mwcc_debug_index(),
+        **write_removed_reference_indexes(),
     }
     print(json.dumps({"repo_root": str(repo_root), "stats": stats}, indent=2))
     return 0

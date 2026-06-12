@@ -1,0 +1,374 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2560",
+  "pr": {
+    "number": 2560,
+    "title": "Implement scratches",
+    "url": "https://github.com/doldecomp/melee/pull/2560",
+    "state": "MERGED",
+    "author": "ribbanya",
+    "created_at": "2026-05-31T15:54:15Z",
+    "merged_at": "2026-05-31T16:07:24Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Small multi-file scratch implementation touching camera, Flat Zone ground, DevText text drawing/text library, and baselib particle code. The diff mainly adjusts local expression shapes and matching tactics: pointer temporaries in gmCamera, scoped dont_inline pragmas and PAD_STACK in DevText, an indexed array loop in particle cleanup, and minor control-flow/local declaration reshaping in grflatzone.",
+  "change_classification": {
+    "primary_type": "code-change",
+    "categories": [
+      "decomp-scratch-implementation",
+      "matching-tactic",
+      "local-control-flow-cleanup"
+    ],
+    "systems": [
+      "game-mode",
+      "stage",
+      "interface-text",
+      "sysdolphin-baselib"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gm/gmcamera.c",
+      "role": "Adjusted gmCamera_801A30E4 to use a gcus local, pointer temporaries for xC and x8, and alternate JObj access expressions.",
+      "evidence_refs": [
+        "changed_files: src/melee/gm/gmcamera.c added 11 deleted 7",
+        "raw_diff:gmcamera.c gmCamera_801A30E4 hunk"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grflatzone.c",
+      "role": "Reshaped grFlatzone_80218260 by hoisting HSD_JObj* declaration and combining GET_JOBJ assignment with a NULL check.",
+      "evidence_refs": [
+        "changed_files: src/melee/gr/grflatzone.c added 4 deleted 5",
+        "raw_diff:grflatzone.c grFlatzone_80218260 hunk"
+      ]
+    },
+    {
+      "path": "src/melee/if/textdraw.c",
+      "role": "Added scoped dont_inline pragmas around DevText_InitPool and DevText_CreateCObj, added PAD_STACK(8) in DevText_Setup, and masked render priority to 8 bits.",
+      "evidence_refs": [
+        "changed_files: src/melee/if/textdraw.c added 8 deleted 1",
+        "raw_diff:textdraw.c DevText_InitPool, DevText_CreateCObj, DevText_Setup hunks"
+      ]
+    },
+    {
+      "path": "src/melee/if/textlib.c",
+      "role": "Added scoped dont_inline pragmas around several small DevText flag/erase helpers.",
+      "evidence_refs": [
+        "changed_files: src/melee/if/textlib.c added 15 deleted 0",
+        "raw_diff:textlib.c DevText_ShowBackground, DevText_HideBackground, DevText_ShowText, DevText_HideText, DevText_Erase hunks"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/particle.c",
+      "role": "Simplified hsd_8039CEAC by removing a bins pointer local and indexing hsd_804D0908 directly inside the loop.",
+      "evidence_refs": [
+        "changed_files: src/sysdolphin/baselib/particle.c added 2 deleted 5",
+        "raw_diff:particle.c hsd_8039CEAC hunk"
+      ]
+    }
+  ],
+  "what_changed": [
+    "PR body says it resolves issues #2550 through #2554, but the slice does not include those issue bodies.",
+    "gmCamera_801A30E4 now caches gmCamera_80479BC8.gcus in a local pointer and uses pointer locals for gcus->xC and gcus->x8 in repeated accesses.",
+    "grFlatzone_80218260 changed a nested block-local GET_JOBJ pattern into an assignment expression inside the NULL check.",
+    "DevText functions gained tightly scoped #pragma push / #pragma dont_inline on / #pragma pop blocks around InitPool, CreateCObj, ShowBackground, HideBackground, ShowText, HideText, and Erase.",
+    "DevText_Setup gained PAD_STACK(8) and passes devtext_setup_render_priority & 0xFF to GObj_SetupGXLink.",
+    "hsd_8039CEAC now indexes hsd_804D0908[i] directly instead of walking a void** bins pointer."
+  ],
+  "smart_moves": [
+    {
+      "text": "Scoped each dont_inline pragma with push/pop rather than leaving a broad pragma state in effect.",
+      "evidence_refs": [
+        "raw_diff:textdraw.c DevText_InitPool and DevText_CreateCObj hunks",
+        "raw_diff:textlib.c DevText flag helper and Erase hunks"
+      ]
+    },
+    {
+      "text": "Kept the particle loop as a natural for-loop over 16 entries while changing the access form from pointer increment to array indexing.",
+      "evidence_refs": [
+        "raw_diff:particle.c hsd_8039CEAC hunk"
+      ]
+    },
+    {
+      "text": "Reduced repeated long global/member expressions in gmCamera_801A30E4 by introducing gcus and pointer locals.",
+      "evidence_refs": [
+        "raw_diff:gmcamera.c gmCamera_801A30E4 hunk"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For scratch or matching work, small expression-shape changes can be spread across unrelated files; preserve each file's local evidence rather than inferring one broad subsystem rule.",
+      "scope": [
+        "multi-file scratch PRs"
+      ],
+      "evidence_refs": [
+        "changed_files: five changed files across gm, gr, if, and sysdolphin",
+        "human_pr_text: resolves #2550-#2554"
+      ]
+    },
+    {
+      "lesson": "When a loop already has a clear counter, direct array indexing may be a viable alternative to carrying a separate incremented pointer local.",
+      "scope": [
+        "src/sysdolphin/baselib/particle.c",
+        "hsd_8039CEAC"
+      ],
+      "evidence_refs": [
+        "raw_diff:particle.c removed bins pointer and bins++ while using hsd_804D0908[i]"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "gcus",
+      "meaning": "Local pointer to gmCamera_80479BC8.gcus.",
+      "scope": [
+        "src/melee/gm/gmcamera.c",
+        "gmCamera_801A30E4"
+      ],
+      "evidence_refs": [
+        "raw_diff:gmcamera.c added gmCameraUnkStruct* gcus = &gmCamera_80479BC8.gcus"
+      ]
+    },
+    {
+      "name": "pxc",
+      "meaning": "Local pointer to gcus->xC.",
+      "scope": [
+        "src/melee/gm/gmcamera.c",
+        "gmCamera_801A30E4"
+      ],
+      "evidence_refs": [
+        "raw_diff:gmcamera.c added s32* pxc = &gcus->xC"
+      ]
+    },
+    {
+      "name": "px8",
+      "meaning": "Local pointer to gcus->x8.",
+      "scope": [
+        "src/melee/gm/gmcamera.c",
+        "gmCamera_801A30E4"
+      ],
+      "evidence_refs": [
+        "raw_diff:gmcamera.c added HSD_JObj** px8 and px8 = &gcus->x8"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Use scoped #pragma dont_inline blocks around small helpers to affect inlining while limiting pragma scope.",
+      "scope": [
+        "DevText_InitPool",
+        "DevText_CreateCObj",
+        "DevText_ShowBackground",
+        "DevText_HideBackground",
+        "DevText_ShowText",
+        "DevText_HideText",
+        "DevText_Erase"
+      ],
+      "evidence_refs": [
+        "raw_diff:textdraw.c scoped dont_inline additions",
+        "raw_diff:textlib.c scoped dont_inline additions"
+      ],
+      "caveat": "No review comment or objdiff evidence is included explaining why dont_inline was required; current decomp standards treat pragmas as exceptions needing tight evidence."
+    },
+    {
+      "tactic": "Use PAD_STACK(8) in DevText_Setup to affect stack layout.",
+      "scope": [
+        "src/melee/if/textdraw.c",
+        "DevText_Setup"
+      ],
+      "evidence_refs": [
+        "raw_diff:textdraw.c added PAD_STACK(8)"
+      ],
+      "caveat": "The slice includes only an automated report saying no changes, not a narrow objdiff rationale for PAD_STACK."
+    },
+    {
+      "tactic": "Force an 8-bit value at a callsite by passing devtext_setup_render_priority & 0xFF.",
+      "scope": [
+        "src/melee/if/textdraw.c",
+        "DevText_Setup",
+        "GObj_SetupGXLink call"
+      ],
+      "evidence_refs": [
+        "raw_diff:textdraw.c changed GObj_SetupGXLink argument to devtext_setup_render_priority & 0xFF"
+      ]
+    },
+    {
+      "tactic": "Introduce pointer-to-field locals to influence repeated global/member access codegen.",
+      "scope": [
+        "src/melee/gm/gmcamera.c",
+        "gmCamera_801A30E4"
+      ],
+      "evidence_refs": [
+        "raw_diff:gmcamera.c added pxc and px8 and used *pxc, *px8"
+      ]
+    },
+    {
+      "tactic": "Use an assignment expression in a NULL check for a local JObj.",
+      "scope": [
+        "src/melee/gr/grflatzone.c",
+        "grFlatzone_80218260"
+      ],
+      "evidence_refs": [
+        "raw_diff:grflatzone.c if ((jobj = GET_JOBJ(gobj)) != NULL)"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "type": "automated-report",
+      "author": "decomp-dev[bot]",
+      "text": "Report for GALE01 states: No changes.",
+      "evidence_refs": [
+        "text_corpus: issue_comment by decomp-dev[bot] at 2026-05-31T15:57:14Z"
+      ]
+    },
+    {
+      "type": "absence",
+      "author": null,
+      "text": "No human review comments or review records are present in the loaded slice.",
+      "evidence_refs": [
+        "metadata_json: counts.review_comments 0 and reviews 0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2560",
+    "Implement scratches",
+    "ribbanya",
+    "gmCamera_801A30E4",
+    "gmCameraUnkStruct",
+    "gmCamera_80479BC8.gcus",
+    "HSD_JObjClearFlagsAll",
+    "HSD_JObjSetFlagsAll",
+    "JOBJ_HIDDEN",
+    "lb_80011E24",
+    "grFlatzone_80218260",
+    "GET_GROUND",
+    "GET_JOBJ",
+    "DevText_InitPool",
+    "DevText_CreateCObj",
+    "DevText_Setup",
+    "DevText_ShowBackground",
+    "DevText_HideBackground",
+    "DevText_ShowText",
+    "DevText_HideText",
+    "DevText_Erase",
+    "pragma dont_inline",
+    "PAD_STACK",
+    "GObj_SetupGXLink",
+    "devtext_setup_render_priority",
+    "hsd_8039CEAC",
+    "hsd_804D0908",
+    "particle bins pointer"
+  ],
+  "follow_up_queries": [
+    "PR 2560 issues 2550 2551 2552 2553 2554 scratches",
+    "DevText_Setup PAD_STACK(8) dont_inline",
+    "gmCamera_801A30E4 pxc px8 gcus matching",
+    "hsd_8039CEAC hsd_804D0908 bins array indexing",
+    "grFlatzone_80218260 GET_JOBJ assignment NULL check",
+    "decomp-dev bot GALE01 No changes PR 2560"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR metadata, changed file counts, merge status",
+      "human_pr_text: PR body with resolved issue checklist",
+      "raw_diff: full diff for five files",
+      "text_corpus: automated report comment"
+    ],
+    "notes": [
+      "The diff and metadata are complete enough to identify changed files and local code tactics.",
+      "The PR body is minimal and only lists resolved issues; issue contents are not loaded, so the meaning of 'scratches' and each resolved issue cannot be reconstructed from this slice.",
+      "No human review comments are loaded, so reviewer intent and rationale are unknown.",
+      "The automated GALE01 report says 'No changes', but the slice does not include detailed objdiff/build output per symbol; matching claims should remain cautious.",
+      "Pragmas and PAD_STACK are visible tactics, but the PR evidence does not explain why they were necessary."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "type": "historical_tactic_example",
+        "title": "PR 2560 used tightly scoped dont_inline pragmas in DevText scratch work",
+        "text": "In PR 2560, several DevText helpers were wrapped with #pragma push / #pragma dont_inline on / #pragma pop. This is evidence of a historical matching tactic, not proof that dont_inline is generally preferred.",
+        "scope": [
+          "src/melee/if/textdraw.c",
+          "src/melee/if/textlib.c",
+          "DevText"
+        ],
+        "evidence_refs": [
+          "raw_diff:textdraw.c DevText_InitPool and DevText_CreateCObj",
+          "raw_diff:textlib.c DevText_ShowBackground/HideBackground/ShowText/HideText/Erase"
+        ]
+      },
+      {
+        "type": "historical_tactic_example",
+        "title": "PR 2560 replaced particle bin pointer walking with direct indexed access",
+        "text": "hsd_8039CEAC removed a bins pointer local and bins++ increment, using hsd_804D0908[i] directly inside the existing 16-iteration loop.",
+        "scope": [
+          "src/sysdolphin/baselib/particle.c",
+          "hsd_8039CEAC"
+        ],
+        "evidence_refs": [
+          "raw_diff:particle.c hsd_8039CEAC"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Add PR 2560 as a cautionary example for scoped pragma and PAD_STACK tactics",
+        "text": "PR 2560 contains scoped dont_inline pragmas and PAD_STACK(8) in DevText scratch work. If curated, it should be documented only as a historical matching tactic that still needs narrow objdiff/build evidence, aligning with existing standards that pragmas and stack padding are exceptions.",
+        "source_path": null,
+        "scope": [
+          "avoid-pragmas-register-asm",
+          "matching-tactics-need-evidence",
+          "src/melee/if/textdraw.c",
+          "src/melee/if/textlib.c"
+        ],
+        "evidence_refs": [
+          "raw_diff:textdraw.c added #pragma dont_inline blocks and PAD_STACK(8)",
+          "raw_diff:textlib.c added #pragma dont_inline blocks",
+          "text_corpus: decomp-dev[bot] report says No changes"
+        ],
+        "reason": "The PR gives a compact historical example of tightly scoped pragmas and stack padding, but lacks detailed verifier rationale; route for curator review rather than promoting as accepted style."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Consider cross-reference from natural loop guidance to direct array indexing examples",
+        "text": "PR 2560's hsd_8039CEAC keeps a 16-iteration for-loop and replaces a walked pointer local with hsd_804D0908[i]. This may be useful as an example that natural loop structure can coexist with direct indexed global-array access when it matches.",
+        "source_path": "src/sysdolphin/baselib/particle.c",
+        "scope": [
+          "natural-loops",
+          "src/sysdolphin/baselib/particle.c",
+          "hsd_8039CEAC"
+        ],
+        "evidence_refs": [
+          "raw_diff:particle.c removed bins local and bins++",
+          "raw_diff:particle.c added hsd_804D0908[i] reads"
+        ],
+        "reason": "Potential reusable example; not enough evidence to make a stronger rule without object-level matching detail."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that all DevText helpers should be dont_inline; this PR only shows specific scoped additions.",
+      "Do not infer accepted semantics for gcus, pxc, or px8 beyond their immediate field-pointer roles in the diff.",
+      "Do not claim the five resolved issues' contents or validation criteria; the issue bodies are not included in the slice.",
+      "Do not promote PAD_STACK(8) or comma-expression access in gmCamera as normal style without additional objdiff/build evidence."
+    ]
+  },
+  "confidence": 0.76,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

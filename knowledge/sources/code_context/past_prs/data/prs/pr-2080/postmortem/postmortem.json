@@ -1,0 +1,405 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2080",
+  "pr": {
+    "number": 2080,
+    "title": "Pr/mn diagram",
+    "url": "https://github.com/doldecomp/melee/pull/2080",
+    "state": "CLOSED",
+    "author": "itsgrimetime",
+    "created_at": "2026-01-10T02:36:20Z",
+    "merged_at": null
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Closed draft/WIP PR for matching and prototype cleanup across the mn diagram files. The slice shows new C bodies in mndiagram.c, mndiagram2.c, and mndiagram3.c, broad header prototype replacement of UNK_RET/UNK_PARAMS with typed signatures, and bot-reported code-match progress. Author later closed it to reorganize with more matches across mndiagram, mndiagram2, and mndiagram3.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "naming",
+      "prototype-recovery",
+      "menu-system"
+    ],
+    "systems": [
+      "melee-core",
+      "mn",
+      "mndiagram",
+      "mndiagram2",
+      "mndiagram3"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/mn/mndiagram.c",
+      "role": "Main implementation file; replaced multiple placeholder markers with C bodies and added includes/externs for mn, gm, language, gobj, gobjproc, and sislib helpers.",
+      "evidence_refs": [
+        "changed_files: src/melee/mn/mndiagram.c +219/-19",
+        "raw_diff: mnDiagram_8023EA54, GetNameTotalKOs, GetNameTotalFalls, GetFighterTotalKOs, GetFighterTotalFalls, mnDiagram_8023F334, mnDiagram_8023F3A8, mnDiagram_8023F45C, mnDiagram_8023F4CC, mnDiagram_8023FDD8, fn_80240B18, fn_80241AE8, mnDiagram_802433AC"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mndiagram.h",
+      "role": "Header prototype cleanup; many UNK_RET/UNK_PARAMS declarations replaced with typed signatures and HSD_GObj forward include added.",
+      "evidence_refs": [
+        "changed_files: src/melee/mn/mndiagram.h +44/-43",
+        "raw_diff: mndiagram.h prototype block"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mndiagram.static.h",
+      "role": "Static/header data declaration added for mnDiagram_803EE774 animation-loop table.",
+      "evidence_refs": [
+        "changed_files: src/melee/mn/mndiagram.static.h +2/-0",
+        "raw_diff: extern f32 mnDiagram_803EE774[]"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mndiagram2.c",
+      "role": "New implementation content for mndiagram2 including animation-loop callback, cleanup/free function, and setup function.",
+      "evidence_refs": [
+        "changed_files: src/melee/mn/mndiagram2.c +56/-0",
+        "raw_diff: fn_80244D20, fn_80245028, mnDiagram2_802453B0"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mndiagram2.h",
+      "role": "New header guard, forward include, and prototypes for mndiagram2 functions.",
+      "evidence_refs": [
+        "changed_files: src/melee/mn/mndiagram2.h +10/-0",
+        "raw_diff: mndiagram2.h"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mndiagram3.c",
+      "role": "Added animation-loop callback fn_80246E04 using mn_8022ED6C and HSD_GObjPLink_80390228.",
+      "evidence_refs": [
+        "changed_files: src/melee/mn/mndiagram3.c +17/-0",
+        "raw_diff: fn_80246E04"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mndiagram3.h",
+      "role": "Added prototype for fn_80246E04 and address comments.",
+      "evidence_refs": [
+        "changed_files: src/melee/mn/mndiagram3.h +2/-1",
+        "raw_diff: mndiagram3.h"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnmainrule.h",
+      "role": "Prototype recovery for mnmainrule symbols, replacing several unknown declarations with typed signatures.",
+      "evidence_refs": [
+        "changed_files: src/melee/mn/mnmainrule.h +21/-12",
+        "raw_diff: mnmainrule.h prototype block"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnname.h",
+      "role": "Prototype recovery for mnname symbols; loaded diff is truncated, but excerpt shows many UNK_RET/UNK_PARAMS replacements.",
+      "evidence_refs": [
+        "changed_files: src/melee/mn/mnname.h +30/-30",
+        "raw_diff: mnname.h partial prototype block"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnnamenew.h",
+      "role": "Small header change listed in metadata; exact changed line is not visible in loaded truncated diff.",
+      "evidence_refs": [
+        "changed_files: src/melee/mn/mnnamenew.h +1/-1"
+      ]
+    }
+  ],
+  "what_changed": [
+    "The PR body describes the work as WIP while the author cleaned up and gathered functions they had matches for.",
+    "Bot report for GALE01 reported matched code improving by +0.01% and +392 bytes.",
+    "Bot report listed 4 new 100% matches: fn_80240B18, mnDiagram_8023EA54, mnDiagram_8023FDD8, and fn_80245028.",
+    "Bot report listed 13 improvements in unmatched functions across mndiagram, mndiagram2, and mndiagram3, including mnDiagram_802433AC at 93.38%, GetNameTotalFalls at 88.18%, mnDiagram_8023F334 at 97.76%, fn_80241AE8 at 95.80%, fn_80244D20 at 74.58%, and fn_80246E04 at 69.58%.",
+    "mndiagram.c added C implementations for totals/counting helpers, digit formatting, previous/next valid-entry scans, cleanup/free functions, animation-loop unlink callbacks, and gobj/jobj setup.",
+    "mndiagram2.c grew from effectively empty to include fn_80244D20, fn_80245028, and mnDiagram2_802453B0.",
+    "mndiagram3.c added fn_80246E04, a callback that reads gobj user data, gets a jobj, compares mn_8022ED6C against table end data, and unlinks the gobj when complete.",
+    "Headers mndiagram.h, mndiagram2.h, mndiagram3.h, mnmainrule.h, and mnname.h were updated with typed prototypes instead of placeholder unknown signatures.",
+    "The author closed the PR and said they would reorganize it with more matches across mndiagram, mndiagram2, and mndiagram3."
+  ],
+  "smart_moves": [
+    "Typed prototype updates accompanied recovered bodies, matching the loaded standard that function bodies proving signatures should update owning headers.",
+    "The PR kept uncertain function names in address-style form such as fn_80240B18 and mnDiagram_802433AC rather than inventing semantic global names.",
+    "The same animation-loop/unlink pattern was attempted across mndiagram, mndiagram2, and mndiagram3, which may help future matching compare sibling functions.",
+    "The bot report separated full matches from partial improvements, making it clear which functions were verified as 100% and which were only score progress."
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When recovering menu subsystem functions, update the related headers in the same slice once signatures are evident, but keep the evidence boundary clear for functions that are only partial score improvements.",
+      "evidence_refs": [
+        "raw_diff: mndiagram.h UNK_RET/UNK_PARAMS replacements",
+        "raw_diff: mnmainrule.h and mnname.h prototype replacements",
+        "text_corpus: bot report full matches versus unmatched improvements"
+      ]
+    },
+    {
+      "lesson": "Repeated animation-loop callback shapes across sibling files can be useful matching anchors: read gobj data, get jobj at data+0x0C, compare mn_8022ED6C against an end-frame/table value, then call HSD_GObjPLink_80390228.",
+      "evidence_refs": [
+        "raw_diff: fn_80241AE8",
+        "raw_diff: fn_80244D20",
+        "raw_diff: fn_80246E04"
+      ]
+    },
+    {
+      "lesson": "Closed WIP PRs can still contain useful match evidence, but only bot-reported 100% functions should be treated as matched from this slice; partial percentages should remain candidate/search evidence.",
+      "evidence_refs": [
+        "human_pr_text: WIP body",
+        "text_corpus: decomp-dev bot report",
+        "human_pr_text: author closed to reorganize"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Use address-style names for unresolved or not-yet-semantic functions, e.g. fn_80240B18, fn_80241AE8, fn_80244D20, fn_80246E04, and mnDiagram_802433AC.",
+      "evidence_refs": [
+        "raw_diff: function definitions and prototypes"
+      ]
+    },
+    {
+      "convention": "Recovered helper-like functions may use semantic names already present in the codebase, such as GetNameTotalKOs, GetNameTotalFalls, GetFighterTotalKOs, and GetFighterTotalFalls.",
+      "evidence_refs": [
+        "raw_diff: mndiagram.c totals helpers",
+        "raw_diff: mndiagram.h prototypes"
+      ]
+    },
+    {
+      "convention": "Local names in this slice are mostly short role names such as data, table, jobj, gobj, ptr, total, offset, original, and digit_count.",
+      "evidence_refs": [
+        "raw_diff: mndiagram.c, mndiagram2.c, mndiagram3.c function bodies"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Dummy locals and dummy arrays were introduced in several functions, including s32 dummy[4], s32 dummy[8], and int dummy, apparently to influence stack/codegen shape.",
+      "evidence_refs": [
+        "raw_diff: GetNameTotalFalls",
+        "raw_diff: GetFighterTotalFalls",
+        "raw_diff: mnDiagram_802433AC",
+        "raw_diff: fn_80244D20"
+      ],
+      "caution": "Loaded standards require explicit verifier evidence for dummy locals or stack-padding tactics; this slice only provides bot percentages and no detailed objdiff rationale."
+    },
+    {
+      "tactic": "Raw pointer arithmetic was used for untyped menu data, gobj fields, and persistent stats offsets, such as gobj+0x2C, data+0x0C, arg0+0x38 through arg0+0x48, and u16 loads from byte offsets.",
+      "evidence_refs": [
+        "raw_diff: GetNameTotalKOs/GetNameTotalFalls/GetFighterTotalKOs/GetFighterTotalFalls",
+        "raw_diff: fn_80240B18",
+        "raw_diff: fn_80241AE8",
+        "raw_diff: fn_80244D20",
+        "raw_diff: fn_80246E04"
+      ],
+      "caution": "This may be bridge code; typed-fields-over-pointer-math suggests replacing raw offsets once real structs/fields are known."
+    },
+    {
+      "tactic": "A temporary macro alias mapped GetNameText to GetNameText_u8 around GetNameTotalKOs, then undefed it.",
+      "evidence_refs": [
+        "raw_diff: char* GetNameText_u8(u8); #define GetNameText GetNameText_u8; #undef GetNameText"
+      ],
+      "caution": "This is a local matching tactic, not a naming standard."
+    },
+    {
+      "tactic": "Do-while loops with pre-decrement/pre-increment were used for previous/next valid name/fighter index scans.",
+      "evidence_refs": [
+        "raw_diff: mnDiagram_8023F3A8",
+        "raw_diff: mnDiagram_8023F45C",
+        "raw_diff: mnDiagram_8023F4CC"
+      ],
+      "caution": "These are supported by the diff as attempted source shapes, but only partial bot percentages are reported for these functions."
+    },
+    {
+      "tactic": "Manual bitfield update on gobj byte 0xD was used in mnDiagram2_802453B0: mask out 0x30 and OR in (HSD_GObj_804D783C & 3) << 4.",
+      "evidence_refs": [
+        "raw_diff: mnDiagram2_802453B0"
+      ],
+      "caution": "This remains raw byte manipulation in the slice and should not be generalized without type/field evidence."
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "author": "decomp-dev[bot]",
+      "summary": "Reported +392 matched-code bytes, 4 new full matches, and 13 partial improvements.",
+      "evidence_refs": [
+        "text_corpus: issue_comment by decomp-dev[bot] at 2026-01-10T02:39:43Z"
+      ]
+    },
+    {
+      "kind": "author_followup",
+      "author": "itsgrimetime",
+      "summary": "Author closed the PR to reorganize it with more matches across mndiagram, mndiagram2, and mndiagram3.",
+      "evidence_refs": [
+        "human_pr_text: issuecomment-3771096361",
+        "text_corpus: issue_comment by itsgrimetime at 2026-01-20T05:23:41Z"
+      ]
+    },
+    {
+      "kind": "review_absence",
+      "author": null,
+      "summary": "No review comments or reviews are present in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata_json: counts.review_comments=0, reviews=0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2080",
+    "Pr/mn diagram",
+    "itsgrimetime",
+    "mndiagram",
+    "mndiagram2",
+    "mndiagram3",
+    "mnDiagram_8023EA54",
+    "mnDiagram_8023FDD8",
+    "fn_80240B18",
+    "fn_80245028",
+    "mnDiagram_802433AC",
+    "GetNameTotalKOs",
+    "GetNameTotalFalls",
+    "GetFighterTotalKOs",
+    "GetFighterTotalFalls",
+    "mnDiagram_8023F334",
+    "mnDiagram_8023F3A8",
+    "mnDiagram_8023F45C",
+    "mnDiagram_8023F4CC",
+    "fn_80241AE8",
+    "fn_80244D20",
+    "fn_80246E04",
+    "mnDiagram2_802453B0",
+    "mn_8022ED6C",
+    "HSD_GObjPLink_80390228",
+    "HSD_SisLib_803A5CC4",
+    "HSD_Free",
+    "UNK_RET",
+    "UNK_PARAMS",
+    "AnimLoopSettings",
+    "GetNameText_u8",
+    "dummy locals",
+    "raw pointer offsets"
+  ],
+  "follow_up_queries": [
+    "PR 2080 mndiagram fn_80240B18 HSD_SisLib_803A5CC4 HSD_Free",
+    "PR 2080 mnDiagram_8023EA54 lbLang_IsSavedLanguageUS threshold",
+    "PR 2080 GetNameTotalKOs GetNameTotalFalls GetPersistentNameData",
+    "PR 2080 GetFighterTotalKOs GetFighterTotalFalls GetPersistentFighterData",
+    "PR 2080 fn_80241AE8 fn_80244D20 fn_80246E04 mn_8022ED6C HSD_GObjPLink_80390228",
+    "PR 2080 mndiagram header UNK_RET UNK_PARAMS prototype recovery",
+    "mndiagram2_802453B0 HSD_GObj_804D783C byte 0xD",
+    "mndiagram dummy local dummy array matching tactic"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR number/title/state/author/changed_files",
+      "human_pr_text: WIP body and author close/reorganize comment",
+      "text_corpus: decomp-dev bot report with 4 full matches and 13 partial improvements",
+      "raw_diff: truncated but includes most implementation and header excerpts",
+      "changed_files: complete 10-file metadata"
+    ],
+    "notes": [
+      "The PR was a closed draft/WIP with merged_at null, so do not infer acceptance or merge status.",
+      "Loaded raw_diff is truncated; exact mnnamenew.h line and the remainder of mnname.h are not visible.",
+      "No human review comments are present, so there is no reviewer intent to preserve.",
+      "Bot report supports match percentages for listed functions, but the slice does not include detailed objdiff output, build logs, or rationale for stack/dummy/pointer tactics.",
+      "Several functions are bot-reported as partial improvements only; they should not be treated as matched from this evidence."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "pr_postmortem_lesson",
+        "title": "Closed WIP PRs can preserve useful match evidence but require confidence separation",
+        "text": "In PR 2080, bot output identified 4 full matches and 13 partial improvements, while the author described the PR as WIP and later closed it to reorganize. Curated records should distinguish bot-reported 100% matches from partial score improvements and should not infer merge acceptance.",
+        "scope": [
+          "past_pr_intake",
+          "decomp-matching",
+          "mn"
+        ],
+        "evidence_refs": [
+          "human_pr_text: WIP body",
+          "text_corpus: decomp-dev bot report",
+          "human_pr_text: author close/reorganize comment",
+          "metadata_json: merged_at=null"
+        ]
+      },
+      {
+        "record_type": "matching_pattern_candidate",
+        "title": "mn diagram animation-loop unlink callback pattern",
+        "text": "PR 2080 shows sibling callback attempts in mndiagram, mndiagram2, and mndiagram3 that read gobj data, obtain a jobj from data+0x0C, compare mn_8022ED6C against table end data, and call HSD_GObjPLink_80390228 when complete.",
+        "scope": [
+          "src/melee/mn/mndiagram.c",
+          "src/melee/mn/mndiagram2.c",
+          "src/melee/mn/mndiagram3.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: fn_80241AE8",
+          "raw_diff: fn_80244D20",
+          "raw_diff: fn_80246E04"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "mn diagram work spans mndiagram, mndiagram2, and mndiagram3 under src/melee/mn",
+        "text": "PR 2080 author explicitly said they would reorganize matches across mndiagram, mndiagram2, and mndiagram3; changed files and bot report also group work in these three units.",
+        "source_path": "src/melee/mn",
+        "scope": [
+          "src/melee/mn/mndiagram.c",
+          "src/melee/mn/mndiagram2.c",
+          "src/melee/mn/mndiagram3.c"
+        ],
+        "evidence_refs": [
+          "human_pr_text: author close/reorganize comment",
+          "changed_files: mndiagram.c, mndiagram2.c, mndiagram3.c",
+          "text_corpus: bot report units main/melee/mn/mndiagram, mndiagram2, mndiagram3"
+        ],
+        "reason": "Could help future curator/source lookup route mn diagram matching work to the related sibling translation units."
+      },
+      {
+        "target_source_id": "other",
+        "update_kind": "source_update",
+        "title": "Investigate typed struct coverage for mn diagram callback/free data offsets",
+        "text": "PR 2080 uses repeated raw offsets such as gobj+0x2C, data+0x0C, arg0+0x38..0x48, arg0+0xC4, and gobj byte 0xD. Curator may route this as a future type-recovery note rather than an accepted style.",
+        "source_path": "src/melee/mn",
+        "scope": [
+          "src/melee/mn/mndiagram.c",
+          "src/melee/mn/mndiagram2.c",
+          "src/melee/mn/mndiagram3.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: fn_80240B18",
+          "raw_diff: fn_80241AE8",
+          "raw_diff: fn_80244D20",
+          "raw_diff: fn_80245028",
+          "raw_diff: fn_80246E04",
+          "raw_diff: mnDiagram2_802453B0"
+        ],
+        "reason": "Loaded typed-fields-over-pointer-math standard suggests raw pointer arithmetic should be bridge code when fields can be recovered."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote dummy locals/dummy arrays as accepted matching style from this PR; the slice has no detailed objdiff rationale beyond bot percentages.",
+      "Do not treat partial bot percentages as matched functions.",
+      "Do not infer that this PR was merged or accepted; metadata shows CLOSED and merged_at null.",
+      "Do not infer reviewer preferences; no reviews or review comments are present.",
+      "Do not promote the GetNameText_u8 macro alias as a naming convention or standard; it appears only as a local matching tactic in the diff."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

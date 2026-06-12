@@ -1,0 +1,17 @@
+{
+  "number": 1451,
+  "title": "Nearly match sysdolphin/controller.c",
+  "state": "MERGED",
+  "createdAt": "2024-09-17T00:35:55Z",
+  "updatedAt": "2024-09-17T00:45:08Z",
+  "mergedAt": "2024-09-17T00:45:01Z",
+  "closedAt": "2024-09-17T00:45:01Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/1451",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 13453
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 300,
+  "title": "Add the modified calcprogress that is closer on r40",
+  "state": "MERGED",
+  "createdAt": "2022-02-21T20:50:01Z",
+  "updatedAt": "2022-02-21T20:50:27Z",
+  "mergedAt": "2022-02-21T20:50:08Z",
+  "closedAt": "2022-02-21T20:50:08Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/300",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 3178
+  }
+}

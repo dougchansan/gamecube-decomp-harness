@@ -1,0 +1,17 @@
+{
+  "number": 175,
+  "title": "Remove bss completely, fix a fakematch on id.c from a mistake in logic",
+  "state": "MERGED",
+  "createdAt": "2021-12-11T05:51:02Z",
+  "updatedAt": "2021-12-11T05:51:12Z",
+  "mergedAt": "2021-12-11T05:51:10Z",
+  "closedAt": "2021-12-11T05:51:10Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/175",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 100781
+  }
+}

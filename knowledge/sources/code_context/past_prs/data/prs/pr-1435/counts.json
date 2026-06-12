@@ -1,0 +1,17 @@
+{
+  "number": 1435,
+  "title": "Merge `ft_3C61` into `ftCo_0B3E`",
+  "state": "MERGED",
+  "createdAt": "2024-08-17T07:11:03Z",
+  "updatedAt": "2024-08-17T07:13:39Z",
+  "mergedAt": "2024-08-17T07:13:39Z",
+  "closedAt": "2024-08-17T07:13:39Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1435",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 950900
+  }
+}

@@ -1,0 +1,372 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2342",
+  "pr": {
+    "number": 2342,
+    "title": "it: decompile 5 item/Pokemon functions",
+    "url": "https://github.com/doldecomp/melee/pull/2342",
+    "state": "MERGED",
+    "author": "johnwinston",
+    "created_at": "2026-03-21T15:02:16Z",
+    "merged_at": "2026-03-21T20:26:33Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Decompiled five item/Pokemon-related functions across Blastoise/Kamex, Kirby Cutter beam, Lugia, Goomba/Oldkuri, and Pikachu Thunder files, with small header prototype updates for recovered signatures. Evidence includes the PR body, full diff, changed-file metadata, and a decomp-dev bot report; verification evidence is mixed because the PR body claims all five functions matched while the bot report lists three new 100% matches and two near-matches/improvements.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "includes",
+      "item-functions"
+    ],
+    "systems": [
+      "item",
+      "Pokemon",
+      "Kirby Cutter beam",
+      "Pikachu Thunder",
+      "Lugia",
+      "Oldkuri",
+      "Kamex"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/it/items/itkamex.c",
+      "role": "Replaced placeholder for itKamex_UnkMotion1_Anim with C implementation using item timer, velocity, animation update, hitlag callbacks, and accessory callback.",
+      "evidence_refs": [
+        "changed_files.jsonl: itkamex.c added 31 deleted 1",
+        "raw_diff: itkamex.c hunk replacing /// #itKamex_UnkMotion1_Anim",
+        "human_pr_text: lists itKamex_UnkMotion1_Anim and describes Blastoise water gun"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itkirbycutterbeam.c",
+      "role": "Added includes and implemented it_8029BAB8 as a Kirby Cutter beam SpawnItem setup and post-spawn initialization routine.",
+      "evidence_refs": [
+        "changed_files.jsonl: itkirbycutterbeam.c added 28 deleted 4",
+        "raw_diff: itkirbycutterbeam.c hunk adding db/item includes and it_8029BAB8 body",
+        "human_pr_text: describes Kirby Cutter beam spawner"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itkirbycutterbeam.h",
+      "role": "Updated it_8029BB90 prototype from UNK_RET/UNK_PARAMS to void it_8029BB90(Item_GObj* gobj, HSD_GObj* owner).",
+      "evidence_refs": [
+        "changed_files.jsonl: itkirbycutterbeam.h added 1 deleted 1",
+        "raw_diff: itkirbycutterbeam.h prototype change"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itlugia.c",
+      "role": "Replaced placeholder for it_802D1E8C with SpawnItem construction for Lugia-related item spawning, including previous/current positions, facing direction, velocity from it_802D1F64, parent links, and Item_80268B18 return.",
+      "evidence_refs": [
+        "changed_files.jsonl: itlugia.c added 17 deleted 1",
+        "raw_diff: itlugia.c hunk replacing /// #it_802D1E8C",
+        "human_pr_text: describes it_802D1E8C as Lugia flight callback"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itlugia.h",
+      "role": "Updated Lugia prototypes for it_802D1E8C and it_802D1F64 from unknown signatures to typed Item_GObj*/ItemKind/f32 and Vec3-returning forms.",
+      "evidence_refs": [
+        "changed_files.jsonl: itlugia.h added 2 deleted 2",
+        "raw_diff: itlugia.h prototype changes"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itoldkuri.c",
+      "role": "Replaced placeholder for itOldkuri_UnkMotion2_Phys with rolling physics implementation using oldkuri item variables, attributes, velocity updates, floor-normal velocity adjustment, and gravity/physics helper.",
+      "evidence_refs": [
+        "changed_files.jsonl: itoldkuri.c added 22 deleted 1",
+        "raw_diff: itoldkuri.c hunk replacing /// #itOldkuri_UnkMotion2_Phys",
+        "human_pr_text: describes Goomba rolling physics"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itpikachuthunder.c",
+      "role": "Added include for it/it_266F.h and implemented itPikachuthunder_UnkMotion1_Coll with collision branch logic, offset position setup, thunder termination helper, and Pikachu SpecialLw callback checks.",
+      "evidence_refs": [
+        "changed_files.jsonl: itpikachuthunder.c added 34 deleted 1, 2 hunks",
+        "raw_diff: itpikachuthunder.c include and collision function hunks",
+        "human_pr_text: describes Pikachu Thunder collision"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Five placeholder item functions were replaced with C implementations: itKamex_UnkMotion1_Anim, it_8029BAB8, it_802D1E8C, itOldkuri_UnkMotion2_Phys, and itPikachuthunder_UnkMotion1_Coll.",
+    "Two headers were updated to replace unknown prototypes with recovered typed signatures: itkirbycutterbeam.h for it_8029BB90 and itlugia.h for it_802D1E8C/it_802D1F64.",
+    "itkirbycutterbeam.c gained db/item includes needed by the new spawner implementation; itpikachuthunder.c gained it/it_266F.h.",
+    "The bot report recorded +640 matched code bytes, three new 100% matches, and two additional function improvements that did not appear as 100% in the bot output."
+  ],
+  "smart_moves": [
+    "Recovered header prototypes alongside callsite/body usage instead of leaving UNK_RET/UNK_PARAMS for functions whose signatures were needed by the new code.",
+    "Used existing item subsystem structures and helpers such as SpawnItem, Item_80268B18, GET_ITEM, Item_GObj, HSD_GObj, ItemKind, and item-var union arms instead of raw pointer-only code.",
+    "Kept unknown address-style names such as it_802D1E8C and it_8029BAB8 where the diff did not prove semantic global names.",
+    "Captured item spawner behavior through field-by-field SpawnItem initialization, including parent gobj links, facing direction, damage, velocity, and flags."
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a recovered item function proves related callee signatures, update the owning header prototypes in the same PR rather than preserving UNK_RET/UNK_PARAMS.",
+      "evidence_refs": [
+        "raw_diff: itkirbycutterbeam.h changes it_8029BB90 to void it_8029BB90(Item_GObj* gobj, HSD_GObj* owner)",
+        "raw_diff: itlugia.h changes it_802D1E8C and it_802D1F64 signatures",
+        "decomp_standards: truthful-headers-and-includes"
+      ]
+    },
+    {
+      "lesson": "Item-spawn decompilation can often be expressed with the existing SpawnItem struct and Item_80268B18 helper, with parent links and flags made explicit.",
+      "evidence_refs": [
+        "raw_diff: itkirbycutterbeam.c it_8029BAB8 initializes SpawnItem and calls Item_80268B18",
+        "raw_diff: itlugia.c it_802D1E8C initializes SpawnItem and returns Item_80268B18"
+      ]
+    },
+    {
+      "lesson": "Use the correct item-var union arms and typed attribute structs when they are available, even when fields remain partially named by offsets.",
+      "evidence_refs": [
+        "raw_diff: xDD4_itemVar.pokemon.timer/x68/x6C and itKamexAttributes",
+        "raw_diff: xDD4_itemVar.oldkuri.xDFC/xDF4 and itOldkuriAttributes",
+        "raw_diff: xDD4_itemVar.pikachuthunder fields and itPikachuthunderAttributes",
+        "decomp_standards: typed-fields-over-pointer-math"
+      ]
+    },
+    {
+      "lesson": "Treat author-stated verification and bot reports as separate evidence sources; do not collapse them when they disagree on exact match status.",
+      "evidence_refs": [
+        "human_pr_text: claims all 5 functions 100% match verified by overnight script",
+        "text_corpus: decomp-dev bot reports 3 new matches and 3 improvements, with itPikachuthunder_UnkMotion1_Coll at 99.80% and itKamex_UnkMotion1_Anim at 99.44%"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Preserve address-style global names when the PR does not prove a semantic name.",
+      "examples": [
+        "it_8029BAB8",
+        "it_802D1E8C",
+        "it_802D1F64"
+      ],
+      "evidence_refs": [
+        "raw_diff: implementations keep address-style names",
+        "decomp_standards: conservative-naming"
+      ]
+    },
+    {
+      "convention": "Use established short local names for obvious item/spawn roles.",
+      "examples": [
+        "ip",
+        "attrs",
+        "attr",
+        "spawn",
+        "spawned_gobj",
+        "pos",
+        "facing_dir"
+      ],
+      "evidence_refs": [
+        "raw_diff: local variables in itkamex.c, itkirbycutterbeam.c, itlugia.c, itoldkuri.c, itpikachuthunder.c"
+      ]
+    },
+    {
+      "convention": "Keep existing function family prefixes for item behavior callbacks.",
+      "examples": [
+        "itKamex_UnkMotion1_Anim",
+        "itOldkuri_UnkMotion2_Phys",
+        "itPikachuthunder_UnkMotion1_Coll"
+      ],
+      "evidence_refs": [
+        "human_pr_text: summary lists functions",
+        "raw_diff: placeholder comments replaced by same-named function bodies"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Narrow PAD_STACK(8) use was retained in three implemented functions.",
+      "locations": [
+        "itKamex_UnkMotion1_Anim",
+        "itOldkuri_UnkMotion2_Phys",
+        "itPikachuthunder_UnkMotion1_Coll"
+      ],
+      "evidence_refs": [
+        "raw_diff: PAD_STACK(8) in itkamex.c",
+        "raw_diff: PAD_STACK(8) in itoldkuri.c",
+        "raw_diff: PAD_STACK(8) in itpikachuthunder.c",
+        "decomp_standards: matching-tactics-need-evidence"
+      ],
+      "notes": "The PR body claims all five functions matched by overnight script, but the bot report lists Kamex and Pikachu Thunder as sub-100% improvements; keep PAD_STACK as a tactic needing curator/reviewer caution rather than a general style lesson."
+    },
+    {
+      "tactic": "Field initialization order in SpawnItem was written explicitly, likely to match generated code shape for item spawning.",
+      "locations": [
+        "it_8029BAB8",
+        "it_802D1E8C"
+      ],
+      "evidence_refs": [
+        "raw_diff: SpawnItem field assignments in itkirbycutterbeam.c",
+        "raw_diff: SpawnItem field assignments in itlugia.c"
+      ]
+    },
+    {
+      "tactic": "Some functions re-fetch GET_ITEM into a shadowed ip inside a nested block, suggesting local lifetime/register-shape steering.",
+      "locations": [
+        "itKamex_UnkMotion1_Anim",
+        "itOldkuri_UnkMotion2_Phys"
+      ],
+      "evidence_refs": [
+        "raw_diff: nested Item* ip = GET_ITEM(gobj) in itkamex.c",
+        "raw_diff: nested Item* ip = GET_ITEM(gobj) in itoldkuri.c",
+        "decomp_standards: matching-tactics-need-evidence"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "source": "decomp-dev[bot]",
+      "feedback": "Reported matched code 59.38% (+0.02%, +640 bytes), with 3 new matches: it_8029BAB8, it_802D1E8C, and itOldkuri_UnkMotion2_Phys at 100%.",
+      "evidence_refs": [
+        "text_corpus: issue_comment by decomp-dev[bot] at 2026-03-21T15:05:39Z"
+      ]
+    },
+    {
+      "source": "decomp-dev[bot]",
+      "feedback": "Reported improvements, not full 100% matches, for itPikachuthunder_UnkMotion1_Coll at 99.80%, itKamex_UnkMotion1_Anim at 99.44%, and itkirbycutterbeam .sdata2 at 12.50%.",
+      "evidence_refs": [
+        "text_corpus: issue_comment improvements table"
+      ]
+    },
+    {
+      "source": "metadata",
+      "feedback": "No review comments or reviews were included in the slice.",
+      "evidence_refs": [
+        "metadata_json: counts.review_comments=0 and reviews=0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2342",
+    "johnwinston",
+    "it: decompile 5 item/Pokemon functions",
+    "itKamex_UnkMotion1_Anim",
+    "itPikachuthunder_UnkMotion1_Coll",
+    "itOldkuri_UnkMotion2_Phys",
+    "it_802D1E8C",
+    "it_8029BAB8",
+    "it_8029BB90",
+    "it_802D1F64",
+    "itkirbycutterbeam",
+    "itlugia",
+    "itoldkuri",
+    "itkamex",
+    "itpikachuthunder",
+    "SpawnItem",
+    "Item_80268B18",
+    "GET_ITEM",
+    "PAD_STACK(8)",
+    "Item_GObj",
+    "HSD_GObj",
+    "ItemKind",
+    "UNK_RET",
+    "UNK_PARAMS",
+    "xDD4_itemVar",
+    "pokemon.timer",
+    "oldkuri.xDFC",
+    "oldkuri.xDF4",
+    "pikachuthunder.x38",
+    "ftPk_SpecialLw_CheckProperty",
+    "ftPk_SpecialLw_80127608",
+    "It_Kind_Kirby_CBeam",
+    "db_80225DD8",
+    "it_802750F8",
+    "it_8027C8D0",
+    "it_8027C0A8",
+    "it_8026DA70"
+  ],
+  "follow_up_queries": [
+    "Find later PRs touching itKamex_UnkMotion1_Anim or itPikachuthunder_UnkMotion1_Coll to see whether the 99.44%/99.80% bot-reported improvements were later resolved.",
+    "Search for PAD_STACK(8) in item/Pokemon functions to identify whether this PR's usage became cleaned up or remained as a matching tactic.",
+    "Search for SpawnItem initialization patterns in item spawner functions using Item_80268B18, especially parent gobj and x44_flag.b0 setup.",
+    "Search for header updates replacing UNK_RET/UNK_PARAMS in src/melee/it/items headers around recovered item functions.",
+    "Search for it_8029BB90 signature usage after this PR to confirm consistency with Item_GObj* and HSD_GObj* owner parameters."
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR #2342 metadata and changed files",
+      "human_pr_text: PR body summary and claimed verification",
+      "raw_diff: full diff for seven changed files",
+      "changed_files.jsonl: changed-file metadata",
+      "text_corpus: decomp-dev bot issue comment"
+    ],
+    "notes": [
+      "The raw diff and changed-file metadata strongly support what files changed and what code was added.",
+      "The PR body claims all five functions are 100% matched by an overnight script, but the loaded bot report says only three functions are new 100% matches and lists Kamex/Pikachu Thunder as near-match improvements.",
+      "No human review comments are present in the loaded slice, so reviewer intent and requested changes cannot be inferred.",
+      "The PR body contains generated-by-Claude text; semantic descriptions are useful PR evidence but should not outrank code/diff evidence.",
+      "No independent build, objdiff, or source lookup was performed during intake."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson",
+        "title": "Header prototypes should be updated when recovered item bodies prove signatures",
+        "text": "PR #2342 replaced UNK_RET/UNK_PARAMS prototypes in item headers after implementing functions that used typed callees/returns, aligning with truthful header practice.",
+        "scope": [
+          "src/melee/it/items",
+          "headers",
+          "item decomp"
+        ],
+        "evidence_refs": [
+          "raw_diff: itkirbycutterbeam.h prototype for it_8029BB90",
+          "raw_diff: itlugia.h prototypes for it_802D1E8C and it_802D1F64",
+          "decomp_standards: truthful-headers-and-includes"
+        ]
+      },
+      {
+        "record_type": "matching_tactic",
+        "title": "PAD_STACK and shadowed locals appeared as narrow matching tactics in item functions",
+        "text": "PR #2342 used PAD_STACK(8) and nested GET_ITEM re-fetches in a few item functions. Because verification evidence is mixed for two functions, this should be remembered as a narrow tactic needing objdiff evidence, not as general source style.",
+        "scope": [
+          "src/melee/it/items",
+          "matching tactics"
+        ],
+        "evidence_refs": [
+          "raw_diff: PAD_STACK(8) in Kamex, Oldkuri, and Pikachu Thunder functions",
+          "raw_diff: nested GET_ITEM re-fetches in Kamex and Oldkuri",
+          "text_corpus: decomp-dev bot report"
+        ]
+      },
+      {
+        "record_type": "decomp_lesson",
+        "title": "SpawnItem-based item spawners can expose typed structure without semantic renaming",
+        "text": "PR #2342 implemented address-named item spawners with SpawnItem field setup and Item_80268B18 while preserving address-style global names where semantics were not proven.",
+        "scope": [
+          "src/melee/it/items",
+          "item spawning",
+          "conservative naming"
+        ],
+        "evidence_refs": [
+          "raw_diff: it_8029BAB8 SpawnItem setup",
+          "raw_diff: it_802D1E8C SpawnItem setup",
+          "decomp_standards: conservative-naming"
+        ]
+      }
+    ],
+    "source_update_candidates": [],
+    "rejection_notes": [
+      "Do not promote the PR body's 'all 5 functions 100% match' claim as an accepted validation result without reconciling it with the bot report showing only three new 100% matches and two near-matches.",
+      "Do not treat PAD_STACK(8), shadowed ip locals, or exact field assignment order as preferred style; the evidence supports them only as narrow matching tactics in this PR.",
+      "Do not invent semantic names for it_8029BAB8, it_802D1E8C, or related address-style symbols based only on the PR body's functional descriptions."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

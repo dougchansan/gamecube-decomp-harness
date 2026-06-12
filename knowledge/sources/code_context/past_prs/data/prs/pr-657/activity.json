@@ -1,0 +1,10 @@
+{
+  "pr": 657,
+  "title": "Clean up `dolphin/types.h` and change empty brace formatting",
+  "url": "https://github.com/doldecomp/melee/pull/657",
+  "text_records_with_body": 2,
+  "review_comments": 0,
+  "changed_files": 44,
+  "added_lines": 254,
+  "deleted_lines": 449
+}

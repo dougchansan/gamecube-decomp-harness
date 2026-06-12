@@ -1,0 +1,10 @@
+{
+  "pr": 383,
+  "title": "add PUSH_ATTRS macro for fighter chara OnLoad, works on the first 8 o…",
+  "url": "https://github.com/doldecomp/melee/pull/383",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 37,
+  "added_lines": 310,
+  "deleted_lines": 437
+}

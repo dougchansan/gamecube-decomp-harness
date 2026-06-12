@@ -34,7 +34,7 @@ export function globalStandardsContext(): Record<string, unknown> {
     accepted_standard_count: records.filter((record) => record.status === "accepted").length,
     trust_rule: FINAL_AUTHORITY,
     mutation_policy: "proposal_only_until_validated",
-    search_command: "python3 knowledge/sources/decomp_standards/api/search.py --query <query> --limit 10 --json",
+    search_command: "python3 knowledge/sources/injectable/decomp_standards/api/search.py --query <query> --limit 10 --json",
     standards: records.map((record) => ({
       id: record.id,
       title: record.title,
@@ -44,6 +44,34 @@ export function globalStandardsContext(): Record<string, unknown> {
       evidence_refs: stringArray(record.evidence_refs),
     })),
   };
+}
+
+export function globalStandardsPromptXml(): string {
+  const records = loadGlobalStandards().filter((record) => record.status === "accepted");
+  const lines = [
+    "<decomp_standards>",
+    "    <instruction>All code changes must conform to the following standards.</instruction>",
+    `    <authority>${xmlText(FINAL_AUTHORITY)}</authority>`,
+  ];
+
+  for (const record of records) {
+    lines.push(`    <standard id="${xmlAttribute(promptStandardId(record.id))}">`);
+    lines.push(`        <summary>${xmlText(record.summary)}</summary>`);
+    lines.push("        <do>");
+    for (const item of stringArray(record.do)) {
+      lines.push(`            - ${xmlText(item)}`);
+    }
+    lines.push("        </do>");
+    lines.push("        <do_not>");
+    for (const item of stringArray(record.do_not)) {
+      lines.push(`            - ${xmlText(item)}`);
+    }
+    lines.push("        </do_not>");
+    lines.push("    </standard>");
+  }
+
+  lines.push("</decomp_standards>");
+  return lines.join("\n");
 }
 
 export function resolvePathFactsContext(sourcePath: string, limit = 5): PathFactResolution {
@@ -65,7 +93,7 @@ export function resolvePathFactsContext(sourcePath: string, limit = 5): PathFact
     excluded_fact_ids: excluded,
     facts: matches,
     trust_rule: FINAL_AUTHORITY,
-    resolve_command: `python3 knowledge/sources/path_facts/api/resolve_for_path.py --path ${shellQuote(normalizedPath)} --limit ${limit} --json`,
+    resolve_command: `python3 knowledge/sources/injectable/path_facts/api/resolve_for_path.py --path ${shellQuote(normalizedPath)} --limit ${limit} --json`,
   };
 }
 
@@ -79,7 +107,7 @@ function loadPathFacts(): JsonRecord[] {
   return readdirSync(root)
     .filter((file) => file.endsWith(".jsonl"))
     .sort()
-    .flatMap((file) => readJsonl(resolve(root, file)).map((row) => ({ ...row, source_file: `knowledge/sources/path_facts/data/path_facts/${file}` })));
+    .flatMap((file) => readJsonl(resolve(root, file)).map((row) => ({ ...row, source_file: `knowledge/sources/injectable/path_facts/data/path_facts/${file}` })));
 }
 
 function formatPathFact(fact: JsonRecord, score: number): JsonRecord {
@@ -142,6 +170,21 @@ function normalizeMeleePath(path: string): string {
 
 function stringArray(value: unknown): string[] {
   return Array.isArray(value) ? value.map((item) => String(item)) : [];
+}
+
+function promptStandardId(value: unknown): string {
+  return String(value ?? "").replace(/^global_standard:/, "");
+}
+
+function xmlText(value: unknown): string {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function xmlAttribute(value: unknown): string {
+  return xmlText(value).replace(/"/g, "&quot;");
 }
 
 function escapeRegExp(value: string): string {

@@ -1,0 +1,444 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2531",
+  "pr": {
+    "number": 2531,
+    "title": "Jj/gricemt",
+    "url": "https://github.com/doldecomp/melee/pull/2531",
+    "state": "MERGED",
+    "author": "jurrejelle",
+    "created_at": "2026-05-24T11:37:49Z",
+    "merged_at": "2026-05-31T10:02:36Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Decomp/matching PR focused on Ice Mountain stage code in gricemt. It substantially rewrote src/melee/gr/gricemt.c, adjusted Ice Mountain ground-var and parameter types, updated gricemt prototypes, and changed one symbols.txt text symbol boundary. The bot report records 13 new gricemt matches, 11 partial improvements, and one broken 4-byte match from fn_801F91A4 being absorbed into fn_801F9150 symbol sizing.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "type-recovery",
+      "symbol-metadata"
+    ],
+    "systems": [
+      "stage",
+      "ground",
+      "Ice Mountain",
+      "config"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gr/gricemt.c",
+      "role": "Primary Ice Mountain stage decomp/matching work; added typed data, HSD_ASSERT usage, recovered callbacks/helpers, icemt/icemt2 field accesses, local stack-shape tactics, and function bodies.",
+      "evidence_refs": [
+        "metadata_json.changed_files: src/melee/gr/gricemt.c added 605 deleted 226 hunks 36",
+        "raw_diff: gricemt.c include additions baselib/debug.h and baselib/forward.h",
+        "raw_diff: grIceMt_801F686C HSD_ASSERT conversion and bg_gobj naming",
+        "raw_diff: grIceMt_801F7D94/grIceMt_801F7F70/grIceMt_801F8208/grIceMt_801F83EC/grIceMt_801F865C/grIceMt_801F8850 bodies expanded",
+        "text_corpus: decomp-dev bot reports 13 new matches and 11 improvements in main/melee/gr/gricemt"
+      ]
+    },
+    {
+      "path": "src/melee/gr/types.h",
+      "role": "Ground-vars layout recovery for grIceMt_GroundVars and grIceMt_GroundVars2, including corrected offset comments, padding, and moving HSD_GObj* array ownership to icemt2.",
+      "evidence_refs": [
+        "metadata_json.changed_files: src/melee/gr/types.h added 37 deleted 35 hunks 1",
+        "raw_diff: grIceMt_GroundVars comments changed from repeated +0 gp+C4/+D8 to explicit offsets",
+        "raw_diff: grIceMt_GroundVars2 adds HSD_GObj* xF8[20]"
+      ]
+    },
+    {
+      "path": "src/melee/gr/gricemt.h",
+      "role": "Header/prototype cleanup for recovered Ice Mountain signatures and IceMountainParams fields.",
+      "evidence_refs": [
+        "metadata_json.changed_files: src/melee/gr/gricemt.h added 7 deleted 8 hunks 3",
+        "raw_diff: IceMountainParams xB0/xB4 changed from float to s16*",
+        "raw_diff: fn_801F8E58, fn_801F9150, grIceMt_801F96E0, grIceMt_801FA0BC, grIceMt_801FA500 prototypes updated"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Symbol metadata adjusted for neighboring function boundary around fn_801F9150/fn_801F91A4.",
+      "evidence_refs": [
+        "metadata_json.changed_files: config/GALE01/symbols.txt added 1 deleted 2 hunks 1",
+        "raw_diff: fn_801F9150 size changed from 0x54 to 0x58 and fn_801F91A4 entry removed",
+        "text_corpus: bot report lists fn_801F91A4 as one broken match, -4 bytes"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Recovered or improved multiple Ice Mountain functions, with bot-reported 100% matches for fn_801F9338, fn_801F9448, fn_801F9558, grIceMt_801F7F70, grIceMt_801F83EC, grIceMt_801F8B10, grIceMt_801F796C, fn_801F9150, grIceMt_801F865C, grIceMt_801FA7F0, grIceMt_801F8208, grIceMt_801F8850, and grIceMt_801F7D94.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev bot report, 13 new matches"
+      ]
+    },
+    {
+      "text": "Updated Ice Mountain data declarations: Vec3 table became const, IceMtRowData fields x4/x8 became f32 and received concrete initializer rows, and small helper structs GrIm588/GrIm825C were introduced for copied stack data.",
+      "evidence_refs": [
+        "raw_diff: grIm_803B8220 static const Vec3",
+        "raw_diff: IceMtRowData x4/x8 u32 to f32 and grIm_803E4068 initializer",
+        "raw_diff: typedef GrIm588 and GrIm825C additions"
+      ]
+    },
+    {
+      "text": "Replaced several raw __assert blocks with HSD_ASSERT while preserving source file line numbers such as 0x27C, 0x27D, 0x475, 0x4C3, 0x4C5, 0x78F, and 0xBB2.",
+      "evidence_refs": [
+        "raw_diff: grIceMt_801F686C HSD_ASSERT conversions",
+        "raw_diff: grIceMt_801F796C HSD_ASSERT(0x475, mgobj)",
+        "raw_diff: grIceMt_801F7A2C HSD_ASSERT(0x4C3, mgobj) and HSD_ASSERT(0x4C5, jobj)",
+        "raw_diff: grIceMt_801F8B10 HSD_ASSERT(0x78F, jobj)"
+      ]
+    },
+    {
+      "text": "Corrected several field accesses from unrelated or less accurate union arms to Ice Mountain-specific arms, including corneria to icemt and object arrays to icemt2.xF8.",
+      "evidence_refs": [
+        "raw_diff: grIceMt_801F7728 uses gp->gv.icemt instead of gp->gv.corneria",
+        "raw_diff: grIceMt_801F7A2C uses gp->gv.icemt.xC8",
+        "raw_diff: destroy callbacks use gp->gv.icemt2.xF8 instead of gp->gv.icemt.xF8"
+      ]
+    },
+    {
+      "text": "Cleaned some generated-looking constants and data-symbol references by inlining 0.0f instead of grIm_804DB574 in state reset/clamp code.",
+      "evidence_refs": [
+        "raw_diff: grIceMt_801F785C assigns 0.0f to xE4 and xD4",
+        "raw_diff: grIceMt_801F7A2C compares/clamps against 0.0f"
+      ]
+    },
+    {
+      "text": "Updated header signatures to match recovered function bodies, removing UNK_RET for grIceMt_801FA0BC and changing several helper callback signatures.",
+      "evidence_refs": [
+        "raw_diff: gricemt.h prototype changes"
+      ]
+    },
+    {
+      "text": "Adjusted symbols.txt so fn_801F9150 spans 0x58 bytes and fn_801F91A4 is no longer a separate 4-byte function entry.",
+      "evidence_refs": [
+        "raw_diff: symbols.txt fn_801F9150/fn_801F91A4 hunk",
+        "text_corpus: bot report broken fn_801F91A4 match"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Used header prototype updates alongside body recovery, keeping call sites and declarations aligned instead of relying on local casts alone.",
+      "evidence_refs": [
+        "raw_diff: gricemt.h fn_801F8E58/fn_801F9150/grIceMt_801F96E0/grIceMt_801FA500 signature changes",
+        "raw_diff: gricemt.c call sites pass &gp->gv.icemt and HSD_JObj* arguments"
+      ]
+    },
+    {
+      "text": "Replaced unrelated GroundVars union-arm accesses with Ice Mountain-specific fields, improving type expression and reviewability.",
+      "evidence_refs": [
+        "raw_diff: corneria.xC8/xC4 replaced with icemt.xC8/xC4",
+        "raw_diff: icemt2.xF8 used for material object arrays"
+      ]
+    },
+    {
+      "text": "Mapped expanded assert code to HSD_ASSERT with matching line numbers, reducing decompiler noise while preserving assertion evidence.",
+      "evidence_refs": [
+        "raw_diff: __assert blocks replaced by HSD_ASSERT in grIceMt_801F686C and grIceMt_801F7A2C"
+      ]
+    },
+    {
+      "text": "Used local role names such as bg_gobj, mgobj, jobj, and gp where roles are clear, while leaving address-style global/function names where semantics remain unproven.",
+      "evidence_refs": [
+        "raw_diff: gobj renamed bg_gobj in grIceMt_801F686C",
+        "raw_diff: HSD_GObj* mgobj in grIceMt_801F796C",
+        "raw_diff: retained grIceMt_801F* and grIm_* names"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a stage-specific GroundVars union arm is known, use that arm rather than borrowing fields from another stage arm; this PR repeatedly moved accesses from corneria or ambiguous icemt fields into icemt/icemt2 fields.",
+      "scope": [
+        "src/melee/gr/gricemt.c",
+        "src/melee/gr/types.h"
+      ],
+      "evidence_refs": [
+        "raw_diff: gp->gv.corneria.xC8 replaced with gp->gv.icemt.xC8",
+        "raw_diff: gp->gv.icemt.xF8 uses replaced with gp->gv.icemt2.xF8",
+        "decomp_standards: typed-fields-over-pointer-math"
+      ]
+    },
+    {
+      "lesson": "Recovered bodies should be paired with truthful header prototypes; gricemt.h was updated for proven helper signatures instead of leaving UNK_RET or stale argument lists.",
+      "scope": [
+        "src/melee/gr/gricemt.h"
+      ],
+      "evidence_refs": [
+        "raw_diff: UNK_RET grIceMt_801FA0BC changed to void grIceMt_801FA0BC(s16*)",
+        "raw_diff: grIceMt_801FA500 changed to take HSD_GObj* and HSD_JObj*",
+        "decomp_standards: truthful-headers-and-includes"
+      ]
+    },
+    {
+      "lesson": "Assert cleanup can be reliable when file-local line numbers are preserved through existing macros such as HSD_ASSERT.",
+      "scope": [
+        "src/melee/gr/gricemt.c"
+      ],
+      "evidence_refs": [
+        "raw_diff: HSD_ASSERT(0x27C, bg_gobj), HSD_ASSERT(0x27D, jobj)",
+        "raw_diff: HSD_ASSERT(0x475, mgobj)",
+        "decomp_standards: assert-report-macros"
+      ]
+    },
+    {
+      "lesson": "Do not keep named float data symbols when the diff only shows ordinary scalar constants; this PR replaced grIm_804DB574 uses with inline 0.0f in several expressions.",
+      "scope": [
+        "src/melee/gr/gricemt.c"
+      ],
+      "evidence_refs": [
+        "raw_diff: gp->gv.icemt.xE4 = 0.0f",
+        "raw_diff: gp->gv.icemt.xD4 = 0.0f",
+        "decomp_standards: literals-and-data-ownership"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name_or_pattern": "bg_gobj",
+      "meaning": "Local HSD_GObj* for background/topi setup object in grIceMt_801F686C.",
+      "evidence_refs": [
+        "raw_diff: HSD_GObj* gobj changed to HSD_GObj* bg_gobj"
+      ]
+    },
+    {
+      "name_or_pattern": "mgobj",
+      "meaning": "Local HSD_GObj* fetched by Ground_801C2BA4 and asserted before Ground_801C4A08.",
+      "evidence_refs": [
+        "raw_diff: HSD_GObj* mgobj in grIceMt_801F796C"
+      ]
+    },
+    {
+      "name_or_pattern": "icemt and icemt2",
+      "meaning": "Stage-specific GroundVars union arms used for Ice Mountain state and secondary jobj/gobj arrays.",
+      "evidence_refs": [
+        "raw_diff: gp->gv.icemt.xC4/xC6/xC8 accesses",
+        "raw_diff: gp->gv.icemt2.xF8 array accesses",
+        "raw_diff: types.h struct grIceMt_GroundVars and grIceMt_GroundVars2"
+      ]
+    },
+    {
+      "name_or_pattern": "address-style grIceMt_801F* and grIm_*",
+      "meaning": "Address-style names retained where the diff does not prove semantic names.",
+      "evidence_refs": [
+        "raw_diff: retained function/global names throughout gricemt.c and gricemt.h",
+        "decomp_standards: conservative-naming"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "PAD_STACK",
+      "description": "Several functions added narrow PAD_STACK calls, including PAD_STACK(0x10), PAD_STACK(8), and PAD_STACK(0x4), apparently to satisfy stack shape for matching.",
+      "evidence_refs": [
+        "raw_diff: grIceMt_801F686C PAD_STACK(0x10)",
+        "raw_diff: grIceMt_801F796C PAD_STACK(8)",
+        "raw_diff: grIceMt_801F7D94/grIceMt_801F7F70/grIceMt_801F83EC/grIceMt_801F865C/grIceMt_801F8850 PAD_STACK(0x4)"
+      ],
+      "caution": "The PR evidence shows bot match results but not per-function objdiff rationale for each PAD_STACK."
+    },
+    {
+      "tactic": "Stack struct copies from small data records",
+      "description": "Functions copy GrIm588, GrIm825C, or anonymous two-u32 structs into stack locals before passing them as s16* joint index lists.",
+      "evidence_refs": [
+        "raw_diff: GrIm588 sp14 = grIm_804DB588/grIm_804DB58C then grIceMt_801F8CDC",
+        "raw_diff: sp14.x0 = grIm_804DB590; sp14.x4 = grIm_804DB594",
+        "raw_diff: GrIm825C sp14 copies grIm_803B825C fields"
+      ],
+      "caution": "Useful as observed matching tactic, but broad data ownership of those externs is not established by this slice."
+    },
+    {
+      "tactic": "Symbol-boundary metadata correction",
+      "description": "Merged a 4-byte fn_801F91A4 entry into fn_801F9150 by expanding fn_801F9150 from 0x54 to 0x58 in symbols.txt.",
+      "evidence_refs": [
+        "raw_diff: symbols.txt fn_801F9150 size change and fn_801F91A4 deletion",
+        "text_corpus: bot report lists fn_801F91A4 broken, -4 bytes"
+      ],
+      "caution": "The bot report treats fn_801F91A4 as broken after the metadata change; intake cannot infer reviewer intent beyond the diff."
+    },
+    {
+      "tactic": "Header inline/helper usage",
+      "description": "JObj translation operations use existing HSD_JObjSetTranslateY/GetTranslationY helpers instead of expanded field/assert code.",
+      "evidence_refs": [
+        "raw_diff: grIceMt_801F686C HSD_JObjSetTranslateY",
+        "raw_diff: grIceMt_801F7A2C HSD_JObjGetTranslationY",
+        "raw_diff: grIceMt_801F8B10 HSD_JObjGetTranslationY and HSD_JObjSetTranslateY"
+      ]
+    },
+    {
+      "tactic": "Natural traversal loop",
+      "description": "grIceMt_801FA500 uses a while loop to walk JObj child/next/parent links while counting until a target JObj is found.",
+      "evidence_refs": [
+        "raw_diff around grIceMt_801FA500: while (jobj != NULL), HSD_JObjGetChild/GetNext/GetParent, count++",
+        "decomp_standards: natural-loops"
+      ]
+    }
+  ],
+  "review_feedback": [],
+  "searchable_terms": [
+    "pr-2531",
+    "Jj/gricemt",
+    "jurrejelle",
+    "gricemt",
+    "Ice Mountain",
+    "src/melee/gr/gricemt.c",
+    "src/melee/gr/gricemt.h",
+    "src/melee/gr/types.h",
+    "config/GALE01/symbols.txt",
+    "grIceMt_801F7F70",
+    "grIceMt_801F83EC",
+    "grIceMt_801F8B10",
+    "grIceMt_801F796C",
+    "fn_801F9150",
+    "fn_801F91A4",
+    "fn_801F9338",
+    "fn_801F9448",
+    "fn_801F9558",
+    "grIceMt_801FA7F0",
+    "grIceMt_801FA500",
+    "grIceMt_801F9ACC",
+    "grIceMt_801FA0BC",
+    "grIceMt_GroundVars",
+    "grIceMt_GroundVars2",
+    "IceMountainParams",
+    "icemt",
+    "icemt2",
+    "HSD_ASSERT",
+    "PAD_STACK",
+    "grIm_803E4068",
+    "grIm_804DB588",
+    "grIm_803B825C"
+  ],
+  "follow_up_queries": [
+    "gricemt PAD_STACK objdiff rationale",
+    "grIceMt_GroundVars icemt2 xF8 ownership",
+    "fn_801F9150 fn_801F91A4 symbol boundary",
+    "grIceMt_801FA500 JObj traversal loop",
+    "IceMountainParams xB0 xB4 s16 pointer",
+    "gricemt HSD_ASSERT line number cleanup",
+    "grIm_804DB588 GrIm588 joint indices",
+    "grIm_803B825C GrIm825C joint indices"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR metadata, state MERGED, changed file counts",
+      "raw_diff: full local diff available but loaded excerpt was truncated; targeted read/grep used for gricemt.h and types.h hunks",
+      "text_corpus: decomp-dev bot report with match deltas",
+      "text_corpus: no PR body content, no review comments"
+    ],
+    "notes": [
+      "Strong evidence for changed files, symbol/prototype/type diffs, and bot-reported match deltas.",
+      "No human review comments were present in the loaded slice, so review_feedback is empty.",
+      "The bot report is evidence of reported matching progress, but the slice does not include per-symbol objdiff logs or build commands.",
+      "The diff is large and initially truncated in the loaded context; only targeted additional diff sections were inspected for header/type details.",
+      "Data ownership for newly declared extern/static data records is not fully proven by this intake slice."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson_candidate",
+        "title": "Use stage-specific GroundVars union arms when recovered",
+        "text": "PR 2531 repeatedly replaces borrowed or ambiguous field accesses with Ice Mountain-specific icemt/icemt2 accesses, including corneria.xC8 to icemt.xC8 and icemt.xF8 to icemt2.xF8, aligning with typed-fields-over-pointer-math.",
+        "scope": [
+          "src/melee/gr/gricemt.c",
+          "src/melee/gr/types.h",
+          "stage ground vars"
+        ],
+        "evidence_refs": [
+          "raw_diff: grIceMt_801F7728 corneria to icemt",
+          "raw_diff: material cleanup loops use gp->gv.icemt2.xF8",
+          "decomp_standards: typed-fields-over-pointer-math"
+        ]
+      },
+      {
+        "record_type": "decomp_lesson_candidate",
+        "title": "Pair recovered gricemt bodies with header prototype cleanup",
+        "text": "PR 2531 updates gricemt.h prototypes for recovered helpers, removing stale UNK_RET and changing argument lists where body/callsite evidence supports the signature.",
+        "scope": [
+          "src/melee/gr/gricemt.h"
+        ],
+        "evidence_refs": [
+          "raw_diff: fn_801F8E58 and fn_801F9150 signatures become s32 callbacks with s32* out parameter",
+          "raw_diff: grIceMt_801FA0BC changes from UNK_RET to void",
+          "raw_diff: grIceMt_801FA500 gains HSD_JObj* parameter",
+          "decomp_standards: truthful-headers-and-includes"
+        ]
+      },
+      {
+        "record_type": "matching_tactic_candidate",
+        "title": "Narrow stack shaping in gricemt",
+        "text": "Several newly matched or improved gricemt functions use small PAD_STACK entries and stack-local copied structs before helper calls. Keep this as a tactic requiring narrow verifier evidence, not general style.",
+        "scope": [
+          "src/melee/gr/gricemt.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: PAD_STACK additions",
+          "raw_diff: GrIm588/GrIm825C/anonymous stack locals passed to grIceMt_801F8CDC",
+          "text_corpus: bot report new matches",
+          "decomp_standards: matching-tactics-need-evidence"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "gricemt paths are Ice Mountain stage ground code and type headers",
+        "text": "src/melee/gr/gricemt.c and src/melee/gr/gricemt.h contain Ice Mountain stage functions and parameters; src/melee/gr/types.h contains grIceMt_GroundVars and grIceMt_GroundVars2 layouts used by those functions.",
+        "source_path": "src/melee/gr/gricemt.c",
+        "scope": [
+          "src/melee/gr/gricemt.c",
+          "src/melee/gr/gricemt.h",
+          "src/melee/gr/types.h"
+        ],
+        "evidence_refs": [
+          "raw_diff: IceMountainParams in gricemt.h",
+          "raw_diff: grIceMt_GroundVars and grIceMt_GroundVars2 in types.h",
+          "raw_diff: grIceMt_* functions in gricemt.c"
+        ],
+        "reason": "Useful searchable path fact, but source-owned path facts should be curated separately."
+      },
+      {
+        "target_source_id": "other",
+        "update_kind": "source_update",
+        "title": "Investigate grIm_* data ownership in gricemt",
+        "text": "PR 2531 introduces/changes several grIm_* data declarations and externs, including grIm_803E4068, grIm_804DB588, grIm_804DB58C, grIm_804DB590 through grIm_804DB5A4, and grIm_803B825C. Curator may want a data-ownership note only after checking section/symbol metadata outside this slice.",
+        "source_path": "src/melee/gr/gricemt.c",
+        "scope": [
+          "data ownership",
+          "src/melee/gr/gricemt.c",
+          "config/GALE01/symbols.txt"
+        ],
+        "evidence_refs": [
+          "raw_diff: grIm_803E4068 initializer",
+          "raw_diff: GrIm588/GrIm825C extern declarations",
+          "decomp_standards: data-sections-and-tu-splits",
+          "decomp_standards: literals-and-data-ownership"
+        ],
+        "reason": "The PR slice shows data declaration changes but not enough section metadata to accept a data ownership rule."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that PAD_STACK is generally acceptable in gricemt; the slice only supports that it was used here alongside bot-reported matches.",
+      "Do not treat fn_801F91A4 deletion as a universal symbol-splitting rule; the evidence only shows this one symbols.txt boundary change and bot-reported 4-byte broken match.",
+      "Do not claim human reviewer approval rationale; no review comments were present.",
+      "Do not promote semantic names for grIceMt_801F* or grIm_* symbols beyond what the diff itself names."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

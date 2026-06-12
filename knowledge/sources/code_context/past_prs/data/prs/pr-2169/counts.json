@@ -1,0 +1,17 @@
+{
+  "number": 2169,
+  "title": "Partially match `itseakchain`",
+  "state": "MERGED",
+  "createdAt": "2026-02-11T00:55:40Z",
+  "updatedAt": "2026-02-11T01:00:10Z",
+  "mergedAt": "2026-02-11T01:00:09Z",
+  "closedAt": "2026-02-11T01:00:09Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/2169",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 18498
+  }
+}

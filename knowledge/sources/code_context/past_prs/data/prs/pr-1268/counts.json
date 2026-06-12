@@ -1,0 +1,17 @@
+{
+  "number": 1268,
+  "title": "Revert `build-ninja` condition",
+  "state": "MERGED",
+  "createdAt": "2024-02-20T10:31:49Z",
+  "updatedAt": "2024-02-20T10:32:17Z",
+  "mergedAt": "2024-02-20T10:32:16Z",
+  "closedAt": "2024-02-20T10:32:16Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1268",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 435
+  }
+}

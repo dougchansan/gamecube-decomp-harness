@@ -1,0 +1,17 @@
+{
+  "number": 96,
+  "title": "Remove final incbin from __ppc_eabi_init",
+  "state": "MERGED",
+  "createdAt": "2021-11-08T17:45:39Z",
+  "updatedAt": "2021-11-09T03:40:35Z",
+  "mergedAt": "2021-11-08T17:45:44Z",
+  "closedAt": "2021-11-08T17:45:44Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/96",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 1009
+  }
+}

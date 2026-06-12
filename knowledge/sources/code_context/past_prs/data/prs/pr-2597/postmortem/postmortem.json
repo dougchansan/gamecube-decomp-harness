@@ -1,0 +1,214 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2597",
+  "pr": {
+    "number": 2597,
+    "title": "Match and link ftco_damagefall",
+    "url": "https://github.com/doldecomp/melee/pull/2597",
+    "state": "MERGED",
+    "author": "PsiLupan",
+    "created_at": "2026-06-07T06:54:00Z",
+    "merged_at": "2026-06-07T06:57:40Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2597 made ftCo_DamageFall.c a Matching object in configure.py and applied a narrow source change in ftCo_80090594: copying the FtMotionId parameter msid into a local FtMotionId motion_id before passing it to calcShift. No PR body, review comments, or issue comments were present in the loaded slice.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "build-configuration"
+    ],
+    "systems": [
+      "fighter",
+      "ftCommon",
+      "repo-root"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "configure.py",
+      "role": "Changed ftCo_DamageFall.c from NonMatching to Matching in the MatchingFor object list.",
+      "evidence_refs": [
+        "raw_diff: configure.py hunk at MatchingFor list",
+        "changed_files.jsonl: configure.py added 1 deleted 1"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_DamageFall.c",
+      "role": "Adjusted ftCo_80090594 by introducing a local FtMotionId motion_id initialized from msid and using it in the calcShift call.",
+      "evidence_refs": [
+        "raw_diff: ftCo_DamageFall.c hunk around ftCo_80090594",
+        "changed_files.jsonl: src/melee/ft/chara/ftCommon/ftCo_DamageFall.c added 2 deleted 1"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Marked melee/ft/chara/ftCommon/ftCo_DamageFall.c as Matching instead of NonMatching in configure.py.",
+      "evidence_refs": [
+        "raw_diff: -Object(NonMatching, \"melee/ft/chara/ftCommon/ftCo_DamageFall.c\") / +Object(Matching, \"melee/ft/chara/ftCommon/ftCo_DamageFall.c\")"
+      ]
+    },
+    {
+      "text": "In ftCo_80090594, added a typed local variable `FtMotionId motion_id = msid;`.",
+      "evidence_refs": [
+        "raw_diff: +    FtMotionId motion_id = msid;"
+      ]
+    },
+    {
+      "text": "Changed the calcShift call to pass `motion_id` instead of the original parameter `msid`.",
+      "evidence_refs": [
+        "raw_diff: -calcShift(hitlag_mul, msid, dmg) / +calcShift(hitlag_mul, motion_id, dmg)"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Kept the matching-oriented source edit very narrow: one local alias in one function plus the configure.py matching status flip.",
+      "evidence_refs": [
+        "raw_diff: ftCo_DamageFall.c hunk",
+        "raw_diff: configure.py hunk"
+      ]
+    },
+    {
+      "text": "Used the existing typed enum-like motion ID type for the local copy rather than an untyped temporary.",
+      "evidence_refs": [
+        "raw_diff: `FtMotionId motion_id = msid;`"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "A small typed local copy of a parameter can be part of closing a function/object match, but the PR slice only supports this as a local tactic for ftCo_80090594, not as a broad standard.",
+      "scope": [
+        "src/melee/ft/chara/ftCommon/ftCo_DamageFall.c",
+        "ftCo_80090594"
+      ],
+      "evidence_refs": [
+        "raw_diff: local FtMotionId motion_id introduced and used in calcShift",
+        "metadata: PR title `Match and link ftco_damagefall`",
+        "raw_diff: configure.py changed ftCo_DamageFall.c to Matching"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "The added local uses a clear role-preserving name `motion_id` for the existing `FtMotionId msid` parameter.",
+      "evidence_refs": [
+        "raw_diff: `FtMotionId motion_id = msid;`"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Introduce a typed local alias for a parameter before a call to influence local lifetime/register/codegen while preserving source meaning.",
+      "scope": [
+        "ftCo_80090594",
+        "calcShift(hitlag_mul, motion_id, dmg)"
+      ],
+      "evidence_refs": [
+        "raw_diff: `FtMotionId motion_id = msid;`",
+        "raw_diff: `calcShift(hitlag_mul, motion_id, dmg)`"
+      ],
+      "caveat": "No objdiff, build log, or reviewer explanation is included in the slice; the match is inferred from the PR title and configure.py Matching change."
+    },
+    {
+      "tactic": "After the source adjustment, link the object by changing its configure.py status from NonMatching to Matching.",
+      "scope": [
+        "configure.py",
+        "melee/ft/chara/ftCommon/ftCo_DamageFall.c"
+      ],
+      "evidence_refs": [
+        "raw_diff: configure.py MatchingFor object list"
+      ],
+      "caveat": "The loaded slice does not include independent verification output."
+    }
+  ],
+  "review_feedback": [],
+  "searchable_terms": [
+    "pr-2597",
+    "PsiLupan",
+    "ftco_damagefall",
+    "ftCo_DamageFall.c",
+    "ftCo_80090594",
+    "calcShift",
+    "FtMotionId",
+    "motion_id",
+    "msid",
+    "hitlag_mul",
+    "x18fa_model_shift_frames",
+    "configure.py",
+    "Object(Matching)",
+    "Object(NonMatching)",
+    "ftCommon",
+    "fighter"
+  ],
+  "follow_up_queries": [
+    "ftCo_80090594 motion_id msid calcShift",
+    "ftCo_DamageFall.c Object(Matching)",
+    "FtMotionId local alias matching tactic",
+    "x18fa_model_shift_frames calcShift hitlag_mul",
+    "PR 2597 ftco_damagefall"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR number/title/author/state/timestamps",
+      "raw_diff: complete diff, 1697 bytes",
+      "changed_files.jsonl: two changed files",
+      "text_corpus.jsonl: empty PR body",
+      "metadata_json: 0 issue comments, 0 review comments, 0 reviews"
+    ],
+    "notes": [
+      "Strong evidence for changed files and exact code/configuration edits.",
+      "No PR body, review comments, issue comments, or review records were present.",
+      "No build, objdiff, checkdiff, or regression output is included in the slice; matching status is evidenced by the configure.py status change and PR title, not by loaded verifier logs.",
+      "The local variable may be a register/lifetime/codegen tactic, but the slice does not explain author intent."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "type": "pr_postmortem_candidate",
+        "title": "ftCo_DamageFall match used a typed local alias before calcShift",
+        "text": "In PR 2597, ftCo_80090594 gained `FtMotionId motion_id = msid;` and then passed `motion_id` to `calcShift`; the PR also changed ftCo_DamageFall.c from NonMatching to Matching in configure.py. Treat this as a localized matching tactic with no broader standard unless corroborated by more PRs or verifier evidence.",
+        "scope": [
+          "src/melee/ft/chara/ftCommon/ftCo_DamageFall.c",
+          "ftCo_80090594"
+        ],
+        "evidence_refs": [
+          "raw_diff: ftCo_DamageFall.c hunk",
+          "raw_diff: configure.py hunk",
+          "metadata_json: title `Match and link ftco_damagefall`"
+        ]
+      }
+    ],
+    "source_update_candidates": [],
+    "rejection_notes": [
+      {
+        "text": "Do not promote `always copy motion ID parameters to motion_id before calls` as a standard; this PR only shows one local source edit and lacks verifier or author explanation.",
+        "evidence_refs": [
+          "raw_diff: only one function-local alias added",
+          "metadata_json: 0 review comments and empty PR body"
+        ]
+      },
+      {
+        "text": "Do not claim reviewer approval rationale or validation details beyond merge status; the slice contains no reviews, comments, or verifier output.",
+        "evidence_refs": [
+          "metadata_json: reviews 0, review_comments 0, issue_comments 0",
+          "text_corpus.jsonl: empty PR body"
+        ]
+      }
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

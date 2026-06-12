@@ -1,0 +1,17 @@
+{
+  "number": 1826,
+  "title": "Fix `--require-protos` build",
+  "state": "MERGED",
+  "createdAt": "2025-08-11T18:26:24Z",
+  "updatedAt": "2025-08-11T19:40:21Z",
+  "mergedAt": "2025-08-11T19:40:19Z",
+  "closedAt": "2025-08-11T19:40:19Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1826",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 150709
+  }
+}

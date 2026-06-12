@@ -1,0 +1,17 @@
+{
+  "number": 1845,
+  "title": "Bump objdiff to v3.0.0 and wibo to 0.7.0",
+  "state": "MERGED",
+  "createdAt": "2025-08-16T13:48:22Z",
+  "updatedAt": "2025-08-19T00:39:15Z",
+  "mergedAt": "2025-08-19T00:39:13Z",
+  "closedAt": "2025-08-19T00:39:13Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1845",
+  "counts": {
+    "issue_comments": 5,
+    "review_comments": 2,
+    "reviews": 2,
+    "diff_bytes": 5924
+  }
+}

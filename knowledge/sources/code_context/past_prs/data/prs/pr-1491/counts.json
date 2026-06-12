@@ -1,0 +1,17 @@
+{
+  "number": 1491,
+  "title": "Match `ftattacks4combo`",
+  "state": "MERGED",
+  "createdAt": "2025-03-14T17:47:58Z",
+  "updatedAt": "2025-03-24T15:24:35Z",
+  "mergedAt": "2025-03-24T15:24:35Z",
+  "closedAt": "2025-03-24T15:24:35Z",
+  "author": "in-amber",
+  "url": "https://github.com/doldecomp/melee/pull/1491",
+  "counts": {
+    "issue_comments": 2,
+    "review_comments": 2,
+    "reviews": 2,
+    "diff_bytes": 11925
+  }
+}

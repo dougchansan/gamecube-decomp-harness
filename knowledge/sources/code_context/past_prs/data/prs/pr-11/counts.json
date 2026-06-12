@@ -1,0 +1,17 @@
+{
+  "number": 11,
+  "title": "dump some strings",
+  "state": "MERGED",
+  "createdAt": "2020-07-02T22:29:15Z",
+  "updatedAt": "2020-07-02T23:19:37Z",
+  "mergedAt": "2020-07-02T23:19:37Z",
+  "closedAt": "2020-07-02T23:19:37Z",
+  "author": "camthesaxman",
+  "url": "https://github.com/doldecomp/melee/pull/11",
+  "counts": {
+    "issue_comments": 2,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 270385
+  }
+}

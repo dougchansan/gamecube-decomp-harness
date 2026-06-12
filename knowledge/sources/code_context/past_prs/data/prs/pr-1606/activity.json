@@ -1,0 +1,10 @@
+{
+  "pr": 1606,
+  "title": "Matching functions in ftSk_SpecialHi.c",
+  "url": "https://github.com/doldecomp/melee/pull/1606",
+  "text_records_with_body": 7,
+  "review_comments": 4,
+  "changed_files": 3,
+  "added_lines": 226,
+  "deleted_lines": 17
+}

@@ -1,0 +1,10 @@
+{
+  "pr": 1052,
+  "title": "Finish __strtoul match",
+  "url": "https://github.com/doldecomp/melee/pull/1052",
+  "text_records_with_body": 0,
+  "review_comments": 0,
+  "changed_files": 7,
+  "added_lines": 136,
+  "deleted_lines": 330
+}

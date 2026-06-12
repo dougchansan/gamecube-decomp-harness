@@ -1,0 +1,10 @@
+{
+  "pr": 1729,
+  "title": "Use major scene enum values",
+  "url": "https://github.com/doldecomp/melee/pull/1729",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 10,
+  "added_lines": 182,
+  "deleted_lines": 182
+}

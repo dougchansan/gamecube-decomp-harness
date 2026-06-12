@@ -1,0 +1,17 @@
+{
+  "number": 1250,
+  "title": "Clean up `publish-packages`",
+  "state": "MERGED",
+  "createdAt": "2024-02-18T20:12:36Z",
+  "updatedAt": "2024-02-18T20:14:19Z",
+  "mergedAt": "2024-02-18T20:14:18Z",
+  "closedAt": "2024-02-18T20:14:18Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1250",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 25334
+  }
+}

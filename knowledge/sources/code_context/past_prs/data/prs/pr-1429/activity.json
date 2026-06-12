@@ -1,0 +1,10 @@
+{
+  "pr": 1429,
+  "title": "Only use code bytes for `wiki_tu` percentages",
+  "url": "https://github.com/doldecomp/melee/pull/1429",
+  "text_records_with_body": 0,
+  "review_comments": 0,
+  "changed_files": 1,
+  "added_lines": 4,
+  "deleted_lines": 1
+}

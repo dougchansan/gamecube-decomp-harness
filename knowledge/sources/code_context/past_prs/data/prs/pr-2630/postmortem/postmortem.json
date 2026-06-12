@@ -1,0 +1,332 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2630",
+  "pr": {
+    "number": 2630,
+    "title": "Improvements to split up: VI",
+    "url": "https://github.com/doldecomp/melee/pull/2630",
+    "state": "MERGED",
+    "author": "fjooord",
+    "created_at": "2026-06-08T14:30:57Z",
+    "merged_at": "2026-06-08T15:04:54Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Path-sliced VI decomp improvement touching only src/melee/vi/vi0502.c. The diff refactors un_8031E444_OnEnter from byte-indexed arg access and a reused generic gobj local toward typed ViCharaDesc field access and role-specific GObj locals, with a decomp-dev bot report showing one unmatched-item improvement for main/melee/vi/vi0502: un_8031E444_OnEnter from 98.92% to 99.66%.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "source-cleanup",
+      "typed-access"
+    ],
+    "systems": [
+      "melee-core",
+      "vi",
+      "visual-scene"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/vi/vi0502.c",
+      "role": "Only changed file; updates un_8031E444_OnEnter variable typing, object-local naming, typed argument field access, and small expression/codegen-shaping details.",
+      "evidence_refs": [
+        "changed_files: src/melee/vi/vi0502.c added 36 deleted 26 hunks 1",
+        "raw_diff: diff --git a/src/melee/vi/vi0502.c b/src/melee/vi/vi0502.c",
+        "human_pr_text: Files - src/melee/vi/vi0502.c"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Changed un_8031E444_OnEnter to cast arg to ViCharaDesc* desc and use desc->p1_char_index, desc->p1_costume_index, and desc->p2_costume_index instead of indexing a u8* input buffer.",
+      "evidence_refs": [
+        "raw_diff: removed u8* input = arg; added ViCharaDesc* desc; desc = (ViCharaDesc*) arg;",
+        "raw_diff: char_index = desc->p1_char_index;",
+        "raw_diff: vi0502_8031E124(desc->p1_char_index, desc->p1_costume_index, desc->p2_costume_index);"
+      ]
+    },
+    {
+      "text": "Replaced one reused HSD_GObj* gobj local with role-specific locals for fog_gobj, light_gobj, camera_gobj, and model_gobj.",
+      "evidence_refs": [
+        "raw_diff: added HSD_GObj* fog_gobj, light_gobj, camera_gobj, model_gobj",
+        "raw_diff: GObj_Create results assigned to fog_gobj/light_gobj/camera_gobj/model_gobj"
+      ]
+    },
+    {
+      "text": "Simplified erase_colors_vi0502 assignment from a GXColor pointer cast write to direct assignment from fog->color.",
+      "evidence_refs": [
+        "raw_diff: removed *(GXColor*) &erase_colors_vi0502 = fog->color;",
+        "raw_diff: added erase_colors_vi0502 = fog->color;"
+      ]
+    },
+    {
+      "text": "Adjusted model-loop codegen shape by introducing HSD_JObj* new_var as an alias for jobj and passing new_var to HSD_GObjObject_80390A70 and HSD_JObjReqAnimAll.",
+      "evidence_refs": [
+        "raw_diff: added HSD_JObj* new_var;",
+        "raw_diff: new_var = jobj;",
+        "raw_diff: HSD_GObjObject_80390A70(model_gobj, HSD_GObj_804D7849, new_var);",
+        "raw_diff: HSD_JObjReqAnimAll(new_var, 0.0F);"
+      ]
+    },
+    {
+      "text": "Changed gm_8016895C third argument from literal 0 to (un_804D6F90->models[i] != NULL) * 0, apparently to influence generated code while preserving a zero value.",
+      "evidence_refs": [
+        "raw_diff: removed gm_8016895C(jobj, un_804D6F90->models[i], 0);",
+        "raw_diff: added gm_8016895C(jobj, un_804D6F90->models[i], (un_804D6F90->models[i] != NULL) * 0);"
+      ]
+    },
+    {
+      "text": "The decomp-dev bot reported one improvement in an unmatched item for main/melee/vi/vi0502, item un_8031E444_OnEnter, from 98.92% to 99.66%.",
+      "evidence_refs": [
+        "text_corpus issue_comment decomp-dev[bot]: 1 improvement in an unmatched item",
+        "text_corpus issue_comment: main/melee/vi/vi0502 | un_8031E444_OnEnter | +4 | 98.92% | 99.66%"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Using ViCharaDesc fields instead of raw byte indices makes the entry argument contract more reviewable and aligns with typed-fields-over-pointer-math guidance.",
+      "evidence_refs": [
+        "raw_diff: desc = (ViCharaDesc*) arg;",
+        "raw_diff: desc->p1_char_index, desc->p1_costume_index, desc->p2_costume_index",
+        "decomp_standards: typed-fields-over-pointer-math"
+      ]
+    },
+    {
+      "text": "Role-specific GObj local names clarify which created object is being configured for fog, lights, camera, and models.",
+      "evidence_refs": [
+        "raw_diff: fog_gobj/light_gobj/camera_gobj/model_gobj replacements",
+        "decomp_standards: conservative-naming"
+      ]
+    },
+    {
+      "text": "Keeping the PR as a path slice under src/melee/vi reduced review scope to one file and one reported unmatched-item improvement.",
+      "evidence_refs": [
+        "human_pr_text: Split from #2617 by directory/subsystem so the matching improvements are easier to review",
+        "human_pr_text: Scope src/melee/vi",
+        "changed_files: one changed file"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a function argument is known to be a struct-like descriptor, replacing raw byte-buffer indexing with the descriptor type and named fields can improve both readability and matching progress.",
+      "scope": [
+        "src/melee/vi",
+        "un_8031E444_OnEnter",
+        "entry functions receiving descriptor args"
+      ],
+      "evidence_refs": [
+        "raw_diff: u8* input replaced by ViCharaDesc* desc",
+        "raw_diff: input[0], input[1], input[3] replaced by desc fields",
+        "text_corpus issue_comment: un_8031E444_OnEnter improved 98.92% to 99.66%"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "lesson": "For setup functions that create several GObj instances, splitting a reused generic local into role-specific locals can clarify object lifetimes without obscuring the HSD setup sequence.",
+      "scope": [
+        "src/melee/vi/vi0502.c",
+        "scene setup code",
+        "HSD_GObj setup"
+      ],
+      "evidence_refs": [
+        "raw_diff: gobj replaced by fog_gobj, light_gobj, camera_gobj, model_gobj",
+        "decomp_standards: conservative-naming"
+      ],
+      "confidence": 0.74
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "desc",
+      "meaning": "Local ViCharaDesc* cast from the untyped entry argument.",
+      "evidence_refs": [
+        "raw_diff: ViCharaDesc* desc;",
+        "raw_diff: desc = (ViCharaDesc*) arg;"
+      ]
+    },
+    {
+      "name": "char_index",
+      "meaning": "u8 local initialized from desc->p1_char_index and used to select the character animation archive.",
+      "evidence_refs": [
+        "raw_diff: u8 char_index;",
+        "raw_diff: char_index = desc->p1_char_index;",
+        "raw_diff: viGetCharAnimByIndex(char_index)"
+      ]
+    },
+    {
+      "name": "fog_gobj/light_gobj/camera_gobj/model_gobj",
+      "meaning": "Role-specific HSD_GObj locals for the fog, light, camera, and model setup blocks.",
+      "evidence_refs": [
+        "raw_diff: added role-specific HSD_GObj* locals",
+        "raw_diff: each local is passed through HSD_GObjObject_80390A70 and GObj_SetupGXLink/GObj_SetupGXLinkMax or HSD_GObj_SetupProc"
+      ]
+    },
+    {
+      "name": "new_var",
+      "meaning": "Temporary HSD_JObj* alias for jobj introduced in the model loop; semantic role is not explained by PR evidence.",
+      "evidence_refs": [
+        "raw_diff: HSD_JObj* new_var;",
+        "raw_diff: new_var = jobj;"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Typed descriptor cast and field access",
+      "text": "Casts arg to ViCharaDesc* and accesses named fields instead of byte offsets, likely changing/clarifying load shape while improving source fidelity.",
+      "evidence_refs": [
+        "raw_diff: desc = (ViCharaDesc*) arg;",
+        "raw_diff: desc->p1_char_index, desc->p1_costume_index, desc->p2_costume_index",
+        "decomp_standards: typed-fields-over-pointer-math"
+      ]
+    },
+    {
+      "tactic": "Narrow local alias for codegen",
+      "text": "Introduces new_var = jobj and uses the alias for selected calls in the model loop. This is supported by the diff but lacks explanatory verifier evidence beyond the bot score improvement.",
+      "evidence_refs": [
+        "raw_diff: new_var = jobj;",
+        "raw_diff: HSD_GObjObject_80390A70(..., new_var); HSD_JObjReqAnimAll(new_var, 0.0F);",
+        "text_corpus issue_comment: un_8031E444_OnEnter improved to 99.66%"
+      ]
+    },
+    {
+      "tactic": "Expression-shaped zero argument",
+      "text": "Replaces literal 0 with (un_804D6F90->models[i] != NULL) * 0 for gm_8016895C. This appears to be a matching tactic rather than a readability improvement; no PR comment explains it.",
+      "evidence_refs": [
+        "raw_diff: gm_8016895C third argument changed from 0 to (un_804D6F90->models[i] != NULL) * 0"
+      ]
+    },
+    {
+      "tactic": "Direct typed color assignment",
+      "text": "Replaces a pointer-cast assignment to erase_colors_vi0502 with direct assignment from fog->color.",
+      "evidence_refs": [
+        "raw_diff: *(GXColor*) &erase_colors_vi0502 = fog->color; changed to erase_colors_vi0502 = fog->color;"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "source": "decomp-dev[bot]",
+      "text": "Reported 1 improvement in an unmatched item: main/melee/vi/vi0502 un_8031E444_OnEnter, +4 bytes, 98.92% before to 99.66% after.",
+      "evidence_refs": [
+        "text_corpus issue_comment created_at 2026-06-08T14:37:55Z"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2630",
+    "Improvements to split up: VI",
+    "fjooord",
+    "src/melee/vi/vi0502.c",
+    "vi0502",
+    "un_8031E444_OnEnter",
+    "ViCharaDesc",
+    "p1_char_index",
+    "p1_costume_index",
+    "p2_costume_index",
+    "viGetCharAnimByIndex",
+    "fog_gobj",
+    "light_gobj",
+    "camera_gobj",
+    "model_gobj",
+    "erase_colors_vi0502",
+    "HSD_FogLoadDesc",
+    "HSD_GObjObject_80390A70",
+    "GObj_SetupGXLink",
+    "GObj_SetupGXLinkMax",
+    "HSD_JObjLoadJoint",
+    "gm_8016895C",
+    "new_var",
+    "typed descriptor arg",
+    "expression zero matching tactic"
+  ],
+  "follow_up_queries": [
+    "src/melee/vi ViCharaDesc p1_char_index p1_costume_index p2_costume_index",
+    "un_8031E444_OnEnter new_var gm_8016895C",
+    "erase_colors_vi0502 fog->color GXColor cast",
+    "src/melee/vi role-specific gobj locals fog_gobj light_gobj camera_gobj model_gobj",
+    "PR 2617 src/melee/vi vi0502 split source"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "human_pr_text: PR body with scope, preliminary report, local checks",
+      "raw_diff: complete one-hunk diff for src/melee/vi/vi0502.c",
+      "changed_files: one changed file",
+      "text_corpus: decomp-dev bot issue comment with item-level score"
+    ],
+    "notes": [
+      "The changed file and diff are fully available and directly support file-specific observations.",
+      "There are no human review comments and no review records in the slice.",
+      "The PR body says per-PR CI/decomp-dev reporting is authoritative once complete; the loaded bot comment gives an item-level improvement but not a full match claim.",
+      "The body includes full unsplit branch statistics, but those are broader than this PR slice and should not be treated as this slice's exact score.",
+      "The new_var alias and expression-shaped zero are visible in the diff but lack author explanation or narrow objdiff rationale, so they should not be promoted as general style."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "kind": "decomp_lesson",
+        "title": "Prefer recovered descriptor fields over raw byte indexing when the argument type is known",
+        "text": "In src/melee/vi/vi0502.c, un_8031E444_OnEnter improved by replacing u8* input indexing with ViCharaDesc* desc and named fields for character and costume indices. This is a concrete example of typed field recovery improving reviewability and coinciding with a bot-reported unmatched-item improvement.",
+        "scope": [
+          "src/melee/vi",
+          "entry/setup functions",
+          "typed field recovery"
+        ],
+        "evidence_refs": [
+          "raw_diff: input[0], input[1], input[3] replaced by desc fields",
+          "text_corpus issue_comment: un_8031E444_OnEnter 98.92% to 99.66%"
+        ]
+      },
+      {
+        "kind": "naming_convention_candidate",
+        "title": "Use role-specific GObj local names in multi-object scene setup",
+        "text": "This PR replaced a reused generic gobj local with fog_gobj, light_gobj, camera_gobj, and model_gobj in a VI scene setup routine, improving local role clarity while preserving the setup sequence.",
+        "scope": [
+          "src/melee/vi",
+          "HSD_GObj scene setup"
+        ],
+        "evidence_refs": [
+          "raw_diff: role-specific HSD_GObj* locals and uses"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "src/melee/vi/vi0502.c contains VI scene setup entry un_8031E444_OnEnter using ViCharaDesc",
+        "text": "PR #2630 evidence shows src/melee/vi/vi0502.c includes un_8031E444_OnEnter, which casts its void* argument to ViCharaDesc* and uses p1_char_index, p1_costume_index, and p2_costume_index while loading Vi0502.dat, visual0502Scene, character animation data, fog, lights, camera, and models.",
+        "source_path": "src/melee/vi/vi0502.c",
+        "scope": [
+          "src/melee/vi",
+          "vi0502",
+          "un_8031E444_OnEnter"
+        ],
+        "evidence_refs": [
+          "raw_diff: un_8031E444_OnEnter body",
+          "changed_files: src/melee/vi/vi0502.c"
+        ],
+        "reason": "Useful path-local fact for future VI work; should be verified against current source before adding to path facts."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote new_var as a naming convention; PR evidence only shows it as a temporary alias with no semantic explanation.",
+      "Do not promote (un_804D6F90->models[i] != NULL) * 0 as accepted style; it appears to be a narrow matching tactic and conflicts with the need for explicit evidence for codegen tactics.",
+      "Do not treat the unsplit branch's +11944 matched-code bytes or 26 new matches as this PR slice's exact result; the loaded slice bot report only names one unmatched-item improvement."
+    ]
+  },
+  "confidence": 0.79,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

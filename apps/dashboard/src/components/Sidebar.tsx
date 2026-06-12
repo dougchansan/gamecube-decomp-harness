@@ -1,16 +1,34 @@
-import { Ban, ChevronLeft, ChevronRight, Download, FileCheck, Flag, GitBranch, GitPullRequest, Pause, Play, RefreshCw, RotateCcw, ShieldCheck, Square, Undo2, Zap } from "lucide-react";
-import { asArray, asObject, clock, num, text, type Dashboard, type FormState, type UiConfig } from "@decomp-orchestrator/ui-contract";
+import { Ban, ChevronLeft, ChevronRight, Download, GitBranch, GitPullRequest, Pause, Play, RefreshCw, RotateCcw, ShieldCheck, Wrench } from "lucide-react";
+import type { ReactNode } from "react";
+import { asArray, asObject, clock, delta, num, numberValue, pct, text, type Dashboard, type FormState, type UiConfig } from "@decomp-orchestrator/ui-contract";
+import { derivePhaseModel } from "./PhaseStepper";
+import { agoText, campaignState, stateToneClass } from "./PositionPanel";
 import { Button, CheckboxField, Field, PanelSection, PanelTitle, SelectField } from "./primitives";
 
+type SidebarAction =
+  | "refresh"
+  | "sync"
+  | "fresh"
+  | "startWork"
+  | "forceStop"
+  | "pausePr"
+  | "checkpoint"
+  | "qa"
+  | "reconcile"
+  | "splitPlan"
+  | "preparePr"
+  | "syncPrs"
+  | "openAllPrs";
+
 interface SidebarProps {
-  activityMessage: string;
   busy: boolean;
   collapsed: boolean;
   config: UiConfig | null;
   dashboard: Dashboard | null;
   form: FormState;
-  onAction: (action: "refresh" | "sync" | "init" | "fresh" | "report" | "start" | "stop" | "forceStop" | "pausePr" | "resumePr" | "checkpoint" | "qa" | "splitPlan" | "preparePr") => void;
+  onAction: (action: SidebarAction) => void;
   onCollapsedChange: (collapsed: boolean) => void;
+  onOpenPr: (branch: string) => void;
   setForm: (updates: Partial<FormState>) => void;
 }
 
@@ -55,75 +73,24 @@ function useProcessView(dashboard: Dashboard | null, selectedName: string) {
   return { detached, display, pillState, proc, running, saved };
 }
 
-function ProcessPanel({
-  dashboard,
-  form,
-}: Pick<SidebarProps, "dashboard" | "form">) {
-  const selectedName = processName(form.processName);
-  const { display, pillState, saved } = useProcessView(dashboard, selectedName);
-  const facts: Array<[string, unknown]> = [
-    ["Name", display.name || selectedName || "-"],
-    ["State", pillState],
-    ["PID", display.pid || "-"],
-    ["Group", display.processGroup || "-"],
-    ["Started", display.startedAt ? clock(display.startedAt) : "-"],
-    ["Ended", display.endedAt ? clock(display.endedAt) : "-"],
-    ["Exit", display.exitCode ?? display.signal ?? "-"],
-    ["Kill", display.killCommand || "-"],
-    ["PID file", display.pidFilePath || "-"],
-  ];
-
-  return (
-    <PanelSection>
-      <PanelTitle>Process</PanelTitle>
-      <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-2.5 gap-y-1">
-        {facts.map(([label, value]) => (
-          <div className="contents" key={label}>
-            <dt className="text-[#969b97]">{label}</dt>
-            <dd className="m-0 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap" title={String(value ?? "")}>
-              {String(value ?? "")}
-            </dd>
-          </div>
-        ))}
-      </dl>
-      <div className="mt-3 text-[11px] uppercase text-[#969b97]">Saved Processes</div>
-      <div className="mt-1.5 grid gap-1.5">
-        {saved.slice(0, 8).map((item) => (
-          <div
-            className={`grid min-h-7 w-full grid-cols-[minmax(0,1fr)_64px_68px] items-center gap-2 rounded-[5px] border px-2 py-1 text-left ${
-              text(item.name) === selectedName ? "border-[#2a7d38]" : "border-[#363a38]"
-            } bg-[#151715]`}
-            key={text(item.name)}
-          >
-            <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-[#e2e5e2]">{text(item.name, "-")}</span>
-            <span className={`text-right ${item.alive ? "text-[#45e05e]" : "text-[#969b97]"}`}>{item.alive ? "alive" : text(item.state, "saved")}</span>
-            <span className="text-right">{String(item.pid || "-")}</span>
-          </div>
-        ))}
-        {saved.length === 0 ? <div className="pt-1 text-[#969b97]">No saved process files</div> : null}
-      </div>
-    </PanelSection>
-  );
-}
-
 function statusClass(value: unknown): string {
   const status = text(value);
-  if (status === "passed" || status === "pr_ready") return "text-[#45e05e]";
-  if (status === "failed" || status === "blocked") return "text-[#ff8f8f]";
-  if (status === "local_only" || status === "open") return "text-[#d7a64b]";
-  return "text-[#969b97]";
+  if (status === "passed" || status === "pr_ready") return "text-up";
+  if (status === "failed" || status === "blocked") return "text-down";
+  if (status === "local_only" || status === "open") return "text-warn";
+  return "text-dim";
 }
 
 function existsClass(value: unknown): string {
-  return value === false ? "bg-[#8d3838]" : "bg-[#2a7d38]";
+  return value === false ? "bg-down" : "bg-up";
 }
 
 function ProjectPathRow({ exists, label, path }: { exists?: unknown; label: string; path?: unknown }) {
   return (
-    <div className="grid min-h-7 grid-cols-[72px_8px_minmax(0,1fr)] items-center gap-2 rounded-[5px] border border-[#292d2b] bg-[#151715] px-2 py-1">
-      <span className="text-[11px] uppercase text-[#969b97]">{label}</span>
+    <div className="grid min-h-7 grid-cols-[72px_8px_minmax(0,1fr)] items-center gap-2 rounded-none border border-line bg-card px-2 py-1">
+      <span className="text-[10px] uppercase tracking-[0.1em] text-dim">{label}</span>
       <span className={`h-2 w-2 rounded-full ${existsClass(exists)}`} />
-      <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-[#cfd4d0]" title={text(path)}>
+      <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-soft" title={text(path)}>
         {text(path, "-")}
       </span>
     </div>
@@ -132,130 +99,731 @@ function ProjectPathRow({ exists, label, path }: { exists?: unknown; label: stri
 
 function ArtifactRow({ label, path, status }: { label: string; path?: unknown; status?: unknown }) {
   return (
-    <div className="grid min-h-7 grid-cols-[72px_74px_minmax(0,1fr)] items-center gap-2 border-t border-[#292d2b] bg-[#151715] px-2 py-1 first:border-t-0">
-      <span className="text-[11px] uppercase text-[#969b97]">{label}</span>
+    <div className="grid min-h-7 grid-cols-[72px_74px_minmax(0,1fr)] items-center gap-2 border-t border-line bg-card px-2 py-1 first:border-t-0">
+      <span className="text-[10px] uppercase tracking-[0.1em] text-dim">{label}</span>
       <span className={`${statusClass(status)} overflow-hidden text-ellipsis whitespace-nowrap`}>{text(status, "-")}</span>
-      <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-[#969b97]" title={text(path)}>
+      <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-dim" title={text(path)}>
         {text(path, "-")}
       </span>
     </div>
   );
 }
 
-function ActivityPanel({ dashboard, message }: { dashboard: Dashboard | null; message: string }) {
-  const proc = asObject(dashboard?.process);
-  const logs = asArray(proc.logs).map(asObject).slice(-5);
-  const fallback = proc.projectSyncActive
-    ? "Syncing code, intaking newly merged PRs, and rebuilding knowledge..."
-    : proc.freshRunActive
-      ? "Preparing a fresh run..."
-      : "";
-  const headline = message || fallback;
-  if (!headline && logs.length === 0) return null;
-
-  return (
-    <div className="activity-panel">
-      <div className="activity-headline">{headline || "Latest activity"}</div>
-      {logs.length ? (
-        <div className="activity-log">
-          {logs.map((line, index) => (
-            <div className="activity-log-line" key={`${index}-${text(line.at)}`}>
-              <span className={line.stream === "stderr" ? "text-[#ff8f8f]" : line.stream === "stdout" ? "text-[#b8dabf]" : "text-[#969b97]"}>{text(line.stream, "ui")}</span>
-              <span>{text(line.text)}</span>
-            </div>
-          ))}
-        </div>
-      ) : null}
-    </div>
-  );
+interface ActionSpec {
+  action: SidebarAction;
+  enabled: boolean;
+  icon: ReactNode;
+  label: string;
+  /** Tooltip when enabled: what the button does. */
+  title: string;
+  /** Tooltip when disabled: why it is grayed out right now. */
+  reason: string;
+  tone?: "warning" | "danger";
 }
 
-function HandoffPanel({
-  busy,
-  dashboard,
-  form,
-  onAction,
-  running,
-  setForm,
-}: Pick<SidebarProps, "busy" | "dashboard" | "form" | "onAction" | "setForm"> & { running: boolean }) {
-  const run = asObject(dashboard?.status?.run);
-  const status = asObject(dashboard?.status);
-  const activeLeases = Number(status.activeLeases || 0);
-  const handoff = asObject(dashboard?.handoff);
-  const checkpoint = asObject(handoff.checkpoint || dashboard?.checkpoint);
-  const checkpointCounts = asObject(checkpoint.counts);
-  const qa = asObject(handoff.qa);
-  const qaPromotion = asObject(qa.prPromotion);
-  const splitPlan = asObject(handoff.splitPlan);
-  const runStatus = text(run.status);
-  const runPaused = runStatus === "paused";
-  const runActive = runStatus === "active";
-  const hasRun = Boolean(run.id);
-  const handoffReady = hasRun && activeLeases === 0;
-  const qaReady = handoffReady && !running;
-
+/**
+ * Every sidebar panel follows one shape: a title row with right-aligned meta
+ * (current status at a glance), always-visible primary content, and at most
+ * one disclosure for secondary detail. Anything that doesn't earn a spot in
+ * that shape belongs in the details rail or the project config, not here.
+ */
+function SidebarPanel({ children, meta, title }: { children: ReactNode; meta?: ReactNode; title: string }) {
   return (
     <PanelSection>
-      <PanelTitle>PR Handoff</PanelTitle>
-      <div className="mb-2 overflow-hidden rounded-md border border-[#292d2b]">
-        <ArtifactRow label="Run" path={run.id ? `active leases ${num(activeLeases)}` : ""} status={text(run.status, "none")} />
-        <ArtifactRow label="Checkpoint" path={checkpoint.prCandidatesPath} status={checkpoint.id ? `${num(checkpointCounts.pr_candidate)} PR` : ""} />
-        <ArtifactRow label="QA" path={qa.prReportPath || qa.summaryPath} status={text(qaPromotion.status, text(qa.status))} />
-        <ArtifactRow label="Plan" path={splitPlan.outputPath} status={splitPlan.status} />
+      <div className="mb-2 flex min-h-5 items-center justify-between gap-2">
+        <PanelTitle className="mb-0">{title}</PanelTitle>
+        <span className="flex min-w-0 items-center overflow-hidden whitespace-nowrap text-[11px] text-dim">{meta}</span>
       </div>
-
-      <div className="grid grid-cols-2 gap-2">
-        <Field label="QA target" onChange={(event) => setForm({ qaTarget: event.currentTarget.value })} spellCheck={false} value={form.qaTarget} />
-        <Field label="QA rows" min={0} onChange={(event) => setForm({ qaReportMaxRows: Number(event.currentTarget.value) })} type="number" value={form.qaReportMaxRows} />
-      </div>
-      <CheckboxField checked={form.requirePrPromotion} label="Require PR promotion" onChange={(event) => setForm({ requirePrPromotion: event.currentTarget.checked })} />
-      <div className="mt-2 grid grid-cols-2 gap-2">
-        <Field label="Base ref" onChange={(event) => setForm({ prBaseRef: event.currentTarget.value })} spellCheck={false} value={form.prBaseRef} />
-        <SelectField label="Group" onChange={(event) => setForm({ prGroupMode: event.currentTarget.value })} options={["melee-subsystem", "top-dir"]} value={form.prGroupMode} />
-        <Field label="Max files" min={1} onChange={(event) => setForm({ prMaxFilesPerPr: Number(event.currentTarget.value) })} type="number" value={form.prMaxFilesPerPr} />
-        <Field label="Branch prefix" onChange={(event) => setForm({ prBranchPrefix: event.currentTarget.value })} spellCheck={false} value={form.prBranchPrefix} />
-      </div>
-      <Field label="Title prefix" onChange={(event) => setForm({ prTitlePrefix: event.currentTarget.value })} spellCheck={false} value={form.prTitlePrefix} />
-      <CheckboxField checked={form.prIncludeUntracked} label="Include untracked" onChange={(event) => setForm({ prIncludeUntracked: event.currentTarget.checked })} />
-      <CheckboxField checked={form.prCommittedOnly} label="Committed only" onChange={(event) => setForm({ prCommittedOnly: event.currentTarget.checked })} />
-      <CheckboxField checked={form.pauseBeforeHandoff} label="Pause before prepare" onChange={(event) => setForm({ pauseBeforeHandoff: event.currentTarget.checked })} />
-
-      <div className="mt-2.5 grid grid-cols-2 gap-2">
-        <Button disabled={!hasRun || !runActive || busy} icon={<Pause size={14} />} onClick={() => onAction("pausePr")} title="Stop accepting new worker work so the current run can be packaged." tone="warning" type="button">
-          Pause Intake
-        </Button>
-        <Button disabled={!hasRun || !runPaused || busy} icon={<Undo2 size={14} />} onClick={() => onAction("resumePr")} title="Resume worker scheduling for a paused run." type="button">
-          Resume
-        </Button>
-        <Button disabled={!handoffReady || busy} icon={<FileCheck size={14} />} onClick={() => onAction("checkpoint")} title="Snapshot completed work into PR candidates and carry-forward items." type="button">
-          Checkpoint
-        </Button>
-        <Button disabled={!qaReady || busy} icon={<ShieldCheck size={14} />} onClick={() => onAction("qa")} title="Run the PR regression and promotion gate against the selected project." type="button">
-          Run QA
-        </Button>
-        <Button disabled={!qaReady || busy} icon={<GitBranch size={14} />} onClick={() => onAction("splitPlan")} title="Group changed files into reviewer-sized PR slices." type="button">
-          Plan PRs
-        </Button>
-        <Button disabled={!handoffReady || busy} icon={<GitPullRequest size={14} />} onClick={() => onAction("preparePr")} title="Pause, checkpoint, run QA, and create the split plan in one sequence." tone="primary" type="button">
-          Prepare
-        </Button>
-      </div>
+      {children}
     </PanelSection>
   );
 }
 
-export function Sidebar({ activityMessage, busy, collapsed, config, dashboard, form, onAction, onCollapsedChange, setForm }: SidebarProps) {
+/**
+ * The one action the current flow position recommends; it gets the primary
+ * tone in the Actions panel so "what do I do next" stays a one-glance answer.
+ */
+function recommendedAction(options: { activeLeases: number; behind: number; operationActive: boolean; runActive: boolean; runPaused: boolean; running: boolean; syncing: boolean }): SidebarAction | null {
+  const { activeLeases, behind, operationActive, runActive, runPaused, running, syncing } = options;
+  if (syncing || operationActive) return null;
+  if (runActive && running) return "pausePr";
+  if (runActive) return "startWork";
+  if (runPaused) return activeLeases > 0 || running ? null : "preparePr";
+  if (Number.isFinite(behind) && behind > 0) return "sync";
+  return "startWork";
+}
+
+function StatusRow({ label, tone = "text-soft", value }: { label: string; tone?: string; value: string }) {
+  return (
+    <div className="grid min-h-7 grid-cols-[84px_minmax(0,1fr)] items-center gap-2 border-t border-line bg-card px-2 py-1 first:border-t-0">
+      <span className="text-[10px] uppercase tracking-[0.1em] text-dim">{label}</span>
+      <span className={`min-w-0 overflow-hidden text-ellipsis whitespace-nowrap ${tone}`} title={value}>
+        {value}
+      </span>
+    </div>
+  );
+}
+
+/**
+ * One lifecycle stage as a vertical slice: numbered header with the stage's
+ * one-line verdict, then everything that belongs to the stage — detail rows,
+ * its own buttons, and its disclosures. The current stage gets the filled
+ * number chip and bright border so "where am I" is a one-glance answer.
+ */
+function StageCard({ active, children, index, title, tone = "text-soft", verdict }: { active: boolean; children: ReactNode; index: number; title: string; tone?: string; verdict?: string }) {
+  return (
+    <section className={`border bg-panel ${active ? "border-faint" : "border-line"}`}>
+      <header className="flex min-h-8 items-center gap-2 border-b border-line bg-raised px-2.5 py-1.5">
+        <span className={`flex h-5 w-5 shrink-0 items-center justify-center text-[11px] font-bold ${active ? "bg-fg text-ink" : "border border-line2 text-dim"}`}>{index}</span>
+        <span className={`shrink-0 text-[11px] font-bold uppercase tracking-[0.14em] ${active ? "text-fg" : "text-dim"}`}>{title}</span>
+        {verdict ? (
+          <span className={`ml-auto min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-[11px] ${tone}`} title={verdict}>
+            {verdict}
+          </span>
+        ) : null}
+      </header>
+      <div className="p-2.5">{children}</div>
+    </section>
+  );
+}
+
+/** Shared flow position computed once and handed to every stage. */
+interface FlowState {
+  activeLeases: number;
+  behind: number;
+  handoffIdle: boolean;
+  handoffReason: string;
+  hasRun: boolean;
+  /** A multi-step server operation (QA, Prepare, New Session, ...) is running. */
+  operationActive: boolean;
+  operationLabel: string;
+  recommended: SidebarAction | null;
+  runActive: boolean;
+  runPaused: boolean;
+  running: boolean;
+  syncLocked: boolean;
+  syncing: boolean;
+}
+
+function flowState(dashboard: Dashboard | null, running: boolean, syncLocked: boolean): FlowState {
+  const status = asObject(dashboard?.status);
+  const run = asObject(status.run);
+  const runStatus = text(run.status);
+  const runActive = runStatus === "active";
+  const runPaused = runStatus === "paused";
+  const hasRun = Boolean(run.id);
+  const activeLeases = Number(status.activeLeases || 0);
+  const proc = asObject(dashboard?.process);
+  const syncing = proc.projectSyncActive === true;
+  const operation = asObject(proc.operation);
+  const operationActive = text(operation.status) === "running" || proc.freshRunActive === true;
+  const operationLabel = text(operation.label, "An operation");
+  const behind = numberValue(asObject(dashboard?.campaign).behindBase, NaN);
+  const handoffIdle = hasRun && !running && activeLeases === 0 && !syncing && !operationActive;
+  const leaseReason = activeLeases > 0 ? `Waiting on ${activeLeases} draining lease(s).` : "";
+  const handoffReason = !hasRun
+    ? "No run yet — Start first."
+    : running
+      ? "Pause the run first."
+      : syncing
+        ? "Sync is in progress."
+        : operationActive
+          ? `${operationLabel} is in progress.`
+          : leaseReason;
+  const recommended = recommendedAction({ activeLeases, behind, operationActive, runActive, runPaused, running, syncing });
+  return { activeLeases, behind, handoffIdle, handoffReason, hasRun, operationActive, operationLabel, recommended, runActive, runPaused, running, syncLocked, syncing };
+}
+
+/**
+ * Which stage the operator is in right now. The cycle wraps: PRs merge ->
+ * sync intake (1) -> new session (5) -> run (2).
+ */
+function currentStageIndex(flow: FlowState, shipStatus: string, records: JsonObjectLike[]): number {
+  if (flow.syncing) return 1;
+  if (flow.runActive) return 2;
+  if (flow.runPaused) return shipStatus === "pr_ready" ? 4 : 3;
+  if (Number.isFinite(flow.behind) && flow.behind > 0) return 1;
+  if (records.length > 0 && records.every((record) => ["merged", "closed"].includes(text(record.status)))) return 5;
+  return 2;
+}
+
+type JsonObjectLike = Record<string, unknown>;
+
+/**
+ * Top-of-rail summary: the campaign's one number (matched code %) with the
+ * run's movement, and the operating-state pill.
+ */
+function RailSummary({ dashboard }: Pick<SidebarProps, "dashboard">) {
+  const initial = asObject(asObject(dashboard?.initial).measures);
+  const current = asObject(asObject(dashboard?.current).measures);
+  const start = Number(initial.matched_code_percent);
+  const now = Number(current.matched_code_percent);
+  const diff = Number.isFinite(start) && Number.isFinite(now) ? now - start : NaN;
+  const state = campaignState(dashboard);
+  return (
+    <div className="flex min-h-9 items-center justify-between gap-2 border border-line bg-panel px-3 py-1.5">
+      <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-dim">
+        matched <strong className="text-[13px] text-fg">{pct(now)}</strong>
+        {Number.isFinite(diff) ? <span className={`ml-1.5 ${diff > 0 ? "text-up" : diff < 0 ? "text-down" : "text-dim"}`}>{delta(diff)} run</span> : null}
+      </span>
+      <span className={`whitespace-nowrap rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.08em] ${stateToneClass[state.tone]}`}>{state.label}</span>
+    </div>
+  );
+}
+
+/** Stage 1 — pull upstream, intake merged PRs, rebuild knowledge. */
+function SyncStage({ active, busy, dashboard, flow, onAction }: { active: boolean; busy: boolean; dashboard: Dashboard | null; flow: FlowState; onAction: (action: SidebarAction) => void }) {
+  const campaign = asObject(dashboard?.campaign);
+  const head = asObject(campaign.head);
+  const baseRef = text(campaign.baseRef, "origin/master");
+  const baseline = asObject(asObject(dashboard?.handoff).baseline);
+  const baselineSha = text(baseline.baseSha);
+  const baselineFresh = Boolean(baselineSha) && baselineSha === text(campaign.baseSha);
+  const behindKnown = Number.isFinite(flow.behind);
+  const dirty = head.dirty === true;
+  const enabled = !flow.syncLocked && !flow.running && !flow.syncing && !flow.operationActive && flow.activeLeases === 0;
+  return (
+    <StageCard
+      active={active}
+      index={1}
+      title="Sync"
+      tone={behindKnown && flow.behind > 0 ? "text-warn" : behindKnown ? "text-up" : "text-dim"}
+      verdict={!behindKnown ? "unknown" : flow.behind > 0 ? `${num(flow.behind)} commit(s) behind ${baseRef}` : `up to date with ${baseRef}`}
+    >
+      <div className="overflow-hidden border border-line">
+        <StatusRow label="Branch" tone={dirty ? "text-warn" : "text-soft"} value={`${text(head.branch, "-")}${dirty ? " · dirty" : ""}`} />
+        <StatusRow
+          label="Baseline"
+          tone={baselineFresh ? "text-up" : baselineSha ? "text-warn" : "text-dim"}
+          value={baselineSha ? `${baselineSha.slice(0, 10)} · ${baselineFresh ? "current" : "stale — Prepare rebuilds it"}` : "not built — Prepare builds it"}
+        />
+      </div>
+      <div className="mt-2">
+        <Button
+          disabled={!enabled || busy}
+          icon={<Download size={14} />}
+          onClick={() => onAction("sync")}
+          title={
+            enabled
+              ? "Pull upstream, intake newly merged PRs, and rebuild knowledge."
+              : flow.syncing
+                ? "Sync already in progress."
+                : flow.syncLocked
+                  ? "Sync is locked while the run is active."
+                  : flow.running
+                    ? "Pause the run first."
+                    : flow.operationActive
+                      ? `${flow.operationLabel} is in progress.`
+                      : `Waiting on ${num(flow.activeLeases)} draining lease(s).`
+          }
+          tone={!enabled ? undefined : flow.recommended === "sync" ? "primary" : undefined}
+          type="button"
+        >
+          Sync Merged PRs
+        </Button>
+      </div>
+    </StageCard>
+  );
+}
+
+/** Stage 2 — the worker loop plus everything that configures or hosts it. */
+function RunStage({
+  active,
+  busy,
+  dashboard,
+  flow,
+  form,
+  onAction,
+  setForm,
+}: { active: boolean; busy: boolean; flow: FlowState; onAction: (action: SidebarAction) => void } & Pick<SidebarProps, "dashboard" | "form" | "setForm">) {
+  const buttons: ActionSpec[] = [
+    {
+      action: "startWork",
+      enabled: !flow.running && !flow.syncing && !flow.operationActive,
+      icon: <Play size={14} />,
+      label: flow.runPaused ? "Resume" : "Start",
+      title: flow.runPaused ? "Resume scheduling for this paused run and start the worker loop." : "Init a run (if needed) and start the worker loop.",
+      reason: flow.running ? "Workers are already running." : flow.syncing ? "Sync is in progress." : `${flow.operationLabel} is in progress.`,
+    },
+    {
+      action: "pausePr",
+      enabled: flow.running,
+      icon: <Pause size={14} />,
+      label: "Pause",
+      title: "Let in-flight workers finish, stop scheduling new ones, and pause the run at a save point.",
+      reason: flow.runPaused ? "Run is already paused." : "Workers are not running.",
+      tone: "warning",
+    },
+    {
+      action: "forceStop",
+      enabled: flow.running,
+      icon: <Ban size={14} />,
+      label: "Kill",
+      title: "Kill all workers immediately and recover their leases (asks to confirm).",
+      reason: "No process is running.",
+      tone: "danger",
+    },
+  ];
+  return (
+    <StageCard
+      active={active}
+      index={2}
+      title="Run"
+    >
+      <div className="grid grid-cols-3 gap-2">
+        {buttons.map((item) => (
+          <Button
+            disabled={!item.enabled || busy}
+            icon={item.icon}
+            key={item.action}
+            onClick={() => onAction(item.action)}
+            title={item.enabled ? item.title : item.reason}
+            tone={!item.enabled ? undefined : item.action === "startWork" && flow.runPaused ? "primary" : item.action === "pausePr" ? "warning" : flow.recommended === item.action ? "primary" : item.tone}
+            type="button"
+          >
+            {item.label}
+          </Button>
+        ))}
+      </div>
+      <RunSetupDisclosure dashboard={dashboard} form={form} setForm={setForm} />
+      <ProcessDisclosure dashboard={dashboard} form={form} />
+    </StageCard>
+  );
+}
+
+/** Stage 3 — package what the run produced and verify the ship set. */
+function ShipStage({ active, busy, dashboard, flow, onAction }: { active: boolean; busy: boolean; dashboard: Dashboard | null; flow: FlowState; onAction: (action: SidebarAction) => void }) {
+  const handoff = asObject(dashboard?.handoff);
+  const checkpoint = asObject(handoff.checkpoint || dashboard?.checkpoint);
+  const counts = asObject(checkpoint.counts);
+  const qa = asObject(handoff.qa);
+  const qaStatus = text(asObject(qa.prPromotion).status, text(qa.status));
+  const regressionCounts = asObject(qa.regressionCounts);
+  const fuzzy = numberValue(regressionCounts.fuzzyRegressions, 0);
+  const metric = numberValue(regressionCounts.metricRegressions, 0);
+  const splitPlan = asObject(handoff.splitPlan);
+  const planMatch = numberValue(splitPlan.matchSlices, NaN);
+  const ship = asObject(handoff.ship);
+  const shipStatus = text(ship.status);
+  const prepareEnabled = flow.handoffIdle && (flow.runActive || flow.runPaused);
+  // Checkpointing is automatic (epoch drains and the handoff itself), and
+  // reconcile runs inside Prepare when the ship set is blocked — these are
+  // manual escape hatches for debugging, not part of the normal flow.
+  const stepwise: ActionSpec[] = [
+    {
+      action: "qa",
+      enabled: flow.handoffIdle,
+      icon: <ShieldCheck size={14} />,
+      label: "Run QA",
+      title: "Build the branch and run the regression + promotion gates vs the installed baseline.",
+      reason: flow.handoffReason,
+    },
+    {
+      action: "reconcile",
+      enabled: flow.handoffIdle && flow.runPaused,
+      icon: <Wrench size={14} />,
+      label: "Reconcile",
+      title: "Agent fix-loop for the regressions in the latest QA report (Prepare runs this automatically when the ship set is blocked).",
+      reason: flow.handoffReason || "Pause the run first — reconcile only runs while scheduling is locked.",
+    },
+    {
+      action: "splitPlan",
+      enabled: flow.handoffIdle,
+      icon: <GitBranch size={14} />,
+      label: "Plan PRs",
+      title: "Lane-aware PR split plan from the checkpoint and regression report.",
+      reason: flow.handoffReason,
+    },
+  ];
+  // The card face is verdict + two facts + the one button; the four
+  // diagnostic rows live in the disclosure. Flow, not diagnostics.
+  const factOne = shipStatus
+    ? shipStatus === "pr_ready"
+      ? `${num(ship.newMatches)} confirmed match(es) · 0 regressions`
+      : `${num(ship.fuzzyRegressions)} fuzzy · ${num(ship.metricRegressions)} metric regression(s) in the ship set`
+    : flow.runActive && flow.running
+      ? "run active — pause to package this session"
+      : flow.hasRun
+        ? "workers stopped — Prepare packages this session"
+        : "no run yet — Start first";
+  const reworkCount = numberValue(counts.needs_rework, 0);
+  const factTwo = checkpoint.id ? `${num(reworkCount)} rework requeued for the next run` : "";
+  return (
+    <StageCard
+      active={active}
+      index={3}
+      title="Ship"
+      tone={statusClass(shipStatus === "pr_ready" ? "pr_ready" : shipStatus)}
+      verdict={shipStatus ? (shipStatus === "pr_ready" ? `pr_ready — ${num(splitPlan.matchSlices)} PR(s)` : shipStatus) : "not verified yet"}
+    >
+      <p className="m-0 text-xs text-soft">{factOne}</p>
+      {factTwo ? <p className="mt-0.5 mb-0 text-xs text-dim">{factTwo}</p> : null}
+      <div className="mt-2">
+        <Button
+          className="w-full"
+          disabled={!prepareEnabled || busy}
+          icon={<GitPullRequest size={14} />}
+          onClick={() => onAction("preparePr")}
+          title={
+            prepareEnabled
+              ? "End the session as a hard save point: pause, pull & rebase, rebuild baseline, QA, checkpoint, plan, verify the ship set (reconciling if blocked), seed the PR board, save point."
+              : flow.handoffReason || "Run is not active or paused."
+          }
+          tone={!prepareEnabled ? undefined : flow.recommended === "preparePr" ? "primary" : undefined}
+          type="button"
+        >
+          Prepare Handoff
+        </Button>
+      </div>
+      <details className="control-disclosure">
+        <summary>Details &amp; manual steps</summary>
+        <div className="mt-2 overflow-hidden border border-line">
+          <StatusRow
+            label="Checkpoint"
+            tone={checkpoint.id ? "text-soft" : "text-dim"}
+            value={checkpoint.id ? `${num(counts.pr_candidate)} match · ${num(counts.improvement_candidate)} improve · ${num(counts.needs_rework)} rework` : "not run"}
+          />
+          <StatusRow
+            label="Branch QA"
+            tone={statusClass(qaStatus)}
+            value={qaStatus ? (qaStatus === "blocked" ? `blocked — ${num(fuzzy)} fuzzy · ${num(metric)} metric regression(s) (rework; does not gate PRs)` : qaStatus) : "not run"}
+          />
+          <StatusRow
+            label="Ship set"
+            tone={statusClass(shipStatus === "pr_ready" ? "pr_ready" : shipStatus)}
+            value={
+              shipStatus
+                ? shipStatus === "pr_ready"
+                  ? `pr_ready — ${num(ship.newMatches)} confirmed match(es), 0 regressions`
+                  : `${shipStatus} — ${num(ship.fuzzyRegressions)} fuzzy · ${num(ship.metricRegressions)} metric`
+                : "not verified"
+            }
+          />
+          <StatusRow
+            label="Plan"
+            tone={statusClass(splitPlan.status)}
+            value={
+              text(splitPlan.status)
+                ? Number.isFinite(planMatch)
+                  ? `${text(splitPlan.status)} — ${num(splitPlan.matchSlices)} match PR(s) · ${num(splitPlan.localSlices)} local`
+                  : text(splitPlan.status)
+                : "not run"
+            }
+          />
+        </div>
+        <div className="mt-2 grid grid-cols-2 gap-2">
+          {stepwise.map((item) => (
+            <Button
+              disabled={!item.enabled || busy}
+              icon={item.icon}
+              key={item.action}
+              onClick={() => onAction(item.action)}
+              title={item.enabled ? item.title : item.reason}
+              type="button"
+            >
+              {item.label}
+            </Button>
+          ))}
+        </div>
+        <div className="mt-2 overflow-hidden border border-line">
+          <ArtifactRow label="Candidates" path={checkpoint.prCandidatesPath} status={checkpoint.id ? "written" : "-"} />
+          <ArtifactRow label="QA report" path={qa.prReportPath || qa.summaryPath} status={text(qa.status, "-")} />
+          <ArtifactRow label="Plan" path={splitPlan.outputPath} status={text(splitPlan.status, "-")} />
+        </div>
+      </details>
+    </StageCard>
+  );
+}
+
+/** Stage 5 — close the session; unshipped improvements stay on the branch. */
+function SessionStage({ active, busy, flow, onAction }: { active: boolean; busy: boolean; flow: FlowState; onAction: (action: SidebarAction) => void }) {
+  const enabled = !flow.running && !flow.syncing && !flow.operationActive && flow.activeLeases === 0;
+  return (
+    <StageCard active={active} index={5} title="New Session" tone="text-dim" verdict="restart baseline · keep local work">
+      <p className="m-0 text-xs text-dim">Checkpoint anything pending, reset the report baseline, and init a brand-new run. Unshipped improvements stay on the branch as the local delta.</p>
+      <div className="mt-2">
+        <Button
+          disabled={!enabled || busy}
+          icon={<RotateCcw size={14} />}
+          onClick={() => onAction("fresh")}
+          title={
+            enabled
+              ? "Checkpoint, reset the report baseline, and init a new run."
+              : flow.running
+                ? "Pause the run first."
+                : flow.syncing
+                  ? "Sync is in progress."
+                  : flow.operationActive
+                    ? `${flow.operationLabel} is in progress.`
+                    : `Waiting on ${num(flow.activeLeases)} draining lease(s).`
+          }
+          tone={!enabled ? undefined : "warning"}
+          type="button"
+        >
+          New Session
+        </Button>
+      </div>
+    </StageCard>
+  );
+}
+
+const prStatusMeta: Record<string, { label: string; tone: string }> = {
+  planned: { label: "not opened", tone: "text-dim" },
+  branch_pushed: { label: "pushed", tone: "text-soft" },
+  draft: { label: "draft", tone: "text-warn" },
+  open: { label: "open", tone: "text-soft" },
+  changes_requested: { label: "changes req.", tone: "text-down" },
+  merged: { label: "merged", tone: "text-up" },
+  closed: { label: "closed", tone: "text-dim" },
+};
+
+function PrRecordRow({ busy, lockReason, onOpenPr, record }: { busy: boolean; lockReason: string; onOpenPr: (branch: string) => void; record: Record<string, unknown> }) {
+  const status = text(record.status, "planned");
+  const meta = prStatusMeta[status] ?? { label: status, tone: "text-soft" };
+  const files = asArray(record.files).map((path) => text(path)).filter(Boolean);
+  const prNumber = numberValue(record.prNumber, NaN);
+  const comments = numberValue(record.comments, 0);
+  const ci = text(record.ci);
+  const url = text(record.url);
+  const branch = text(record.branch);
+  const right = [
+    Number.isFinite(prNumber) ? `#${prNumber}` : `${files.length}f`,
+    comments > 0 ? `💬${comments}` : "",
+    ci === "failing" ? "ci ✗" : ci === "pending" ? "ci …" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+  const name = text(record.displayName, text(record.sliceId, text(record.branch, "-")));
+  return (
+    <details className="group border-t border-line bg-card first:border-t-0">
+      <summary className="grid min-h-7 cursor-pointer list-none grid-cols-[minmax(0,1fr)_92px_64px] items-center gap-2 px-2 py-1 hover:bg-raised [&::-webkit-details-marker]:hidden">
+        <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-soft">{name}</span>
+        <span className={`overflow-hidden text-ellipsis whitespace-nowrap ${meta.tone}`}>{meta.label}</span>
+        <span className={`text-right ${ci === "failing" ? "text-down" : "text-dim"}`}>{right}</span>
+      </summary>
+      <div className="border-t border-line2 bg-panel px-2 py-1.5">
+        <div className="mb-1 flex items-center justify-between gap-2 text-[11px]">
+          <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-dim" title={text(record.title)}>
+            {text(record.branch, "-")}
+          </span>
+          {url ? (
+            <a className="shrink-0 text-soft underline decoration-line2 hover:text-fg" href={url} rel="noreferrer" target="_blank">
+              {Number.isFinite(prNumber) ? `#${prNumber} ↗` : "open ↗"}
+            </a>
+          ) : null}
+        </div>
+        <ul className="m-0 list-none p-0 font-mono text-[11px] leading-5 text-soft">
+          {files.map((file) => (
+            <li className="overflow-hidden text-ellipsis whitespace-nowrap" key={file} title={file}>
+              {file.replace(/^src\//, "")}
+            </li>
+          ))}
+          {files.length === 0 ? <li className="text-dim">no file manifest (synced from GitHub only)</li> : null}
+        </ul>
+        {status === "planned" && branch ? (
+          <div className="mt-1.5">
+            <Button
+              disabled={busy || Boolean(lockReason)}
+              icon={<GitPullRequest size={14} />}
+              onClick={() => onOpenPr(branch)}
+              title={lockReason || "Verify this slice alone against the baseline, then branch, push to your fork, and open a draft PR on the upstream repo."}
+              tone={lockReason ? undefined : "primary"}
+              type="button"
+            >
+              Open draft PR
+            </Button>
+          </div>
+        ) : null}
+      </div>
+    </details>
+  );
+}
+
+/**
+ * Stage 4 — the hub for shipped work: every match slice tracked from planned
+ * through merged, with comment/CI state pulled from GitHub on demand.
+ * Records persist across sessions so PR history outlives the plan it came
+ * from.
+ */
+function PrsStage({ active, busy, dashboard, flow, onAction, onOpenPr }: { active: boolean; flow: FlowState } & Pick<SidebarProps, "busy" | "dashboard" | "onAction" | "onOpenPr">) {
+  // Opening a PR checks out branches and pushes — never while workers, sync,
+  // or another operation can touch the tree.
+  const lockReason = flow.running
+    ? "Pause the run first."
+    : flow.syncing
+      ? "Sync is in progress."
+      : flow.operationActive
+        ? `${flow.operationLabel} is in progress.`
+        : flow.activeLeases > 0
+          ? `Waiting on ${num(flow.activeLeases)} draining lease(s).`
+          : "";
+  const prs = asObject(dashboard?.prs);
+  const records = asArray(prs.records).map(asObject);
+  const opened = records.filter((record) => ["draft", "open", "changes_requested"].includes(text(record.status)));
+  const merged = records.filter((record) => text(record.status) === "merged");
+  const toOpen = records.length - opened.length - merged.length - records.filter((record) => text(record.status) === "closed").length;
+  const upstreamOpen = numberValue(prs.upstreamOpen, NaN);
+  const needsAttention = records.some((record) => text(record.status) === "changes_requested" || text(record.ci) === "failing");
+  const summary = records.length === 0 ? "none tracked" : `${opened.length} open · ${toOpen} to open · ${merged.length} merged`;
+
+  return (
+    <StageCard active={active} index={4} title="PRs" tone={needsAttention ? "text-down" : records.length ? "text-soft" : "text-dim"} verdict={summary}>
+      <div className="overflow-hidden border border-line">
+        {records.map((record) => (
+          <PrRecordRow busy={busy} key={text(record.branch, text(record.sliceId))} lockReason={lockReason} onOpenPr={onOpenPr} record={record} />
+        ))}
+        {records.length === 0 ? <div className="bg-card px-2 py-1.5 text-xs text-dim">No PR records yet — run Plan PRs (stage 3), then Sync PR Status.</div> : null}
+        <div className="grid min-h-7 grid-cols-[84px_minmax(0,1fr)] items-center gap-2 border-t border-line bg-card px-2 py-1">
+          <span className="text-[10px] uppercase tracking-[0.1em] text-dim">Upstream</span>
+          <span className="text-dim">{Number.isFinite(upstreamOpen) ? `${num(upstreamOpen)} other open PR(s)` : "unknown — sync to fetch"}</span>
+        </div>
+      </div>
+      {text(prs.warning) ? <p className="mt-1.5 mb-0 text-xs text-warn">{text(prs.warning)}</p> : null}
+      <div className="mt-2 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          {toOpen > 0 ? (
+            <Button
+              disabled={busy || Boolean(lockReason)}
+              icon={<GitPullRequest size={14} />}
+              onClick={() => onAction("openAllPrs")}
+              title={lockReason || `Open all ${toOpen} planned slice(s) as draft PRs, one at a time (support slices first). Each is verified alone against the baseline before anything is pushed.`}
+              tone={lockReason ? undefined : "primary"}
+              type="button"
+            >
+              Open All Drafts
+            </Button>
+          ) : null}
+          <Button disabled={busy} icon={<RefreshCw size={14} />} onClick={() => onAction("syncPrs")} title="Re-seed from the latest split plan and pull status, comments, and CI from GitHub." type="button">
+            Sync PR Status
+          </Button>
+        </div>
+        {prs.syncedAt ? <span className="whitespace-nowrap text-[11px] text-dim">synced {agoText(prs.syncedAt)}</span> : null}
+      </div>
+    </StageCard>
+  );
+}
+
+function RunSetupDisclosure({ dashboard, form, setForm }: Pick<SidebarProps, "dashboard" | "form" | "setForm">) {
+  const schedulingPreset = schedulingPresetForWorkers(form.maxWorkers);
+  const run = asObject(dashboard?.status?.run);
+  const runDesiredWorkers = numberValue(run.desiredWorkers);
+  const runWorkersMismatch = text(run.status) === "active" && runDesiredWorkers > 0 && runDesiredWorkers !== form.maxWorkers;
+  return (
+    <details className="control-disclosure">
+      <summary>{`Setup — ${text(form.provider, "codex-lb")} · ${schedulingPreset.label} · ${num(form.maxWorkers)} workers`}</summary>
+      <label className="mt-2 mb-2 block text-xs text-dim">
+        <span>Run size</span>
+        <select className="mt-1" onChange={(event) => setForm(schedulingForWorkers(Number(event.currentTarget.value)))} value={schedulingPreset.workers}>
+          {schedulingPresets.map((preset) => (
+            <option key={preset.id} value={preset.workers}>
+              {preset.label} / {preset.workers} workers / queue {preset.workers * 4}
+            </option>
+          ))}
+        </select>
+      </label>
+      {runWorkersMismatch ? (
+        <p className="mb-2 text-xs text-warn">
+          Active run is set to {runDesiredWorkers} workers. Start Work applies the new size ({form.maxWorkers}) to this run.
+        </p>
+      ) : null}
+      <SelectField label="Director thinking" onChange={(event) => setForm({ thinkingLevel: event.currentTarget.value })} options={["medium", "low", "high", "xhigh"]} value={form.thinkingLevel} />
+      <SelectField label="Worker thinking" onChange={(event) => setForm({ workerThinkingLevel: event.currentTarget.value })} options={["medium", "low", "high", "xhigh"]} value={form.workerThinkingLevel} />
+      <p className="mt-2 text-xs text-dim">
+        Handoff and QA settings (QA target, base ref, grouping, max files per PR, improvement promotion floors) come from{" "}
+        <code>projects/&lt;id&gt;/project.json</code>.
+      </p>
+    </details>
+  );
+}
+
+function nextCheckpointText(dashboard: Dashboard | null): string {
+  const progress = asObject(dashboard?.checkpointProgress);
+  const remaining = numberValue(progress.remaining, NaN);
+  const interval = numberValue(progress.interval, NaN);
+  if (!Number.isFinite(remaining) || !Number.isFinite(interval) || interval <= 0) return "-";
+  if (remaining <= 0) return "due (fires on the pool's next completed lease past its interval)";
+  return `in ~${remaining} ${remaining === 1 ? "lease" : "leases"} (every ${interval})`;
+}
+
+function ProcessDisclosure({ dashboard, form }: Pick<SidebarProps, "dashboard" | "form">) {
   const selectedName = processName(form.processName);
-  const { pillState, running } = useProcessView(dashboard, selectedName);
-  const actionBusy = busy;
+  const { display, pillState, saved } = useProcessView(dashboard, selectedName);
+  const run = asObject(asObject(dashboard?.status).run);
+  const facts: Array<[string, unknown]> = [
+    ["PID", display.pid || "-"],
+    ["Started", display.startedAt ? clock(display.startedAt) : "-"],
+    ["Exit", display.exitCode ?? display.signal ?? "-"],
+    ["Kill", display.killCommand || "-"],
+  ];
+  const runFacts: Array<[string, unknown]> = [
+    ["Run ID", text(run.id) || "-"],
+    ["Created", run.createdAt ? clock(run.createdAt) : "-"],
+    ["Status", text(run.status) || "-"],
+    ["Checkpoint", nextCheckpointText(dashboard)],
+  ];
+
+  return (
+    <details className="control-disclosure">
+      <summary>{`Process — ${text(display.name, selectedName)} · ${pillState}`}</summary>
+      <div>
+        <dl className="mt-2 grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1.5">
+          {facts.map(([label, value]) => (
+            <div className="contents" key={label}>
+              <dt className="text-dim">{label}</dt>
+              <dd className="m-0 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap" title={String(value ?? "")}>
+                {String(value ?? "")}
+              </dd>
+            </div>
+          ))}
+        </dl>
+        <div className="mt-3 text-[10px] uppercase tracking-[0.1em] text-dim">Run Details</div>
+        <dl className="mt-1.5 grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1.5">
+          {runFacts.map(([label, value]) => (
+            <div className="contents" key={label}>
+              <dt className="text-dim">{label}</dt>
+              <dd className="m-0 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap" title={String(value ?? "")}>
+                {String(value ?? "")}
+              </dd>
+            </div>
+          ))}
+        </dl>
+        <div className="mt-3 text-[10px] uppercase tracking-[0.1em] text-dim">Saved Processes</div>
+        <div className="mt-1.5 grid gap-1.5">
+          {saved.slice(0, 4).map((item) => (
+            <div
+              className={`grid min-h-7 w-full grid-cols-[minmax(0,1fr)_64px_68px] items-center gap-2 rounded-none border px-2 py-1 text-left ${
+                text(item.name) === selectedName ? "border-up/60" : "border-line2"
+              } bg-card`}
+              key={text(item.name)}
+            >
+              <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-fg">{text(item.name, "-")}</span>
+              <span className={`text-right ${item.alive ? "text-up" : "text-dim"}`}>{item.alive ? "alive" : text(item.state, "saved")}</span>
+              <span className="text-right">{String(item.pid || "-")}</span>
+            </div>
+          ))}
+          {saved.length === 0 ? <div className="pt-1 text-dim">No saved process files</div> : null}
+        </div>
+      </div>
+    </details>
+  );
+}
+
+export function Sidebar({ busy, collapsed, config, dashboard, form, onAction, onCollapsedChange, onOpenPr, setForm }: SidebarProps) {
+  const selectedName = processName(form.processName);
+  const { running } = useProcessView(dashboard, selectedName);
   const projects = config?.availableProjects ?? [];
   const selectedProject = projects.find((project) => project.id === form.projectId) ?? dashboard?.project ?? config?.selectedProject ?? null;
-  const schedulingPreset = schedulingPresetForWorkers(form.maxWorkers);
+  const phaseModel = derivePhaseModel(dashboard, running);
+  const syncLocked = Boolean(phaseModel.syncLockReason);
+  const flow = flowState(dashboard, running, syncLocked);
+  const shipStatus = text(asObject(asObject(dashboard?.handoff).ship).status);
+  const prRecords = asArray(asObject(dashboard?.prs).records).map(asObject);
+  const stage = currentStageIndex(flow, shipStatus, prRecords);
 
   if (collapsed) {
     return (
-      <aside className="sidebar-rail sidebar-rail-collapsed grid min-w-0 border-r border-[#363a38] bg-[#1d1f1e] overflow-hidden max-[780px]:block">
-        <div className="sidebar-rail-tab z-10 flex h-full flex-col items-center justify-start gap-2 border-b border-[#292d2b] bg-[#181a19] px-2 py-1.5 max-[780px]:h-[42px] max-[780px]:flex-row">
+      <aside className="sidebar-rail sidebar-rail-collapsed grid min-w-0 border-r border-line2 bg-ink overflow-hidden max-[780px]:block">
+        <div className="sidebar-rail-tab z-10 flex h-full flex-col items-center justify-start gap-2 border-b border-line bg-raised px-2 py-1.5 max-[780px]:h-[42px] max-[780px]:flex-row">
           <Button
             aria-expanded={false}
             className="h-7 min-w-7 px-0"
@@ -266,7 +834,7 @@ export function Sidebar({ activityMessage, busy, collapsed, config, dashboard, f
           >
             <span className="sr-only">Show</span>
           </Button>
-          <span className="[writing-mode:vertical-rl] rotate-180 text-xs font-bold uppercase text-[#c0c5c1] max-[780px]:[writing-mode:initial] max-[780px]:rotate-0">
+          <span className="[writing-mode:vertical-rl] rotate-180 text-[11px] font-bold uppercase tracking-[0.14em] text-soft max-[780px]:[writing-mode:initial] max-[780px]:rotate-0">
             Controls
           </span>
         </div>
@@ -275,9 +843,9 @@ export function Sidebar({ activityMessage, busy, collapsed, config, dashboard, f
   }
 
   return (
-    <aside className="sidebar-rail sidebar-rail-open min-w-0 overflow-auto border-r border-[#363a38] bg-[#1d1f1e]">
+    <aside className="sidebar-rail sidebar-rail-open min-w-0 overflow-auto border-r border-line2 bg-ink">
       <div className="sidebar-rail-content">
-        <PanelSection className="sticky top-0 z-10 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-2.5 bg-[#181a19]">
+        <div className="sticky top-0 z-10 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-2.5 border-b border-line2 bg-raised px-3 py-2.5">
           <Button
             aria-expanded
             className="h-7 min-w-7 px-0"
@@ -289,41 +857,37 @@ export function Sidebar({ activityMessage, busy, collapsed, config, dashboard, f
             <span className="sr-only">Hide</span>
           </Button>
           <div className="min-w-0">
-            <h1 className="m-0 overflow-hidden text-ellipsis whitespace-nowrap text-lg font-semibold tracking-normal">Decomp Orchestrator</h1>
+            <h1 className="m-0 overflow-hidden text-ellipsis whitespace-nowrap text-[13px] font-bold uppercase tracking-[0.2em] text-fg">Decomp Orchestrator</h1>
           </div>
-        </PanelSection>
+        </div>
 
-        <PanelSection className="py-2">
-          <details className="control-disclosure project-disclosure">
-            <summary>
-              <span>Project</span>
-              <small>{text(form.projectId || selectedProject?.id, "-")}</small>
-            </summary>
-            <SelectField
-              label="Project"
-              onChange={(event) => {
-                const project = projects.find((item) => item.id === event.currentTarget.value);
-                setForm({
-                  projectId: event.currentTarget.value,
-                  usePathOverrides: false,
-                  repoRoot: project?.repoRoot ?? form.repoRoot,
-                  stateDir: project?.stateDir ?? form.stateDir,
-                  graphDbPath: project?.graphDbPath ?? form.graphDbPath,
-                  processName: project?.processName ?? form.processName,
-                  prBaseRef: project?.baseRef ?? form.prBaseRef,
-                });
-              }}
-              options={projects.length ? projects.map((project) => project.id) : [form.projectId || ""]}
-              value={form.projectId}
-            />
-            <div className="mb-2 grid grid-cols-[auto_minmax(0,1fr)] gap-x-2.5 gap-y-1 text-xs">
-              <span className="text-[#969b97]">Name</span>
-              <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">{selectedProject?.displayName ?? text(form.projectId, "-")}</span>
-              <span className="text-[#969b97]">Kind</span>
-              <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">{selectedProject?.kind ?? "-"}</span>
-            </div>
-            <details className="control-disclosure">
-              <summary>Edit project</summary>
+        <div className="grid gap-2.5 p-2.5">
+          <RailSummary dashboard={dashboard} />
+          <SyncStage active={stage === 1} busy={busy} dashboard={dashboard} flow={flow} onAction={onAction} />
+          <RunStage active={stage === 2} busy={busy} dashboard={dashboard} flow={flow} form={form} onAction={onAction} setForm={setForm} />
+          <ShipStage active={stage === 3} busy={busy} dashboard={dashboard} flow={flow} onAction={onAction} />
+          <PrsStage active={stage === 4} busy={busy} dashboard={dashboard} flow={flow} onAction={onAction} onOpenPr={onOpenPr} />
+          <SessionStage active={stage === 5} busy={busy} flow={flow} onAction={onAction} />
+
+          <SidebarPanel meta={text(form.projectId || selectedProject?.id, "-")} title="Project">
+            <details className="control-disclosure project-disclosure">
+              <summary>{selectedProject?.displayName ?? text(form.projectId, "-")}</summary>
+              <SelectField
+                label="Project"
+                onChange={(event) => {
+                  const project = projects.find((item) => item.id === event.currentTarget.value);
+                  setForm({
+                    projectId: event.currentTarget.value,
+                    usePathOverrides: false,
+                    repoRoot: project?.repoRoot ?? form.repoRoot,
+                    stateDir: project?.stateDir ?? form.stateDir,
+                    graphDbPath: project?.graphDbPath ?? form.graphDbPath,
+                    processName: project?.processName ?? form.processName,
+                  });
+                }}
+                options={projects.length ? projects.map((project) => project.id) : [form.projectId || ""]}
+                value={form.projectId}
+              />
               <div className="project-paths">
                 <ProjectPathRow exists={selectedProject?.repoRootExists} label="Repo" path={form.repoRoot || selectedProject?.repoRoot} />
                 <ProjectPathRow exists={selectedProject?.stateDirExists} label="State" path={form.stateDir || selectedProject?.stateDir} />
@@ -334,85 +898,8 @@ export function Sidebar({ activityMessage, busy, collapsed, config, dashboard, f
               <Field disabled={!form.usePathOverrides} label="State dir" onChange={(event) => setForm({ stateDir: event.currentTarget.value })} spellCheck={false} value={form.stateDir} />
               <Field disabled={!form.usePathOverrides} label="Graph DB" onChange={(event) => setForm({ graphDbPath: event.currentTarget.value })} spellCheck={false} value={form.graphDbPath} />
             </details>
-          </details>
-        </PanelSection>
-
-      <PanelSection>
-        <PanelTitle>Run Setup</PanelTitle>
-        <div className="run-disclosure-grid">
-          <details className="control-disclosure">
-            <summary>
-              <span>Agent</span>
-              <small>{`${text(form.provider, "codex-lb")} · ${text(form.model, "gpt-5.5")}`}</small>
-            </summary>
-            <SelectField label="Director thinking" onChange={(event) => setForm({ thinkingLevel: event.currentTarget.value })} options={["medium", "low", "high", "x-high"]} value={form.thinkingLevel} />
-            <SelectField label="Worker thinking" onChange={(event) => setForm({ workerThinkingLevel: event.currentTarget.value })} options={["medium", "low", "high", "x-high"]} value={form.workerThinkingLevel} />
-            <CheckboxField checked={form.dryRunAgents} label="Dry-run agents" onChange={(event) => setForm({ dryRunAgents: event.currentTarget.checked })} />
-          </details>
-
-          <details className="control-disclosure">
-            <summary>
-              <span>Scheduling</span>
-              <small>{`${schedulingPreset.label} · ${num(form.maxWorkers)} workers · queue ${num(form.queueTargetSize)}`}</small>
-            </summary>
-            <label className="mb-2 block text-xs text-[#969b97]">
-              <span>Size</span>
-              <select className="mt-1" onChange={(event) => setForm(schedulingForWorkers(Number(event.currentTarget.value)))} value={schedulingPreset.workers}>
-                {schedulingPresets.map((preset) => (
-                  <option key={preset.id} value={preset.workers}>
-                    {preset.label} / {preset.workers} workers
-                  </option>
-                ))}
-              </select>
-            </label>
-            <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-2.5 gap-y-1 text-xs">
-              <span className="text-[#969b97]">Ready queue</span>
-              <span className="text-right">{num(form.queueTargetSize)}</span>
-              <span className="text-[#969b97]">Refill at</span>
-              <span className="text-right">{num(form.queueLowWatermark)}</span>
-            </div>
-          </details>
+          </SidebarPanel>
         </div>
-
-        <details className="control-disclosure">
-          <summary>Fresh run options</summary>
-          <CheckboxField checked={form.checkpointBeforeFresh} label="Checkpoint before fresh" onChange={(event) => setForm({ checkpointBeforeFresh: event.currentTarget.checked })} />
-          <CheckboxField checked={form.refreshPrLibrary} label="Refresh PR library" onChange={(event) => setForm({ refreshPrLibrary: event.currentTarget.checked })} />
-          <CheckboxField checked={form.resetReportBaseline} label="Reset report baseline" onChange={(event) => setForm({ resetReportBaseline: event.currentTarget.checked })} />
-        </details>
-
-        <div className="mt-2.5 grid grid-cols-2 gap-2">
-          <Button className="col-span-2" disabled={running || actionBusy} icon={<Play size={14} />} onClick={() => onAction("start")} title="Start the managed worker loop for the current run." tone="primary" type="button">
-            Start
-          </Button>
-          <Button disabled={!running || actionBusy || pillState === "draining"} icon={<Square size={14} />} onClick={() => onAction("stop")} title="Drain the managed process so no new workers start." tone="warning" type="button">
-            Stop
-          </Button>
-          <Button disabled={!running || actionBusy} icon={<Ban size={14} />} onClick={() => onAction("forceStop")} title="Kill the process group and recover active leases." tone="danger" type="button">
-            Force Stop
-          </Button>
-          <Button disabled={running || actionBusy} icon={<Download size={14} />} onClick={() => onAction("sync")} title="Fetch/pull or rebase Melee, find PRs newly merged into origin/master, run PR intake agents for those PRs, and rebuild the knowledge graph." type="button">
-            Intake Merged PRs
-          </Button>
-          <Button icon={<RefreshCw size={14} />} onClick={() => onAction("refresh")} title="Reload dashboard state only. This does not run git, build, report, or agents." type="button">
-            Refresh
-          </Button>
-          <Button disabled={running || actionBusy} icon={<Flag size={14} />} onClick={() => onAction("init")} title="Create a run and seed targets from the current project report." type="button">
-            Init Run
-          </Button>
-          <Button disabled={actionBusy} icon={<Zap size={14} />} onClick={() => onAction("report")} title="Regenerate report.json and report_changes.json for the current checkout." type="button">
-            Report Now
-          </Button>
-          <Button className="col-span-2" disabled={running || actionBusy} icon={<RotateCcw size={14} />} onClick={() => onAction("fresh")} title="Checkpoint the old run, reset the report baseline, initialize a new run, and refresh PR knowledge." tone="warning" type="button">
-            Fresh Run
-          </Button>
-        </div>
-        <ActivityPanel dashboard={dashboard} message={activityMessage} />
-      </PanelSection>
-
-      <HandoffPanel busy={busy} dashboard={dashboard} form={form} onAction={onAction} running={running} setForm={setForm} />
-
-      <ProcessPanel dashboard={dashboard} form={form} />
       </div>
     </aside>
   );

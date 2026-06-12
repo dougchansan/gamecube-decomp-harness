@@ -1,0 +1,17 @@
+{
+  "number": 1988,
+  "title": "100% match splGetSplinePoint",
+  "state": "MERGED",
+  "createdAt": "2025-11-21T17:33:49Z",
+  "updatedAt": "2025-11-21T17:52:45Z",
+  "mergedAt": "2025-11-21T17:37:34Z",
+  "closedAt": "2025-11-21T17:37:34Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/1988",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 9511
+  }
+}

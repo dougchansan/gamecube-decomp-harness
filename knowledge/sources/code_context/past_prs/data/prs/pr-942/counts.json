@@ -1,0 +1,17 @@
+{
+  "number": 942,
+  "title": "Split out known ft files from ft_08A4",
+  "state": "MERGED",
+  "createdAt": "2023-06-29T01:44:02Z",
+  "updatedAt": "2023-06-29T01:56:13Z",
+  "mergedAt": "2023-06-29T01:56:10Z",
+  "closedAt": "2023-06-29T01:56:10Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/942",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 3835112
+  }
+}

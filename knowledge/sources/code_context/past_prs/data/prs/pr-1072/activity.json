@@ -1,0 +1,10 @@
+{
+  "pr": 1072,
+  "title": "Disable `-W all` and fix include paths in `configure.py`",
+  "url": "https://github.com/doldecomp/melee/pull/1072",
+  "text_records_with_body": 0,
+  "review_comments": 0,
+  "changed_files": 4,
+  "added_lines": 5,
+  "deleted_lines": 5
+}

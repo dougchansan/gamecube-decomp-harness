@@ -1,0 +1,17 @@
+{
+  "number": 1703,
+  "title": "Match duplicated IASA and Phys functions in ftCrazyhand",
+  "state": "MERGED",
+  "createdAt": "2025-07-18T17:34:38Z",
+  "updatedAt": "2025-07-18T17:39:16Z",
+  "mergedAt": "2025-07-18T17:39:13Z",
+  "closedAt": "2025-07-18T17:39:13Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/1703",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 17851
+  }
+}

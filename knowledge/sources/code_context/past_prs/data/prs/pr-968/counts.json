@@ -1,0 +1,17 @@
+{
+  "number": 968,
+  "title": "ftPeach Matches",
+  "state": "MERGED",
+  "createdAt": "2023-09-18T22:32:49Z",
+  "updatedAt": "2023-09-18T22:52:42Z",
+  "mergedAt": "2023-09-18T22:52:39Z",
+  "closedAt": "2023-09-18T22:52:39Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/968",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 41626
+  }
+}

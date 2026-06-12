@@ -1,0 +1,25 @@
+{
+  "generated_at": "2026-06-12T17:42:04Z",
+  "dump_root": "/Users/Ford/Github Repos/oss/decomp-orchestrator/knowledge/sources/code_context/past_prs/data",
+  "library_root": "/Users/Ford/Github Repos/oss/decomp-orchestrator/knowledge/sources/code_context/past_prs/data/library",
+  "agent_root": "/Users/Ford/Github Repos/oss/decomp-orchestrator/packages/agents/src/pr-review",
+  "run_artifacts": "/Users/Ford/Github Repos/oss/decomp-orchestrator/knowledge/sources/code_context/past_prs/data/runs/postmortems/20260612T174201Z",
+  "processed_pr_count": 0,
+  "jobs": 16,
+  "run_agent": true,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  },
+  "per_pr_artifacts": [
+    "prs/pr-NNNN/postmortem/postmortem.json",
+    "runs/postmortems/<timestamp>/pr-inputs/pr-*/"
+  ],
+  "stats": {
+    "indexed_records": 2570
+  }
+}

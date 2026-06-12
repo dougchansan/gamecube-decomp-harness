@@ -1,0 +1,17 @@
+{
+  "number": 575,
+  "title": "func_8007B6EC",
+  "state": "CLOSED",
+  "createdAt": "2022-10-24T06:25:17Z",
+  "updatedAt": "2022-10-26T16:01:57Z",
+  "mergedAt": null,
+  "closedAt": "2022-10-26T16:01:57Z",
+  "author": "stephenjayakar",
+  "url": "https://github.com/doldecomp/melee/pull/575",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 2,
+    "diff_bytes": 1548
+  }
+}

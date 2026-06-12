@@ -1,0 +1,17 @@
+{
+  "number": 797,
+  "title": "Clean up `ftGameWatch` motion definitions",
+  "state": "MERGED",
+  "createdAt": "2023-04-22T19:17:42Z",
+  "updatedAt": "2023-04-22T19:29:50Z",
+  "mergedAt": "2023-04-22T19:29:49Z",
+  "closedAt": "2023-04-22T19:29:49Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/797",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 34161
+  }
+}

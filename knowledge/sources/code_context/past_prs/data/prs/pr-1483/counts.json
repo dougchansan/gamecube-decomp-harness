@@ -1,0 +1,17 @@
+{
+  "number": 1483,
+  "title": "Decompile a handful of functions in mplib.c",
+  "state": "MERGED",
+  "createdAt": "2024-10-20T03:14:25Z",
+  "updatedAt": "2024-10-20T05:36:18Z",
+  "mergedAt": "2024-10-20T04:44:10Z",
+  "closedAt": "2024-10-20T04:44:10Z",
+  "author": "eperdew",
+  "url": "https://github.com/doldecomp/melee/pull/1483",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 6395
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 1348,
+  "title": "Check for progress regressions in CI",
+  "state": "MERGED",
+  "createdAt": "2024-02-28T16:18:34Z",
+  "updatedAt": "2024-02-28T19:40:53Z",
+  "mergedAt": "2024-02-28T19:40:53Z",
+  "closedAt": "2024-02-28T19:40:53Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1348",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 3495
+  }
+}

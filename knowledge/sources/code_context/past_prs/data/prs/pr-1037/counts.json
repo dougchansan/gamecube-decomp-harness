@@ -1,0 +1,17 @@
+{
+  "number": 1037,
+  "title": "Match itmato, itmetamon",
+  "state": "MERGED",
+  "createdAt": "2023-12-21T05:40:04Z",
+  "updatedAt": "2023-12-21T06:14:03Z",
+  "mergedAt": "2023-12-21T06:14:00Z",
+  "closedAt": "2023-12-21T06:14:00Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1037",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 20796
+  }
+}

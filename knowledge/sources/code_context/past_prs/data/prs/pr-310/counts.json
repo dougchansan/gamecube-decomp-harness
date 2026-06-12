@@ -1,0 +1,17 @@
+{
+  "number": 310,
+  "title": "Fix another bad JObj function name and bad functions.h declaration",
+  "state": "MERGED",
+  "createdAt": "2022-02-23T21:31:43Z",
+  "updatedAt": "2022-02-23T21:31:50Z",
+  "mergedAt": "2022-02-23T21:31:48Z",
+  "closedAt": "2022-02-23T21:31:48Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/310",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 1897
+  }
+}

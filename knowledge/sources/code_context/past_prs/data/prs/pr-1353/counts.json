@@ -1,0 +1,17 @@
+{
+  "number": 1353,
+  "title": "Properly compare builds on push event",
+  "state": "MERGED",
+  "createdAt": "2024-02-28T23:46:11Z",
+  "updatedAt": "2024-02-28T23:51:19Z",
+  "mergedAt": "2024-02-28T23:51:18Z",
+  "closedAt": "2024-02-28T23:51:18Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1353",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 1541
+  }
+}

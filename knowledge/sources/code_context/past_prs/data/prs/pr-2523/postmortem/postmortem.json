@@ -1,0 +1,338 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2523",
+  "pr": {
+    "number": 2523,
+    "title": "Jj/plbonus",
+    "url": "https://github.com/doldecomp/melee/pull/2523",
+    "state": "CLOSED",
+    "author": "jurrejelle",
+    "created_at": "2026-05-23T15:49:11Z",
+    "merged_at": null
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Draft PR for src/melee/pl/plbonus added a large C implementation of fn_80039618, adjusted fn_8003CC84 digit arithmetic, wrapped fn_80038700 in a dont_inline pragma, and refined several pl_804D6470_t fields in src/melee/pl/types.h. Bot report showed 3 new matches and fn_80039618 improving from 0.00% to 99.67%, but the PR was closed unmerged with no human review comments.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "matching-tactics"
+    ],
+    "systems": [
+      "melee-core",
+      "player-bonus",
+      "src/melee/pl"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/pl/plbonus.c",
+      "role": "Main decompilation change: implemented fn_80039618, added a scoped dont_inline pragma around fn_80038700, adjusted fn_8003CC84 arithmetic, and used PAD_STACK(16).",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/pl/plbonus.c added 319 deleted 3",
+        "raw_diff: plbonus.c hunk replacing /// #fn_80039618 with function body",
+        "raw_diff: #pragma push/#pragma dont_inline on around fn_80038700",
+        "raw_diff: fn_8003CC84 temp_r3_3/temp_r0 arithmetic change",
+        "text_corpus: bot report fn_80039618 0.00% to 99.67%, fn_8003CC84 97.94% to 100.00%"
+      ]
+    },
+    {
+      "path": "src/melee/pl/types.h",
+      "role": "Header/type refinement for pl_804D6470_t offsets used by plbonus calculations.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/pl/types.h added 9 deleted 6",
+        "raw_diff: pl_804D6470_t fields x0, x8, xC, x10, x20, x50, x54, xF0, x160 changed from padding/byte arrays to typed fields"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Implemented fn_80039618 as a long bonus-flag calculation over Player_GetStaleMoveTableIndexPtr2, Player_GetActionStats, Player_GetEntity, attack/hit counters, stale move table fields, and gm/player helpers.",
+      "evidence_refs": [
+        "raw_diff: fn_80039618 body",
+        "text_corpus: bot report fn_80039618 improved 0.00% to 99.67%"
+      ]
+    },
+    {
+      "text": "Added a tightly scoped #pragma push / #pragma dont_inline on / #pragma pop around fn_80038700.",
+      "evidence_refs": [
+        "raw_diff: pragma hunk around fn_80038700"
+      ]
+    },
+    {
+      "text": "Changed fn_8003CC84 digit extraction from modulus expressions to subtract-and-divide expressions.",
+      "evidence_refs": [
+        "raw_diff: temp_r3_3 and temp_r0 arithmetic changes",
+        "text_corpus: bot report fn_8003CC84 97.94% to 100.00%"
+      ]
+    },
+    {
+      "text": "Refined pl_804D6470_t field types at several offsets from opaque byte arrays to float or u32 fields used by plbonus.c.",
+      "evidence_refs": [
+        "raw_diff: types.h pl_804D6470_t field changes"
+      ]
+    },
+    {
+      "text": "Bot report claimed overall matched code +1640 bytes, matched data +456 bytes, 3 new matches, and plbonus .data/.sdata2 reaching 100%.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev bot report for GALE01"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "The implementation cached frequently used stats fields and array pointers into locals before the long condition sequence, keeping the large function readable despite many repeated counters.",
+      "evidence_refs": [
+        "raw_diff: fn_80039618 local declarations for aerials, atk_counts, hit_counts, x358_counts, totals"
+      ]
+    },
+    {
+      "text": "The PR paired code reconstruction with header field refinement, replacing several opaque pl_804D6470_t padding ranges with typed fields used by the new function.",
+      "evidence_refs": [
+        "raw_diff: fn_80039618 references pl_804D6470->x0/x8/xC/x10/x20/x50/x54/xF0/x160",
+        "raw_diff: types.h pl_804D6470_t field changes"
+      ]
+    },
+    {
+      "text": "For ranges with repeated tests, the added function used loops and a switch rather than fully unrolled generated-looking blocks.",
+      "evidence_refs": [
+        "raw_diff: fn_80039618 loops over hit_counts, x358_counts, player indices, and switch over 0x42/0x46/0x4A/0x4E/0x56"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "Large stats/bonus functions can often be made reviewable by first naming local counter roles and preserving natural loops over attack indices or player slots.",
+      "evidence_refs": [
+        "raw_diff: fn_80039618 uses atk_counts, hit_counts, x358_counts and for-loops over ranges 1..99, 0x40..0x62, 0..5"
+      ],
+      "related_standard_ids": [
+        "natural-loops",
+        "infer-authored-source-style",
+        "conservative-naming"
+      ]
+    },
+    {
+      "lesson": "When a matched function needs thresholds from an opaque config struct, recovering typed fields in the owning header can be cleaner than retaining byte-array padding at every accessed offset.",
+      "evidence_refs": [
+        "raw_diff: pl_804D6470_t padding fields converted to float/u32 fields",
+        "raw_diff: fn_80039618 threshold comparisons against pl_804D6470 fields"
+      ],
+      "related_standard_ids": [
+        "typed-fields-over-pointer-math",
+        "truthful-headers-and-includes"
+      ]
+    },
+    {
+      "lesson": "Arithmetic spelling can affect matching even for simple decimal digit extraction; in this slice, subtracting the hundreds/tens products corresponded with fn_8003CC84 reaching 100% in the bot report.",
+      "evidence_refs": [
+        "raw_diff: fn_8003CC84 changed modulus-based digit extraction to subtract-and-divide",
+        "text_corpus: bot report fn_8003CC84 97.94% to 100.00%"
+      ],
+      "related_standard_ids": [
+        "canonical-control-flow-and-macros",
+        "verification-and-regression-ledger"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "Locals used short role names for clear objects and counters, including table, stats, gobj, atk_counts, hit_counts, x358_counts, attacks_total, hits_total, and x358_total.",
+      "evidence_refs": [
+        "raw_diff: fn_80039618 local declarations"
+      ]
+    },
+    {
+      "text": "Unrecovered globals and fields remained address/offset-style, such as pl_804D6470, fn_80039618, x1A8, xD04, xD0C, xDD1, and x160, rather than being given speculative semantic names.",
+      "evidence_refs": [
+        "raw_diff: fn_80039618 and types.h names"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Scoped dont_inline pragma around fn_80038700.",
+      "evidence_refs": [
+        "raw_diff: #pragma push/#pragma dont_inline on/#pragma pop"
+      ],
+      "caution": "PR evidence does not explain why the pragma was required or provide adjacent-function objdiff beyond the bot summary."
+    },
+    {
+      "tactic": "PAD_STACK(16) at the end of fn_80039618.",
+      "evidence_refs": [
+        "raw_diff: fn_80039618 ends with PAD_STACK(16)"
+      ],
+      "caution": "The function remained 99.67% per bot report, and no human or detailed objdiff evidence explains the stack padding."
+    },
+    {
+      "tactic": "Used goto labels to exit positive all-range checks while keeping surrounding loop structure compact.",
+      "evidence_refs": [
+        "raw_diff: skip_only_low_moves and skip_combo_count labels in fn_80039618"
+      ],
+      "caution": "This may be matching-motivated control flow; no review discussion confirms it as preferred style."
+    },
+    {
+      "tactic": "Changed division/modulus expression shape in fn_8003CC84 to subtraction-based digit extraction.",
+      "evidence_refs": [
+        "raw_diff: fn_8003CC84 temp_r3_3/temp_r0 arithmetic",
+        "text_corpus: bot report fn_8003CC84 reached 100.00%"
+      ],
+      "caution": "Only the bot summary ties this hunk to a match; no detailed asm excerpt is present."
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "author": "decomp-dev[bot]",
+      "text": "Report for GALE01 showed matched code 67.81% (+0.04%, +1640 bytes), matched data 39.68% (+0.04%, +456 bytes), 3 new matches, and fn_80039618 improving to 99.67%.",
+      "evidence_refs": [
+        "text_corpus: issue_comment by decomp-dev[bot] at 2026-05-23T15:53:53Z"
+      ]
+    },
+    {
+      "kind": "missing_human_review",
+      "author": null,
+      "text": "No human review comments or review records were included in the slice.",
+      "evidence_refs": [
+        "metadata_json: counts review_comments 0 reviews 0",
+        "text_corpus: only PR body and bot issue comment present"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2523",
+    "Jj/plbonus",
+    "jurrejelle",
+    "src/melee/pl/plbonus.c",
+    "src/melee/pl/types.h",
+    "fn_80039618",
+    "fn_80038700",
+    "fn_8003CC84",
+    "pl_804D6470_t",
+    "pl_804D6470",
+    "Player_GetStaleMoveTableIndexPtr2",
+    "Player_GetActionStats",
+    "Player_GetEntity",
+    "plActionStats",
+    "pl_StaleMoveTableExt_t",
+    "setFlag",
+    "pl_CalculateAverage",
+    "PAD_STACK(16)",
+    "pragma dont_inline",
+    "x358_hits",
+    "by_attack_counts",
+    "staleMoveTable",
+    "fn_8003CC84 digit extraction"
+  ],
+  "follow_up_queries": [
+    "fn_80039618 PAD_STACK(16)",
+    "fn_80038700 dont_inline pragma",
+    "pl_804D6470_t x0 x8 xC x10 x20 x50 x54 xF0 x160",
+    "fn_8003CC84 temp_ret digit extraction",
+    "plbonus 99.67 fn_80039618",
+    "Player_GetStaleMoveTableIndexPtr2 xC60 xC64 xC74 xC78 xC94"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR 2523 closed, merged_at null, draft true in raw_pr_json",
+      "changed_files.jsonl: two changed files",
+      "raw_diff: complete diff excerpt for changed files",
+      "text_corpus: bot report only; no human review comments"
+    ],
+    "notes": [
+      "The raw diff is complete and supports the changed-file and tactic extraction.",
+      "The PR body is empty and there are no human review comments, so reviewer intent and acceptance cannot be inferred.",
+      "The PR was closed with merged_at null; this intake does not treat the changes as accepted upstream.",
+      "The bot report provides high-level matching evidence but not detailed objdiff, build logs, or adjacent regression checks.",
+      "fn_80039618 was reported as 99.67%, not 100%, so the implementation should be treated as a score improvement rather than a proven final match."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson_candidate",
+        "title": "Use typed config fields when a decompiled function proves offset usage",
+        "text": "In plbonus, the fn_80039618 reconstruction used thresholds at specific pl_804D6470_t offsets and the PR converted several opaque padding ranges in types.h to float/u32 fields. This is a candidate example for preferring typed fields over raw padding when usage evidence exists.",
+        "scope": [
+          "src/melee/pl",
+          "pl_804D6470_t",
+          "plbonus"
+        ],
+        "evidence_refs": [
+          "raw_diff: fn_80039618 references pl_804D6470 fields",
+          "raw_diff: types.h pl_804D6470_t padding-to-field changes"
+        ],
+        "confidence": 0.72
+      },
+      {
+        "record_type": "matching_tactic_candidate",
+        "title": "Decimal digit extraction expression shape can be match-sensitive",
+        "text": "The fn_8003CC84 hunk replaced modulus-based tens/ones extraction with subtracting the hundreds and tens products; the bot report listed fn_8003CC84 as reaching 100%.",
+        "scope": [
+          "src/melee/pl/plbonus.c",
+          "fn_8003CC84"
+        ],
+        "evidence_refs": [
+          "raw_diff: fn_8003CC84 arithmetic hunk",
+          "text_corpus: bot report fn_8003CC84 100.00%"
+        ],
+        "confidence": 0.66
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Require explicit evidence for dont_inline and PAD_STACK in reviewable source",
+        "text": "This PR used both a scoped dont_inline pragma and PAD_STACK(16), while the slice only contains a high-level bot report. Curator may consider whether existing matching-tactics and pragma standards should emphasize recording the exact objdiff/build reason for dont_inline and PAD_STACK when introduced.",
+        "source_path": null,
+        "scope": [
+          "matching tactics",
+          "pragmas",
+          "stack padding"
+        ],
+        "evidence_refs": [
+          "raw_diff: #pragma dont_inline on around fn_80038700",
+          "raw_diff: PAD_STACK(16) in fn_80039618",
+          "text_corpus: bot report without detailed objdiff"
+        ],
+        "reason": "The PR is a useful cautionary example, but because it was closed unmerged and lacks human review, this should be curator-reviewed rather than promoted directly."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "plbonus.c contains player bonus/stat flag calculations",
+        "text": "The changed function fn_80039618 in src/melee/pl/plbonus.c calculates many setFlag calls from action stats, stale move table fields, KOs, falls, damage, and match/player helpers.",
+        "source_path": "src/melee/pl/plbonus.c",
+        "scope": [
+          "src/melee/pl",
+          "plbonus",
+          "player bonus flags"
+        ],
+        "evidence_refs": [
+          "raw_diff: fn_80039618 body",
+          "raw_diff: calls to setFlag, Player_GetActionStats, Player_GetStaleMoveTableIndexPtr2"
+        ],
+        "reason": "Useful source-path classification candidate; not promoted because this PR was not merged and the slice only shows a draft PR."
+      }
+    ],
+    "rejection_notes": [
+      "Do not record fn_80039618 as a completed match; the bot report says 99.67%, not 100%.",
+      "Do not infer that the dont_inline pragma or PAD_STACK are accepted style from this PR alone; no human review or detailed verifier evidence is present.",
+      "Do not infer semantic meanings for x1A8, x358_hits, xD04, xD0C, xDD1, x160, or pl_804D6470_t fields beyond the offset/type changes shown in the diff.",
+      "Do not treat plbonus .data/.sdata2 changes as accepted data ownership facts; the PR was closed unmerged and the report is only bot output."
+    ]
+  },
+  "confidence": 0.76,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

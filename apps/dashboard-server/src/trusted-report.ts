@@ -41,11 +41,11 @@ function emptyCounts(): TrustedReportCounts {
   };
 }
 
-function emptyTrustedReport(path: string, status: Exclude<TrustedReportStatus, "ready">, error?: string): TrustedReport {
+function emptyTrustedReport(path: string, source: string, status: Exclude<TrustedReportStatus, "ready">, error?: string): TrustedReport {
   return {
     status,
     path,
-    source: "build/GALE01/report_changes.json",
+    source,
     generatedAt: null,
     ...(error ? { error } : {}),
     counts: emptyCounts(),
@@ -66,8 +66,11 @@ function errorText(error: unknown): string {
 }
 
 export async function loadTrustedReport(repoRoot: string, maxRows = 100): Promise<TrustedReport> {
-  const path = resolve(repoRoot, "build/GALE01/report_changes.json");
-  if (!existsSync(path)) return emptyTrustedReport(path, "missing");
+  return loadTrustedReportFile(resolve(repoRoot, "build/GALE01/report_changes.json"), "build/GALE01/report_changes.json", maxRows);
+}
+
+export async function loadTrustedReportFile(path: string, source: string, maxRows = 100): Promise<TrustedReport> {
+  if (!existsSync(path)) return emptyTrustedReport(path, source, "missing");
 
   try {
     const report = await readRegressionReport(path, "Current local report", maxRows);
@@ -75,7 +78,7 @@ export async function loadTrustedReport(repoRoot: string, maxRows = 100): Promis
     return {
       status: "ready",
       path,
-      source: "build/GALE01/report_changes.json",
+      source,
       generatedAt: mtime,
       counts: {
         newMatches: report.newMatches.length,
@@ -95,6 +98,6 @@ export async function loadTrustedReport(repoRoot: string, maxRows = 100): Promis
       metricProgressions: report.progressions.slice(0, maxRows),
     };
   } catch (error) {
-    return emptyTrustedReport(path, "parse_error", errorText(error));
+    return emptyTrustedReport(path, source, "parse_error", errorText(error));
   }
 }

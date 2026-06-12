@@ -1,0 +1,17 @@
+{
+  "number": 1285,
+  "title": "Split Python requirements into separate files",
+  "state": "MERGED",
+  "createdAt": "2024-02-21T03:50:40Z",
+  "updatedAt": "2024-02-21T03:53:30Z",
+  "mergedAt": "2024-02-21T03:53:29Z",
+  "closedAt": "2024-02-21T03:53:29Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1285",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 7478
+  }
+}

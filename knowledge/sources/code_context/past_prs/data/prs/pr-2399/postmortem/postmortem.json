@@ -1,0 +1,395 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2399",
+  "pr": {
+    "number": 2399,
+    "title": "some grgreatbay data matching + attribute labelling",
+    "url": "https://github.com/doldecomp/melee/pull/2399",
+    "state": "MERGED",
+    "author": "MarioLover63",
+    "created_at": "2026-04-09T17:43:57Z",
+    "merged_at": "2026-04-09T21:02:27Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Great Bay stage PR touching only src/melee/gr/grgreatbay.c. It labels grGb_StageAttr fields by observed use, annotates StageCallbacks rows with object roles, defines previously extern data for item spawning/rotation, and makes small matching-oriented local/PAD_STACK adjustments. Bot report says grgreatbay .data, .rodata, and .sdata reached 100% and several functions improved slightly.",
+  "change_classification": {
+    "primary_type": "data_matching_and_attribute_labelling",
+    "categories": [
+      "decomp-matching",
+      "data-matching",
+      "struct-field-labelling",
+      "stage-callback-labelling"
+    ],
+    "systems": [
+      "stage",
+      "Great Bay",
+      "grgreatbay"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gr/grgreatbay.c",
+      "role": "Only changed file; Great Bay stage source with StageCallbacks, grGb_StageAttr field names, data definitions, and affected Great Bay functions.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gr/grgreatbay.c added 115 deleted 97 hunks 22",
+        "raw_diff: single diff for src/melee/gr/grgreatbay.c"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Added inline comments to grGb_803E3E84 StageCallbacks entries identifying roles such as turtle, main stage, background, foreground water, giants, moon, and tingle.",
+      "evidence_refs": [
+        "raw_diff: StageCallbacks grGb_803E3E84 comments added"
+      ]
+    },
+    {
+      "text": "Renamed grGb_StageAttr offset-style fields x0..x78/x7C to semantic fields for moon wait frames, float floor rates/limits, kame turtle wait/rebirth frames, position offsets, scale, direction probabilities, item probability, and item table entries.",
+      "evidence_refs": [
+        "raw_diff: typedef struct grGb_StageAttr field rename block"
+      ]
+    },
+    {
+      "text": "Updated Great Bay code to use the new grGb_StageAttr field names in turtle setup/update, moon setup/update, float floor movement, direction selection, and item spawning logic.",
+      "evidence_refs": [
+        "raw_diff: grGreatBay_801F4694, grGreatBay_801F499C, grGreatBay_801F5A00, grGreatBay_801F5AF8, grGreatBay_801F5E28, grGreatBay_801F60C4, grGreatBay_801F62F8, grGreatBay_801F63F4 field use changes"
+      ]
+    },
+    {
+      "text": "Renamed a local HSD_JObj pointer in grGreatBay_801F499C from jobj2 to trans_jobj and updated assertions/call sites accordingly.",
+      "evidence_refs": [
+        "raw_diff: grGreatBay_801F499C jobj2 to trans_jobj"
+      ]
+    },
+    {
+      "text": "Changed grGb_803B81C8 and grGb_803B81D4 from extern declarations to const Vec3 and const SpawnItem definitions in grgreatbay.c.",
+      "evidence_refs": [
+        "raw_diff: extern Vec3 grGb_803B81C8 and extern SpawnItem grGb_803B81D4 replaced with const definitions"
+      ]
+    },
+    {
+      "text": "Adjusted PAD_STACK usage in grGreatBay_801F60C4 and grGreatBay_801F63F4 and added a padding local in grGreatBay_801F63F4.",
+      "evidence_refs": [
+        "raw_diff: PAD_STACK(12) to PAD_STACK(4), PAD_STACK(8) to PAD_STACK(4), s32 padding added"
+      ]
+    },
+    {
+      "text": "Bot report recorded data-section matches for main/melee/gr/grgreatbay and slight score improvements for grGreatBay_801F499C, grGreatBay_801F63F4, and grGreatBay_801F60C4.",
+      "evidence_refs": [
+        "text_corpus.jsonl: decomp-dev[bot] report for GALE01"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "The PR replaced offset-style stage-attribute fields with names grouped by behavior domain: moon, floatfloor, kame, probabilities, and item table. This makes later code review and decomp work easier without changing the struct layout shown in the diff.",
+      "evidence_refs": [
+        "raw_diff: grGb_StageAttr offset comments preserved while field names changed"
+      ]
+    },
+    {
+      "text": "The new field names are propagated through actual use sites, so readers can see why each label was chosen, for example kame_scale used for JObj scale, moon_fall_wait_* used for moon timers, and floatfloor_* used in floating-floor response calculations.",
+      "evidence_refs": [
+        "raw_diff: grGreatBay_801F4694 kame_scale/kame_x/kame_y",
+        "raw_diff: grGreatBay_801F5A00 moon_fall_wait_a/b",
+        "raw_diff: grGreatBay_801F60C4 floatfloor_* fields"
+      ]
+    },
+    {
+      "text": "The StageCallbacks comments provide a lightweight map from callback array rows to stage objects, which helps navigate address-style callback functions without renaming the function symbols themselves.",
+      "evidence_refs": [
+        "raw_diff: grGb_803E3E84 row comments"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a stage attribute struct is still offset-named, field labels can be recovered from repeated use-site roles while preserving offset comments and exact types.",
+      "scope": [
+        "stage attribute structs",
+        "src/melee/gr/grgreatbay.c"
+      ],
+      "evidence_refs": [
+        "raw_diff: grGb_StageAttr x0..x78/x7C renamed with unchanged offsets/types",
+        "raw_diff: field names used in Great Bay functions"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "lesson": "For callback arrays that remain address-function based, adding object-role comments can improve local navigation without asserting new semantic function names.",
+      "scope": [
+        "StageCallbacks arrays",
+        "stage source files"
+      ],
+      "evidence_refs": [
+        "raw_diff: grGb_803E3E84 comments turtle/main stage/background/foreground water/giants/moon/tingle"
+      ],
+      "confidence": 0.74
+    },
+    {
+      "lesson": "Data matching may require moving known Vec3/SpawnItem data from extern declarations into const definitions in the owning translation unit, but this should be backed by section/report evidence.",
+      "scope": [
+        "data matching",
+        "stage data ownership"
+      ],
+      "evidence_refs": [
+        "raw_diff: grGb_803B81C8 and grGb_803B81D4 const definitions added",
+        "text_corpus.jsonl: bot report .data/.rodata/.sdata for main/melee/gr/grgreatbay reached 100%"
+      ],
+      "confidence": 0.7
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Use subsystem/object prefixes for recovered stage attribute fields: moon_*, floatfloor_*, and kame_*.",
+      "examples": [
+        "moon_fall_wait_a",
+        "moon_fall_wait_b",
+        "floatfloor_landing_rate",
+        "floatfloor_slant_limit",
+        "kame_wait_frame_a",
+        "kame_x_offset_init",
+        "kame_dir_prob",
+        "kame_item_prob"
+      ],
+      "evidence_refs": [
+        "raw_diff: grGb_StageAttr renamed fields"
+      ],
+      "confidence": 0.8
+    },
+    {
+      "convention": "For paired random-range bounds in this PR, suffixes _a and _b were used instead of min/max names.",
+      "examples": [
+        "kame_wait_frame_a",
+        "kame_wait_frame_b",
+        "kame_rebirth_frame_a",
+        "kame_rebirth_frame_b",
+        "moon_fall_wait_a",
+        "moon_fall_wait_b"
+      ],
+      "evidence_refs": [
+        "raw_diff: grGb_StageAttr s16 timer fields and rand_range use sites"
+      ],
+      "confidence": 0.66
+    },
+    {
+      "convention": "Rename ambiguous locals when a specific role is clear; this PR used trans_jobj for the JObj used for translation/rotation operations.",
+      "examples": [
+        "trans_jobj"
+      ],
+      "evidence_refs": [
+        "raw_diff: grGreatBay_801F499C local jobj2 renamed to trans_jobj"
+      ],
+      "confidence": 0.72
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Use narrowly scoped PAD_STACK size changes and an explicit padding local to influence stack shape for partially unmatched functions.",
+      "evidence_refs": [
+        "raw_diff: grGreatBay_801F60C4 PAD_STACK(12) to PAD_STACK(4)",
+        "raw_diff: grGreatBay_801F63F4 added s32 padding and PAD_STACK(8) to PAD_STACK(4)",
+        "text_corpus.jsonl: bot report improvements for grGreatBay_801F60C4 and grGreatBay_801F63F4"
+      ],
+      "caveat": "The PR evidence has a bot score report but no author explanation or objdiff details for why these exact padding changes were needed.",
+      "confidence": 0.57
+    },
+    {
+      "tactic": "Define TU-owned const data rather than leaving extern declarations when data-section matching evidence supports ownership.",
+      "evidence_refs": [
+        "raw_diff: const Vec3 grGb_803B81C8 and const SpawnItem grGb_803B81D4 definitions",
+        "text_corpus.jsonl: .data/.rodata/.sdata for main/melee/gr/grgreatbay improved to 100%"
+      ],
+      "caveat": "The slice does not include symbols.txt, map, or split metadata proving ownership independently of the diff and bot report.",
+      "confidence": 0.64
+    },
+    {
+      "tactic": "Keep loop structure for item probability selection while replacing offset-style table accesses with named struct array fields.",
+      "evidence_refs": [
+        "raw_diff: grGreatBay_801F63F4 loops over items[offset / 4] and items[i]"
+      ],
+      "confidence": 0.68
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "automation_report",
+      "author": "decomp-dev[bot]",
+      "text": "GALE01 report: matched data +0.05% (+632 bytes), with grgreatbay .data, .rodata, and .sdata reaching 100%; grGreatBay_801F499C, grGreatBay_801F63F4, and grGreatBay_801F60C4 had small improvements.",
+      "evidence_refs": [
+        "text_corpus.jsonl: issue_comment by decomp-dev[bot] at 2026-04-09T17:47:27Z"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2399",
+    "MarioLover63",
+    "grgreatbay",
+    "src/melee/gr/grgreatbay.c",
+    "grGb_StageAttr",
+    "grGb_803E3E84",
+    "StageCallbacks",
+    "grGb_803E3F6C",
+    "grGb_804D69E0",
+    "moon_fall_wait_a",
+    "moon_fall_wait_b",
+    "floatfloor_landing_rate",
+    "floatfloor_slant_mul",
+    "floatfloor_slant_add",
+    "floatfloor_slant_limit",
+    "floatfloor_slant_rate",
+    "floatfloor_slant_reb_rate",
+    "floatfloor_slide_mul",
+    "floatfloor_slide_add",
+    "floatfloor_slide_limit",
+    "floatfloor_slide_rate",
+    "floatfloor_slide_reb_rate",
+    "floatfloor_down_mul",
+    "floatfloor_down_add",
+    "floatfloor_down_limit",
+    "floatfloor_down_up_rate",
+    "floatfloor_down_down_rate",
+    "kame_wait_frame_a",
+    "kame_wait_frame_b",
+    "kame_rebirth_frame_a",
+    "kame_rebirth_frame_b",
+    "kame_x",
+    "kame_y",
+    "kame_x_offset_init",
+    "kame_x_lr_offset_a",
+    "kame_x_lr_offset_b",
+    "kame_x_fb_offset_a",
+    "kame_x_fb_offset_b",
+    "kame_scale",
+    "kame_ud_scale",
+    "kame_dir_prob",
+    "kame_item_prob",
+    "items",
+    "grGreatBay_801F499C",
+    "grGreatBay_801F60C4",
+    "grGreatBay_801F63F4",
+    "grGb_803B81C8",
+    "grGb_803B81D4",
+    "SpawnItem",
+    "PAD_STACK"
+  ],
+  "follow_up_queries": [
+    "grgreatbay grGb_StageAttr field labels",
+    "grGb_803B81C8 grGb_803B81D4 data ownership",
+    "Great Bay StageCallbacks turtle moon tingle",
+    "kame_dir_prob kame_item_prob items SpawnItem",
+    "floatfloor_slant_limit floatfloor_slide_limit floatfloor_down_limit",
+    "PAD_STACK grGreatBay_801F60C4 grGreatBay_801F63F4"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR 2399 merged, one changed file, 115 additions, 97 deletions",
+      "raw_diff: complete diff for src/melee/gr/grgreatbay.c",
+      "text_corpus.jsonl: empty PR body",
+      "text_corpus.jsonl: one decomp-dev[bot] report",
+      "metadata_json: review_comments 0 and reviews 0"
+    ],
+    "notes": [
+      "Diff evidence is strong for what changed in grgreatbay.c.",
+      "There is no human PR body, review comment, or review rationale in the slice.",
+      "The bot report supports data-section matching/improvement claims but does not provide objdiff details, build logs, or author intent.",
+      "Semantic correctness of labels such as kame and floatfloor is supported by use-site names/operations in the diff, but the slice does not include external asset metadata or source comments proving every label."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson_candidate",
+        "title": "Use use-site behavior to label stage attribute structs while preserving layout evidence",
+        "text": "PR 2399 shows grGb_StageAttr offset fields renamed into moon, floatfloor, kame, probability, and item-table fields, with unchanged offset comments/types and use sites updated throughout grgreatbay.c.",
+        "scope": [
+          "stage attribute structs",
+          "grgreatbay"
+        ],
+        "evidence_refs": [
+          "raw_diff: grGb_StageAttr field rename block",
+          "raw_diff: Great Bay function use-site updates"
+        ]
+      },
+      {
+        "record_type": "matching_tactic_candidate",
+        "title": "Treat PAD_STACK/padding changes as narrow matching tactics requiring report evidence",
+        "text": "PR 2399 changes PAD_STACK sizes and adds a padding local in two partially unmatched functions; the only validation in-slice is the bot report showing small improvements for those functions.",
+        "scope": [
+          "stack-shape tactics",
+          "grGreatBay_801F60C4",
+          "grGreatBay_801F63F4"
+        ],
+        "evidence_refs": [
+          "raw_diff: PAD_STACK and padding local changes",
+          "text_corpus.jsonl: bot report function improvements"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "src/melee/gr/grgreatbay.c owns Great Bay stage callbacks and grGb_StageAttr labels",
+        "text": "PR 2399 changed only src/melee/gr/grgreatbay.c, adding StageCallbacks row role comments and semantic labels for grGb_StageAttr fields used by Great Bay moon, kame/turtle, floating floor, and item-spawn logic.",
+        "source_path": "src/melee/gr/grgreatbay.c",
+        "scope": [
+          "stage",
+          "Great Bay",
+          "grgreatbay"
+        ],
+        "evidence_refs": [
+          "changed_files.jsonl: only src/melee/gr/grgreatbay.c changed",
+          "raw_diff: StageCallbacks comments and grGb_StageAttr labels"
+        ],
+        "reason": "Could help future path/source classification for Great Bay stage data and attribute work; curator should verify against current source before promoting."
+      },
+      {
+        "target_source_id": "ssbm_data_sheet",
+        "update_kind": "source_update",
+        "title": "Great Bay grGb_StageAttr field name candidates",
+        "text": "Candidate field names from PR 2399: moon_fall_wait_a/b; floatfloor_landing_rate, slant/slide/down multipliers/adds/limits/rates; kame wait/rebirth frames, x/y positions, offsets, scale, ud scale, direction probabilities, item probability, and items[10].",
+        "source_path": "src/melee/gr/grgreatbay.c",
+        "scope": [
+          "Great Bay attributes",
+          "grGb_StageAttr"
+        ],
+        "evidence_refs": [
+          "raw_diff: grGb_StageAttr field rename block"
+        ],
+        "reason": "May be useful as data-sheet terminology, but this intake does not verify against current source, asset names, or external data documentation."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Callback-array role comments as a conservative alternative to speculative function renames",
+        "text": "When callback functions still have address-style names, object-role comments on callback array rows can improve reviewability without renaming symbols before semantics are fully proven.",
+        "source_path": "src/melee/gr/grgreatbay.c",
+        "scope": [
+          "StageCallbacks",
+          "conservative naming"
+        ],
+        "evidence_refs": [
+          "raw_diff: grGb_803E3E84 row comments"
+        ],
+        "reason": "This aligns with conservative naming, but should remain a curator-reviewed standards candidate rather than an accepted global rule from one PR."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that every new grGb_StageAttr field name is globally canonical without checking current source and any stage asset/data documentation.",
+      "Do not generalize the exact PAD_STACK sizes or the added padding local as reusable style; the slice lacks objdiff/build rationale beyond a bot score report.",
+      "Do not claim human reviewer approval or rationale; the slice has no human review comments and an empty PR body."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

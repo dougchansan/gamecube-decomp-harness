@@ -1,0 +1,423 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2227",
+  "pr": {
+    "number": 2227,
+    "title": "Rename ftKb_SpecialNFx to ftkirbyspecialfox, match most functions",
+    "url": "https://github.com/doldecomp/melee/pull/2227",
+    "state": "MERGED",
+    "author": "PsiLupan",
+    "created_at": "2026-03-06T19:24:53Z",
+    "merged_at": "2026-03-06T19:32:00Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2227 renamed Kirby's copied Fox/Falco neutral-special translation unit from ftKb_SpecialNFx.c to ftkirbyspecialfox.c, updated build/split/symbol/header references, typed the Kirby fighter var xB0 as an HSD_GObj* blaster item pointer, and added or improved many function bodies for the new unit. The automated report recorded +1592 matched-code bytes, 36 new matches in the renamed unit, and 3 unmatched-item improvements, while also showing old-unit broken matches consistent with the file rename.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "naming",
+      "headers",
+      "config",
+      "type-recovery"
+    ],
+    "systems": [
+      "fighter",
+      "Kirby",
+      "Fox/Falco copied special",
+      "build-config",
+      "symbols"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftkirbyspecialfox.c",
+      "role": "new renamed translation unit with expanded Kirby Fox/Falco blaster special implementations and helper inlines",
+      "evidence_refs": [
+        "changed_files.jsonl: added 713 deleted 0",
+        "raw_diff: new file mode for ftkirbyspecialfox.c",
+        "raw_diff: functions ftKb_SpecialNFx_800FDC70, ftKb_SpecialNFx_OnChangeAction, ftKb_SpecialNFx_800FDDF4, ftKb_SpecialNFx_800FE100, ftKb_SpecialNFx_800FE240 and FxSpecialN/FxSpecialAirN anim handlers added"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_SpecialNFx.c",
+      "role": "deleted old translation unit path",
+      "evidence_refs": [
+        "changed_files.jsonl: added 0 deleted 372",
+        "raw_diff: deleted file mode for ftKb_SpecialNFx.c"
+      ]
+    },
+    {
+      "path": "config/GALE01/splits.txt",
+      "role": "renamed split entry while preserving text and sdata2 ranges",
+      "evidence_refs": [
+        "diff_excerpt: split path changed from ftKb_SpecialNFx.c to ftkirbyspecialfox.c with .text 0x800FDC70-0x800FEDD0 and .sdata2 0x804D944C-0x804D9474"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "renamed two address-style function symbols to semantic ftKb_SpecialNFx names",
+      "evidence_refs": [
+        "diff_excerpt: fn_800FDCE0 renamed to ftKb_SpecialNFx_OnChangeAction",
+        "diff_excerpt: fn_800FE0E0 renamed to ftKb_SpecialNFx_CreateBlasterShot"
+      ]
+    },
+    {
+      "path": "configure.py",
+      "role": "updated object list to build renamed translation unit path",
+      "evidence_refs": [
+        "diff_excerpt: Object(NonMatching, ftKb_SpecialNFx.c) changed to Object(NonMatching, ftkirbyspecialfox.c)"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftKb_Init.h",
+      "role": "updated prototypes for renamed semantic functions",
+      "evidence_refs": [
+        "diff_excerpt: prototype fn_800FDCE0 changed to ftKb_SpecialNFx_OnChangeAction",
+        "diff_excerpt: prototype fn_800FE0E0 changed to ftKb_SpecialNFx_CreateBlasterShot"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/types.h",
+      "role": "recovered xB0 type and field meaning for Kirby fighter vars",
+      "evidence_refs": [
+        "raw_diff lines 1166-1175: xB0 changed from u32 to HSD_GObj* with comment Fox/Falco blaster item"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Renamed the Kirby Fox copied-special source file to ftkirbyspecialfox.c and synchronized the split table and build object path.",
+      "evidence_refs": [
+        "diff_excerpt: splits.txt path rename",
+        "diff_excerpt: configure.py object path rename",
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "text": "Renamed fn_800FDCE0 to ftKb_SpecialNFx_OnChangeAction and fn_800FE0E0 to ftKb_SpecialNFx_CreateBlasterShot in symbols and header declarations.",
+      "evidence_refs": [
+        "diff_excerpt: symbols.txt renames",
+        "diff_excerpt: ftKb_Init.h prototype renames"
+      ]
+    },
+    {
+      "text": "Added implementations for previously stubbed or todo-marked functions such as ftKb_SpecialNFx_800FDC70, ftKb_SpecialNFx_800FDDF4, ftKb_SpecialNFx_800FE100, ftKb_SpecialNFx_800FE240, and several FxSpecialN/FxSpecialAirN animation routines.",
+      "evidence_refs": [
+        "raw_diff: deleted file had /// # markers for several functions",
+        "raw_diff: new file contains function bodies",
+        "text_corpus.jsonl: bot report lists 36 new matches and 3 unmatched-item improvements"
+      ]
+    },
+    {
+      "text": "Replaced magic motion-state case labels in ftKb_SpecialNFx_800FDD4C with ftKb_MS_* and ftCo_MS_* enum names while retaining numeric offset arithmetic.",
+      "evidence_refs": [
+        "raw_diff: old function used 0x1A7/0x208/0xDC comments",
+        "diff_excerpt: new function uses ftKb_MS_FxSpecialNStart, ftKb_MS_FcSpecialNStart, ftCo_MS_ThrowB, and related enum cases"
+      ]
+    },
+    {
+      "text": "Typed ftKb_FighterVars.xB0 as HSD_GObj* and documented it as the Fox/Falco blaster item.",
+      "evidence_refs": [
+        "raw_diff lines 1166-1175"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "The rename was propagated through splits, configure.py, symbols, and prototypes rather than only moving the C file.",
+      "evidence_refs": [
+        "diff_excerpt: splits.txt",
+        "diff_excerpt: configure.py",
+        "diff_excerpt: symbols.txt",
+        "diff_excerpt: ftKb_Init.h"
+      ]
+    },
+    {
+      "text": "Recovered a concrete field type for xB0 and then used it as an object pointer in blaster-handling code, reducing reliance on integer storage for item object state.",
+      "evidence_refs": [
+        "raw_diff lines 1166-1175",
+        "raw_diff: calls using fp->fv.kb.xB0 with it_802ADDD0, it_802AE538, it_802AE608, it_802AEAB4"
+      ]
+    },
+    {
+      "text": "Factored repeated Fox/Falco hat-kind selection into small inline helpers for blaster item IDs and start/loop/end motion IDs.",
+      "evidence_refs": [
+        "raw_diff: inline ftKbGetBlasterId",
+        "raw_diff: inline ftKbGetStartMotionId, ftKbGetAirStartMotionId, ftKbGetLoopMotionId, ftKbGetEndMotionId, ftKbGetAirLoopMotionId"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For translation-unit renames, update all path surfaces together: split entries, build object lists, symbols/prototypes, and source filenames. Otherwise automated reports may show old-unit broken matches even when the renamed unit gains matches.",
+      "scope": [
+        "translation-unit rename",
+        "config/GALE01/splits.txt",
+        "configure.py",
+        "symbols",
+        "headers"
+      ],
+      "evidence_refs": [
+        "diff_excerpt: splits.txt and configure.py path rename",
+        "diff_excerpt: symbols.txt and ftKb_Init.h renames",
+        "text_corpus.jsonl: bot report lists new matches under ftkirbyspecialfox and broken matches under ftKb_SpecialNFx"
+      ]
+    },
+    {
+      "lesson": "When a field's role is recovered from the decompilation, typing it in the owning struct can make item/object interactions clearer than storing the value as u32 and repeatedly casting.",
+      "scope": [
+        "Kirby fighter vars",
+        "typed-fields-over-pointer-math"
+      ],
+      "evidence_refs": [
+        "raw_diff lines 1166-1175: xB0 u32 to HSD_GObj* Fox/Falco blaster item",
+        "diff_excerpt: new code uses fp->fv.kb.xB0 in item helper calls"
+      ]
+    },
+    {
+      "lesson": "Replacing literal motion-state IDs with existing enum names improves reviewability when the enum names are available and the old code already comments the intended states.",
+      "scope": [
+        "motion-state switches",
+        "Kirby copied specials"
+      ],
+      "evidence_refs": [
+        "raw_diff: old ftKb_SpecialNFx_800FDD4C used numeric cases with comments",
+        "diff_excerpt: new ftKb_SpecialNFx_800FDD4C uses ftKb_MS_* and ftCo_MS_* cases"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "ftkirbyspecialfox.c",
+      "kind": "source_file",
+      "convention": "lowercase character/special file naming for Kirby's copied Fox special source path",
+      "evidence_refs": [
+        "PR title",
+        "diff_excerpt: split and configure path rename"
+      ]
+    },
+    {
+      "name": "ftKb_SpecialNFx_OnChangeAction",
+      "kind": "function",
+      "convention": "semantic name for 0x800FDCE0 replacing fn_ address-style name when body calls action-change helpers",
+      "evidence_refs": [
+        "diff_excerpt: symbols.txt rename",
+        "diff_excerpt: ftKb_Init.h prototype rename",
+        "raw_diff: function body calls ft_800892A0 and ft_80089824"
+      ]
+    },
+    {
+      "name": "ftKb_SpecialNFx_CreateBlasterShot",
+      "kind": "function",
+      "convention": "semantic name for 0x800FE0E0 replacing fn_ address-style name when wrapper invokes blaster-shot creation/update function",
+      "evidence_refs": [
+        "diff_excerpt: symbols.txt rename",
+        "diff_excerpt: ftKb_Init.h prototype rename",
+        "raw_diff: function body calls ftKb_SpecialNFx_800FDF30"
+      ]
+    },
+    {
+      "name": "fp, gobj, da, blasterGObj",
+      "kind": "local_variables",
+      "convention": "short local role names for fighter pointer, game object, data attributes, and created blaster object",
+      "evidence_refs": [
+        "raw_diff: ftKb_SpecialNFx_800FE100 and ftKb_SpecialNFx_800FE240 locals"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Used narrow stack-padding tactics in specific functions, including FORCE_PAD_STACK_8 and PAD_STACK(8), where the PR's automated report shows those functions as matched or improved.",
+      "evidence_refs": [
+        "raw_diff: ftKb_SpecialNFx_OnChangeAction uses FORCE_PAD_STACK_8",
+        "raw_diff: ftKb_SpecialNFx_800FDEE0 and ftKb_FxSpecialAirNLoop_Anim use PAD_STACK(8)",
+        "text_corpus.jsonl: bot report lists ftKb_SpecialNFx_OnChangeAction and ftKb_SpecialNFx_800FDEE0 as 100% new matches"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "tactic": "Introduced inline helper functions to share hat-kind dispatch while preserving likely inlined callsite codegen for motion IDs, blaster item IDs, and callback setup.",
+      "evidence_refs": [
+        "raw_diff: inline ftKb_SpecialNFx_SetCall",
+        "raw_diff: inline ftKbGetBlasterId and ftKbGet*MotionId helpers",
+        "text_corpus.jsonl: bot report lists multiple affected animation functions as 100% new matches"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "tactic": "Used OSReport plus HSD_ASSERT on blaster creation failure paths in the new start functions.",
+      "evidence_refs": [
+        "raw_diff: ftKb_SpecialNFx_800FE100 has OSReport(\"ftToSpecialNFox::Caution!!!\\n\") and HSD_ASSERT(429, 0)",
+        "raw_diff: ftKb_SpecialNFx_800FE240 has OSReport(\"ftToSpecialNFox::Caution!!!\\n\") and HSD_ASSERT(465, 0)"
+      ],
+      "confidence": "medium"
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "automated_report",
+      "author": "decomp-dev[bot]",
+      "text": "Report for GALE01 recorded matched code 55.24% (+0.04%, +1592 bytes), 36 new matches in main/melee/ft/chara/ftKirby/ftkirbyspecialfox, 3 improvements in unmatched items, 30 broken matches under the old ftKb_SpecialNFx unit, and 1 old-unit .sdata2 unmatched regression.",
+      "evidence_refs": [
+        "text_corpus.jsonl issue_comment by decomp-dev[bot] at 2026-03-06T19:31:27Z"
+      ]
+    },
+    {
+      "kind": "human_review",
+      "author": null,
+      "text": "No human review comments were present in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata_json: review_comments 0, reviews 0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2227",
+    "PsiLupan",
+    "ftkirbyspecialfox",
+    "ftKb_SpecialNFx",
+    "ftKb_SpecialNFx_OnChangeAction",
+    "ftKb_SpecialNFx_CreateBlasterShot",
+    "ftKb_SpecialNFx_800FDC70",
+    "ftKb_SpecialNFx_800FDDF4",
+    "ftKb_SpecialNFx_800FE100",
+    "ftKb_SpecialNFx_800FE240",
+    "ftKb_FxSpecialNStart_Anim",
+    "ftKb_FxSpecialNLoop_Anim",
+    "ftKb_FxSpecialAirNStart_Anim",
+    "ftKb_FxSpecialAirNLoop_Anim",
+    "Fox blaster item",
+    "Falco blaster item",
+    "ftKb_FighterVars.xB0",
+    "HSD_GObj* xB0",
+    "ftKbGetBlasterId",
+    "ftKbGetStartMotionId",
+    "FORCE_PAD_STACK_8",
+    "PAD_STACK",
+    "OSReport",
+    "HSD_ASSERT"
+  ],
+  "follow_up_queries": [
+    "ftkirbyspecialfox.c remaining unmatched ftKb_SpecialNFx_800FE100 ftKb_SpecialNFx_800FE240",
+    "ftKb_FighterVars xB0 Fox/Falco blaster item uses",
+    "ftKbGetBlasterId helper pattern copied specials",
+    "ftKb_MS_FxSpecialNStart ftKb_MS_FcSpecialNStart enum offsets",
+    "Kirby copied Fox special blaster callbacks death2_cb take_dmg_cb accessory4_cb",
+    "old ftKb_SpecialNFx .sdata2 regression after ftkirbyspecialfox rename"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json",
+      "changed_files.jsonl",
+      "raw_diff.diff truncated but targeted sections loaded",
+      "text_corpus.jsonl automated report"
+    ],
+    "notes": [
+      "The PR body is empty and no human review comments are loaded.",
+      "The raw diff excerpt in the prompt is truncated, but targeted local reads recovered the helper-inline and types.h sections needed for this intake.",
+      "Automated match data supports match-progress claims, but no local build, objdiff command output, or author rationale is present beyond the bot report.",
+      "The bot report's broken matches are listed under the deleted old unit path, so they are treated as rename/report artifacts rather than proof of functional regression."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson",
+        "title": "Coordinate translation-unit renames across split, build, symbol, and header surfaces",
+        "text": "PR 2227 shows a focused TU rename from ftKb_SpecialNFx.c to ftkirbyspecialfox.c with matching updates in config/GALE01/splits.txt, configure.py, config/GALE01/symbols.txt, and ftKb_Init.h. Automated reporting then attributed gains to the new unit and losses to the old unit path.",
+        "scope": [
+          "translation-unit rename",
+          "build config",
+          "splits",
+          "symbols",
+          "headers"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: splits/configure/symbols/header updates",
+          "text_corpus.jsonl: automated report"
+        ]
+      },
+      {
+        "record_type": "decomp_lesson",
+        "title": "Promote recovered object-pointer fighter vars out of integer storage",
+        "text": "The PR changed ftKb_FighterVars.xB0 from u32 to HSD_GObj* with a Fox/Falco blaster item comment, and the new source uses that field with item object helper calls.",
+        "scope": [
+          "Kirby fighter vars",
+          "item object fields",
+          "typed fields"
+        ],
+        "evidence_refs": [
+          "raw_diff lines 1166-1175",
+          "raw_diff: fp->fv.kb.xB0 item helper callsites"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "Kirby copied Fox/Falco neutral-special source path renamed",
+        "text": "In PR 2227, the split/build path for the Kirby Fox/Falco copied neutral-special unit changed from src/melee/ft/chara/ftKirby/ftKb_SpecialNFx.c to src/melee/ft/chara/ftKirby/ftkirbyspecialfox.c. The split ranges remained .text 0x800FDC70-0x800FEDD0 and .sdata2 0x804D944C-0x804D9474 in the shown diff.",
+        "source_path": "src/melee/ft/chara/ftKirby/ftkirbyspecialfox.c",
+        "scope": [
+          "src/melee/ft/chara/ftKirby",
+          "config/GALE01/splits.txt",
+          "configure.py"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: splits.txt path rename and ranges",
+          "diff_excerpt: configure.py object path rename"
+        ],
+        "reason": "Possible source-owned path fact for curator review; not promoted by intake."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "source_update",
+        "title": "ftKb_FighterVars.xB0 typed as Fox/Falco blaster item object",
+        "text": "PR 2227 changed ftKb_FighterVars.xB0 from u32 to HSD_GObj* with the comment 'Fox/Falco blaster item'.",
+        "source_path": "src/melee/ft/chara/ftKirby/types.h",
+        "scope": [
+          "Kirby fighter vars",
+          "Fox/Falco copied special",
+          "item object state"
+        ],
+        "evidence_refs": [
+          "raw_diff lines 1166-1175"
+        ],
+        "reason": "Could be curated as a struct-field/path fact if not already represented in current source facts."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Treat rename-induced old-unit broken matches separately from true regressions",
+        "text": "When a PR renames a translation unit and the report shows new matches under the new unit plus broken matches under the old unit, curator may consider documenting that intake should classify the old-unit losses as rename/report noise unless additional evidence shows actual regression.",
+        "source_path": null,
+        "scope": [
+          "automated decomp reports",
+          "translation-unit renames"
+        ],
+        "evidence_refs": [
+          "text_corpus.jsonl: 36 new matches under ftkirbyspecialfox and 30 broken matches under ftKb_SpecialNFx"
+        ],
+        "reason": "Potential reporting interpretation standard; requires curator review because one PR is limited evidence."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that every function in ftkirbyspecialfox.c matched; the bot report names 36 new matches and 3 unmatched-item improvements, with ftKb_SpecialNFx_800FE100 and ftKb_SpecialNFx_800FE240 shown below 100%.",
+      "Do not treat PAD_STACK or FORCE_PAD_STACK use as generally accepted style from this PR alone; the evidence only supports narrow use in this file with automated match reporting.",
+      "Do not promote human reviewer intent or approval rationale; no human review comments were loaded."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

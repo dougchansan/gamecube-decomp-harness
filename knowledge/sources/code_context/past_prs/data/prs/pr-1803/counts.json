@@ -1,0 +1,17 @@
+{
+  "number": 1803,
+  "title": "table-typer: Fill in lots of StageCallback types",
+  "state": "MERGED",
+  "createdAt": "2025-08-07T03:09:04Z",
+  "updatedAt": "2025-08-07T03:36:55Z",
+  "mergedAt": "2025-08-07T03:36:55Z",
+  "closedAt": "2025-08-07T03:36:55Z",
+  "author": "lukechampine",
+  "url": "https://github.com/doldecomp/melee/pull/1803",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 127196
+  }
+}

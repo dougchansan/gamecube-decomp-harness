@@ -1,0 +1,17 @@
+{
+  "number": 97,
+  "title": "Cleanup of some duplicated data pointers and convert some hex to ASCII",
+  "state": "MERGED",
+  "createdAt": "2021-11-09T05:14:27Z",
+  "updatedAt": "2021-11-09T05:14:39Z",
+  "mergedAt": "2021-11-09T05:14:36Z",
+  "closedAt": "2021-11-09T05:14:36Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/97",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 81016
+  }
+}

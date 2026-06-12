@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Dump the harness mwcc_debug pcdump section for one function."""
+"""Dump the tool-local mwcc_debug pcdump section for one function."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from pathlib import Path
 import sys
 
 sys.path.append(str(Path(__file__).resolve().parents[3] / "_shared"))
-from harness import clamp_int, print_json, resolve_repo_root, run_harness_script
+from melee_tooling import clamp_int, print_json, resolve_repo_root, run_tool_script
 
 
 def main() -> None:
@@ -16,12 +16,12 @@ def main() -> None:
     parser.add_argument("--repo-root", help="Target Melee checkout root.")
     parser.add_argument("--function", required=True, help="Function symbol to dump.")
     parser.add_argument("--runner", choices=("auto", "wibo", "wine"), default="auto", help="Execution backend for mwcc_debug.")
-    parser.add_argument("--timeout-seconds", type=int, default=180, help="Maximum runtime for the harness command.")
+    parser.add_argument("--timeout-seconds", type=int, default=180, help="Maximum runtime for the tool-local command.")
     parser.add_argument("--json", action="store_true", help="Emit JSON output.")
     args = parser.parse_args()
 
     repo_root = resolve_repo_root(args.repo_root)
-    payload = run_harness_script(
+    payload = run_tool_script(
         "mwcc_dump.py",
         ["--runner", args.runner, args.function],
         repo_root=repo_root,

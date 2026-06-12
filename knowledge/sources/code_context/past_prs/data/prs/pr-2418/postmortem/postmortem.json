@@ -1,0 +1,164 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2418",
+  "pr": {
+    "number": 2418,
+    "title": "Move mac to wine",
+    "url": "https://github.com/doldecomp/melee/pull/2418",
+    "state": "MERGED",
+    "author": "jellejurre",
+    "created_at": "2026-04-14T21:08:17Z",
+    "merged_at": "2026-04-25T07:37:05Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Tooling-only PR that changed the wibo selection predicate in tools/project.py: use_wibo now requires sys.platform == \"linux\" instead of allowing both Linux and Darwin. The PR title says \"Move mac to wine\", but the loaded evidence only directly proves removal of Darwin/macOS from the wibo path.",
+  "change_classification": {
+    "primary_type": "tooling",
+    "categories": [
+      "tooling",
+      "platform-configuration",
+      "compiler-wrapper"
+    ],
+    "systems": [
+      "tools/project.py",
+      "compiler_wrapper",
+      "wibo"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "tools/project.py",
+      "role": "Changed ProjectConfig.use_wibo platform gate for compiler wrapper selection.",
+      "evidence_refs": [
+        "changed_files: tools/project.py added 1 deleted 1 hunks 1",
+        "raw_diff: tools/project.py @@ -285 use_wibo"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "In tools/project.py, ProjectConfig.use_wibo stopped accepting sys.platform == \"darwin\" and now only accepts sys.platform == \"linux\", while retaining checks for wibo_tag, supported machine architectures, and absence of an explicit wrapper.",
+      "evidence_refs": [
+        "raw_diff: removed `(sys.platform == \"linux\" or sys.platform == \"darwin\")`",
+        "raw_diff: added `sys.platform == \"linux\"`"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "The change is narrowly scoped to a single platform predicate in the tooling wrapper path, minimizing unrelated project churn.",
+      "evidence_refs": [
+        "changed_files: one changed file, one hunk, one added line, one deleted line",
+        "raw_diff: only use_wibo platform condition changed"
+      ]
+    }
+  ],
+  "decomp_lessons": [],
+  "naming_conventions": [],
+  "assembly_or_matching_tactics": [],
+  "review_feedback": [
+    {
+      "text": "Automated GALE01 report said \"No changes\", indicating the tooling predicate edit did not alter the reported game output in that bot run.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev[bot] issue_comment `### Report for GALE01 ... No changes`"
+      ]
+    },
+    {
+      "text": "The PR received approvals from ribbanya and jurrejelle; no loaded review comments explain additional rationale.",
+      "evidence_refs": [
+        "text_corpus: review by ribbanya state APPROVED",
+        "text_corpus: review by jurrejelle state APPROVED"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2418",
+    "Move mac to wine",
+    "tools/project.py",
+    "compiler_wrapper",
+    "use_wibo",
+    "wibo_tag",
+    "sys.platform",
+    "linux",
+    "darwin",
+    "macOS",
+    "wine",
+    "platform.machine",
+    "x86_64",
+    "aarch64",
+    "arm64",
+    "GALE01 No changes"
+  ],
+  "follow_up_queries": [
+    "tools/project.py use_wibo sys.platform linux darwin",
+    "compiler_wrapper mac wine wibo",
+    "wibo_tag platform.machine wrapper None",
+    "PR 2418 Move mac to wine"
+  ],
+  "evidence_quality": {
+    "status": "strong",
+    "evidence_refs": [
+      "metadata_json: PR 2418 title/state/author/timestamps",
+      "changed_files: tools/project.py one hunk",
+      "raw_diff: exact platform predicate edit",
+      "text_corpus: bot report and approvals"
+    ],
+    "notes": [
+      "The exact code change is strongly evidenced by the full raw diff.",
+      "The PR body is empty and there are no review comments, so the rationale behind \"Move mac to wine\" is only partially evidenced by the title plus the Darwin removal.",
+      "No decomp source, matching, naming, assembly, or objdiff tactics were involved in the loaded PR slice."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "kind": "tooling_postmortem",
+        "title": "use_wibo became Linux-only in tools/project.py",
+        "text": "PR 2418 changed ProjectConfig.use_wibo so wibo is selected only on sys.platform == \"linux\" rather than on Linux or Darwin. This was a one-line tooling predicate change with a GALE01 bot report of \"No changes\" and two approval reviews.",
+        "scope": [
+          "tools/project.py",
+          "compiler_wrapper",
+          "use_wibo"
+        ],
+        "evidence_refs": [
+          "raw_diff: tools/project.py use_wibo predicate",
+          "text_corpus: decomp-dev[bot] GALE01 No changes",
+          "text_corpus: approvals by ribbanya and jurrejelle"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "tools/project.py use_wibo platform gate",
+        "text": "As of PR 2418, tools/project.py's use_wibo predicate allows wibo only when sys.platform == \"linux\"; Darwin/macOS is no longer accepted by this predicate.",
+        "source_path": "tools/project.py",
+        "scope": [
+          "ProjectConfig.use_wibo",
+          "compiler wrapper selection",
+          "tooling platform gates"
+        ],
+        "evidence_refs": [
+          "raw_diff: removed Darwin from use_wibo platform condition",
+          "changed_files: tools/project.py"
+        ],
+        "reason": "This is a concrete tooling path fact supported by the PR diff, but it should be curated as source/path metadata rather than treated as a global decomp standard."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer from this slice alone that all macOS compiler execution must use Wine; the title suggests that direction, but the only loaded code evidence is removal of Darwin from the wibo predicate.",
+      "Do not record decomp matching or assembly lessons from this PR; it changed only tooling configuration."
+    ]
+  },
+  "confidence": 0.86,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 733,
+  "title": "Tidy up root directory for real",
+  "state": "MERGED",
+  "createdAt": "2023-01-29T21:30:10Z",
+  "updatedAt": "2023-01-29T22:01:45Z",
+  "mergedAt": "2023-01-29T22:01:44Z",
+  "closedAt": "2023-01-29T22:01:44Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/733",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 1,
+    "diff_bytes": 10782
+  }
+}

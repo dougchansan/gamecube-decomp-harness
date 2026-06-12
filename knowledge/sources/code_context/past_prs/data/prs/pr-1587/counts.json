@@ -1,0 +1,17 @@
+{
+  "number": 1587,
+  "title": "sislib matches",
+  "state": "MERGED",
+  "createdAt": "2025-06-10T03:35:03Z",
+  "updatedAt": "2025-06-10T03:46:58Z",
+  "mergedAt": "2025-06-10T03:46:56Z",
+  "closedAt": "2025-06-10T03:46:56Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/1587",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 33655
+  }
+}

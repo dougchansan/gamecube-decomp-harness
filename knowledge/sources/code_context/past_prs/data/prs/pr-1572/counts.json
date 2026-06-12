@@ -1,0 +1,17 @@
+{
+  "number": 1572,
+  "title": "Various stage matches",
+  "state": "MERGED",
+  "createdAt": "2025-06-05T10:36:28Z",
+  "updatedAt": "2025-06-05T10:40:00Z",
+  "mergedAt": "2025-06-05T10:39:43Z",
+  "closedAt": "2025-06-05T10:39:43Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/1572",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 27989
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 1243,
+  "title": "Edit `README` slightly",
+  "state": "MERGED",
+  "createdAt": "2024-02-17T05:44:38Z",
+  "updatedAt": "2024-02-17T05:45:52Z",
+  "mergedAt": "2024-02-17T05:45:51Z",
+  "closedAt": "2024-02-17T05:45:51Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1243",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 1800
+  }
+}

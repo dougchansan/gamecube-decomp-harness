@@ -1,0 +1,17 @@
+{
+  "number": 405,
+  "title": "decompile util.c",
+  "state": "MERGED",
+  "createdAt": "2022-07-08T19:41:51Z",
+  "updatedAt": "2022-07-08T19:43:41Z",
+  "mergedAt": "2022-07-08T19:43:41Z",
+  "closedAt": "2022-07-08T19:43:41Z",
+  "author": "RevoSucks",
+  "url": "https://github.com/doldecomp/melee/pull/405",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 10233
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 1104,
+  "title": "Disable `publish-pages`",
+  "state": "MERGED",
+  "createdAt": "2024-01-24T14:59:29Z",
+  "updatedAt": "2024-01-24T15:00:45Z",
+  "mergedAt": "2024-01-24T15:00:44Z",
+  "closedAt": "2024-01-24T15:00:44Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/1104",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 380
+  }
+}

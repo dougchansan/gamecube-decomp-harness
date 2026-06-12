@@ -1,0 +1,361 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2655",
+  "pr": {
+    "number": 2655,
+    "title": "Melee decomp: FT",
+    "url": "https://github.com/doldecomp/melee/pull/2655",
+    "state": "OPEN",
+    "author": "fjooord",
+    "created_at": "2026-06-11T19:59:26Z",
+    "merged_at": null
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Open fighter decompilation PR touching four FT files. PR body claims exact-match decompilation of 4 newly matched functions, verified in isolation with ninja changes_all and clean regression report; bot report lists 4 new matches and 8 additional unmatched-item improvements.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "tooling-validated"
+    ],
+    "systems": [
+      "fighter",
+      "fighter-common",
+      "kirby",
+      "fighter-collision"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/ft/ftcoll.c",
+      "role": "Largest change; refactors ftColl_80077970 into inline helpers, relocates .sdata2 constant definitions after the matched function with extern declarations earlier, and improves ftColl_80077C60.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/ft/ftcoll.c +156/-115, 14 hunks",
+        "diff_excerpt: ftcoll.c .sdata2 extern declarations and later definitions",
+        "diff_excerpt: ftColl_80077970 introduces inlineItemA0 and inlineItemA1",
+        "text_corpus issue_comment: ftColl_8007925C and ftColl_80077970 reach 100%; ftColl_80077C60 improves to 98.60%"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_0A01.c",
+      "role": "Common fighter matching cleanup; rewrites item selection control flow, adds a terminal-velocity inline accessor, and expands an island collision check in ftCo_800AB224.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/ft/chara/ftCommon/ftCo_0A01.c +55/-35, 6 hunks",
+        "diff_excerpt: ftCo_800A61D8 uses continue guards, ftCo_800A5908, and itemDist",
+        "diff_excerpt: ftCo_800A9904_inline0 returns fp->co_attrs.terminal_vel",
+        "diff_excerpt: ftCo_800AB224 replaces ftCo_800A21FC call with explicit mpIsland_8005AB54/mpIsland_8005AC14 logic",
+        "text_corpus issue_comment: ftCo_800AB224 reaches 100%; ftCo_800A61D8 and ftCo_800A9904 improve"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_Attack100.c",
+      "role": "Small stack/declaration-order matching changes for Link/Samus hookshot-related functions.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/ft/chara/ftCommon/ftCo_Attack100.c +6/-5, 4 hunks",
+        "diff_excerpt: fn_800D8EC8 adds UNUSED u32 unused0",
+        "diff_excerpt: fn_800D9930 reorders frame/i declarations, changes PAD_STACK from 0x8 to 4, and moves Item* it declaration into branch",
+        "text_corpus issue_comment: fn_800D8EC8 reaches 100%; fn_800D9930 improves to 98.80%"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftKirby/ftkirby.c",
+      "role": "Kirby SpecialN matching changes; adjusts table signedness, wraps a function body in a static inline helper, extracts joint-reference loop helper, and tunes PAD_STACK/declaration order.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/ft/chara/ftKirby/ftkirby.c +37/-24, 8 hunks",
+        "diff_excerpt: ftKb_Init_803CB46C changes from s8 to u8",
+        "diff_excerpt: ftKb_SpecialN_800EED50 body moved into ftKb_SpecialN_800EED50_inline wrapper",
+        "diff_excerpt: ftKb_SpecialN_800EF0E4_insert_joint_refs extracted from loop over joints and FighterBone parts",
+        "diff_excerpt: ftKb_SpecialN_800EF0E4 and ftKb_SpecialN_800EF35C PAD_STACK changes",
+        "text_corpus issue_comment: Kirby functions ftKb_SpecialN_800EED50, ftKb_SpecialN_800EEC34, ftKb_SpecialN_800EF0E4, and ftKb_SpecialN_800EF35C improve but are not listed as new 100% matches"
+      ]
+    }
+  ],
+  "what_changed": [
+    "PR body states this slice exact-matches 4 newly matched functions across 4 files, with runner validation and clean regressions.",
+    "Bot report lists 4 new matches: ftColl_8007925C, ftColl_80077970, ftCo_800AB224, and fn_800D8EC8.",
+    "Bot report lists 8 improvements in unmatched items, including ftColl_80077C60, fn_800D9930, multiple Kirby SpecialN functions, ftCo_800A61D8, and ftCo_800A9904.",
+    "ftCo_800A61D8 changed from nested relevant/prio conditionals to guard-continue filtering using ftCo_800A5908 and itemDist.",
+    "ftCo_800AB224 replaced a call to ftCo_800A21FC with explicit ground/island collision logic and corresponding stack/local changes.",
+    "ftColl_80077970 was split into two static inline helpers, inlineItemA0 and inlineItemA1, while preserving midpoint/effect-spawn logic in the wrapper.",
+    "ftcoll.c .sdata2 constants were changed from early definitions to early extern declarations plus later definitions after ftColl_80077970.",
+    "ftkirby.c introduced static inline helper extraction for ftKb_SpecialN_800EED50 and ftKb_SpecialN_800EF0E4 joint-reference insertion, plus PAD_STACK and local-order changes."
+  ],
+  "smart_moves": [
+    {
+      "text": "Flattened nested item-selection logic in ftCo_800A61D8 into guard-continue checks, reducing temporary flag variables while preserving the candidate-selection flow.",
+      "evidence_refs": [
+        "diff_excerpt: ftCo_800A61D8 removes relevant/prio and adds continue guards"
+      ]
+    },
+    {
+      "text": "Used narrow static inline helpers to isolate codegen-sensitive subblocks in ftColl_80077970 and Kirby SpecialN without changing public call surfaces.",
+      "evidence_refs": [
+        "diff_excerpt: inlineItemA0/inlineItemA1 in ftcoll.c",
+        "diff_excerpt: ftKb_SpecialN_800EED50_inline wrapper",
+        "diff_excerpt: ftKb_SpecialN_800EF0E4_insert_joint_refs"
+      ]
+    },
+    {
+      "text": "Kept verifier evidence explicit in the PR body and bot report: isolated build, clean regression report, and per-symbol match/improvement table.",
+      "evidence_refs": [
+        "human_pr_text: Verification section",
+        "text_corpus issue_comment: Report for GALE01"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For codegen-sensitive matching, extracting a repeated or bulky subblock into a static inline helper can change the wrapper shape enough to close or improve a match, but should be tied to verifier evidence.",
+      "scope": [
+        "src/melee/ft/ftcoll.c",
+        "src/melee/ft/chara/ftKirby/ftkirby.c"
+      ],
+      "evidence_refs": [
+        "diff_excerpt: ftColl_80077970 introduces inlineItemA0/inlineItemA1 and bot reports 100%",
+        "diff_excerpt: ftKb_SpecialN_800EF0E4_insert_joint_refs and bot reports improvement"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "Guard-continue control flow can be a useful alternative to deeply nested generated-looking conditionals when filtering candidates in loops.",
+      "scope": [
+        "src/melee/ft/chara/ftCommon/ftCo_0A01.c"
+      ],
+      "evidence_refs": [
+        "diff_excerpt: ftCo_800A61D8 removes nested relevant/prio ladder and uses continue guards",
+        "text_corpus issue_comment: ftCo_800A61D8 improves from 98.82% to 99.11%"
+      ],
+      "confidence": 0.72
+    },
+    {
+      "lesson": "Small stack-shape and declaration-lifetime changes, including PAD_STACK size and moving locals into narrower scopes, were used in this PR for score improvements and one new exact match; these remain matching tactics requiring verification rather than broad style guidance.",
+      "scope": [
+        "src/melee/ft/chara/ftCommon/ftCo_Attack100.c",
+        "src/melee/ft/chara/ftKirby/ftkirby.c",
+        "src/melee/ft/chara/ftCommon/ftCo_0A01.c"
+      ],
+      "evidence_refs": [
+        "diff_excerpt: fn_800D9930 PAD_STACK(4) and branch-local Item* it",
+        "diff_excerpt: ftKb_SpecialN_800EF0E4 PAD_STACK(4)",
+        "diff_excerpt: ftCo_800AB224 PAD_STACK(0x18)",
+        "human_pr_text: clean isolated regression report"
+      ],
+      "confidence": 0.7
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "Observed inline helper names sometimes preserve the owning function name plus `_inline` or `_inline0`, e.g. ftKb_SpecialN_800EED50_inline and ftCo_800A9904_inline0.",
+      "evidence_refs": [
+        "diff_excerpt: ftKb_SpecialN_800EED50_inline",
+        "diff_excerpt: ftCo_800A9904_inline0"
+      ],
+      "confidence": 0.76
+    },
+    {
+      "text": "Observed short local role names include fp, ip, cur, item, hit, ef_pos, part_off, sp28, and sp24; the PR does not provide enough evidence to promote these beyond local practice.",
+      "evidence_refs": [
+        "diff_excerpt: ftCo_800A61D8 loop locals",
+        "diff_excerpt: inlineItemA0/inlineItemA1 signatures",
+        "diff_excerpt: ftKb_SpecialN_800EF0E4_insert_joint_refs signature"
+      ],
+      "confidence": 0.62
+    },
+    {
+      "text": "Address-style global/function names are retained for unclear semantics, such as ftColl_804D82E0 and ftCo_800AB224.",
+      "evidence_refs": [
+        "diff_excerpt: ftcoll.c ftColl_804D82E0 extern/definition",
+        "diff_excerpt: ftCo_800AB224"
+      ],
+      "confidence": 0.8
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Static inline extraction to alter inlining and local code shape while preserving a public wrapper.",
+      "evidence_refs": [
+        "diff_excerpt: ftColl_80077970 -> inlineItemA0/inlineItemA1",
+        "diff_excerpt: ftKb_SpecialN_800EED50 wrapper calls ftKb_SpecialN_800EED50_inline",
+        "diff_excerpt: ftKb_SpecialN_800EF0E4_insert_joint_refs"
+      ]
+    },
+    {
+      "tactic": "PAD_STACK tuning and local declaration reordering were used in several touched functions.",
+      "evidence_refs": [
+        "diff_excerpt: ftCo_800AB224 PAD_STACK(0x18)",
+        "diff_excerpt: fn_800D9930 PAD_STACK(4)",
+        "diff_excerpt: ftKb_SpecialN_800EF0E4 PAD_STACK(4)",
+        "diff_excerpt: ftKb_SpecialN_800EF35C adds PAD_STACK(4) and moves idx declaration"
+      ]
+    },
+    {
+      "tactic": "Data placement was adjusted in ftcoll.c by declaring .sdata2 constants as extern near the top and defining them later after ftColl_80077970.",
+      "evidence_refs": [
+        "diff_excerpt: ftcoll.c .sdata2 declarations changed to extern",
+        "diff_excerpt: later .sdata2 definitions inserted after ftColl_80077970"
+      ]
+    },
+    {
+      "tactic": "Explicit field and helper access was substituted for prior temporary variables or helper calls where it improved matching, e.g. ftCo_800A9904_inline0 and explicit mpIsland checks.",
+      "evidence_refs": [
+        "diff_excerpt: ftCo_800A9904_inline0 returns fp->co_attrs.terminal_vel",
+        "diff_excerpt: ftCo_800AB224 expands mpIsland_8005AB54/mpIsland_8005AC14 checks"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "text": "No human review comments or review records are present in the loaded slice.",
+      "evidence_refs": [
+        "metadata_json: review_comments 0, reviews 0",
+        "text_corpus: only pr_body and decomp-dev[bot] issue_comment loaded"
+      ]
+    },
+    {
+      "text": "Automated bot feedback reports 4 new matches, 8 improvements, and matched code increase of +5812 bytes; this is validation/report evidence, not reviewer intent.",
+      "evidence_refs": [
+        "text_corpus issue_comment: Report for GALE01"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2655",
+    "Melee decomp: FT",
+    "fjooord",
+    "src/melee/ft/ftcoll.c",
+    "src/melee/ft/chara/ftCommon/ftCo_0A01.c",
+    "src/melee/ft/chara/ftCommon/ftCo_Attack100.c",
+    "src/melee/ft/chara/ftKirby/ftkirby.c",
+    "ftColl_80077970",
+    "ftColl_8007925C",
+    "ftColl_80077C60",
+    "ftCo_800AB224",
+    "ftCo_800A61D8",
+    "ftCo_800A9904",
+    "fn_800D8EC8",
+    "fn_800D9930",
+    "ftKb_SpecialN_800EED50",
+    "ftKb_SpecialN_800EF0E4",
+    "ftKb_SpecialN_800EF35C",
+    "inlineItemA0",
+    "inlineItemA1",
+    "ftKb_SpecialN_800EF0E4_insert_joint_refs",
+    "PAD_STACK",
+    "sdata2",
+    "mpIsland_8005AB54",
+    "mpIsland_8005AC14",
+    "HSD_IDInsertToTable",
+    "Item_IsGrabbable",
+    "itemDist"
+  ],
+  "follow_up_queries": [
+    "Search later PRs for inlineItemA0 inlineItemA1 to see whether ftColl_80077970 helper names survived review.",
+    "Search later PRs for ftKb_SpecialN_800EF0E4_insert_joint_refs to see whether extracted joint traversal became accepted or was cleaned up.",
+    "Search ftcoll.c history for ftColl_804D82E0 .sdata2 extern definitions to determine whether this data-placement tactic was retained.",
+    "Search later comments on PR #2655 for human review after the loaded slice timestamp, because current slice has no review comments.",
+    "Search for ftCo_800AB224 and ftCo_800A21FC in later source to determine whether the explicit mpIsland expansion was retained or reabstracted."
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR identity, state OPEN, changed-file counts",
+      "human_pr_text: summary and verification claims",
+      "text_corpus issue_comment: automated match/improvement report",
+      "diff_excerpt/raw_diff: representative file changes, but raw_diff marked truncated"
+    ],
+    "notes": [
+      "Strong evidence for PR identity, changed files, validation claims, and automated match report.",
+      "Diff evidence is truncated, so details for later ftcoll.c hunks and any omitted context are incomplete.",
+      "No human review comments are loaded; review feedback is limited to automated bot output.",
+      "The PR is open and merged_at is null in the loaded metadata; do not infer merge or final acceptance.",
+      "Verification claims come from PR body and bot report in the slice; no independent tool execution was performed during intake."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson_candidate",
+        "title": "Static inline extraction as a narrow matching tactic",
+        "text": "PR #2655 shows static inline extraction used in ftColl_80077970 and Kirby SpecialN functions, with bot-reported exact matches or improvements. Treat as a tactic requiring verifier evidence, not as unconditional style.",
+        "scope": [
+          "fighter",
+          "src/melee/ft/ftcoll.c",
+          "src/melee/ft/chara/ftKirby/ftkirby.c"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: inlineItemA0/inlineItemA1",
+          "diff_excerpt: ftKb_SpecialN_800EED50_inline",
+          "diff_excerpt: ftKb_SpecialN_800EF0E4_insert_joint_refs",
+          "text_corpus issue_comment: match/improvement table"
+        ]
+      },
+      {
+        "record_type": "decomp_lesson_candidate",
+        "title": "Guard-continue loop filters can replace nested generated conditionals",
+        "text": "In ftCo_800A61D8, nested item relevance/prio logic was rewritten into continue guards and helper calls, with the bot reporting a score improvement for the function.",
+        "scope": [
+          "fighter-common",
+          "src/melee/ft/chara/ftCommon/ftCo_0A01.c"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: ftCo_800A61D8",
+          "text_corpus issue_comment: ftCo_800A61D8 improves"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "ftcoll.c .sdata2 constants placement around ftColl_80077970",
+        "text": "In PR #2655, ftcoll.c changed ftColl_804D82E0 through ftColl_804D831C from early .sdata2 definitions to early extern declarations with definitions placed after ftColl_80077970. Curator should verify against current source/history before recording as a path fact.",
+        "source_path": "src/melee/ft/ftcoll.c",
+        "scope": [
+          "fighter-collision",
+          ".sdata2",
+          "ftColl_80077970"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: ftcoll.c top .sdata2 block changed to extern declarations",
+          "diff_excerpt: .sdata2 definitions inserted after ftColl_80077970"
+        ],
+        "reason": "Possible file-specific data-placement fact, but it may be a temporary matching tactic and the PR is still open in the loaded metadata."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Inline-helper extraction should remain evidence-gated",
+        "text": "PR #2655 provides another example where static inline helpers and wrapper functions were used for matching. Existing standards already caution that manual inline expansion/tactics need evidence; curator may consider whether inline-helper extraction should be named explicitly if similar PRs accumulate.",
+        "source_path": null,
+        "scope": [
+          "matching tactics",
+          "static inline helpers",
+          "fighter"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: inlineItemA0/inlineItemA1",
+          "diff_excerpt: ftKb_SpecialN_800EED50_inline",
+          "human_pr_text: clean verification claim",
+          "text_corpus issue_comment: bot match report"
+        ],
+        "reason": "Potential refinement to existing matching-tactics guidance; one PR alone is not enough to promote a new global standard."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote PAD_STACK size choices from this PR as general style; they are local codegen tactics with verifier evidence only for this slice.",
+      "Do not infer semantic names for address-style symbols such as ftColl_804D82E0 or ftCo_800AB224; the PR keeps address-style names.",
+      "Do not treat the bot report as human review approval or merge acceptance.",
+      "Do not conclude that data-section movement is broadly acceptable; ftcoll.c data relocation needs source/path verification and may be specific to this match."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "session_dir": "/Users/Ford/Github Repos/oss/decomp-orchestrator/.pi-sessions/pr-review"
+  }
+}

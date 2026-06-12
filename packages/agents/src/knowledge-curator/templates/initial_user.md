@@ -1,10 +1,12 @@
-<run>
-Inspect this curator context and return the required JSON object.
-Focus on whether the deterministic records are safe to promote, and which source-specific updates should remain proposals.
-</run>
+<task>
+    Review this curator batch and return graph-safe curation decisions.
+    Promote only evidence-backed reusable records; leave source-owned changes as proposals.
+</task>
+
+{{AVAILABLE_TOOLS_XML}}
 
 <curator_context>
-{curator_context_json}
+{{CURATOR_CONTEXT_JSON}}
 </curator_context>
 
 Return exactly one JSON object.

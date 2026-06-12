@@ -1,0 +1,17 @@
+{
+  "number": 1049,
+  "title": "Match the initial GObj callback functions in some of the vi files",
+  "state": "MERGED",
+  "createdAt": "2024-01-08T18:29:07Z",
+  "updatedAt": "2024-01-08T18:45:59Z",
+  "mergedAt": "2024-01-08T18:45:55Z",
+  "closedAt": "2024-01-08T18:45:55Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/1049",
+  "counts": {
+    "issue_comments": 0,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 11361
+  }
+}

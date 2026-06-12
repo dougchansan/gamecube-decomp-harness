@@ -1,0 +1,10 @@
+{
+  "pr": 2594,
+  "title": "Fix ftcolanim/ftmaterial split and fix string usages in ftmaterial",
+  "url": "https://github.com/doldecomp/melee/pull/2594",
+  "text_records_with_body": 1,
+  "review_comments": 0,
+  "changed_files": 10,
+  "added_lines": 61,
+  "deleted_lines": 62
+}
