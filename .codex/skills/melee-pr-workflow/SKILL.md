@@ -147,6 +147,12 @@ For review-style cleanup and regression triage, use the local QA reference in
 `references/pr-review-qa-standards.md`. Keep that reference in the workflow
 skill, not in upstream Melee docs.
 
+For adversarial cleanup of an existing PR, standards-clean source outranks fuzzy
+score. If removing overzealous worker output, pragmas, fake anchors, dummy
+padding, or other tactic-shaped code lowers fuzzy score or even loses a match,
+keep the clean source, report the score impact, and route the result through
+carry-forward or explicit operator policy instead of restoring the tactic.
+
 For PR splitting/grouping and reviewer-facing PR body content, use
 `references/pr-shaping-reviewer-guidance.md`.
 
@@ -220,7 +226,7 @@ bun run --cwd decomp-orchestrator orch -- \
 
 - `build/GALE01/main.dol: OK`
 - zero broken matches
-- zero fuzzy regressions in unmatched items
+- zero unexplained or unaccepted fuzzy regressions in unmatched items
 - zero unit, section, or function metric regressions
 - no unresolved actionable review comments or relevant build warnings/errors
 

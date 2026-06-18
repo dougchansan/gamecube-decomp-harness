@@ -142,17 +142,18 @@ pattern" a machine-detected, ship-blocking condition in four layers (rationale
 and rollout in
 [the plan](../30-plans/2026-06-11-qa-ship-gate-and-pr-review-wiring.md)):
 
-- **L1 — worker attempt lint.** A violating attempt is rejected at attempt
-  time inside the worker post-return gate, with the findings fed back as
-  repair feedback (see [worker lifecycle](40-worker-lifecycle.md)).
+- **L1 — worker attempt lint.** Any attempt with deterministic QA findings,
+  including warning-only findings, is rejected at attempt time inside the
+  worker post-return gate, with the findings fed back as repair feedback (see
+  [worker lifecycle](40-worker-lifecycle.md)).
 - **L2 — regression-check hard gate.** `regression-check` runs the
   deterministic `review_lint` diff scan against the upstream base by default;
   the only bypass is an explicit `--skip-qa-gate`. The summary gains
   `qaGateExitCode`, `qaGateSkipped`, `qaFindings`, `qaCounts`, and
   `qaScanPath`, and the verdict folds the gate in:
   `passed = regressionGatePassed && !promotionBlocked && qaGatePassed`. A
-  failure hint lists the violating rules at `file:line`, and each finding
-  cites the standard it violates.
+  failure hint lists every finding at `file:line`, including warning-only
+  findings, and each finding cites the standard it violates.
 - **L3 — pre-ship adversarial review.** `pr-preship-review` runs the
   PR reviewer agent in adversarial mode over every shipping slice between
   regression-check and PR body drafting; any `reject` finding — or any
@@ -182,15 +183,23 @@ gate become `needs_rework` and requeue at repair priority; a slice ships
 without them or not at all. MATCHES-only shipping is unchanged — the gate
 narrows what a match is allowed to contain.
 
+Adversarial cleanup and QA repair are allowed to lower fuzzy score or lose an
+exact match when they remove overzealous worker output or maintainer-rejected
+source shape. The lower-score result is reported and carried forward or routed
+through an explicit improvement lane; the banned tactic is not restored simply
+to preserve a score.
+
 The QA repair lane extends this disposition before split planning: a
 candidate-file sweep converts deterministic QA findings and file-backed review
 findings into a repair queue, a resolver-style agent attempts source-level
 repairs before minimal reverts, and each finding receives an explicit
-disposition. Strict draft PR QA treats warnings as repair targets and keeps
-clean-lower-score files out of ready status unless an operator explicitly
-accepts that outcome. Its ship-filter artifact feeds split planning so queued,
-blocked, false-positive, or clean-lower-score files are not silently included
-in match PRs. The flow and implementation details live in
+disposition. Strict automated handoff treats warnings as repair targets:
+worker L1 and `regression-check` L2 both require zero QA findings, and draft
+PR QA keeps the same strict default unless an operator explicitly selects
+advisory warnings. Clean-lower-score files stay out of ready status unless an
+operator explicitly accepts that outcome. The ship-filter artifact feeds split
+planning so queued, blocked, false-positive, or clean-lower-score files are
+not silently included in match PRs. The flow and implementation details live in
 [the QA repair lane plan](../30-plans/2026-06-13-qa-repair-lane.md).
 
 ## PR Boundary

@@ -4,6 +4,11 @@ Use this as the review checklist for decomp PRs and worker output. Code should
 look like maintainable original C, and matching-only tactics should be backed by
 local build, objdiff, or regression evidence.
 
+Source quality can outrank score during cleanup. When a reviewer or QA finding
+exposes overfit worker output, remove the tactic-shaped source even if fuzzy
+score drops or an exact match is lost; report that impact instead of
+reintroducing the tactic.
+
 ## Source Rules
 
 - Recover natural loops with ordinary `for`, `while`, or `do while` forms when
@@ -56,4 +61,6 @@ local build, objdiff, or regression evidence.
 - Inspect adjacent functions when changing pragmas, includes, data, literals, or
   TU ownership.
 - Report broken matches, fuzzy regressions, and metric regressions explicitly.
+- Mark standards-driven clean-lower-score outcomes as carry-forward or
+  operator-accepted improvement work, not silent match-lane PR content.
 - Keep tool or regression-gate changes separate from decomp source changes.

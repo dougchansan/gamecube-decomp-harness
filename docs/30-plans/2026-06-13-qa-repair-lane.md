@@ -221,6 +221,11 @@ described here, a clean non-regressing improvement can still be PR-bound when
 the operator has chosen an improvement PR lane; otherwise it remains local
 carry-forward rather than being discarded.
 
+This cleanup tolerance covers fuzzy score drops and small lost matches caused
+by removing overzealous worker output. It does not make dirty tactics
+acceptable again; the repair report records what score was lost and why the
+cleaner source stays.
+
 ## Candidate Set
 
 The QA sweep should run over PR-bound candidate files, not every file in the
@@ -663,5 +668,6 @@ the PR plan.
 - The command processes one live agent pass per selected item. Operators can
   bound work with `--max-items` or focus with `--item-id`; broader retry policy
   remains a follow-up.
-- Advisory warnings remain report/prompt context. Error-severity findings are
-  the repair queue blockers.
+- Standalone `qa-repair` can still preserve advisory warning context, but
+  strict worker, handoff, and draft-PR flows route warnings as repair targets
+  unless an operator explicitly selects advisory warning behavior.

@@ -47,6 +47,11 @@ Agents should reconstruct likely original authored C, not generated C that only
 moves a score. Use matched siblings, nearby files, headers, macros, naming
 habits, and local control-flow idioms as evidence.
 
+Score is telemetry, not a source-quality override. In review cleanup and QA
+repair, removing generated or tactic-shaped code is correct even when fuzzy
+score drops or an exact match is lost; the score impact should be reported and
+the clean source kept as carry-forward evidence.
+
 Deterministic coverage:
 
 - `m2c_goto_label`: added `goto block_NN` or `block_NN:` residue is an error;
@@ -70,6 +75,7 @@ Do not:
 - Preserve generated gotos, copied branch ladders, or local macro clones before
   checking ordinary source forms.
 - Let decompiler output or data-section parity outrank matched local source.
+- Keep generated or tactic-shaped source solely to avoid a fuzzy score drop.
 
 Example:
 
@@ -135,8 +141,9 @@ Standards:
 - `global_standard:header-inlines`
 - `global_standard:assert-report-macros`
 
-Agents should map expanded assert/report code back to project macros and header
-inlines when local evidence identifies the source operation.
+Agents should map expanded assert/report code back to project macros, header
+inlines, and existing helper boundaries when local evidence identifies the
+source operation.
 
 Deterministic coverage:
 
@@ -155,12 +162,16 @@ Do:
 - Preserve real `OSReport` or `OSPanic` side effects.
 - Use `jobj.h` file/line evidence to find the owning `HSD_JObj*` helper.
 - Use `GET_JOBJ` only when local evidence supports that access shape.
+- Restore a shared local inline/helper when sibling bodies show duplicated
+  expanded logic and objdiff supports the helper boundary.
 
 Do not:
 
 - Keep `__assert("jobj.h", line, ...)` when a header inline is identifiable.
 - Paste `jobj.h` inline helper bodies into stage, item, or fighter TUs.
 - Invent fake assert strings, report globals, or dummy storage to force a match.
+- Duplicate local helper bodies across wrappers when a shared inline/helper is
+  the evidenced authored shape.
 
 Example:
 
@@ -270,6 +281,8 @@ Do:
   evidence.
 - Check adjacent functions when a tactic can perturb codegen, data order, or
   local stack shape.
+- Remove unsupported tactics during cleanup even when the clean source lowers
+  score; report the score impact instead of reintroducing the tactic.
 
 Do not:
 
@@ -277,6 +290,7 @@ Do not:
   ordinary matching style.
 - Hide same-TU function bodies from MWCC with source-local externs.
 - Keep one-off helpers or lifetime churn without evidence and a cleanup reason.
+- Preserve an overfit worker tactic merely because it protects exactness.
 
 Example:
 

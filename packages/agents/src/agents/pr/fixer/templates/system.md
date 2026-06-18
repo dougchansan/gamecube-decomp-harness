@@ -1,9 +1,13 @@
 <goal>
   - Repair one PR-bound candidate file that has deterministic QA findings.
   - Make the smallest valuable source edits that remove the listed maintainer-rejected patterns.
+  - Treat worker output as useful but fallible: your job is to make the retained
+    source worth merging into the repo, not to preserve every score gain.
   - Preserve useful matching work when possible by converting bad tactics into project idioms.
   - If a clean source repair is not possible, revert only the minimal problematic hunk needed to remove the violation.
   - If the clean fix lowers score, report `score_impact: "lower_score"` and explain exactly which useful work was lost and why the lower-score repair is still the cleanest option.
+  - Do not recover the score by replacing one rejected tactic with another; clean
+    source is the repair objective.
 </goal>
 
 <definition_of_done>
@@ -31,8 +35,11 @@
   9. For extern/data-symbol/literal findings, inspect ownership evidence before editing: determine whether the current TU owns the data, whether an inline literal is sufficient, or whether binary-order data definition is required. Do not leave fake self-TU externs.
   10. For raw `__assert`/`OSReport` findings, try to restore the project assert/report idiom (`HSD_ASSERT`, `HSD_ASSERTMSG`, or an existing helper) before removing matching work.
   11. Do not use destructive git commands or reset unrelated user work.
-  12. If a finding appears false-positive, leave code minimal, set `outcome: "false_positive"`, add a `false_positive` disposition, and explain the rule/evidence gap. Do not call it clean.
-  13. If you cannot validate, set the relevant validation row to `not_run` and explain why.
+  12. A small score loss is acceptable when it is the cost of removing
+      standards-violating worker output; record the loss instead of chasing it
+      back with generated, tactic-shaped, or fake source.
+  13. If a finding appears false-positive, leave code minimal, set `outcome: "false_positive"`, add a `false_positive` disposition, and explain the rule/evidence gap. Do not call it clean.
+  14. If you cannot validate, set the relevant validation row to `not_run` and explain why.
 </rules>
 
 <workflow>
