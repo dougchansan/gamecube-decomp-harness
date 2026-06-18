@@ -56,8 +56,8 @@ decomp-orchestrator/
 
 ## Child Sections
 
-- [Agents](agents/00-overview.md): worker, PR-review, knowledge-curator,
-  reconcile, QA repair, and runtime prompt/session code.
+- [Agents](agents/00-overview.md): worker, PR indexer, PR splitter, PR reviewer,
+  knowledge-curator, reconcile, QA repair, and runtime prompt/session code.
 - [CLI](cli/00-overview.md): operator command surface and command modules.
 - [Knowledge](knowledge/00-overview.md): sectioned knowledge sources,
   CLI-first tools, resource graph, agent context routing, and past PR library.

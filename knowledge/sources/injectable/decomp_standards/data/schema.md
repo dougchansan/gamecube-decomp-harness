@@ -7,7 +7,7 @@ Records live in `data/standards.jsonl`. Each row is a JSON object with:
 - `kind`: `global_standard`.
 - `status`: `accepted` for records that may be injected.
 - `title`: short rule title.
-- `summary`: one compact paragraph usable in a worker or QA packet.
+- `summary`: renderable bullet-point strings usable in a worker or QA packet.
 - `do`: actionable positive checks.
 - `do_not`: review failures and forbidden shortcuts.
 - `evidence_refs`: source documents, corpus audits, or PR-corpus artifacts that
@@ -24,4 +24,3 @@ Runtime rules:
 - Search APIs return JSON with evidence references.
 - Curator output may propose new or changed global standards, but applying a
   proposal requires source-specific validation or operator review.
-

@@ -52,11 +52,27 @@ def record_text(record: dict[str, Any]) -> str:
         record.get("id"),
         record.get("title"),
         record.get("summary"),
+        record.get("family"),
+        record.get("disposition"),
+        record.get("qa_enforcement"),
+        record.get("qa_rule_ids"),
         record.get("do"),
         record.get("do_not"),
         record.get("evidence_refs"),
     ]
     return json.dumps(parts, sort_keys=True)
+
+
+def string_list(value: Any) -> list[str]:
+    if isinstance(value, list):
+        return [str(item).strip() for item in value if str(item).strip()]
+    if isinstance(value, str) and value.strip():
+        return [value.strip()]
+    return []
+
+
+def joined_strings(value: Any) -> str:
+    return " ".join(string_list(value))
 
 
 def search_records(query: str, limit: int) -> list[dict[str, Any]]:
@@ -80,7 +96,7 @@ def format_hit(record: dict[str, Any], score: int) -> dict[str, Any]:
         "id": record.get("id"),
         "title": record.get("title"),
         "score": score,
-        "snippet": clip(str(record.get("summary", ""))),
+        "snippet": clip(joined_strings(record.get("summary"))),
         "evidence_refs": record.get("evidence_refs", []),
         "payload": record,
     }
@@ -138,9 +154,13 @@ def write_index() -> dict[str, Any]:
                 "text": "\n".join(
                     [
                         str(record.get("title", "")),
-                        str(record.get("summary", "")),
-                        " ".join(record.get("do", [])),
-                        " ".join(record.get("do_not", [])),
+                        joined_strings(record.get("summary")),
+                        str(record.get("family", "")),
+                        str(record.get("disposition", "")),
+                        str(record.get("qa_enforcement", "")),
+                        joined_strings(record.get("qa_rule_ids")),
+                        joined_strings(record.get("do")),
+                        joined_strings(record.get("do_not")),
                     ]
                 ),
                 "evidence_ref": ";".join(record.get("evidence_refs", [])),

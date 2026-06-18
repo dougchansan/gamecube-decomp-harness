@@ -101,7 +101,7 @@ function specializedTool(definition: SpecializedToolDefinition): AgentToolRegist
   return {
     id: definition.id,
     purpose: definition.purpose,
-    allowedRoles: ["worker", "pr-review", "knowledge-curator"],
+    allowedRoles: ["worker", "pr-indexer", "pr-splitter", "knowledge-curator"],
     capabilities: ["registered_tool_api", definition.toolId],
     create() {
       return {
@@ -130,7 +130,7 @@ function knowledgeApiTool(definition: KnowledgeApiToolDefinition): AgentToolRegi
   return {
     id: definition.id,
     purpose: definition.purpose,
-    allowedRoles: ["worker", "pr-review", "knowledge-curator"],
+    allowedRoles: ["worker", "pr-indexer", "pr-splitter", "knowledge-curator"],
     capabilities: ["registered_tool_api", definition.toolId],
     create(context) {
       return {

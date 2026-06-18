@@ -120,8 +120,8 @@ decompilation decisions.
   deterministic admission/refill, sleep, and wake events work.
 - [Board prioritization](15-board-prioritization.md) covers helper score inputs
   and scheduler rank signals.
-- [Agent model](20-agent-model.md) covers worker, PR-review, curator, reconcile,
-  and QA repair agents plus the shared runtime boundary.
+- [Agent model](20-agent-model.md) covers worker, PR indexer/splitter/reviewer,
+  curator, reconcile, and QA repair agents plus the shared runtime boundary.
 - [Process guardians](25-process-guardians.md) covers the babysit wrapper,
   health incidents, recovery policy, and restart boundary.
 - [Durable state and events](30-state-and-events.md) covers the board, leases,
@@ -142,6 +142,9 @@ decompilation decisions.
 - [Campaign and save points](70-save-points.md) covers the canonical campaign
   timeline, commit-anchored save points, and the where-we-are staleness
   contract.
+- [Project session architecture mockup](75-project-session-architecture.md)
+  covers the target project-centered model, single active session rule,
+  run-to-PR lifecycle, and multi-page dashboard shape.
 
 ## Design Source
 

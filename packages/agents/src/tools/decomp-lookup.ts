@@ -299,7 +299,7 @@ export function createDecompLookupTool(context: AgentToolRuntimeContext): PiTool
 export const decompLookupToolRegistration: AgentToolRegistration = {
   id: "decomp_lookup",
   purpose: "Reusable bounded lookup over decomp resource graph, source indexes, path facts, standards, and tool APIs.",
-  allowedRoles: ["worker", "pr-review", "knowledge-curator"],
+  allowedRoles: ["worker", "pr-indexer", "pr-splitter", "knowledge-curator"],
   capabilities: ["knowledge_lookup", "graph_search", "source_api_lookup", "tool_api_lookup"],
   create: createDecompLookupTool,
 };

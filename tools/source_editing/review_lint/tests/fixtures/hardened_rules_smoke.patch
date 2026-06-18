@@ -2,7 +2,7 @@ diff --git a/src/melee/gr/grsmoke.c b/src/melee/gr/grsmoke.c
 index 1111111..2222222 100644
 --- a/src/melee/gr/grsmoke.c
 +++ b/src/melee/gr/grsmoke.c
-@@ -20,8 +20,27 @@ void grSmoke(void)
+@@ -20,8 +20,30 @@ void grSmoke(void)
  {
 -    HSD_ASSERTMSG(100, obj != NULL, "obj");
 +    OSReport("obj");
@@ -12,6 +12,8 @@ index 1111111..2222222 100644
 +    register s32 flag;
 +    M2C_FIELD(obj, s32*, 0x14) = flag;
 +    data = (u8*) data;
++    value = *(s32*) ((u8*) obj + 0x14);
++    volatile s32 local_flag;
 +    goto block_30;
 +block_30:
 +    goto cleanup;
@@ -25,5 +27,6 @@ index 1111111..2222222 100644
 +#define block_idx_table grI1_803E49A8.block_table
 +#define old_name new_name
 +#define FTCO_800A9CB4_ABS(x) ((x) < 0 ? -(x) : (x))
++static const f32 grSmoke_804D0000 = 1.0F;
 +#pragma dont_inline on
 +#pragma inline_depth(4)

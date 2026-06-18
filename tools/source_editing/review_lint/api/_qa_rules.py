@@ -24,6 +24,9 @@ gate plan (docs/30-plans/2026-06-11-qa-ship-gate-and-pr-review-wiring.md):
   clones and hunks that replace project assert macros with raw asserts/reports.
 - ``register_keyword`` / ``inline_asm`` / ``novel_pragma``: exceptional codegen
   steering introduced in normal ``src/`` code.
+- ``pointer_offset_arithmetic`` / ``address_named_static_data`` /
+  ``codegen_pragma`` / ``volatile_local_tactic``: recurring source-quality
+  issues from recent PR review that are deterministic enough to flag.
 - ``m2c_residue_names`` / ``m2c_goto_label`` / ``m2c_field_use``: generated C
   residue that should not reach the ship gate.
 - ``define_alias`` / ``type_erasing_cast``: define aliases over names/expressions
@@ -115,6 +118,19 @@ BLOCK_LABEL_RE = re.compile(r"^\s*(?P<label>block_\d+)\s*:")
 ANY_GOTO_RE = re.compile(r"\bgoto\s+(?P<label>[A-Za-z_]\w*)\s*;")
 M2C_FIELD_RE = re.compile(r"\bM2C_FIELD\s*\(")
 TYPE_ERASING_CAST_RE = re.compile(r"\(\s*(?:void|u8|char)\s*\*+\s*\)")
+BYTE_POINTER_OFFSET_RE = re.compile(
+    r"\(\s*(?P<cast>u8|char)\s*\*+\s*\)\s*"
+    r"(?P<base>[A-Za-z_]\w*)"
+    r"(?P<trailer>(?:\s*(?:->|\.)\s*[A-Za-z_]\w*|\s*\([^)]*\)|\s*)*)"
+    r"\+\s*(?P<offset>0[xX][0-9A-Fa-f]+|\d+|[A-Za-z_]\w*\s*\*\s*(?:0[xX][0-9A-Fa-f]+|\d+))\b"
+)
+ADDRESS_NAMED_DATA_DEF_RE = re.compile(
+    r"^\s*(?!extern\b)(?!typedef\b)"
+    r"(?:(?:static|const|volatile|signed|unsigned|long|short|SDATA|RODATA|DATA)\s+)*"
+    r"(?:(?:struct|union|enum)\s+[A-Za-z_]\w*\s+|[A-Za-z_]\w*(?:\s*\*+\s*|\s+)+)"
+    r"(?P<name>[A-Za-z_]\w*_8[0-9A-Fa-f]{7})"
+    r"\s*(?:\[[^\]]*\])?\s*(?:=|;)"
+)
 IDENT_RE = re.compile(r"^[A-Za-z_]\w*$")
 MACRO_CANONICAL_SUFFIX_RE = re.compile(r"_(?:ABS|MIN|MAX|CLAMP)$")
 CAST_ALIAS_RE = re.compile(r"^\(*\s*\([A-Za-z_]\w*(?:\s+[A-Za-z_]\w*)*\s*\*+\s*\)\s*[A-Za-z_]\w*\s*\)*$")
@@ -130,6 +146,18 @@ ESTABLISHED_PRAGMAS = {
     "pool_data",
     "clang diagnostic",
 }
+CODEGEN_PRAGMAS = {"dont_inline", "auto_inline", "global_optimizer", "pool_data"}
+VOLATILE_LOCAL_DECL_RE = re.compile(
+    r"^\s+"
+    r"(?!(?:extern|typedef)\b)"
+    r"(?:(?:static|const|signed|unsigned|long|short|struct\s+[A-Za-z_]\w*)\s+)*"
+    r"volatile\s+"
+    r"(?:(?:const|signed|unsigned|long|short|struct\s+[A-Za-z_]\w*)\s+)*"
+    r"[A-Za-z_]\w*(?:\s*\*+\s*|\s+)+(?P<name>[A-Za-z_]\w*)\b"
+)
+JOBJ_ASSERT_LINE_RE = re.compile(
+    r"\b__assert(?:_msg)?\s*\(\s*\"jobj\.h\"\s*,\s*(?P<line>0[xX][0-9A-Fa-f]+|\d+)"
+)
 
 # `ident + 0xNN` offset expression (string-table pointer arithmetic).
 OFFSET_EXPR_RE = re.compile(r"\b(?P<base>[A-Za-z_]\w*)\s*\+\s*0[xX][0-9A-Fa-f]+\b")
@@ -685,6 +713,26 @@ def check_unrolled_assert(hunk: dict[str, Any]) -> list[dict[str, Any]]:
         if re.search(r"\\\s*$", text) or re.search(r"^\s*#\s*define\b", text):
             continue
         if ASSERT_CALL_RE.search(blank_line(text)):
+            jobj_match = JOBJ_ASSERT_LINE_RE.search(text)
+            if jobj_match:
+                findings.append(
+                    {
+                        "line": lineno,
+                        "excerpt": text.strip(),
+                        "message": (
+                            f"Open-coded `jobj.h` __assert at line {jobj_match.group('line')}; "
+                            "use the line number to recover the owning HSD_JObj* "
+                            "inline/helper, or restore the HSD_ASSERT* form if the "
+                            "source operation is a plain assertion. "
+                            f"{STANDARD_TITLES[standard]}."
+                        ),
+                        "detail": {
+                            "assert_file": "jobj.h",
+                            "assert_line": jobj_match.group("line"),
+                        },
+                    }
+                )
+                continue
             findings.append(
                 {
                     "line": lineno,
@@ -696,6 +744,63 @@ def check_unrolled_assert(hunk: dict[str, Any]) -> list[dict[str, Any]]:
                     ),
                 }
             )
+    return findings
+
+
+def check_pointer_offset_arithmetic(hunk: dict[str, Any]) -> list[dict[str, Any]]:
+    """Warn on raw byte-pointer offset access in added lines."""
+
+    standard = "global_standard:typed-fields-over-pointer-math"
+    findings: list[dict[str, Any]] = []
+    for lineno, text in hunk["added"]:
+        clean = blank_line(text)
+        for match in BYTE_POINTER_OFFSET_RE.finditer(clean):
+            offset = _normalize_ws(match.group("offset"))
+            findings.append(
+                {
+                    "line": lineno,
+                    "excerpt": text.strip(),
+                    "message": (
+                        f"Added raw `({match.group('cast')}*) {match.group('base')} + {offset}` "
+                        "pointer-offset arithmetic. Prefer a real field, correct "
+                        "union arm, helper, or temporary typed struct before raw "
+                        "byte math. "
+                        f"{STANDARD_TITLES[standard]}."
+                    ),
+                    "detail": {
+                        "cast": f"({match.group('cast')}*)",
+                        "base": match.group("base"),
+                        "offset": offset,
+                    },
+                }
+            )
+    return findings
+
+
+def check_address_named_static_data(hunk: dict[str, Any]) -> list[dict[str, Any]]:
+    """Flag newly added address-named static/global data definitions."""
+
+    standard = "global_standard:literals-and-data-ownership"
+    findings: list[dict[str, Any]] = []
+    for lineno, text in hunk["added"]:
+        clean = blank_line(text)
+        match = ADDRESS_NAMED_DATA_DEF_RE.match(clean)
+        if not match:
+            continue
+        name = match.group("name")
+        findings.append(
+            {
+                "line": lineno,
+                "excerpt": text.strip(),
+                "message": (
+                    f"Added address-named data definition `{name}`. Do not create "
+                    "static literals or globals solely to force data order; keep "
+                    "ordinary literals inline or fix symbol/split ownership instead. "
+                    f"{STANDARD_TITLES[standard]}."
+                ),
+                "detail": {"symbol": name},
+            }
+        )
     return findings
 
 
@@ -1096,6 +1201,61 @@ def check_novel_pragma(hunk: dict[str, Any]) -> list[dict[str, Any]]:
     return findings
 
 
+def check_codegen_pragma(hunk: dict[str, Any]) -> list[dict[str, Any]]:
+    """Warn on newly added established pragmas used for codegen steering."""
+
+    standard = "global_standard:avoid-pragmas-register-asm"
+    findings: list[dict[str, Any]] = []
+    for lineno, text in hunk["added"]:
+        match = PRAGMA_RE.match(text)
+        if not match:
+            continue
+        key = _pragma_key(match.group("body"))
+        if key not in CODEGEN_PRAGMAS:
+            continue
+        findings.append(
+            {
+                "line": lineno,
+                "excerpt": text.strip(),
+                "message": (
+                    f"Added codegen pragma `{key}`. Established MWCC pragmas are "
+                    "still matching tactics in normal source; try clean C first "
+                    "and keep pragmas only as narrow, evidenced exceptions. "
+                    f"{STANDARD_TITLES[standard]}."
+                ),
+                "detail": {"directive": key},
+            }
+        )
+    return findings
+
+
+def check_volatile_local_tactic(hunk: dict[str, Any]) -> list[dict[str, Any]]:
+    """Warn on local volatile declarations used as matching tactics."""
+
+    standard = "global_standard:matching-tactics-need-evidence"
+    findings: list[dict[str, Any]] = []
+    for lineno, text in hunk["added"]:
+        clean = blank_line(text)
+        match = VOLATILE_LOCAL_DECL_RE.search(clean)
+        if not match:
+            continue
+        findings.append(
+            {
+                "line": lineno,
+                "excerpt": text.strip(),
+                "message": (
+                    f"Added local volatile declaration `{match.group('name')}`. "
+                    "Volatile locals in normal source are codegen tactics; prefer "
+                    "ordinary locals or cleaner expressions unless real hardware/"
+                    "SDK semantics require volatile. "
+                    f"{STANDARD_TITLES[standard]}."
+                ),
+                "detail": {"name": match.group("name")},
+            }
+        )
+    return findings
+
+
 def check_type_erasing_cast(hunk: dict[str, Any]) -> list[dict[str, Any]]:
     """Warn on new void*/u8*/char* casts in added lines."""
 
@@ -1138,6 +1298,14 @@ RULES: list[dict[str, Any]] = [
         "applies_to": DEFAULT_APPLIES_TO,
     },
     {
+        "rule_id": "volatile_local_tactic",
+        "severity": "warning",
+        "standard_id": "global_standard:matching-tactics-need-evidence",
+        "check": check_volatile_local_tactic,
+        "message": "New local volatile declaration used as a codegen tactic.",
+        "applies_to": DEFAULT_APPLIES_TO,
+    },
+    {
         "rule_id": "string_literal_to_symbol",
         "severity": "error",
         "standard_id": "global_standard:no-string-literal-symbol-regression",
@@ -1151,6 +1319,14 @@ RULES: list[dict[str, Any]] = [
         "standard_id": "global_standard:literals-and-data-ownership",
         "check": check_numeric_literal_to_symbol,
         "message": "Numeric literal replaced by an address-style data symbol.",
+        "applies_to": DEFAULT_APPLIES_TO,
+    },
+    {
+        "rule_id": "address_named_static_data",
+        "severity": "error",
+        "standard_id": "global_standard:literals-and-data-ownership",
+        "check": check_address_named_static_data,
+        "message": "New address-named static/global data definition.",
         "applies_to": DEFAULT_APPLIES_TO,
     },
     {
@@ -1242,6 +1418,14 @@ RULES: list[dict[str, Any]] = [
         "applies_to": DEFAULT_APPLIES_TO,
     },
     {
+        "rule_id": "pointer_offset_arithmetic",
+        "severity": "warning",
+        "standard_id": "global_standard:typed-fields-over-pointer-math",
+        "check": check_pointer_offset_arithmetic,
+        "message": "New raw byte-pointer offset arithmetic.",
+        "applies_to": DEFAULT_APPLIES_TO,
+    },
+    {
         "rule_id": "define_alias",
         "severity": "error",
         "standard_id": "global_standard:no-define-alias-global-renames",
@@ -1255,6 +1439,14 @@ RULES: list[dict[str, Any]] = [
         "standard_id": "global_standard:avoid-pragmas-register-asm",
         "check": check_novel_pragma,
         "message": "New pragma outside the upstream-established directive set.",
+        "applies_to": DEFAULT_APPLIES_TO,
+    },
+    {
+        "rule_id": "codegen_pragma",
+        "severity": "warning",
+        "standard_id": "global_standard:avoid-pragmas-register-asm",
+        "check": check_codegen_pragma,
+        "message": "New established codegen pragma used as a matching tactic.",
         "applies_to": DEFAULT_APPLIES_TO,
     },
     {

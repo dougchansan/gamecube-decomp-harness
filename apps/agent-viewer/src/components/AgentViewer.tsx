@@ -11,6 +11,7 @@ import {
   type UiConfig,
 } from "@decomp-orchestrator/ui-contract";
 import { defaultWorkerToolProfile, workerToolPromptInfo } from "@decomp-orchestrator/agents/tools/profile-data";
+import standardExamplesJsonlRaw from "../../../../knowledge/sources/injectable/decomp_standards/data/examples.jsonl?raw";
 import standardsJsonlRaw from "../../../../knowledge/sources/injectable/decomp_standards/data/standards.jsonl?raw";
 import { fetchPromptPreview, loadConfig, projectOptionLabel, type AgentViewerForm } from "../lib/api";
 import { promptStats } from "../lib/promptStats";
@@ -43,9 +44,10 @@ type JsonRecord = Record<string, unknown>;
 
 const agents: Array<{ id: PromptPreviewAgentId; label: string }> = [
   { id: "worker", label: "Worker" },
-  { id: "pr-review", label: "PR Intake" },
+  { id: "pr-indexer", label: "PR Indexer" },
+  { id: "pr-splitter", label: "PR Splitter" },
   { id: "knowledge-curator", label: "Curator" },
-  { id: "qa-repair", label: "QA Repair" },
+  { id: "qa-repair", label: "PR Fixer" },
 ];
 
 const sources: Array<{ id: PromptPreviewSource; label: string }> = [
@@ -72,7 +74,16 @@ function clampPromptFontSize(value: number): number {
 }
 
 function stringArray(value: unknown): string[] {
-  return Array.isArray(value) ? value.map((item) => String(item)) : [];
+  if (Array.isArray(value)) return value.map((item) => String(item));
+  const text = typeof value === "string" ? value.trim() : "";
+  return text ? [text] : [];
+}
+
+function standardExampleDescription(record: JsonRecord): string[] {
+  const description = stringArray(record.description).filter((item) => item.trim());
+  if (description.length > 0) return description;
+  const legacyWhy = typeof record.why === "string" ? record.why.trim() : "";
+  return legacyWhy ? [legacyWhy] : [];
 }
 
 function xmlText(value: unknown): string {
@@ -102,16 +113,26 @@ function localStandardsPromptXml(): string {
         return null;
       }
     })
-    .filter((record): record is JsonRecord => record !== null && record.status === "accepted");
+    .filter((record): record is JsonRecord => record !== null && record.status === "accepted" && record.worker_facing !== false);
   const lines = [
     "<decomp_standards>",
-    "    <instruction>All code changes must conform to the following standards.</instruction>",
+    "    <instruction>All code changes must conform to the active code-quality standards below. Detailed examples are routed to QA repair and pre-ship review after a finding identifies the relevant standard.</instruction>",
     "    <authority>Current source, headers, symbols, splits, assembly, objdiff, and regression output outrank global standards and path facts.</authority>",
   ];
 
   for (const standard of standards) {
-    lines.push(`    <standard id="${xmlAttribute(promptStandardId(standard.id))}">`);
-    lines.push(`        <summary>${xmlText(standard.summary)}</summary>`);
+    const attrs = [
+      `id="${xmlAttribute(promptStandardId(standard.id))}"`,
+      optionalXmlAttribute("family", standard.family),
+      optionalXmlAttribute("severity", standard.severity),
+      optionalXmlAttribute("qa_enforcement", standard.qa_enforcement),
+    ].filter(Boolean);
+    lines.push(`    <standard ${attrs.join(" ")}>`);
+    lines.push("        <summary>");
+    for (const item of stringArray(standard.summary)) {
+      lines.push(`            - ${xmlText(item)}`);
+    }
+    lines.push("        </summary>");
     lines.push("        <do>");
     for (const item of stringArray(standard.do)) {
       lines.push(`            - ${xmlText(item)}`);
@@ -130,6 +151,50 @@ function localStandardsPromptXml(): string {
 }
 
 const LOCAL_DECOMP_STANDARDS_XML = localStandardsPromptXml();
+
+function localStandardExamplesPromptXml(limit = 12): string {
+  const examples = standardExamplesJsonlRaw
+    .split(/\r\n|\r|\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line): JsonRecord | null => {
+      try {
+        return JSON.parse(line) as JsonRecord;
+      } catch {
+        return null;
+      }
+    })
+    .filter((record): record is JsonRecord => record !== null)
+    .slice(0, limit);
+  const lines = [
+    `<standard_examples count="${examples.length}">`,
+    "    <instruction>Use these examples only after a lint finding, repair item, or pre-ship concern identifies the relevant standard or rule. Do not dump examples into ordinary worker reasoning.</instruction>",
+  ];
+  for (const example of examples) {
+    const attrs = [
+      optionalXmlAttribute("id", example.id),
+      optionalXmlAttribute("standard_id", example.standard_id),
+      optionalXmlAttribute("qa_rule_id", example.qa_rule_id),
+      optionalXmlAttribute("severity", example.severity),
+    ].filter(Boolean);
+    lines.push(`    <example ${attrs.join(" ")}>`);
+    lines.push(`        <bad_pattern>${xmlText(example.bad_pattern)}</bad_pattern>`);
+    lines.push(`        <preferred_shape>${xmlText(example.preferred_shape)}</preferred_shape>`);
+    lines.push("        <description>");
+    for (const item of standardExampleDescription(example)) {
+      lines.push(`            - ${xmlText(item)}`);
+    }
+    lines.push("        </description>");
+    if (example.evidence_ref) {
+      lines.push(`        <evidence_ref>${xmlText(example.evidence_ref)}</evidence_ref>`);
+    }
+    lines.push("    </example>");
+  }
+  lines.push("</standard_examples>");
+  return lines.join("\n");
+}
+
+const LOCAL_STANDARD_EXAMPLES_XML = localStandardExamplesPromptXml();
 
 function localAvailableToolsPromptXml(): string {
   const groups = new Map<string, { provider: string; type: string; toolIds: string[] }>();
@@ -443,9 +508,12 @@ function hydratePromptPlaceholders(prompt: string, context: JsonRecord = {}): st
     .replace(/\{\{\s*PR_CONTEXT_JSON\s*\}\}/g, () => JSON.stringify(asObject(context.prContext), null, 2))
     .replace(/\{\{\s*PR_CONTEXT_XML\s*\}\}/g, () => localPrContextPromptXml(context))
     .replace(/\{\{\s*PR_OUTPUT_SCHEMA_JSON\s*\}\}/g, () => JSON.stringify(asObject(context.output_schema), null, 2))
+    .replace(/\{\{\s*PR_SPLITTER_CONTEXT_JSON\s*\}\}/g, () => JSON.stringify(asObject(context.splitContext), null, 2))
+    .replace(/\{\{\s*PR_SPLITTER_OUTPUT_SCHEMA_JSON\s*\}\}/g, () => JSON.stringify(asObject(context.output_schema), null, 2))
     .replace(/\{\{\s*QA_REPAIR_ITEM_JSON\s*\}\}/g, () => JSON.stringify(asObject(context.qaRepairItem), null, 2))
     .replace(/\{\{\s*QA_REPAIR_OUTPUT_SCHEMA_JSON\s*\}\}/g, () => JSON.stringify(asObject(context.output_schema), null, 2))
     .replace(/\{\{\s*QA_REPAIR_QUEUE_SUMMARY_JSON\s*\}\}/g, () => JSON.stringify(firstObject(context.queueSummary, context.qaRepairQueueSummary), null, 2))
+    .replace(/\{\{\s*STANDARD_EXAMPLES_XML\s*\}\}/g, () => LOCAL_STANDARD_EXAMPLES_XML)
     .replace(/\{\{\s*TARGET_GRAPH_FILE_CARD_XML\s*\}\}/g, () => localTargetGraphFileCardPromptXml(context))
     .replace(/\{\{\s*TARGET_XML\s*\}\}/g, () => localTargetPromptXml(context))
     .replace(/\{\{\s*TARGET_FILE_XML\s*\}\}/g, () => localTargetFilePromptXml(context));
@@ -1105,7 +1173,18 @@ function AccessGroupView({ group }: { group: AccessGroup }) {
 
 function AgentAccessPanel({ agent, context, prompt }: { agent: PromptPreviewAgentId; context: JsonRecord; prompt: string }) {
   const groups = useMemo(() => buildAccessGroups(agent, prompt, context), [agent, context, prompt]);
-  const title = agent === "worker" ? "Worker Launch Inputs" : agent === "pr-review" ? "PR Intake Access" : agent === "knowledge-curator" ? "Curator Access" : "Agent Access";
+  const title =
+    agent === "worker"
+      ? "Worker Launch Inputs"
+      : agent === "pr-indexer"
+        ? "PR Indexer Access"
+        : agent === "pr-splitter"
+          ? "PR Splitter Access"
+          : agent === "knowledge-curator"
+            ? "Curator Access"
+            : agent === "qa-repair"
+              ? "PR Fixer Access"
+              : "Agent Access";
 
   return (
     <InspectorSection badge={formatCount(groups.reduce((total, group) => total + (group.badgeCount ?? group.rows.length), 0))} title={title}>

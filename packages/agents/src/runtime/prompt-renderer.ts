@@ -12,6 +12,8 @@ export interface PromptTemplateValues {
   PR_CONTEXT_JSON?: string;
   PR_CONTEXT_XML?: string;
   PR_OUTPUT_SCHEMA_JSON?: string;
+  PR_SPLITTER_CONTEXT_JSON?: string;
+  PR_SPLITTER_OUTPUT_SCHEMA_JSON?: string;
   RESOURCES_JSON?: string;
   PRIMARY_SOURCE_PATH?: string;
   TARGET_FILE_XML?: string;

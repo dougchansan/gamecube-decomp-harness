@@ -10,7 +10,7 @@ import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { isAbsolute, resolve } from "node:path";
 import { artifactTimestamp } from "@decomp-orchestrator/agents/runtime";
-import type { PreshipReview, PreshipReviewFinding } from "@decomp-orchestrator/agents/pr-review";
+import type { PreshipReview, PreshipReviewFinding } from "@decomp-orchestrator/agents/pr-reviewer";
 import { runQaScanDiff, type QaScanFinding, type QaScanInvocation, type QaScanResult, type RunQaScanDiffOptions } from "@decomp-orchestrator/core/qa";
 import type { QaRepairItemStatus, QaRepairQueue, QaRepairQueueItem } from "@decomp-orchestrator/core/qa/repair-lane";
 import { runCommand, type CommandResult } from "@decomp-orchestrator/core/shell";

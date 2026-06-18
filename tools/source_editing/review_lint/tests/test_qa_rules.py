@@ -156,6 +156,14 @@ def test_unrolled_assert_flags_call_sites():
     assert len(findings) == 1
 
 
+def test_unrolled_assert_jobj_hint_carries_line_detail():
+    findings = _assert_findings('        __assert("jobj.h", 0x257, "jobj");\n')
+    assert len(findings) == 1
+    assert "HSD_JObj" in findings[0]["message"]
+    assert findings[0]["detail"]["assert_file"] == "jobj.h"
+    assert findings[0]["detail"]["assert_line"] == "0x257"
+
+
 def test_unrolled_assert_skips_macro_definitions():
     text = (
         "#define HSD_ASSERT(line, cond)                                       \\\n"
@@ -250,11 +258,30 @@ def test_m2c_goto_label_errors_block_labels_and_warns_other_gotos():
 
 
 def test_m2c_field_and_type_erasing_casts():
-    hunk = _hardened_hunk("    M2C_FIELD(obj, s32*, 0x14) = 1;\n    data = (u8*) data;\n")
+    hunk = _hardened_hunk(
+        "    M2C_FIELD(obj, s32*, 0x14) = 1;\n"
+        "    data = (u8*) data;\n"
+        "    value = *(s32*) ((u8*) obj + 0x14);\n"
+    )
     assert len(_qa_rules.check_m2c_field_use(hunk)) == 1
     casts = _qa_rules.check_type_erasing_cast(hunk)
-    assert len(casts) == 1
-    assert casts[0]["detail"]["cast"] == "(u8*)"
+    assert len(casts) == 2
+    assert {finding["detail"]["cast"] for finding in casts} == {"(u8*)"}
+    pointer_offsets = _qa_rules.check_pointer_offset_arithmetic(hunk)
+    assert len(pointer_offsets) == 1
+    assert pointer_offsets[0]["detail"]["base"] == "obj"
+    assert pointer_offsets[0]["detail"]["offset"] == "0x14"
+
+
+def test_address_named_static_data_flags_new_address_symbol_defs():
+    hunk = _hardened_hunk(
+        "static const f32 grSmoke_804D0000 = 1.0F;\n"
+        "extern const f32 grSmoke_804D0004;\n"
+        "void fn_80000000(void);\n"
+    )
+    findings = _qa_rules.check_address_named_static_data(hunk)
+    assert len(findings) == 1
+    assert findings[0]["detail"]["symbol"] == "grSmoke_804D0000"
 
 
 def test_define_alias_identifier_expression_and_canonical_macro_warning():
@@ -277,6 +304,16 @@ def test_novel_pragma_warns_only_outside_established_set():
     findings = _qa_rules.check_novel_pragma(hunk)
     assert len(findings) == 1
     assert findings[0]["detail"]["directive"] == "inline_depth"
+    codegen = _qa_rules.check_codegen_pragma(hunk)
+    assert len(codegen) == 1
+    assert codegen[0]["detail"]["directive"] == "dont_inline"
+
+
+def test_volatile_local_tactic_warns_on_indented_local_decl():
+    hunk = _hardened_hunk("volatile s32 global_flag;\n    volatile s32 local_flag;\n")
+    findings = _qa_rules.check_volatile_local_tactic(hunk)
+    assert len(findings) == 1
+    assert findings[0]["detail"]["name"] == "local_flag"
 
 
 # ---------------------------------------------------------------------------

@@ -9,6 +9,7 @@ import { createRunCheckpoint, latestCheckpointSummary, shipsInPr } from "@decomp
 import { readRegressionReport, type RegressionReport } from "@decomp-orchestrator/core/objdiff/report";
 import { prioritizeQueuedTargets } from "@decomp-orchestrator/core/state";
 import { listProjects, projectToSummary, resolveProject, type ProjectSummary, type ResolvedProject } from "@decomp-orchestrator/core";
+import { globalStandardsContext, globalStandardsPromptXml, sourceDataRoot } from "@decomp-orchestrator/knowledge";
 import { forceReportRun, type ReportRunResult } from "@decomp-orchestrator/core/report";
 import { getLatestRun, getRun, latestSavePoint, listSavePoints, openState, setRunDesiredWorkers, statusSnapshot, updateRunStatus } from "@decomp-orchestrator/core/state";
 import { loadTrustedReport, loadTrustedReportFile } from "./trusted-report.js";
@@ -401,6 +402,16 @@ function text(data: string, init: ResponseInit = {}): Response {
   });
 }
 
+function staticFile(path: string): Response {
+  return new Response(Bun.file(path), {
+    headers: {
+      "cache-control": "no-store, max-age=0",
+      expires: "0",
+      pragma: "no-cache",
+    },
+  });
+}
+
 function sendHotReloadEvent(controller: ReadableStreamDefaultController<Uint8Array>, event: string, data: JsonObject = {}): void {
   controller.enqueue(hotReloadEncoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`));
 }
@@ -505,7 +516,263 @@ function projectDefaults(project: ResolvedProject | null): JsonObject | null {
     validation: project.validation,
     dashboard: project.dashboard,
     pr: project.pr,
+    knowledge: project.knowledge,
   };
+}
+
+// Global decomp standards live in a single shared source, not per-project, but
+// the Knowledge Base reads/writes them through the resolved project context so
+// inventory + warnings stay project-scoped. The records are shared across all
+// projects today; editing them is an operator action on durable knowledge.
+const standardsSourcePath = resolve(sourceDataRoot("decomp_standards"), "standards.jsonl");
+const standardsExamplesPath = resolve(sourceDataRoot("decomp_standards"), "examples.jsonl");
+
+interface StandardsFileRecord {
+  schema_version: string;
+  id: string;
+  kind: string;
+  status: string;
+  title: string;
+  summary: string[] | string;
+  do: string[];
+  do_not: string[];
+  evidence_refs: string[];
+  family?: string;
+  disposition?: string;
+  severity?: string;
+  qa_enforcement?: string;
+  worker_facing?: boolean;
+  retired_into?: string;
+  qa_rule_ids?: string[];
+  example_policy?: string;
+  preferred_repairs?: string[];
+  superseded_by?: string[];
+  curator_update_policy?: JsonObject;
+  [key: string]: unknown;
+}
+
+interface StandardExampleFileRecord {
+  schema_version: string;
+  id: string;
+  standard_id: string;
+  qa_rule_id?: string | null;
+  severity: string;
+  bad_pattern: string;
+  preferred_shape: string;
+  description?: string[];
+  why?: string;
+  evidence_ref?: string;
+  [key: string]: unknown;
+}
+
+function readStandardsFile(): StandardsFileRecord[] {
+  if (!existsSync(standardsSourcePath)) return [];
+  return readFileSync(standardsSourcePath, "utf8")
+    .split(/\r?\n/)
+    .filter((line) => line.trim())
+    .map((line) => JSON.parse(line) as StandardsFileRecord);
+}
+
+function readStandardExamplesFile(): StandardExampleFileRecord[] {
+  if (!existsSync(standardsExamplesPath)) return [];
+  return readFileSync(standardsExamplesPath, "utf8")
+    .split(/\r?\n/)
+    .filter((line) => line.trim())
+    .map((line) => JSON.parse(line) as StandardExampleFileRecord);
+}
+
+function writeStandardsFile(records: StandardsFileRecord[]): void {
+  const body = `${records.map((record) => JSON.stringify(record)).join("\n")}\n`;
+  mkdirSync(dirname(standardsSourcePath), { recursive: true });
+  writeFileSync(standardsSourcePath, body);
+}
+
+function standardsInventory(project: ResolvedProject | null): {
+  globalSources: string[];
+  projectSources: string[];
+  validation: JsonObject;
+  pr: JsonObject;
+} {
+  const knowledge = asObject(asObject(projectDefaults(project)).knowledge);
+  return {
+    globalSources: asArray(knowledge.globalSources).map((item) => stringValue(item)).filter(Boolean),
+    projectSources: asArray(knowledge.projectSources).map((item) => stringValue(item)).filter(Boolean),
+    validation: asObject(asObject(projectDefaults(project)).validation),
+    pr: asObject(asObject(projectDefaults(project)).pr),
+  };
+}
+
+function loadStandardsPayload(project: ResolvedProject | null): JsonObject {
+  const records = readStandardsFile();
+  const examples = readStandardExamplesFile();
+  const warnings: string[] = [];
+  if (records.length === 0) warnings.push(`No standards found at ${standardsSourcePath}.`);
+  if (examples.length === 0) warnings.push(`No standard examples found at ${standardsExamplesPath}.`);
+  return {
+    project: project ? projectToSummary(project) : null,
+    sourcePath: standardsSourcePath,
+    examplesPath: standardsExamplesPath,
+    records: records.map((record) => ({
+      id: record.id,
+      title: record.title,
+      summary: asStringArray(record.summary),
+      status: record.status,
+      family: typeof record.family === "string" ? record.family : undefined,
+      disposition: typeof record.disposition === "string" ? record.disposition : undefined,
+      severity: typeof record.severity === "string" ? record.severity : undefined,
+      qaEnforcement: typeof record.qa_enforcement === "string" ? record.qa_enforcement : undefined,
+      workerFacing: typeof record.worker_facing === "boolean" ? record.worker_facing : undefined,
+      retiredInto: typeof record.retired_into === "string" ? record.retired_into : undefined,
+      qaRuleIds: Array.isArray(record.qa_rule_ids) ? record.qa_rule_ids.map((item) => String(item)) : undefined,
+      examplePolicy: typeof record.example_policy === "string" ? record.example_policy : undefined,
+      preferredRepairs: Array.isArray(record.preferred_repairs) ? record.preferred_repairs.map((item) => String(item)) : undefined,
+      do: record.do ?? [],
+      doNot: record.do_not ?? [],
+      evidenceRefs: record.evidence_refs ?? [],
+    })),
+    examples: examples.map((example) => ({
+      id: example.id,
+      standardId: example.standard_id,
+      qaRuleId: typeof example.qa_rule_id === "string" ? example.qa_rule_id : null,
+      severity: example.severity,
+      badPattern: example.bad_pattern,
+      preferredShape: example.preferred_shape,
+      description: standardExampleDescription(example),
+      evidenceRef: typeof example.evidence_ref === "string" ? example.evidence_ref : undefined,
+    })),
+    effectiveXml: safeStandardsXml(warnings),
+    context: safeStandardsContext(warnings),
+    inventory: standardsInventory(project),
+    warnings,
+  };
+}
+
+function safeStandardsXml(warnings: string[]): string {
+  try {
+    return globalStandardsPromptXml();
+  } catch (error) {
+    warnings.push(`Unable to render effective standards XML: ${error instanceof Error ? error.message : String(error)}`);
+    return "";
+  }
+}
+
+function safeStandardsContext(warnings: string[]): JsonObject {
+  try {
+    return globalStandardsContext() as JsonObject;
+  } catch (error) {
+    warnings.push(`Unable to load standards context: ${error instanceof Error ? error.message : String(error)}`);
+    return {};
+  }
+}
+
+interface StandardEdit {
+  id: string;
+  title?: unknown;
+  summary?: unknown;
+  status?: unknown;
+  family?: unknown;
+  disposition?: unknown;
+  severity?: unknown;
+  qaEnforcement?: unknown;
+  workerFacing?: unknown;
+  retiredInto?: unknown;
+  qaRuleIds?: unknown;
+  examplePolicy?: unknown;
+  preferredRepairs?: unknown;
+  do?: unknown;
+  doNot?: unknown;
+  evidenceRefs?: unknown;
+}
+
+function asStringArray(value: unknown): string[] {
+  if (Array.isArray(value)) return value.map((item) => String(item).trim()).filter((item) => item);
+  const text = stringValue(value).trim();
+  return text ? [text] : [];
+}
+
+function standardExampleDescription(example: StandardExampleFileRecord): string[] {
+  const description = asStringArray(example.description);
+  if (description.length > 0) return description;
+  const legacyWhy = stringValue(example.why).trim();
+  return legacyWhy ? [legacyWhy] : [];
+}
+
+function validateStandardEdit(edit: StandardEdit): string[] {
+  const errors: string[] = [];
+  if (!/^global_standard:[a-z0-9-]+$/.test(stringValue(edit.id))) errors.push("id must match global_standard:<slug>.");
+  if (!stringValue(edit.title).trim()) errors.push("title is required.");
+  if (asStringArray(edit.summary).length === 0) errors.push("summary is required.");
+  if (!["accepted", "proposed", "superseded", "merged", "workflow_only"].includes(stringValue(edit.status, "accepted"))) {
+    errors.push("status must be accepted, proposed, superseded, merged, or workflow_only.");
+  }
+  return errors;
+}
+
+function optionalStringValue(value: unknown): string | undefined {
+  const text = stringValue(value).trim();
+  return text ? text : undefined;
+}
+
+// Structured-record save/apply step: the Knowledge Base edits a record's
+// fields and writes the whole JSONL back atomically. Status stays under operator
+// control per the curator proposal-only-until-validated policy.
+function applyStandardEdit(edit: StandardEdit): JsonObject {
+  const errors = validateStandardEdit(edit);
+  if (errors.length > 0) return { ok: false, errors };
+  const records = readStandardsFile();
+  const index = records.findIndex((record) => record.id === edit.id);
+  const existing = index >= 0 ? records[index] : null;
+  const merged: StandardsFileRecord = existing
+    ? {
+        ...existing,
+        title: stringValue(edit.title, existing.title),
+        summary: "summary" in edit ? asStringArray(edit.summary) : asStringArray(existing.summary),
+        status: stringValue(edit.status, existing.status || "accepted"),
+        family: "family" in edit ? optionalStringValue(edit.family) : existing.family,
+        disposition: "disposition" in edit ? optionalStringValue(edit.disposition) : existing.disposition,
+        severity: "severity" in edit ? optionalStringValue(edit.severity) : existing.severity,
+        qa_enforcement: "qaEnforcement" in edit ? optionalStringValue(edit.qaEnforcement) : existing.qa_enforcement,
+        worker_facing: "workerFacing" in edit ? boolValue(edit.workerFacing) : existing.worker_facing,
+        retired_into: "retiredInto" in edit ? optionalStringValue(edit.retiredInto) : existing.retired_into,
+        qa_rule_ids: "qaRuleIds" in edit ? asStringArray(edit.qaRuleIds) : existing.qa_rule_ids,
+        example_policy: "examplePolicy" in edit ? optionalStringValue(edit.examplePolicy) : existing.example_policy,
+        preferred_repairs: "preferredRepairs" in edit ? asStringArray(edit.preferredRepairs) : existing.preferred_repairs,
+        do: "do" in edit ? asStringArray(edit.do) : existing.do,
+        do_not: "doNot" in edit ? asStringArray(edit.doNot) : existing.do_not,
+        evidence_refs: "evidenceRefs" in edit ? asStringArray(edit.evidenceRefs) : existing.evidence_refs,
+      }
+    : {
+        schema_version: "global_standard_v1",
+        id: edit.id,
+        kind: "global_standard",
+        status: stringValue(edit.status, "accepted"),
+        title: stringValue(edit.title),
+        summary: asStringArray(edit.summary),
+        family: optionalStringValue(edit.family),
+        disposition: optionalStringValue(edit.disposition),
+        severity: optionalStringValue(edit.severity),
+        qa_enforcement: optionalStringValue(edit.qaEnforcement),
+        worker_facing: "workerFacing" in edit ? boolValue(edit.workerFacing) : true,
+        retired_into: optionalStringValue(edit.retiredInto),
+        qa_rule_ids: asStringArray(edit.qaRuleIds),
+        example_policy: optionalStringValue(edit.examplePolicy),
+        preferred_repairs: asStringArray(edit.preferredRepairs),
+        do: asStringArray(edit.do),
+        do_not: asStringArray(edit.doNot),
+        evidence_refs: asStringArray(edit.evidenceRefs),
+        superseded_by: ["current source", "headers", "symbols", "splits", "assembly", "objdiff", "regression output"],
+        curator_update_policy: {
+          target_source_id: "decomp_standards",
+          update_kind: "global_standard",
+          mutation_policy: "proposal_only_until_validated",
+        },
+      };
+  if (index >= 0) records[index] = merged;
+  else records.push(merged);
+  records.sort((a, b) => a.id.localeCompare(b.id));
+  writeStandardsFile(records);
+  appendLog("ui", `standards ${edit.id} ${existing ? "updated" : "created"} via Knowledge Base`);
+  return { ok: true, savedId: edit.id, sourcePath: standardsSourcePath };
 }
 
 function availableProjects(): ProjectSummary[] {
@@ -1650,12 +1917,332 @@ function handoffForRun(stateDir: string, runId: string, checkpoint: JsonObject |
 // sessions so opened PRs stay visible after the plan that produced them is
 // superseded. See docs/10-system-design/65-operator-flow-and-pr-tracking.md.
 
+// v2 adds per-slice in-flight preparation state (local.status "preparing" +
+// local.prepStartedAt) and a review substate envelope (review.subState /
+// review.lastSeenComments / review.subStateSetAt) used by the kanban board.
+// normalizePrRecord backfills both on v1 records, so older state upgrades
+// transparently.
+const PR_RECORDS_SCHEMA_VERSION = "session_pr_records_v2";
+const PR_RECORD_SCHEMA_VERSION = "session_pr_record_v2";
+const DEFAULT_PR_BATCH_LIMIT = 3;
+
+interface PrRecordContext {
+  baseSha?: string;
+  runId?: string;
+  sessionId?: string;
+  sourcePlan?: JsonObject;
+}
+
 function prRecordsPath(stateDir: string): string {
   return resolve(stateDir, "pr_handoff", "pr_records.json");
 }
 
 function readPrRecords(stateDir: string): JsonObject {
   return readJsonObject(prRecordsPath(stateDir));
+}
+
+function prSessionId(runId: string): string {
+  return runId ? `run:${runId}` : "legacy";
+}
+
+function prRecordContext(stateDir: string, runId = ""): PrRecordContext {
+  const baselineStatus = readJsonObject(resolve(stateDir, "pr_handoff", "baseline_status.json"));
+  const shipStatus = readJsonObject(resolve(stateDir, "pr_handoff", "ship_status.json"));
+  const plan = runId ? latestPrSplitPlanSummary(stateDir, runId) : null;
+  const planObject = asObject(plan);
+  return {
+    runId,
+    sessionId: prSessionId(runId),
+    baseSha: stringValue(baselineStatus.baseSha, stringValue(shipStatus.baseSha)),
+    sourcePlan: Object.keys(planObject).length
+      ? {
+          runId,
+          summaryPath: stringValue(planObject.summaryPath),
+          outputPath: stringValue(planObject.outputPath),
+          createdAt: stringValue(planObject.createdAt),
+        }
+      : undefined,
+  };
+}
+
+function normalizePrRecord(record: JsonObject, context: PrRecordContext = {}): JsonObject {
+  const local = asObject(record.local);
+  const validation = asObject(record.validation);
+  const batch = asObject(record.batch);
+  const github = asObject(record.github);
+  const review = asObject(record.review);
+  const sourcePlan = asObject(record.sourcePlan);
+  const prNumber = numberValue(record.prNumber, NaN);
+  const comments = numberValue(record.comments, 0);
+  const status = stringValue(record.status, "planned");
+  const branch = stringValue(record.branch);
+  const runId = stringValue(record.runId, context.runId ?? "");
+  const sessionId = stringValue(record.sessionId, context.sessionId ?? prSessionId(runId));
+  const baseSha = stringValue(record.baseSha, context.baseSha ?? "");
+  return {
+    ...record,
+    schemaVersion: stringValue(record.schemaVersion, PR_RECORD_SCHEMA_VERSION),
+    runId,
+    sessionId,
+    ...(baseSha ? { baseSha } : {}),
+    sourcePlan: {
+      ...sourcePlan,
+      ...asObject(context.sourcePlan),
+    },
+    local: {
+      status: stringValue(local.status, "not_prepared"),
+      branch: stringValue(local.branch, branch),
+      worktreePath: stringValue(local.worktreePath),
+      commitSha: stringValue(local.commitSha),
+      preparedAt: stringValue(local.preparedAt),
+      prepStartedAt: stringValue(local.prepStartedAt),
+      error: stringValue(local.error),
+      ...local,
+    },
+    validation: {
+      status: stringValue(validation.status, "not_run"),
+      checkedAt: stringValue(validation.checkedAt),
+      summaryPath: stringValue(validation.summaryPath),
+      reportPath: stringValue(validation.reportPath),
+      newMatches: numberValue(validation.newMatches, 0),
+      regressions: numberValue(validation.regressions, 0),
+      issuesCheck: stringValue(validation.issuesCheck),
+      repairNote: stringValue(validation.repairNote),
+      ...validation,
+    },
+    batch: {
+      state: stringValue(batch.state, "unbatched"),
+      ordinal: numberValue(batch.ordinal, NaN),
+      selectedAt: stringValue(batch.selectedAt),
+      publishedAt: stringValue(batch.publishedAt),
+      ...batch,
+    },
+    github: {
+      status,
+      prNumber: Number.isFinite(prNumber) ? prNumber : null,
+      url: stringValue(record.url),
+      ci: stringValue(record.ci),
+      comments,
+      author: stringValue(record.author),
+      updatedAt: stringValue(record.updatedAt),
+      ...github,
+    },
+    // review.subState is the per-PR review subphase used by the In Review
+    // column of the kanban: awaiting | new_comments | changes_requested |
+    // fixing. It is derived on GitHub hydrate (see hydrateReviewSubState) and
+    // can be set manually via /api/prs/review-state. lastSeenComments tracks
+    // the comment count at the last operator ack so new comments surface.
+    review: {
+      subState: stringValue(review.subState, ""),
+      lastSeenComments: numberValue(review.lastSeenComments, comments),
+      subStateSetAt: stringValue(review.subStateSetAt),
+      lastReviewerSeenAt: stringValue(review.lastReviewerSeenAt),
+      lastOurActionAt: stringValue(review.lastOurActionAt),
+      ...review,
+    },
+  };
+}
+
+function normalizePrRecordsPayload(payload: JsonObject, context: PrRecordContext = {}): JsonObject {
+  return {
+    ...payload,
+    schemaVersion: stringValue(payload.schemaVersion, PR_RECORDS_SCHEMA_VERSION),
+    batchLimit: intValue(payload.batchLimit, DEFAULT_PR_BATCH_LIMIT, 1),
+    records: asArray(payload.records).map((record) => normalizePrRecord(asObject(record), context)),
+  };
+}
+
+function writePrRecords(stateDir: string, payload: JsonObject): JsonObject {
+  const normalized = normalizePrRecordsPayload(payload);
+  mkdirSync(dirname(prRecordsPath(stateDir)), { recursive: true });
+  writeFileSync(prRecordsPath(stateDir), JSON.stringify(normalized, null, 2), "utf8");
+  return normalized;
+}
+
+// Local preparation stamps local.status "preparing" before it starts so the
+// kanban can show the in-flight slice. If that operation never finishes
+// (process killed, server restart), the stamp would stick forever; this
+// recovers it. It is a no-op while a prepare-local operation is actually
+// running (operation is the module-level singleton tracking the live op),
+// and otherwise rewrites any "preparing" record back to not_prepared.
+// Dashboard polling calls this every few seconds, so stale prep self-heals
+// promptly without a manual resync.
+function localPrepOperationRunning(): boolean {
+  return Boolean(operation && operation.status === "running" && (operation.name === "prepare-local-pr" || operation.name === "prepare-local-batch"));
+}
+
+function recoverInFlightPrepState(stateDir: string, payload: JsonObject): JsonObject {
+  if (localPrepOperationRunning()) return payload;
+  const records = asArray(payload.records).map(asObject);
+  let recovered = 0;
+  const next = records.map((record) => {
+    const local = asObject(record.local);
+    if (stringValue(local.status) === "preparing") {
+      recovered += 1;
+      return { ...record, local: { ...local, status: "not_prepared", prepStartedAt: "", error: "Previous local preparation did not complete; retry." } };
+    }
+    return record;
+  });
+  if (recovered === 0) return payload;
+  appendLog("ui", `recovered ${recovered} stale in-flight local preparation record(s)`);
+  return writePrRecords(stateDir, { ...payload, records: next, syncedAt: stringValue(payload.syncedAt) || new Date().toISOString() });
+}
+
+// Find the newest QA-repair artifact directory across the run-scoped
+// (qa_repairs/{runId}) and campaign-scoped (qa-repair-campaign /
+// qa-repair-lane) roots. Campaigns nest as <campaign>/<timestamp>; the
+// run-scoped path is a single timestamped dir. Returns "" when none exists.
+function latestQaRepairArtifactDir(stateDir: string, runId: string): string {
+  const candidates: string[] = [];
+  if (runId) candidates.push(latestChildDirectory(resolve(stateDir, "qa_repairs", runId)));
+  for (const root of [resolve(stateDir, "qa-repair-campaign", "qa_repairs"), resolve(stateDir, "qa-repair-lane", "qa_repairs")]) {
+    const campaign = latestChildDirectory(root);
+    if (campaign) candidates.push(latestChildDirectory(campaign));
+  }
+  let best = "";
+  let bestAt = "";
+  for (const dir of candidates) {
+    if (!dir) continue;
+    const queue = readJsonObject(resolve(dir, "queue.json"));
+    const createdAt = stringValue(queue.created_at, stringValue(queue.createdAt, ""));
+    // Prefer an explicit created_at; fall back to the dir name (ISO timestamp).
+    const effectiveAt = createdAt || dir.split(/[\\/]/).pop() || "";
+    if (!best || effectiveAt > bestAt) {
+      best = dir;
+      bestAt = effectiveAt;
+    }
+  }
+  return best;
+}
+
+// Build sourcePath -> status from the newest QA-repair queue, blending the
+// per-file queue statuses with the ship_status droppedFiles (paths dropped
+// because QA repair is still queued for them). Empty map when no repair run
+// exists; the enrich step then becomes a no-op.
+function latestQaRepairFileStatuses(stateDir: string, runId: string): Map<string, string> {
+  const dir = latestQaRepairArtifactDir(stateDir, runId);
+  const result = new Map<string, string>();
+  if (!dir) return result;
+  for (const candidate of asArray(readJsonObject(resolve(dir, "queue.json")).candidate_files).map(asObject)) {
+    const sourcePath = stringValue(candidate.sourcePath);
+    if (sourcePath) result.set(sourcePath, stringValue(candidate.status, "needs_qa_repair"));
+  }
+  const dropped = asObject(readJsonObject(resolve(dir, "ship_status.json")).droppedFiles);
+  for (const path of Object.keys(dropped)) {
+    if (path && !result.has(path)) result.set(path, "qa_repair_blocked");
+  }
+  return result;
+}
+
+// View-only enrichment: mark planned, not-yet-verified slices whose files
+// overlap the latest QA-repair pending set as "repairing". Never overrides a
+// locally-verified validation (passed/failed) or an in-flight/blocked local
+// workspace — those states are authoritative for the slice.
+function enrichRecordsWithQaRepair(records: JsonObject[], stateDir: string, runId: string): JsonObject[] {
+  const repairStatuses = latestQaRepairFileStatuses(stateDir, runId);
+  if (repairStatuses.size === 0) return records;
+  return records.map((record) => {
+    const validation = asObject(record.validation);
+    const localStatus = stringValue(asObject(record.local).status);
+    if (stringValue(record.status, "planned") !== "planned") return record;
+    if (["ready", "preparing", "blocked", "dirty"].includes(localStatus)) return record;
+    const validationStatus = stringValue(validation.status, "not_run");
+    if (validationStatus !== "not_run" && validationStatus !== "") return record;
+    const files = asArray(record.files).map((path) => stringValue(path)).filter(Boolean);
+    const pending = files.filter((file) => repairStatuses.has(file));
+    if (pending.length === 0) return record;
+    return {
+      ...record,
+      validation: { ...validation, status: "repairing", repairNote: `QA repair pending on ${pending.length}/${files.length} file(s)`, repairFileCount: pending.length },
+    };
+  });
+}
+
+// Derive the In Review subphase from GitHub state + the stored last-seen
+// baseline. Preserves a manual "fixing" subState unless something newer
+// arrived (changes requested again, or comments grew). Returns the review
+// envelope to merge into the record on hydrate.
+function deriveReviewSubState(prev: JsonObject, githubStatus: string, reviewDecision: string, comments: number): JsonObject {
+  const subStateSetAt = stringValue(prev.subStateSetAt);
+  const prevSubState = stringValue(prev.subState);
+  const lastSeenComments = numberValue(prev.lastSeenComments, comments);
+  if (githubStatus === "merged" || githubStatus === "closed" || githubStatus === "draft") {
+    return { ...prev, subState: "" };
+  }
+  if (reviewDecision === "CHANGES_REQUESTED") {
+    return { ...prev, subState: "changes_requested", lastSeenComments: comments, subStateSetAt: subStateSetAt || new Date().toISOString() };
+  }
+  const commentsIncreased = comments > lastSeenComments;
+  // A manual "fixing" persists across syncs until the operator clears it or
+  // new reviewer activity supersedes it; new comments take priority.
+  if (commentsIncreased) {
+    return { ...prev, subState: "new_comments", lastSeenComments: comments, subStateSetAt: subStateSetAt || new Date().toISOString() };
+  }
+  if (prevSubState === "fixing") return prev;
+  return { ...prev, subState: "awaiting", subStateSetAt: subStateSetAt || new Date().toISOString() };
+}
+
+// Assemble the PR records view shown on the dashboard: normalize persisted
+// state, self-heal any stale in-flight preparation stamp, then layer the
+// QA-repair derivation on top. Never writes the QA-repair enrichment to disk
+// — it is a view concern; persisted validation comes from local verification.
+function buildPrRecordsView(stateDir: string, runId: string): JsonObject {
+  const context = prRecordContext(stateDir, runId);
+  const recovered = recoverInFlightPrepState(stateDir, normalizePrRecordsPayload(readPrRecords(stateDir), context));
+  const enriched = enrichRecordsWithQaRepair(asArray(recovered.records).map(asObject), stateDir, runId);
+  return { ...recovered, records: enriched };
+}
+
+function updatePrRecord(stateDir: string, branch: string, update: (record: JsonObject) => JsonObject): JsonObject | null {
+  const payload = normalizePrRecordsPayload(readPrRecords(stateDir));
+  const records = asArray(payload.records).map(asObject);
+  const index = records.findIndex((candidate) => stringValue(candidate.branch) === branch);
+  if (index < 0) return null;
+  records[index] = normalizePrRecord(update(records[index]));
+  return writePrRecords(stateDir, { ...payload, records, syncedAt: new Date().toISOString() });
+}
+
+function prBranchPathSlug(branch: string): string {
+  return branch.replace(/[^A-Za-z0-9_.-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 96) || "slice";
+}
+
+function prWorkspacePath(stateDir: string, runId: string, branch: string): string {
+  return resolve(stateDir, "pr_workspaces", runId || "manual", prBranchPathSlug(branch));
+}
+
+function prHandoffArtifactPath(stateDir: string, savedPath: string, filename: string): string {
+  if (savedPath && existsSync(savedPath)) return savedPath;
+  return resolve(stateDir, "pr_handoff", filename);
+}
+
+function prRecordMatchesRun(record: JsonObject, runId: string, activeBranches: Set<string> = new Set()): boolean {
+  if (!runId) return true;
+  const recordRunId = stringValue(record.runId);
+  if (recordRunId) return recordRunId === runId;
+  const sessionId = stringValue(record.sessionId);
+  if (sessionId && sessionId !== "legacy") return sessionId === prSessionId(runId);
+  const branch = stringValue(record.branch);
+  if (branch && activeBranches.has(branch)) return true;
+  const status = stringValue(record.status, "planned");
+  return !Number.isFinite(numberValue(record.prNumber, NaN)) && ["planned", "planned_mock", "blocked"].includes(status);
+}
+
+function activeSessionPrBlockers(stateDir: string, runId = latestRunId(stateDir)): string[] {
+  const payload = normalizePrRecordsPayload(readPrRecords(stateDir));
+  const activeBranches = new Set(asArray(latestPrSplitPlanSummary(stateDir, runId)?.slices).map((slice) => stringValue(asObject(slice).branchName)).filter(Boolean));
+  const activeStatuses = new Set(["planned", "planned_mock", "branch_pushed", "draft", "open", "changes_requested", "blocked"]);
+  const localBlocking = new Set(["ready", "blocked", "dirty"]);
+  const blockers: string[] = [];
+  for (const record of asArray(payload.records).map(asObject)) {
+    if (!prRecordMatchesRun(record, runId, activeBranches)) continue;
+    const status = stringValue(record.status, "planned");
+    const localStatus = stringValue(asObject(record.local).status, "not_prepared");
+    if (status === "merged" || status === "closed") continue;
+    if (!activeStatuses.has(status) && !localBlocking.has(localStatus)) continue;
+    const label = stringValue(record.displayName, stringValue(record.sliceId, stringValue(record.branch, "PR slice")));
+    blockers.push(`${label}: ${status}${localStatus !== "not_prepared" ? ` / local ${localStatus}` : ""}`);
+  }
+  return blockers;
 }
 
 function upstreamRepoSlug(repoRoot: string): string {
@@ -1684,6 +2271,219 @@ function ciVerdict(rollup: unknown): string {
   return "passing";
 }
 
+function quietGit(repoRoot: string, args: string[]): CliResult {
+  const result = spawnSync("git", ["-C", repoRoot, ...args], { encoding: "utf8" });
+  return {
+    exitCode: result.status,
+    stdout: result.stdout ?? "",
+    stderr: result.stderr ?? "",
+  };
+}
+
+function splitSeriesMatch(branch: string): RegExpMatchArray | null {
+  return branch.match(/^codex\/split-(\d{2})-(.+)$/);
+}
+
+function isLocalBranchPrRecord(record: JsonObject): boolean {
+  const branch = stringValue(record.branch);
+  return Boolean(splitSeriesMatch(branch)) || stringValue(asObject(record.sourcePlan).source) === "local_branch_discovery";
+}
+
+function splitSeriesOrdinal(branch: string): number {
+  const match = splitSeriesMatch(branch);
+  return match ? Number(match[1]) : Number.MAX_SAFE_INTEGER;
+}
+
+function humanizeBranchSlug(slug: string): string {
+  return slug
+    .split("-")
+    .filter(Boolean)
+    .map((part) => (part.length <= 2 ? part.toUpperCase() : `${part.charAt(0).toUpperCase()}${part.slice(1)}`))
+    .join(" ");
+}
+
+function splitSeriesTitle(branch: string, total: number): string {
+  const match = splitSeriesMatch(branch);
+  if (!match) return branch;
+  const ordinal = Number(match[1]);
+  return `${ordinal}/${total}: ${humanizeBranchSlug(match[2])}`;
+}
+
+function splitSeriesSort(left: JsonObject, right: JsonObject): number {
+  const leftBranch = stringValue(left.branch);
+  const rightBranch = stringValue(right.branch);
+  const leftOrdinal = splitSeriesOrdinal(leftBranch);
+  const rightOrdinal = splitSeriesOrdinal(rightBranch);
+  if (leftOrdinal !== rightOrdinal) return leftOrdinal - rightOrdinal;
+  return leftBranch.localeCompare(rightBranch);
+}
+
+function branchWorktreePaths(repoRoot: string): Map<string, string> {
+  const result = quietGit(repoRoot, ["worktree", "list", "--porcelain"]);
+  const paths = new Map<string, string>();
+  if (result.exitCode !== 0) return paths;
+  let currentPath = "";
+  for (const line of result.stdout.split("\n")) {
+    if (line.startsWith("worktree ")) {
+      currentPath = line.slice("worktree ".length).trim();
+    } else if (line.startsWith("branch refs/heads/") && currentPath) {
+      paths.set(line.slice("branch refs/heads/".length).trim(), currentPath);
+    }
+  }
+  return paths;
+}
+
+function branchExists(repoRoot: string, branch: string): boolean {
+  return Boolean(branch) && quietGit(repoRoot, ["rev-parse", "--verify", branch]).exitCode === 0;
+}
+
+function localBranchDiffBase(repoRoot: string, baseRef: string, branch: string): string {
+  const mergeBase = quietGit(repoRoot, ["merge-base", baseRef, branch]).stdout.trim();
+  return mergeBase || baseRef;
+}
+
+function mergePrRecord(base: JsonObject, update: JsonObject, context: PrRecordContext = {}): JsonObject {
+  return normalizePrRecord(
+    {
+      ...base,
+      ...update,
+      sourcePlan: {
+        ...asObject(base.sourcePlan),
+        ...asObject(update.sourcePlan),
+      },
+      local: {
+        ...asObject(base.local),
+        ...asObject(update.local),
+      },
+      validation: {
+        ...asObject(base.validation),
+        ...asObject(update.validation),
+      },
+      batch: {
+        ...asObject(base.batch),
+        ...asObject(update.batch),
+      },
+      github: {
+        ...asObject(base.github),
+        ...asObject(update.github),
+      },
+    },
+    context,
+  );
+}
+
+function setPrRecord(recordsByBranch: Map<string, JsonObject>, branch: string, update: JsonObject, context: PrRecordContext = {}): JsonObject {
+  const merged = mergePrRecord(recordsByBranch.get(branch) ?? {}, update, context);
+  recordsByBranch.set(branch, merged);
+  return merged;
+}
+
+function localSplitSeriesRecords(repoRoot: string, baseRef: string, baseSha: string, context: PrRecordContext): JsonObject[] {
+  const refs = quietGit(repoRoot, ["for-each-ref", "refs/heads/codex/split-*", "--format=%(refname:short)%09%(objectname)%09%(upstream:short)"]);
+  if (refs.exitCode !== 0) return [];
+  const worktrees = branchWorktreePaths(repoRoot);
+  const branches = refs.stdout
+    .split("\n")
+    .map((line) => {
+      const [branch = "", commitSha = "", upstream = ""] = line.split("\t");
+      return { branch: branch.trim(), commitSha: commitSha.trim(), upstream: upstream.trim() };
+    })
+    .filter((item) => splitSeriesMatch(item.branch))
+    .sort((left, right) => splitSeriesOrdinal(left.branch) - splitSeriesOrdinal(right.branch));
+  const total = branches.reduce((max, item) => Math.max(max, splitSeriesOrdinal(item.branch)), 0);
+  return branches.map((item) => {
+    const diffBase = localBranchDiffBase(repoRoot, baseRef, item.branch);
+    const files = quietGit(repoRoot, ["diff", "--name-only", `${diffBase}..${item.branch}`]).stdout
+      .split("\n")
+      .map((file) => file.trim())
+      .filter(Boolean);
+    const worktreePath = worktrees.get(item.branch) ?? "";
+    const worktreeReady = Boolean(worktreePath) && existsSync(resolve(worktreePath, ".git"));
+    return normalizePrRecord(
+      {
+        sliceId: item.branch.replace(/^codex\/split-/, "split-"),
+        displayName: splitSeriesTitle(item.branch, total),
+        branch: item.branch,
+        title: splitSeriesTitle(item.branch, total),
+        scope: "split-series",
+        files,
+        status: "planned",
+        baseSha,
+        sourcePlan: {
+          source: "local_branch_discovery",
+          baseRef,
+          diffBase,
+          discoveredAt: new Date().toISOString(),
+        },
+        local: {
+          status: worktreeReady ? "ready" : "local_only",
+          branch: item.branch,
+          worktreePath: worktreeReady ? worktreePath : "",
+          commitSha: item.commitSha,
+          preparedAt: "",
+          error: "",
+        },
+        validation: {
+          status: "not_run",
+        },
+        batch: {
+          state: "unbatched",
+          ordinal: splitSeriesOrdinal(item.branch),
+        },
+      },
+      context,
+    );
+  });
+}
+
+function shouldKeepUnplannedPrRecord(record: JsonObject, repoRoot: string): boolean {
+  const branch = stringValue(record.branch);
+  const local = asObject(record.local);
+  const sourcePlan = asObject(record.sourcePlan);
+  if (record.prNumber) return true;
+  if (splitSeriesMatch(branch) && branchExists(repoRoot, branch)) return true;
+  if (stringValue(sourcePlan.source) === "local_branch_discovery" && branchExists(repoRoot, branch)) return true;
+  return ["ready", "blocked", "dirty", "local_only"].includes(stringValue(local.status));
+}
+
+async function hydratePrRecordFromGithub(record: JsonObject, pr: JsonObject, repoSlug: string, repoRoot: string): Promise<JsonObject> {
+  const prNumber = numberValue(pr.number, NaN);
+  if (!Number.isFinite(prNumber)) return record;
+  const update: JsonObject = {
+    prNumber,
+    url: stringValue(pr.url),
+    author: stringValue(asObject(pr.author).login),
+    status: prStatusFromGithub(pr),
+    updatedAt: stringValue(pr.updatedAt),
+    github: {
+      status: prStatusFromGithub(pr),
+      prNumber,
+      url: stringValue(pr.url),
+      author: stringValue(asObject(pr.author).login),
+      updatedAt: stringValue(pr.updatedAt),
+    },
+  };
+  const view = await runCli(["gh", "pr", "view", String(prNumber), "--repo", repoSlug, "--json", "comments,statusCheckRollup,files"], repoRoot);
+  let comments = numberValue(record.comments, 0);
+  if (view.exitCode === 0) {
+    const detail = asObject(JSON.parse(view.stdout || "{}"));
+    comments = asArray(detail.comments).length;
+    const ci = ciVerdict(detail.statusCheckRollup);
+    update.comments = comments;
+    update.ci = ci;
+    update.files = asArray(detail.files).map((file) => stringValue(asObject(file).path)).filter(Boolean);
+    update.github = {
+      ...asObject(update.github),
+      ci,
+      comments,
+    };
+  }
+  const githubStatus = stringValue(update.status);
+  const reviewDecision = stringValue(pr.reviewDecision);
+  update.review = deriveReviewSubState(asObject(record.review), githubStatus, reviewDecision, comments);
+  return mergePrRecord(record, update);
+}
+
 /**
  * Seed records from the latest (ship-filtered) split plan's match slices,
  * keep previously tracked records that already map to a PR, then hydrate
@@ -1695,18 +2495,23 @@ async function syncPrRecords(body: JsonObject): Promise<JsonObject> {
   const paths = resolveDashboardProject(body, { useDefaultProject: true });
   const { repoRoot, stateDir } = paths;
   const runId = activeRunIdFromBody(body, stateDir);
+  const context = prRecordContext(stateDir, runId);
   const plan = latestPrSplitPlanSummary(stateDir, runId);
-  const previous = asArray(readPrRecords(stateDir).records).map(asObject);
+  const previous = asArray(normalizePrRecordsPayload(readPrRecords(stateDir)).records).map(asObject);
   const previousByBranch = new Map(previous.map((record) => [stringValue(record.branch), record]));
+  const baseRef = paths.project?.baseRef ?? "origin/master";
+  const baseSha =
+    stringValue(context.baseSha) ||
+    quietGit(repoRoot, ["rev-parse", "--verify", baseRef]).stdout.trim();
 
-  const records: JsonObject[] = [];
+  const recordsByBranch = new Map<string, JsonObject>();
   for (const slice of asArray(plan?.slices).map(asObject)) {
     if (slice.lane !== "match") continue;
     const branch = stringValue(slice.branchName);
     if (!branch) continue;
     const prior = previousByBranch.get(branch) ?? {};
     previousByBranch.delete(branch);
-    records.push({
+    setPrRecord(recordsByBranch, branch, {
       ...prior,
       sliceId: stringValue(slice.id),
       displayName: stringValue(slice.displayName, stringValue(slice.id)),
@@ -1715,12 +2520,46 @@ async function syncPrRecords(body: JsonObject): Promise<JsonObject> {
       scope: stringValue(slice.scope),
       files: asArray(slice.pathspecs).map((path) => stringValue(path)).filter(Boolean),
       status: stringValue(prior.status, "planned"),
-    });
+    }, context);
+  }
+
+  for (const localRecord of localSplitSeriesRecords(repoRoot, baseRef, baseSha, context)) {
+    const branch = stringValue(localRecord.branch);
+    if (!branch) continue;
+    const prior = previousByBranch.get(branch) ?? {};
+    previousByBranch.delete(branch);
+    setPrRecord(recordsByBranch, branch, {
+      ...localRecord,
+      ...prior,
+      sourcePlan: {
+        ...asObject(localRecord.sourcePlan),
+        ...asObject(prior.sourcePlan),
+      },
+      local: {
+        ...asObject(prior.local),
+        ...asObject(localRecord.local),
+      },
+      validation: {
+        ...asObject(localRecord.validation),
+        ...asObject(prior.validation),
+      },
+      batch: {
+        ...asObject(localRecord.batch),
+        ...asObject(prior.batch),
+      },
+      files: asArray(prior.files).length > 0 ? asArray(prior.files) : asArray(localRecord.files),
+      status: stringValue(prior.status, stringValue(localRecord.status, "planned")),
+    }, context);
   }
   // A record whose slice vanished from the plan stays tracked once it has a
-  // PR (merged work drops out of later plans; the PR history should not).
+  // PR or points at local operator work. Merged work drops out of later plans,
+  // and local split branches can exist without GitHub PRs yet; neither should
+  // disappear from the board just because the active split-plan artifact moved.
   for (const leftover of previousByBranch.values()) {
-    if (leftover.prNumber) records.push(leftover);
+    if (shouldKeepUnplannedPrRecord(leftover, repoRoot)) {
+      const branch = stringValue(leftover.branch);
+      if (branch) setPrRecord(recordsByBranch, branch, normalizePrRecord(leftover, context), context);
+    }
   }
 
   const repoSlug = upstreamRepoSlug(repoRoot);
@@ -1734,22 +2573,46 @@ async function syncPrRecords(body: JsonObject): Promise<JsonObject> {
     if (list.exitCode === 0) {
       const pulls = (JSON.parse(list.stdout || "[]") as unknown[]).map(asObject);
       const byHead = new Map(pulls.map((pr) => [stringValue(pr.headRefName), pr]));
-      for (const record of records) {
-        const pr = byHead.get(stringValue(record.branch));
-        if (!pr) continue;
-        record.prNumber = numberValue(pr.number);
-        record.url = stringValue(pr.url);
-        record.author = stringValue(asObject(pr.author).login);
-        record.status = prStatusFromGithub(pr);
-        record.updatedAt = stringValue(pr.updatedAt);
-        const view = await runCli(["gh", "pr", "view", String(record.prNumber), "--repo", repoSlug, "--json", "comments,statusCheckRollup"], repoRoot);
-        if (view.exitCode === 0) {
-          const detail = asObject(JSON.parse(view.stdout || "{}"));
-          record.comments = asArray(detail.comments).length;
-          record.ci = ciVerdict(detail.statusCheckRollup);
+      const importHeads = new Set<string>();
+      for (const pr of pulls) {
+        const head = stringValue(pr.headRefName);
+        if (!splitSeriesMatch(head)) continue;
+        importHeads.add(head);
+        if (!recordsByBranch.has(head)) {
+          setPrRecord(recordsByBranch, head, {
+            sliceId: head.replace(/^codex\/split-/, "split-"),
+            displayName: splitSeriesTitle(head, 14),
+            branch: head,
+            title: stringValue(pr.title, splitSeriesTitle(head, 14)),
+            scope: "split-series",
+            status: prStatusFromGithub(pr),
+            sourcePlan: {
+              source: "github_import",
+              importedAt: new Date().toISOString(),
+            },
+            local: {
+              status: "remote_only",
+              branch: head,
+            },
+          }, context);
         }
       }
-      const trackedHeads = new Set(records.map((record) => stringValue(record.branch)));
+
+      for (const branch of importHeads) {
+        const record = recordsByBranch.get(branch);
+        const pr = byHead.get(branch);
+        if (!record || !pr) continue;
+        recordsByBranch.set(branch, await hydratePrRecordFromGithub(record, pr, repoSlug, repoRoot));
+      }
+
+      for (const [branch, record] of [...recordsByBranch.entries()]) {
+        if (importHeads.has(branch)) continue;
+        const pr = byHead.get(branch);
+        if (!pr) continue;
+        recordsByBranch.set(branch, await hydratePrRecordFromGithub(record, pr, repoSlug, repoRoot));
+      }
+
+      const trackedHeads = new Set([...recordsByBranch.values()].map((record) => stringValue(record.branch)));
       upstreamOpen = pulls.filter((pr) => stringValue(pr.state).toUpperCase() === "OPEN" && !trackedHeads.has(stringValue(pr.headRefName))).length;
     } else {
       warning = `gh pr list failed (${list.exitCode}): ${outputTail(list.stderr, 300)}`;
@@ -1758,9 +2621,8 @@ async function syncPrRecords(body: JsonObject): Promise<JsonObject> {
     warning = "Could not derive the upstream repo from the origin remote.";
   }
 
-  const payload: JsonObject = { records, upstreamOpen, repo: repoSlug, syncedAt: new Date().toISOString(), ...(warning ? { warning } : {}) };
-  mkdirSync(dirname(prRecordsPath(stateDir)), { recursive: true });
-  writeFileSync(prRecordsPath(stateDir), JSON.stringify(payload, null, 2), "utf8");
+  const records = [...recordsByBranch.values()].map((record) => normalizePrRecord(record)).sort(splitSeriesSort);
+  const payload = writePrRecords(stateDir, { records, upstreamOpen, repo: repoSlug, syncedAt: new Date().toISOString(), ...(warning ? { warning } : {}) });
   appendLog("ui", `PR sync: ${records.length} tracked record(s)${Number.isFinite(Number(upstreamOpen)) ? `, ${upstreamOpen} other open upstream` : ""}${warning ? ` — ${warning}` : ""}`);
   return payload;
 }
@@ -2181,7 +3043,7 @@ async function runDashboard(paths: DashboardProjectContext): Promise<JsonObject>
     campaign,
     epochs,
     checkpointProgress: runId ? checkpointProgressFor(stateDir, runId, epochs, allReports, runCreatedAt, runDesiredWorkers) : null,
-    prs: readPrRecords(stateDir),
+    prs: buildPrRecordsView(stateDir, runId),
   };
 }
 
@@ -2968,6 +3830,11 @@ function prGroupMode(value: unknown): string {
   return groupMode === "top-dir" ? groupMode : "melee-subsystem";
 }
 
+function prSplitStrategy(value: unknown): string {
+  const strategy = stringValue(value, "deterministic");
+  return strategy === "agent" ? strategy : "deterministic";
+}
+
 function prHandoffRoot(stateDir: string, runId: string, kind: string): string {
   return resolve(stateDir, "pr_handoff", runId, kind, artifactTimestamp());
 }
@@ -3218,6 +4085,8 @@ async function runPrSplitPlan(body: JsonObject): Promise<JsonObject> {
     stringValue(body.prBaseRef, paths.project?.baseRef ?? "origin/master").trim() || "origin/master",
     "--group-mode",
     prGroupMode(stringValue(body.prGroupMode, paths.project?.pr.groupMode ?? "melee-subsystem")),
+    "--strategy",
+    prSplitStrategy(stringValue(body.prSplitStrategy, paths.project?.pr.splitStrategy ?? "deterministic")),
     "--max-files-per-pr",
     String(intValue(body.prMaxFilesPerPr, paths.project?.pr.maxFilesPerPr ?? 30, 1)),
     "--branch-prefix",
@@ -3226,6 +4095,10 @@ async function runPrSplitPlan(body: JsonObject): Promise<JsonObject> {
     stringValue(body.prTitlePrefix, paths.project?.pr.titlePrefix ?? "Melee decomp"),
     "--output",
     outputPath,
+    "--agent-output-dir",
+    resolve(artifactDir, "splitter_agent"),
+    "--run-id",
+    runId,
     "--json",
   ];
   if (checkpointPath && existsSync(checkpointPath)) command.push("--checkpoint", checkpointPath);
@@ -3255,6 +4128,9 @@ async function runPrSplitPlan(body: JsonObject): Promise<JsonObject> {
       totalFiles: numberValue(plan.totalFiles, 0),
       sliceCount: slices.length,
       shipFilterApplied: boolValue(plan.shipFilterApplied),
+      planningStrategy: stringValue(plan.planningStrategy, "deterministic"),
+      splitterApplied: boolValue(plan.splitterApplied),
+      splitterArtifacts: asObject(plan.splitterArtifacts),
       matchSlices: slices.filter((slice) => slice.lane === "match").length,
       localSlices: slices.filter((slice) => slice.lane === "local").length,
       unassignedSlices: slices.filter((slice) => !slice.lane).length,
@@ -3289,6 +4165,7 @@ async function runPrSplitPlan(body: JsonObject): Promise<JsonObject> {
     checkpointPath: checkpointPath || null,
     baseRef: stringValue(body.prBaseRef, paths.project?.baseRef ?? "origin/master").trim() || "origin/master",
     groupMode: prGroupMode(stringValue(body.prGroupMode, paths.project?.pr.groupMode ?? "melee-subsystem")),
+    requestedPlanningStrategy: prSplitStrategy(stringValue(body.prSplitStrategy, paths.project?.pr.splitStrategy ?? "deterministic")),
     maxFilesPerPr: intValue(body.prMaxFilesPerPr, paths.project?.pr.maxFilesPerPr ?? 30, 1),
     command,
     exitCode: result.exitCode,
@@ -3370,6 +4247,24 @@ async function rebuildProductionBaseline(paths: DashboardProjectContext): Promis
   mkdirSync(dirname(statusPath), { recursive: true });
   writeFileSync(statusPath, JSON.stringify(status, null, 2), "utf8");
   return status as unknown as JsonObject;
+}
+
+async function ensureOpenPrBaseline(paths: DashboardProjectContext): Promise<JsonObject> {
+  const baseRef = paths.project?.baseRef ?? "origin/master";
+  const baseSha = (await runGit(paths.repoRoot, ["rev-parse", "--verify", baseRef], { failureHint: `Unable to resolve ${baseRef}` })).stdout.trim();
+  const status = readJsonObject(resolve(paths.stateDir, "pr_handoff", "baseline_status.json"));
+  const worktreeDir = stringValue(status.worktreeDir);
+  const baselinePath = worktreeDir ? resolve(worktreeDir, "build/GALE01/baseline.json") : "";
+  if (stringValue(status.baseSha) === baseSha && worktreeDir && existsSync(baselinePath)) return status;
+
+  const reason =
+    stringValue(status.baseSha) && stringValue(status.baseSha) !== baseSha
+      ? `baseline cache is stale (${stringValue(status.baseSha).slice(0, 10)} != ${baseSha.slice(0, 10)})`
+      : worktreeDir && !existsSync(baselinePath)
+        ? `baseline cache is missing at ${worktreeDir}`
+        : "baseline cache is missing";
+  appendLog("ui", `open draft: ${reason}; rebuilding production baseline`);
+  return rebuildProductionBaseline(paths);
 }
 
 // Parsed branch-vs-baseline report; the source for both rework
@@ -3565,6 +4460,350 @@ async function checkCodeIssues(worktreeDir: string): Promise<CodeIssuesResult> {
   return { status: "issues", output, files };
 }
 
+async function verifyPrSliceInBaseline(params: { baseSha: string; baselineWorktree: string; files: string[]; patchPath: string }): Promise<{ issues: CodeIssuesResult; report: RegressionReport }> {
+  const includeArgs = params.files.map((file) => `--include=${file}`);
+  let report: RegressionReport | null = null;
+  let issues: CodeIssuesResult = { status: "unavailable", output: "verification did not reach code-issues", files: [] };
+  try {
+    const apply = await runCli(["git", "apply", ...includeArgs, params.patchPath], params.baselineWorktree);
+    if (apply.exitCode !== 0) throw new Error(`Slice patch did not apply (${apply.exitCode}): ${outputTail(apply.stderr, 1500)}`);
+    const build = await runCli(["ninja", "changes_all"], params.baselineWorktree);
+    if (build.exitCode !== 0) throw new Error(`Slice build failed (${build.exitCode}): ${outputTail(build.stderr || build.stdout, 3000)}`);
+    report = await readRegressionReport(resolve(params.baselineWorktree, "build/GALE01/report_changes.json"), "slice isolation", 0);
+    if (report.regressions.length === 0 && report.brokenMatches.length === 0 && report.fuzzyRegressions.length === 0) {
+      issues = await checkCodeIssues(params.baselineWorktree);
+    } else {
+      issues = { status: "unavailable", output: "skipped — slice regressed in isolation", files: [] };
+    }
+  } finally {
+    await runCli(["git", "reset", "--hard", params.baseSha], params.baselineWorktree);
+    await runCli(["git", "clean", "-fd", "--", "src", "include", "config"], params.baselineWorktree);
+  }
+  if (!report) throw new Error("Slice verification did not produce a regression report.");
+  return { report, issues };
+}
+
+function sliceValidationSummary(report: RegressionReport, issues: CodeIssuesResult): JsonObject {
+  const regressions = report.regressions.length + report.brokenMatches.length + report.fuzzyRegressions.length;
+  const status = regressions > 0 || issues.status === "issues" ? "failed" : issues.status === "unavailable" ? "warning" : "passed";
+  return {
+    status,
+    checkedAt: new Date().toISOString(),
+    newMatches: report.newMatches.length,
+    regressions,
+    brokenMatches: report.brokenMatches.length,
+    fuzzyRegressions: report.fuzzyRegressions.length,
+    metricRegressions: report.regressions.length,
+    matchedCodeBytesDelta: report.summary.matchedCodeBytesDelta,
+    issuesCheck: issues.status,
+    issuesFiles: issues.files,
+    issuesOutput: issues.status === "clean" ? "" : outputTail(issues.output, 1200),
+  };
+}
+
+function assertSliceVerificationClean(branch: string, validation: JsonObject): void {
+  if (stringValue(validation.status) === "passed" || stringValue(validation.status) === "warning") return;
+  throw new Error(
+    `Slice ${branch} is not locally ready: ${numberValue(validation.brokenMatches)} broken · ${numberValue(validation.fuzzyRegressions)} fuzzy · ${numberValue(validation.metricRegressions)} metric · ${stringValue(validation.issuesCheck)} issues.`,
+  );
+}
+
+async function readyLocalPrSource(params: { baseSha: string; branch: string; files: string[]; record: JsonObject; repoRoot: string; stateDir: string }): Promise<JsonObject | null> {
+  const local = asObject(params.record.local);
+  const worktreePath = stringValue(local.worktreePath);
+  const localStatus = stringValue(local.status);
+  const localBranchRecord = isLocalBranchPrRecord(params.record);
+
+  if (localStatus !== "ready" && !localBranchRecord) return null;
+  if (localStatus === "ready" && (!worktreePath || !existsSync(resolve(worktreePath, ".git")))) {
+    updatePrRecord(params.stateDir, params.branch, (record) => ({
+      ...record,
+      local: {
+        ...asObject(record.local),
+        status: localBranchRecord ? "local_only" : "blocked",
+        error: worktreePath ? `Local PR worktree is missing at ${worktreePath}.` : "Local PR worktree path is missing.",
+      },
+    }));
+    if (!localBranchRecord) return null;
+  }
+
+  if (worktreePath && existsSync(resolve(worktreePath, ".git"))) {
+    const status = await runGit(worktreePath, ["status", "--porcelain"], { check: false });
+    if (status.exitCode !== 0) throw new Error(`Unable to inspect local PR worktree for ${params.branch}: ${outputTail(status.stderr || status.stdout, 1200)}`);
+    if (status.stdout.trim()) {
+      const message = `Local PR worktree for ${params.branch} has uncommitted changes at ${worktreePath}. Commit or stash them before opening a draft.`;
+      updatePrRecord(params.stateDir, params.branch, (record) => ({
+        ...record,
+        local: {
+          ...asObject(record.local),
+          status: "dirty",
+          error: message,
+        },
+      }));
+      throw new Error(message);
+    }
+
+    const currentBranch = await runGit(worktreePath, ["rev-parse", "--abbrev-ref", "HEAD"], { failureHint: `Unable to read local PR worktree branch for ${params.branch}` });
+    if (currentBranch.stdout.trim() !== params.branch) {
+      throw new Error(`Local PR worktree for ${params.branch} is checked out to ${currentBranch.stdout.trim() || "(detached)"}. Check out ${params.branch} before opening.`);
+    }
+  }
+
+  if (!branchExists(params.repoRoot, params.branch)) return null;
+  const sourceRepo = worktreePath && existsSync(resolve(worktreePath, ".git")) ? worktreePath : params.repoRoot;
+  const head = await runGit(params.repoRoot, ["rev-parse", params.branch], { failureHint: `Unable to read local PR branch HEAD for ${params.branch}` });
+  const commitSha = head.stdout.trim();
+  const diffBase = localBranchDiffBase(params.repoRoot, params.baseSha, params.branch);
+  const changed = await runGit(params.repoRoot, ["diff", "--name-only", `${diffBase}..${params.branch}`], { failureHint: `Unable to inspect local PR diff for ${params.branch}` });
+  const changedFiles = changed.stdout.split("\n").map((file) => file.trim()).filter(Boolean);
+  if (changedFiles.length === 0) throw new Error(`Local PR branch ${params.branch} has no committed diff from ${diffBase.slice(0, 10)}.`);
+  const manifest = new Set(params.files);
+  const outsideManifest = changedFiles.filter((file) => !manifest.has(file));
+  if (outsideManifest.length > 0) {
+    throw new Error(`Local PR branch ${params.branch} changes file(s) outside the PR manifest: ${outsideManifest.slice(0, 8).join(", ")}${outsideManifest.length > 8 ? `, +${outsideManifest.length - 8} more` : ""}. Re-plan or move those edits before opening.`);
+  }
+
+  const patchDir = resolve(params.stateDir, "pr_handoff", "local_patches");
+  mkdirSync(patchDir, { recursive: true });
+  const patchPath = resolve(patchDir, `${prBranchPathSlug(params.branch)}.patch`);
+  const diff = await runGit(params.repoRoot, ["diff", "--binary", `${diffBase}..${params.branch}`, "--", ...params.files], { failureHint: `Unable to write local PR patch for ${params.branch}` });
+  if (!diff.stdout.trim()) throw new Error(`Local PR worktree for ${params.branch} produced an empty manifest diff.`);
+  writeFileSync(patchPath, diff.stdout, "utf8");
+
+  return {
+    commitSha,
+    diffBase,
+    patchPath,
+    source: sourceRepo === worktreePath ? "local_worktree" : "local_branch",
+    worktreePath: sourceRepo === worktreePath ? worktreePath : "",
+  };
+}
+
+async function prepareLocalPrWorkspace(params: {
+  baseSha: string;
+  branch: string;
+  files: string[];
+  force: boolean;
+  patchPath: string;
+  record: JsonObject;
+  repoRoot: string;
+  runId: string;
+  stateDir: string;
+  title: string;
+}): Promise<JsonObject> {
+  const local = asObject(params.record.local);
+  const existingWorktree = stringValue(local.worktreePath);
+  const worktreePath = existingWorktree || prWorkspacePath(params.stateDir, params.runId, params.branch);
+  if (stringValue(local.status) === "ready" && worktreePath && existsSync(resolve(worktreePath, ".git"))) {
+    return {
+      ...params.record,
+      local: { ...local, status: "ready", branch: params.branch, worktreePath },
+    };
+  }
+  if (existsSync(worktreePath) && !params.force) {
+    throw new Error(`Local worktree already exists at ${worktreePath}. Inspect it or rerun with force before overwriting local PR workspace state.`);
+  }
+
+  mkdirSync(dirname(worktreePath), { recursive: true });
+  if (!existsSync(resolve(worktreePath, ".git"))) {
+    await runGit(params.repoRoot, ["worktree", "prune"], { check: false });
+    const add = await runGit(params.repoRoot, ["worktree", "add", "-B", params.branch, worktreePath, params.baseSha], { check: false });
+    if (add.exitCode !== 0) throw new Error(`git worktree add failed (${add.exitCode}): ${outputTail(add.stderr || add.stdout, 1500)}`);
+  } else if (params.force) {
+    const checkout = await runGit(worktreePath, ["checkout", "-B", params.branch, params.baseSha], { check: false });
+    if (checkout.exitCode !== 0) throw new Error(`git checkout failed in local PR worktree (${checkout.exitCode}): ${outputTail(checkout.stderr || checkout.stdout, 1500)}`);
+    await runGit(worktreePath, ["reset", "--hard", params.baseSha], { check: false });
+    await runGit(worktreePath, ["clean", "-fd", "--", "src", "include", "config"], { check: false });
+  }
+
+  const origSource = resolve(params.repoRoot, "orig");
+  if (existsSync(origSource)) linkMissingFiles(origSource, resolve(worktreePath, "orig"));
+
+  const includeArgs = params.files.map((file) => `--include=${file}`);
+  const apply = await runCli(["git", "apply", "--index", ...includeArgs, params.patchPath], worktreePath);
+  if (apply.exitCode !== 0) throw new Error(`Patch apply failed in the local PR worktree (${apply.exitCode}): ${outputTail(apply.stderr, 1500)}`);
+  const commit = await runCli(["git", "commit", "-m", params.title], worktreePath);
+  if (commit.exitCode !== 0) throw new Error(`git commit failed in the local PR worktree (${commit.exitCode}): ${outputTail(commit.stderr || commit.stdout, 1500)}`);
+  const head = await runGit(worktreePath, ["rev-parse", "HEAD"], { failureHint: "Unable to read local PR worktree HEAD" });
+  return {
+    ...params.record,
+    local: {
+      ...local,
+      status: "ready",
+      branch: params.branch,
+      worktreePath,
+      commitSha: head.stdout.trim(),
+      preparedAt: new Date().toISOString(),
+      error: "",
+    },
+  };
+}
+
+async function prepareLocalPrForBranch(body: JsonObject, branch: string): Promise<JsonObject> {
+  const paths = resolveDashboardProject(body, { useDefaultProject: true });
+  const { repoRoot, stateDir } = paths;
+  assertHandoffIdle(stateDir, "Prepare local PR");
+  const runId = activeRunIdFromBody(body, stateDir);
+  const context = prRecordContext(stateDir, runId);
+  const payload = normalizePrRecordsPayload(readPrRecords(stateDir));
+  const records = asArray(payload.records).map(asObject);
+  const index = records.findIndex((candidate) => stringValue(candidate.branch) === branch);
+  if (index < 0) throw new Error(`No PR record for branch ${branch}; run Sync PR Status first.`);
+  const record = normalizePrRecord(records[index], context);
+  const status = stringValue(record.status, "planned");
+  if (status !== "planned") throw new Error(`Local preparation expects a planned PR slice; ${branch} is ${status}.`);
+  const files = asArray(record.files).map((path) => stringValue(path)).filter(Boolean);
+  if (files.length === 0) throw new Error(`PR record for ${branch} has no file manifest; re-run Plan PRs and Sync PR Status.`);
+
+  const shipStatus = readJsonObject(resolve(stateDir, "pr_handoff", "ship_status.json"));
+  if (stringValue(shipStatus.status) !== "pr_ready") throw new Error("Ship set is not pr_ready; run Prepare Handoff first.");
+  const patchPath = stringValue(shipStatus.patchPath, resolve(stateDir, "pr_handoff", "ship_set.patch"));
+  if (!existsSync(patchPath)) throw new Error(`Verified ship patch missing at ${patchPath}; run Prepare Handoff first.`);
+  const baselineStatus = readJsonObject(resolve(stateDir, "pr_handoff", "baseline_status.json"));
+  const baseSha = stringValue(baselineStatus.baseSha);
+  const baselineWorktree = stringValue(baselineStatus.worktreeDir);
+  if (!baseSha || !baselineWorktree || !existsSync(baselineWorktree)) {
+    throw new Error("Baseline worktree missing; run Prepare Handoff to rebuild the production baseline.");
+  }
+  if (baseSha !== stringValue(shipStatus.baseSha)) throw new Error("Baseline and ship status disagree on the base SHA; re-run Prepare Handoff.");
+
+  try {
+    updatePrRecord(stateDir, branch, (current) => ({
+      ...current,
+      local: { ...asObject(current.local), status: "preparing", prepStartedAt: new Date().toISOString(), error: "" },
+    }));
+    operationStep("verify slice locally", `${files.length} file(s) onto baseline ${baseSha.slice(0, 10)}`);
+    const { report, issues } = await verifyPrSliceInBaseline({ baseSha, baselineWorktree, files, patchPath });
+    const validation = sliceValidationSummary(report, issues);
+    assertSliceVerificationClean(branch, validation);
+    operationStepDetail("verify slice locally", `${numberValue(validation.newMatches)} new match(es), ${stringValue(validation.issuesCheck)} issues check`);
+
+    operationStep("prepare local worktree", branch);
+    const title = stringValue(record.title, `Melee decomp: ${stringValue(record.displayName, branch)}`);
+    const prepared = await prepareLocalPrWorkspace({
+      baseSha,
+      branch,
+      files,
+      force: body.forceLocalPrepare === true,
+      patchPath,
+      record: { ...record, baseSha, validation },
+      repoRoot,
+      runId,
+      stateDir,
+      title,
+    });
+    const updated = normalizePrRecord(
+      {
+        ...prepared,
+        status: "planned",
+        baseSha,
+        validation,
+        batch: {
+          ...asObject(prepared.batch),
+          state: stringValue(asObject(prepared.batch).state, "unbatched"),
+        },
+      },
+      context,
+    );
+    records[index] = updated;
+    const nextPayload = writePrRecords(stateDir, { ...payload, records, syncedAt: stringValue(payload.syncedAt) || new Date().toISOString() });
+    operationStepDetail("prepare local worktree", `${branch} @ ${stringValue(asObject(updated.local).commitSha).slice(0, 10)}`);
+    appendLog("ui", `local PR prepared: ${branch} -> ${stringValue(asObject(updated.local).worktreePath)}`);
+    return { prepared: true, branch, record: updated, prs: nextPayload };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    records[index] = normalizePrRecord(
+      {
+        ...record,
+        local: {
+          ...asObject(record.local),
+          status: "blocked",
+          error: message,
+        },
+        validation: {
+          ...asObject(record.validation),
+          status: "failed",
+          checkedAt: new Date().toISOString(),
+        },
+      },
+      context,
+    );
+    writePrRecords(stateDir, { ...payload, records });
+    throw error;
+  }
+}
+
+async function prepareLocalPr(body: JsonObject): Promise<JsonObject> {
+  const branch = stringValue(body.prBranch);
+  if (!branch) throw new Error("Prepare local PR needs prBranch (the slice's branch name).");
+  return withOperation("prepare-local-pr", `Prepare Local PR — ${branch}`, ["verify slice locally", "prepare local worktree"], () => prepareLocalPrForBranch(body, branch));
+}
+
+// Manual review-substate control for the In Review column. The operator uses
+// it to ack new comments (clears "new_comments" back to "awaiting") or to
+// mark that they are addressing feedback ("fixing"). Derivation on the next
+// sync supersedes "fixing" only when new reviewer activity arrives.
+async function setPrReviewState(body: JsonObject): Promise<JsonObject> {
+  const paths = resolveDashboardProject(body, { useDefaultProject: true });
+  const branch = stringValue(body.prBranch);
+  if (!branch) throw new Error("Review state needs prBranch (the slice's branch name).");
+  const subState = stringValue(body.subState);
+  const allowed = new Set(["awaiting", "new_comments", "changes_requested", "fixing", ""]);
+  if (!allowed.has(subState)) throw new Error(`Unknown review subState: ${subState || "(empty)"}.`);
+  const seenComments = numberValue(body.seenComments, NaN);
+  const updated = updatePrRecord(paths.stateDir, branch, (record) => {
+    const review = asObject(record.review);
+    const github = asObject(record.github);
+    const currentComments = numberValue(github.comments, numberValue(record.comments, 0));
+    return {
+      ...record,
+      review: {
+        ...review,
+        subState,
+        lastSeenComments: Number.isFinite(seenComments) ? seenComments : currentComments,
+        subStateSetAt: new Date().toISOString(),
+        ...(subState === "fixing" ? { lastOurActionAt: new Date().toISOString() } : subState === "awaiting" ? { lastReviewerSeenAt: new Date().toISOString() } : {}),
+      },
+    };
+  });
+  if (!updated) throw new Error(`No PR record for branch ${branch}; run Sync PR Status first.`);
+  appendLog("ui", `review state for ${branch}: ${subState || "(cleared)"}`);
+  const runId = activeRunIdFromBody(body, paths.stateDir);
+  return { branch, review: asObject(updated).review, prs: buildPrRecordsView(paths.stateDir, runId) };
+}
+
+async function prepareLocalPrBatch(body: JsonObject): Promise<JsonObject> {
+  const paths = resolveDashboardProject(body, { useDefaultProject: true });
+  const runId = activeRunIdFromBody(body, paths.stateDir);
+  const payload = normalizePrRecordsPayload(readPrRecords(paths.stateDir));
+  const limit = intValue(body.batchLimit, DEFAULT_PR_BATCH_LIMIT, 1);
+  const candidates = asArray(payload.records)
+    .map(asObject)
+    .filter((record) => prRecordMatchesRun(record, runId) && stringValue(record.status, "planned") === "planned" && stringValue(asObject(record.local).status, "not_prepared") === "not_prepared" && stringValue(record.branch))
+    .slice(0, limit);
+  if (candidates.length === 0) throw new Error("No planned PR slices need local preparation.");
+  return withOperation("prepare-local-batch", `Prepare Local Batch — next ${candidates.length}`, candidates.map((record) => stringValue(record.branch)), async () => {
+    const results: JsonObject[] = [];
+    for (const record of candidates) {
+      const branch = stringValue(record.branch);
+      operationStep(branch, "local workspace preparation");
+      try {
+        const result = await prepareLocalPrForBranch(body, branch);
+        results.push({ branch, prepared: true, record: asObject(result.record) });
+        operationStepDetail(branch, "local ready");
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        results.push({ branch, prepared: false, error: message });
+        operationStepDetail(branch, `failed: ${outputTail(message, 300)}`);
+        appendLog("stderr", `prepare-local-batch: ${branch} failed — ${message}`);
+      }
+    }
+    const preparedCount = results.filter((result) => result.prepared === true).length;
+    if (preparedCount === 0) throw new Error(`No local PR workspaces prepared; all ${results.length} slice(s) failed. See Logs.`);
+    return { preparedCount, failedCount: results.length - preparedCount, results, prs: normalizePrRecordsPayload(readPrRecords(paths.stateDir)) };
+  });
+}
+
 /**
  * Publish one planned slice as a draft PR. The slice is re-verified alone in
  * the cached baseline worktree (incremental build + regression report, then
@@ -3586,52 +4825,59 @@ async function openPrForSlice(body: JsonObject): Promise<JsonObject> {
   const files = asArray(record.files).map((path) => stringValue(path)).filter(Boolean);
   if (files.length === 0) throw new Error(`PR record for ${branch} has no file manifest; re-run Plan PRs and Sync PR Status.`);
 
-  const shipStatus = readJsonObject(resolve(stateDir, "pr_handoff", "ship_status.json"));
-  if (stringValue(shipStatus.status) !== "pr_ready") throw new Error("Ship set is not pr_ready; run Prepare Handoff first.");
-  const patchPath = stringValue(shipStatus.patchPath, resolve(stateDir, "pr_handoff", "ship_set.patch"));
-  if (!existsSync(patchPath)) throw new Error(`Verified ship patch missing at ${patchPath}; run Prepare Handoff first.`);
-  const baselineStatus = readJsonObject(resolve(stateDir, "pr_handoff", "baseline_status.json"));
-  const baseSha = stringValue(baselineStatus.baseSha);
-  const baselineWorktree = stringValue(baselineStatus.worktreeDir);
-  if (!baseSha || !baselineWorktree || !existsSync(baselineWorktree)) {
-    throw new Error("Baseline worktree missing; run Prepare Handoff to rebuild the production baseline.");
-  }
-  if (baseSha !== stringValue(shipStatus.baseSha)) throw new Error("Baseline and ship status disagree on the base SHA; re-run Prepare Handoff.");
   const repoSlug = upstreamRepoSlug(repoRoot);
   const forkOwner = remoteOwner(repoRoot, "fork");
   if (!repoSlug || !forkOwner) throw new Error("Need an `origin` (upstream) and `fork` (push target) remote on the checkout.");
 
-  const includeArgs = files.map((file) => `--include=${file}`);
   const title = stringValue(record.title, `Melee decomp: ${stringValue(record.displayName, branch)}`);
-  const steps = ["verify slice in isolation", "check code issues", "create branch & commit", "push to fork", "create draft PR", "sync PR records"];
+  const steps = ["prepare baseline", "prepare source patch", "verify slice in isolation", "check code issues", "publish branch", "create draft PR", "sync PR records"];
   return withOperation("open-pr", `Open PR — ${stringValue(record.displayName, branch)}`, steps, async () => {
-    // Same pattern as verifyShipSet: apply onto the cached baseline
-    // worktree, build incrementally, read the report, always reset.
-    operationStep("verify slice in isolation", `${files.length} file(s) onto baseline ${baseSha.slice(0, 10)}`);
-    let report: RegressionReport;
-    let issues: CodeIssuesResult;
-    try {
-      const apply = await runCli(["git", "apply", ...includeArgs, patchPath], baselineWorktree);
-      if (apply.exitCode !== 0) throw new Error(`Slice patch did not apply (${apply.exitCode}): ${outputTail(apply.stderr, 1500)}`);
-      const build = await runCli(["ninja", "changes_all"], baselineWorktree);
-      if (build.exitCode !== 0) throw new Error(`Slice build failed (${build.exitCode}): ${outputTail(build.stderr || build.stdout, 3000)}`);
-      report = await readRegressionReport(resolve(baselineWorktree, "build/GALE01/report_changes.json"), "slice isolation", 0);
-      if (report.regressions.length === 0 && report.brokenMatches.length === 0 && report.fuzzyRegressions.length === 0) {
-        operationStep("check code issues", "upstream check-issues lint on the patched tree");
-        issues = await checkCodeIssues(baselineWorktree);
-      } else {
-        issues = { status: "unavailable", output: "skipped — slice regressed in isolation", files: [] };
-      }
-    } finally {
-      await runCli(["git", "reset", "--hard", baseSha], baselineWorktree);
-      await runCli(["git", "clean", "-fd", "--", "src", "include", "config"], baselineWorktree);
+    const baseRef = paths.project?.baseRef ?? "origin/master";
+    operationStep("prepare baseline", baseRef);
+    const baselineStatus = await ensureOpenPrBaseline(paths);
+    const baseSha = stringValue(baselineStatus.baseSha);
+    const baselineWorktree = stringValue(baselineStatus.worktreeDir);
+    const baselineJson = baselineWorktree ? resolve(baselineWorktree, "build/GALE01/baseline.json") : "";
+    if (!baseSha || !baselineWorktree || !existsSync(baselineJson)) {
+      failOperationStep("prepare baseline");
+      throw new Error("Baseline worktree missing; run Prepare Handoff to rebuild the production baseline.");
     }
+    operationStepDetail("prepare baseline", `${baseSha.slice(0, 10)} at ${baselineWorktree}`);
+
+    operationStep("prepare source patch", isLocalBranchPrRecord(record) ? "local branch" : "verified ship set");
+    const localSource = await readyLocalPrSource({ baseSha, branch, files, record, repoRoot, stateDir });
+    const shipStatus = readJsonObject(resolve(stateDir, "pr_handoff", "ship_status.json"));
+    let patchToApply = stringValue(localSource?.patchPath);
+    let shipSetVerified = false;
+    if (localSource) {
+      operationStepDetail("prepare source patch", `${stringValue(localSource.source, "local source")} commit ${stringValue(localSource.commitSha).slice(0, 10)}`);
+    } else {
+      if (stringValue(shipStatus.status) !== "pr_ready") {
+        operationNextHint("Run Prepare Handoff, or make sure the local PR branch exists so Open Draft can publish from that branch.");
+        throw new Error("Ship set is not pr_ready and no local branch source was available.");
+      }
+      if (baseSha !== stringValue(shipStatus.baseSha)) {
+        operationNextHint("Run Prepare Handoff again, or open from a local branch that can be verified against the current baseline.");
+        throw new Error(`Verified ship set was prepared for ${stringValue(shipStatus.baseSha).slice(0, 10)}, but ${baseRef} is ${baseSha.slice(0, 10)}.`);
+      }
+      const shipPatchPath = prHandoffArtifactPath(stateDir, stringValue(shipStatus.patchPath), "ship_set.patch");
+      if (!existsSync(shipPatchPath)) throw new Error(`Verified ship patch missing at ${shipPatchPath}; run Prepare Handoff first.`);
+      patchToApply = shipPatchPath;
+      shipSetVerified = true;
+      operationStepDetail("prepare source patch", "verified ship_set.patch");
+    }
+    if (!patchToApply) throw new Error(`No source patch could be prepared for ${branch}.`);
+
+    const includeArgs = files.map((file) => `--include=${file}`);
+    operationStep("verify slice in isolation", `${files.length} file(s) onto baseline ${baseSha.slice(0, 10)}`);
+    const { report, issues } = await verifyPrSliceInBaseline({ baseSha, baselineWorktree, files, patchPath: patchToApply });
     if (report.regressions.length > 0 || report.brokenMatches.length > 0 || report.fuzzyRegressions.length > 0) {
       failOperationStep("verify slice in isolation");
       operationNextHint("This slice does not stand alone — it likely depends on a shared/support slice. Open that slice's PR first, or stack the branches manually.");
       throw new Error(`Slice ${branch} regresses in isolation: ${report.brokenMatches.length} broken · ${report.fuzzyRegressions.length} fuzzy · ${report.regressions.length} metric.`);
     }
     operationStepDetail("verify slice in isolation", `${report.newMatches.length} new match(es), 0 regressions`);
+    operationStep("check code issues", "upstream check-issues lint on the patched tree");
     if (issues.status === "issues") {
       failOperationStep("check code issues");
       operationNextHint("Upstream CI's Issues job would reject this slice. Fix the listed file(s) (e.g. permuter slop like self-assignment, conflicting prototypes) and re-run Prepare Handoff.");
@@ -3639,52 +4885,71 @@ async function openPrForSlice(body: JsonObject): Promise<JsonObject> {
     }
     operationStepDetail("check code issues", issues.status === "clean" ? "Issues: OK" : `skipped — ${outputTail(issues.output, 200)}`);
 
-    operationStep("create branch & commit", branch);
-    const worktreeDir = resolve(tmpdir(), `melee-pr-${branch.replace(/[^A-Za-z0-9_.-]+/g, "-")}`);
-    if (existsSync(worktreeDir)) await runCli(["git", "worktree", "remove", "--force", worktreeDir], repoRoot);
-    const add = await runCli(["git", "worktree", "add", "-B", branch, worktreeDir, baseSha], repoRoot);
-    if (add.exitCode !== 0) throw new Error(`git worktree add failed (${add.exitCode}): ${outputTail(add.stderr, 1500)}`);
-    try {
-      const apply = await runCli(["git", "apply", "--index", ...includeArgs, patchPath], worktreeDir);
-      if (apply.exitCode !== 0) throw new Error(`Patch apply failed in the PR worktree (${apply.exitCode}): ${outputTail(apply.stderr, 1500)}`);
-      const commit = await runCli(["git", "commit", "-m", title], worktreeDir);
-      if (commit.exitCode !== 0) throw new Error(`git commit failed (${commit.exitCode}): ${outputTail(commit.stderr || commit.stdout, 1500)}`);
-
-      operationStep("push to fork", `fork/${branch}`);
-      const push = await runCli(["git", "push", "--force-with-lease", "-u", "fork", branch], worktreeDir);
+    if (localSource) {
+      updatePrRecord(stateDir, branch, (current) => ({
+        ...current,
+        local: {
+          ...asObject(current.local),
+          status: stringValue(localSource.source) === "local_worktree" ? "ready" : "local_only",
+          worktreePath: stringValue(localSource.worktreePath),
+          commitSha: stringValue(localSource.commitSha),
+          error: "",
+        },
+        validation: sliceValidationSummary(report, issues),
+      }));
+      operationStep("publish branch", `fork/${branch}`);
+      const push =
+        stringValue(localSource.source) === "local_worktree"
+          ? await runCli(["git", "push", "--force-with-lease", "-u", "fork", `HEAD:${branch}`], stringValue(localSource.worktreePath))
+          : await runCli(["git", "push", "--force-with-lease", "-u", "fork", `${branch}:${branch}`], repoRoot);
       if (push.exitCode !== 0) throw new Error(`git push failed (${push.exitCode}): ${outputTail(push.stderr, 1500)}`);
-
-      operationStep("create draft PR", `${repoSlug} ← ${forkOwner}:${branch}`);
-      const bodyDir = resolve(stateDir, "pr_handoff", "pr_bodies");
-      mkdirSync(bodyDir, { recursive: true });
-      const bodyPath = resolve(bodyDir, `${branch.replace(/[^A-Za-z0-9_.-]+/g, "-")}.md`);
-      const bodyLines = [
-        "## Summary",
-        "",
-        `Exact-match decompilation of ${files.length} file(s) (${report.newMatches.length} newly matched function(s)). Produced by the decomp-orchestrator pipeline; only runner-validated exact matches ship.`,
-        "",
-        "## Files",
-        "",
-        ...files.map((file) => `- \`${file}\``),
-        "",
-        "## Verification",
-        "",
-        `- Slice verified in isolation against the production baseline at \`${baseSha.slice(0, 10)}\`: applied alone, built with \`ninja changes_all\`, regression report clean (0 broken matches, 0 fuzzy regressions, 0 metric regressions).`,
-        `- Also verified as part of the full ship set (${numberValue(shipStatus.newMatches)} new matches, 0 regressions).`,
-        ...(issues.status === "clean" ? ["- Passed the upstream `check-issues` lint locally (same container as CI's Issues job)."] : []),
-      ];
-      writeFileSync(bodyPath, `${bodyLines.join("\n")}\n`, "utf8");
-      const create = await runCli(
-        ["gh", "pr", "create", "--repo", repoSlug, "--head", `${forkOwner}:${branch}`, "--draft", "--title", title, "--body-file", bodyPath],
-        worktreeDir,
-      );
-      if (create.exitCode !== 0) throw new Error(`gh pr create failed (${create.exitCode}): ${outputTail(create.stderr || create.stdout, 1500)}`);
-      const prUrl = create.stdout.trim().split("\n").pop() ?? "";
-      operationStepDetail("create draft PR", prUrl);
-      appendLog("ui", `draft PR opened: ${prUrl}`);
-    } finally {
-      await runCli(["git", "worktree", "remove", "--force", worktreeDir], repoRoot);
+    } else {
+      operationStep("publish branch", branch);
+      const worktreeDir = resolve(tmpdir(), `melee-pr-${branch.replace(/[^A-Za-z0-9_.-]+/g, "-")}`);
+      if (existsSync(worktreeDir)) await runCli(["git", "worktree", "remove", "--force", worktreeDir], repoRoot);
+      const add = await runCli(["git", "worktree", "add", "-B", branch, worktreeDir, baseSha], repoRoot);
+      if (add.exitCode !== 0) throw new Error(`git worktree add failed (${add.exitCode}): ${outputTail(add.stderr, 1500)}`);
+      try {
+        const apply = await runCli(["git", "apply", "--index", ...includeArgs, patchToApply], worktreeDir);
+        if (apply.exitCode !== 0) throw new Error(`Patch apply failed in the PR worktree (${apply.exitCode}): ${outputTail(apply.stderr, 1500)}`);
+        const commit = await runCli(["git", "commit", "-m", title], worktreeDir);
+        if (commit.exitCode !== 0) throw new Error(`git commit failed (${commit.exitCode}): ${outputTail(commit.stderr || commit.stdout, 1500)}`);
+        const push = await runCli(["git", "push", "--force-with-lease", "-u", "fork", branch], worktreeDir);
+        if (push.exitCode !== 0) throw new Error(`git push failed (${push.exitCode}): ${outputTail(push.stderr, 1500)}`);
+      } finally {
+        await runCli(["git", "worktree", "remove", "--force", worktreeDir], repoRoot);
+      }
     }
+
+    operationStep("create draft PR", `${repoSlug} ← ${forkOwner}:${branch}`);
+    const bodyDir = resolve(stateDir, "pr_handoff", "pr_bodies");
+    mkdirSync(bodyDir, { recursive: true });
+    const bodyPath = resolve(bodyDir, `${branch.replace(/[^A-Za-z0-9_.-]+/g, "-")}.md`);
+    const bodyLines = [
+      "## Summary",
+      "",
+      `Exact-match decompilation of ${files.length} file(s) (${report.newMatches.length} newly matched function(s)). Produced by the decomp-orchestrator pipeline; only runner-validated exact matches ship.`,
+      "",
+      "## Files",
+      "",
+      ...files.map((file) => `- \`${file}\``),
+      "",
+      "## Verification",
+      "",
+      `- Slice verified in isolation against the production baseline at \`${baseSha.slice(0, 10)}\`: applied alone, built with \`ninja changes_all\`, regression report clean (0 broken matches, 0 fuzzy regressions, 0 metric regressions).`,
+      ...(shipSetVerified ? [`- Also verified as part of the full ship set (${numberValue(shipStatus.newMatches)} new matches, 0 regressions).`] : []),
+      ...(localSource ? [`- Published from the ${stringValue(localSource.source, "local source").replace(/_/g, " ")} commit \`${stringValue(localSource.commitSha).slice(0, 10)}\`.`] : []),
+      ...(issues.status === "clean" ? ["- Passed the upstream `check-issues` lint locally (same container as CI's Issues job)."] : []),
+    ];
+    writeFileSync(bodyPath, `${bodyLines.join("\n")}\n`, "utf8");
+    const create = await runCli(
+      ["gh", "pr", "create", "--repo", repoSlug, "--head", `${forkOwner}:${branch}`, "--draft", "--title", title, "--body-file", bodyPath],
+      stringValue(localSource?.worktreePath) || repoRoot,
+    );
+    if (create.exitCode !== 0) throw new Error(`gh pr create failed (${create.exitCode}): ${outputTail(create.stderr || create.stdout, 1500)}`);
+    const prUrl = create.stdout.trim().split("\n").pop() ?? "";
+    operationStepDetail("create draft PR", prUrl);
+    appendLog("ui", `draft PR opened: ${prUrl}`);
 
     operationStep("sync PR records");
     const prs = await syncPrRecords({ ...body });
@@ -3703,9 +4968,10 @@ async function openPrForSlice(body: JsonObject): Promise<JsonObject> {
  */
 async function openAllPlannedPrs(body: JsonObject): Promise<JsonObject> {
   const paths = resolveDashboardProject(body, { useDefaultProject: true });
-  const records = asArray(readPrRecords(paths.stateDir).records).map(asObject);
+  const runId = activeRunIdFromBody(body, paths.stateDir);
+  const records = asArray(normalizePrRecordsPayload(readPrRecords(paths.stateDir)).records).map(asObject);
   const planned = records.filter(
-    (record) => stringValue(record.status, "planned") === "planned" && stringValue(record.branch) && asArray(record.files).length > 0,
+    (record) => prRecordMatchesRun(record, runId) && stringValue(record.status, "planned") === "planned" && stringValue(record.branch) && asArray(record.files).length > 0,
   );
   if (planned.length === 0) throw new Error("No planned PR records to open. Run Prepare Handoff (or Plan PRs + Sync PR Status) first.");
   const ordered = [...planned].sort((left, right) => {
@@ -3737,6 +5003,69 @@ async function openAllPlannedPrs(body: JsonObject): Promise<JsonObject> {
     }
     appendLog("ui", `open-all: ${openedCount}/${results.length} draft PR(s) opened`);
     return { openedCount, failedCount: results.length - openedCount, results };
+  });
+}
+
+async function openNextDraftBatch(body: JsonObject): Promise<JsonObject> {
+  const paths = resolveDashboardProject(body, { useDefaultProject: true });
+  const runId = activeRunIdFromBody(body, paths.stateDir);
+  const limit = intValue(body.batchLimit, DEFAULT_PR_BATCH_LIMIT, 1);
+  const payload = normalizePrRecordsPayload(readPrRecords(paths.stateDir));
+  const ready = asArray(payload.records)
+    .map(asObject)
+    .filter((record) => {
+      const localStatus = stringValue(asObject(record.local).status);
+      return (
+        prRecordMatchesRun(record, runId) &&
+        stringValue(record.status, "planned") === "planned" &&
+        stringValue(record.branch) &&
+        (localStatus === "ready" || (localStatus === "local_only" && isLocalBranchPrRecord(record)))
+      );
+    })
+    .slice(0, limit);
+  if (ready.length === 0) throw new Error("No local-ready or local-branch PR slices to open. Prepare a local batch first, or run Sync PRs to rediscover local branches.");
+  return withOperation("open-draft-batch", `Open Draft Batch — next ${ready.length}`, ready.map((record) => stringValue(record.branch)), async () => {
+    const results: JsonObject[] = [];
+    const published = new Set<string>();
+    for (const record of ready) {
+      const branch = stringValue(record.branch);
+      operationStep(branch);
+      try {
+        const result = await openPrForSlice({ ...body, prBranch: branch });
+        const opened = asObject(result.record);
+        results.push({ branch, opened: true, prNumber: numberValue(opened.prNumber, NaN), url: stringValue(opened.url) });
+        published.add(branch);
+        operationStepDetail(branch, `draft #${numberValue(opened.prNumber)} opened`);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        results.push({ branch, opened: false, error: message });
+        operationStepDetail(branch, `failed: ${outputTail(message, 300)}`);
+        appendLog("stderr", `open-draft-batch: ${branch} failed — ${message}`);
+      }
+    }
+    const openedCount = results.filter((result) => result.opened === true).length;
+    if (openedCount === 0) {
+      operationNextHint("Every local-ready slice failed to open. Check the Logs tab for the first failure.");
+      throw new Error(`No PRs opened; all ${results.length} local-ready slice(s) failed. See Logs.`);
+    }
+
+    const latest = normalizePrRecordsPayload(readPrRecords(paths.stateDir));
+    const updatedRecords = asArray(latest.records).map((value) => {
+      const record = asObject(value);
+      if (!published.has(stringValue(record.branch))) return record;
+      return normalizePrRecord(
+        {
+          ...record,
+          batch: {
+            ...asObject(record.batch),
+            state: "published",
+            publishedAt: new Date().toISOString(),
+          },
+        },
+      );
+    });
+    const prs = writePrRecords(paths.stateDir, { ...latest, records: updatedRecords, syncedAt: new Date().toISOString() });
+    return { openedCount, failedCount: results.length - openedCount, results, prs };
   });
 }
 
@@ -3958,6 +5287,10 @@ async function freshRun(body: JsonObject): Promise<JsonObject> {
     if (activeManaged || activeSaved) {
       const activeName = stringValue(activeSaved?.name, managed?.name ?? name);
       throw new Error(`Stop the active process (${activeName}) before starting a fresh run.`);
+    }
+    const prBlockers = activeSessionPrBlockers(stateDir);
+    if (prBlockers.length > 0) {
+      throw new Error(`Resolve this session's PR work before starting a fresh run: ${prBlockers.slice(0, 6).join("; ")}${prBlockers.length > 6 ? `; +${prBlockers.length - 6} more` : ""}`);
     }
 
     const steps: FreshRunStep[] = [];
@@ -4226,6 +5559,14 @@ async function handleApi(req: Request, url: URL): Promise<Response> {
     const paths = requestPaths(url, { useDefaultProject: true });
     return json(runDetails(paths.stateDir, url.searchParams.get("runId") || "", paths.project));
   }
+  if (url.pathname === "/api/standards") {
+    const paths = requestPaths(url, { useDefaultProject: true });
+    if (req.method === "POST") {
+      const body = asObject(await req.json().catch(() => ({})));
+      return json(applyStandardEdit(asObject(body.edit) as unknown as StandardEdit));
+    }
+    return json(loadStandardsPayload(paths.project));
+  }
   if (url.pathname === "/api/process") {
     const paths = requestPaths(url, { useDefaultProject: true });
     return json(processStatus(paths.stateDir, paths.project));
@@ -4285,8 +5626,20 @@ async function handleApi(req: Request, url: URL): Promise<Response> {
   if (url.pathname === "/api/prs/sync" && req.method === "POST") {
     return json(await syncPrRecords(asObject(await req.json().catch(() => ({})))));
   }
+  if (url.pathname === "/api/prs/review-state" && req.method === "POST") {
+    return json(await setPrReviewState(asObject(await req.json().catch(() => ({})))));
+  }
+  if (url.pathname === "/api/prs/prepare-local" && req.method === "POST") {
+    return json(await prepareLocalPr(asObject(await req.json().catch(() => ({})))));
+  }
+  if (url.pathname === "/api/prs/prepare-local-batch" && req.method === "POST") {
+    return json(await prepareLocalPrBatch(asObject(await req.json().catch(() => ({})))));
+  }
   if (url.pathname === "/api/prs/open" && req.method === "POST") {
     return json(await openPrForSlice(asObject(await req.json().catch(() => ({})))));
+  }
+  if (url.pathname === "/api/prs/open-batch" && req.method === "POST") {
+    return json(await openNextDraftBatch(asObject(await req.json().catch(() => ({})))));
   }
   if (url.pathname === "/api/prs/open-all" && req.method === "POST") {
     return json(await openAllPlannedPrs(asObject(await req.json().catch(() => ({})))));
@@ -4322,10 +5675,10 @@ function staticResponse(pathname: string): Response {
   if (!path.startsWith(appRoot)) return text("Not found", { status: 404 });
   if (!existsSync(path)) {
     const fallback = resolve(appRoot, "index.html");
-    if (existsSync(fallback)) return new Response(Bun.file(fallback));
+    if (existsSync(fallback)) return staticFile(fallback);
     return text("Not found", { status: 404 });
   }
-  return new Response(Bun.file(path));
+  return staticFile(path);
 }
 
 export async function fetchDashboardServer(req: Request): Promise<Response> {

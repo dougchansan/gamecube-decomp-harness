@@ -1,4 +1,4 @@
-import type { Dashboard, FormState, JsonObject, RunDetails, UiConfig } from "@decomp-orchestrator/ui-contract";
+import type { Dashboard, FormState, JsonObject, RunDetails, StandardsPayload, UiConfig } from "@decomp-orchestrator/ui-contract";
 
 export async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
   const response = await fetch(url, options);
@@ -51,4 +51,23 @@ export function postJson<T>(url: string, body: JsonObject): Promise<T> {
     headers: { "content-type": "application/json" },
     body: JSON.stringify(body),
   });
+}
+
+export function fetchStandards(form: Pick<FormState, "projectId" | "usePathOverrides" | "repoRoot" | "stateDir" | "graphDbPath">): Promise<StandardsPayload> {
+  return fetchJson<StandardsPayload>(`/api/standards?${dashboardParams(form)}`);
+}
+
+export function saveStandard(form: Pick<FormState, "projectId" | "usePathOverrides" | "repoRoot" | "stateDir" | "graphDbPath">, edit: JsonObject): Promise<{ ok: boolean; errors?: string[]; savedId?: string }> {
+  return postJson("/api/standards", { ...formBodyPartial(form), edit });
+}
+
+function formBodyPartial(form: Pick<FormState, "projectId" | "usePathOverrides" | "repoRoot" | "stateDir" | "graphDbPath">): JsonObject {
+  const body: JsonObject = { projectId: form.projectId };
+  if (form.usePathOverrides) {
+    body.usePathOverrides = true;
+    body.repoRoot = form.repoRoot;
+    body.stateDir = form.stateDir;
+    body.graphDbPath = form.graphDbPath;
+  }
+  return body;
 }

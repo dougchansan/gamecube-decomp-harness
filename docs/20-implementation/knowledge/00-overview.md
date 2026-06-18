@@ -316,4 +316,4 @@ agent context, a source slice, a tool, or graph-owned enrichment.
 ## Related
 
 - [Knowledge model](../../10-system-design/50-knowledge-model.md)
-- [PR-review agent](../agents/20-pr-review.md)
+- [PR indexer, splitter, and reviewer agents](../agents/20-pr-review.md)

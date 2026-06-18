@@ -66,9 +66,9 @@ apps/cli/src/
 | `epoch-run` | Runs one epoch checkpoint cycle by hand: commits validated work (excluding active-lease files), rebuilds the full report in the persistent epoch worktree, records an `epoch` save point, and requeues regression repairs. `--no-requeue` plans repairs without touching the queue. |
 | `regression-check` | Wraps the repo's global saved-baseline regression gate, runs the QA ship gate (`review_lint` diff scan vs `--qa-base`, fail-closed, bypass only via `--skip-qa-gate`), and writes run artifacts. |
 | `qa-repair` | Builds the PR-bound QA repair queue from checkpoint candidates, explicit candidate files, or saved `review_lint scan_diff` JSON; optionally runs the `qa-repair` agent over selected items; writes queue/report/ship-filter artifacts under `state_dir/qa_repairs/<run-id>/<timestamp>/`. |
-| `pr-split-plan` | Plans review-sized PR slices from the current branch/worktree by grouping changed files by Melee subsystem or top-level directory. |
+| `pr-split-plan` | Plans review-sized PR slices from the current branch/worktree. Deterministic mode groups changed files by Melee subsystem or top-level directory; agent mode asks `pr-splitter` to reshape the validated seed plan into a semantic PR series. |
 | `pr-draft-qa` | Runs the draft PR lifecycle around an opened GitHub PR: resolve/fetch PR refs, run preship review, scan deterministic QA findings, optionally run repair agents, comment unresolved findings with stable dedupe markers, and verify CI/local checks. Artifacts land under `state_dir/pr_draft_qa/pr-<number>/<run-id>/`. |
-| `pr-preship-review` | Runs the pr-review agent in adversarial pre-ship mode over planned PR slices (`--plan` from saved `pr-split-plan --json` output, `--all` or `--slice <id>`); any `reject` finding or infrastructure failure exits 1 and blocks handoff. Artifacts land under `state_dir/preship_reviews/<run-id>/<slice-id>/`. |
+| `pr-preship-review` | Runs the PR reviewer agent in adversarial pre-ship mode over planned PR slices (`--plan` from saved `pr-split-plan --json` output, `--all` or `--slice <id>`); any `reject` finding or infrastructure failure exits 1 and blocks handoff. Artifacts land under `state_dir/preship_reviews/<run-id>/<slice-id>/`. |
 | `reconcile` | Runs the reconcile Pi agent. `--mode ship-validate` fixes QA-gate regressions before PR handoff; `--mode sync-merge` resolves merge conflicts, duplicate matches, and build errors after an upstream sync. `--attempt-budget` bounds fix cycles; artifacts land under `state_dir/reconcile/<timestamp>/`. |
 | `save-point` | Records a campaign save point: commits the dirty worktree (never staging `decomp-orchestrator/` or the state dir), copies `report.json`/`report_changes.json` plus a board snapshot under `state_dir/save_points/<timestamp>/`, and inserts the row with commit/base SHAs and `matched_code_percent`. `--list` prints recent save points. |
 | `kg-sources` | Lists active knowledge source sections and external tool integrations. |
@@ -329,7 +329,8 @@ the leases have been recovered.
 `pr-split-plan` is the operator handoff command for turning a large accepted
 change bundle into smaller review units. It reads `git diff --name-status
 <base-ref>...HEAD` and dirty worktree status from `--repo-root`, merges those
-paths, and groups them into slices.
+paths, applies checkpoint lanes and ship-status filtering, and produces a
+validated seed plan.
 
 The default `--group-mode melee-subsystem` treats any path containing
 `melee/<subsystem>` as part of that subsystem, so source, headers, and assembly
@@ -337,6 +338,18 @@ for `it`, `gm`, `cm`, `ft`, and adjacent directories stay together. Support
 roots such as `sysdolphin`, `Runtime`, `MSL`, and `MetroTRK` become their own
 slices, while cross-cutting root/config files become shared slices. Use
 `--group-mode top-dir` for a simpler first-directory split.
+
+`--strategy deterministic` emits the seed plan directly. `--strategy agent`
+passes that seed plan to the `pr-splitter` agent, which can regroup slices,
+set review order, write better titles, name dependencies, and summarize the PR
+body focus. The command validates the proposal before using it: every changed
+file must appear exactly once, files must keep their deterministic lane, match
+and local lanes cannot mix, dependencies must point to emitted slice ids, and
+the max-files-per-PR ceiling must hold. If parsing, schema validation, or
+semantic validation fails, the deterministic plan is retained with a warning.
+Agent prompt/output artifacts go under `--agent-output-dir` or
+`state_dir/pr_splitter/<timestamp>/`; `--run-id` records the session as
+`pr-splitter` in run details.
 
 Passing `--checkpoint <checkpoint.json>` (the dashboard does this
 automatically using the latest run checkpoint) splits each subsystem slice
@@ -366,8 +379,9 @@ included by default so the operator can see unfinished local changes, but the
 command warns that generated patch commands only replay committed `HEAD`
 changes. Use `--committed-only` after committing the source bundle,
 `--worktree-only` for a local staging preview, `--no-untracked` to suppress
-untracked paths, `--json` for automation, or `--output <path>` to save the
-rendered plan.
+untracked paths, `--json` for automation, `--output <path>` to save the
+rendered plan, or global `--dry-run-agents --strategy agent` to write splitter
+prompts without accepting an agent proposal.
 
 ## Draft PR QA Lifecycle
 
@@ -432,7 +446,7 @@ The UI server wraps the same operator commands for PR preparation:
 | `Pause Intake` | Drains the managed process and marks the run `paused`, which prevents `start`, `tick`, `worker`, and `run-loop` scheduling until the run is resumed. |
 | `Checkpoint` | Runs the checkpoint handoff logic and writes checkpoint artifacts under the run state directory. |
 | `Run QA` | Runs `regression-check` with `--require-pr-promotion` enabled by default, plus `--promotion-min-unmatched-improvement-bytes` from the project's improvement byte floor so improvement-only handoffs can still promote. |
-| `Plan PRs` | Runs `pr-split-plan` with the selected base ref, group mode, branch prefix, title prefix, worktree/untracked options, the latest checkpoint for match/improvement lane splitting, and the latest ship-status filter when Prepare produced one. |
+| `Plan PRs` | Runs `pr-split-plan` with the selected base ref, project split strategy, group mode, branch prefix, title prefix, worktree/untracked options, the latest checkpoint for match/improvement lane splitting, and the latest ship-status filter when Prepare produced one. |
 | `Prepare` | Runs pause, upstream sync/rebase, baseline rebuild, branch QA, checkpoint, rework requeue, QA repair, split planning, ship-set verification, reconcile/replan when needed, PR-record sync, and a ship save point. |
 
 The UI stores split-plan artifacts under
@@ -453,7 +467,7 @@ five-minute maintenance interval; dry-run agents default to disabled. Use
 Maintenance does not require the main loop to inspect individual PRs. The PR
 postmortem command uses pending-only discovery to find PRs in the active corpus
 that do not have `postmortem/postmortem.json` yet. Live run-loop maintenance queues up to
-eight pending PRs per interval through the PR-review agent by default; use
+eight pending PRs per interval through the PR indexer agent by default; use
 `--no-run-pr-agent` to keep the background pass deterministic or `--pr-limit`
 to tune the batch. Direct `kg-maintain` remains deterministic unless
 `--run-pr-agent` is passed. The knowledge curator then rewrites graph-owned

@@ -41,6 +41,7 @@ MOVED_LINE_DOWNGRADE_RULES = {
     "register_keyword",
     "inline_asm",
     "numeric_literal_to_symbol",
+    "address_named_static_data",
     "m2c_residue_names",
     "m2c_goto_label",
     "m2c_field_use",

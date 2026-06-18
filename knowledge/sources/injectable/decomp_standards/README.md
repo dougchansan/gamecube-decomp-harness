@@ -18,6 +18,36 @@ APIs are kept for status checks, proposal review, and focused follow-up. This
 source is primarily injected into prompts rather than treated as a broad RAG
 store.
 
+## Record Fields
+
+The stable identity fields remain `schema_version`, `id`, `kind`, `status`,
+`title`, `summary`, `do`, `do_not`, and `evidence_refs`. `summary`, `do`, and
+`do_not` are renderable bullet-string lists. Existing
+`global_standard:*` ids should be preserved unless every consumer is migrated.
+
+Current records also carry optional code-quality metadata:
+
+- `family`: one of the active source-quality families, such as
+  `authored_source_shape`, `typed_access_and_pointer_math`,
+  `asserts_reports_and_header_inlines`, `literals_data_and_externs`,
+  `codegen_tactics`, or `names_defines_headers_and_prototypes`.
+- `disposition`: `active`, `merged`, or `workflow_only`.
+- `worker_facing`: `false` keeps merged/workflow records searchable without
+  injecting them into worker, repair, or pre-ship standards XML.
+- `severity` and `qa_enforcement`: describe whether the rule is hard lint,
+  warning lint, pre-ship review, or pipeline-owned workflow policy.
+- `qa_rule_ids`: deterministic `review_lint` rule ids that implement or
+  partially cover the standard.
+- `example_policy` and `preferred_repairs`: compact routing/repair hints.
+  Detailed examples live in targeted repair/reviewer catalogs, not the worker
+  bootstrap prompt.
+
+`data/examples.jsonl` stores targeted bad/preferred examples for QA repair and
+pre-ship review. Each record is lookupable by `standard_id` and optional
+`qa_rule_id`; `description` is a list of bullet-point strings rendered in the
+dashboard and prompt XML. `standardExamplesPromptXml()` renders only the
+relevant subset when a repair item or lint finding identifies the rule.
+
 ```bash
 python3 knowledge/sources/injectable/decomp_standards/api/status.py --json
 python3 knowledge/sources/injectable/decomp_standards/api/search.py --query typed --limit 10 --json

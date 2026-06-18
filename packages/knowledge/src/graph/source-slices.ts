@@ -256,6 +256,10 @@ export function buildDecompStandardsGraphRecords(): GraphRecords | null {
     const text = compactText([
       stringField(row, "title"),
       stringField(row, "summary"),
+      stringField(row, "family"),
+      stringField(row, "disposition"),
+      stringField(row, "qa_enforcement"),
+      arrayField(row, "qa_rule_ids").join(" "),
       arrayField(row, "do").join(" "),
       arrayField(row, "do_not").join(" "),
       arrayField(row, "evidence_refs").join(" "),

@@ -2,11 +2,11 @@
  * Central catalog for reusable Pi custom tools.
  *
  * Agent profiles refer to tools by id so a capability can be shared by worker,
- * PR-review, curator, or future agents without duplicating prompt text or
+ * PR indexer, curator, or future agents without duplicating prompt text or
  * command recipes.
  */
 import type { RuntimeAgentRole } from "@decomp-orchestrator/core/types";
-import { appendWorkerToolEvent, boundedTelemetryValue, type WorkerToolEvent } from "../worker/telemetry.js";
+import { appendWorkerToolEvent, boundedTelemetryValue, type WorkerToolEvent } from "../agents/run/worker/telemetry.js";
 import { decompLookupToolRegistration } from "./decomp-lookup.js";
 import { sourceSiloToolRegistrations } from "./source-silos.js";
 import { specializedToolRegistrations } from "./specialized-tools.js";

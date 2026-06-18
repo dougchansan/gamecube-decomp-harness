@@ -1,7 +1,7 @@
 ---
 covers: Worker-facing tool discoverability for decomp knowledge tools
 concepts: [worker-tools, available-tools, knowledge-tools, prompt-surface]
-code-ref: packages/agents/src/tools/profile-data.ts, packages/agents/src/worker/templates
+code-ref: packages/agents/src/tools/profile-data.ts, packages/agents/src/agents/run/worker/templates
 ---
 
 # Worker Tooling Prompt Surface
@@ -26,11 +26,11 @@ prompt artifact names the same callable tools in a compact, readable form.
 actual Pi tool definitions, and renders `<available_tools>` from those resolved
 tools. This keeps the prompt text aligned with the tools Pi can call.
 
-`packages/agents/src/worker/templates/system.md` owns the universal worker
+`packages/agents/src/agents/run/worker/templates/system.md` owns the universal worker
 contract: edit boundary, evidence priority, validation, local regression ledger,
 stop conditions, and JSON output shape.
 
-`packages/agents/src/worker/templates/initial_user.md` owns the target packet:
+`packages/agents/src/agents/run/worker/templates/initial_user.md` owns the target packet:
 current state, available tools, standards, embedded target file, and the task.
 
 ## Worker Tool Policy
@@ -56,5 +56,5 @@ should be reported as weak evidence rather than converted into source churn.
 - [Knowledge overview](00-overview.md)
 - `packages/agents/src/tools/profile-data.ts`
 - `packages/agents/src/tools/profiles.ts`
-- `packages/agents/src/worker/templates/system.md`
-- `packages/agents/src/worker/templates/initial_user.md`
+- `packages/agents/src/agents/run/worker/templates/system.md`
+- `packages/agents/src/agents/run/worker/templates/initial_user.md`

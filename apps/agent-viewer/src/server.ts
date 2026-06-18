@@ -4,7 +4,8 @@ import {
   agentToolProfileSummary,
   knowledgeCuratorPrompt,
   prContextPromptXml,
-  prReviewPrompt,
+  prIndexerPrompt,
+  prSplitterPrompt,
   qaRepairPrompt,
   targetPacketTarget,
   workerPacket,
@@ -21,7 +22,7 @@ import {
   openState,
 } from "@decomp-orchestrator/core/state";
 import type { BoardSnapshot, PiPromptBundle, RunProjectMetadata, RunRecord } from "@decomp-orchestrator/core/types";
-import { globalStandardsPromptXml, loadKnowledgeBoardSnapshot } from "@decomp-orchestrator/knowledge";
+import { globalStandardsPromptXml, loadKnowledgeBoardSnapshot, standardExamplesPromptXml } from "@decomp-orchestrator/knowledge";
 import type { PromptPreviewAgentId, PromptPreviewSource } from "@decomp-orchestrator/ui-contract";
 import { promptStats } from "./lib/promptStats.js";
 
@@ -52,7 +53,7 @@ const defaultStateDir = resolve(packageRoot, ".decomp-orchestrator-state");
 const builtStaticRoot = resolve(packageRoot, "apps/agent-viewer/dist");
 const sampleRepoRoot = resolve(packageRoot, "testdata/smoke_repo");
 const port = Number(Bun.env.AGENT_VIEWER_PORT ?? Bun.env.PROMPT_VIEWER_PORT ?? Bun.env.ORCH_PROMPT_VIEWER_PORT ?? 8797);
-const promptPreviewAgents: PromptPreviewAgentId[] = ["worker", "pr-review", "knowledge-curator", "qa-repair"];
+const promptPreviewAgents: PromptPreviewAgentId[] = ["worker", "pr-indexer", "pr-splitter", "knowledge-curator", "qa-repair"];
 
 function asObject(value: unknown): JsonObject {
   return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonObject) : {};
@@ -261,9 +262,12 @@ interface PromptPreviewPlaceholders {
   prContextJson?: string;
   prContextXml?: string;
   prOutputSchemaJson?: string;
+  prSplitterContextJson?: string;
+  prSplitterOutputSchemaJson?: string;
   qaRepairItemJson?: string;
   qaRepairOutputSchemaJson?: string;
   qaRepairQueueSummaryJson?: string;
+  standardExamplesXml?: string;
   targetGraphFileCardXml?: string;
   targetXml?: string;
 }
@@ -277,6 +281,7 @@ interface PromptPreviewRendered {
 
 function hydratePromptPreviewPlaceholders(bundle: PiPromptBundle, placeholders: PromptPreviewPlaceholders = {}): PiPromptBundle {
   const standardsXml = globalStandardsPromptXml();
+  const standardExamplesXml = placeholders.standardExamplesXml ?? standardExamplesPromptXml({ limit: 12 });
   const hydrate = (prompt: string) =>
     prompt
       .replace(/\{\{\s*AVAILABLE_TOOLS_XML\s*\}\}/g, () => placeholders.availableToolsXml ?? "")
@@ -287,9 +292,12 @@ function hydratePromptPreviewPlaceholders(bundle: PiPromptBundle, placeholders: 
       .replace(/\{\{\s*PR_CONTEXT_JSON\s*\}\}/g, () => placeholders.prContextJson ?? "")
       .replace(/\{\{\s*PR_CONTEXT_XML\s*\}\}/g, () => placeholders.prContextXml ?? "")
       .replace(/\{\{\s*PR_OUTPUT_SCHEMA_JSON\s*\}\}/g, () => placeholders.prOutputSchemaJson ?? "")
+      .replace(/\{\{\s*PR_SPLITTER_CONTEXT_JSON\s*\}\}/g, () => placeholders.prSplitterContextJson ?? "")
+      .replace(/\{\{\s*PR_SPLITTER_OUTPUT_SCHEMA_JSON\s*\}\}/g, () => placeholders.prSplitterOutputSchemaJson ?? "")
       .replace(/\{\{\s*QA_REPAIR_ITEM_JSON\s*\}\}/g, () => placeholders.qaRepairItemJson ?? "")
       .replace(/\{\{\s*QA_REPAIR_OUTPUT_SCHEMA_JSON\s*\}\}/g, () => placeholders.qaRepairOutputSchemaJson ?? "")
       .replace(/\{\{\s*QA_REPAIR_QUEUE_SUMMARY_JSON\s*\}\}/g, () => placeholders.qaRepairQueueSummaryJson ?? "")
+      .replace(/\{\{\s*STANDARD_EXAMPLES_XML\s*\}\}/g, () => standardExamplesXml)
       .replace(/\{\{\s*TARGET_GRAPH_FILE_CARD_XML\s*\}\}/g, () => placeholders.targetGraphFileCardXml ?? "")
       .replace(/\{\{\s*TARGET_XML\s*\}\}/g, () => placeholders.targetXml ?? "");
   return {
@@ -699,15 +707,15 @@ function workerPromptPreview(
   };
 }
 
-function prReviewPromptPreview(
+function prIndexerPromptPreview(
   paths: PromptProjectContext,
   requestedSource: PromptPreviewSource,
   warnings: string[],
 ): PromptPreviewRendered {
-  if (requestedSource === "latest") warnings.push("The agent viewer does not keep a single current PR intake context; rendered a deterministic sample PR context.");
+  if (requestedSource === "latest") warnings.push("The agent viewer does not keep a single current PR indexer context; rendered a deterministic sample PR context.");
   const project = projectMetadataForPrompt(paths);
   const toolContext: AgentToolRuntimeContext = {
-    role: "pr-review",
+    role: "pr-indexer",
     cwd: paths.repoRoot,
     repoRoot: paths.repoRoot,
     stateDir: paths.stateDir,
@@ -794,14 +802,14 @@ function prReviewPromptPreview(
     ],
     intake_focus: ["extract reusable source-shape facts", "preserve evidence paths", "handoff proposal-only source updates to the curator"],
   };
-  const outputSchema = readJsonObject(resolve(packageRoot, "packages/agents/src/pr-review/schema.json"));
+  const outputSchema = readJsonObject(resolve(packageRoot, "packages/agents/src/agents/knowledge/pr-indexer/schema.json"));
   return {
-    bundle: prReviewPrompt({ prContext, repoRoot: paths.repoRoot, stateDir: paths.stateDir, project }),
+    bundle: prIndexerPrompt({ prContext, repoRoot: paths.repoRoot, stateDir: paths.stateDir, project }),
     context: {
       prContext,
       pr_context_xml: prContextPromptXml({ prContext, repoRoot: paths.repoRoot }),
       output_schema: outputSchema,
-      attached_tools: agentToolProfileSummary("pr-review"),
+      attached_tools: agentToolProfileSummary("pr-indexer"),
       available_tools_xml: availableToolsPromptXml(toolContext),
     },
     contextSource: "sample",
@@ -810,6 +818,153 @@ function prReviewPromptPreview(
       prContextJson: stableJson(prContext),
       prContextXml: prContextPromptXml({ prContext, repoRoot: paths.repoRoot }),
       prOutputSchemaJson: stableJson(outputSchema),
+    },
+  };
+}
+
+function prSplitterPromptPreview(
+  paths: PromptProjectContext,
+  requestedSource: PromptPreviewSource,
+  warnings: string[],
+): PromptPreviewRendered {
+  if (requestedSource === "latest") warnings.push("The agent viewer does not keep a single current PR split context; rendered a deterministic sample split context.");
+  const project = projectMetadataForPrompt(paths);
+  const toolContext: AgentToolRuntimeContext = {
+    role: "pr-splitter",
+    cwd: paths.repoRoot,
+    repoRoot: paths.repoRoot,
+    stateDir: paths.stateDir,
+    project,
+  };
+  const splitContext = {
+    schema_version: "melee_pr_splitter_context_v1",
+    plan_inputs: {
+      repo_root: paths.repoRoot,
+      base_ref: paths.project?.baseRef ?? "origin/master",
+      head_ref: "agent-viewer-sample-head",
+      current_branch: "codex/split-up/mn",
+      group_mode: "melee-subsystem",
+      max_files_per_pr: 30,
+      lanes_applied: true,
+      ship_filter_applied: true,
+      total_files: 4,
+    },
+    invariants: {
+      all_changed_files_must_be_assigned_exactly_once: true,
+      preserve_file_lanes: true,
+      do_not_mix_match_and_local_files: true,
+      max_files_per_pr_is_hard_ceiling: 30,
+      branch_creation_and_validation_remain_runner_owned: true,
+    },
+    changed_files: [
+      {
+        path: "src/melee/gm/gmmain_lib.c",
+        statuses: ["M"],
+        sources: ["branch"],
+        deterministic_lane: "match",
+        deterministic_slice_id: "gm",
+        directory: "src/melee/gm",
+      },
+      {
+        path: "src/melee/gm/gmresult.c",
+        statuses: ["M"],
+        sources: ["branch"],
+        deterministic_lane: "match",
+        deterministic_slice_id: "gm",
+        directory: "src/melee/gm",
+      },
+      {
+        path: "src/melee/mn/mngallery.c",
+        statuses: ["M"],
+        sources: ["branch"],
+        deterministic_lane: "match",
+        deterministic_slice_id: "mn",
+        directory: "src/melee/mn",
+      },
+      {
+        path: "src/melee/mn/mnname.c",
+        statuses: ["M"],
+        sources: ["branch"],
+        deterministic_lane: "local",
+        deterministic_slice_id: "local-mn",
+        directory: "src/melee/mn",
+      },
+    ],
+    seed_slices: [
+      {
+        id: "gm",
+        display_name: "GM",
+        title: "Melee decomp: GM",
+        lane: "match",
+        scope: "melee/gm",
+        directories: ["src/melee/gm"],
+        file_count: 2,
+        files: ["src/melee/gm/gmmain_lib.c", "src/melee/gm/gmresult.c"],
+        independence: {
+          kind: "independent",
+          verified: false,
+          confidence: "medium",
+          reasons: ["all files are source/header-like paths scoped to melee/gm"],
+          requiredChecks: ["apply this slice to a fresh branch or worktree based on the selected base ref"],
+          possibleDependencies: [],
+        },
+        warnings: [],
+      },
+      {
+        id: "mn",
+        display_name: "MN",
+        title: "Melee decomp: MN",
+        lane: "match",
+        scope: "melee/mn",
+        directories: ["src/melee/mn"],
+        file_count: 1,
+        files: ["src/melee/mn/mngallery.c"],
+        independence: {
+          kind: "independent",
+          verified: false,
+          confidence: "medium",
+          reasons: ["all files are source/header-like paths scoped to melee/mn"],
+          requiredChecks: ["apply this slice to a fresh branch or worktree based on the selected base ref"],
+          possibleDependencies: [],
+        },
+        warnings: ["Small match slice; consider packing with related review scope if semantic risk stays low."],
+      },
+      {
+        id: "local-mn",
+        display_name: "MN (local only)",
+        title: "Melee decomp: MN local",
+        lane: "local",
+        scope: "melee/mn",
+        directories: ["src/melee/mn"],
+        file_count: 1,
+        files: ["src/melee/mn/mnname.c"],
+        independence: {
+          kind: "stacked",
+          verified: false,
+          confidence: "low",
+          reasons: ["local-only improvements do not ship"],
+          requiredChecks: ["keep local-only files out of match PRs"],
+          possibleDependencies: [],
+        },
+        warnings: ["Local-only: improvements and support files that do not ship."],
+      },
+    ],
+    warnings: ["Shared prep and local-only carry-forward must stay explicit in the PR body."],
+  };
+  const outputSchema = readJsonObject(resolve(packageRoot, "packages/agents/src/agents/pr/splitter/schema.json"));
+  return {
+    bundle: prSplitterPrompt({ splitContext, repoRoot: paths.repoRoot, stateDir: paths.stateDir, project }),
+    context: {
+      splitContext,
+      output_schema: outputSchema,
+      attached_tools: agentToolProfileSummary("pr-splitter"),
+      available_tools_xml: availableToolsPromptXml(toolContext),
+    },
+    contextSource: "sample",
+    placeholders: {
+      availableToolsXml: availableToolsPromptXml(toolContext),
+      prSplitterContextJson: stableJson(splitContext),
+      prSplitterOutputSchemaJson: stableJson(outputSchema),
     },
   };
 }
@@ -871,7 +1026,7 @@ function knowledgeCuratorPromptPreview(
     ],
     requested_decisions: ["promote_safe_records", "leave source-specific updates as proposals", "reject unsupported broad rules"],
   };
-  const outputSchema = readJsonObject(resolve(packageRoot, "packages/agents/src/knowledge-curator/schema.json"));
+  const outputSchema = readJsonObject(resolve(packageRoot, "packages/agents/src/agents/knowledge/curator/schema.json"));
   return {
     bundle: knowledgeCuratorPrompt({ curatorContext, repoRoot: paths.repoRoot, stateDir: paths.stateDir, project }),
     context: {
@@ -894,7 +1049,7 @@ function qaRepairPromptPreview(
   requestedSource: PromptPreviewSource,
   warnings: string[],
 ): PromptPreviewRendered {
-  if (requestedSource === "latest") warnings.push("The agent viewer does not keep a single current QA repair item context; rendered a deterministic sample QA repair item.");
+  if (requestedSource === "latest") warnings.push("The agent viewer does not keep a single current PR fixer item context; rendered a deterministic sample QA repair item.");
   const project = projectMetadataForPrompt(paths);
   const toolContext: AgentToolRuntimeContext = {
     role: "qa-repair",
@@ -974,7 +1129,7 @@ function qaRepairPromptPreview(
 	    queued_items: 1,
 	    recommendation: "repair_required",
 	  };
-  const outputSchema = readJsonObject(resolve(packageRoot, "packages/agents/src/qa-repair/schema.json"));
+  const outputSchema = readJsonObject(resolve(packageRoot, "packages/agents/src/agents/pr/fixer/schema.json"));
   return {
     bundle: qaRepairPrompt({ item: item as any, queueSummary, repoRoot: paths.repoRoot, stateDir: paths.stateDir, project }),
     context: {
@@ -999,11 +1154,13 @@ function renderPromptPreview(paths: PromptProjectContext, agent: PromptPreviewAg
   const rendered =
     agent === "worker"
       ? workerPromptPreview(paths, requestedSource, warnings)
-      : agent === "pr-review"
-        ? prReviewPromptPreview(paths, requestedSource, warnings)
-        : agent === "knowledge-curator"
-          ? knowledgeCuratorPromptPreview(paths, requestedSource, warnings)
-          : qaRepairPromptPreview(paths, requestedSource, warnings);
+      : agent === "pr-indexer"
+        ? prIndexerPromptPreview(paths, requestedSource, warnings)
+        : agent === "pr-splitter"
+          ? prSplitterPromptPreview(paths, requestedSource, warnings)
+          : agent === "knowledge-curator"
+            ? knowledgeCuratorPromptPreview(paths, requestedSource, warnings)
+            : qaRepairPromptPreview(paths, requestedSource, warnings);
   const { context, contextSource } = rendered;
   const bundle = hydratePromptPreviewPlaceholders(rendered.bundle, rendered.placeholders);
   return {

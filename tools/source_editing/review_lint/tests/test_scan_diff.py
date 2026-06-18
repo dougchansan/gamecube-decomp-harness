@@ -277,11 +277,15 @@ def test_hardened_rules_smoke_flags_real_gate_path(melee_checkout):
         "m2c_residue_names",
         "m2c_goto_label",
         "m2c_field_use",
+        "address_named_static_data",
         "define_alias",
     }
     for rule_id in expected_errors:
         assert "error" in by_rule.get(rule_id, set()), json.dumps(payload["findings"], indent=2)
     assert "warning" in by_rule.get("novel_pragma", set())
+    assert "warning" in by_rule.get("codegen_pragma", set())
+    assert "warning" in by_rule.get("pointer_offset_arithmetic", set())
+    assert "warning" in by_rule.get("volatile_local_tactic", set())
     assert "warning" in by_rule.get("type_erasing_cast", set())
     assert "warning" in by_rule.get("m2c_residue_names", set())  # sp24
     assert "warning" in by_rule.get("m2c_goto_label", set())  # non-block goto

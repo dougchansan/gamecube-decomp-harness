@@ -35,6 +35,9 @@ docs/
   maps each original HTML design section to markdown coverage.
 - [Original visual design](design.html) keeps the standalone HTML design doc
   intact for diagram-heavy review.
+- [Project workspace UI redesign plan](30-plans/2026-06-17-project-workspace-ui-redesign.md)
+  captures the project dashboard, knowledge base, sessions, and active-session
+  mockups for the next dashboard navigation restructure.
 - [Knowledge resource graph design](resource-graph-design.html) sketches the
   proposed resource registry, vertical-slice indexers, file graph, worker
   lookup APIs, and graph-ranked scheduling layer.

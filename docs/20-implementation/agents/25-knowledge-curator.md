@@ -1,7 +1,7 @@
 ---
 covers: Knowledge-curator agent and graph enrichment reducer
 concepts: [knowledge-curator, graph-enrichment, worker-reports, pr-postmortems]
-code-ref: decomp-orchestrator/packages/agents/src/knowledge-curator, decomp-orchestrator/packages/knowledge/src/curator.ts
+code-ref: decomp-orchestrator/packages/agents/src/agents/knowledge/curator, decomp-orchestrator/packages/knowledge/src/curator.ts
 ---
 
 # Knowledge Curator Agent
@@ -14,10 +14,10 @@ writer, and the agent can optionally add proposal-only source updates.
 
 | File | Purpose |
 | --- | --- |
-| `packages/agents/src/knowledge-curator/index.ts` | Registers the agent slice. |
-| `packages/agents/src/knowledge-curator/prompt.ts` | Builds the curator prompt bundle. |
-| `packages/agents/src/knowledge-curator/schema.json` | Defines the expected JSON shape. |
-| `packages/agents/src/knowledge-curator/templates/system.md` | Defines curation rules and output contract. |
+| `packages/agents/src/agents/knowledge/curator/index.ts` | Registers the agent slice. |
+| `packages/agents/src/agents/knowledge/curator/prompt.ts` | Builds the curator prompt bundle. |
+| `packages/agents/src/agents/knowledge/curator/schema.json` | Defines the expected JSON shape. |
+| `packages/agents/src/agents/knowledge/curator/templates/system.md` | Defines curation rules and output contract. |
 | `packages/knowledge/src/curator.ts` | Deterministically reduces worker reports and PR postmortems into enrichment records. |
 | `packages/knowledge/src/graph/knowledge-curator.ts` | Emits curator records into internal graph entities, facts, and edges. |
 
@@ -37,7 +37,7 @@ proposal-only source updates are appended in deterministic ID order. The live
 agent uses the shared defaults unless overridden: provider `codex-lb`, model
 `gpt-5.5`, thinking `medium`. `local.env` sets
 `PI_CODING_AGENT_DIR=.pi-agent`, so auth is loaded from ignored repo-local
-`.pi-agent/models.json`, matching the PR-review path.
+`.pi-agent/models.json`, matching the PR indexer path.
 
 Workers and PR agents contribute evidence. The curator decides whether that
 evidence becomes an accepted graph lesson or a proposal-only source update.
@@ -48,4 +48,4 @@ owning tool suite.
 ## Related
 
 - [Knowledge implementation](../knowledge/00-overview.md)
-- [PR-review agent](20-pr-review.md)
+- [PR indexer, splitter, and reviewer agents](20-pr-review.md)

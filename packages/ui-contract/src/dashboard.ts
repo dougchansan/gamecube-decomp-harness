@@ -105,7 +105,7 @@ export interface RunDetails {
   knowledgeIntake?: JsonObject;
 }
 
-export type PromptPreviewAgentId = "worker" | "pr-review" | "knowledge-curator" | "qa-repair";
+export type PromptPreviewAgentId = "worker" | "pr-indexer" | "pr-splitter" | "knowledge-curator" | "qa-repair";
 export type PromptPreviewSource = "latest" | "sample";
 
 export interface PromptPreviewStats {
@@ -129,5 +129,60 @@ export interface PromptPreview {
   systemStats: PromptPreviewStats;
   userStats: PromptPreviewStats;
   context: JsonObject;
+  warnings: string[];
+}
+
+/** A durable decomp standard record loaded from the decomp_standards source. */
+export interface StandardRecord {
+  id: string;
+  title: string;
+  summary: string[];
+  status: string;
+  family?: string;
+  disposition?: string;
+  severity?: string;
+  qaEnforcement?: string;
+  workerFacing?: boolean;
+  retiredInto?: string;
+  qaRuleIds?: string[];
+  examplePolicy?: string;
+  preferredRepairs?: string[];
+  do: string[];
+  doNot: string[];
+  evidenceRefs: string[];
+}
+
+/** A targeted repair/review example tied to a standard and optional QA rule. */
+export interface StandardExampleRecord {
+  id: string;
+  standardId: string;
+  qaRuleId?: string | null;
+  severity: string;
+  badPattern: string;
+  preferredShape: string;
+  description: string[];
+  evidenceRef?: string;
+}
+
+/** Source/tool inventory surfaced by the Knowledge Base. */
+export interface KnowledgeInventory {
+  globalSources: string[];
+  projectSources: string[];
+  validation: JsonObject;
+  pr: JsonObject;
+}
+
+/** Payload returned by GET /api/standards for the Knowledge Base surface. */
+export interface StandardsPayload {
+  project: ProjectSummary | null;
+  sourcePath: string;
+  examplesPath?: string;
+  records: StandardRecord[];
+  examples: StandardExampleRecord[];
+  /** Rendered <decomp_standards> XML as worker/QA prompts see it. */
+  effectiveXml: string;
+  /** The structured context object the knowledge package exposes. */
+  context: JsonObject;
+  inventory: KnowledgeInventory;
   warnings: string[];
 }

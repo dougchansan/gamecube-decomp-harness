@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState, type CSSProperties } from "react";
 import { fetchRunDetails, formBody, loadConfig, postJson } from "../lib/api";
-import { asArray, asObject, text, type Dashboard, type FormState, type RunDetails, type UiConfig } from "@decomp-orchestrator/ui-contract";
+import { asObject, type Dashboard, type FormState, type RunDetails, type UiConfig } from "@decomp-orchestrator/ui-contract";
 import { useDashboardStream } from "../hooks/useDashboardStream";
 import { DetailsRail } from "./DetailsRail";
-import { ProgressPanel } from "./ProgressPanel";
-import { Sidebar } from "./Sidebar";
-import { type ImprovedMode, type WorkMode, WorkTables } from "./WorkTables";
+import { ProjectDashboard } from "./ProjectDashboard";
+import { ProjectWorkspace, type DashboardAction } from "./SessionWorkspace";
+import { type ImprovedMode, type WorkMode } from "./WorkTables";
+import { type AppRoute, routeFromUrl, saveRoute } from "../routing";
 
 function schedulingForWorkers(workers: number) {
   const maxWorkers = Number.isFinite(workers) && workers > 0 ? Math.trunc(workers) : 16;
@@ -123,12 +124,12 @@ const defaultForm: FormState = {
   fullKgMaintenanceMode: "full",
 };
 
-type Action = "refresh" | "sync" | "init" | "fresh" | "start" | "startWork" | "stop" | "forceStop" | "pausePr" | "resumePr" | "checkpoint" | "qa" | "reconcile" | "splitPlan" | "preparePr" | "syncPrs" | "openPr" | "openAllPrs";
+type Action = DashboardAction;
 
 // Multi-step server operations tracked by process.operation. Triggering one
 // auto-opens the details rail on the Logs tab so the activity card and live
 // output are in view the moment the work starts.
-const operationActions: ReadonlySet<Action> = new Set(["sync", "fresh", "checkpoint", "qa", "reconcile", "splitPlan", "preparePr", "openPr", "openAllPrs"]);
+const operationActions: ReadonlySet<Action> = new Set(["sync", "fresh", "checkpoint", "qa", "reconcile", "splitPlan", "preparePr", "prepareLocalPr", "prepareLocalBatch", "openPr", "openDraftBatch", "openAllPrs"]);
 
 const actionLabels: Record<Action, string> = {
   refresh: "Refreshing dashboard...",
@@ -147,7 +148,10 @@ const actionLabels: Record<Action, string> = {
   splitPlan: "Building PR split plan...",
   preparePr: "Pausing, checkpointing, running QA repair, and planning PRs...",
   syncPrs: "Syncing PR status from GitHub...",
+  prepareLocalPr: "Preparing local PR workspace...",
+  prepareLocalBatch: "Preparing the next local PR workspace batch...",
   openPr: "Opening draft PR (verify slice, branch, push, create)...",
+  openDraftBatch: "Opening the next local-ready draft PR batch...",
   openAllPrs: "Opening all planned draft PRs, one slice at a time...",
 };
 
@@ -234,28 +238,6 @@ function saveSidebarCollapsed(collapsed: boolean) {
   }
 }
 
-/**
- * Error-only banner over the center column: client-triggered actions that
- * fail without a process.operation record (start, stop, init) have no other
- * surface. Live operation progress belongs to the Logs tab's activity card
- * (auto-opened when an operation starts), never to the center column — the
- * center is the run, not a status ticker.
- */
-function ErrorStrip({ error, onDismiss }: { error: string; onDismiss: () => void }) {
-  if (!error) return null;
-  return (
-    <div className="flex w-full items-center gap-2.5 border-b border-down/40 bg-down/10 px-3 py-1.5 text-xs text-down">
-      <span>✕</span>
-      <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap" title={error}>
-        {error}
-      </span>
-      <button className="ml-auto whitespace-nowrap text-down/80 hover:text-down" onClick={onDismiss} type="button">
-        dismiss
-      </button>
-    </div>
-  );
-}
-
 export function App() {
   const [config, setConfig] = useState<UiConfig | null>(null);
   const [form, setFormState] = useState<FormState>(initialForm);
@@ -271,6 +253,7 @@ export function App() {
   const [runDetails, setRunDetails] = useState<RunDetails | null>(null);
   const [loadingRunDetails, setLoadingRunDetails] = useState(false);
   const [detailsTabRequest, setDetailsTabRequest] = useState<{ nonce: number; tab: "agents" | "logs" | "run" } | null>(null);
+  const [route, setRouteState] = useState<AppRoute>(routeFromUrl);
 
   const setForm = useCallback((updates: Partial<FormState>) => {
     setFormState((current) => ({ ...current, ...updates }));
@@ -330,6 +313,20 @@ export function App() {
     setSidebarCollapsedState(collapsed);
     saveSidebarCollapsed(collapsed);
   }
+
+  // Keep the URL in sync with the route and pick up browser back/forward. The
+  // project dashboard auto-opens the default project the first time the
+  // operator arrives with no route, mirroring the pre-redesign default.
+  const navigate = useCallback((next: AppRoute) => {
+    setRouteState(next);
+    saveRoute(next);
+  }, []);
+
+  useEffect(() => {
+    const onPop = () => setRouteState(routeFromUrl());
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
 
   const setDetailsWidth = useCallback((width: number) => {
     setDetailsWidthState(clampDetailsWidth(width));
@@ -426,8 +423,17 @@ export function App() {
         } else if (nextAction === "syncPrs") {
           await postJson("/api/prs/sync", body);
           await manualRefresh();
+        } else if (nextAction === "prepareLocalPr") {
+          await postJson("/api/prs/prepare-local", body);
+          await manualRefresh();
+        } else if (nextAction === "prepareLocalBatch") {
+          await postJson("/api/prs/prepare-local-batch", { ...body, batchLimit: 3 });
+          await manualRefresh();
         } else if (nextAction === "openPr") {
           await postJson("/api/prs/open", body);
+          await manualRefresh();
+        } else if (nextAction === "openDraftBatch") {
+          await postJson("/api/prs/open-batch", { ...body, batchLimit: 3 });
           await manualRefresh();
         } else if (nextAction === "openAllPrs") {
           await postJson("/api/prs/open-all", body);
@@ -442,13 +448,47 @@ export function App() {
     [currentDashboard, form, manualRefresh, openLogsView, showError],
   );
 
+  // Lightweight, non-operation review-substate update for the In Review
+  // column (ack new comments / mark fixing). It POSTs the field, refreshes
+  // the dashboard, and surfaces failures through the same error strip.
+  const setReviewState = useCallback(
+    async (branch: string, subState: string) => {
+      try {
+        await postJson("/api/prs/review-state", { ...formBody(form, currentDashboard), prBranch: branch, subState });
+        await manualRefresh();
+      } catch (error) {
+        showError(error instanceof Error ? error : new Error(String(error)));
+      }
+    },
+    [currentDashboard, form, manualRefresh, showError],
+  );
+
+  // The dashboard route is full-bleed project selection (no workspace nav, no
+  // details rail). The workspace route restores the 3-column shell.
+  if (route.kind === "dashboard") {
+    return (
+      <main className="app-shell grid h-screen min-h-[620px] bg-ink text-fg max-[780px]:block max-[780px]:min-h-0" style={{ ["--app-grid-columns"]: "minmax(0,1fr)", ["--app-grid-columns-medium"]: "minmax(0,1fr)" } as CSSProperties}>
+        <ProjectDashboard
+          busy={busy}
+          config={config}
+          dashboard={currentDashboard}
+          errorMessage={errorMessage}
+          form={form}
+          onAction={(nextAction) => void runAction(nextAction)}
+          onDismissError={() => setErrorMessage("")}
+          onNavigate={navigate}
+        />
+      </main>
+    );
+  }
+
   // Fixed-length rail tracks (min() resolves to a length) so the
   // grid-template-columns transition can interpolate; minmax() tracks cannot.
-  const railWidth = "min(425px, 30vw)";
+  const railWidth = "min(300px, 26vw)";
   const detailsRailWidth = `min(${detailsWidth}px, 56vw)`;
   const gridColumns = {
-    desktop: `${sidebarCollapsed ? "44px" : railWidth} minmax(0, 1fr) ${detailsCollapsed ? "44px" : detailsRailWidth}`,
-    medium: `${sidebarCollapsed ? "44px" : "min(425px, 42vw)"} minmax(0, 1fr)`,
+    desktop: `${sidebarCollapsed ? "52px" : railWidth} minmax(0, 1fr) ${detailsCollapsed ? "52px" : detailsRailWidth}`,
+    medium: `${sidebarCollapsed ? "52px" : "min(300px, 38vw)"} minmax(0, 1fr)`,
   };
   const shellStyle = {
     "--app-grid-columns": gridColumns.desktop,
@@ -461,30 +501,30 @@ export function App() {
       className={`app-shell ${detailsResizing ? "app-shell-resizing" : ""} grid h-screen min-h-[620px] bg-ink text-fg max-[1180px]:h-auto max-[780px]:block max-[780px]:min-h-0`}
       style={shellStyle}
     >
-      <Sidebar
+      <ProjectWorkspace
         busy={busy}
         collapsed={sidebarCollapsed}
         config={config}
         dashboard={currentDashboard}
+        errorMessage={errorMessage}
         form={form}
         onAction={(nextAction) => void runAction(nextAction)}
         onCollapsedChange={setSidebarCollapsed}
+        onDismissError={() => setErrorMessage("")}
+        onNavigate={navigate}
         onOpenPr={(branch) => void runAction("openPr", { prBranch: branch })}
+        onPrepareLocalPr={(branch) => void runAction("prepareLocalPr", { prBranch: branch })}
+        onSetReviewState={(branch, subState) => void setReviewState(branch, subState)}
+        route={route}
         setForm={setForm}
+        setImprovedMode={setImprovedMode}
+        setImprovedPage={setImprovedPage}
+        setWorkMode={setWorkMode}
+        improvedMode={improvedMode}
+        improvedPage={improvedPage}
+        streamState={streamState}
+        workMode={workMode}
       />
-      <section className="min-w-0 overflow-auto bg-panel">
-        <ErrorStrip error={errorMessage} onDismiss={() => setErrorMessage("")} />
-        <ProgressPanel dashboard={currentDashboard} streamState={streamState} />
-        <WorkTables
-          dashboard={currentDashboard}
-          improvedMode={improvedMode}
-          improvedPage={improvedPage}
-          setImprovedMode={setImprovedMode}
-          setImprovedPage={setImprovedPage}
-          setWorkMode={setWorkMode}
-          workMode={workMode}
-        />
-      </section>
       <DetailsRail
         collapsed={detailsCollapsed}
         dashboard={currentDashboard}

@@ -13,6 +13,9 @@
   /* Hairlines */
   --color-line: #29323e;
   --color-line2: #3b4655;
+  /* Section divider: thin, cool-blue so grouped sections read as distinct
+     bands without the heavy gray of --color-line2. */
+  --color-section: rgba(94, 193, 247, 0.28);
 
   /* Text ramp */
   --color-fg: #e8edf2;
@@ -358,7 +361,7 @@
   /* Pin open-rail content at its final width so the slide reveals it
      instead of reflowing it mid-animation. */
   .sidebar-rail-open .sidebar-rail-content {
-    min-width: min(425px, 30vw);
+    min-width: min(300px, 26vw);
   }
 
   .details-rail-open .details-rail-content {
@@ -366,9 +369,9 @@
   }
 
   @media (max-width: 1180px) {
-    /* Medium layout: sidebar track is min(425px, 42vw); details rail spans full width. */
+    /* Medium layout: sidebar track is min(300px, 38vw); details rail spans full width. */
     .sidebar-rail-open .sidebar-rail-content {
-      min-width: min(425px, 42vw);
+      min-width: min(300px, 38vw);
     }
 
     .details-rail-open .details-rail-content {
@@ -552,4 +555,659 @@
       animation: none;
     }
   }
+
+  /* PR pipeline stepper: Checkpoint → QA → QA Repair → Ship Set → Draft PRs */
+  .pipeline {
+    display: flex;
+    align-items: stretch;
+    min-width: 0;
+  }
+
+  .pipeline-node {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+    padding: 9px 12px;
+    border: 1px solid var(--color-line);
+    background: var(--color-card);
+  }
+
+  .pipeline-node-label {
+    color: var(--color-dim);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .pipeline-node-value {
+    overflow: hidden;
+    color: var(--color-soft);
+    font-size: 13px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .pipeline-connector {
+    flex: 0 0 16px;
+    align-self: center;
+    height: 1px;
+    background: var(--color-line2);
+  }
+
+  /* PR draft kanban board */
+  .kanban {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .kanban-col {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .kanban-col-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 7px 9px;
+    border: 1px solid var(--color-line2);
+    border-bottom: none;
+    background: var(--color-raised);
+  }
+
+  .kanban-col-label {
+    color: var(--color-soft);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .kanban-col-count {
+    color: var(--color-dim);
+    font-size: 11px;
+  }
+
+  .kanban-col-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 64px;
+    padding: 8px;
+    border: 1px solid var(--color-line);
+    background: var(--color-inset);
+  }
+
+  .kanban-empty {
+    padding: 4px 2px;
+    color: var(--color-faint);
+    font-size: 11px;
+  }
+
+  .pr-card {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+    padding: 8px 9px;
+    border: 1px solid var(--color-line);
+    background: var(--color-card);
+  }
+
+  .pr-card-blocked {
+    border-color: rgba(255, 107, 107, 0.4);
+    background: rgba(255, 107, 107, 0.05);
+  }
+
+  .pr-card-head {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .pr-card-lamp {
+    flex: 0 0 6px;
+    width: 6px;
+    height: 6px;
+    margin-top: 5px;
+    border-radius: 50%;
+    background: var(--color-faint);
+  }
+
+  .pr-card-lamp.lamp-idle {
+    background: var(--color-faint);
+  }
+
+  .pr-card-lamp.lamp-flight {
+    background: var(--color-warn);
+    animation: lamp-pulse 1.6s ease-in-out infinite;
+  }
+
+  .pr-card-lamp.lamp-ready {
+    background: var(--color-up);
+  }
+
+  .pr-card-lamp.lamp-attention {
+    background: var(--color-down);
+    animation: lamp-pulse 1.6s ease-in-out infinite;
+  }
+
+  .pr-card-lamp.lamp-neutral {
+    background: var(--color-accent);
+  }
+
+  .pr-card-title {
+    overflow: hidden;
+    color: var(--color-fg);
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .pr-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+  }
+
+  .pr-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 2px;
+  }
+
+  .pr-card-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 7px;
+    border: 1px solid var(--color-line2);
+    background: var(--color-raised);
+    color: var(--color-soft);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .pr-card-link:hover {
+    border-color: var(--color-faint);
+    color: var(--color-fg);
+  }
+
+  .pr-card-blocked-note {
+    color: var(--color-down);
+    font-size: 11px;
+  }
+
+  .pr-card-note {
+    font-size: 11px;
+  }
+
+  .pr-card-files > summary {
+    list-style: none;
+    padding: 2px 0;
+    color: var(--color-dim);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: none;
+  }
+
+  .pr-card-files > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .pr-card-file-list {
+    display: grid;
+    gap: 2px;
+    max-height: 120px;
+    margin: 6px 0 0;
+    padding: 0;
+    overflow: auto;
+    color: var(--color-soft);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    list-style: none;
+  }
+
+  .pr-card-file-list li {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* PR pipeline action groups */
+  .pr-action-groups {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+  }
+
+  .pr-action-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .pr-action-group-label {
+    display: block;
+    width: 100%;
+    margin-bottom: 2px;
+    color: var(--color-dim);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 1180px) {
+    .kanban {
+      grid-template-columns: repeat(6, minmax(190px, 1fr));
+      overflow-x: auto;
+    }
+  }
+
+  @media (max-width: 780px) {
+    .pipeline {
+      flex-direction: column;
+    }
+
+    .pipeline-connector {
+      display: none;
+    }
+  }
+}
+
+/*
+ * Effective prompt viewer — numbered prompt lines in a sticky gutter with XML
+ * element lines picked out. Uses the dashboard palette so it reads like the
+ * rest of the page rather than a light-mode island.
+ */
+.effective-viewer {
+  border: 1px solid var(--color-line);
+  background: var(--color-inset);
+  color: var(--color-soft);
+  max-height: 72rem;
+  overflow: auto;
+}
+
+.effective-viewer .ev-rendered {
+  min-width: 0;
+  padding: 0 0 16px;
+  color: var(--color-soft);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.effective-viewer .ev-line {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  min-width: 0;
+}
+
+.effective-viewer .ev-line:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.effective-viewer .ev-line-number {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  border-right: 1px solid var(--color-line);
+  background: var(--color-card);
+  color: var(--color-faint);
+  font-size: 0.85em;
+  line-height: inherit;
+  padding: 2px 10px 2px 8px;
+  text-align: right;
+  user-select: none;
+}
+
+.effective-viewer .ev-line-content {
+  min-width: 0;
+  padding: 2px 16px;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.effective-viewer .ev-line-blank .ev-line-content {
+  min-height: 1.6em;
+}
+
+.effective-viewer .ev-line-heading .ev-line-content {
+  color: var(--color-fg);
+  font-size: 1.05em;
+  font-weight: 700;
+}
+
+.effective-viewer .ev-line-xml .ev-line-content {
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.effective-viewer .ev-inline-code {
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-fg);
+  font-family: var(--font-mono);
+  padding: 1px 4px;
+}
+
+/*
+ * Multi-line code examples in Standards. The catalog stores real source-shaped
+ * snippets, so these blocks use a persistent line gutter and light C-ish token
+ * styling instead of plain wrapped prose.
+ */
+.example-code {
+  margin-bottom: 10px;
+  overflow: hidden;
+  border: 1px solid var(--color-line);
+  background: var(--color-inset);
+}
+
+/* The header bar doubles as the Flag/Fix semantic cue: a subtle tinted strip
+   with a status lamp (red = bad pattern, green = preferred shape), the way a
+   diff flags before/after. The code body stays neutral so token colors read
+   cleanly and stacked Flag/Fix pairs don't read as a wall of color. */
+.example-code-header {
+  display: flex;
+  min-height: 26px;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--color-line);
+  background: var(--color-card);
+  padding: 3px 10px 3px 8px;
+}
+
+.example-code-label,
+.example-code-count {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.example-code-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-dim);
+}
+
+/* Status lamp, recolored per variant through the parent class. */
+.example-code-label::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  background: var(--color-faint);
+}
+
+.example-code-count {
+  margin-left: auto;
+  color: var(--color-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.example-code-flag .example-code-header {
+  background: rgba(255, 107, 107, 0.06);
+  border-bottom-color: rgba(255, 107, 107, 0.28);
+}
+
+.example-code-flag .example-code-label {
+  color: var(--color-down);
+}
+
+.example-code-flag .example-code-label::before {
+  background: var(--color-down);
+}
+
+.example-code-fix .example-code-header {
+  background: rgba(63, 226, 131, 0.06);
+  border-bottom-color: rgba(63, 226, 131, 0.28);
+}
+
+.example-code-fix .example-code-label {
+  color: var(--color-up);
+}
+
+.example-code-fix .example-code-label::before {
+  background: var(--color-up);
+}
+
+.code-block {
+  background: var(--color-inset);
+}
+
+.cb-line {
+  display: grid;
+  min-width: max-content;
+}
+
+.cb-line:hover {
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.cb-gutter {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  border-right: 1px solid var(--color-line);
+  background: var(--color-card);
+  color: var(--color-faint);
+  font-size: 0.85em;
+  padding: 2px 8px 2px 6px;
+  text-align: right;
+  user-select: none;
+}
+
+.cb-content {
+  min-width: 0;
+  color: var(--color-soft);
+  overflow-wrap: normal;
+  padding: 2px 14px;
+  white-space: pre;
+}
+
+.cb-comment,
+.cb-comment-token {
+  color: var(--color-faint);
+  font-style: italic;
+}
+
+.cb-string-token {
+  color: #8fdcaa;
+}
+
+.cb-preproc-token {
+  color: var(--color-purple);
+  font-weight: 700;
+}
+
+.cb-keyword-token {
+  color: var(--color-accent);
+  font-weight: 700;
+}
+
+.cb-type-token {
+  color: var(--color-cyan);
+  font-weight: 600;
+}
+
+.cb-number-token {
+  color: var(--color-warn);
+}
+
+.cb-ellipsis-token {
+  color: var(--color-faint);
+}
+
+.standard-summary-list {
+  display: grid;
+  gap: 8px;
+  margin: 16px 0 0;
+  padding: 0;
+  color: var(--color-soft);
+  font-size: 14px;
+  line-height: 1.6;
+  list-style: none;
+}
+
+.standard-summary-list li {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr);
+  gap: 8px;
+  min-width: 0;
+  list-style: none;
+}
+
+.standard-summary-bullet {
+  color: var(--color-accent);
+  line-height: 1.6;
+  text-align: center;
+}
+
+.standard-summary-text {
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.standard-description-list {
+  margin: 0;
+  padding: 10px 16px 12px;
+  color: var(--color-soft);
+  font-size: 14px;
+  line-height: 1.6;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+
+.standard-description-list li {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr);
+  gap: 8px;
+  min-width: 0;
+  align-items: start;
+  overflow-wrap: anywhere;
+  list-style: none;
+}
+
+.standard-description-bullet {
+  line-height: 1.6;
+  text-align: center;
+}
+
+.standard-description-text {
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.standard-description-list-do .standard-description-bullet {
+  color: var(--color-up);
+}
+
+.standard-description-list-do-not .standard-description-bullet {
+  color: var(--color-down);
+}
+
+/* Table-style Do/Don't: hairline row separators between items so each list
+   reads like the adjacent metadata table instead of a loose bullet group. */
+.standard-description-list-divided {
+  gap: 0;
+  padding: 0;
+}
+
+.standard-description-list-divided li {
+  padding: 10px 16px;
+  border-top: 1px solid var(--color-line);
+}
+
+.standard-description-list-divided li:first-child {
+  border-top: 0;
+}
+
+.preferred-repair-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  color: var(--color-soft);
+  font-size: 13px;
+  line-height: 1.6;
+  list-style: none;
+}
+
+.preferred-repair-list li {
+  display: grid;
+  grid-template-columns: 14px minmax(0, 1fr);
+  gap: 8px;
+  min-width: 0;
+  padding: 10px 12px;
+  border-top: 1px solid var(--color-line);
+  list-style: none;
+}
+
+.preferred-repair-list li:first-child {
+  border-top: 0;
+}
+
+.preferred-repair-bullet {
+  color: var(--color-up);
+  line-height: 1.6;
+  text-align: center;
+}
+
+.preferred-repair-text {
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.example-description-list {
+  display: grid;
+  gap: 6px;
+  margin: 10px 0 0;
+  padding: 0;
+  color: var(--color-soft);
+  font-size: 13px;
+  line-height: 1.55;
+  list-style: none;
+}
+
+.example-description-list li {
+  display: grid;
+  grid-template-columns: 14px minmax(0, 1fr);
+  gap: 7px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  list-style: none;
+}
+
+.example-description-bullet {
+  color: var(--color-accent);
+  line-height: 1.55;
+  text-align: center;
+}
+
+.example-description-text {
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }

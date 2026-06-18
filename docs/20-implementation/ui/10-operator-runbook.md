@@ -30,7 +30,7 @@ highlighted.
 | 1 Sync | Branch (dirty marker), Baseline freshness | `up to date with origin/master` | Sync Merged PRs (locked while a run is active) |
 | 2 Run | Workers, Queue/reports, last Save point | `active · N leases` while working, `paused · 0 leases` before handoff | Start Working, Pause Intake, Resume, Stop, Force Stop; Setup + Process disclosures |
 | 3 Ship | Checkpoint lanes, Branch QA (informational; `blocked` = rework requeued, never a PR gate), Ship set (THE PR gate), Plan | `pr_ready — N confirmed match(es)` | Prepare Handoff (the whole pipeline incl. auto-reconcile, PR board seed, and the hard `ship` save point — it ends the session); Manual steps (Run QA, Reconcile, Plan PRs — debug escape hatches; checkpointing is automatic) + Artifacts disclosure |
-| 4 PRs | One row per tracked slice PR (status, #, comments, CI), upstream open count | `N open · M to open · K merged` | Sync PR Status (gh-backed; records persist in `pr_handoff/pr_records.json`) |
+| 4 PRs | One row per tracked slice PR (status, #, comments, CI), upstream open count | `N open · M to open · K merged` | **Draft PR Board** — a six-column kanban (Planned → Preparing → Prepared → Draft → In Review → Done) reflecting derived per-slice state; in-flight prep and QA-repair-pending slices show in Preparing, review substate (awaiting/new comments/changes requested/fixing) drives the In Review chip + Ack/Fixing controls. Sync PR Status (gh-backed; records persist in `pr_handoff/pr_records.json`); `/api/prs/review-state` for manual review flags |
 | 5 New Session | — | `restart baseline · keep local work` | New Session (checkpoints first; unshipped improvements stay local) |
 
 Enablement is unchanged from the old Actions panel: handoff buttons need a

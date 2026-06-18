@@ -25,6 +25,12 @@ export interface PathFactResolution {
   resolve_command: string;
 }
 
+export interface StandardExampleSelector {
+  standardIds?: Iterable<string>;
+  qaRuleIds?: Iterable<string>;
+  limit?: number;
+}
+
 export function globalStandardsContext(): Record<string, unknown> {
   const records = loadGlobalStandards();
   return {
@@ -37,8 +43,16 @@ export function globalStandardsContext(): Record<string, unknown> {
     search_command: "python3 knowledge/sources/injectable/decomp_standards/api/search.py --query <query> --limit 10 --json",
     standards: records.map((record) => ({
       id: record.id,
+      status: record.status,
+      family: record.family,
+      disposition: record.disposition,
+      severity: record.severity,
+      qa_enforcement: record.qa_enforcement,
+      worker_facing: record.worker_facing,
+      retired_into: record.retired_into,
       title: record.title,
-      summary: record.summary,
+      summary: stringArray(record.summary),
+      qa_rule_ids: stringArray(record.qa_rule_ids),
       do: stringArray(record.do),
       do_not: stringArray(record.do_not),
       evidence_refs: stringArray(record.evidence_refs),
@@ -46,17 +60,72 @@ export function globalStandardsContext(): Record<string, unknown> {
   };
 }
 
+export function loadStandardExamples(): JsonRecord[] {
+  return readJsonl(resolve(sourceDataRoot("decomp_standards"), "examples.jsonl"));
+}
+
+export function standardExamplesPromptXml(selector: StandardExampleSelector = {}): string {
+  const standardIds = new Set([...(selector.standardIds ?? [])].filter(Boolean));
+  const qaRuleIds = new Set([...(selector.qaRuleIds ?? [])].filter(Boolean));
+  const hasFilter = standardIds.size > 0 || qaRuleIds.size > 0;
+  const examples = loadStandardExamples()
+    .filter((record) => {
+      if (!hasFilter) return true;
+      const standardId = stringValue(record.standard_id);
+      const qaRuleId = stringValue(record.qa_rule_id);
+      return (standardId && standardIds.has(standardId)) || (qaRuleId && qaRuleIds.has(qaRuleId));
+    })
+    .slice(0, Math.max(0, selector.limit ?? 12));
+
+  const lines = [
+    `<standard_examples count="${examples.length}">`,
+    "    <instruction>Use these examples only after a lint finding, repair item, or pre-ship concern identifies the relevant standard or rule. Do not dump examples into ordinary worker reasoning.</instruction>",
+  ];
+  for (const example of examples) {
+    const attrs = [
+      optionalXmlAttribute("id", example.id),
+      optionalXmlAttribute("standard_id", example.standard_id),
+      optionalXmlAttribute("qa_rule_id", example.qa_rule_id),
+      optionalXmlAttribute("severity", example.severity),
+    ].filter(Boolean);
+    lines.push(`    <example ${attrs.join(" ")}>`);
+    lines.push(`        <bad_pattern>${xmlText(example.bad_pattern)}</bad_pattern>`);
+    lines.push(`        <preferred_shape>${xmlText(example.preferred_shape)}</preferred_shape>`);
+    lines.push("        <description>");
+    for (const item of standardExampleDescription(example)) {
+      lines.push(`            - ${xmlText(item)}`);
+    }
+    lines.push("        </description>");
+    if (example.evidence_ref) {
+      lines.push(`        <evidence_ref>${xmlText(example.evidence_ref)}</evidence_ref>`);
+    }
+    lines.push("    </example>");
+  }
+  lines.push("</standard_examples>");
+  return lines.join("\n");
+}
+
 export function globalStandardsPromptXml(): string {
-  const records = loadGlobalStandards().filter((record) => record.status === "accepted");
+  const records = loadGlobalStandards().filter((record) => record.status === "accepted" && record.worker_facing !== false);
   const lines = [
     "<decomp_standards>",
-    "    <instruction>All code changes must conform to the following standards.</instruction>",
+    "    <instruction>All code changes must conform to the active code-quality standards below. Detailed examples are routed to QA repair and pre-ship review after a finding identifies the relevant standard.</instruction>",
     `    <authority>${xmlText(FINAL_AUTHORITY)}</authority>`,
   ];
 
   for (const record of records) {
-    lines.push(`    <standard id="${xmlAttribute(promptStandardId(record.id))}">`);
-    lines.push(`        <summary>${xmlText(record.summary)}</summary>`);
+    const attrs = [
+      `id="${xmlAttribute(promptStandardId(record.id))}"`,
+      optionalXmlAttribute("family", record.family),
+      optionalXmlAttribute("severity", record.severity),
+      optionalXmlAttribute("qa_enforcement", record.qa_enforcement),
+    ].filter(Boolean);
+    lines.push(`    <standard ${attrs.join(" ")}>`);
+    lines.push("        <summary>");
+    for (const item of stringArray(record.summary)) {
+      lines.push(`            - ${xmlText(item)}`);
+    }
+    lines.push("        </summary>");
     lines.push("        <do>");
     for (const item of stringArray(record.do)) {
       lines.push(`            - ${xmlText(item)}`);
@@ -169,7 +238,20 @@ function normalizeMeleePath(path: string): string {
 }
 
 function stringArray(value: unknown): string[] {
-  return Array.isArray(value) ? value.map((item) => String(item)) : [];
+  if (Array.isArray(value)) return value.map((item) => String(item));
+  const text = stringValue(value).trim();
+  return text ? [text] : [];
+}
+
+function standardExampleDescription(record: JsonRecord): string[] {
+  const description = stringArray(record.description).filter((item) => item.trim());
+  if (description.length > 0) return description;
+  const legacyWhy = stringValue(record.why).trim();
+  return legacyWhy ? [legacyWhy] : [];
+}
+
+function stringValue(value: unknown): string {
+  return typeof value === "string" ? value : "";
 }
 
 function promptStandardId(value: unknown): string {
@@ -185,6 +267,11 @@ function xmlText(value: unknown): string {
 
 function xmlAttribute(value: unknown): string {
   return xmlText(value).replace(/"/g, "&quot;");
+}
+
+function optionalXmlAttribute(name: string, value: unknown): string {
+  if (value === null || value === undefined || value === "") return "";
+  return `${name}="${xmlAttribute(value)}"`;
 }
 
 function escapeRegExp(value: string): string {

@@ -72,8 +72,8 @@ PR and worker learning enters through a maintenance pipeline:
 
 1. PR refresh/sync updates `knowledge/sources/code_context/past_prs/data`.
    Full corpus refresh uses `bun run pr:refresh:all`, which runs 32 fetch
-   workers and 32 PR-review workers by default.
-2. The PR-review/indexing pass creates missing per-PR postmortems under
+   workers and 32 PR indexer workers by default.
+2. The PR indexer pass creates missing per-PR postmortems under
    `knowledge/sources/code_context/past_prs/data/prs/pr-NNNN/postmortem`.
 3. Source indexers generate source-local `indexes/*.jsonl` files for active
    injected context, searchable documents, CSVs, PDF page text, and external

@@ -28,6 +28,7 @@ export interface ProjectPrDefaults {
   titlePrefix?: string;
   branchPrefix?: string;
   maxFilesPerPr?: number;
+  splitStrategy?: string;
   improvementMinGainPoints?: number;
   improvementMinMatchedBytes?: number;
 }
@@ -145,6 +146,7 @@ const defaultPr: Required<ProjectPrDefaults> = {
   titlePrefix: "Melee decomp",
   branchPrefix: "pr-split",
   maxFilesPerPr: 30,
+  splitStrategy: "deterministic",
   improvementMinGainPoints: 2,
   improvementMinMatchedBytes: 64,
 };
@@ -243,6 +245,7 @@ function prFromObject(value: unknown): ProjectPrDefaults | undefined {
     titlePrefix: stringField(value.titlePrefix),
     branchPrefix: stringField(value.branchPrefix),
     maxFilesPerPr: numberField(value.maxFilesPerPr),
+    splitStrategy: stringField(value.splitStrategy),
     improvementMinGainPoints: numberField(value.improvementMinGainPoints),
     improvementMinMatchedBytes: numberField(value.improvementMinMatchedBytes),
   };

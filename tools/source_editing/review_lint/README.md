@@ -40,6 +40,7 @@ human-readable summary goes to stderr. Rules live in `api/_qa_rules.py`
 | `function_extern_visibility` / `same_tu_function_extern` | warning / error | Added function `extern` declarations. Cross-TU/unknown declarations stay warnings; declarations for functions defined in the same `.c` file escalate to errors because they can hide the same-TU body from MWCC inline-boundary decisions. |
 | `string_literal_to_symbol` | error | A string-literal call argument replaced by a data symbol or `ident + 0xNN` offset expression within the same hunk. |
 | `numeric_literal_to_symbol` | error | A numeric literal such as `0.0F`, `1.0F`, or `-F32_MAX` replaced by an address-style data symbol within the same hunk. |
+| `address_named_static_data` | error | Added `static`/global data definitions with address-style names such as `lbl_804DA60C` or `grSmoke_804D0000`. Exact moved pre-existing lines are downgraded to warnings by the moved-vs-invented pass. |
 | `packed_string_blob` | error | Hand-packed `static char name[0xNN] =` blobs concatenating string literals with `\0` padding, or `#define NAME (lbl_8XXXXXXX + 0xNN)` pointer-offset macros. |
 | `copied_jobj_inline` | error | Local copies of `jobj.h` inline helper bodies in source TUs instead of calls to canonical `HSD_JObj*` helpers. |
 | `stage_ground_var_owner` | error | Stage TUs that add `gv.<member>` accesses for another stage family's GroundVars arm instead of the owning stage arm. |
@@ -51,8 +52,11 @@ human-readable summary goes to stderr. Rules live in `api/_qa_rules.py`
 | `m2c_residue_names` | error / warning | Added `temp_rNN`/`var_rNN`/`phi_fNN`-style locals are errors; typed `spNN` locals are warnings. |
 | `m2c_goto_label` | error / warning | Added `goto block_NN` or `block_NN:` labels are errors; other added gotos are warnings. |
 | `m2c_field_use` | error | Added `M2C_FIELD(...)` bridge-code uses. |
+| `pointer_offset_arithmetic` | warning | Added raw byte-pointer offset arithmetic such as `((u8*) obj) + 0x14`, which should usually become a typed field, correct union arm, helper, or temporary struct. |
 | `define_alias` | error / warning | Added identifier/expression `#define` aliases are errors; local `_ABS`/`_MIN`/`_MAX`/`_CLAMP` macro clones are warnings. |
 | `novel_pragma` | warning | Added `#pragma` directives outside the upstream-established set (`push`, `pop`, `dont_inline`, `auto_inline`, `force_active`, `fp_contract`, `global_optimizer`, `pool_data`, `clang diagnostic`). |
+| `codegen_pragma` | warning | Added established-but-suspicious codegen pragmas (`dont_inline`, `auto_inline`, `global_optimizer`, `pool_data`) in normal source. |
+| `volatile_local_tactic` | warning | Added indented local `volatile` declarations in normal source, which are usually lifetime/register steering tactics unless real hardware or SDK semantics require them. |
 | `type_erasing_cast` | warning | Added `(void*)`, `(u8*)`, or `(char*)` casts. |
 | `banned_pattern:<id>` | error | Regex detectors loaded from `knowledge/sources/injectable/banned_patterns/data/banned.jsonl` (env override `REVIEW_LINT_BANNED_DIR`). |
 | `resubmission_tombstone` | error | An added hunk whose normalized token-shingle Jaccard similarity to a previously rejected hunk meets the tombstone's threshold (default 0.7; hunks under 12 tokens are never checked). The finding cites the original rejection comment URL. |

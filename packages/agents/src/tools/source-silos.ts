@@ -111,7 +111,7 @@ function sourceSearchTool(definition: SourceSearchDefinition): AgentToolRegistra
   return {
     id: definition.id,
     purpose: definition.purpose,
-    allowedRoles: ["worker", "pr-review", "knowledge-curator"],
+    allowedRoles: ["worker", "pr-indexer", "pr-splitter", "knowledge-curator"],
     capabilities: ["knowledge_source_search", definition.sourceId],
     create(context) {
       return {
@@ -151,7 +151,7 @@ function fixedSourceApiTool(params: {
   return {
     id: params.id,
     purpose: params.purpose,
-    allowedRoles: ["worker", "pr-review", "knowledge-curator"],
+    allowedRoles: ["worker", "pr-indexer", "pr-splitter", "knowledge-curator"],
     capabilities: ["knowledge_source_lookup", params.sourceId],
     create() {
       return {
@@ -195,7 +195,7 @@ function proposalSourceApiTool(params: {
 export const codeGraphFileCardToolRegistration: AgentToolRegistration = {
   id: "code_graph_file_card",
   purpose: "Load the graph file card for one source path, including editability, match status, PR history, resources, and scheduling signals.",
-  allowedRoles: ["worker", "pr-review", "knowledge-curator"],
+  allowedRoles: ["worker", "pr-indexer", "pr-splitter", "knowledge-curator"],
   capabilities: ["code_graph", "file_card", "target_context"],
   create(context): PiToolDefinition {
     return {
@@ -378,7 +378,7 @@ export const decompStandardsProposalsToolRegistration = proposalSourceApiTool({
 export const decompStandardsContextToolRegistration: AgentToolRegistration = {
   id: "decomp_standards_context",
   purpose: "Return the compact global decomp standards context that is also preloaded into worker packets.",
-  allowedRoles: ["worker", "pr-review", "knowledge-curator"],
+  allowedRoles: ["worker", "pr-indexer", "pr-splitter", "knowledge-curator"],
   capabilities: ["decomp_standards", "preloaded_context"],
   create(): PiToolDefinition {
     return {
@@ -403,7 +403,7 @@ export const decompStandardsContextToolRegistration: AgentToolRegistration = {
 export const pathFactsResolveToolRegistration: AgentToolRegistration = {
   id: "path_facts_resolve",
   purpose: "Resolve bounded path-scoped decomp facts for one source path.",
-  allowedRoles: ["worker", "pr-review", "knowledge-curator"],
+  allowedRoles: ["worker", "pr-indexer", "pr-splitter", "knowledge-curator"],
   capabilities: ["path_facts", "path_scoped_context"],
   create(): PiToolDefinition {
     return {

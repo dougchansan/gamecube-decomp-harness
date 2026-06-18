@@ -26,6 +26,7 @@
     "titlePrefix": "Melee decomp",
     "branchPrefix": "decomp",
     "maxFilesPerPr": 8,
+    "splitStrategy": "agent",
     "improvementMinGainPoints": 2.0,
     "improvementMinMatchedBytes": 64
   },

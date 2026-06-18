@@ -18,7 +18,7 @@ The board carries:
 - Targets and queue rows: candidate functions or units with priority and
   rationale.
 - Leases and file locks: active ownership of bounded write sets.
-- Pi sessions: worker, review, curation, reconcile, and QA repair invocation
+- Pi sessions: worker, PR splitter/reviewer, curation, reconcile, and QA repair invocation
   metadata.
 - Scheduler epochs: active epoch configuration, fixed target membership,
   ready-queue state, completion counts, refresh counters, and boundary routing

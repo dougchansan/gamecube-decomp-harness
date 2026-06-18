@@ -1,339 +1,349 @@
 ---
-covers: Melee decomp PR coding standards and QA rules
+covers: Melee decomp code-quality standards, QA lint coverage, retired rules, and repair examples
 concepts: [past-prs, review-standards, decomp-quality, matching-standards, qa-checklist]
-code-ref: knowledge/sources/code_context/past_prs/data
+code-ref: knowledge/sources/injectable/decomp_standards/data/standards.jsonl, tools/source_editing/review_lint/api/_qa_rules.py
 ---
 
-# Melee PR Review QA Standards
+# Melee Code Quality Standards
 
-Use this as the review checklist for decomp PRs and worker output. Code should
-look like maintainable original C, and matching-only tactics should be backed by
-local build, objdiff, or regression evidence.
+Use these standards for agent-authored Melee C and for QA review of PR-bound
+candidate files. They define source-quality rules: how code should be written,
+which source shapes should be repaired, and which recurring failures are caught
+deterministically.
 
-## Source Rules
+These standards are not PR shape policy. PR split size, PR body format, and
+manual verification ledgers belong to workflow/runbook surfaces. Build,
+objdiff/checkdiff, regression, and QA artifacts remain runner-owned evidence.
 
-### Recover Natural Loops
+## Coverage Tiers
 
-Do:
+| Tier | Meaning | Examples |
+| --- | --- | --- |
+| Deterministic error | Added diff shape is mechanically rejected or maintainer-rejected. | `new_data_anchor`, `self_tu_extern`, `packed_string_blob`, `copied_jobj_inline`, `unrolled_assert`, `register_keyword`, `inline_asm`, `m2c_field_use`, `define_alias`. |
+| Deterministic warning | Added diff shape is suspicious but context can justify it. | `extern_literal_anchor` for floats, `function_extern_visibility`, `novel_pragma`, `type_erasing_cast`, typed `spNN` locals. |
+| Pre-ship review | Judgment needs local source analogs, type context, or objdiff reasoning. | likely loops, one-off helpers, authored-source style, broad local lifetime churn, semantic naming. |
+| Pipeline-owned verification | Runner/build evidence proves whether retained source matches. | `ninja`, objdiff/checkdiff, regression-check, worker validation artifacts. |
 
-- Use `for`, `while`, or `do while` when repeated blocks vary only by an index,
-  pointer, or counter.
-- Test an exact `int` counter when relying on MWCC loop unrolling.
-- Index from the original base pointer when later code still needs that base.
+Every `review_lint` finding carries a `standard_id`. Repair and pre-ship review
+should use that id plus `rule_id` to retrieve examples and repair hints.
 
-Do not:
+## Retired Or Merged Standards
 
-- Leave repeated generated-looking blocks just because they currently match.
-- Mutate the only copy of a base pointer if the original address is needed
-  later.
-- Keep unrolled code unless cleaner loop forms were checked and failed.
+| Standard | Disposition | Replacement |
+| --- | --- | --- |
+| `global_standard:verification-and-regression-ledger` | Workflow-only; not a worker-facing code standard. | Runner validation and workflow docs own build, objdiff, checkdiff, regression, and QA artifacts. |
+| `global_standard:text-before-data-matching` | Merged; not a standalone worker standard. | Code-quality data/literal issues live under literals, data, and externs. Broad text-vs-data prioritization is workflow context. |
+| `global_standard:data-sections-and-tu-splits` | Merged. | Split and section ownership guidance lives under literals, data, and externs. |
 
-### Prefer Typed Fields Over Pointer Math
+## 1. Authored Source Shape
 
-Do prefer access forms in this order:
+Standards:
 
-1. real field on the actual struct
-2. correct `GroundVars`, `FighterVars`, or `ItemVars` union arm
-3. temporary internal struct with explicit padding
-4. `M2C_FIELD`
-5. raw pointer arithmetic only as a last resort
+- `global_standard:infer-authored-source-style`
+- `global_standard:natural-loops`
+- `global_standard:canonical-control-flow-and-macros`
 
-Do:
+Agents should reconstruct likely original authored C, not generated C that only
+moves a score. Use matched siblings, nearby files, headers, macros, naming
+habits, and local control-flow idioms as evidence.
 
-- Replace raw offsets with real fields when the type is known.
-- Model item, fighter, ground, and HSD object data at the correct offset instead
-  of borrowing unrelated fields.
-- In stage TUs, use the `gv` union arms owned by that map/stage family. If a
-  newly understood stage object needs names, add or extend that stage's
-  `GroundVars` arm instead of borrowing another map's arm.
-- Treat `M2C_FIELD` as temporary bridge code.
+Deterministic coverage:
 
-Do not:
-
-- Use `((u8*) obj) + offset` when a field, union arm, helper, or temporary struct
-  can express the access.
-- Add new `M2C_FIELD` uses when the real type can reasonably be recovered.
-- Use unrelated `gv` union arms such as `gv.arwing` in another stage TU merely
-  because the offsets happen to line up.
-- Treat raw pointer math as finished source style.
-
-### Recognize Header Inlines
+- `m2c_goto_label`: added `goto block_NN` or `block_NN:` residue is an error;
+  other new gotos are warnings.
+- `m2c_residue_names`: added `temp_rNN`, `var_rNN`, and `phi_fNN` names are
+  errors; typed `spNN` locals are warnings.
+- `define_alias`: local `_ABS`, `_MIN`, `_MAX`, and `_CLAMP` clones are
+  warnings.
 
 Do:
 
-- Map expanded header asserts back to the inline helper in the owning header.
-- For `jobj.h` asserts, use the line number to identify the matching
-  `HSD_JObj*` inline.
-- Prefer existing `HSD_JObjSet*` and `HSD_JObjGet*` forms when they represent
-  the source-level operation.
-- Use `GET_JOBJ` only when local evidence shows that wrapper/access pattern is
-  required; sometimes direct `gobj->hsd_obj`, an existing `jobj` local, or
-  another source shape is the correct match.
+- Try natural `for`, `while`, or `do while` forms when repeated source differs
+  only by index, pointer, counter, or stride.
+- Try structured `switch`, ordinary branches, ternaries, and canonical
+  expression macros before preserving generated residue.
+- Record negative evidence if a cleaner authored form was tested and failed.
 
 Do not:
 
-- Keep expanded `__assert("jobj.h", line, ...)` code when the header inline is
-  identifiable.
-- Copy or paste `jobj.h` inline helper bodies into a stage or item TU. Use the
-  canonical `HSD_JObj*` helper, or add the missing helper at the owning API
-  layer if the project truly lacks it.
-- Treat `GET_JOBJ` as an unconditional cleanup rule.
-- Redefine header macros or local helper names just to force an inline.
-- Manually expand an inline without objdiff evidence.
+- Leave repeated generated-looking blocks only because they currently match.
+- Preserve generated gotos, copied branch ladders, or local macro clones before
+  checking ordinary source forms.
+- Let decompiler output or data-section parity outrank matched local source.
 
-### Use Project Assert And Report Macros
+Example:
+
+```c
+/* Bad: repeated generated blocks remain expanded. */
+slot[0] = base[0].x4;
+slot[1] = base[1].x4;
+slot[2] = base[2].x4;
+
+/* Better: test the likely authored loop form. */
+for (i = 0; i < 3; i++) {
+    slot[i] = base[i].x4;
+}
+```
+
+## 2. Typed Access And Pointer Math
+
+Standard:
+
+- `global_standard:typed-fields-over-pointer-math`
+
+Agents should describe memory through the most precise local type available:
+real fields, correct union arms, accessors, or temporary internal structs before
+raw pointer arithmetic.
+
+Deterministic coverage:
+
+- `stage_ground_var_owner`: stage TUs borrowing another stage family's
+  `GroundVars` arm are errors.
+- `m2c_field_use`: new `M2C_FIELD(...)` uses are errors.
+- `type_erasing_cast`: new `(void*)`, `(u8*)`, or `(char*)` casts are warnings.
+- `pointer_offset_arithmetic`: new raw byte-pointer offset access is a warning.
 
 Do:
 
-- Use `HSD_ASSERT(line, cond)` for plain asserts.
-- Use `HSD_ASSERTMSG(line, cond, msg)` when the message string is real.
-- Use `HSD_ASSERTREPORT(line, cond, ...)` when the report side effect is real.
-- Use `OSReport(...)` or `OSPanic(__FILE__, ...)` when the source has that
-  behavior.
+- Replace raw offsets with fields, the correct union arm, a helper, or a
+  temporary typed struct when the type is known.
+- Add or extend the owning stage/fighter/item union arm instead of borrowing an
+  unrelated layout.
+- Keep raw byte math only as a documented bridge while the real type is still
+  unknown.
 
 Do not:
 
-- Leave direct `__assert` blocks when an existing project macro represents the
-  same source.
-- Invent fake assert strings, fake report globals, or dummy storage to force a
-  match.
-- Drop a real report or panic side effect while cleaning up an assert.
+- Keep `((u8*) obj) + offset` when a type can express the access.
+- Borrow `gv.arwing` or another unrelated union arm because offsets line up.
+- Treat `M2C_FIELD` as finished source style.
 
-### Keep Literals Inline Unless Data Evidence Says Otherwise
+Example:
+
+```c
+/* Bad: raw offset into a known object. */
+value = *(s32*) ((u8*) state + 0x14 + pnum * 0x24);
+
+/* Better: field and array access on the recovered type. */
+value = state->players[pnum].x14;
+```
+
+## 3. Asserts, Reports, And Header Inlines
+
+Standards:
+
+- `global_standard:header-inlines`
+- `global_standard:assert-report-macros`
+
+Agents should map expanded assert/report code back to project macros and header
+inlines when local evidence identifies the source operation.
+
+Deterministic coverage:
+
+- `unrolled_assert`: open-coded `__assert` or `__assert_msg` in normal source is
+  an error.
+- `fake_assert_macro`: local assert/report macro clones are errors.
+- `assert_idiom_downgrade`: replacing `HSD_ASSERT*` with raw assert/report code
+  is an error.
+- `copied_jobj_inline`: pasted `jobj.h` inline helper bodies in source TUs are
+  errors.
 
 Do:
 
-- Keep constants, strings, and float literals inline when there is no real data
-  ownership evidence.
-- Verify section ownership before promoting a literal to a named symbol.
-- Use named data only when symbol metadata, section placement, or surrounding
-  source supports it.
+- Use `HSD_ASSERT`, `HSD_ASSERTMSG`, or `HSD_ASSERTREPORT` when they represent
+  the source.
+- Preserve real `OSReport` or `OSPanic` side effects.
+- Use `jobj.h` file/line evidence to find the owning `HSD_JObj*` helper.
+- Use `GET_JOBJ` only when local evidence supports that access shape.
 
 Do not:
 
-- Create static string or float symbols just because generated code exposed an
-  address.
-- Replace ordinary numeric literals such as `0.0F`, `1.0F`, or `-F32_MAX` with
-  TU-local address-named symbols solely for relocation or data-order pressure.
-- Add fake data anchors, dummy static functions, or data-order globals as normal
-  source style.
-- Move literals out of source without checking `.data`, `.rodata`, `.sdata`, or
-  `.sdata2` ownership.
+- Keep `__assert("jobj.h", line, ...)` when a header inline is identifiable.
+- Paste `jobj.h` inline helper bodies into stage, item, or fighter TUs.
+- Invent fake assert strings, report globals, or dummy storage to force a match.
 
-### Do Not Replace String Literals With Data Symbols
+Example:
+
+```c
+/* Bad: raw assert expansion. */
+__assert("jobj.h", 0x257, "jobj");
+
+/* Better: project macro when this is a plain assertion. */
+HSD_ASSERT(0x257, jobj);
+```
+
+## 4. Literals, Data, And Externs
+
+Standards:
+
+- `global_standard:literals-and-data-ownership`
+- `global_standard:no-string-literal-symbol-regression`
+- merged: `global_standard:text-before-data-matching`
+- merged: `global_standard:data-sections-and-tu-splits`
+
+Agents should not introduce external variables, static literals, address-named
+symbols, or packed string blobs solely to force data ordering. Ordinary strings,
+floats, constants, assert text, asset names, and report text should stay inline
+unless real ownership evidence says otherwise.
+
+Deterministic coverage:
+
+- `extern_literal_anchor`: address-style externs for string types are errors;
+  float types are warnings before ownership analysis.
+- `new_data_anchor`: extern, use, and definition all introduced together are an
+  error.
+- `self_tu_extern`: externing data owned by the current TU is an error.
+- `string_literal_to_symbol`: replacing a string literal with a data symbol or
+  offset expression is an error.
+- `numeric_literal_to_symbol`: replacing numeric literals with address-style
+  data symbols is an error.
+- `packed_string_blob`: hand-packed string blobs and pointer-offset macros over
+  address-style symbols are errors.
+- `banned_pattern:*` and `resubmission_tombstone`: curated maintainer
+  rejections and fuzzy resubmissions are errors.
+- `address_named_static_data`: newly invented address-style static or global
+  data definitions are errors; exact moved pre-existing lines are downgraded to
+  warnings.
 
 Do:
 
-- Keep source string literals inline when they are ordinary asset names, table
-  labels, assert text, report text, or resource names.
-- Treat a string-literal-to-symbol change as data work that needs explicit
-  ownership evidence and PR scope.
-- Prefer the code match that leaves the literal in place when the alternative is
-  only a data-section relocation change.
+- Keep constants, strings, and float literals inline when no data ownership
+  evidence exists.
+- Fix symbol size, type, scope, local labels, or splits when metadata is wrong.
+- Use named data only when section placement, symbol metadata, or surrounding
+  source supports ownership.
 
 Do not:
 
-- Replace a literal such as `"MenMainBack_Top_joint"` with a symbol such as
-  `mnNameNew_803EE38C` to chase data parity.
-- Convert strings into named globals because generated output exposed an address
-  or because another data section looks closer.
-- Keep a string-symbol replacement that creates report noise unless the PR is
-  explicitly about data ownership and the evidence explains the tradeoff.
+- Create static literals, externs, globals, fake anchors, or dummy storage
+  solely to force data order.
+- Replace asset/report/assert strings with symbols or offsets into packed
+  blobs.
+- Move data across translation units without split evidence.
 
-### Match Text Before Chasing Data
+Example:
+
+```c
+/* Bad: external variable introduced to force a float load. */
+extern const f32 lbl_804DA60C;
+speed = lbl_804DA60C;
+
+/* Better: keep the ordinary literal inline. */
+speed = 1.0F;
+```
+
+```c
+/* Bad: string data accessed through a packed blob or offset. */
+static char lbl_803EFB60[0xA8] = "Can't get user_data.\n\0\0\0";
+OSReport(lbl_803EFB60 + 0x28);
+
+/* Better: recover the source string or a real string table. */
+OSReport("Can't get user_data.\n");
+```
+
+## 5. Codegen Tactics
+
+Standards:
+
+- `global_standard:matching-tactics-need-evidence`
+- `global_standard:avoid-pragmas-register-asm`
+
+Agents should first try clean C. Pragmas, `register`, volatile locals, widened
+lifetimes, dummy locals, direct extern declarations, and declaration-order
+steering are exceptions, not source style.
+
+Deterministic coverage:
+
+- `function_extern_visibility`: new function externs are warnings.
+- `same_tu_function_extern`: externs for functions defined in the same TU are
+  errors.
+- `register_keyword`: new `register` declarations are errors.
+- `inline_asm`: new inline assembly in normal source is an error.
+- `novel_pragma`: new unknown pragmas are warnings.
+- `codegen_pragma`: newly added known MWCC codegen pragmas are warnings.
+- `volatile_local_tactic`: local volatile declarations are warnings.
 
 Do:
 
-- Treat text-section function progress as the primary acceptance signal for
-  matching PRs.
-- Keep data, literal, symbol, or split edits only when they are required for the
-  claimed code match, backed by section ownership or symbol metadata, or
-  explicitly scoped as data cleanup.
-- Narrow or revert data edits that create noisy report regressions or
-  false-positive section movement when the code match can land without them.
-- Wait until a translation unit's text section is complete before spending broad
-  effort on remaining data sections, unless a data owner issue is blocking the
-  code match.
+- Try clean C before tactics.
+- Keep unavoidable tactics narrow and backed by build/objdiff/regression
+  evidence.
+- Check adjacent functions when a tactic can perturb codegen, data order, or
+  local stack shape.
 
 Do not:
 
-- Chase data-section parity as routine matching work before the translation
-  unit's text section is complete.
-- Add or move static data, literal externs, local assert overrides, fake helpers,
-  fake anchors, or split churn solely to quiet a data diff.
-- Mix a focused code match with unrelated `.sdata`, `.sdata2`, `.rodata`, or
-  symbol cleanup.
-- Retain data changes that create section-regression noise unless the PR is
-  explicitly about data and the evidence explains the tradeoff.
+- Use pragmas, `register`, inline asm, local externs, or volatile locals as
+  ordinary matching style.
+- Hide same-TU function bodies from MWCC with source-local externs.
+- Keep one-off helpers or lifetime churn without evidence and a cleanup reason.
 
-### Use Canonical Control Flow And Macros
+Example:
+
+```c
+/* Bad: pragma added as a first-line matching tactic. */
+#pragma push
+#pragma global_optimizer off
+void fn(void) { ... }
+#pragma pop
+
+/* Better: attempt cleaner source first and keep only proven narrow exceptions. */
+void fn(void) { ... }
+```
+
+## 6. Names, Defines, Headers, And Prototypes
+
+Standards:
+
+- `global_standard:conservative-naming`
+- `global_standard:no-define-alias-global-renames`
+- `global_standard:truthful-headers-and-includes`
+
+Agents should not hide guessed names or missing declarations behind macro
+aliases or local externs. Headers and prototypes should become more truthful as
+source is recovered.
+
+Deterministic coverage:
+
+- `m2c_residue_names`: generated local names are errors or warnings depending
+  on confidence.
+- `define_alias`: identifier-to-identifier and expression aliases are errors;
+  canonical macro clones are warnings.
+- `function_extern_visibility` and `same_tu_function_extern`: indirect coverage
+  for header/prototype repair, currently mapped to matching tactics.
 
 Do:
 
-- Try a grouped `switch` for range dispatch or repeated adjacent branches.
-- Try ternaries for select-like assignments.
-- Use project macros such as `ABS`, `MIN`, `MAX`, and `CLAMP` when they express
-  the natural source.
-- Convert goto-heavy generated output into structured C when it can still match.
-
-Do not:
-
-- Preserve branch ladders or generated gotos before testing ordinary source
-  forms.
-- Replace readable control flow with fake code solely to match one local
-  sequence.
-- Ignore common expression macros when the assembly shape suggests them.
-
-## Matching Tactic Rules
-
-### Require Evidence For Matching Tactics
-
-Do require targeted evidence before keeping:
-
-- `PAD_STACK` or `FORCE_PAD_STACK`
-- declaration order changes
-- branch-local or widened local lifetimes
-- dummy stack locals
-- volatile locals
-- manual inline expansion
-- direct global or extern access instead of a struct path
-- temporary structs with offset padding
-
-Do not:
-
-- Use a matching tactic if it shifts nearby functions, changes data order, or
-  hides a real type.
-- Treat a tactic as permanent style without a cleanup reason.
-- Keep local/register/stack churn that has no objdiff benefit.
-
-### Avoid New Pragmas, `register`, And Inline Assembly
-
-Do:
-
-- Scope unavoidable pragmas as tightly as possible.
-- Prove any pragma or inline-assembly exception does not affect adjacent
-  functions.
-- Remove `register` and similar keyword steering when it is not required.
-
-Do not:
-
-- Add new `#pragma global_optimizer off` for normal source.
-- Leave unbalanced or empty `#pragma push` / `#pragma pop` blocks.
-- Add unexplained `#pragma dont_inline`.
-- Use inline assembly outside SDK-like code unless there is no reasonable C
-  alternative.
-
-## Data, Naming, And File Rules
-
-### Respect Data Sections And TU Splits
-
-Do:
-
-- Treat `.sdata`, `.sdata2`, `.sbss`, `.rodata`, and `.data` placement as part
-  of the match.
-- Fix symbol size and type metadata in `symbols.txt` when metadata is wrong.
-- Use local `@NNN` labels for compiler-local data when appropriate.
-- Use assert filenames, string clusters, object names, and float groups as TU
-  split evidence.
-
-Do not:
-
-- Add dummy C storage to compensate for incorrect symbol metadata.
-- Move data across TUs without checking split boundaries.
-- Treat data section placement as cosmetic.
-
-### Be Conservative With Names
-
-Do:
-
-- Use semantic names when the role is evidenced.
-- Keep `fn_<addr>`, `lbl_<addr>`, or module-address names when semantics are not
-  proven.
-- Use short local role names such as `fp`, `ip`, `gp`, `gobj`, and `jobj` when
-  those roles are clear.
-- Clean up generated names once the role is known.
+- Use semantic names only when source, callsite, data, or PR evidence supports
+  the role.
+- Keep one canonical declaration for one known symbol.
+- Move declarations to the real owning header when a body proves the signature.
+- Remove stale `UNK_RET` and `UNK_PARAMS`.
 
 Do not:
 
 - Invent semantic names from guesses.
-- Rename address-style symbols before the source meaning is supported.
-- Leave `temp_rXX`-style names when a clear local role is known.
-
-### Do Not Alias Global Renames With Defines
-
-Do:
-
-- Preserve existing global, data, and extern names unless the rename itself is
-  supported by local source, symbol, map, or review evidence.
-- Keep one canonical declaration for one known data address in the owning scope.
-- Use a real rename only when the evidence supports it and update references
-  directly in the same scoped change.
-
-Do not:
-
-- Add `#define old_name new_name` or `#define new_name old_name` to hide a
-  renamed variable.
-- Keep two extern declarations with different names for the same address-commented
-  data symbol.
-- Rename address-style globals to semantic names because an external mirror,
-  decompiler, or AI output guessed the role.
-- Use a define as an alias to avoid updating call sites or to make a guessed
-  semantic name appear accepted.
-
-### Keep Headers And Includes Truthful
-
-Do:
-
-- Update prototypes when a function body proves the signature.
-- Remove stale `UNK_RET` and `UNK_PARAMS`.
-- Put declarations in the real owning header.
-- Use established local include style, such as `<MSL/math.h>` or
-  `<baselib/gobj.h>`, when nearby code does.
-- Run `python configure.py --require-protos` before handoff when applicable.
-
-Do not:
-
-- Add fake local declarations when the real header should own them.
-- Leave mismatched prototypes after recovering a function body.
+- Add `#define old_name new_name` or local expression aliases to hide a rename.
 - Hide missing prototypes behind source-local declarations.
 
-### Keep Formatting And Mechanical Changes Reviewable
+Example:
 
-Do:
+```c
+/* Bad: aliasing a speculative rename. */
+#define camera_state lbl_804D1234
 
-- Keep formatting-only sweeps separate from semantic matching work when
-  possible.
-- Apply broad style conventions gradually or only in files already being touched.
-- Include a from/to table or reproducible command for large rename or labeling
-  changes.
-- Keep the corresponding main header first in `.c` files so the header proves it
-  can stand alone.
-- Respect 80-column expectations, EditorConfig checks, `clang-format`, and
-  scoped `clang-format off/on` blocks around MWERKS inline-asm cases.
+/* Better: keep the canonical address-style name until meaning is evidenced. */
+lbl_804D1234.x0 = value;
+```
 
-Do not:
+## Example Routing
 
-- Mix broad mechanical churn with matching changes when it obscures review.
-- Reformat unrelated files just because a PR touches nearby code.
-- Leave formatter exceptions open-ended after a rebase.
-- Force repeated history rewrites when the normal final merge is already
-  squashed.
+Detailed examples belong in targeted repair and review contexts:
 
-## Verification Rules
-
-Do:
-
-- Run the narrow touched-object build when possible.
-- Run full `ninja` before handoff when the blast radius is nontrivial.
-- Run objdiff or checkdiff for every claimed matched symbol or unit.
-- Inspect adjacent functions when changing pragmas, includes, data, literals, or
-  TU ownership.
-- Report broken matches, fuzzy regressions, and metric regressions explicitly.
-- Keep tool or regression-gate changes separate from decomp source changes.
-
-Do not:
-
-- Claim a match without local build and objdiff/checkdiff evidence.
-- Hide regressions behind a broad "builds locally" statement.
-- Mix tooling changes and decomp source changes when either can be reviewed
-  separately.
+| Use case | Source |
+| --- | --- |
+| Worker base prompt | Compact summaries from `standards.jsonl`; no bulky examples. |
+| Deterministic lint finding | `review_lint` message, `standard_id`, `rule_id`, and targeted repair hint. |
+| QA repair / PR fixer | Standard-linked examples looked up by `standard_id` and `qa_rule_id`. |
+| Pre-ship review | `preship_exhibits.json`, banned-pattern exhibits, and standard-linked examples. |
+| Repeated rejected hunk | `banned_patterns/data/tombstones.jsonl` with the original rejection URL. |

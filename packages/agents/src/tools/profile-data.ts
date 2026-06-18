@@ -43,9 +43,17 @@ export const defaultWorkerToolProfile = [
   "review_lint_scan",
 ] as const;
 
-/** Default PR intake tools attached to PR postmortem launches. */
-export const defaultPrReviewToolProfile = [
+/** Default PR indexer tools attached to PR postmortem launches. */
+export const defaultPrIndexerToolProfile = [
   "code_graph_search",
+  "path_facts_resolve",
+  "review_lint_scan",
+] as const;
+
+/** Default PR splitter tools attached to handoff planning launches. */
+export const defaultPrSplitterToolProfile = [
+  "code_graph_search",
+  "past_prs_search",
   "path_facts_resolve",
   "review_lint_scan",
 ] as const;

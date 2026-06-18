@@ -27,5 +27,13 @@ export {
   type CurateKnowledgeResult,
 } from "./curator.js";
 export { resourceMap } from "./resources.js";
-export { globalStandardsContext, globalStandardsPromptXml, resolvePathFactsContext, type PathFactResolution } from "./decomp-context.js";
+export {
+  globalStandardsContext,
+  globalStandardsPromptXml,
+  loadStandardExamples,
+  resolvePathFactsContext,
+  standardExamplesPromptXml,
+  type PathFactResolution,
+  type StandardExampleSelector,
+} from "./decomp-context.js";
 export * from "./graph/index.js";

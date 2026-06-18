@@ -1,6 +1,6 @@
 ---
 covers: The operator lifecycle as one flow, the pipeline-rail sidebar design, and PR tracking as first-class state
-concepts: [operator-flow, pipeline-rail, pr-tracking, pr-board, session-lifecycle, epoch-qa]
+concepts: [operator-flow, pipeline-rail, pr-tracking, pr-board, pr-kanban, session-lifecycle, epoch-qa]
 code-ref: apps/dashboard/src/components/Sidebar.tsx, apps/dashboard-server/src/server.ts
 ---
 
@@ -41,8 +41,9 @@ One session, start to finish:
    established: everything it sees as confirmed is already known to work.
    (Direction: keep moving robustness into the epoch/checkpoint loop so
    prepare stays cheap.)
-7. **Plan PRs** — the split plan becomes a visible PR list: which PRs exist,
-   what files each carries, which are ready to open.
+7. **Plan PRs** — the deterministic or splitter-shaped plan becomes a visible
+   PR list: which PRs exist, what files each carries, dependency order, and
+   which are ready to open.
 8. **Open and track PRs** — branches pushed, PRs opened, and from then on
    the system tracks each PR's status (draft / open / changes requested /
    merged / closed), whether it is ours, comment and CI state, and its file
@@ -109,35 +110,134 @@ A PR record marries a split-plan slice to a GitHub PR and outlives both:
 - **Identity**: slice id (`ft`, `gm`, …), branch name, title, file manifest
   (pathspecs from the surviving match lane).
 - **Lifecycle status**: `planned` → `branch_pushed` → `draft` → `open` →
-  `changes_requested` → `merged` / `closed`. Planned slices come from the
-  latest ship-filtered split plan; everything after comes from `gh`.
+  `changes_requested` → `merged` / `closed`. Planned slices can come from the
+  latest ship-filtered split plan or from discovered local split-series
+  branches; published/review state comes from `gh`.
 - **GitHub state**: PR number/URL, ours vs upstream-author, review decision,
   unresolved comment count, CI verdict, base/head SHAs.
+- **Local workspace state**: owning session/run id, base SHA, local branch,
+  persistent worktree path, local commit SHA, validation verdict, batch state,
+  and any local repair/blocker error. `local.status` adds an in-flight
+  `preparing` value (set at the start of local preparation and cleared to
+  `ready`/`blocked` on completion) plus `local.prepStartedAt` so the board can
+  show the slice currently being verified. Stale `preparing` stamps
+  self-heal: every dashboard poll rewrites them back to `not_prepared` unless
+  a prepare-local operation is actually running.
+- **QA-repair derivation** (view-only): the board view layers a
+  `validation.status: "repairing"` + `validation.repairNote` onto planned,
+  not-yet-verified slices whose files overlap the latest QA-repair pending
+  set (`qa_repairs/`, `qa-repair-campaign/qa_repairs/`, or
+  `qa-repair-lane/qa_repairs/`). It never overrides a locally-verified
+  validation and is never persisted — persisted validation comes only from
+  local slice verification.
+- **Review substate**: `review.subState` (`awaiting` | `new_comments` |
+  `changes_requested` | `fixing`) plus `review.lastSeenComments`. Derived on
+  GitHub hydrate from `reviewDecision` and the comment-count delta since the
+  last operator ack; settable manually via `/api/prs/review-state` (Ack /
+  Fixing). A manual `fixing` persists across syncs until superseded by fresh
+  reviewer activity.
 - **Persistence**: records live in orchestrator state (not just the plan
   artifact) so a PR opened in one session is still tracked in the next, and
   `Sync Merged PRs` can mark records merged and trigger intake.
 
-Each board row expands to its branch, GitHub link, and file manifest. A
-`planned` row carries the **Open draft PR** button (`/api/prs/open`): the
-slice is re-verified alone against the cached baseline worktree (apply →
-incremental build → regression report → upstream `check-issues` lint →
-reset), then a branch is cut from the base SHA, the slice's subset of
-`ship_set.patch` is committed, pushed to the `fork` remote, and opened as a
-**draft** on upstream with a generated body (summary, file list,
-verification). Draft means nothing pings maintainers until the operator
-reviews the body and un-drafts. A slice that regresses in isolation fails
-with a stacking hint instead of publishing; a slice that fails the lint
-(the same `ghcr.io/doldecomp/melee/check-issues` container CI runs, so
-things like `-Wself-assign` permuter slop or conflicting prototypes) fails
-before pushing instead of failing on the PR. Ship-set verification runs the
-same lint each survivor round and drops offending files to rework. If
-docker is unavailable the lint is skipped with a warning and CI remains the
-backstop.
-**Open All Drafts** (`/api/prs/open-all`) runs the same pipeline for every
-planned slice sequentially — support/shared slices first, since subsystem
-slices may only build on top of them — and a failed slice is recorded and
-skipped rather than stranding the rest. Upstream PRs by other authors appear
-as a count, because they gate when a sync is worthwhile.
+Each board row expands to its branch, GitHub link, and file manifest. A sync
+pass joins three inputs into the same session board: current split-plan
+match slices when present, existing GitHub PRs whose heads match the session's
+split branch series, and local split-series branches/worktrees that have not
+been published yet. Imported GitHub rows keep the reviewer-facing PR file list,
+while local-only rows use the local branch diff as the manifest.
+
+A `planned` row first carries local preparation controls: **Prepare Local**
+(`/api/prs/prepare-local`) and **Prepare Next 3**
+(`/api/prs/prepare-local-batch`). Preparation re-verifies the slice alone
+against the cached baseline worktree (apply → incremental build → regression
+report → upstream `check-issues` lint → reset), then cuts a persistent local
+worktree branch from the base SHA, applies that slice's subset of
+`ship_set.patch`, commits it locally, and records the worktree/commit on the PR
+object. Nothing is pushed or opened during local preparation.
+
+When a small set is local-ready, **Open Ready 3** (`/api/prs/open-batch`) opens
+only the next bounded batch as GitHub drafts. Local-ready publication uses the
+persistent worktree's committed diff, re-verifies that exact diff against the
+cached production baseline, and pushes the local worktree branch. Operator
+repair commits made in the local worktree are therefore the state that ships.
+The legacy **Open All Drafts** (`/api/prs/open-all`) remains available as an
+escape hatch, but the intended reviewer-friendly flow is private local
+preparation followed by explicit small publication batches. Draft means nothing
+pings maintainers until the operator reviews the body and un-drafts. A slice
+that regresses in isolation fails with a stacking hint instead of publishing; a
+slice that fails the lint (the same `ghcr.io/doldecomp/melee/check-issues`
+container CI runs, so things like `-Wself-assign` permuter slop or conflicting
+prototypes) fails before pushing instead of failing on the PR. Ship-set
+verification runs the same lint each survivor round and drops offending files to
+rework. If docker is unavailable the lint is skipped with a warning and CI
+remains the backstop. Upstream PRs by other authors appear as a count, because
+they gate when a sync is worthwhile.
+
+## PR Board (kanban stage model)
+
+The PR Mode page renders tracked slices as a six-column, read-only kanban that
+reads as the slice lifecycle. No drag-and-drop — columns reflect derived state,
+not operator positioning. Each card carries a status lamp, a sub-status chip,
+QA/CI verdicts, a single contextual action for its stage, and a collapsible
+file manifest.
+
+```
+PLANNED  →  PREPARING  →  PREPARED  →  DRAFT  →  IN REVIEW  →  DONE
+ ○            ◐             ○          ●/◑        ◑/○         ✓/✕
+```
+
+| Column | What it holds | Card action | Lamp |
+| --- | --- | --- | --- |
+| Planned | `planned`/`planned_mock`, not yet verified | Prepare (→ Preparing) | idle |
+| Preparing | `local.status "preparing"` or `validation "repairing"`; blocked slices stay here red-tinted | — (in flight) | flight (pulsing) |
+| Prepared | `local.ready`/`local_only` (QA-clean, draft-ready); `dirty` shown with a chip | Open Draft (→ Draft) | ready |
+| Draft | `draft`/`branch_pushed`/has PR number — our manual review | View PR | neutral / attention |
+| In Review | `open`/`changes_requested` — upstream review; sub-status chip names the phase | View PR + Ack/Fixing | neutral / attention |
+| Done | `merged`/`closed` | — | ready (merged) / idle (closed) |
+
+The sub-status chip disambiguates phases within a column:
+
+- **Preparing**: `verifying` (in-flight local prep) · `QA repair` (files
+  pending QA repair, from the view-only derivation) · `blocked`.
+- **Prepared**: `ready` · `local branch` (discovered, not pipeline-prepared) ·
+  `uncommitted changes` (dirty worktree — Open Draft is disabled until committed).
+- **In Review**: `awaiting` · `new comments` · `changes requested` · `fixing`
+  (the last two drive the attention lamp). `new comments`/`changes requested`
+  surface an **Ack** control; **Fixing** toggles the manual flag.
+
+### Stage derivation (`prStage`)
+
+Stages are derived with this precedence (first match wins):
+
+1. `merged`/`closed` → **Done**
+2. `open`/`changes_requested` → **In Review**
+3. `draft`/`branch_pushed`/has a PR number → **Draft**
+4. `local "preparing"` or `validation "repairing"` → **Preparing**
+5. `local ready`/`local_only`/`dirty` → **Prepared**
+6. otherwise → **Planned**
+
+Review substate is derived in `deriveReviewSubState` during GitHub hydrate and
+refreshed only on a PR sync (GitHub is not polled on the dashboard cadence, to
+stay off rate limits). `changes_requested` (from `reviewDecision`) and a
+comment-count increase since `review.lastSeenComments` are detected
+automatically; `fixing` and ack are operator-set via `/api/prs/review-state`.
+
+### Endpoints
+
+- `/api/prs/sync` — seed from the split plan, keep tracked PRs, hydrate status
+  + review substate from GitHub.
+- `/api/prs/prepare-local` / `/api/prs/prepare-local-batch` — verify a slice
+  alone and cut a persistent local worktree; stamps `preparing` for the
+  in-flight window.
+- `/api/prs/open` / `/api/prs/open-batch` / `/api/prs/open-all` — publish a
+  draft (re-verifies in isolation, pushes, opens as draft).
+- `/api/prs/review-state` — set `review.subState` and ack the comment count
+  (`{ prBranch, subState, seenComments? }`).
+
+The dashboard's `prs` payload is assembled by `buildPrRecordsView`: normalize →
+recover stale in-flight prep → layer the QA-repair derivation. The enrichment is
+a view concern; only local verification and the review substate are persisted.
 
 ## Related
 

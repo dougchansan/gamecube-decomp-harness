@@ -1,7 +1,7 @@
 /**
  * Pre-ship adversarial PR review gate (QA ship gate L3).
  *
- * Runs the pr-review agent in preship mode over each planned PR slice diff
+ * Runs the PR reviewer agent in preship mode over each planned PR slice diff
  * (from a saved `pr-split-plan --json` output), aggregates the verdicts, and
  * fails closed: any "reject" verdict — or any infrastructure failure (git,
  * lint tooling crash, agent failure, unparseable/invalid output) — exits 1.
@@ -19,7 +19,7 @@ import {
   prPreshipReviewPrompt,
   validatePreshipReview,
   type PreshipReview,
-} from "@decomp-orchestrator/agents/pr-review";
+} from "@decomp-orchestrator/agents/pr-reviewer";
 import { parseJsonObject, runPiAgent, type PiRunOptions } from "@decomp-orchestrator/agents/runtime";
 import { qaGatePassed, runQaScanDiff, type QaScanInvocation } from "@decomp-orchestrator/core/qa";
 import { runCommand } from "@decomp-orchestrator/core/shell";
@@ -235,7 +235,7 @@ async function reviewOneSlice(slice: PreshipPlanSlice, options: PreshipReviewRun
   }
 
   const result = await runner({
-    role: "pr-review",
+    role: "pr-reviewer",
     cwd: repoRoot,
     prompt,
     outputDir: reviewDir,
@@ -255,7 +255,7 @@ async function reviewOneSlice(slice: PreshipPlanSlice, options: PreshipReviewRun
       rejectFindings: 0,
       warnFindings: 0,
       reviewPath: null,
-      error: `pr-review agent failed: ${result.error ?? result.providerError ?? "unknown failure"} (output: ${result.outputPath})`,
+      error: `pr-reviewer agent failed: ${result.error ?? result.providerError ?? "unknown failure"} (output: ${result.outputPath})`,
     };
   }
   const parsed = parseJsonObject(result.rawText);
@@ -266,7 +266,7 @@ async function reviewOneSlice(slice: PreshipPlanSlice, options: PreshipReviewRun
       rejectFindings: 0,
       warnFindings: 0,
       reviewPath: null,
-      error: `pr-review agent output was not a JSON object: ${parsed.error ?? "unknown parse error"} (output: ${result.outputPath})`,
+      error: `pr-reviewer agent output was not a JSON object: ${parsed.error ?? "unknown parse error"} (output: ${result.outputPath})`,
     };
   }
   const validated = validatePreshipReview(parsed.object);
@@ -277,7 +277,7 @@ async function reviewOneSlice(slice: PreshipPlanSlice, options: PreshipReviewRun
       rejectFindings: 0,
       warnFindings: 0,
       reviewPath: null,
-      error: `pr-review agent output failed schema validation: ${validated.errors.join("; ")} (output: ${result.outputPath})`,
+      error: `pr-reviewer agent output failed schema validation: ${validated.errors.join("; ")} (output: ${result.outputPath})`,
     };
   }
 

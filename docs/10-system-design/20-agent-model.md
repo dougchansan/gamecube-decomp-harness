@@ -1,6 +1,6 @@
 ---
 covers: Centralized agent catalog, runtime role boundaries, and non-agent run-loop/guardian actors
-concepts: [agents, scheduler, worker-agent, pr-review-agent, runtime, run-loop, guardians]
+concepts: [agents, scheduler, worker-agent, pr-indexer, pr-splitter, pr-reviewer, runtime, run-loop, guardians]
 ---
 
 # Agent Model
@@ -19,7 +19,9 @@ and state-machine mechanics, including target admission and ready-queue refill.
 | Agent | Owns | Does Not Own |
 | --- | --- | --- |
 | Worker | One leased target packet, research, edits, local validation, durable report | Board strategy, cross-worker coordination, unleased file edits |
-| PR-review | PR postmortem/review analysis and reusable review knowledge | Live decomp worker execution, scheduler admission |
+| PR indexer | PR postmortem indexing and reusable review knowledge | Live decomp worker execution, scheduler admission, preship findings |
+| PR splitter | Review-sized PR series planning from deterministic handoff evidence: slice grouping, order, titles, dependencies, and PR-body focus | Deciding which files ship, source edits, GitHub publication, scheduler admission |
+| PR reviewer | Planned/opened PR slice review and maintainer-risk findings | Knowledge curation, source repairs, scheduler admission |
 | Knowledge-curator | Reducing worker/PR evidence into graph-safe lessons and proposal-only source updates | Direct graph mutation, scheduling, decomp attempts |
 | Reconcile | Making a bundle safe at run-cycle boundaries: fixing QA regressions before PR handoff (`ship-validate`) and resolving merge conflicts, duplicate work, and build errors after an upstream sync (`sync-merge`) | Board scheduling, lease-scoped worker tactics, knowledge graph mutation, publishing PRs |
 
@@ -61,7 +63,7 @@ preserved beside agent output.
 
 ## Adding Agents
 
-A new agent should enter through the same catalog as the worker, PR-review,
-knowledge-curator, reconcile, and QA repair agents. It should not create a
+A new agent should enter through the same catalog as the worker, PR indexer,
+PR splitter, PR reviewer, knowledge-curator, reconcile, and QA repair agents. It should not create a
 side-channel prompt tree or hidden runtime path. The package should have one
 obvious place to discover every agent role and its contract.

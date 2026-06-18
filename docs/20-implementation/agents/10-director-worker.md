@@ -1,7 +1,7 @@
 ---
 covers: Worker prompt builders, target packets, and output contracts
 concepts: [worker-agent, scheduler, target-packet, prompts, output]
-code-ref: decomp-orchestrator/packages/agents/src/worker
+code-ref: decomp-orchestrator/packages/agents/src/agents/run/worker
 ---
 
 # Worker Agents And Scheduler Delegation
@@ -27,11 +27,11 @@ runner releases the lease.
 
 | File | Purpose |
 | --- | --- |
-| `packages/agents/src/worker/packet.ts` | Defines the target-packet shape passed into worker prompts. |
-| `packages/agents/src/worker/prompt.ts` | Builds worker prompt inputs and rendered prompt pair. |
-| `packages/agents/src/worker/output.ts` | Parses worker output/report content and evaluates return-gate repair reasons. |
-| `packages/agents/src/worker/templates/system.md` | Defines worker authority, write safety, and validation rules. |
-| `packages/agents/src/worker/templates/initial_user.md` | Carries the target packet, selected worker context, resources, repair requests, and report contract. |
+| `packages/agents/src/agents/run/worker/packet.ts` | Defines the target-packet shape passed into worker prompts. |
+| `packages/agents/src/agents/run/worker/prompt.ts` | Builds worker prompt inputs and rendered prompt pair. |
+| `packages/agents/src/agents/run/worker/output.ts` | Parses worker output/report content and evaluates return-gate repair reasons. |
+| `packages/agents/src/agents/run/worker/templates/system.md` | Defines worker authority, write safety, and validation rules. |
+| `packages/agents/src/agents/run/worker/templates/initial_user.md` | Carries the target packet, selected worker context, resources, repair requests, and report contract. |
 
 ## Key Rules
 

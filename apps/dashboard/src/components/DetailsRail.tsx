@@ -847,7 +847,7 @@ function RunTab({ dashboard, loadRunDetails, loadingRunDetails, runDetails }: Pi
   );
 }
 
-const agentRoleOrder = ["worker", "knowledge-curator", "pr-review", "reconcile", "qa-repair"];
+const agentRoleOrder = ["worker", "knowledge-curator", "pr-indexer", "pr-splitter", "pr-reviewer", "reconcile", "qa-repair"];
 const agentSessionsPerRole = 8;
 
 function sessionStatusTone(status: string): string {
@@ -1077,19 +1077,30 @@ export function DetailsRail({
   return (
     <aside className={`details-rail ${collapsed ? "details-rail-collapsed" : "details-rail-open"} relative grid min-w-0 border-l border-line2 bg-panel ${collapsed ? "grid-rows-[minmax(0,1fr)]" : "grid-rows-[auto_minmax(0,1fr)]"} overflow-hidden max-[1180px]:col-span-2 max-[1180px]:border-t max-[780px]:block`}>
       {!collapsed ? <div aria-hidden className="details-rail-resize-handle" onPointerDown={startResize} title="Drag to resize" /> : null}
-      <div className={`details-rail-tab z-10 flex items-center gap-2 border-b border-line bg-raised px-2 py-1.5 ${collapsed ? "h-full flex-col justify-start" : "sticky top-0 min-h-[42px]"} max-[1180px]:static max-[1180px]:h-[42px] max-[1180px]:flex-row`}>
-        <Button
-          aria-expanded={!collapsed}
-          className="h-7 min-w-7 px-0"
-          icon={collapsed ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
-          onClick={() => onCollapsedChange(!collapsed)}
-          title={collapsed ? "Show details" : "Hide details"}
-          type="button"
-        >
-          <span className="sr-only">{collapsed ? "Show" : "Hide"}</span>
-        </Button>
-        <span className={`text-[11px] font-bold uppercase tracking-[0.14em] text-soft ${collapsed ? "[writing-mode:vertical-rl] rotate-180" : ""} max-[1180px]:[writing-mode:initial] max-[1180px]:rotate-0`}>Details</span>
-      </div>
+      {collapsed ? (
+        <div className="details-rail-tab z-10 flex h-full flex-col items-center justify-start gap-3 bg-raised px-0 max-[1180px]:h-[42px] max-[1180px]:flex-row max-[1180px]:items-center max-[1180px]:gap-2 max-[1180px]:px-3">
+          {/* Header region mirrors the open rail's 68px top bar (including its
+              bottom separator) so the divider and toggle button stay aligned
+              with the left sidebar when expanding/collapsing. */}
+          <div className="flex h-[68px] w-full shrink-0 items-center justify-center border-b border-line2 max-[1180px]:h-auto max-[1180px]:w-auto max-[1180px]:border-b-0">
+            <button aria-expanded={false} className="inline-flex h-8 w-8 shrink-0 items-center justify-center border border-line2 bg-raised text-soft hover:border-faint hover:text-fg" onClick={() => onCollapsedChange(false)} title="Show details" type="button">
+              <ChevronLeft size={16} />
+              <span className="sr-only">Show</span>
+            </button>
+          </div>
+          <span className="[writing-mode:vertical-rl] rotate-180 text-[11px] font-bold uppercase tracking-[0.14em] text-soft max-[1180px]:[writing-mode:initial] max-[1180px]:rotate-0">Details</span>
+        </div>
+      ) : (
+        <div className="details-rail-tab sticky top-0 z-10 flex h-[68px] items-center gap-2 border-b border-line2 bg-raised px-3 max-[1180px]:static max-[1180px]:h-[42px]">
+          {/* Title centers between the left edge and the collapse button on the
+              right, mirroring the left sidebar's header layout. */}
+          <h2 className="m-0 min-w-0 flex-1 overflow-hidden px-3 text-center text-ellipsis whitespace-nowrap text-[13px] font-bold uppercase tracking-[0.14em] text-soft">Details</h2>
+          <button aria-expanded className="inline-flex h-8 w-8 shrink-0 items-center justify-center border border-line2 bg-raised text-soft hover:border-faint hover:text-fg" onClick={() => onCollapsedChange(true)} title="Hide details" type="button">
+            <ChevronRight size={16} />
+            <span className="sr-only">Hide</span>
+          </button>
+        </div>
+      )}
       <div className={`details-rail-content ${collapsed ? "hidden" : ""} grid min-h-0 grid-rows-[auto_minmax(0,1fr)]`}>
         <div className="flex gap-1.5 border-b border-line bg-raised p-2" role="tablist" aria-label="Details rail">
           <TabButton active={activeTab === "run"} onClick={() => setActiveTab("run")}>

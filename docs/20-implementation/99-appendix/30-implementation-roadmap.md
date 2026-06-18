@@ -19,7 +19,7 @@ artifact while naming the current package status.
 | 3 | State substrate | Present for runs, targets, queue, leases, locks, reports, events, sessions, and integrations. |
 | 4 | Read-only indexer | Present for `report.json` and `objdiff.json` fixture/live loading; richer graph edges are future work. |
 | 5 | Scheduler tick dry run | Present through deterministic `tick` and run-loop activation. |
-| 6 | Prompt builder and capability templates | Present under `packages/agents/src/{worker,pr-review,knowledge-curator,qa-repair}` plus agent context manifest routes. |
+| 6 | Prompt builder and capability templates | Present under `packages/agents/src/agents/{run,knowledge,pr}` plus agent context manifest routes. |
 | 7 | One locked worker | Present through `worker` and run-loop subprocess workers. |
 | 8 | Score integration dry run | Represented by `regression-check`, PR promotion reports, and dashboard QA controls; full patch accept/reject integration is future work. |
 | 9 | Event-driven refill loop | Present through `run-loop`; `trigger-agent` / `bootstrap` remain aliases. |

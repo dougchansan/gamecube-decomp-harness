@@ -1,6 +1,6 @@
 ---
 covers: Score integration gate, global regression protection, and PR handoff boundary
-concepts: [score-integration, regression-gate, qa-ship-gate, preship-review, draft-pr-qa, baseline, pr-handoff, pr-split-plan, review, dashboard]
+concepts: [score-integration, regression-gate, qa-ship-gate, preship-review, draft-pr-qa, baseline, pr-handoff, pr-split-plan, pr-splitter, review, dashboard]
 ---
 
 # Score Integration And PR Handoff
@@ -154,10 +154,10 @@ and rollout in
   failure hint lists the violating rules at `file:line`, and each finding
   cites the standard it violates.
 - **L3 — pre-ship adversarial review.** `pr-preship-review` runs the
-  pr-review agent in adversarial mode over every shipping slice between
+  PR reviewer agent in adversarial mode over every shipping slice between
   regression-check and PR body drafting; any `reject` finding — or any
   infrastructure failure — exits 1 and blocks the handoff (see
-  [PR-review agent](../20-implementation/agents/20-pr-review.md)).
+  [PR indexer, splitter, and reviewer agents](../20-implementation/agents/20-pr-review.md)).
 - **Draft PR lifecycle.** `pr-draft-qa` runs after a draft PR exists, or opens
   the draft first. It treats the PR as the central remote object, fetches the
   PR refs, runs L3 preship review plus the deterministic scan/repair loop,
@@ -199,13 +199,22 @@ The orchestrator does not create one PR per file, worker, symbol, or lease, and
 it does not publish GitHub PRs automatically. Human-facing PR packaging is a
 separate step after the run produces a coherent improvement bundle.
 
-For review-sized handoff, the packaging step can ask the orchestrator for a
-directory-scoped split plan. `pr-split-plan` inspects the branch/worktree
-against the selected base ref, groups changed files by Melee subsystem
-directories such as `melee/it`, `melee/gm`, and `melee/cm`, and emits suggested
-slice branches, titles, pathspecs, and patch commands. Shared or support
-directories become separate slices so cross-cutting changes can be reviewed or
-stacked intentionally.
+For review-sized handoff, the packaging step asks the orchestrator for a split
+plan. `pr-split-plan` owns deterministic evidence collection: it inspects the
+branch/worktree against the selected base ref, applies checkpoint lanes and
+ship-filter verdicts, keeps every changed file assigned exactly once, and emits
+suggested slice branches, titles, pathspecs, and patch commands. The default
+strategy groups by Melee subsystem directories such as `melee/it`, `melee/gm`,
+and `melee/cm`; shared or support directories become separate slices so
+cross-cutting changes can be reviewed or stacked intentionally.
+
+When a project or command selects the agent strategy, the PR splitter agent
+receives the deterministic plan as evidence and proposes a smarter review
+series: regrouped slices, order, titles, dependency notes, review focus, and PR
+body summaries. The runner validates the proposal before using it. The agent
+cannot add or drop files, change match/local lanes, mix lanes in one slice,
+exceed the configured max-file ceiling, or decide that a file ships. Invalid
+splitter output falls back to the deterministic plan with a warning.
 
 When given the latest checkpoint (`--checkpoint checkpoint.json`; the
 dashboard passes it automatically), the planner splits slices into two lanes:
@@ -221,8 +230,8 @@ dashboard passes it automatically), the planner splits slices into two lanes:
 
 A file with both matched and improved functions rides the match lane and the
 slice warns about it so the PR body can call it out. `--max-files-per-pr` is a
-hard ceiling, not a packing target: the operator (or agent) shaping the final
-PRs should aim for the fewest comfortable PRs, not the fullest ones.
+hard ceiling, not a packing target: the splitter and operator should aim for
+the fewest comfortable PRs, not the fullest ones.
 
 Subsystem grouping is a starting proposal, not the PR boundary. Match-lane
 subsystem slices smaller than `--min-files-per-pr` (default 4) pack together
@@ -239,11 +248,12 @@ configure/build/regression check by itself. If a subsystem slice only passes
 after a shared slice is present, the PRs should be stacked or merged rather than
 presented as independent.
 
-The PR-review agent can help analyze review patterns and PR knowledge, but
-final branch creation, presentation, reviewer coordination, and merge readiness
-stay operator-owned outside the worker lease loop. Once opened, PRs become
-tracked state — slice, branch, number, draft/open/merged status, comments,
-CI — per [operator flow and PR tracking](65-operator-flow-and-pr-tracking.md).
+The PR splitter shapes the handoff series before PRs exist; the PR indexer
+analyzes merged PRs for reusable knowledge after the fact. Final branch
+creation, presentation, reviewer coordination, and merge readiness stay
+operator-owned outside the worker lease loop. Once opened, PRs become tracked
+state — slice, branch, number, draft/open/merged status, comments, CI — per
+[operator flow and PR tracking](65-operator-flow-and-pr-tracking.md).
 
 After a slice is opened as a draft PR, `pr-draft-qa` is the repeatable handoff
 loop for that remote PR. The command resolves the PR with GitHub, records
@@ -304,7 +314,10 @@ which stage is running, its detail, and where a failure happened:
                                 report_changes.json joins the match lane via
                                 its unit source path), so matches from
                                 earlier sessions ship even without a worker
-                                report in this run
+                                report in this run. Project configuration can
+                                use the PR splitter strategy here to reshape
+                                the deterministic seed plan into a semantic,
+                                ordered PR series before validation.
 10. verify ship set             THE PR GATE. The match-lane diff (worktree vs
                                 the base SHA, so uncommitted work counts) is
                                 applied onto the cached baseline worktree,

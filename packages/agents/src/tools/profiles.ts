@@ -6,15 +6,17 @@
  * templates. This keeps agent/tool composition explicit and testable.
  */
 import type { RuntimeAgentRole } from "@decomp-orchestrator/core/types";
-import { defaultKnowledgeCuratorToolProfile, defaultPrReviewToolProfile, defaultQaRepairToolProfile, defaultReconcileToolProfile, defaultWorkerToolProfile, workerToolPromptInfo } from "./profile-data.js";
+import { defaultKnowledgeCuratorToolProfile, defaultPrIndexerToolProfile, defaultPrSplitterToolProfile, defaultQaRepairToolProfile, defaultReconcileToolProfile, defaultWorkerToolProfile, workerToolPromptInfo } from "./profile-data.js";
 import { agentToolSummary, createAgentTools } from "./registry.js";
 import type { AgentToolProfileInput, AgentToolRuntimeContext, PiToolDefinition } from "./types.js";
 
-export { defaultKnowledgeCuratorToolProfile, defaultPrReviewToolProfile, defaultQaRepairToolProfile, defaultReconcileToolProfile, defaultWorkerToolProfile } from "./profile-data.js";
+export { defaultKnowledgeCuratorToolProfile, defaultPrIndexerToolProfile, defaultPrSplitterToolProfile, defaultQaRepairToolProfile, defaultReconcileToolProfile, defaultWorkerToolProfile } from "./profile-data.js";
 
 export const defaultAgentToolProfiles: Record<RuntimeAgentRole, string[]> = {
   worker: [...defaultWorkerToolProfile],
-  "pr-review": [...defaultPrReviewToolProfile],
+  "pr-indexer": [...defaultPrIndexerToolProfile],
+  "pr-reviewer": [],
+  "pr-splitter": [...defaultPrSplitterToolProfile],
   "knowledge-curator": [...defaultKnowledgeCuratorToolProfile],
   reconcile: [...defaultReconcileToolProfile],
   "qa-repair": [...defaultQaRepairToolProfile],

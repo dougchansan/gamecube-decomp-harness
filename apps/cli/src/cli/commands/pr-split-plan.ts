@@ -1,13 +1,25 @@
-import { readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
+import {
+  prSplitterPrompt,
+  validatePrSplitterPlan,
+  type PrSplitterPlan as AgentPrSplitterPlan,
+  type PrSplitterSlice,
+} from "@decomp-orchestrator/agents/pr-splitter";
+import { artifactTimestamp, parseJsonObject, runPiAgent, type PiRunOptions } from "@decomp-orchestrator/agents/runtime";
 import { readRegressionReport } from "@decomp-orchestrator/core/objdiff/report";
 import { runCommand } from "@decomp-orchestrator/core/shell";
-import { booleanArg, numberArg, stringArg, type GlobalArgs } from "../args.js";
+import { addPiSession, openState } from "@decomp-orchestrator/core/state";
+import type { PiRunResult } from "@decomp-orchestrator/core/types";
+import { booleanArg, numberArg, projectMetadata, stringArg, type GlobalArgs } from "../args.js";
 
 type ChangeSource = "branch" | "worktree";
 type GroupMode = "melee-subsystem" | "top-dir";
 type IndependenceKind = "independent" | "shared-prep" | "stacked" | "needs-merge";
 type PrLane = "match" | "local";
+type PrSplitPlanningStrategy = "deterministic" | "agent";
+
+export type PrSplitterAgentRunner = (options: PiRunOptions) => Promise<PiRunResult>;
 
 export interface PrLaneSets {
   matchPaths: string[];
@@ -80,6 +92,20 @@ export interface PrSplitPlan {
   currentBranch: string;
   groupMode: GroupMode;
   maxFilesPerPr: number;
+  planningStrategy: PrSplitPlanningStrategy;
+  splitterApplied: boolean;
+  splitterRationale?: string;
+  splitterConfidence?: number;
+  splitterArtifacts?: {
+    outputDir: string;
+    sessionId: string;
+    sessionFile?: string;
+    systemPromptPath: string;
+    userPromptPath: string;
+    outputPath: string;
+    parsedOutputPath?: string;
+    dryRun: boolean;
+  };
   lanesApplied: boolean;
   shipFilterApplied: boolean;
   totalFiles: number;
@@ -99,6 +125,7 @@ interface BuildPlanOptions {
   branchPrefix: string;
   titlePrefix: string;
   sliceCheckCommand: string;
+  planningStrategy?: PrSplitPlanningStrategy;
   lanes?: PrLaneSets | null;
   shipFilter?: PrShipFilter | null;
   warnings?: string[];
@@ -625,12 +652,340 @@ export function buildPrSplitPlanFromChanges(changes: RawChangedFile[], options: 
     currentBranch: options.currentBranch,
     groupMode: options.groupMode,
     maxFilesPerPr: options.maxFilesPerPr,
+    planningStrategy: options.planningStrategy ?? "deterministic",
+    splitterApplied: false,
     lanesApplied: Boolean(lanes),
     shipFilterApplied: Boolean(lanes && shipFilter),
     totalFiles: files.length,
     slices,
     warnings,
   };
+}
+
+function uniqueStrings(values: string[]): string[] {
+  return [...new Set(values.map((value) => value.trim()).filter(Boolean))];
+}
+
+function planFileMap(plan: PrSplitPlan): Map<string, PrChangedFile> {
+  const files = new Map<string, PrChangedFile>();
+  for (const slice of plan.slices) {
+    for (const file of slice.files) files.set(normalizePath(file.path), file);
+  }
+  return files;
+}
+
+function planFileLaneMap(plan: PrSplitPlan): Map<string, PrLane | null> {
+  const lanes = new Map<string, PrLane | null>();
+  for (const slice of plan.slices) {
+    for (const file of slice.files) lanes.set(normalizePath(file.path), slice.lane);
+  }
+  return lanes;
+}
+
+function seedWarningsForFiles(plan: PrSplitPlan, filePaths: string[]): string[] {
+  const paths = new Set(filePaths.map(normalizePath));
+  return uniqueStrings(plan.slices.filter((slice) => slice.files.some((file) => paths.has(normalizePath(file.path)))).flatMap((slice) => slice.warnings));
+}
+
+function splitterContextFromPlan(plan: PrSplitPlan): Record<string, unknown> {
+  const laneByFile = planFileLaneMap(plan);
+  const seedSliceByFile = new Map<string, string>();
+  for (const slice of plan.slices) {
+    for (const file of slice.files) seedSliceByFile.set(normalizePath(file.path), slice.id);
+  }
+  return {
+    schema_version: "melee_pr_splitter_context_v1",
+    plan_inputs: {
+      repo_root: plan.repoRoot,
+      base_ref: plan.baseRef,
+      head_ref: plan.headRef,
+      current_branch: plan.currentBranch,
+      group_mode: plan.groupMode,
+      max_files_per_pr: plan.maxFilesPerPr,
+      lanes_applied: plan.lanesApplied,
+      ship_filter_applied: plan.shipFilterApplied,
+      total_files: plan.totalFiles,
+    },
+    invariants: {
+      all_changed_files_must_be_assigned_exactly_once: true,
+      preserve_file_lanes: true,
+      do_not_mix_match_and_local_files: true,
+      max_files_per_pr_is_hard_ceiling: plan.maxFilesPerPr,
+      branch_creation_and_validation_remain_runner_owned: true,
+    },
+    changed_files: plan.slices.flatMap((slice) =>
+      slice.files.map((file) => ({
+        path: file.path,
+        old_path: file.oldPath ?? null,
+        statuses: file.statuses,
+        sources: file.sources,
+        deterministic_lane: laneByFile.get(normalizePath(file.path)) ?? null,
+        deterministic_slice_id: seedSliceByFile.get(normalizePath(file.path)) ?? null,
+        directory: directoryForPath(file.path),
+      })),
+    ),
+    seed_slices: plan.slices.map((slice) => ({
+      id: slice.id,
+      display_name: slice.displayName,
+      title: slice.title,
+      lane: slice.lane,
+      scope: slice.scope,
+      directories: slice.directories,
+      file_count: slice.fileCount,
+      files: slice.files.map((file) => file.path),
+      status_counts: slice.statusCounts,
+      sources: slice.sources,
+      independence: slice.independence,
+      warnings: slice.warnings,
+    })),
+    warnings: plan.warnings,
+  };
+}
+
+function validateSplitterProposalAgainstSeed(proposal: AgentPrSplitterPlan, seedPlan: PrSplitPlan): string[] {
+  const errors: string[] = [];
+  const seedFiles = planFileMap(seedPlan);
+  const seedLanes = planFileLaneMap(seedPlan);
+  const seenFiles = new Map<string, string>();
+  const ids = new Set<string>();
+
+  for (const slice of proposal.slices) {
+    const id = sanitizeId(slice.id);
+    if (!id || id !== slice.id) errors.push(`slice id "${slice.id}" must already be a sanitized id`);
+    if (ids.has(slice.id)) errors.push(`duplicate slice id "${slice.id}"`);
+    ids.add(slice.id);
+    if (slice.files.length > seedPlan.maxFilesPerPr) {
+      errors.push(`slice "${slice.id}" has ${slice.files.length} files, above --max-files-per-pr=${seedPlan.maxFilesPerPr}`);
+    }
+    const lanes = new Set<PrLane | null>();
+    for (const rawPath of slice.files) {
+      const path = normalizePath(rawPath);
+      if (!seedFiles.has(path)) {
+        errors.push(`slice "${slice.id}" references unknown file "${rawPath}"`);
+        continue;
+      }
+      const owner = seenFiles.get(path);
+      if (owner) errors.push(`file "${path}" appears in both "${owner}" and "${slice.id}"`);
+      else seenFiles.set(path, slice.id);
+      lanes.add(seedLanes.get(path) ?? null);
+    }
+    if (lanes.size > 1) {
+      errors.push(`slice "${slice.id}" mixes deterministic lanes`);
+    } else {
+      const expectedLane = [...lanes][0] ?? null;
+      if (slice.lane !== expectedLane) errors.push(`slice "${slice.id}" lane must be ${expectedLane ?? "null"} from deterministic evidence`);
+    }
+  }
+
+  for (const path of seedFiles.keys()) {
+    if (!seenFiles.has(path)) errors.push(`file "${path}" is missing from splitter output`);
+  }
+  for (const slice of proposal.slices) {
+    for (const dependency of slice.depends_on) {
+      if (dependency === slice.id) errors.push(`slice "${slice.id}" depends on itself`);
+      else if (!ids.has(dependency)) errors.push(`slice "${slice.id}" depends on unknown slice "${dependency}"`);
+    }
+  }
+  return errors;
+}
+
+function splitterArtifacts(result: PiRunResult, outputDir: string, parsedOutputPath?: string): NonNullable<PrSplitPlan["splitterArtifacts"]> {
+  return {
+    outputDir,
+    sessionId: result.sessionId,
+    sessionFile: result.sessionFile,
+    systemPromptPath: result.systemPromptPath,
+    userPromptPath: result.userPromptPath,
+    outputPath: result.outputPath,
+    parsedOutputPath,
+    dryRun: result.dryRun,
+  };
+}
+
+function fallbackFromSplitter(seedPlan: PrSplitPlan, artifacts: NonNullable<PrSplitPlan["splitterArtifacts"]>, warning: string): PrSplitPlan {
+  return {
+    ...seedPlan,
+    planningStrategy: "agent",
+    splitterApplied: false,
+    splitterArtifacts: artifacts,
+    warnings: uniqueStrings([...seedPlan.warnings, warning]),
+  };
+}
+
+function fallbackFromSplitterLaunchError(seedPlan: PrSplitPlan, warning: string): PrSplitPlan {
+  return {
+    ...seedPlan,
+    planningStrategy: "agent",
+    splitterApplied: false,
+    warnings: uniqueStrings([...seedPlan.warnings, warning]),
+  };
+}
+
+function applySplitterProposalToPlan(
+  seedPlan: PrSplitPlan,
+  proposal: AgentPrSplitterPlan,
+  artifacts: NonNullable<PrSplitPlan["splitterArtifacts"]>,
+  options: Pick<BuildPlanOptions, "branchPrefix" | "sliceCheckCommand">,
+): PrSplitPlan {
+  const fileMap = planFileMap(seedPlan);
+  const slicesWithoutCommands: Array<Omit<PrSplitSlice, "commands" | "isolationCommands">> = proposal.slices.map((slice) => {
+    const files = slice.files
+      .map((file) => fileMap.get(normalizePath(file)))
+      .filter((file): file is PrChangedFile => Boolean(file))
+      .sort((left, right) => left.path.localeCompare(right.path));
+    const pathspecs = files.map((file) => file.path);
+    const independence: PrSliceIndependence = {
+      kind: slice.independence_kind,
+      verified: false,
+      confidence: proposal.confidence >= 0.75 ? "medium" : "low",
+      reasons: uniqueStrings([slice.review_focus, slice.pr_body_summary, ...slice.risks]),
+      requiredChecks: uniqueStrings([
+        "apply this slice to a fresh branch or worktree based on the selected base ref",
+        "run configure/build for that isolated slice",
+        "run the saved-baseline regression gate or equivalent local PR check",
+        "promote to a true independent PR only if the isolated slice passes",
+        ...slice.validation_notes,
+      ]),
+      possibleDependencies: slice.depends_on,
+    };
+    return {
+      id: slice.id,
+      displayName: slice.display_name,
+      title: slice.title,
+      branchName: `${options.branchPrefix.replace(/\/+$/g, "")}/${sanitizeId(slice.id) || "slice"}`,
+      lane: slice.lane,
+      scope: slice.scope,
+      directories: Array.from(new Set(files.map((file) => directoryForPath(file.path)))).sort(),
+      fileCount: files.length,
+      files,
+      pathspecs,
+      statusCounts: statusCounts(files),
+      sources: sliceSources(files),
+      independence,
+      warnings: seedWarningsForFiles(seedPlan, pathspecs),
+    };
+  });
+  const slices = slicesWithoutCommands.map((slice) => ({
+    ...slice,
+    commands: commandsForSlice(slice, seedPlan.baseRef, seedPlan.headRef),
+    isolationCommands: isolationCommandsForSlice(slice, {
+      repoRoot: seedPlan.repoRoot,
+      baseRef: seedPlan.baseRef,
+      headRef: seedPlan.headRef,
+      sliceCheckCommand: options.sliceCheckCommand,
+    }),
+  }));
+  return {
+    ...seedPlan,
+    planningStrategy: "agent",
+    splitterApplied: true,
+    splitterRationale: proposal.rationale,
+    splitterConfidence: proposal.confidence,
+    splitterArtifacts: artifacts,
+    slices,
+    warnings: uniqueStrings([...seedPlan.warnings, ...proposal.warnings]),
+  };
+}
+
+function recordPrSplitterSession(globals: GlobalArgs, runId: string, result: PiRunResult): void {
+  if (!runId) return;
+  const store = openState(globals.stateDir);
+  try {
+    addPiSession({
+      store,
+      runId,
+      role: "pr-splitter",
+      sessionId: result.sessionId,
+      sessionFile: result.sessionFile,
+      provider: globals.provider,
+      model: globals.model,
+      thinkingLevel: globals.thinkingLevel,
+      status: result.failed || result.providerError ? "failed" : result.dryRun ? "dry_run" : "succeeded",
+      outputPath: result.outputPath,
+    });
+  } finally {
+    store.db.close();
+  }
+}
+
+async function applyPrSplitterStrategy(params: {
+  globals: GlobalArgs;
+  args: Map<string, string | true>;
+  plan: PrSplitPlan;
+  branchPrefix: string;
+  sliceCheckCommand: string;
+  runner?: PrSplitterAgentRunner;
+}): Promise<PrSplitPlan> {
+  const outputDirArg = stringArg(params.args, "--agent-output-dir", "");
+  const outputDir = outputDirArg ? resolve(params.globals.repoRoot, outputDirArg) : resolve(params.globals.stateDir, "pr_splitter", artifactTimestamp());
+  await mkdir(outputDir, { recursive: true });
+  const context = splitterContextFromPlan(params.plan);
+  let result: PiRunResult;
+  try {
+    result = await (params.runner ?? runPiAgent)({
+      role: "pr-splitter",
+      cwd: params.globals.repoRoot,
+      prompt: prSplitterPrompt({
+        splitContext: context,
+        repoRoot: params.globals.repoRoot,
+        stateDir: params.globals.stateDir,
+        project: projectMetadata(params.globals),
+      }),
+      outputDir,
+      dryRun: params.globals.dryRunAgents,
+      provider: params.globals.provider,
+      model: params.globals.model,
+      thinkingLevel: params.globals.thinkingLevel,
+      timeoutMs: params.globals.agentTimeoutSeconds ? params.globals.agentTimeoutSeconds * 1000 : undefined,
+      toolContext: {
+        repoRoot: params.globals.repoRoot,
+        stateDir: params.globals.stateDir,
+        project: projectMetadata(params.globals),
+      },
+    });
+  } catch (error) {
+    return fallbackFromSplitterLaunchError(params.plan, `PR splitter could not start; deterministic plan retained (${error instanceof Error ? error.message : String(error)}).`);
+  }
+  recordPrSplitterSession(params.globals, stringArg(params.args, "--run-id", ""), result);
+  const parsedOutputPath = resolve(outputDir, "agent_plan.json");
+  const artifacts = splitterArtifacts(result, outputDir, parsedOutputPath);
+  if (result.dryRun) {
+    await writeFile(parsedOutputPath, `${JSON.stringify({ dry_run: true, context }, null, 2)}\n`);
+    return fallbackFromSplitter(params.plan, artifacts, "PR splitter dry run wrote prompt artifacts; deterministic plan retained.");
+  }
+  if (result.failed || result.providerError) {
+    await writeFile(parsedOutputPath, `${JSON.stringify({ error: result.error ?? result.providerError ?? "unknown failure" }, null, 2)}\n`);
+    return fallbackFromSplitter(params.plan, artifacts, `PR splitter failed; deterministic plan retained (${result.error ?? result.providerError ?? "unknown failure"}).`);
+  }
+  const parsed = parseJsonObject(result.rawText);
+  if (!parsed.object) {
+    await writeFile(parsedOutputPath, `${JSON.stringify({ parse_error: parsed.error ?? "unknown parse error" }, null, 2)}\n`);
+    return fallbackFromSplitter(params.plan, artifacts, `PR splitter output was not parseable JSON; deterministic plan retained (${parsed.error ?? "unknown parse error"}).`);
+  }
+  const validated = validatePrSplitterPlan(parsed.object);
+  const semanticErrors = validated.plan ? validateSplitterProposalAgainstSeed(validated.plan, params.plan) : [];
+  await writeFile(
+    parsedOutputPath,
+    `${JSON.stringify(
+      {
+        parsed: parsed.object,
+        schema_errors: validated.errors,
+        semantic_errors: semanticErrors,
+      },
+      null,
+      2,
+    )}\n`,
+  );
+  if (!validated.plan) {
+    return fallbackFromSplitter(params.plan, artifacts, `PR splitter output failed schema validation; deterministic plan retained (${validated.errors.join("; ")}).`);
+  }
+  if (semanticErrors.length > 0) {
+    return fallbackFromSplitter(params.plan, artifacts, `PR splitter output violated deterministic invariants; deterministic plan retained (${semanticErrors.join("; ")}).`);
+  }
+  return applySplitterProposalToPlan(params.plan, validated.plan, artifacts, {
+    branchPrefix: params.branchPrefix,
+    sliceCheckCommand: params.sliceCheckCommand,
+  });
 }
 
 function parseNameStatus(output: string): RawChangedFile[] {
@@ -738,7 +1093,12 @@ export function renderPrSplitPlan(plan: PrSplitPlan): string {
     `Files: ${plan.totalFiles}`,
     `Slices: ${plan.slices.length}`,
     `Max files per PR: ${plan.maxFilesPerPr} (hard ceiling, not a target — pack slices for easy review without producing a pile of PRs)`,
+    `Planning strategy: ${plan.planningStrategy}${plan.splitterApplied ? " (splitter applied)" : ""}`,
   ];
+
+  if (plan.splitterRationale) {
+    lines.push(`Splitter rationale: ${plan.splitterRationale}`);
+  }
 
   if (plan.lanesApplied) {
     const matchSlices = plan.slices.filter((slice) => slice.lane === "match").length;
@@ -833,6 +1193,10 @@ export async function prSplitPlan(globals: GlobalArgs, args: Map<string, string 
   if (groupMode !== "melee-subsystem" && groupMode !== "top-dir") {
     throw new Error("--group-mode must be melee-subsystem or top-dir");
   }
+  const planningStrategy = stringArg(args, "--strategy", globals.project?.pr.splitStrategy ?? "deterministic");
+  if (planningStrategy !== "deterministic" && planningStrategy !== "agent") {
+    throw new Error("--strategy must be deterministic or agent");
+  }
 
   const branchPrefix = stringArg(args, "--branch-prefix", globals.project?.pr.branchPrefix ?? "pr-split");
   const titlePrefix = stringArg(args, "--title-prefix", globals.project?.pr.titlePrefix ?? "Melee decomp");
@@ -893,7 +1257,7 @@ export async function prSplitPlan(globals: GlobalArgs, args: Map<string, string 
     includeWorktree,
     includeUntracked,
   });
-  const plan = buildPrSplitPlanFromChanges(collected.changes, {
+  let plan = buildPrSplitPlanFromChanges(collected.changes, {
     repoRoot: globals.repoRoot,
     baseRef,
     headRef: collected.headRef,
@@ -904,10 +1268,14 @@ export async function prSplitPlan(globals: GlobalArgs, args: Map<string, string 
     branchPrefix,
     titlePrefix,
     sliceCheckCommand,
+    planningStrategy,
     lanes,
     shipFilter,
     warnings: collected.warnings,
   });
+  if (planningStrategy === "agent" && plan.slices.length > 0) {
+    plan = await applyPrSplitterStrategy({ globals, args, plan, branchPrefix, sliceCheckCommand });
+  }
   // The output file is always the human-readable plan; --json only changes
   // what stdout carries so callers can parse slice/lane data.
   const outputPath = args.get("--output");

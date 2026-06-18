@@ -23,3 +23,7 @@ advanced path overrides still win over both tracked and local project config.
 For Melee, either clone/worktree `doldecomp/melee` into
 `projects/melee/checkout/` or create `projects/melee/local.project.json` with a
 `repoRoot` that points at an existing external checkout.
+
+PR defaults live under the descriptor's `pr` key. `splitStrategy` can be
+`deterministic` or `agent`; the tracked Melee descriptor uses `agent` so
+handoff planning asks the PR splitter to reshape the deterministic seed plan.

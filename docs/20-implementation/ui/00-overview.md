@@ -65,44 +65,40 @@ when stable state changes and compact tick payloads for elapsed-time updates.
 
 ## Layout
 
+`apps/dashboard/src/components/SessionWorkspace.tsx` is the main project and
+session shell. It derives a client-side session view model from the existing
+dashboard payload rather than requiring a durable session-store migration. The
+view model maps selected project, run status, process state, handoff artifacts,
+PR records, campaign/save-point data, epochs, and run details into one active
+session with a mode verdict: `Run Mode`, `PR Mode`, or `No Active Session`.
+
 The React app has three regions:
 
-- Left controls rail: five panels that all share one shape — a title row with
-  right-aligned status meta, always-visible primary content, and at most one
-  disclosure for secondary detail. In order: Status (campaign pill plus
-  readiness rows: run/leases, workers, upstream rebase position, baseline
-  freshness, checkpoint lanes, QA verdict, plan lanes, with artifact paths
-  behind the disclosure), Actions (every operator button in one panel,
-  sectioned Run / Handoff / Session, grayed by flow position with the
-  blocking reason as the tooltip and the recommended next action
-  highlighted), Project, Run Setup, and Process. See the
-  [operator runbook](10-operator-runbook.md) for how a full cycle reads.
-- Center work area: progress metrics, the match-verification ladder, and
-  active/queued work. The ladder is three tabs: **Confirmed** (new exact
-  matches in the trusted `report_changes.json` — byte-level truth vs the
-  baseline), **Tentative** (runner-validated worker match claims newer than
-  the current report; each report rebuild either confirms them into the first
-  tab or clears them), and **Improvements** (report-level fuzzy gains plus
-  fresh worker gains since the report). Workers add tentative rows between
-  report builds; epoch boundaries and QA rebuild the report and settle them.
-- Right details rail: `Run`, `Agents`, and `Logs` tabs — the view into the
-  system, while the left rail stays controls-only. The Logs tab opens with an
-  operation activity card: the server tracks the one long-running dashboard
-  operation (sync, prepare handoff, checkpoint, QA, plan PRs, reconcile, fresh
-  run) as named steps with per-step status and elapsed time, exposed as
-  `process.operation` in the dashboard payload. The card shows which step is
-  running, keeps the last result (including the failing step and error) until
-  the next operation starts, and sits directly above the live command output
-  it summarizes. Triggering any of these operations auto-opens the details
-  rail on the Logs tab, and while one runs (or after one fails) a slim
-  clickable strip across the top of the center column shows the operation,
-  its current step, and elapsed time even when the rail is collapsed.
+- Left project/session navigation rail: selected project, active session label,
+  current mode verdict, and page buttons for Project Home, Project Access,
+  Active Session, Run Mode, PR Mode, and Session History. The rail is the
+  navigation and orientation surface; it does not show every operator control
+  at once.
+- Center focused page: the selected page owns the primary work surface. Project
+  Home shows the active-session gate and recommended next page. Project Access
+  shows project paths, config health, knowledge sources, validation defaults,
+  and PR defaults. Active Session shows mode evidence and key artifacts. Run
+  Mode shows run controls, run setup, process state, progress, epochs,
+  workers, queues, leases, and reports. PR Mode shows handoff status, QA and
+  repair rounds, ship-set/split-plan artifacts, PR rows, draft-opening
+  controls, and review/blocker status. Session History shows save points,
+  epochs, PR intake, and carry-forward state from available artifacts.
+- Right details rail: `Run`, `Agents`, and `Logs` tabs remain available for
+  deep inspection. The Logs tab opens with an operation activity card: the
+  server tracks the one long-running dashboard operation (sync, prepare
+  handoff, checkpoint, QA, plan PRs, reconcile, fresh run) as named steps with
+  per-step status and elapsed time, exposed as `process.operation` in the
+  dashboard payload. Triggering any long-running operation auto-opens the
+  details rail on the Logs tab.
 
-Both side rails are collapsible. The open left controls rail uses the same
-responsive track as the open right details rail, `minmax(440px, 560px)`, so
-handoff controls have enough horizontal space. Collapsed rails use a `44px`
-icon strip and persist their collapsed state in `localStorage` as
-`sidebarCollapsed` and `detailsCollapsed`.
+Both side rails are collapsible. The navigation rail persists its collapsed
+state in `localStorage` as `sidebarCollapsed`; the details rail persists
+`detailsCollapsed` and `detailsWidth`.
 
 ## Session Phase Stepper
 
@@ -113,7 +109,9 @@ six-step stepper (Sync & Intake → Baseline & Init → Run → Checkpoint & Val
 → Ship PRs → Resync) at the top of the left rail. No new state is stored; the
 phase is recomputed from each dashboard payload.
 
-The same derivation produces the sync lock: while the run is `active`,
+The focused page shell uses `SessionWorkspace` for the primary mode verdict,
+but the phase derivation remains the source for the sync lock. While the run is
+`active`,
 `Intake Merged PRs` is disabled with the lock reason as its tooltip, and the
 server independently rejects `POST /api/project/sync` so the lock is hard, not
 UI-only. The full design rationale lives in
@@ -193,7 +191,7 @@ artifacts.
 | `Checkpoint` | `POST /api/run/checkpoint` | Calls `createRunCheckpoint` for the current run and writes `checkpoint.json`, `pr_candidates.md` (match and improvement lanes), and `carry_forward.md`. |
 | `Run QA` | `POST /api/pr/qa` | Runs `regression-check --require-pr-promotion` by default (plus the project's improvement byte floor as `--promotion-min-unmatched-improvement-bytes`) and returns the generated summary/report artifact paths even when the gate fails. |
 | `Reconcile` | `POST /api/pr/reconcile` | Runs the reconcile agent in `ship-validate` mode against the latest QA summary to fix regressions before handoff. Rejected while the run is `active`. |
-| `Plan PRs` | `POST /api/pr/split-plan` | Runs `pr-split-plan` with the latest checkpoint for lane splitting and writes a Markdown plan plus `summary.json` under the handoff artifact directory. |
+| `Plan PRs` | `POST /api/pr/split-plan` | Runs `pr-split-plan` with the latest checkpoint for lane splitting, the project's PR split strategy, and writes a Markdown plan plus `summary.json` under the handoff artifact directory. |
 | `Prepare` | `POST /api/pr/prepare` | Runs the full ship pipeline: pause → pull upstream & rebase → rebuild production baseline (worktree at the base SHA, cached per SHA) → QA vs the new baseline → checkpoint (regressed symbols forced to `needs_rework`) → lane-aware split plan. Stops with the QA hint as the error if the gate fails; the checkpoint still lands. |
 
 Checkpoint, QA, split planning, and Prepare refuse to run while a worker
@@ -214,6 +212,22 @@ Latest handoff artifacts are summarized in the dashboard under
 - `splitPlan`: latest
   `state_dir/pr_handoff/<run_id>/split_plans/<timestamp>/summary.json`.
 
+PR mode also reads `dashboard.prs`, a compatibility PR ledger from
+`state_dir/pr_handoff/pr_records.json`. The server normalizes legacy rows with
+session/run provenance plus additive `local`, `validation`, `batch`, and
+`github` subobjects. `POST /api/prs/sync` seeds the ledger from the current
+split plan, imports existing GitHub PRs whose heads match the local split-series
+branches, and discovers local `codex/split-##-*` branches/worktrees so local
+PRs appear before publication. Planned rows can be prepared locally before
+publication: `POST /api/prs/prepare-local` prepares one slice in a persistent
+worktree under `state_dir/pr_workspaces/<run_id>/`, while locally discovered
+worktrees are tracked in place, and
+`POST /api/prs/prepare-local-batch` prepares the next three unprepared slices.
+`POST /api/prs/open-batch` opens the next three local-ready slices as GitHub
+drafts by generating a patch from each persistent worktree's committed diff,
+re-verifying it, and pushing the local branch. `POST /api/prs/open-all` remains
+as the legacy all-planned path.
+
 ## Artifact Locations
 
 | Artifact | Location |
@@ -225,6 +239,9 @@ Latest handoff artifacts are summarized in the dashboard under
 | QA PR report | `state_dir/regression_checks/<run_id>/<timestamp>/pr_report.md` |
 | Split plan summary | `state_dir/pr_handoff/<run_id>/split_plans/<timestamp>/summary.json` |
 | Split plan Markdown | `state_dir/pr_handoff/<run_id>/split_plans/<timestamp>/pr_split_plan.md` |
+| PR ledger | `state_dir/pr_handoff/pr_records.json` |
+| Local PR worktrees | `state_dir/pr_workspaces/<run_id>/<branch-slug>/` |
+| Local PR publish patches | `state_dir/pr_handoff/local_patches/<branch-slug>.patch` |
 
 ## Related
 
