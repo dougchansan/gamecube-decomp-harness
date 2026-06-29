@@ -1,12 +1,12 @@
 ---
 name: melee-pr-workflow
-description: "Top-level Melee PR workflow skill. Use when refreshing the orchestrator-owned past-PR corpus, syncing or rebasing the parent doldecomp/melee checkout, designing reviewer-friendly PRs or PR series, preparing a PR for handoff, running PR regression checks, drafting/updating PR bodies, or coordinating GitHub PR review/CI work."
+description: "Top-level Melee PR workflow skill. Use when syncing the orchestrator-owned past-PR corpus, syncing or rebasing the parent doldecomp/melee checkout, designing reviewer-friendly PRs or PR series, preparing a PR for handoff, running PR regression checks, drafting/updating PR bodies, or coordinating GitHub PR review/CI work."
 ---
 
 # Melee PR Workflow
 
 This is the single top-level skill for Melee PR-adjacent work. It routes to the
-decomp orchestrator for PR knowledge refresh and regression gates, while keeping
+decomp orchestrator for missing PR knowledge sync and regression gates, while keeping
 parent Melee git/PR work separate from the nested `decomp-orchestrator/` repo.
 
 ## Guardrails
@@ -20,7 +20,7 @@ parent Melee git/PR work separate from the nested `decomp-orchestrator/` repo.
 
 ## Refresh PR Knowledge
 
-Use this path when the user asks to refresh recent PR data, comments, reviews,
+Use this path when the user asks to sync missing PR data, comments, reviews,
 diffs, searchable postmortems, file-card context, or past-PR graph/search data.
 
 Preview the fetch scope:
@@ -29,28 +29,18 @@ Preview the fetch scope:
 python3 decomp-orchestrator/knowledge/sources/code_context/past_prs/commands/fetch_recent_pr_dump.py --dry-run
 ```
 
-Fetch missing recent PRs and scaffold searchable records:
+Fetch only PRs that are not already present locally and scaffold searchable records:
 
 ```bash
 python3 decomp-orchestrator/knowledge/sources/code_context/past_prs/commands/fetch_recent_pr_dump.py
 ```
 
-Refresh recently updated PRs whose comments or reviews may have changed:
-
-```bash
-python3 decomp-orchestrator/knowledge/sources/code_context/past_prs/commands/fetch_recent_pr_dump.py \
-  --activity updated \
-  --refresh-existing \
-  --postmortem-scope fetched
-```
-
-Run Pi-reviewed postmortems for the active corpus:
+Run Pi-reviewed postmortems for PRs that need searchable records:
 
 ```bash
 python3 decomp-orchestrator/knowledge/sources/code_context/past_prs/commands/build_pr_postmortems.py \
   --dump-root decomp-orchestrator/knowledge/sources/code_context/past_prs/data \
   --run-agent \
-  --rerun-existing \
   --jobs 16
 ```
 
@@ -64,12 +54,15 @@ Notes:
 
 - `kg-maintain` and `trigger-agent` can index pending postmortems and rebuild graph state, but they do not fetch fresh GitHub PR data.
 - The PR corpus lives under `decomp-orchestrator/knowledge/sources/code_context/past_prs/data`.
+- Existing PR dump slices are treated as immutable during sync. To rebuild a
+  stale or damaged PR record, delete that PR's local slice first, then run the
+  missing-only fetcher.
 - The fetcher uses `gh api`; GitHub CLI auth must be available.
 
 ## Sync Repo And PR Corpus
 
-Use this path when the user asks to sync, refresh, rebase, or update the local
-checkout and PR library together.
+Use this path when the user asks to sync, rebase, or update the local checkout
+and missing PR library entries together.
 
 Standard sync:
 
@@ -79,17 +72,7 @@ python3 decomp-orchestrator/knowledge/sources/code_context/past_prs/commands/syn
   --postmortem-jobs 16
 ```
 
-Refresh recently updated PR records while syncing:
-
-```bash
-python3 decomp-orchestrator/knowledge/sources/code_context/past_prs/commands/sync_repo_and_pr_library.py \
-  --pr-activity updated \
-  --refresh-existing-prs \
-  --postmortem-scope fetched \
-  --postmortem-jobs 16
-```
-
-Skip git and only refresh the PR corpus:
+Skip git and only sync missing PR corpus entries:
 
 ```bash
 python3 decomp-orchestrator/knowledge/sources/code_context/past_prs/commands/sync_repo_and_pr_library.py \
@@ -165,12 +148,10 @@ git remote -v
 gh pr status --repo doldecomp/melee
 ```
 
-2. Sync mainline and recently updated PR knowledge:
+2. Sync mainline and missing PR knowledge:
 
 ```bash
 python3 decomp-orchestrator/knowledge/sources/code_context/past_prs/commands/sync_repo_and_pr_library.py \
-  --pr-activity updated \
-  --refresh-existing-prs \
   --postmortem-scope fetched \
   --postmortem-jobs 16
 ```

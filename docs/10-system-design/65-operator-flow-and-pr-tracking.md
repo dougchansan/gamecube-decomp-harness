@@ -1,7 +1,7 @@
 ---
 covers: The operator lifecycle as one flow, the pipeline-rail sidebar design, and PR tracking as first-class state
 concepts: [operator-flow, pipeline-rail, pr-tracking, pr-board, pr-kanban, session-lifecycle, epoch-qa]
-code-ref: apps/dashboard/src/components/Sidebar.tsx, apps/dashboard-server/src/server.ts
+code-ref: apps/frontend/src/components/Sidebar.tsx, apps/server/src/server.ts
 ---
 
 # Operator Flow And PR Tracking
@@ -19,14 +19,14 @@ One session, start to finish:
 1. **Start a run** — sync everything down (pull upstream, intake merged PRs,
    rebuild knowledge), rebuild the report so the baseline and progress
    numbers are current.
-2. **Queue runs** — workers lease targets with whatever pool/thinking
-   configuration was chosen.
+2. **Run workers** — workers claim admitted epoch targets with whatever
+   pool/thinking configuration was chosen.
 3. **Epoch boundary** — when the admitted scheduler epoch completes, the epoch
    cycle commits, rebuilds the report, and the confirmed set updates.
    Confirmation happens *here*, continuously, not only at the end.
 4. **Salvage, don't discard** — tentative items that didn't survive are
    wiped from the board; regressions and QA failures become improvements or
-   needs_rework and are requeued at repair priority. Nothing verified is
+   needs_rework and are readmitted at repair priority. Nothing verified is
    thrown away; it is re-aimed.
 5. **Accumulate** — the loop continues, building confirmed and tentative
    items until the operator decides there is enough to ship.
@@ -63,8 +63,8 @@ One session, start to finish:
 │   branch codex/split-up/mn ·dirty │
 │   [ Sync Merged PRs ]             │
 ├───────────────────────────────────┤
-│ 2 RUN              paused · 0 ls  │
-│   queue 0 · workers stopped       │
+│ 2 RUN          paused · 0 claims  │
+│   admitted 0 · workers stopped    │
 │   31 confirmed · 0 tentative      │
 │   [► Start]  [‖ Pause]  [Resume]  │
 │   ▸ run setup (size, thinking)    │

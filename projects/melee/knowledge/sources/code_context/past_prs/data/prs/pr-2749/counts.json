@@ -1,0 +1,17 @@
+{
+  "number": 2749,
+  "title": "Match `lbmthp` data",
+  "state": "MERGED",
+  "createdAt": "2026-06-21T17:40:23Z",
+  "updatedAt": "2026-06-21T20:57:48Z",
+  "mergedAt": "2026-06-21T20:57:46Z",
+  "closedAt": "2026-06-21T20:57:46Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/2749",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 38764
+  }
+}

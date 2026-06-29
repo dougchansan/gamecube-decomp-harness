@@ -1,29 +1,42 @@
 ---
-covers: Package-owned knowledge layout, agent context routing, helper scripts, resources, and past PR library
+covers: Project-owned Melee knowledge sources, server runtime knowledge code, toolpack boundaries, agent context routing, resource graph, and past PR library
 concepts: [knowledge, agent-context, sources, tools, resource-graph, past-prs]
-code-ref: decomp-orchestrator/knowledge, decomp-orchestrator/packages/knowledge/src, decomp-orchestrator/packages/agents/src/context.ts
+code-ref: projects/melee/knowledge, toolpacks/gamecube-decomp, projects/melee/tool-bindings, apps/server/src/core/knowledge, apps/server/src/core/tools/resolver.ts, apps/server/src/core/agent-catalog/context.ts
 ---
 
 # Knowledge: Overview
 
-`knowledge/` is the runtime evidence surface. It owns global source corpora,
-source/tool registries, access-mode metadata, and graph-owned enrichment files.
+Melee knowledge is project-owned. `projects/melee/knowledge` owns source
+descriptors, source API code, registry metadata, graph schemas, graph commands,
+accumulated corpora, generated indexes, source-local data, and graph-owned
+enrichment files. The server owns runtime code under
+`apps/server/src/core/knowledge`; it resolves and executes project knowledge but
+does not own the knowledge tree. The active graph database lives at
+`projects/melee/graph/graph.sqlite`.
+
+Tools are callable operations, not knowledge sources. Reusable GameCube decomp
+tool definitions live in `toolpacks/gamecube-decomp`; Melee selects that pack
+from `projects/melee/project.json`, configures it in
+`projects/melee/tool-bindings`, stores stable tool data in
+`projects/melee/shared/tool-data`, and scopes mutable tool output under
+`projects/melee/worktrees/<worktree_id>/tool-cache`.
+
 The selected project supplies the checkout root and graph database path used for
 project-derived graph data such as `code_graph`, rank features, file cards, and
-agent-state enrichment. Agent role behavior and prompt context live beside the
-agents under `packages/agents/src/*/context/` and are selected through
-`packages/agents/src/context/manifest.json`.
+agent-state enrichment. Agent role behavior and prompt context live in the
+catalog under `apps/server/src/core/agent-catalog/` and are selected through
+`apps/server/src/core/agent-catalog/context/manifest.json`.
 
 This keeps evidence infrastructure separate from worker and scheduler behavior:
 sources can be indexed and refreshed without moving prompts, and prompt context
-can change without pretending it is a knowledge source. Within `knowledge/`,
-sources are sectioned by access pattern: injected context, RAG-style searchable
-sources, and code-connected evidence.
+can change without pretending it is a knowledge source. Resource descriptors are
+sectioned by access pattern: injected context, RAG-style searchable sources, and
+code-connected evidence.
 
 ## File Tree
 
 ```text
-knowledge/
+projects/melee/knowledge/
 +-- README.md
 +-- sources/
 |   +-- README.md
@@ -37,21 +50,26 @@ knowledge/
 |           +-- source.json
 |           +-- api/
 |           +-- commands/
+|           +-- tests/
 |           +-- data/
 |           +-- indexes/
-|           +-- tests/
 +-- resource_graph/
     +-- README.md
-    +-- graph.sqlite          # compatibility/default graph DB when no project is selected
     +-- commands/
-    +-- enrichments/
-    +-- indexes/
     +-- schemas/
+    +-- enrichments/
 ```
 
 ```text
-tools/
-+-- README.md
+projects/melee/graph/
++-- graph.sqlite
++-- graph.sqlite-shm
++-- graph.sqlite-wal
+```
+
+```text
+toolpacks/gamecube-decomp/
++-- toolpack.json
 +-- registry.json
 +-- operations/
 +-- research/
@@ -60,27 +78,45 @@ tools/
 +-- source_editing/
 +-- data_conversion/
 +-- recipes/
++-- _shared/
++-- _impl/
 ```
 
 ```text
-packages/agents/src/
+projects/melee/
++-- tool-bindings/
+|   +-- <tool_id>.json
++-- shared/tool-data/
+|   +-- <tool_id>/
++-- worktrees/<worktree_id>/tool-cache/
+    +-- <tool_id>/
+```
+
+```text
+apps/server/src/core/agent-catalog/
 +-- context.ts
 +-- context/
 |   +-- manifest.json
-+-- worker/
-    +-- templates/
-        +-- system.md
-        +-- initial_user.md
-+-- tools/
-    +-- profile-data.ts
++-- agents/
+|   +-- running/worker/
+|   +-- pr/
+|   +-- knowledge/
++-- kernel-catalog.ts
++-- kernel-preview.ts
 ```
 
 ```text
-packages/knowledge/src/
+apps/server/src/core/knowledge/
 +-- board.ts
 +-- curator.ts
 +-- decomp-context.ts
 +-- graph/
+|   +-- builders/          # graph record builders and rebuild orchestration
+|   +-- queries/           # read models such as file cards and rank features
+|   +-- registry/          # source/tool registry descriptor loading
+|   +-- storage/           # Drizzle schema, store, ingestion, search, stats
+|   +-- db.ts              # compatibility facade for graph storage exports
+|   +-- index.ts           # public graph API exports
 +-- index.ts
 +-- paths.ts
 +-- resources.ts
@@ -91,49 +127,76 @@ They are not runtime prompt routes.
 
 ## Agent Context Contract
 
-`packages/agents/src/context/manifest.json` contains:
+`apps/server/src/core/agent-catalog/context/manifest.json` contains:
 
-- `role_defaults`: role context defaults. Worker prompt guidance is embedded in
-  the worker templates rather than routed through guide files.
+- `role_defaults`: role context defaults. Worker system guidance is embedded in
+  the worker prompt module rather than routed through guide files.
 - `capability_routes`: optional routed context selections. The active worker
   route does not use secondary guide files.
 - `references`: known role-context files with purpose metadata.
 - `scripts`: helper scripts exposed to prompt builders and operators.
 
-`packages/agents/src/context.ts` reads the manifest, resolves paths relative to the
+`apps/server/src/core/agent-catalog/context.ts` reads the manifest, resolves paths relative to the
 package root, deduplicates any selected context references, and exposes script
 metadata. Scheduler policy is deterministic runtime code, not prompt context.
-Worker policy is embedded in `worker/templates/system.md`, while
-`worker/templates/initial_user.md` receives target state, standards, target file
-content, and a generated `<available_tools>` block derived from the resolved
-worker tool profile. Targeted iteration is owned by the worker system prompt.
+Agent policy is embedded in each role's `prompt.ts` as stable system guidance.
+Runtime state, standards, target or PR/QA/reconcile evidence, output schemas,
+and generated `<available_tools>` blocks are assembled by the matching
+`context.ts` into role-specific context packets. Targeted iteration remains
+owned by the role system prompt.
 Detailed historical worker and sweep docs are archived.
 
 ## Knowledge Code Path
 
-`packages/knowledge/src/resources.ts` builds the resource map that agents see in rendered
+`apps/server/src/core/knowledge/resources.ts` builds the resource map that agents see in rendered
 prompts. It points agents at roots, progress inputs, local context, PR evidence,
 data-sheet resources, graph commands, source sections, and helper scripts. It
 includes the agent context summary but does not own prompt-context selection.
 
-`packages/knowledge/src/graph/` implements the v1 resource graph. It indexes
-the selected project's current code graph, the global past-PR corpus, registered
-global sources, and graph-owned enrichments into SQLite. In project mode,
-commands default to the selected project's
-`graphDbPath`; without a project, they use the compatibility graph at
-`knowledge/resource_graph/graph.sqlite`. The graph API exposes file cards,
-graph search, source/tool registries, graph-derived rank features, and internal
-graph enrichments. External sources and tools are registered as optional slices
-until their usage justifies deeper indexing.
+`apps/server/src/core/knowledge/graph/` implements the v1 resource graph. It
+indexes the selected project's current code graph, the global past-PR corpus,
+registered global sources, and graph-owned enrichments into SQLite. In project
+mode, commands default to the selected project's `graphDbPath`, which is
+`projects/melee/graph/graph.sqlite` for the tracked Melee project. The graph
+API exposes file cards, graph search, source/tool registries, graph-derived rank
+features, and internal graph enrichments. External sources and tools are
+registered as optional slices until their usage justifies deeper indexing.
 
-The resource map rendered into worker and boundary-agent prompts carries both
-boundaries: global knowledge roots under `knowledge/`, and project fields such
-as `project_id`, `project_kind`, `board_repo_root`, `state_dir`, and
-`graph_db`. This prevents prompts and knowledge commands from guessing a parent
-checkout when a project has already been resolved.
+The graph runtime is organized as vertical slices under
+`apps/server/src/core/knowledge/graph/`:
+
+| Slice | Responsibility |
+| --- | --- |
+| `builders/` | Converts code graph reports, past PRs, source slices, curator records, and imported lessons into `GraphRecords`. |
+| `queries/` | Builds read models over the graph, including file cards and scheduler rank features. |
+| `registry/` | Loads project source and tool registry descriptors. |
+| `storage/` | Owns the SQLite connection, Drizzle schema, graph ingestion, graph search, and stats. |
+
+`storage/schema.ts` is the typed Drizzle schema for the persisted graph tables:
+sources, tools, resource versions, entities, facts, edges, search chunks,
+worker graph updates, and merged PR updates. `storage/store.ts` opens the Bun
+SQLite database and exposes both the raw `Database` handle and the typed Drizzle
+ORM on `KnowledgeGraphStore`. Write paths in `storage/ingest.ts` use Drizzle
+transactions and typed JSON columns for graph payloads. Query paths in
+`queries/` use Drizzle selects for graph facts, edges, chunks, and aggregate
+counts.
+
+Raw SQL remains part of the storage boundary for SQLite features that Drizzle
+does not model directly: connection pragmas, bootstrap DDL, and the
+`search_chunks_fts` FTS5 virtual table. Search uses FTS5 when available and
+falls back to LIKE scanning over `search_chunks` when FTS is unavailable.
+
+The resource map rendered into worker and boundary-agent prompts carries the
+runtime boundaries: source definitions/data under `projects/melee/knowledge`,
+tool definitions under the enabled toolpack, project tool bindings/data under
+`projects/melee`, and project fields such as `project_id`, `project_kind`,
+`board_repo_root`, `state_dir`, and `graph_db`. This prevents prompts and
+knowledge commands from guessing a parent checkout when a project has already
+been resolved.
 
 The source slices are shallow on purpose. Actual corpora live under each slice's
-`data/` folder, while `knowledge/sources/registry.json` declares active section
+project-owned `data/` folder, while
+`projects/melee/knowledge/sources/registry.json` declares active section
 and access-mode metadata:
 
 | Section | Active sources | Access model |
@@ -146,18 +209,18 @@ Actual corpus paths:
 
 | Source | Actual corpus path |
 | --- | --- |
-| `decomp_standards` | `knowledge/sources/injectable/decomp_standards/data` |
-| `path_facts` | `knowledge/sources/injectable/path_facts/data` |
-| `banned_patterns` | `knowledge/sources/injectable/banned_patterns/data` |
-| `past_prs` | `knowledge/sources/code_context/past_prs/data` |
-| `discord_knowledge` | `knowledge/sources/rag_search/discord_knowledge/data/docs` |
-| `ssbm_data_sheet` | `knowledge/sources/code_context/ssbm_data_sheet/data` |
-| `powerpc_docs` | `knowledge/sources/rag_search/powerpc_docs/data` |
-| `external_mirrors` | `knowledge/sources/code_context/external_mirrors/data` |
+| `decomp_standards` | `projects/melee/knowledge/sources/injectable/decomp_standards/data` |
+| `path_facts` | `projects/melee/knowledge/sources/injectable/path_facts/data` |
+| `banned_patterns` | `projects/melee/knowledge/sources/injectable/banned_patterns/data` |
+| `past_prs` | `projects/melee/knowledge/sources/code_context/past_prs/data` |
+| `discord_knowledge` | `projects/melee/knowledge/sources/rag_search/discord_knowledge/data/docs` |
+| `ssbm_data_sheet` | `projects/melee/knowledge/sources/code_context/ssbm_data_sheet/data` |
+| `powerpc_docs` | `projects/melee/knowledge/sources/rag_search/powerpc_docs/data` |
+| `external_mirrors` | `projects/melee/knowledge/sources/code_context/external_mirrors/data` |
 
-Every active registered source also has a source-local CLI API under its
+Every active registered source also has a source-local script API under its
 registry path, such as
-`knowledge/sources/code_context/past_prs/api/`:
+`projects/melee/knowledge/sources/code_context/past_prs/api/`:
 
 - `status.py --json` reports index readiness, generated index files, record
   counts, and declared data paths.
@@ -173,13 +236,15 @@ registry path, such as
   `discord_knowledge/api/topics_for_terms.py`.
 
 `banned_patterns` is the QA ship gate's executable record of maintainer
-rejections: `data/banned.jsonl` (one record per rejection; `agent_exhibit`
-detectors feed the pre-ship review prompt, human-approved `regex` detectors
-become extra `review_lint` rules) and `data/tombstones.jsonl` (fuzzy
-token-shingle fingerprints that block resubmission of rejected hunks). Loader
-contracts and field shapes live in the source's `data/schema.md`; candidate
-records arrive via `build_pr_postmortems.py --extract-banned-patterns` into
-`data/proposals/` (see the
+rejections:
+`projects/melee/knowledge/sources/injectable/banned_patterns/data/banned.jsonl`
+(one record per rejection; `agent_exhibit` detectors feed the pre-ship review
+prompt, human-approved `regex` detectors become extra `review_lint` rules) and
+`projects/melee/knowledge/sources/injectable/banned_patterns/data/tombstones.jsonl`
+(fuzzy token-shingle fingerprints that block resubmission of rejected hunks).
+Loader contracts and field shapes live in the source's `data/schema.md`;
+candidate records arrive via `build_pr_postmortems.py --extract-banned-patterns`
+into `data/proposals/` (see the
 [knowledge model](../../10-system-design/50-knowledge-model.md)).
 
 Workers can use active source-local APIs for quick lookups, then use
@@ -195,17 +260,17 @@ SQLite, and keep the provider/model/dimensions/source fingerprint in a manifest
 so stale or mixed embeddings are visible in `status.py --json`.
 
 Internal graph enrichments are graph-owned artifacts rather than source slices.
-`knowledge/resource_graph/enrichments/agent_shared_state_lessons.jsonl` is
+`projects/melee/knowledge/resource_graph/enrichments/agent_shared_state_lessons.jsonl` is
 generated from a legacy `agent_state-shared.db` by
 `bun run kg:import-agent-state -- --input agent_state-shared.db`. The importer
-keeps historical tool issues and nontrivial function hints, skips stale
-operational tables such as claims/scratches/audit log, and lets the raw DB be
-removed after import.
+keeps historical tool issues and nontrivial function hints, skips stale legacy
+operational tables, and lets the raw DB be removed after import.
 
-`knowledge/resource_graph/enrichments/knowledge_curator_updates.jsonl` is an
+`projects/melee/knowledge/resource_graph/enrichments/knowledge_curator_updates.jsonl` is an
 internal ingestion artifact generated by `bun run kg:curate`. It is not a
-source slice and is not worker-facing search material. It reduces durable
-worker reports and past-PR postmortems into accepted or proposal graph records.
+source slice and is not worker-facing search material. It reduces persisted
+worker states, selected checkpoints, and past-PR postmortems into accepted or
+proposal graph records.
 Clean worker/PR-backed lessons can become accepted graph facts. More complex
 updates, such as data-sheet changes, stay as
 `source_update_proposal` records until a source-specific updater validates and
@@ -218,7 +283,7 @@ the current code graph through file, function, and PR edges. Raw objdiff and
 checkdiff rows remain tool/run evidence; durable pattern knowledge enters the
 resource graph only after it appears in accepted or imported lessons.
 
-Package scripts expose the CLI-first graph surface:
+Package scripts expose the script-backed graph surface:
 
 - `bun run kg:sources`
 - `bun run kg:status -- --project melee`
@@ -229,19 +294,14 @@ Package scripts expose the CLI-first graph surface:
 - `bun run kg:search`
 - `bun run kg:file-card`
 - `bun run kg:rank-features`
-- `bun run kg:tool-runner:ghidra`
-- `bun run kg:tool-runner:opseq`
-- `bun run kg:tool-runner:mismatch-db`
-- `bun run kg:tool-runner:mwcc-debug`
 
 ## Tool Runner Contract
 
 Registered tools are live-ready only when `api/status.py --repo-root <repo_root>
 --json` reports `operation_mode: live_runner_v1`, `runner_available: true`,
 `runner_smoke_passed: true`, and a matching cache repo root. The smoke proof is
-`cache/runner_status.json`;
-generated runner rows and fallback lookup rows stay under the owning tool's
-`cache/` and `indexes/` folders.
+`cache/runner_status.json`. Generated runner rows and lookup indexes resolve
+under `projects/<id>/shared/tool-data/<tool_id>/{cache,indexes}`.
 
 The current live runner paths are:
 
@@ -252,22 +312,25 @@ The current live runner paths are:
 | `mismatch_db` | `build/tools/objdiff-cli diff` runs against an imperfect function and writes tool-local objdiff mismatch summaries. Generalized pattern knowledge is surfaced through graph `mismatch_patterns`. |
 | `mwcc_debug` | Wine runs `GC/1.2.5n/mwcceppc.exe -version` and the runner records MWCC build-rule snippets. |
 
-Generated fallback rows such as symbol lookup, function shapes, and live runner
+Generated lookup rows such as symbol lookup, function shapes, and live runner
 summaries remain useful tool-local API evidence, but they do not alone satisfy
-strict live tool readiness.
+strict live tool readiness. Mutable validation and source-editing output belongs
+under the resolved worktree cache, not under shared project data.
 
 The registered tools serve two audiences. Maintenance and operator workflows run
-the tool runners to build caches and indexes; workers consume the small CLI APIs
+the tool runners to build caches and indexes; workers consume the small source APIs
 during evidence gathering. Worker tool discoverability is rendered in the
 worker prompt as `<available_tools>`, grouped by provider and type from
-`packages/agents/src/tools/profile-data.ts`. Tool API results are
+wrapper-local metadata under
+`apps/server/src/core/tools/wrappers`. Tool API results are
 provenance-rich hypotheses, not source proof, and retained edits still need
 local objdiff/checkdiff validation.
 
 `kg-maintain` is the maintenance loop entry point. It uses pending-only PR
 postmortem indexing, runs live tool runners unless `--no-tool-runners` is set,
-rewrites tool lookup indexes, rewrites the curator enrichment, optionally runs
-the knowledge-curator agent for proposal review, and rebuilds the graph. The
+rewrites tool lookup indexes through the toolpack resolver, rewrites the curator
+enrichment, optionally runs the knowledge-curator agent for proposal review,
+and rebuilds the graph. The
 `run-loop` uses two lanes: fast in-epoch refresh runs
 `kg-maintain --no-tool-runners` after a coalesced interval/report-count trigger,
 and full boundary maintenance runs after report truth is rebuilt according to
@@ -276,10 +339,18 @@ available through `--knowledge-maintenance-interval-ms`.
 
 ## Past PR Library
 
-`knowledge/sources/code_context/past_prs/data/` contains the stable PR dump and searchable
-per-PR postmortem records. `knowledge/sources/code_context/past_prs/commands/` contains the
-refresh, postmortem, and sync commands so this evidence library travels with
-the orchestrator package.
+`projects/melee/knowledge/sources/code_context/past_prs/data/` contains the
+stable PR dump and searchable per-PR postmortem records.
+`projects/melee/knowledge/sources/code_context/past_prs/commands/`
+contains the missing-only fetch, postmortem, and sync commands so this evidence library
+travels with the orchestrator package while its accumulated data stays with the
+project.
+
+Past-PR sync is append/gap-fill only. The fetcher reads the last successful
+sync metadata, discovers the recent PR window from that high-water mark, and
+fetches raw PR slices only when the local `prs/pr-NNNN` record is absent or
+incomplete. Existing PR slices are not refreshed during session start; rebuilding
+a stale PR record is a manual delete-and-refetch operation.
 
 The PR postmortem builder supports `--pending-only`, so maintenance can scan
 the active PR corpus and only queue PRs whose
@@ -287,15 +358,25 @@ the active PR corpus and only queue PRs whose
 `--run-pr-agent` enables model-reviewed PR records; without it, deterministic
 scaffold records still keep the graph indexable.
 
-Current bootstrap status, 2026-06-09:
+Current validation status, 2026-06-26:
 
-- `2550 / 2550` discovered PRs have complete raw slices and model-reviewed
-  `agent_completed` postmortems.
-- Active PR postmortems have zero missing, unreadable, validation-issue, or
-  `agent_failed_scaffold_written` records.
-- Source-local API smoke, live tool runner smoke, graph rebuild, strict graph
-  smoke, TypeScript checks, and Python compile checks pass against the current
-  data layer when the validation ladder is run from the orchestrator layout.
+- Toolpack resolver coverage passes with `bun test
+  src/core/tools/resolver.test.ts` from `apps/server`.
+- TypeScript and integrated repository checks pass with `bunx tsc --noEmit
+  --pretty false` and `bun run check`.
+- `bun run kg:sources` lists registered tools through the enabled
+  `gamecube-decomp` toolpack.
+- Representative resolver-backed status calls pass for `ghidra`, `checkdiff`,
+  `mwcc_debug`, and `review_lint`.
+- `bun run kg:smoke -- --strict` requires project context; without
+  `--project melee`, tool status checks use the package root as the effective
+  repo root and fail project checkout prerequisites or stale-runner root
+  checks.
+- `bun run kg:smoke -- --project melee --strict` resolves tools through the
+  toolpack/project binding runtime, but strict readiness still fails for
+  unindexed sources (`banned_patterns`, `powerpc_docs`, `ssbm_data_sheet`) and
+  live-runner smoke proofs for `ghidra`, `opseq`, `mismatch_db`, and
+  `mwcc_debug`.
 
 ## Archive Boundary
 

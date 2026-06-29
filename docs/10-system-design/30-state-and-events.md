@@ -1,32 +1,36 @@
 ---
-covers: Durable state substrate, events, leases, reports, facts, and artifacts
-concepts: [durable-state, sqlite, leases, events, facts, artifacts]
+covers: Durable state substrate, events, target claims, worker states, checkpoints, facts, and artifacts
+concepts: [durable-state, sqlite, epochs, target-claims, worker-state, checkpoints, events, facts, artifacts]
 ---
 
 # Durable State And Events
 
 Durable state is the orchestrator's memory. It records the board, active work,
-agent sessions, scheduler epochs, reports, facts, and wake events. The state
-substrate allows workers and deterministic scheduling to operate at different
-times without losing context.
+agent sessions, scheduler epochs, worker states, checkpoints, facts, and wake
+events. The state substrate allows workers and deterministic scheduling to
+operate at different times without losing context.
 
 ## State Model
 
 The board carries:
 
 - Runs: the goal, desired worker count, baseline report identity, and status.
-- Targets and queue rows: candidate functions or units with priority and
-  rationale.
-- Leases and file locks: active ownership of bounded write sets.
+- Targets: candidate functions or units with priority and rationale.
+- Epochs: deterministic scheduling waves with fixed target membership,
+  completion counts, refresh counters, and boundary routing summaries.
+- Epoch targets: the target inventory for one epoch, with lifecycle positions
+  such as admitted, claimed, and finished.
+- Target claims: active or closed worker ownership for one epoch target,
+  including the explicit write set and worker workspace.
+- Worker states: runner-owned lifecycle ledgers for target claims.
+- Worker checkpoints: one row per runner validation attempt, including failed
+  validations and the selected best attempt.
 - Pi sessions: worker, PR splitter/reviewer, curation, reconcile, and QA repair invocation
   metadata.
-- Scheduler epochs: active epoch configuration, fixed target membership,
-  ready-queue state, completion counts, refresh counters, and boundary routing
-  summaries.
 - Legacy director cycles: old board-level decision rows retained only so old
   state files remain readable.
-- Worker reports: progress, blockers, facts, patches, and status.
-- Attempts and integrations: validation results and score-gate records.
+- Epoch verdicts and integrations: target-centric boundary truth, validation
+  results, and score-gate records.
 - Events: durable wake requests.
 
 ## Event Handshake
@@ -41,9 +45,7 @@ Wake events include:
 
 - `run_started`
 - `worker_finished`
-- `worker_stalled`
-- `needs_fact`
-- `score_candidate`
+- `worker_error`
 - `pool_below_target`
 - `epoch_admitted`
 - `epoch_exhausted`
@@ -56,16 +58,14 @@ Wake events include:
 - `epoch_regression_pause`
 - `epoch_cycle_error`
 
-In the default epoch cycle, fixed admission and ready-queue refill are separate.
-A shrinking ready queue is normal when the admitted set is nearly complete.
+In the default epoch cycle, fixed admission and worker-slot realization are
+separate. A shrinking pool of admitted-but-unclaimed work is normal when the
+admitted set is nearly complete.
 Fast refresh events record in-epoch `kg-maintain --no-tool-runners` work and
 coalescing decisions. Full refresh events record boundary knowledge
-maintenance after report truth is rebuilt. In legacy continuous mode
-(`--no-epoch-cycle`) the trigger tops the queue up on every pass and
-`pool_below_target` covers low queued work, low schedulable distinct-file work,
-blocked queued work behind active file locks, long-tail worker drain, and
-optional periodic replans. The state reader prioritizes unhandled
-`pool_below_target` events ahead of ordinary worker-report backlog so
+maintenance after report truth is rebuilt. `pool_below_target` covers worker
+pool pressure and admitted-target exhaustion. The state reader prioritizes
+unhandled `pool_below_target` events ahead of ordinary completion backlog so
 capacity-preserving replans are not delayed behind many older completion
 events.
 
@@ -75,12 +75,15 @@ the refill. `epoch_cycle_error` records a failed epoch commit or report build.
 Both carry enough payload for deterministic routing or an operator to decide
 whether to repair, revert, or resume.
 
-## Leases And Locks
+## Claims And Checkpoints
 
-A worker may only edit paths covered by its active lease. The state substrate
-rejects overlapping active locks for the same source path. When a worker
-finishes, stalls, or is recovered, the lease is released and transient locks are
-removed while reports and artifacts remain.
+A worker may only edit paths covered by its active target claim. Each claim owns
+an explicit write set, and each claim has exactly one worker state. Runner
+validation writes checkpoints under that worker state; failed validations are
+kept as evidence, while selectable checkpoints must pass hard gates and improve
+over baseline. When execution ends, the claim closes and the worker state
+records whether the lifecycle ended as exact, timeout, error, cancellation, or
+another runner-owned terminal state.
 
 ## Facts
 
@@ -103,6 +106,6 @@ The design taxonomy names these fact classes:
 ## Artifacts
 
 Artifacts make the run inspectable. Board snapshots, rendered prompts, raw Pi
-output, worker reports, fact files, blockers, validation transcripts, regression
-reports, guardian system-run logs, and incident packets belong under the run
-state directory.
+output, worker-state summaries, checkpoint notes, fact files, blockers,
+validation transcripts, regression reports, guardian system-run logs, and
+incident packets belong under the run state directory.

@@ -1,0 +1,183 @@
+{
+  "agent_status": "agent_completed",
+  "pr_identity": {
+    "number": 2768,
+    "title": "match and link itflipper.c (matches only)",
+    "state": "MERGED",
+    "author": "lukechampine",
+    "url": "https://github.com/doldecomp/melee/pull/2768",
+    "created_at": "2026-06-28T18:53:26Z",
+    "merged_at": "2026-06-28T18:57:00Z"
+  },
+  "changed_files": [],
+  "summary": "No PR evidence packet, diff excerpt, review comments, issue comments, changed-file metadata, or loaded PR slice files were available in the conversation context, so no PR-specific postmortem facts could be extracted.",
+  "reusable_decomp_lessons": [],
+  "naming_conventions": [],
+  "assembly_or_matching_tactics": [],
+  "review_feedback": [],
+  "follow_up_search_terms": [],
+  "curator_handoff": {
+    "accepted_candidate_records": [],
+    "source_update_candidates": [],
+    "rejection_notes": [
+      {
+        "note": "No claims were promoted because the required PR evidence was not present in the provided context.",
+        "evidence_refs": []
+      }
+    ]
+  },
+  "evidence_quality": {
+    "level": "missing",
+    "notes": [
+      "The injected PR indexer context packet was not visible in the available messages.",
+      "Without PR title, body, comments, changed files, diffs, or loaded files, changed-file and lesson extraction would be unsupported."
+    ]
+  },
+  "confidence": "low",
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2768",
+  "pr": {
+    "number": 2768,
+    "title": "match and link itflipper.c (matches only)",
+    "url": "https://github.com/doldecomp/melee/pull/2768",
+    "state": "MERGED",
+    "author": "lukechampine",
+    "created_at": "2026-06-28T18:53:26Z",
+    "merged_at": "2026-06-28T18:57:00Z"
+  },
+  "intake_role": "pr_intake",
+  "what_changed": [
+    "config/GALE01/symbols.txt: +16/-16 across 3 hunks",
+    "src/melee/it/items/itflipper.c: +15/-17 across 5 hunks",
+    "configure.py: +1/-1 across 1 hunks"
+  ],
+  "smart_moves": [],
+  "decomp_lessons": [
+    "Run the Pi postmortem agent for evidence-backed lessons before relying on this draft."
+  ],
+  "searchable_terms": [
+    "lukechampine",
+    "match",
+    "and",
+    "link",
+    "itflipper",
+    "matches",
+    "only",
+    "config",
+    "gale01",
+    "symbols",
+    "txt",
+    "configure",
+    "src",
+    "melee",
+    "items",
+    "it_803f5db0",
+    "itemstatetable_msbomb",
+    "it_803f5ea8",
+    "it_803f5f18",
+    "it_803f5f40",
+    "it_803f5f90",
+    "it_803f5ff0",
+    "it_804d5258",
+    "it_804d52c0",
+    "it_804d52c8",
+    "it_804dca20",
+    "it_804dcaa8",
+    "it_804dcaac",
+    "it_804dcab0",
+    "it_804dcab4",
+    "it_804dcab8",
+    "it_804dcabc",
+    "it_804dcac0",
+    "it_804dcac4",
+    "it_804dcac8",
+    "it_804dcad0",
+    "it_804dcad4",
+    "it_804dcad8",
+    "it_804dcae0",
+    "matchingfor",
+    "object",
+    "matching",
+    "itfreeze",
+    "itfoods",
+    "itmsbomb",
+    "nonmatching",
+    "itsscope",
+    "itstarrod",
+    "itharisen",
+    "itflipper_datattrs",
+    "itflipper_getattrs",
+    "item",
+    "xc4_article_data",
+    "x4_specialattributes",
+    "itflipper_spinspeedfromfighter",
+    "item_gobj",
+    "hsd_gobj",
+    "vec3",
+    "get_item",
+    "ftlib_800866dc",
+    "ftlib_80086bec",
+    "sqrtf__ff",
+    "it_80290ce8_inline",
+    "xcf4_fightergobjunk",
+    "ftlib_80086960",
+    "eliminate",
+    "it_3f14_logic20_dmgdealt",
+    "pad",
+    "pad_stack",
+    "xdd4_itemvar",
+    "xdd8",
+    "xdd4",
+    "itcoll_bounceoffvictim",
+    "it_3f14_dmgrecv_ce8",
+    "xcec_fightergobj",
+    "it_3f14_logic20_dmgreceived",
+    "xddc"
+  ],
+  "follow_up_queries": [
+    "Search past PR records for files related to PR 2768",
+    "Search review comments for match and link itflipper.c (matches only)"
+  ],
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching"
+    ],
+    "systems": [
+      "config",
+      "item",
+      "repo-root"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "+16/-16 across 3 hunks",
+      "evidence_refs": []
+    },
+    {
+      "path": "src/melee/it/items/itflipper.c",
+      "role": "+15/-17 across 5 hunks",
+      "evidence_refs": []
+    },
+    {
+      "path": "configure.py",
+      "role": "+1/-1 across 1 hunks",
+      "evidence_refs": []
+    }
+  ],
+  "agent_runtime": {
+    "runner": "orchestrator_kernel_pr_indexer",
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "orchestrator_state_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/projects/melee/state",
+    "orchestrator_run_id": "61d22348-876b-403a-bb9a-3154f7156fde",
+    "orchestrator_project_id": "melee",
+    "orchestrator_prepare_intake": true,
+    "orchestrator_kernel_database_url_configured": true,
+    "legacy_session_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/.pi-sessions/pr-review"
+  }
+}

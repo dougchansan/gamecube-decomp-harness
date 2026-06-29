@@ -1,0 +1,418 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2734",
+  "pr": {
+    "number": 2734,
+    "title": "Split and mostly link `gm_1B03`",
+    "url": "https://github.com/doldecomp/melee/pull/2734",
+    "state": "MERGED",
+    "author": "ribbanya",
+    "created_at": "2026-06-17T22:47:23Z",
+    "merged_at": "2026-06-17T22:52:13Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2734 split the former `melee/gm/gm_1B03.c` range into smaller game-mode translation units, linked most of the split units, adjusted symbols/splits/configuration, and moved or exposed related game-mode data/prototypes. The bot report shows linked code and linked/matched data improvements, while the large list of `gm_1B03` broken matches appears to be the expected consequence of moving functions into new split units.",
+  "change_classification": {
+    "primary_type": "decomp-matching split/link",
+    "categories": [
+      "decomp-matching",
+      "split-boundaries",
+      "headers",
+      "symbols",
+      "data-layout"
+    ],
+    "systems": [
+      "game-mode",
+      "config",
+      "item",
+      "library"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "config/GALE01/splits.txt",
+      "role": "Updated split ranges for `gm_1B03.c` and added new ranges for `gm_1B0FB.c`, `gm_1B0FF.c`, and `gm_1B14.c`; also adjusted nearby item data split ranges.",
+      "evidence_refs": [
+        "metadata.changed_files",
+        "diff_excerpt:splits.txt gm_1B03 range split",
+        "diff_excerpt:splits.txt itmsbomb/itflipper data range changes"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Adjusted symbol names/scopes/sizes around the split, including local compiler-style labels for jump tables/string data and local sbss scopes.",
+      "evidence_refs": [
+        "metadata.changed_files",
+        "diff_excerpt:symbols.txt @206/@63 jumptable replacements",
+        "diff_excerpt:symbols.txt gm_804D4310 -> @19",
+        "diff_excerpt:symbols.txt gm_804D68C0/C1/C8 scope and size changes"
+      ]
+    },
+    {
+      "path": "configure.py",
+      "role": "Changed build matching status: `gm_1B03.c`, `gm_1B0FB.c`, and `gm_1B0FF.c` are `Matching`; `gm_1B14.c` remains `NonMatching`.",
+      "evidence_refs": [
+        "diff_excerpt:configure.py MatchingFor object list"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1B03.c",
+      "role": "Shrank original TU by removing later game-mode scene/functions into new split files; retained early range and declared/moved several data objects.",
+      "evidence_refs": [
+        "metadata.changed_files",
+        "diff_excerpt:gm_1B03.c deletion of 1143-line tail",
+        "diff_excerpt:gm_1B03.c added data object declarations",
+        "diff_excerpt:gm_1B03.c TODO possible split due to gm_80480DC8"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1B0FB.c",
+      "role": "New split unit for the `0x801B0FB8..0x801B0FF8` range; bot report lists `gm_801B0FB8` as newly matched.",
+      "evidence_refs": [
+        "metadata.changed_files",
+        "diff_excerpt:splits.txt gm_1B0FB range",
+        "text_corpus:decomp-dev bot report new matches"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1B0FF.c",
+      "role": "New split unit for the `0x801B0FF8..0x801B14A0` range; configured as matching and bot report lists `gm_801B0FF8`, `gm_801B13B8`, and data as newly matched.",
+      "evidence_refs": [
+        "metadata.changed_files",
+        "diff_excerpt:splits.txt gm_1B0FF range",
+        "diff_excerpt:configure.py Matching object",
+        "text_corpus:decomp-dev bot report new matches"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1B14.c",
+      "role": "New split unit for the `0x801B14A0..0x801B2BA4` range; configured as nonmatching but contains many functions reported as newly matched or improved.",
+      "evidence_refs": [
+        "metadata.changed_files",
+        "diff_excerpt:splits.txt gm_1B14 range",
+        "diff_excerpt:configure.py NonMatching object",
+        "text_corpus:decomp-dev bot report new matches and unmatched improvements"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_18A5.h",
+      "role": "Header cleanup and extern additions for game-mode globals, including `gm_804771C4` and `gm_80477738`.",
+      "evidence_refs": [
+        "metadata.changed_files",
+        "diff_excerpt:gm_18A5.h include/prototype/extern changes"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_18A5.c",
+      "role": "Moved `TmData gm_804771C4` definition from static header into C file.",
+      "evidence_refs": [
+        "diff_excerpt:gm_18A5.c gm_804771C4 definition",
+        "diff_excerpt:gm_18A5.static.h removed gm_804771C4"
+      ]
+    },
+    {
+      "path": "src/melee/gm/types.h",
+      "role": "Changed game-mode type surface; exact type additions are not visible in loaded diff excerpt.",
+      "evidence_refs": [
+        "metadata.changed_files"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itlinkboomerang.c",
+      "role": "Item code adjusted, likely to satisfy data/split linkage side effects; exact edits are not visible in loaded diff excerpt.",
+      "evidence_refs": [
+        "metadata.changed_files"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itflipper.c",
+      "role": "Small item code adjustment accompanying item data split range changes; exact source edits are not visible in loaded diff excerpt.",
+      "evidence_refs": [
+        "metadata.changed_files",
+        "diff_excerpt:splits.txt itflipper data range change"
+      ]
+    },
+    {
+      "path": "src/melee/lb/lbdvd.c",
+      "role": "Small library-side adjustment; exact edits are not visible in loaded diff excerpt.",
+      "evidence_refs": [
+        "metadata.changed_files"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Split `melee/gm/gm_1B03.c` text/data ranges into four units: `gm_1B03.c`, `gm_1B0FB.c`, `gm_1B0FF.c`, and `gm_1B14.c`.",
+    "Updated `configure.py` so the first three split units are built as `Matching`, while `gm_1B14.c` is still `NonMatching`.",
+    "Moved a large tail of code and scene data out of `gm_1B03.c`; the diff excerpt shows removal of `gm_801B0FB8`, `gm_801B0FF8`, scene arrays, and much later code from the original file.",
+    "Adjusted symbol metadata around `.data`, `.bss`, `.sdata`, and `.sbss`, including replacing some semantic/generated jumptable names with local `@NN` labels.",
+    "Moved `gm_804771C4` from `gm_18A5.static.h` into `gm_18A5.c` and declared it in `gm_18A5.h`.",
+    "Added new headers/dox files for split game-mode units and updated includes/prototypes in adjacent game-mode files.",
+    "Adjusted item data split ranges for `itmsbomb` and `itflipper`, with related edits in item source files."
+  ],
+  "smart_moves": [
+    "Kept split metadata, build configuration, symbol ownership, and source moves in the same PR, which made the split coherent enough for the bot to report linked-code and data improvements.",
+    "Marked `gm_1B14.c` as `NonMatching` even though many functions newly matched, preserving the remaining nonmatching status instead of overstating the unit as fully matching.",
+    "Used local `@NN` labels for some data/jumptable symbols where the excerpt does not show semantic evidence, aligning with conservative naming rather than inventing meaning.",
+    "Moved a real data definition (`gm_804771C4`) out of a static header into a C file and exposed it through the header, reducing header-owned storage risk."
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When splitting a formerly large TU, expect per-unit match reports to show old-unit broken matches alongside new-unit matches; interpret these as relocation/split effects only when the same functions appear as newly matched in the new units.",
+      "evidence_refs": [
+        "text_corpus:bot report 52 new matches",
+        "text_corpus:bot report 46 broken matches in gm_1B03",
+        "diff_excerpt:splits.txt split ranges"
+      ],
+      "confidence": 0.86
+    },
+    {
+      "lesson": "A split PR can improve linked and matched data significantly even if headline matched-code percentage drops slightly, because symbol/split ownership changes may move code and data across unit boundaries.",
+      "evidence_refs": [
+        "text_corpus:bot report matched code -0.05%, linked code +0.11%, matched data +5.44%, linked data +5.37%"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "For partially linked split work, keep the not-yet-fully-matching split unit explicitly `NonMatching` in configuration while allowing already-matching smaller split units to become `Matching`.",
+      "evidence_refs": [
+        "diff_excerpt:configure.py Object(Matching gm_1B03/gm_1B0FB/gm_1B0FF)",
+        "diff_excerpt:configure.py Object(NonMatching gm_1B14)",
+        "text_corpus:bot report gm_1B14 unmatched improvements"
+      ],
+      "confidence": 0.82
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Address-style game-mode names such as `gm_801B0FB8`, `gm_803DD888_Scenes`, and `gm_804D68B0` were retained where stronger semantic names are not shown in the PR evidence.",
+      "evidence_refs": [
+        "diff_excerpt:gm_1B03.c removed functions/scenes",
+        "diff_excerpt:symbols.txt gm_* symbols"
+      ],
+      "confidence": 0.74
+    },
+    {
+      "convention": "Local data labels may use compiler-style `@NN` symbols instead of speculative names when semantic ownership is not proven in the evidence.",
+      "evidence_refs": [
+        "diff_excerpt:symbols.txt jumptable_803DD850 -> @206",
+        "diff_excerpt:symbols.txt jumptable_803DD8E8 -> @63",
+        "diff_excerpt:symbols.txt gm_804D4310 -> @19"
+      ],
+      "confidence": 0.8
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Split by address ranges in `splits.txt`, then mirror those ranges in `configure.py` objects so the linker and match accounting attribute functions/data to the new units.",
+      "evidence_refs": [
+        "diff_excerpt:splits.txt gm_1B03/gm_1B0FB/gm_1B0FF/gm_1B14 ranges",
+        "diff_excerpt:configure.py object list"
+      ],
+      "confidence": 0.88
+    },
+    {
+      "tactic": "Adjust symbol scopes/sizes and local labels during a split to match new unit ownership, especially for `.data`, `.sdata`, and `.sbss` symbols crossing old boundaries.",
+      "evidence_refs": [
+        "diff_excerpt:symbols.txt scope/name/size changes",
+        "diff_excerpt:splits.txt data/sbss range changes"
+      ],
+      "confidence": 0.79
+    },
+    {
+      "tactic": "Use bot match report deltas to distinguish genuine regressions from expected old-unit broken matches after code moves; in this PR, many `gm_1B03` broken matches correspond to new matches under `gm_1B0FB`, `gm_1B0FF`, or `gm_1B14`.",
+      "evidence_refs": [
+        "text_corpus:bot report new matches",
+        "text_corpus:bot report broken matches"
+      ],
+      "confidence": 0.83
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "author": "decomp-dev[bot]",
+      "summary": "GALE01 report showed matched code 74.94% (-0.05%, -1752 bytes), linked code 48.55% (+0.11%, +4440 bytes), total data +3 bytes, matched data +5.44% (+65859 bytes), linked data +5.37% (+65035 bytes). It listed 52 new matches, 46 broken matches, 2 improvements in unmatched items, and 2 regressions in unmatched items.",
+      "evidence_refs": [
+        "text_corpus:issue_comment decomp-dev[bot] 2026-06-17T22:51:19Z"
+      ]
+    },
+    {
+      "kind": "absence",
+      "author": null,
+      "summary": "No human review comments or PR body rationale are present in the loaded evidence.",
+      "evidence_refs": [
+        "metadata.counts review_comments=0 reviews=0",
+        "text_corpus:pr_body empty"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR 2734",
+    "Split and mostly link gm_1B03",
+    "ribbanya",
+    "gm_1B03",
+    "gm_1B0FB",
+    "gm_1B0FF",
+    "gm_1B14",
+    "gm_801B0FB8",
+    "gm_801B0FF8",
+    "gm_801B13B8",
+    "gm_801B2790",
+    "gm_801B1F70",
+    "gm_801B1C24",
+    "gm_803DD6A0_Scenes",
+    "gm_803DD6D0_Scenes",
+    "gm_803DD888_Scenes",
+    "gm_803DD8B8_Scenes",
+    "gm_803DD9A0_Scenes",
+    "gm_804771C4",
+    "gm_80477738",
+    "gm_80480DC8",
+    "gm_80480F20",
+    "gm_804D68C0",
+    "gm_804D68C1",
+    "gm_804D68C8",
+    "configure.py MatchingFor",
+    "config/GALE01/splits.txt",
+    "config/GALE01/symbols.txt",
+    "linked data +5.37",
+    "matched data +5.44"
+  ],
+  "follow_up_queries": [
+    "gm_1B03 split gm_1B0FB gm_1B0FF gm_1B14",
+    "gm_801B0FF8 MenuEnterData split",
+    "gm_801B2790 gm_1B14 nonmatching",
+    "gm_80480DC8 possible split boundary",
+    "gm_804771C4 TmData ownership",
+    "itflipper itmsbomb data range PR 2734",
+    "jumptable_803DD850 @206",
+    "jumptable_803DD8E8 @63"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json",
+      "changed_files.jsonl",
+      "diff_excerpt",
+      "raw_diff truncated",
+      "text_corpus bot report"
+    ],
+    "notes": [
+      "PR body is empty and there are no human review comments, so author intent and reviewer rationale are mostly unavailable.",
+      "The loaded raw diff is truncated; several changed files are known only from metadata, not from full hunks.",
+      "Bot report gives useful quantitative validation, but no full build log or objdiff details are loaded.",
+      "Claims about exact source edits in `gm_1B0FB.c`, `gm_1B0FF.c`, `gm_1B14.c`, item files, `types.h`, and `lbdvd.c` are limited because their full hunks are not visible in the excerpt."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "pr_lesson",
+        "title": "Split-induced broken matches can be expected when functions move to new units",
+        "text": "In PR 2734, the bot report listed many broken matches under old unit `main/melee/gm/gm_1B03` while listing corresponding new matches under split units `gm_1B0FB`, `gm_1B0FF`, and `gm_1B14`. For split PR review, compare old-unit broken matches against new-unit matches before treating them as regressions.",
+        "scope": [
+          "split-boundaries",
+          "match-report-interpretation",
+          "game-mode"
+        ],
+        "evidence_refs": [
+          "text_corpus:bot report new matches",
+          "text_corpus:bot report broken matches",
+          "diff_excerpt:splits.txt split ranges"
+        ]
+      },
+      {
+        "record_type": "pr_lesson",
+        "title": "Partially matching split units should remain NonMatching in configure.py",
+        "text": "PR 2734 configured `gm_1B03.c`, `gm_1B0FB.c`, and `gm_1B0FF.c` as `Matching`, but left `gm_1B14.c` as `NonMatching` despite many new matches and improvements, reflecting remaining nonmatching work in that split unit.",
+        "scope": [
+          "configure.py",
+          "matching-status",
+          "game-mode"
+        ],
+        "evidence_refs": [
+          "diff_excerpt:configure.py",
+          "text_corpus:bot report gm_1B14 new matches and unmatched improvements"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "gm_1B03 split boundaries from PR 2734",
+        "text": "`src/melee/gm/gm_1B03.c` was split in PR 2734 into `gm_1B03.c` (`0x801B0348..0x801B0FB8`, data `0x803DD6A0..0x803DD888`), `gm_1B0FB.c` (`0x801B0FB8..0x801B0FF8`, data `0x803DD888..0x803DD8B8`), `gm_1B0FF.c` (`0x801B0FF8..0x801B14A0`, data `0x803DD8B8..0x803DD9A0`), and `gm_1B14.c` (`0x801B14A0..0x801B2BA4`, data `0x803DD9A0..0x803DDC58`).",
+        "source_path": "src/melee/gm/gm_1B03.c",
+        "scope": [
+          "src/melee/gm/gm_1B03.c",
+          "src/melee/gm/gm_1B0FB.c",
+          "src/melee/gm/gm_1B0FF.c",
+          "src/melee/gm/gm_1B14.c",
+          "config/GALE01/splits.txt"
+        ],
+        "evidence_refs": [
+          "diff_excerpt:splits.txt"
+        ],
+        "reason": "Useful path-scoped history for future work near these split boundaries; curator should verify against current source before promoting."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Review split PRs by correlating split/configure/symbol changes with match-report movement",
+        "text": "When a PR splits a TU, review the split ranges, configure matching status, symbol ownership, and bot new/broken match lists together. Old-unit broken matches may be expected if the same functions become new matches in newly split units.",
+        "source_path": null,
+        "scope": [
+          "split-boundaries",
+          "matching-reports",
+          "configure.py",
+          "symbols.txt"
+        ],
+        "evidence_refs": [
+          "diff_excerpt:splits.txt",
+          "diff_excerpt:configure.py",
+          "diff_excerpt:symbols.txt",
+          "text_corpus:bot report"
+        ],
+        "reason": "Potential reusable review guidance supported by this PR, but should be curated as a standard only if corroborated by additional split PRs or current project practice."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "gm_1B14 remained configured NonMatching after PR 2734",
+        "text": "PR 2734 added `src/melee/gm/gm_1B14.c` and configured it as `Object(NonMatching, \"melee/gm/gm_1B14.c\")`, while the bot report showed many functions in the unit newly matched and two unmatched-item improvements.",
+        "source_path": "src/melee/gm/gm_1B14.c",
+        "scope": [
+          "src/melee/gm/gm_1B14.c",
+          "configure.py"
+        ],
+        "evidence_refs": [
+          "diff_excerpt:configure.py",
+          "text_corpus:bot report"
+        ],
+        "reason": "Helpful historical context for future `gm_1B14` matching work; curator should check current status before promoting."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that the PR fully matched `gm_1B14.c`; `configure.py` explicitly kept it `NonMatching`.",
+      "Do not infer reviewer approval rationale beyond merge state; no human review comments are loaded.",
+      "Do not promote exact lessons about the item or library edits because the loaded diff excerpt does not show their source changes.",
+      "Do not treat the existing `#pragma dont_inline` visible in `gm_1B03.c` as a new tactic from this PR; the excerpt does not show it being added."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "runner": "orchestrator_kernel_pr_indexer",
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "orchestrator_state_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/projects/melee/state",
+    "orchestrator_run_id": "08bfe41e-1b7c-4685-8646-dff5e02a5dab",
+    "orchestrator_project_id": "melee",
+    "orchestrator_prepare_intake": true,
+    "orchestrator_kernel_database_url_configured": true,
+    "legacy_session_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/.pi-sessions/pr-review"
+  }
+}

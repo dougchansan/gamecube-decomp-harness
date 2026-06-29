@@ -1,0 +1,17 @@
+{
+  "number": 2703,
+  "title": "match itmewtwoshadowball ItemStateTable",
+  "state": "MERGED",
+  "createdAt": "2026-06-15T15:25:04Z",
+  "updatedAt": "2026-06-15T19:40:07Z",
+  "mergedAt": "2026-06-15T19:40:06Z",
+  "closedAt": "2026-06-15T19:40:06Z",
+  "author": "lukechampine",
+  "url": "https://github.com/doldecomp/melee/pull/2703",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 3263
+  }
+}

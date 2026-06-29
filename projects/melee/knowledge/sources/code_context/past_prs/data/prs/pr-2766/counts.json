@@ -1,0 +1,17 @@
+{
+  "number": 2766,
+  "title": "Improve itflipper names",
+  "state": "OPEN",
+  "createdAt": "2026-06-28T18:07:42Z",
+  "updatedAt": "2026-06-28T22:26:40Z",
+  "mergedAt": null,
+  "closedAt": null,
+  "author": "lukechampine",
+  "url": "https://github.com/doldecomp/melee/pull/2766",
+  "counts": {
+    "issue_comments": 11,
+    "review_comments": 0,
+    "reviews": 1,
+    "diff_bytes": 42258
+  }
+}

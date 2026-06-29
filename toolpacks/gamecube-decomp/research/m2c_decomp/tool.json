@@ -1,0 +1,41 @@
+{
+  "id": "m2c_decomp",
+  "title": "m2c decompilation scaffold",
+  "trust_tier": "tool_evidence",
+  "description": "Run the tool-local m2c fork to generate a C-like scaffold for a function or translation unit.",
+  "operation_mode": "tool_local_impl",
+  "runner_status": "on_demand",
+  "status_message": "Tool-local implementation: APIs invoke toolpacks/gamecube-decomp/_impl/gamecube/tools/decomp.py and the vendored m2c package.",
+  "limitations": [
+    "The vendored m2c fork is GPL-3.0 licensed and lives under toolpacks/gamecube-decomp/_impl/gamecube/m2c.",
+    "m2c output is a scaffold for understanding control/data flow, not reviewable source and not a substitute for natural decompilation.",
+    "Requires pyelftools, pcpp, generated object/asm artifacts, and the melee m2ctx.py helper."
+  ],
+  "commands": {
+    "status": "python3 toolpacks/gamecube-decomp/research/m2c_decomp/api/status.py --repo-root <repo_root> --json",
+    "decompile": "python3 toolpacks/gamecube-decomp/research/m2c_decomp/api/decompile.py --repo-root <repo_root> --input <function_or_unit> --json"
+  },
+  "capabilities": [
+    "m2c_scaffold",
+    "asm_decompilation",
+    "control_flow_reference"
+  ],
+  "category": "research",
+  "path": "research/m2c_decomp",
+  "process_role": "control_flow_scaffold",
+  "usage": {
+    "invocation_mode": "on_demand",
+    "mutates_source": false,
+    "blocks_on_failure": false,
+    "triggers": [
+      "function_logic_unknown",
+      "asm_control_flow_needed",
+      "needs_initial_c_scaffold"
+    ],
+    "outputs": [
+      "m2c_scaffold",
+      "control_flow_reference"
+    ],
+    "agent_guidance": "Use for understanding control/data flow only; never paste scaffold output as final source without naturalizing and validating it."
+  }
+}

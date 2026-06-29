@@ -1,7 +1,7 @@
 ---
 covers: Coverage audit and counted evidence for Melee PR review QA standards
 concepts: [past-prs, qa-coverage, review-standards, provenance]
-code-ref: knowledge/sources/code_context/past_prs/data
+code-ref: projects/melee/knowledge/sources/code_context/past_prs/data
 ---
 
 # Melee PR Review QA Coverage Audit

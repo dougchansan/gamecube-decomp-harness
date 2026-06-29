@@ -28,7 +28,7 @@ packets.
 
 ## Run Boundary
 
-The run is the unit of progress. A source file, worker, symbol, or lease is not
+The run is the unit of progress. A source file, worker, symbol, or claim is not
 a PR boundary. A run can target a checkpoint such as `+1.0% matched_code_percent`
 or `+5.0% matched_code_percent` and keep integrating verified improvements until
 that target is reached or useful evidence runs out.
@@ -66,12 +66,12 @@ move down a layer:
 | `decomp-find` | Board scan, candidate-prior features, linked-blocker awareness, and progress metrics. |
 | `melee-decomp` | Worker system prompt and co-located context for one file or symbol: gather evidence, edit source, verify, and stop before guessing. |
 | `melee-decomp-sweep` | Last-resort experimental tooling for bounded source-shape experiments, kept out of default prompt context. |
-| Run scheduler | Deterministic Sudoku player: admit/refill/reroute targets from the whole board, explicit epoch policy, locks, cooldowns, and every durable fact. |
+| Run scheduler | Deterministic Sudoku player: admit and route targets from the whole board, explicit epoch policy, claims, cooldowns, and every durable fact. |
 
 ## Runtime Principle
 
 The orchestrator itself is not the main reasoning agent. It is a thin stateful
-runner that stores facts, leases, events, prompts, and artifacts. It launches
+runner that stores facts, target claims, events, prompts, and artifacts. It launches
 worker and boundary-review Pi sessions only when durable state says there is
 work to do.
 

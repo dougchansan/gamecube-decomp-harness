@@ -1,0 +1,306 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2750",
+  "pr": {
+    "number": 2750,
+    "title": "Improve `gm_1BFA` match",
+    "url": "https://github.com/doldecomp/melee/pull/2750",
+    "state": "MERGED",
+    "author": "dberweger2017",
+    "created_at": "2026-06-22T06:38:22Z",
+    "merged_at": "2026-06-22T10:42:12Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2750 improves the gm_1BFA match for gm_801BFCFC by changing nearby local declaration and helper signature/source shape in src/melee/gm/gm_1BFA.c and aligning struct/member types plus header visibility in src/melee/gm/gm_1BFA.h. The PR body reports no intended behavior change and verification via ninja report plus objdiff improvement to about 99.19%.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "local-declarations",
+      "type-shape"
+    ],
+    "systems": [
+      "game-mode",
+      "gm_1BFA",
+      "challenger-approaching"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gm/gm_1BFA.c",
+      "role": "Adjusted file comment placement, made gm_801BFC60 static with revised parameter/return types, removed uncertain return-type remark, simplified return cast, and changed several gm_801BFCFC local variable types.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gm/gm_1BFA.c added 6 deleted 8 hunks 5",
+        "raw_diff: src/melee/gm/gm_1BFA.c hunks",
+        "human_pr_text: Summary and Verification"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1BFA.h",
+      "role": "Adjusted un_804A1F48_t member types and removed the public prototype for gm_801BFC60 after the helper became static in the C file.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gm/gm_1BFA.h added 3 deleted 4 hunks 1",
+        "raw_diff: src/melee/gm/gm_1BFA.h hunk"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Moved the file-level comment from a @remarks block after includes to an @file comment at the top: 'Seems to deal with the challenger approaching functions.'",
+      "evidence_refs": [
+        "raw_diff: gm_1BFA.c top hunk"
+      ]
+    },
+    {
+      "text": "Changed gm_801BFC60 from an externally declared s32** helper taking s16/s32/s16/s32/void** to a static helper returning UNK_T* and taking u32/s32/u32/u32/UNK_T*.",
+      "evidence_refs": [
+        "raw_diff: gm_1BFA.c gm_801BFC60 signature",
+        "raw_diff: gm_1BFA.h removed gm_801BFC60 prototype"
+      ]
+    },
+    {
+      "text": "Removed a remark saying the gm_801BFC60 return type was uncertain and removed an explicit cast in its fallback return path.",
+      "evidence_refs": [
+        "raw_diff: gm_1BFA.c gm_801BFC60 hunk"
+      ]
+    },
+    {
+      "text": "Adjusted gm_801BFCFC locals: temp_r3 changed from s32** to UNK_T*, var_r25 from u32 to int, and var_r31 from void** to UNK_T*.",
+      "evidence_refs": [
+        "raw_diff: gm_1BFA.c gm_801BFCFC local declarations"
+      ]
+    },
+    {
+      "text": "Changed un_804A1F48_t fields x0 and x2 from signed s16 to unsigned u16, and x8 from s32* to UNK_T.",
+      "evidence_refs": [
+        "raw_diff: gm_1BFA.h struct un_804A1F48_t hunk"
+      ]
+    },
+    {
+      "text": "Reported verification: ninja build/GALE01/report.json and objdiff-cli show gm_801BFCFC at 99.1875% with 20 arg mismatches; bot report records gm_801BFCFC improving from 95.34% to 99.19% for main/melee/gm/gm_1BFA.",
+      "evidence_refs": [
+        "human_pr_text: Verification",
+        "text_corpus.jsonl: decomp-dev[bot] issue_comment report"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Kept the matching change narrow: only the local helper declaration/source shape, local variable declarations, and related header type/prototype surface changed.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff"
+      ]
+    },
+    {
+      "text": "Made gm_801BFC60 static and removed its header declaration, aligning visibility with its local helper role as represented by this PR.",
+      "evidence_refs": [
+        "raw_diff: gm_1BFA.c gm_801BFC60 static",
+        "raw_diff: gm_1BFA.h removed gm_801BFC60 prototype"
+      ]
+    },
+    {
+      "text": "Used UNK_T/UNK_T* to represent not-yet-understood data instead of preserving incompatible-looking s32** or void** shapes.",
+      "evidence_refs": [
+        "raw_diff: gm_1BFA.c gm_801BFC60 and gm_801BFCFC type changes",
+        "raw_diff: gm_1BFA.h x8 type change"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "text": "For matching-sensitive helper calls, local declaration shape can affect current codegen enough to improve a caller match without intended behavior changes.",
+      "scope": [
+        "src/melee/gm/gm_1BFA.c",
+        "gm_801BFCFC",
+        "gm_801BFC60"
+      ],
+      "evidence_refs": [
+        "human_pr_text: 'adding the local declaration source shape needed for the current codegen'",
+        "text_corpus.jsonl: bot report gm_801BFCFC 95.34% to 99.19%"
+      ],
+      "confidence": 0.86
+    },
+    {
+      "text": "When a helper is only needed locally, making it static and removing its public header prototype can be part of the matching/source-shape adjustment, if the diff supports that visibility.",
+      "scope": [
+        "src/melee/gm/gm_1BFA.c",
+        "src/melee/gm/gm_1BFA.h",
+        "gm_801BFC60"
+      ],
+      "evidence_refs": [
+        "raw_diff: gm_801BFC60 became static",
+        "raw_diff: gm_801BFC60 prototype removed from gm_1BFA.h"
+      ],
+      "confidence": 0.78
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "No semantic rename was introduced for unknown symbols; address-style names such as gm_801BFC60, gm_801BFCFC, gm_804D6860, and un_804A1F48_t were retained.",
+      "evidence_refs": [
+        "raw_diff"
+      ]
+    },
+    {
+      "text": "The file comment uses tentative wording ('Seems to deal with the challenger approaching functions') rather than asserting an unsupported subsystem name.",
+      "evidence_refs": [
+        "raw_diff: added @file comment"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "text": "Changed local declarations and helper signature types to influence gm_801BFCFC codegen; PR body explicitly identifies this as the source-shape needed for the current codegen.",
+      "evidence_refs": [
+        "human_pr_text: Summary",
+        "raw_diff: gm_801BFC60 and gm_801BFCFC declaration changes"
+      ]
+    },
+    {
+      "text": "A pre-existing #pragma push / #pragma dont_inline on / #pragma pop surrounds gm_801BFC60 and was retained while the helper signature changed; the PR slice does not show this pragma being newly added.",
+      "evidence_refs": [
+        "raw_diff: gm_801BFC60 hunk shows pragma context without added pragma lines"
+      ]
+    },
+    {
+      "text": "Verification evidence reports a match-score improvement for gm_801BFCFC, but not a full match: objdiff-cli 99.1875% with 20 arg mismatches; bot table 95.34% before to 99.19% after.",
+      "evidence_refs": [
+        "human_pr_text: Verification",
+        "text_corpus.jsonl: decomp-dev[bot] report"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "text": "No human review comments were present in the loaded slice.",
+      "evidence_refs": [
+        "metadata_json: counts.review_comments = 0 and reviews = 0"
+      ]
+    },
+    {
+      "text": "Automated bot feedback recorded one unmatched-item improvement for main/melee/gm/gm_1BFA / gm_801BFCFC.",
+      "evidence_refs": [
+        "text_corpus.jsonl: issue_comment by decomp-dev[bot]"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR 2750",
+    "gm_1BFA",
+    "gm_801BFCFC",
+    "gm_801BFC60",
+    "un_804A1F48_t",
+    "local declaration source shape",
+    "current codegen",
+    "challenger approaching",
+    "UNK_T",
+    "static helper",
+    "dont_inline",
+    "gm_1BFA.h",
+    "gm_1BFA.c",
+    "objdiff-cli 99.1875",
+    "20 arg mismatches",
+    "95.34% to 99.19%"
+  ],
+  "follow_up_queries": [
+    "gm_801BFCFC local declaration source shape",
+    "gm_801BFC60 static UNK_T",
+    "un_804A1F48_t x8 UNK_T",
+    "gm_1BFA challenger approaching",
+    "dont_inline gm_801BFC60",
+    "gm_801BFCFC 20 arg mismatches"
+  ],
+  "evidence_quality": {
+    "status": "strong",
+    "evidence_refs": [
+      "metadata_json: PR metadata, changed files, merge state",
+      "human_pr_text: Summary and Verification",
+      "raw_diff: complete diff excerpt for two changed files",
+      "text_corpus.jsonl: bot report"
+    ],
+    "notes": [
+      "Evidence is strong for what changed and the reported match improvement.",
+      "There are no human review comments, so reviewer intent or acceptance rationale beyond merge status is not available.",
+      "The slice supports that local declaration shape improved codegen for this function, but does not prove a broader project-wide rule about using UNK_T or static helpers.",
+      "The retained dont_inline pragma is visible only as context in the diff; the PR did not add it, so it should not be treated as a new tactic justified by this PR alone."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "kind": "matching_lesson",
+        "title": "Local declaration shape can affect caller codegen",
+        "text": "In PR #2750, changing gm_801BFC60's local helper signature/visibility and related gm_801BFCFC local declarations was described by the author as adding the local declaration source shape needed for current codegen, and the bot report showed gm_801BFCFC improving from 95.34% to 99.19%. Keep this lesson scoped to gm_1BFA-style matching work unless corroborated elsewhere.",
+        "scope": [
+          "src/melee/gm/gm_1BFA.c",
+          "gm_801BFCFC",
+          "gm_801BFC60"
+        ],
+        "evidence_refs": [
+          "human_pr_text: Summary",
+          "raw_diff: gm_801BFC60/gm_801BFCFC declaration changes",
+          "text_corpus.jsonl: decomp-dev[bot] report"
+        ],
+        "confidence": 0.84
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "gm_1BFA tentative challenger-approaching scope",
+        "text": "PR #2750 added a file-level comment to src/melee/gm/gm_1BFA.c: 'Seems to deal with the challenger approaching functions.' This is tentative wording from the diff and should remain scoped/qualified unless other source evidence confirms it.",
+        "source_path": "src/melee/gm/gm_1BFA.c",
+        "scope": [
+          "gm_1BFA",
+          "game-mode"
+        ],
+        "evidence_refs": [
+          "raw_diff: added @file comment"
+        ],
+        "reason": "Could help future path-context search, but the wording itself is uncertain and should not be promoted as a definitive subsystem fact without corroboration."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Keep local helper visibility and declaration shape aligned with codegen evidence",
+        "text": "Consider a standards note that, when a helper is truly local and matching evidence supports it, static visibility plus the local declaration/source shape can be part of the matching hypothesis; header prototypes should be removed only when the helper is not public.",
+        "source_path": null,
+        "scope": [
+          "headers",
+          "local declarations",
+          "decomp matching"
+        ],
+        "evidence_refs": [
+          "human_pr_text: Summary",
+          "raw_diff: gm_801BFC60 became static and prototype was removed",
+          "text_corpus.jsonl: bot report"
+        ],
+        "reason": "The PR provides a concrete example, but it is only one small slice; curator should decide whether it adds anything beyond existing truthful-headers and infer-authored-source-style standards."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that UNK_T is generally preferable to recovered concrete types; this PR only shows UNK_T used in this local matching adjustment.",
+      "Do not infer that #pragma dont_inline is newly justified by this PR; the pragma appears as retained context, not an added change.",
+      "Do not claim gm_801BFCFC fully matched; the reported state remains 99.1875% with 20 arg mismatches."
+    ]
+  },
+  "confidence": 0.88,
+  "agent_runtime": {
+    "runner": "orchestrator_kernel_pr_indexer",
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "orchestrator_state_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/projects/melee/state",
+    "orchestrator_run_id": "08bfe41e-1b7c-4685-8646-dff5e02a5dab",
+    "orchestrator_project_id": "melee",
+    "orchestrator_prepare_intake": true,
+    "orchestrator_kernel_database_url_configured": true,
+    "legacy_session_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/.pi-sessions/pr-review"
+  }
+}

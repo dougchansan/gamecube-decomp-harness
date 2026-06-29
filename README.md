@@ -41,11 +41,10 @@ bun run smoke
 `bun run smoke` uses dry-run agents and fixture data, so it does not require a
 live provider or edit a real decompilation checkout.
 
-Inspect the CLI:
+Inspect the server job surface:
 
 ```sh
-bun run orch -- --help
-bun run orch -- --project melee status
+bun run server:job -- --project melee status
 ```
 
 Launch the dashboard when you want the browser control surface:
@@ -80,7 +79,7 @@ Keep literal API keys and generated session state out of tracked files.
 Initialize a run:
 
 ```sh
-bun run orch -- --project melee init-run \
+bun run server:job -- --project melee init-run \
   --desired-workers 16 \
   --goal-kind matched_code_percent \
   --goal-value 72
@@ -89,7 +88,7 @@ bun run orch -- --project melee init-run \
 Run the supervised worker loop:
 
 ```sh
-bun run orch -- --project melee --agent-timeout-seconds 14400 babysit \
+bun run server:job -- --project melee --agent-timeout-seconds 14400 babysit \
   --max-workers 16 \
   --idle-sleep-ms 5000 \
   --worker-thinking-level low
@@ -98,25 +97,20 @@ bun run orch -- --project melee --agent-timeout-seconds 14400 babysit \
 Before review or handoff, run the regression gate:
 
 ```sh
-bun run orch -- --project melee regression-check
+bun run server:job -- --project melee regression-check
 ```
 
 For high-throughput runs, tune worker count, queue size, candidate windows, graph
-ranking, and lease recovery flags from the CLI or dashboard. The detailed
+ranking, and lease recovery flags from server jobs or the dashboard. The detailed
 operational notes live in the docs.
 
 ## Repository Map
 
 | Area | Purpose |
 | --- | --- |
-| `apps/cli/` | CLI entry point and commands for runs, workers, recovery, regression checks, PR handoff, and knowledge graph maintenance. |
-| `apps/dashboard/` | React/Vite dashboard frontend. |
-| `apps/dashboard-server/` | Bun dashboard API, static serving, process controls, and PR handoff actions. |
-| `apps/agent-viewer/` | Prompt preview and inspection UI for agent templates. |
-| `packages/core/` | Project resolution, SQLite state, board loading, shell helpers, regression logic, handoff helpers, and shared runtime types. |
-| `packages/agents/` | Director, worker, PR-review, knowledge-curator, prompt templates, and Pi runtime integration. |
-| `packages/knowledge/` | Knowledge graph/resource APIs over repo-level `knowledge/` data. |
-| `packages/ui-contract/` | Browser-safe dashboard payload types and formatting helpers. |
+| `apps/frontend/` | React/Vite dashboard frontend. |
+| `apps/server/` | Bun API/static server plus server-owned jobs, process controls, run orchestration, validation, handoff, agents, tools, knowledge, project registry, platform helpers, smoke tests, and fixtures. |
+| `packages/agent-kernel/` | Symlinked external Agent Kernel workspace used by the server runtime. |
 | `projects/` | Tracked project descriptors plus ignored project-local checkout, state, graph, env, and session paths. |
 | `knowledge/` | Repo-level references, resources, indexes, graph state, and past-PR corpus. |
 | `docs/` | Foundation, system design, implementation details, runbooks, and preserved design artifacts. |
@@ -131,5 +125,5 @@ operational notes live in the docs.
 - [Agent model](docs/10-system-design/20-agent-model.md)
 - [Process guardians](docs/10-system-design/25-process-guardians.md)
 - [Worker lifecycle](docs/10-system-design/40-worker-lifecycle.md)
-- [CLI implementation](docs/20-implementation/cli/00-overview.md)
+- [Server job implementation](docs/20-implementation/server-jobs/00-overview.md)
 - [UI implementation](docs/20-implementation/ui/00-overview.md)

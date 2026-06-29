@@ -6,31 +6,60 @@ init-run/
 local.env
 global.env
 ai_docs/pi_agent/resolution_system_v3/outputs/
-knowledge/sources/past_prs/data/current/
-knowledge/sources/past_prs/data/prs/runs/
-knowledge/sources/tool_outputs/indexes/tool_findings.jsonl
-knowledge/sources/external_mirrors/indexes/external_file_mentions.jsonl
-knowledge/sources/ssbm_data_sheet/indexes/cells.jsonl
 
-# code_context (moved knowledge sources): keep small metadata/postmortems
-# tracked, ignore bulk corpora (raw diffs, extracted text, aggregates, runs).
-knowledge/sources/code_context/past_prs/data/current/
-knowledge/sources/code_context/past_prs/data/aggregate/
-knowledge/sources/code_context/past_prs/data/runs/
-knowledge/sources/code_context/past_prs/data/prs/runs/
-knowledge/sources/code_context/past_prs/data/prs/*/raw/
-knowledge/sources/code_context/past_prs/data/prs/*/extracted/
-knowledge/sources/code_context/external_mirrors/indexes/external_file_mentions.jsonl
-knowledge/sources/code_context/ssbm_data_sheet/indexes/cells.jsonl
-knowledge/sources/code_context/ssbm_data_sheet/indexes/codebase_facts.jsonl
-knowledge/sources/code_context/ssbm_data_sheet/indexes/codebase_facts.meta.json
-knowledge/sources/code_context/ssbm_data_sheet/data/generated/
+# Legacy project-knowledge generated indexes; active sources use the sectioned
+# paths below, but local caches may still exist at these older project paths.
+projects/*/knowledge/sources/past_prs/data/current/
+projects/*/knowledge/sources/past_prs/data/prs/runs/
+projects/*/knowledge/sources/tool_outputs/indexes/tool_findings.jsonl
+projects/*/knowledge/sources/external_mirrors/indexes/external_file_mentions.jsonl
+projects/*/knowledge/sources/ssbm_data_sheet/indexes/cells.jsonl
+
+# Project knowledge: keep portable corpora metadata/postmortems tracked, ignore
+# bulk raw corpora, generated indexes, local graph DBs, and runner caches.
+projects/*/knowledge/resource_graph/*.sqlite*
+projects/*/knowledge/resource_graph/enrichments/*.jsonl
+projects/*/knowledge/resource_graph/indexes/
+projects/*/knowledge/sources/code_context/past_prs/data/current/
+projects/*/knowledge/sources/code_context/past_prs/data/aggregate/
+projects/*/knowledge/sources/code_context/past_prs/data/runs/
+projects/*/knowledge/sources/code_context/past_prs/data/prs/runs/
+projects/*/knowledge/sources/code_context/past_prs/data/prs/*/raw/
+projects/*/knowledge/sources/code_context/past_prs/data/prs/*/extracted/
+projects/*/knowledge/sources/**/data/library/index.csv
+projects/*/knowledge/sources/**/data/library/index.jsonl
+projects/*/knowledge/sources/**/data/library/known_fixes.md
+projects/*/knowledge/sources/**/data/library/run_summary.json
+projects/*/knowledge/sources/**/indexes/*.csv
+projects/*/knowledge/sources/**/indexes/*.json
+projects/*/knowledge/sources/**/indexes/*.jsonl
+projects/*/knowledge/sources/**/indexes/*.sqlite*
+projects/*/knowledge/sources/code_context/external_mirrors/indexes/external_file_mentions.jsonl
+projects/*/knowledge/sources/code_context/ssbm_data_sheet/indexes/cells.jsonl
+projects/*/knowledge/sources/code_context/ssbm_data_sheet/indexes/codebase_facts.jsonl
+projects/*/knowledge/sources/code_context/ssbm_data_sheet/indexes/codebase_facts.meta.json
+projects/*/knowledge/sources/code_context/ssbm_data_sheet/data/generated/
+projects/*/knowledge/tools/**/cache/**
+!projects/*/knowledge/tools/**/cache/
+!projects/*/knowledge/tools/**/cache/.gitignore
+!projects/*/knowledge/tools/**/cache/README.md
+projects/*/knowledge/tools/**/indexes/*.json
+projects/*/knowledge/tools/**/indexes/*.jsonl
+projects/*/knowledge/tools/**/indexes/*.sqlite*
 
 # Vendored debug toolchains (zig etc.) — hundreds of MB, fetched on demand.
-tools/_impl/melee/mwcc_debug/tools/
+apps/server/resources/tools/_impl/melee/mwcc_debug/tools/
 
-knowledge/tools/opseq/indexes/function_shapes.jsonl
-knowledge/tools/ghidra/indexes/symbol_lookup.jsonl
+projects/*/knowledge/tools/research/opseq/indexes/function_shapes.jsonl
+projects/*/knowledge/tools/research/ghidra/indexes/symbol_lookup.jsonl
+
+# Project-owned toolpack data. Bindings are tracked; generated shared data and
+# per-worktree mutable caches are local/runtime artifacts.
+projects/*/shared/tool-data/**/cache/**
+projects/*/shared/tool-data/**/indexes/*.json
+projects/*/shared/tool-data/**/indexes/*.jsonl
+projects/*/shared/tool-data/**/indexes/*.sqlite*
+projects/*/worktrees/
 .DS_Store
 __pycache__/
 *.pyc
@@ -47,6 +76,7 @@ projects/*/global.env
 projects/*/local.project.json
 
 # Orchestrator runtime state (logs, per-run cycles, guardian output)
+.decomp-orchestrator-state/
 .decomp-orchestrator-state/runs/
 .decomp-orchestrator-state/guardian/
 .decomp-orchestrator-state/ui-processes/

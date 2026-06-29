@@ -26,7 +26,7 @@ documentation set.
 | Write Safety | [Write safety](../../10-system-design/35-write-safety.md), [Worker lifecycle](../../10-system-design/40-worker-lifecycle.md), and [State implementation](../state/00-overview.md) |
 | Worker Capabilities | [Worker capabilities](../../10-system-design/45-worker-capabilities.md), [Worker lifecycle](../../10-system-design/40-worker-lifecycle.md), and [Knowledge model](../../10-system-design/50-knowledge-model.md) |
 | Score Integration Gate | [Score integration and PR handoff](../../10-system-design/60-score-and-pr-handoff.md) |
-| Current Repo Mechanics | [Current repo mechanics](20-current-repo-mechanics.md), [Implementation overview](../00-overview.md), [CLI overview](../cli/00-overview.md), and [Knowledge overview](../knowledge/00-overview.md) |
+| Current Repo Mechanics | [Current repo mechanics](20-current-repo-mechanics.md), [Implementation overview](../00-overview.md), [Server jobs overview](../server-jobs/00-overview.md), and [Knowledge overview](../knowledge/00-overview.md) |
 | Unified Skill Model | [Core principles](../../10-system-design/05-core-principles.md), [Agent model](../../10-system-design/20-agent-model.md), and [Knowledge model](../../10-system-design/50-knowledge-model.md) |
 | Implementation Plan and Defaults | [Implementation roadmap](30-implementation-roadmap.md), [Foundation overview](../../00-foundation/00-overview.md), and implementation section docs |
 

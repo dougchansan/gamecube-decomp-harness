@@ -1,0 +1,17 @@
+{
+  "number": 2716,
+  "title": "nix: attempt to speed up builds",
+  "state": "OPEN",
+  "createdAt": "2026-06-16T16:25:14Z",
+  "updatedAt": "2026-06-16T20:21:56Z",
+  "mergedAt": null,
+  "closedAt": null,
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/2716",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 1929
+  }
+}

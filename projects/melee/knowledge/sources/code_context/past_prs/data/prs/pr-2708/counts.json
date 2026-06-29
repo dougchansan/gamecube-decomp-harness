@@ -1,0 +1,17 @@
+{
+  "number": 2708,
+  "title": "4/14: GR stage pass A",
+  "state": "MERGED",
+  "createdAt": "2026-06-15T22:20:24Z",
+  "updatedAt": "2026-06-16T05:27:50Z",
+  "mergedAt": "2026-06-16T05:27:49Z",
+  "closedAt": "2026-06-16T05:27:50Z",
+  "author": "fjooord",
+  "url": "https://github.com/doldecomp/melee/pull/2708",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 2,
+    "reviews": 4,
+    "diff_bytes": 106858
+  }
+}

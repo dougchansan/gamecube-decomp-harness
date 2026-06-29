@@ -24,6 +24,13 @@ For Melee, either clone/worktree `doldecomp/melee` into
 `projects/melee/checkout/` or create `projects/melee/local.project.json` with a
 `repoRoot` that points at an existing external checkout.
 
+Project-owned knowledge lives under `projects/melee/knowledge/`: source
+corpora, generated source indexes, tool caches, tool indexes, and graph
+enrichment inputs. The active graph database lives under
+`projects/melee/graph/graph.sqlite`. Reusable callable tool definitions live in
+`toolpacks/`, project-specific tool bindings and data live under each project,
+and server APIs live under `apps/server/src`.
+
 PR defaults live under the descriptor's `pr` key. `splitStrategy` can be
 `deterministic` or `agent`; the tracked Melee descriptor uses `agent` so
 handoff planning asks the PR splitter to reshape the deterministic seed plan.

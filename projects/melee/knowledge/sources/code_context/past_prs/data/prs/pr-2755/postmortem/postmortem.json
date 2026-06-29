@@ -1,0 +1,206 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2755",
+  "pr": {
+    "number": 2755,
+    "title": "Match SimplifyByMerge",
+    "url": "https://github.com/doldecomp/melee/pull/2755",
+    "state": "CLOSED",
+    "author": "dberweger2017",
+    "created_at": "2026-06-24T10:58:39Z",
+    "merged_at": null
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Draft PR added a single fake use, `(void) type;`, before a switch in `SimplifyByMerge` in `src/sysdolphin/baselib/texpdag.c`. The author reported this moved local objdiff for `SimplifyByMerge` from 99.99388% to 100.00000%, but the PR body explicitly said not to merge yet and the raw PR metadata shows `merged_at` was null.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "cleanup",
+      "codegen-tactic",
+      "decomp-matching"
+    ],
+    "systems": [
+      "sysdolphin",
+      "baselib",
+      "texpdag"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/sysdolphin/baselib/texpdag.c",
+      "role": "Only changed file; added `(void) type;` inside `SimplifyByMerge` before switching on `type`.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff",
+        "human_pr_text"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "path": "src/sysdolphin/baselib/texpdag.c",
+      "symbol": "SimplifyByMerge",
+      "change": "Inserted `(void) type;` immediately after `type = arg0->tev.c_in[0].type;` and before `switch ((s32) type)`.",
+      "evidence_refs": [
+        "raw_diff"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/texpdag.c",
+      "symbol": "SimplifyByMerge",
+      "change": "Author described the insertion as a fake use for `type` to achieve a match.",
+      "evidence_refs": [
+        "human_pr_text"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "lesson": "The PR kept the matching tactic extremely narrow: one statement in one function, with direct objdiff and build commands listed.",
+      "evidence_refs": [
+        "human_pr_text",
+        "raw_diff"
+      ]
+    },
+    {
+      "lesson": "The author separated unrelated local investigations from the submitted diff and noted that other dirty files were not verified improvements.",
+      "evidence_refs": [
+        "human_pr_text"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "A fake local use such as `(void) type;` can affect MWCC codegen enough to move a nearly matched function to 100%, but this is a codegen tactic rather than a source-style convention and should remain narrowly justified by objdiff evidence.",
+      "scope": [
+        "SimplifyByMerge",
+        "src/sysdolphin/baselib/texpdag.c"
+      ],
+      "evidence_refs": [
+        "human_pr_text",
+        "raw_diff",
+        "decomp_standards:matching-tactics-need-evidence"
+      ],
+      "confidence": "medium"
+    }
+  ],
+  "naming_conventions": [],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Insert `(void) type;` before `switch ((s32) type)` after assigning `type` from `arg0->tev.c_in[0].type`.",
+      "reported_result": "Author reported local objdiff improvement for `SimplifyByMerge` from 99.99388% to 100.00000%.",
+      "verification_claimed": [
+        "ninja build/GALE01/src/sysdolphin/baselib/texpdag.o",
+        "build/tools/objdiff-cli diff -p . -u main/sysdolphin/baselib/texpdag SimplifyByMerge --format json -o -",
+        "Commit hook checks: clang-format, style-check"
+      ],
+      "caution": "PR was a draft and not merged according to loaded metadata, so this should not be treated as accepted project style.",
+      "evidence_refs": [
+        "human_pr_text",
+        "raw_diff",
+        "raw_pr_json"
+      ]
+    }
+  ],
+  "review_feedback": [],
+  "searchable_terms": [
+    "PR 2755",
+    "Match SimplifyByMerge",
+    "SimplifyByMerge",
+    "src/sysdolphin/baselib/texpdag.c",
+    "HSD_TExp",
+    "type",
+    "(void) type",
+    "fake use",
+    "switch ((s32) type)",
+    "HSD_TE_TEX",
+    "HSD_TE_RAS",
+    "tev.c_in",
+    "a_clamp",
+    "objdiff 100.0",
+    "draft PR",
+    "dberweger2017"
+  ],
+  "follow_up_queries": [
+    "SimplifyByMerge \"(void) type\"",
+    "src/sysdolphin/baselib/texpdag.c SimplifyByMerge",
+    "\"fake use\" \"type\" objdiff",
+    "\"switch ((s32) type)\" \"HSD_TE_TEX\"",
+    "PR 2755 SimplifyByMerge"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json",
+      "human_pr_text",
+      "raw_diff",
+      "changed_files.jsonl",
+      "raw_pr_json"
+    ],
+    "notes": [
+      "Strong evidence for the exact one-line code change and the author's stated matching intent.",
+      "Verification is author-reported in the PR body; this intake did not rerun build or objdiff.",
+      "There were no review comments, issue comments, or reviews in the loaded slice.",
+      "The PR was explicitly described as a draft with 'please do not merge this yet', and raw PR metadata shows `merged_at` null; avoid treating the tactic as accepted global style.",
+      "Local scan notes mention ftYoshi, grgreens, and ftCommon files, but those files were not changed in the PR and should not be promoted as PR lessons beyond the author's caution that their local changes were not verified improvements."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "kind": "matching_tactic_observation",
+        "title": "PR 2755 used a narrow `(void) type;` fake-use tactic for `SimplifyByMerge`",
+        "text": "In draft PR 2755, adding `(void) type;` after assigning `type = arg0->tev.c_in[0].type;` and before `switch ((s32) type)` was reported by the author to move `SimplifyByMerge` in `src/sysdolphin/baselib/texpdag.c` from 99.99388% to 100.00000% in local objdiff. Treat as a narrowly evidenced codegen tactic, not accepted source style.",
+        "scope": [
+          "src/sysdolphin/baselib/texpdag.c",
+          "SimplifyByMerge"
+        ],
+        "evidence_refs": [
+          "human_pr_text",
+          "raw_diff"
+        ],
+        "confidence": "medium"
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Clarify fake `(void)` local uses as matching tactics requiring evidence",
+        "text": "Consider adding fake `(void) local;` uses to the list of narrow codegen tactics that require explicit objdiff/build evidence and should not be treated as normal authored style. PR 2755 provides an example, but it was draft/unmerged, so it should be cited only as historical evidence of the tactic, not as acceptance.",
+        "source_path": null,
+        "scope": [
+          "codegen tactics",
+          "matching-tactics-need-evidence"
+        ],
+        "evidence_refs": [
+          "human_pr_text",
+          "raw_diff",
+          "raw_pr_json"
+        ],
+        "reason": "Loaded standards already require evidence for dummy locals and local/lifetime churn; this PR shows a related fake-use pattern worth curator review."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote `(void) type;` fake uses as a general style rule; the PR was draft, unmerged, and had no reviewer approval in the loaded evidence.",
+      "Do not infer reviewer intent or acceptance status; no review comments or reviews were present.",
+      "Do not create path facts for `ftYs_SpecialS.c`, `grgreens.c`, or `ftCo_0A01.c`; they were only mentioned as local dirty files with no verified submitted improvement."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "runner": "orchestrator_kernel_pr_indexer",
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "orchestrator_state_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/projects/melee/state",
+    "orchestrator_run_id": "08bfe41e-1b7c-4685-8646-dff5e02a5dab",
+    "orchestrator_project_id": "melee",
+    "orchestrator_prepare_intake": true,
+    "orchestrator_kernel_database_url_configured": true,
+    "legacy_session_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/.pi-sessions/pr-review"
+  }
+}

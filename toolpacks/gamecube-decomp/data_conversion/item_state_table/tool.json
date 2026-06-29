@@ -1,0 +1,40 @@
+{
+  "id": "item_state_table",
+  "title": "ItemStateTable conversion preview",
+  "trust_tier": "tool_evidence",
+  "description": "Preview C ItemStateTable definitions generated from assembly data labels.",
+  "operation_mode": "tool_local_impl",
+  "runner_status": "on_demand",
+  "status_message": "Tool-local implementation: APIs import toolpacks/gamecube-decomp/_impl/gamecube/tools/gen_item_state_table.py logic without writing source.",
+  "limitations": [
+    "Only handles ItemStateTable-shaped asm data blocks with four words per entry.",
+    "Preview output needs source ownership, symbol, and section checks before applying.",
+    "The API intentionally does not insert generated code into source files."
+  ],
+  "commands": {
+    "status": "python3 toolpacks/gamecube-decomp/data_conversion/item_state_table/api/status.py --repo-root <repo_root> --json",
+    "preview": "python3 toolpacks/gamecube-decomp/data_conversion/item_state_table/api/preview.py --repo-root <repo_root> --label <symbol> --json"
+  },
+  "capabilities": [
+    "item_state_table",
+    "asm_data_conversion",
+    "data_definition_preview"
+  ],
+  "category": "data_conversion",
+  "path": "data_conversion/item_state_table",
+  "process_role": "asm_data_conversion_preview",
+  "usage": {
+    "invocation_mode": "on_demand",
+    "mutates_source": false,
+    "blocks_on_failure": false,
+    "triggers": [
+      "item_state_table_asm_label",
+      "data_definition_needed"
+    ],
+    "outputs": [
+      "c_table_preview",
+      "asm_label_mapping"
+    ],
+    "agent_guidance": "Use to preview ItemStateTable conversion; apply source changes only after ownership and section placement are verified."
+  }
+}

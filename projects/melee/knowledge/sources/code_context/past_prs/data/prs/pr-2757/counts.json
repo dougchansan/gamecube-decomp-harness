@@ -1,0 +1,17 @@
+{
+  "number": 2757,
+  "title": "texpdag matches",
+  "state": "MERGED",
+  "createdAt": "2026-06-24T13:17:28Z",
+  "updatedAt": "2026-06-24T14:33:42Z",
+  "mergedAt": "2026-06-24T14:31:15Z",
+  "closedAt": "2026-06-24T14:31:15Z",
+  "author": "r-burns",
+  "url": "https://github.com/doldecomp/melee/pull/2757",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 8,
+    "reviews": 3,
+    "diff_bytes": 32880
+  }
+}

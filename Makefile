@@ -22,9 +22,6 @@ QUEUE_TARGET ?= $(CANDIDATE_LIMIT)
 CANDIDATE_WINDOW ?= 256
 IDLE_SLEEP_MS ?= 5000
 DRY_RUN ?= 0
-AGENT_VIEWER_PORT ?= 8797
-PROMPT_VIEWER_PORT ?= $(AGENT_VIEWER_PORT)
-
 DRY_FLAG := $(if $(filter 1 true yes,$(DRY_RUN)),--dry-run-agents,)
 RUN_ID_FLAG := $(if $(RUN_ID),--run-id "$(RUN_ID)",)
 PR_QA_AGENT_FLAG := $(if $(filter 1 true yes,$(PR_QA_RUN_AGENTS)),--run-agents,)
@@ -32,13 +29,12 @@ PR_QA_COMMENT_FLAG := $(if $(filter 1 true yes,$(PR_QA_COMMENT)),--comment-unres
 PR_QA_CI_FLAG := $(if $(filter 1 true yes,$(PR_QA_WAIT_CI)),--wait-ci,)
 ORCH_GLOBAL_FLAGS := --repo-root "$(REPO_ROOT)" --state-dir "$(STATE_DIR)" $(DRY_FLAG) --provider "$(PROVIDER)" --model "$(MODEL)" --thinking-level "$(THINKING)"
 
-.PHONY: help install check smoke ui agent-viewer prompt-viewer status init-run start dry-start recover-leases regression-check pr-split-plan pr-draft-qa kg-status kg-maintain
+.PHONY: help install check smoke ui status init-run start dry-start recover-leases regression-check pr-split-plan pr-draft-qa kg-status kg-maintain
 
 help:
 	@printf '%s\n' \
 	  'Common targets:' \
 	  '  make ui                 Start the hot-reloading dashboard at http://localhost:8787' \
-	  '  make agent-viewer       Start the standalone agent viewer at http://localhost:$(AGENT_VIEWER_PORT)' \
 	  '  make status             Print orchestrator status for REPO_ROOT/STATE_DIR' \
 	  '  make init-run           Create a run with WORKERS/GOAL/CANDIDATE_LIMIT' \
 	  '  make start              Start babysit/run-loop for the current run' \
@@ -70,23 +66,18 @@ smoke:
 ui:
 	bun run ui:dev
 
-agent-viewer:
-	AGENT_VIEWER_PORT="$(AGENT_VIEWER_PORT)" PROMPT_VIEWER_PORT="$(PROMPT_VIEWER_PORT)" bun run agent-viewer
-
-prompt-viewer: agent-viewer
-
 status:
-	bun run orch -- $(ORCH_GLOBAL_FLAGS) status
+	bun run server:job -- $(ORCH_GLOBAL_FLAGS) status
 
 init-run:
-	bun run orch -- $(ORCH_GLOBAL_FLAGS) init-run \
+	bun run server:job -- $(ORCH_GLOBAL_FLAGS) init-run \
 	  --desired-workers "$(WORKERS)" \
 	  --goal-kind "$(GOAL_KIND)" \
 	  --goal-value "$(GOAL)" \
 	  --candidate-limit "$(CANDIDATE_LIMIT)"
 
 start:
-	bun run orch -- $(ORCH_GLOBAL_FLAGS) babysit \
+	bun run server:job -- $(ORCH_GLOBAL_FLAGS) babysit \
 	  $(RUN_ID_FLAG) \
 	  --max-workers "$(WORKERS)" \
 	  --idle-sleep-ms "$(IDLE_SLEEP_MS)" \
@@ -100,20 +91,20 @@ dry-start:
 	$(MAKE) start DRY_RUN=1
 
 recover-leases:
-	bun run orch -- $(ORCH_GLOBAL_FLAGS) recover-leases \
+	bun run server:job -- $(ORCH_GLOBAL_FLAGS) recover-leases \
 	  $(RUN_ID_FLAG) \
 	  --force \
 	  --reason "operator requested recovery via make"
 
 regression-check:
-	bun run orch -- $(ORCH_GLOBAL_FLAGS) regression-check $(RUN_ID_FLAG)
+	bun run server:job -- $(ORCH_GLOBAL_FLAGS) regression-check $(RUN_ID_FLAG)
 
 pr-split-plan:
-	bun run orch -- $(ORCH_GLOBAL_FLAGS) pr-split-plan
+	bun run server:job -- $(ORCH_GLOBAL_FLAGS) pr-split-plan
 
 pr-draft-qa:
 	@test -n "$(PR)" || (printf '%s\n' 'Set PR=<number>, for example: make pr-draft-qa PR=2704' >&2; exit 2)
-	bun run orch -- $(ORCH_GLOBAL_FLAGS) pr-draft-qa \
+	bun run server:job -- $(ORCH_GLOBAL_FLAGS) pr-draft-qa \
 	  $(RUN_ID_FLAG) \
 	  --pr "$(PR)" \
 	  $(PR_QA_AGENT_FLAG) \
@@ -122,7 +113,7 @@ pr-draft-qa:
 	  $(PR_QA_FLAGS)
 
 kg-status:
-	bun run orch -- $(ORCH_GLOBAL_FLAGS) kg-status
+	bun run server:job -- $(ORCH_GLOBAL_FLAGS) kg-status
 
 kg-maintain:
-	bun run orch -- $(ORCH_GLOBAL_FLAGS) kg-maintain $(RUN_ID_FLAG)
+	bun run server:job -- $(ORCH_GLOBAL_FLAGS) kg-maintain $(RUN_ID_FLAG)

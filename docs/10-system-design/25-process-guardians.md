@@ -18,7 +18,7 @@ system when policy allows.
 | Guardian process             |
 | - watches process exit        |
 | - records health incidents    |
-| - recovers failed leases      |
+| - recovers failed claims      |
 | - restarts system process     |
 +---------------+--------------+
                 |
@@ -39,7 +39,7 @@ system when policy allows.
 |              |               |
 |      +----------------+      |
 |      | Worker sessions |     |
-|      | leased work    |      |
+|      | claimed work   |      |
 |      +----------------+      |
 +------------------------------+
 ```
@@ -62,22 +62,19 @@ wake from operational health events:
   event.
 
 The guardian may use timers as health events, but it should not duplicate the
-scheduler's queue, target, or board policy.
+scheduler's epoch, target, or board policy.
 
 The run loop owns decomp-system wakeups. It handles durable events with the
-deterministic scheduler, and in continuous compatibility mode it may also write
-a `pool_below_target` event when the current worker pool is becoming
-inefficient:
+deterministic scheduler, and it may also write a `pool_below_target` event when
+the current worker pool needs more admitted work:
 
-- Total queued work falls below the configured low-water mark while workers are
-  still active.
-- Distinct unlocked source files fall below the schedulable-work water mark.
-- Queued work is present but blocked behind active file locks.
+- Admitted-but-unclaimed work falls below the configured low-water mark while
+  workers are still active.
 - Active workers enter a long-tail drain below the configured active-worker
   water mark.
 - An optional periodic replan interval fires while workers are active.
 
-Those run-loop-produced wake events ask the scheduler to refill, reprioritize,
+Those run-loop-produced wake events ask the scheduler to admit, reprioritize,
 or back off according to policy. The run loop does not edit source or perform
 decomp research; it only applies durable scheduling policy and starts workers.
 
@@ -87,8 +84,8 @@ Recovery starts with deterministic playbooks:
 
 1. Capture stdout, stderr, parsed trigger result, and status summary.
 2. Write an incident packet under the state directory.
-3. Recover failed worker leases when the failed worker id is known.
-4. Recover expired leases for broader process incidents.
+3. Recover failed worker claims when the failed worker id is known.
+4. Recover expired claims for broader process incidents.
 5. Restart the decomp system process when restart policy allows.
 
 A future repair agent can be invoked from an incident packet when deterministic

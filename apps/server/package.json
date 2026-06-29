@@ -1,0 +1,12 @@
+{
+  "name": "@decomp-orchestrator/server",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "smoke": "bun tests/smoke.ts"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.45.0",
+    "postgres": "^3.4.7"
+  }
+}

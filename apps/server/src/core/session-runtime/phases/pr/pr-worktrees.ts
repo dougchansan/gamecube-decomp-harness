@@ -1,0 +1,569 @@
+import { spawnSync } from "node:child_process";
+import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, statSync, symlinkSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { dirname, resolve } from "node:path";
+import type { RegressionReport } from "@server/core/validation/objdiff/report";
+
+export type JsonObject = Record<string, unknown>;
+
+export interface CliResult {
+  exitCode: number | null;
+  stdout: string;
+  stderr: string;
+}
+
+export interface CodeIssuesResult {
+  status: "clean" | "issues" | "unavailable";
+  output: string;
+  files: string[];
+}
+
+export interface PrWorktreeProjectContext {
+  project: { baseRef?: string } | null;
+  repoRoot: string;
+  stateDir: string;
+}
+
+type LogStream = "stdout" | "stderr" | "ui";
+type WorkflowStatus = "started" | "completed" | "failed" | "skipped";
+
+interface WorkflowEventInput {
+  kind: "baseline";
+  operation: string;
+  status?: WorkflowStatus;
+  detail?: string | null;
+  metadata?: Record<string, unknown>;
+}
+
+interface RunGitOptions {
+  check?: boolean;
+  failureHint?: string;
+}
+
+export interface PrWorktreeServiceDeps<Context extends PrWorktreeProjectContext> {
+  appendLog: (stream: LogStream, text: string) => void;
+  branchExists: (repoRoot: string, branch: string) => boolean;
+  isLocalBranchPrRecord: (record: JsonObject) => boolean;
+  localBranchDiffBase: (repoRoot: string, baseRef: string, branch: string) => string;
+  outputTail: (textValue: string, maxLength?: number) => string;
+  prBranchPathSlug: (branch: string) => string;
+  prWorkspacePath: (stateDir: string, runId: string, branch: string) => string;
+  readRegressionReport: (reportChangesPath: string, title: string, maxRows: number) => Promise<RegressionReport>;
+  runCli: (command: string[], cwd?: string) => Promise<CliResult>;
+  runGit: (repoRoot: string, args: string[], options?: RunGitOptions) => Promise<CliResult>;
+  submitWorkflowEvent?: (paths: Context, input: WorkflowEventInput) => Promise<JsonObject | null>;
+  updatePrRecord: (stateDir: string, branch: string, updater: (record: JsonObject) => JsonObject) => JsonObject | null;
+}
+
+function asObject(value: unknown): JsonObject {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonObject) : {};
+}
+
+function stringValue(value: unknown, fallback = ""): string {
+  return typeof value === "string" ? value : fallback;
+}
+
+function numberValue(value: unknown, fallback = 0): number {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string" && value.trim()) {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed)) return parsed;
+  }
+  return fallback;
+}
+
+function readJsonObject(path: string): JsonObject {
+  try {
+    if (!path || !existsSync(path)) return {};
+    return asObject(JSON.parse(readFileSync(path, "utf8")));
+  } catch {
+    return {};
+  }
+}
+
+function linkMissingFiles(sourceDir: string, targetDir: string): number {
+  let linked = 0;
+  mkdirSync(targetDir, { recursive: true });
+  for (const entry of readdirSync(sourceDir)) {
+    const sourcePath = resolve(sourceDir, entry);
+    const targetPath = resolve(targetDir, entry);
+    if (statSync(sourcePath).isDirectory()) {
+      linked += linkMissingFiles(sourcePath, targetPath);
+    } else if (!existsSync(targetPath)) {
+      symlinkSync(sourcePath, targetPath);
+      linked += 1;
+    }
+  }
+  return linked;
+}
+
+function sourcePathFromUnit(name: string): string {
+  const unit = name.split("::")[0] ?? "";
+  const parts = unit.split("/").filter(Boolean);
+  if (parts.length < 2) return "";
+  return `src/${parts.slice(1).join("/")}.c`;
+}
+
+// Upstream CI's "Issues" job rejects PRs that introduce clang semantic issues
+// (-Wself-assign, conflicting prototypes, ...) that the MWCC match build never
+// sees. Run the exact same container locally so a slice fails here, before it
+// is pushed, instead of failing on the PR. The image is amd64-only, so the
+// platform is pinned (Docker on Apple Silicon runs it under Rosetta).
+const CHECK_ISSUES_IMAGE = "ghcr.io/doldecomp/melee/check-issues:latest";
+let dockerAvailable: boolean | null = null;
+
+export function createPrWorktreeService<Context extends PrWorktreeProjectContext>(deps: PrWorktreeServiceDeps<Context>) {
+  const {
+    appendLog,
+    branchExists,
+    isLocalBranchPrRecord,
+    localBranchDiffBase,
+    outputTail,
+    prBranchPathSlug,
+    prWorkspacePath,
+    readRegressionReport,
+    runCli,
+    runGit,
+    submitWorkflowEvent,
+    updatePrRecord,
+  } = deps;
+
+  async function rebuildProductionBaseline(paths: Context): Promise<JsonObject> {
+    const { repoRoot } = paths;
+    const baseRef = paths.project?.baseRef ?? "origin/master";
+    const baseSha = (await runGit(repoRoot, ["rev-parse", "--verify", baseRef], { failureHint: `Unable to resolve ${baseRef}` })).stdout.trim();
+    const worktreeDir = resolve(tmpdir(), `melee-baseline-${baseSha}`);
+    const worktreeBaseline = resolve(worktreeDir, "build/GALE01/baseline.json");
+    const cached = existsSync(worktreeBaseline);
+    await submitWorkflowEvent?.(paths, {
+      kind: "baseline",
+      operation: "rebuildProductionBaseline",
+      status: "started",
+      detail: `${baseRef} ${baseSha.slice(0, 10)}${cached ? " cached" : ""}`.trim(),
+      metadata: { baseRef, baseSha, cached, worktreeDir },
+    });
+    if (!cached) {
+      if (!existsSync(worktreeDir)) {
+        appendLog("ui", `baseline worktree add ${worktreeDir} @ ${baseSha.slice(0, 10)}`);
+        await runGit(repoRoot, ["worktree", "add", "--detach", worktreeDir, baseSha], { failureHint: "Unable to add the baseline worktree" });
+      }
+      // Original game assets under orig/ are gitignored (only .gitkeep skeleton
+      // dirs are tracked), so a fresh worktree cannot split the DOL. Symlink
+      // every asset file the main checkout has that the worktree lacks.
+      const origSource = resolve(repoRoot, "orig");
+      if (existsSync(origSource)) {
+        const linked = linkMissingFiles(origSource, resolve(worktreeDir, "orig"));
+        if (linked > 0) appendLog("ui", `baseline worktree linked ${linked} orig/ game asset file(s) from the main checkout`);
+      }
+      if (!existsSync(resolve(worktreeDir, "build.ninja"))) {
+        appendLog("ui", "baseline configure started");
+        const configure = await runCli(["python3", "configure.py"], worktreeDir);
+        if (configure.exitCode !== 0) {
+          throw new Error(`Baseline configure failed (${configure.exitCode}): ${outputTail(configure.stderr || configure.stdout, 4000)}`);
+        }
+      }
+      appendLog("ui", `baseline build started: ninja baseline @ ${baseSha.slice(0, 10)} (first build for this base SHA does a full build)`);
+      const build = await runCli(["ninja", "baseline"], worktreeDir);
+      if (build.exitCode !== 0) {
+        throw new Error(`Baseline build failed (${build.exitCode}): ${outputTail(build.stderr || build.stdout, 4000)}`);
+      }
+      appendLog("ui", "baseline build complete");
+    } else {
+      appendLog("ui", `baseline reused from cache for ${baseSha.slice(0, 10)}`);
+    }
+    const baselinePath = resolve(repoRoot, "build/GALE01/baseline.json");
+    mkdirSync(dirname(baselinePath), { recursive: true });
+    copyFileSync(worktreeBaseline, baselinePath);
+    appendLog("ui", `production baseline installed at ${baselinePath}`);
+    const status = { baseRef, baseSha, worktreeDir, cached, baselinePath, installedAt: new Date().toISOString() };
+    const statusPath = resolve(paths.stateDir, "pr_handoff", "baseline_status.json");
+    mkdirSync(dirname(statusPath), { recursive: true });
+    writeFileSync(statusPath, JSON.stringify(status, null, 2), "utf8");
+    await submitWorkflowEvent?.(paths, {
+      kind: "baseline",
+      operation: "rebuildProductionBaseline",
+      status: "completed",
+      detail: `${baseSha.slice(0, 10)} installed`,
+      metadata: status,
+    });
+    return status as unknown as JsonObject;
+  }
+
+  async function ensureOpenPrBaseline(paths: Context): Promise<JsonObject> {
+    const baseRef = paths.project?.baseRef ?? "origin/master";
+    const baseSha = (await runGit(paths.repoRoot, ["rev-parse", "--verify", baseRef], { failureHint: `Unable to resolve ${baseRef}` })).stdout.trim();
+    const status = readJsonObject(resolve(paths.stateDir, "pr_handoff", "baseline_status.json"));
+    const worktreeDir = stringValue(status.worktreeDir);
+    const baselinePath = worktreeDir ? resolve(worktreeDir, "build/GALE01/baseline.json") : "";
+    if (stringValue(status.baseSha) === baseSha && worktreeDir && existsSync(baselinePath)) return status;
+
+    const reason =
+      stringValue(status.baseSha) && stringValue(status.baseSha) !== baseSha
+        ? `baseline cache is stale (${stringValue(status.baseSha).slice(0, 10)} != ${baseSha.slice(0, 10)})`
+        : worktreeDir && !existsSync(baselinePath)
+          ? `baseline cache is missing at ${worktreeDir}`
+          : "baseline cache is missing";
+    appendLog("ui", `open draft: ${reason}; rebuilding production baseline`);
+    return rebuildProductionBaseline(paths);
+  }
+
+  async function verifyShipSet(paths: Context, baseline: JsonObject, matchPathspecs: string[]): Promise<JsonObject> {
+    const { repoRoot, stateDir } = paths;
+    const worktreeDir = stringValue(baseline.worktreeDir);
+    const baseSha = stringValue(baseline.baseSha);
+    const statusPath = resolve(stateDir, "pr_handoff", "ship_status.json");
+    const writeStatus = (status: JsonObject): JsonObject => {
+      mkdirSync(dirname(statusPath), { recursive: true });
+      writeFileSync(statusPath, JSON.stringify(status, null, 2), "utf8");
+      return status;
+    };
+    if (!worktreeDir || !baseSha || !existsSync(worktreeDir)) {
+      throw new Error("Ship-set verification needs the baseline worktree; run the rebuild-production-baseline step first.");
+    }
+    if (matchPathspecs.length === 0) {
+      return writeStatus({ status: "nothing_to_ship", baseSha, files: 0, checkedAt: new Date().toISOString() });
+    }
+
+    const patchPath = resolve(stateDir, "pr_handoff", "ship_set.patch");
+    mkdirSync(dirname(patchPath), { recursive: true });
+    let pathspecs = [...matchPathspecs];
+    const droppedFiles = new Map<string, string[]>();
+
+    // Survivor loop: anything that regresses the baseline drops out of the ship
+    // set and the remainder re-verifies, until the assembly is clean. Dropped
+    // symbols are already readmitted as rework by the branch QA pass.
+    for (let round = 1; round <= 4; round += 1) {
+      if (pathspecs.length === 0) {
+        return writeStatus({ status: "nothing_to_ship", baseSha, files: 0, droppedFiles: Object.fromEntries(droppedFiles), checkedAt: new Date().toISOString() });
+      }
+      const diff = await runCli(["git", "diff", "--binary", baseSha, "--", ...pathspecs], repoRoot);
+      if (diff.exitCode !== 0) throw new Error(`Ship-set diff failed (${diff.exitCode}): ${outputTail(diff.stderr, 2000)}`);
+      writeFileSync(patchPath, diff.stdout, "utf8");
+
+      let report: RegressionReport;
+      let issues: CodeIssuesResult;
+      try {
+        appendLog("ui", `ship-set round ${round}: applying ${pathspecs.length} match file(s) onto the baseline worktree`);
+        const apply = await runCli(["git", "apply", patchPath], worktreeDir);
+        if (apply.exitCode !== 0) throw new Error(`Ship-set patch did not apply cleanly (${apply.exitCode}): ${outputTail(apply.stderr, 2000)}`);
+        const build = await runCli(["ninja", "changes_all"], worktreeDir);
+        if (build.exitCode !== 0) throw new Error(`Ship-set build failed (${build.exitCode}): ${outputTail(build.stderr || build.stdout, 4000)}`);
+        report = await readRegressionReport(resolve(worktreeDir, "build/GALE01/report_changes.json"), "ship set", 0);
+        // Upstream CI parity: the patched tree must also pass the Issues lint.
+        issues = await checkCodeIssues(worktreeDir);
+        if (issues.status === "unavailable") appendLog("ui", `ship-set round ${round}: code-issues check skipped — ${outputTail(issues.output, 300)}`);
+        if (issues.status === "issues") appendLog("ui", `ship-set round ${round}: code issues in ${issues.files.join(", ") || "(unattributed)"}\n${outputTail(issues.output, 2000)}`);
+      } finally {
+        // Restore the cached worktree to its pristine base state for reuse.
+        await runCli(["git", "reset", "--hard", baseSha], worktreeDir);
+        await runCli(["git", "clean", "-fd", "--", "src", "include", "config"], worktreeDir);
+      }
+
+      const clean =
+        report.regressions.length === 0 && report.brokenMatches.length === 0 && report.fuzzyRegressions.length === 0 && issues.status !== "issues";
+      if (clean) {
+        const status = {
+          status: report.newMatches.length > 0 ? "pr_ready" : "nothing_to_ship",
+          baseSha,
+          files: pathspecs.length,
+          rounds: round,
+          newMatches: report.newMatches.length,
+          brokenMatches: 0,
+          fuzzyRegressions: 0,
+          metricRegressions: 0,
+          matchedCodeBytesDelta: report.summary.matchedCodeBytesDelta,
+          issuesCheck: issues.status,
+          droppedFiles: Object.fromEntries(droppedFiles),
+          shippedFiles: pathspecs,
+          patchPath,
+          checkedAt: new Date().toISOString(),
+        };
+        appendLog("ui", `ship-set verification: ${status.status} (${status.newMatches} confirmed matches, ${droppedFiles.size} file(s) dropped for rework)`);
+        return writeStatus(status);
+      }
+
+      const offenders = new Map<string, string[]>();
+      const note = (file: string, reason: string): void => {
+        if (!file) return;
+        offenders.set(file, [...(offenders.get(file) ?? []), reason]);
+      };
+      for (const file of issues.files) {
+        note(file, "code issue (upstream check-issues lint)");
+      }
+      for (const entry of [...report.brokenMatches, ...report.fuzzyRegressions]) {
+        note(entry.sourcePath || sourcePathFromUnit(entry.unitName), `${entry.itemName} ${entry.fromPercent.toFixed(2)} -> ${entry.toPercent.toFixed(2)}`);
+      }
+      for (const change of report.regressions) {
+        note(sourcePathFromUnit(stringValue((change as unknown as JsonObject).name)), `metric ${stringValue((change as unknown as JsonObject).name)}`);
+      }
+      const droppable = [...offenders.keys()].filter((file) => pathspecs.includes(file));
+      if (droppable.length === 0) {
+        const status = {
+          status: "blocked",
+          baseSha,
+          files: pathspecs.length,
+          rounds: round,
+          newMatches: report.newMatches.length,
+          brokenMatches: report.brokenMatches.length,
+          fuzzyRegressions: report.fuzzyRegressions.length,
+          metricRegressions: report.regressions.length,
+          droppedFiles: Object.fromEntries(droppedFiles),
+          unattributed: Object.fromEntries(offenders),
+          patchPath,
+          checkedAt: new Date().toISOString(),
+        };
+        appendLog("ui", "ship-set verification: blocked — regressions could not be attributed to a shippable file");
+        return writeStatus(status);
+      }
+      for (const file of droppable) {
+        droppedFiles.set(file, offenders.get(file) ?? []);
+        appendLog("ui", `ship-set round ${round}: dropping ${file} (${(offenders.get(file) ?? []).join("; ")})`);
+      }
+      pathspecs = pathspecs.filter((file) => !droppable.includes(file));
+    }
+    return writeStatus({ status: "blocked", baseSha, rounds: 4, droppedFiles: Object.fromEntries(droppedFiles), reason: "regressions persisted after 4 refinement rounds", checkedAt: new Date().toISOString() });
+  }
+
+  function remoteOwner(repoRoot: string, remote: string): string {
+    const result = spawnSync("git", ["-C", repoRoot, "remote", "get-url", remote], { encoding: "utf8" });
+    if (result.status !== 0) return "";
+    const match = (result.stdout ?? "").trim().match(/github\.com[:/]([^/]+)\//);
+    return match ? match[1] : "";
+  }
+
+  async function checkCodeIssues(worktreeDir: string): Promise<CodeIssuesResult> {
+    if (dockerAvailable === null) {
+      dockerAvailable = spawnSync("docker", ["info"], { stdio: "ignore" }).status === 0;
+    }
+    if (!dockerAvailable) {
+      return { status: "unavailable", output: "docker is not available; upstream CI will still run the Issues check", files: [] };
+    }
+    const uid = typeof process.getuid === "function" ? process.getuid() : 0;
+    const gid = typeof process.getgid === "function" ? process.getgid() : 0;
+    const run = await runCli([
+      "docker", "run", "--rm",
+      "--platform", "linux/amd64",
+      "--user", `${uid}:${gid}`,
+      "--volume", `${worktreeDir}:/input:ro`,
+      CHECK_ISSUES_IMAGE,
+    ]);
+    const output = `${run.stdout}\n${run.stderr}`.trim();
+    if (run.exitCode === 0) return { status: "clean", output, files: [] };
+    // The checker prints an issue tree with per-file counts; anything else
+    // (daemon hiccup, image pull failure) is infrastructure, not a verdict.
+    if (!/Issues: \d/.test(output)) return { status: "unavailable", output, files: [] };
+    const files = [...new Set([...output.matchAll(/^\s+((?:src|include)\/\S+) \(\d+\)$/gm)].map((match) => match[1]))];
+    return { status: "issues", output, files };
+  }
+
+  async function verifyPrSliceInBaseline(params: { baseSha: string; baselineWorktree: string; files: string[]; patchPath: string }): Promise<{ issues: CodeIssuesResult; report: RegressionReport }> {
+    const includeArgs = params.files.map((file) => `--include=${file}`);
+    let report: RegressionReport | null = null;
+    let issues: CodeIssuesResult = { status: "unavailable", output: "verification did not reach code-issues", files: [] };
+    try {
+      const apply = await runCli(["git", "apply", ...includeArgs, params.patchPath], params.baselineWorktree);
+      if (apply.exitCode !== 0) throw new Error(`Slice patch did not apply (${apply.exitCode}): ${outputTail(apply.stderr, 1500)}`);
+      const build = await runCli(["ninja", "changes_all"], params.baselineWorktree);
+      if (build.exitCode !== 0) throw new Error(`Slice build failed (${build.exitCode}): ${outputTail(build.stderr || build.stdout, 3000)}`);
+      report = await readRegressionReport(resolve(params.baselineWorktree, "build/GALE01/report_changes.json"), "slice isolation", 0);
+      if (report.regressions.length === 0 && report.brokenMatches.length === 0 && report.fuzzyRegressions.length === 0) {
+        issues = await checkCodeIssues(params.baselineWorktree);
+      } else {
+        issues = { status: "unavailable", output: "skipped — slice regressed in isolation", files: [] };
+      }
+    } finally {
+      await runCli(["git", "reset", "--hard", params.baseSha], params.baselineWorktree);
+      await runCli(["git", "clean", "-fd", "--", "src", "include", "config"], params.baselineWorktree);
+    }
+    if (!report) throw new Error("Slice verification did not produce a regression report.");
+    return { report, issues };
+  }
+
+  function sliceValidationSummary(report: RegressionReport, issues: CodeIssuesResult): JsonObject {
+    const regressions = report.regressions.length + report.brokenMatches.length + report.fuzzyRegressions.length;
+    const status = regressions > 0 || issues.status === "issues" ? "failed" : issues.status === "unavailable" ? "warning" : "passed";
+    return {
+      status,
+      checkedAt: new Date().toISOString(),
+      newMatches: report.newMatches.length,
+      regressions,
+      brokenMatches: report.brokenMatches.length,
+      fuzzyRegressions: report.fuzzyRegressions.length,
+      metricRegressions: report.regressions.length,
+      matchedCodeBytesDelta: report.summary.matchedCodeBytesDelta,
+      issuesCheck: issues.status,
+      issuesFiles: issues.files,
+      issuesOutput: issues.status === "clean" ? "" : outputTail(issues.output, 1200),
+    };
+  }
+
+  function assertSliceVerificationClean(branch: string, validation: JsonObject): void {
+    if (stringValue(validation.status) === "passed" || stringValue(validation.status) === "warning") return;
+    throw new Error(
+      `Slice ${branch} is not locally ready: ${numberValue(validation.brokenMatches)} broken · ${numberValue(validation.fuzzyRegressions)} fuzzy · ${numberValue(validation.metricRegressions)} metric · ${stringValue(validation.issuesCheck)} issues.`,
+    );
+  }
+
+  async function readyLocalPrSource(params: { baseSha: string; branch: string; files: string[]; record: JsonObject; repoRoot: string; stateDir: string }): Promise<JsonObject | null> {
+    const local = asObject(params.record.local);
+    const worktreePath = stringValue(local.worktreePath);
+    const localStatus = stringValue(local.status);
+    const localBranchRecord = isLocalBranchPrRecord(params.record);
+
+    if (localStatus !== "ready" && !localBranchRecord) return null;
+    if (localStatus === "ready" && (!worktreePath || !existsSync(resolve(worktreePath, ".git")))) {
+      updatePrRecord(params.stateDir, params.branch, (record) => ({
+        ...record,
+        local: {
+          ...asObject(record.local),
+          status: localBranchRecord ? "local_only" : "blocked",
+          error: worktreePath ? `Local PR worktree is missing at ${worktreePath}.` : "Local PR worktree path is missing.",
+        },
+      }));
+      if (!localBranchRecord) return null;
+    }
+
+    if (worktreePath && existsSync(resolve(worktreePath, ".git"))) {
+      const status = await runGit(worktreePath, ["status", "--porcelain"], { check: false });
+      if (status.exitCode !== 0) throw new Error(`Unable to inspect local PR worktree for ${params.branch}: ${outputTail(status.stderr || status.stdout, 1200)}`);
+      if (status.stdout.trim()) {
+        const message = `Local PR worktree for ${params.branch} has uncommitted changes at ${worktreePath}. Commit or stash them before opening a draft.`;
+        updatePrRecord(params.stateDir, params.branch, (record) => ({
+          ...record,
+          local: {
+            ...asObject(record.local),
+            status: "dirty",
+            error: message,
+          },
+        }));
+        throw new Error(message);
+      }
+
+      const currentBranch = await runGit(worktreePath, ["rev-parse", "--abbrev-ref", "HEAD"], { failureHint: `Unable to read local PR worktree branch for ${params.branch}` });
+      if (currentBranch.stdout.trim() !== params.branch) {
+        throw new Error(`Local PR worktree for ${params.branch} is checked out to ${currentBranch.stdout.trim() || "(detached)"}. Check out ${params.branch} before opening.`);
+      }
+    }
+
+    if (!branchExists(params.repoRoot, params.branch)) return null;
+    const sourceRepo = worktreePath && existsSync(resolve(worktreePath, ".git")) ? worktreePath : params.repoRoot;
+    const head = await runGit(params.repoRoot, ["rev-parse", params.branch], { failureHint: `Unable to read local PR branch HEAD for ${params.branch}` });
+    const commitSha = head.stdout.trim();
+    const diffBase = localBranchDiffBase(params.repoRoot, params.baseSha, params.branch);
+    const changed = await runGit(params.repoRoot, ["diff", "--name-only", `${diffBase}..${params.branch}`], { failureHint: `Unable to inspect local PR diff for ${params.branch}` });
+    const changedFiles = changed.stdout.split("\n").map((file) => file.trim()).filter(Boolean);
+    if (changedFiles.length === 0) throw new Error(`Local PR branch ${params.branch} has no committed diff from ${diffBase.slice(0, 10)}.`);
+    const manifest = new Set(params.files);
+    const outsideManifest = changedFiles.filter((file) => !manifest.has(file));
+    if (outsideManifest.length > 0) {
+      throw new Error(`Local PR branch ${params.branch} changes file(s) outside the PR manifest: ${outsideManifest.slice(0, 8).join(", ")}${outsideManifest.length > 8 ? `, +${outsideManifest.length - 8} more` : ""}. Re-plan or move those edits before opening.`);
+    }
+
+    const patchDir = resolve(params.stateDir, "pr_handoff", "local_patches");
+    mkdirSync(patchDir, { recursive: true });
+    const patchPath = resolve(patchDir, `${prBranchPathSlug(params.branch)}.patch`);
+    const diff = await runGit(params.repoRoot, ["diff", "--binary", `${diffBase}..${params.branch}`, "--", ...params.files], { failureHint: `Unable to write local PR patch for ${params.branch}` });
+    if (!diff.stdout.trim()) throw new Error(`Local PR worktree for ${params.branch} produced an empty manifest diff.`);
+    writeFileSync(patchPath, diff.stdout, "utf8");
+
+    return {
+      commitSha,
+      diffBase,
+      patchPath,
+      source: sourceRepo === worktreePath ? "local_worktree" : "local_branch",
+      worktreePath: sourceRepo === worktreePath ? worktreePath : "",
+    };
+  }
+
+  async function prepareLocalPrWorkspace(params: {
+    baseSha: string;
+    branch: string;
+    files: string[];
+    force: boolean;
+    patchPath: string;
+    record: JsonObject;
+    repoRoot: string;
+    runId: string;
+    stateDir: string;
+    title: string;
+  }): Promise<JsonObject> {
+    const local = asObject(params.record.local);
+    const existingWorktree = stringValue(local.worktreePath);
+    const worktreePath = existingWorktree || prWorkspacePath(params.stateDir, params.runId, params.branch);
+    if (stringValue(local.status) === "ready" && worktreePath && existsSync(resolve(worktreePath, ".git"))) {
+      return {
+        ...params.record,
+        local: { ...local, status: "ready", branch: params.branch, worktreePath },
+      };
+    }
+    if (existsSync(worktreePath) && !params.force) {
+      throw new Error(`Local worktree already exists at ${worktreePath}. Inspect it or rerun with force before overwriting local PR workspace state.`);
+    }
+
+    mkdirSync(dirname(worktreePath), { recursive: true });
+    if (!existsSync(resolve(worktreePath, ".git"))) {
+      await runGit(params.repoRoot, ["worktree", "prune"], { check: false });
+      const add = await runGit(params.repoRoot, ["worktree", "add", "-B", params.branch, worktreePath, params.baseSha], { check: false });
+      if (add.exitCode !== 0) throw new Error(`git worktree add failed (${add.exitCode}): ${outputTail(add.stderr || add.stdout, 1500)}`);
+    } else if (params.force) {
+      const checkout = await runGit(worktreePath, ["checkout", "-B", params.branch, params.baseSha], { check: false });
+      if (checkout.exitCode !== 0) throw new Error(`git checkout failed in local PR worktree (${checkout.exitCode}): ${outputTail(checkout.stderr || checkout.stdout, 1500)}`);
+      await runGit(worktreePath, ["reset", "--hard", params.baseSha], { check: false });
+      await runGit(worktreePath, ["clean", "-fd", "--", "src", "include", "config"], { check: false });
+    }
+
+    const origSource = resolve(params.repoRoot, "orig");
+    if (existsSync(origSource)) linkMissingFiles(origSource, resolve(worktreePath, "orig"));
+
+    const includeArgs = params.files.map((file) => `--include=${file}`);
+    const apply = await runCli(["git", "apply", "--index", ...includeArgs, params.patchPath], worktreePath);
+    if (apply.exitCode !== 0) throw new Error(`Patch apply failed in the local PR worktree (${apply.exitCode}): ${outputTail(apply.stderr, 1500)}`);
+    const commit = await runCli(["git", "commit", "-m", params.title], worktreePath);
+    if (commit.exitCode !== 0) throw new Error(`git commit failed in the local PR worktree (${commit.exitCode}): ${outputTail(commit.stderr || commit.stdout, 1500)}`);
+    const head = await runGit(worktreePath, ["rev-parse", "HEAD"], { failureHint: "Unable to read local PR worktree HEAD" });
+    return {
+      ...params.record,
+      local: {
+        ...local,
+        status: "ready",
+        branch: params.branch,
+        worktreePath,
+        commitSha: head.stdout.trim(),
+        preparedAt: new Date().toISOString(),
+        error: "",
+      },
+    };
+  }
+
+  async function publishPatchToFork(params: { baseSha: string; branch: string; files: string[]; patchPath: string; repoRoot: string; title: string }): Promise<void> {
+    const includeArgs = params.files.map((file) => `--include=${file}`);
+    const worktreeDir = resolve(tmpdir(), `melee-pr-${params.branch.replace(/[^A-Za-z0-9_.-]+/g, "-")}`);
+    if (existsSync(worktreeDir)) await runCli(["git", "worktree", "remove", "--force", worktreeDir], params.repoRoot);
+    const add = await runCli(["git", "worktree", "add", "-B", params.branch, worktreeDir, params.baseSha], params.repoRoot);
+    if (add.exitCode !== 0) throw new Error(`git worktree add failed (${add.exitCode}): ${outputTail(add.stderr, 1500)}`);
+    try {
+      const apply = await runCli(["git", "apply", "--index", ...includeArgs, params.patchPath], worktreeDir);
+      if (apply.exitCode !== 0) throw new Error(`Patch apply failed in the PR worktree (${apply.exitCode}): ${outputTail(apply.stderr, 1500)}`);
+      const commit = await runCli(["git", "commit", "-m", params.title], worktreeDir);
+      if (commit.exitCode !== 0) throw new Error(`git commit failed (${commit.exitCode}): ${outputTail(commit.stderr || commit.stdout, 1500)}`);
+      const push = await runCli(["git", "push", "--force-with-lease", "-u", "fork", params.branch], worktreeDir);
+      if (push.exitCode !== 0) throw new Error(`git push failed (${push.exitCode}): ${outputTail(push.stderr, 1500)}`);
+    } finally {
+      await runCli(["git", "worktree", "remove", "--force", worktreeDir], params.repoRoot);
+    }
+  }
+
+  return {
+    assertSliceVerificationClean,
+    checkCodeIssues,
+    ensureOpenPrBaseline,
+    prepareLocalPrWorkspace,
+    publishPatchToFork,
+    readyLocalPrSource,
+    rebuildProductionBaseline,
+    remoteOwner,
+    sliceValidationSummary,
+    verifyPrSliceInBaseline,
+    verifyShipSet,
+  };
+}

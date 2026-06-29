@@ -1,0 +1,29 @@
+{
+  "id": "gamecube-decomp",
+  "kind": "toolpack",
+  "version": 1,
+  "description": "Reusable GameCube decomp tool contracts, default APIs, runner scripts, and shared implementation modules.",
+  "registry": "registry.json",
+  "sharedImplementationRoots": {
+    "python": "_shared",
+    "gamecubeImplementation": "_impl/gamecube"
+  },
+  "tools": [
+    { "id": "ghidra", "path": "research/ghidra" },
+    { "id": "opseq", "path": "research/opseq" },
+    { "id": "mismatch_db", "path": "research/mismatch_db" },
+    { "id": "m2c_decomp", "path": "research/m2c_decomp" },
+    { "id": "checkdiff", "path": "validation/checkdiff" },
+    { "id": "objdiff_score", "path": "validation/objdiff_score" },
+    { "id": "mwcc_debug", "path": "compiler/mwcc_debug" },
+    { "id": "type_oracle", "path": "compiler/type_oracle" },
+    { "id": "source_permuter", "path": "source_editing/source_permuter" },
+    { "id": "include_fixer", "path": "source_editing/include_fixer" },
+    { "id": "review_lint", "path": "source_editing/review_lint" },
+    { "id": "struct_infer", "path": "data_conversion/struct_infer" },
+    { "id": "item_state_table", "path": "data_conversion/item_state_table" }
+  ],
+  "recipes": [
+    { "id": "attempt-evaluation", "path": "recipes/attempt-evaluation.json" }
+  ]
+}

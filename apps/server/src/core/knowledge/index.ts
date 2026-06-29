@@ -1,0 +1,52 @@
+export {
+  agentSharedStateEnrichmentPath,
+  codeGraphFunctionsIndexPath,
+  defaultToolpackId,
+  knowledgeCuratorEnrichmentPath,
+  knowledgeSourceRegistryPath,
+  knowledgeSourcesRoot,
+  knowledgeToolRegistryPath,
+  knowledgeToolsRoot,
+  knowledgeRoot,
+  packageRoot,
+  pastPrsRoot,
+  projectRoot,
+  projectSharedToolDataRoot,
+  projectToolBindingRoot,
+  projectWorktreeRoot,
+  projectWorktreeToolCacheRoot,
+  resourceGraphEnrichmentsRoot,
+  resourceGraphDbPath,
+  resourceGraphRoot,
+  sourceDataRoot,
+  sourceRoot,
+  toolpackRegistryPath,
+  toolpackRoot,
+  toolpacksRoot,
+  toolpackToolRegistryPath,
+  toolsRoot,
+} from "./paths.js";
+export { loadKnowledgeBoardSnapshot, type LoadKnowledgeBoardSnapshotOptions } from "./board.js";
+export {
+  appendCuratedKnowledgeRecords,
+  curateKnowledgeEnrichments,
+  curatedPrRecordsForPostmortem,
+  KNOWLEDGE_CURATOR_SCHEMA_VERSION,
+  KNOWLEDGE_CURATOR_ENRICHMENT_ID,
+  classifySourceUpdateProposal,
+  sourceUpdateProposalRecords,
+  type CuratedKnowledgeRecord,
+  type CurateKnowledgeOptions,
+  type CurateKnowledgeResult,
+} from "./curator.js";
+export { resourceMap } from "./resources.js";
+export {
+  globalStandardsContext,
+  globalStandardsPromptXml,
+  loadStandardExamples,
+  resolvePathFactsContext,
+  standardExamplesPromptXml,
+  type PathFactResolution,
+  type StandardExampleSelector,
+} from "./decomp-context.js";
+export * from "./graph/index.js";

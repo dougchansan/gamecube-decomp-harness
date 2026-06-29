@@ -1,0 +1,377 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2736",
+  "pr": {
+    "number": 2736,
+    "title": "Improve data matches",
+    "url": "https://github.com/doldecomp/melee/pull/2736",
+    "state": "MERGED",
+    "author": "ribbanya",
+    "created_at": "2026-06-18T02:20:19Z",
+    "merged_at": "2026-06-18T02:25:10Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2736 adjusted source definitions, symbol metadata, and split ownership to improve GALE01 data matching across stage, item, fighter, VI, baselib, and MSL files. The bot report shows +0.12% matched data, 11 new data matches, and two unmatched-code regressions.",
+  "change_classification": {
+    "primary_type": "data-matching",
+    "categories": [
+      "decomp-matching",
+      "data-section-ownership",
+      "symbols",
+      "splits",
+      "headers"
+    ],
+    "systems": [
+      "MSL",
+      "config",
+      "fighter",
+      "item",
+      "melee-core",
+      "stage",
+      "sysdolphin"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "config/GALE01/splits.txt",
+      "role": "Adjusted section ownership: shortened grpushon .sbss, added grfigureget .sbss, and moved ittincle .rodata from itkyasarin to ittincle.",
+      "evidence_refs": [
+        "diff_excerpt:splits.txt"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Updated symbol sizes, scopes, data kinds, and labels for grpushon, grfigureget, grmaterial, ittincle, and VI sbss symbols.",
+      "evidence_refs": [
+        "diff_excerpt:symbols.txt"
+      ]
+    },
+    {
+      "path": "src/MSL/math.h",
+      "role": "Added M_TAU_F float macro.",
+      "evidence_refs": [
+        "diff_excerpt:src/MSL/math.h"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftYoshi/ftYs_SpecialS.c",
+      "role": "Added an .sdata2 order helper and replaced some literal math expressions with M_TAU and M_PI_2 forms.",
+      "evidence_refs": [
+        "diff_excerpt:ftYs_SpecialS.c"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grfigureget.c",
+      "role": "Renamed local params type and sbss pointer from address-style extern grFigureGet_804D6AC0 to static yakumono_param, with call sites updated.",
+      "evidence_refs": [
+        "diff_excerpt:grfigureget.c"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grpushon.c",
+      "role": "Converted several extern data declarations into defined const Vec3/float data, added an .sdata order helper, moved light descriptor/config placement, and changed an assert to use HSD_LObjGetType.",
+      "evidence_refs": [
+        "diff_excerpt:grpushon.c"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/itkusudama.c",
+      "role": "Large item data/source reshaping, including include changes and an ItemStateTable definition in the loaded excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff:itkusudama.c truncated excerpt"
+      ]
+    },
+    {
+      "path": "src/melee/it/items/ittincle.c",
+      "role": "Touched item file associated with the new ittincle .rodata split ownership and 100% rodata match in bot report.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "text_corpus:decomp-dev bot report"
+      ]
+    },
+    {
+      "path": "src/melee/vi/types.h",
+      "role": "One-line type/header change; exact hunk not present in loaded excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/lobj.c",
+      "role": "One-line baselib LObj change; exact hunk not present in loaded excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Adjusted GALE01 split ranges so grfigureget owns .sbss 0x804D6AC0-0x804D6AC8 and ittincle owns .rodata 0x803B8740-0x803B8750.",
+    "Changed multiple symbols from global 4byte-style metadata to local float/string metadata, especially grpushon rodata/sdata and ittincle rodata.",
+    "Split or resized data symbols such as grMaterial_803E0A20, grPushOn_803E7B10, grPushOn_803E7B90, grPushOn_804D6AB8, and un_804D6F84.",
+    "Added named labels for previously absorbed data/string ranges, including lbl_803E0AFC, lbl_803E7B44, lbl_803E7BAC, and lbl_803E7CA8.",
+    "In grpushon.c, replaced extern data declarations with source-owned Vec3 const and float definitions and repositioned HSD_LightDesc/light_configs data.",
+    "In grfigureget.c, made the stage parameter pointer static and renamed it yakumono_param; renamed grFigureGet_Data to grFigureGet_Params.",
+    "In ftYs_SpecialS.c, added an .sdata2 order helper and used M_TAU/M_PI_2 expressions in angle math.",
+    "Added M_TAU_F to src/MSL/math.h.",
+    "Bot report recorded 11 new data matches and two unmatched-item regressions."
+  ],
+  "smart_moves": [
+    "Coordinated source definitions with symbols.txt and splits.txt rather than only changing C source, which is appropriate for data-section matching work.",
+    "Used local scope in symbol metadata for data that the diff shows is source-local or TU-owned after the change.",
+    "Converted address-style grFigureGet_804D6AC0 usage into a static named pointer, yakumono_param, where the source now treats it as a file-local parameter pointer.",
+    "Replaced a manual LObj type-mask assert expression in grpushon with HSD_LObjGetType, aligning with helper use when the helper is available."
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "Data-match PRs may require synchronized edits across source data definitions, split ranges, and symbol metadata; changing only the C file can leave section ownership mismatched.",
+      "evidence_refs": [
+        "diff_excerpt:splits.txt",
+        "diff_excerpt:symbols.txt",
+        "diff_excerpt:grpushon.c",
+        "text_corpus:decomp-dev bot report"
+      ]
+    },
+    {
+      "lesson": "When a data object is proven to belong to a translation unit, tightening symbol scope from global to local can be part of the match fix.",
+      "evidence_refs": [
+        "diff_excerpt:symbols.txt grPushOn_* scope:local",
+        "diff_excerpt:symbols.txt it_803B8740 scope:local"
+      ]
+    },
+    {
+      "lesson": "Helper/API restoration can still matter inside data-focused PRs; grpushon changed an inlined LOBJ_TYPE_MASK assert back to HSD_LObjGetType.",
+      "evidence_refs": [
+        "diff_excerpt:grpushon.c HSD_ASSERT(698, HSD_LObjGetType(lobj)==LOBJ_POINT)"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "yakumono_param",
+      "context": "Replaces address-style grFigureGet_804D6AC0 for a static grFigureGet_Params pointer initialized from Ground_801C49F8.",
+      "evidence_refs": [
+        "diff_excerpt:grfigureget.c"
+      ]
+    },
+    {
+      "name": "grFigureGet_Params",
+      "context": "Renames grFigureGet_Data typedef to a params-oriented name.",
+      "evidence_refs": [
+        "diff_excerpt:grfigureget.c"
+      ]
+    },
+    {
+      "name": "M_TAU_F",
+      "context": "New float tau macro added beside M_PI_F in MSL math.h.",
+      "evidence_refs": [
+        "diff_excerpt:src/MSL/math.h"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Added explicit .sdata and .sdata2 order helper functions containing unused literal references.",
+      "evidence_refs": [
+        "diff_excerpt:grpushon.c order_sdata",
+        "diff_excerpt:ftYs_SpecialS.c order_sdata2_0"
+      ],
+      "caution": "The helpers are marked @todo order hacks; existing standards require explicit evidence for data/order tactics and discourage treating them as normal source style."
+    },
+    {
+      "tactic": "Reordered data definitions in grpushon.c by moving grPushOn_804D4948, grPushOn_803E7B90, and light_configs later in the file.",
+      "evidence_refs": [
+        "diff_excerpt:grpushon.c"
+      ],
+      "caution": "Supported by the bot's data-match improvement, but the loaded evidence does not include objdiff details for neighboring codegen beyond the bot summary."
+    },
+    {
+      "tactic": "Changed constants from compound expressions to canonical macros such as M_TAU and M_PI_2 to influence literal/data ordering while retaining readable math.",
+      "evidence_refs": [
+        "diff_excerpt:ftYs_SpecialS.c",
+        "diff_excerpt:src/MSL/math.h"
+      ],
+      "caution": "The PR evidence supports the edit but does not prove a general naming or macro policy."
+    },
+    {
+      "tactic": "Adjusted symbols.txt object sizes/scopes to split large data ranges into smaller owned symbols and labels.",
+      "evidence_refs": [
+        "diff_excerpt:symbols.txt"
+      ],
+      "caution": "This is data ownership work and should be backed by section/symbol evidence for each case."
+    }
+  ],
+  "review_feedback": [
+    {
+      "source": "decomp-dev[bot]",
+      "created_at": "2026-06-18T02:24:43Z",
+      "feedback": "GALE01 report: matched data improved to 48.04% (+0.12%, +1448 bytes) and linked data to 41.10% (+24 bytes). It listed 11 new matches including itkusudama .data, grpushon .rodata/.data/.sdata/.sbss, ittincle .rodata, ftYs_SpecialS .sdata2, grfigureget .sbss, vi0501 .sbss, and grmaterial .data.",
+      "evidence_refs": [
+        "text_corpus:decomp-dev bot report"
+      ]
+    },
+    {
+      "source": "decomp-dev[bot]",
+      "created_at": "2026-06-18T02:24:43Z",
+      "feedback": "The same report showed two regressions in unmatched items: itkusudama it_80289BE8 -16 bytes and grpushon grPushOn_802190D0 -5 bytes.",
+      "evidence_refs": [
+        "text_corpus:decomp-dev bot report"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2736",
+    "Improve data matches",
+    "data match",
+    "symbols.txt scope local data float",
+    "splits.txt section ownership",
+    "grPushOn_803B8440",
+    "grPushOn_804D4934",
+    "grPushOn_804D4948",
+    "grPushOn_802190D0",
+    "light_configs",
+    "order_sdata",
+    "order_sdata2_0",
+    "ftYs_SpecialS",
+    "M_TAU_F",
+    "M_TAU",
+    "M_PI_2",
+    "grFigureGet_Params",
+    "yakumono_param",
+    "itkusudama ItemStateTable",
+    "ittincle rodata",
+    "HSD_LObjGetType",
+    "vi0501 sbss"
+  ],
+  "follow_up_queries": [
+    "Find later PRs touching order_sdata or order_sdata2_0 to see whether the order hacks were removed or normalized.",
+    "Search grPushOn_802190D0 regressions after PR 2736 to see how the -5 unmatched-code regression was repaired.",
+    "Search it_80289BE8 after PR 2736 to see how the -16 regression from itkusudama data work was handled.",
+    "Search yakumono_param and grFigureGet_Params for whether the naming persisted in later stage files.",
+    "Search M_TAU_F and M_TAU uses to determine whether tau macros became an accepted local convention or were only data-order aids."
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json",
+      "changed_files.jsonl",
+      "diff_excerpt",
+      "raw_diff truncated",
+      "text_corpus:decomp-dev bot report"
+    ],
+    "notes": [
+      "PR body is empty and there are no human review comments in the loaded slice.",
+      "The loaded diff is truncated for itkusudama and does not show the exact hunks for ittincle.c, vi/types.h, or lobj.c.",
+      "Bot report provides strong evidence for data-match changes and regressions but not detailed objdiff or author intent.",
+      "Order helper functions are explicitly marked @todo hacks, so they should not be promoted as accepted source style."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "title": "PR2736 data matching combined source, symbols, and splits edits",
+        "text": "PR 2736 improved data matches by coordinating C source data definitions with GALE01 symbols.txt and splits.txt section ownership changes. Bot report showed 11 new data matches and +1448 matched-data bytes.",
+        "scope": [
+          "data matching",
+          "symbols",
+          "splits"
+        ],
+        "evidence_refs": [
+          "diff_excerpt:splits.txt",
+          "diff_excerpt:symbols.txt",
+          "text_corpus:decomp-dev bot report"
+        ]
+      },
+      {
+        "title": "PR2736 retained explicit data-order hacks",
+        "text": "The PR added @todo .sdata/.sdata2 order helper functions in grpushon.c and ftYs_SpecialS.c. Treat this as PR-specific matching evidence, not a general source-style endorsement.",
+        "scope": [
+          "matching tactics",
+          "data order"
+        ],
+        "evidence_refs": [
+          "diff_excerpt:grpushon.c order_sdata",
+          "diff_excerpt:ftYs_SpecialS.c order_sdata2_0"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Clarify treatment of .sdata/.sdata2 order helper hacks",
+        "text": "PR 2736 includes helper functions marked @todo .sdata order hack and @todo .sdata2 order hack. Consider adding examples under matching-tactics-need-evidence that such helpers are narrow data-order tactics requiring explicit match evidence and follow-up cleanup, not normal authored source style.",
+        "source_path": null,
+        "scope": [
+          "matching tactics",
+          "data order",
+          "literals_data_and_externs"
+        ],
+        "evidence_refs": [
+          "diff_excerpt:grpushon.c order_sdata",
+          "diff_excerpt:ftYs_SpecialS.c order_sdata2_0",
+          "text_corpus:decomp-dev bot report"
+        ],
+        "reason": "Existing standards already require evidence for tactics; this PR provides a concrete historical example with @todo order hacks."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "grpushon.c data matching in PR2736 used source-owned consts and data reordering",
+        "text": "PR 2736 converted several grpushon extern data references into defined Vec3 const/float data, moved light descriptor/config placement, and updated symbols/splits to reach 100% grpushon .rodata/.data/.sdata/.sbss data matches per bot report.",
+        "source_path": "src/melee/gr/grpushon.c",
+        "scope": [
+          "stage",
+          "data matching",
+          "grpushon"
+        ],
+        "evidence_refs": [
+          "diff_excerpt:grpushon.c",
+          "diff_excerpt:symbols.txt",
+          "text_corpus:decomp-dev bot report"
+        ],
+        "reason": "Potentially useful path-scoped history for future grpushon data/order work."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "ftYs_SpecialS.c PR2736 changed angle constants and added .sdata2 order helper",
+        "text": "PR 2736 added order_sdata2_0 and changed Yoshi special angle math to use M_TAU and M_PI_2 expressions; bot report says ftYs_SpecialS .sdata2 reached 100%.",
+        "source_path": "src/melee/ft/chara/ftYoshi/ftYs_SpecialS.c",
+        "scope": [
+          "fighter",
+          "Yoshi",
+          "sdata2",
+          "constants"
+        ],
+        "evidence_refs": [
+          "diff_excerpt:ftYs_SpecialS.c",
+          "text_corpus:decomp-dev bot report"
+        ],
+        "reason": "Path-scoped clue for future edits involving literal ordering in this file."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that order_sdata/order_sdata2 helper functions are accepted global style; they are explicitly labeled @todo hacks.",
+      "Do not infer human reviewer approval of the two bot-reported regressions; no human review comments are loaded.",
+      "Do not generalize M_TAU or M_TAU_F as an accepted project-wide replacement rule from this PR alone.",
+      "Do not claim exact behavior of itkusudama, ittincle, vi/types.h, or lobj.c hunks beyond what changed-file metadata, visible diff, and bot report show."
+    ]
+  },
+  "confidence": 0.79,
+  "agent_runtime": {
+    "runner": "orchestrator_kernel_pr_indexer",
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "orchestrator_state_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/projects/melee/state",
+    "orchestrator_run_id": "08bfe41e-1b7c-4685-8646-dff5e02a5dab",
+    "orchestrator_project_id": "melee",
+    "orchestrator_prepare_intake": true,
+    "orchestrator_kernel_database_url_configured": true,
+    "legacy_session_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/.pi-sessions/pr-review"
+  }
+}

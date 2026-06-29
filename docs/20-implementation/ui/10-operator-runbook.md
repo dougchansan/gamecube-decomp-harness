@@ -1,7 +1,7 @@
 ---
 covers: How an operator drives a full session cycle from the dashboard
 concepts: [runbook, operator, status-panel, actions-panel, prepare-handoff, reconcile, ship]
-code-ref: apps/dashboard/src/components/Sidebar.tsx, apps/dashboard-server/src/server.ts
+code-ref: apps/frontend/src/components/Sidebar.tsx, apps/server/src/server.ts, apps/server/src/infrastructure/http/server.ts
 ---
 
 # UI: Operator Runbook
@@ -28,13 +28,13 @@ highlighted.
 | Stage | Detail rows | Healthy verdict | Owns |
 | --- | --- | --- | --- |
 | 1 Sync | Branch (dirty marker), Baseline freshness | `up to date with origin/master` | Sync Merged PRs (locked while a run is active) |
-| 2 Run | Workers, Queue/reports, last Save point | `active · N leases` while working, `paused · 0 leases` before handoff | Start Working, Pause Intake, Resume, Stop, Force Stop; Setup + Process disclosures |
-| 3 Ship | Checkpoint lanes, Branch QA (informational; `blocked` = rework requeued, never a PR gate), Ship set (THE PR gate), Plan | `pr_ready — N confirmed match(es)` | Prepare Handoff (the whole pipeline incl. auto-reconcile, PR board seed, and the hard `ship` save point — it ends the session); Manual steps (Run QA, Reconcile, Plan PRs — debug escape hatches; checkpointing is automatic) + Artifacts disclosure |
+| 2 Run | Workers, claims/checkpoints, last Save point | `active · N active claims` while working, `paused · 0 active claims` before handoff | Start Working, Pause Intake, Resume, Stop, Force Stop; Setup + Process disclosures |
+| 3 Ship | Checkpoint lanes, Branch QA (informational; `blocked` = rework readmitted at repair priority, never a PR gate), Ship set (THE PR gate), Plan | `pr_ready — N confirmed match(es)` | Prepare Handoff (the whole pipeline incl. auto-reconcile, PR board seed, and the hard `ship` save point — it ends the session); Manual steps (Run QA, Resolve QA Repair, Reconcile, Plan PRs — debug escape hatches; checkpointing is automatic) + Artifacts disclosure |
 | 4 PRs | One row per tracked slice PR (status, #, comments, CI), upstream open count | `N open · M to open · K merged` | **Draft PR Board** — a six-column kanban (Planned → Preparing → Prepared → Draft → In Review → Done) reflecting derived per-slice state; in-flight prep and QA-repair-pending slices show in Preparing, review substate (awaiting/new comments/changes requested/fixing) drives the In Review chip + Ack/Fixing controls. Sync PR Status (gh-backed; records persist in `pr_handoff/pr_records.json`); `/api/prs/review-state` for manual review flags |
 | 5 New Session | — | `restart baseline · keep local work` | New Session (checkpoints first; unshipped improvements stay local) |
 
 Enablement is unchanged from the old Actions panel: handoff buttons need a
-run with stopped workers and zero active leases (server-enforced), Reconcile
+run with stopped workers and zero active claims (server-enforced), Reconcile
 additionally needs the run paused, Sync is locked while a run is active.
 
 ## One full cycle
@@ -47,7 +47,7 @@ additionally needs the run paused, Sync is locked while a run is active.
 4. **Prepare Handoff** — the full ship pipeline and the hard save point that
    ends the session (pause → pull & rebase → PR intake for anything newly
    merged → rebuild production baseline → branch QA vs that baseline →
-   checkpoint with regressed symbols forced to needs_rework → requeue rework
+   checkpoint with regressed symbols forced to needs_rework → readmit rework
    at repair priority → match-only split plan → verify ship set →
    auto-reconcile if blocked → replan against the survivors → seed the PR
    board → `ship` save point). Every step shows live in the activity card.
@@ -57,7 +57,7 @@ additionally needs the run paused, Sync is locked while a run is active.
    already exclude them — ship from the plan as written, no manual
    subtraction.
 5. The gate is the **Ship set** row, not Branch QA. Branch regressions are
-   requeued as rework automatically; the pipeline only stops if the match
+   readmitted as rework automatically; the pipeline only stops if the match
    files themselves regress the baseline (run **Reconcile** or drop the
    offending slice and re-run) or if there is nothing to ship yet (Resume and
    keep working).

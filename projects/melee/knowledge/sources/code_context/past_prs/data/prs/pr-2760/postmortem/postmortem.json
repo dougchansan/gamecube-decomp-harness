@@ -1,0 +1,239 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2760",
+  "pr": {
+    "number": 2760,
+    "title": "Match progress",
+    "url": "https://github.com/doldecomp/melee/pull/2760",
+    "state": "CLOSED",
+    "author": "sbergeron42",
+    "created_at": "2026-06-25T09:00:25Z",
+    "merged_at": null
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Draft PR #2760 attempted a one-line decomp matching change in src/melee/gr/grheal.c, replacing GET_GROUND(gobj) with direct gobj->user_data access in grHeal_8021F0D8. The PR was closed unmerged, with maintainer feedback that the author was working from a three-month-old commit and that grheal had already been finished.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "stale-branch",
+      "closed-unmerged"
+    ],
+    "systems": [
+      "stage",
+      "ground",
+      "grheal"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gr/grheal.c",
+      "role": "Only changed file; one-line local access change in grHeal_8021F0D8.",
+      "evidence_refs": [
+        "changed_files: src/melee/gr/grheal.c added=1 deleted=1 hunks=1",
+        "raw_diff: grHeal_8021F0D8 changed Ground* gp = GET_GROUND(gobj); to Ground* gp = gobj->user_data;"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "path": "src/melee/gr/grheal.c",
+      "description": "In grHeal_8021F0D8, initialized Ground* gp from gobj->user_data instead of GET_GROUND(gobj).",
+      "evidence_refs": [
+        "raw_diff"
+      ]
+    },
+    {
+      "path": null,
+      "description": "PR body identified the work as pending matches, but did not provide matching rationale or verifier output.",
+      "evidence_refs": [
+        "human_pr_text",
+        "text_corpus: pr_body"
+      ]
+    },
+    {
+      "path": null,
+      "description": "A bot report for GALE01 stated 'No changes' for base 2e8e958 to head 96f6893.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev[bot] issue_comment 2026-06-27T01:29:31Z"
+      ]
+    },
+    {
+      "path": null,
+      "description": "Maintainer issue comment said the branch was based on a three-month-old commit, 0559a4e28d8b019445e5ceab0a52490cd5de3e56, and that grheal had already been finished.",
+      "evidence_refs": [
+        "human_pr_text",
+        "text_corpus: ribbanya issue_comment 2026-06-27T01:37:55Z"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "The PR was scoped narrowly to a single expression in one function, making the attempted match change easy to review.",
+      "evidence_refs": [
+        "changed_files",
+        "raw_diff"
+      ],
+      "confidence": 0.75
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "text": "Before submitting pending match work, rebase or compare against current master so already-finished files are not reworked from stale source.",
+      "scope": [
+        "workflow",
+        "decomp-matching"
+      ],
+      "evidence_refs": [
+        "text_corpus: ribbanya issue_comment 2026-06-27T01:37:55Z"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "text": "A one-line accessor or field-access change without rationale or verifier evidence is weak evidence for a reusable decomp tactic, especially when the PR is closed as stale.",
+      "scope": [
+        "review",
+        "matching-evidence"
+      ],
+      "evidence_refs": [
+        "raw_diff",
+        "text_corpus: pr_body",
+        "text_corpus: ribbanya issue_comment 2026-06-27T01:37:55Z"
+      ],
+      "confidence": 0.75
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "The local variable name gp was used for a Ground* in grHeal_8021F0D8.",
+      "scope": [
+        "src/melee/gr/grheal.c",
+        "Ground* locals"
+      ],
+      "evidence_refs": [
+        "raw_diff"
+      ],
+      "confidence": 0.65
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "text": "Attempted to alter codegen or matching by replacing the GET_GROUND(gobj) macro/helper form with direct gobj->user_data field access.",
+      "scope": [
+        "src/melee/gr/grheal.c",
+        "grHeal_8021F0D8"
+      ],
+      "evidence_refs": [
+        "raw_diff"
+      ],
+      "confidence": 0.7
+    }
+  ],
+  "review_feedback": [
+    {
+      "author": "ribbanya",
+      "text": "The contributor was working from an old commit, and grheal had already been finished.",
+      "evidence_refs": [
+        "human_pr_text",
+        "text_corpus: ribbanya issue_comment 2026-06-27T01:37:55Z"
+      ],
+      "classification": [
+        "stale-branch",
+        "duplicate-obsolete-work"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR 2760",
+    "Match progress",
+    "sbergeron42",
+    "ribbanya",
+    "grheal",
+    "src/melee/gr/grheal.c",
+    "grHeal_8021F0D8",
+    "GET_GROUND",
+    "gobj->user_data",
+    "Ground* gp",
+    "grAnime_801C8138",
+    "map_id",
+    "stale commit",
+    "0559a4e28d8b019445e5ceab0a52490cd5de3e56",
+    "grheal already finished",
+    "pending matches",
+    "GALE01 No changes"
+  ],
+  "follow_up_queries": [
+    "PRs touching src/melee/gr/grheal.c after commit 0559a4e28d8b019445e5ceab0a52490cd5de3e56",
+    "grHeal_8021F0D8 GET_GROUND gobj->user_data",
+    "closed unmerged stale branch grheal already finished",
+    "pending matches no changes GALE01"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json",
+      "raw_diff",
+      "changed_files",
+      "human_pr_text",
+      "text_corpus"
+    ],
+    "notes": [
+      "The actual code diff is very small and fully visible.",
+      "There are no review comments and no detailed author rationale beyond 'Pending Matches'.",
+      "The bot report says 'No changes' despite the raw diff showing a one-line source diff; this may reflect comparison/report behavior rather than absence of a Git diff.",
+      "The PR was closed with merged_at null in raw_pr_json, so no acceptance or final source state should be inferred.",
+      "Because maintainer feedback says grheal was already finished, the direct user_data access should not be promoted as an accepted local convention from this PR alone."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "process_lesson",
+        "title": "Check current master before submitting pending match work",
+        "text": "PR #2760 was closed after feedback that it was based on a three-month-old commit and the touched grheal work had already been finished. Curators may index this as a workflow caution for stale pending-match branches.",
+        "scope": [
+          "decomp-matching",
+          "workflow",
+          "stale-branch"
+        ],
+        "evidence_refs": [
+          "text_corpus: ribbanya issue_comment 2026-06-27T01:37:55Z",
+          "raw_pr_json: merged_at null"
+        ],
+        "confidence": 0.9
+      }
+    ],
+    "source_update_candidates": [],
+    "rejection_notes": [
+      {
+        "text": "Do not promote 'replace GET_GROUND(gobj) with gobj->user_data' as a global standard or path fact from this PR; the change was in a closed unmerged stale PR and lacks matching rationale.",
+        "evidence_refs": [
+          "raw_diff",
+          "text_corpus: ribbanya issue_comment 2026-06-27T01:37:55Z"
+        ]
+      },
+      {
+        "text": "Do not infer reviewer preference against GET_GROUND from the available feedback; the only maintainer comment addresses stale branch state and already-finished grheal work.",
+        "evidence_refs": [
+          "human_pr_text"
+        ]
+      }
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "runner": "orchestrator_kernel_pr_indexer",
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "orchestrator_state_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/projects/melee/state",
+    "orchestrator_run_id": "08bfe41e-1b7c-4685-8646-dff5e02a5dab",
+    "orchestrator_project_id": "melee",
+    "orchestrator_prepare_intake": true,
+    "orchestrator_kernel_database_url_configured": true,
+    "legacy_session_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/.pi-sessions/pr-review"
+  }
+}

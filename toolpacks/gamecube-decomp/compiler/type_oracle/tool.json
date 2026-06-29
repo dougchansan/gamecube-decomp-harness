@@ -1,0 +1,42 @@
+{
+  "id": "type_oracle",
+  "title": "Clang expression type oracle",
+  "trust_tier": "tool_evidence",
+  "description": "Build a libclang expression-span type map for a source file and look up expression types needed for safe temporary extraction.",
+  "operation_mode": "tool_local_impl",
+  "runner_status": "on_demand",
+  "status_message": "Tool-local implementation: APIs import toolpacks/gamecube-decomp/_impl/gamecube/tools/type_oracle.py and read compile_commands.json.",
+  "limitations": [
+    "Requires libclang Python bindings and a compile_commands.json entry for the target source file.",
+    "Type spans are byte offsets in the current source text; after edits, rebuild the oracle.",
+    "Clang type spelling is evidence for source typing, not proof that MWCC will choose the desired code shape."
+  ],
+  "commands": {
+    "status": "python3 toolpacks/gamecube-decomp/compiler/type_oracle/api/status.py --repo-root <repo_root> --json",
+    "inspect": "python3 toolpacks/gamecube-decomp/compiler/type_oracle/api/inspect.py --repo-root <repo_root> --source-path <src.c> --expression <expr> --json"
+  },
+  "capabilities": [
+    "expression_types",
+    "temporary_extraction",
+    "libclang_oracle"
+  ],
+  "category": "compiler",
+  "path": "compiler/type_oracle",
+  "process_role": "expression_type_lookup",
+  "usage": {
+    "invocation_mode": "on_demand",
+    "mutates_source": false,
+    "blocks_on_failure": false,
+    "triggers": [
+      "extracting_temporary",
+      "splitting_expression",
+      "pointer_or_value_type_unclear"
+    ],
+    "outputs": [
+      "expression_type",
+      "byte_span",
+      "compile_command_context"
+    ],
+    "agent_guidance": "Use before temporary extraction or expression rewrites when the C type of a subexpression matters."
+  }
+}

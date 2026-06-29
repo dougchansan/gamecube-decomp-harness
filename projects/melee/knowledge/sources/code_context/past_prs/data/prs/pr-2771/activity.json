@@ -1,0 +1,10 @@
+{
+  "pr": 2771,
+  "title": "Improve several decomp matches",
+  "url": "https://github.com/doldecomp/melee/pull/2771",
+  "text_records_with_body": 2,
+  "review_comments": 0,
+  "changed_files": 66,
+  "added_lines": 146,
+  "deleted_lines": 36
+}

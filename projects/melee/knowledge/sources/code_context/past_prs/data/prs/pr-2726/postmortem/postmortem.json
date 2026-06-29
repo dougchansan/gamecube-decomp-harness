@@ -1,0 +1,432 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2726",
+  "pr": {
+    "number": 2726,
+    "title": "9/14: MN Rules Name Stage",
+    "url": "https://github.com/doldecomp/melee/pull/2726",
+    "state": "MERGED",
+    "author": "fjooord",
+    "created_at": "2026-06-17T14:15:44Z",
+    "merged_at": "2026-06-20T03:35:45Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Refreshed the MN rules, name-entry, item-switch, and stage-switch menu split against a current baseline, touching seven src/melee/mn files. The slice improved MN code/data matching, with review attention on pragma codegen tactics in mnruleplus.c and mnstagesw.c and on reverting generated named string literals in mnnamenew.c.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "menu-code-refresh",
+      "naming-cleanup",
+      "data-matching",
+      "codegen-tactics"
+    ],
+    "systems": [
+      "melee-core",
+      "mn",
+      "menus",
+      "rules-menu",
+      "name-entry",
+      "item-switch",
+      "stage-switch"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/mn/mnmainrule.c",
+      "role": "Largest changed file; refreshed rules-menu code/data and added or materialized menu data tables and sdata values.",
+      "evidence_refs": [
+        "changed_files.jsonl: mnmainrule.c +521/-346 in 27 hunks",
+        "diff_excerpt: mnmainrule.c adds mn_803EC600, mn_803EC7DC, mn_803EC7EC, mn_803EC808, mn_803EC818, mn_804D4B88/lbl_804D4B8C/mn_804D4B90/mn_804D4B94 and rewrites fn_8022F538",
+        "text_corpus bot report: main/melee/mn/mnmainrule .data 5.70% to 100.00%; mn_80231804 and fn_802309F0 new matches"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnnamenew.c",
+      "role": "Name-entry menu refresh; review flagged generated named string literals that should be reverted to inline literals.",
+      "evidence_refs": [
+        "changed_files.jsonl: mnnamenew.c +269/-206 in 38 hunks",
+        "review_comments: ribbanya comment discussion_r3440019152, 'Revert these named literals.'",
+        "review hunk: mnNameNew_EnterFromMnCharSel replaces asset string literals such as \"MenMainBack_Top_joint\" with mnNameNew_803EE38C-style symbols"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnstagesw.c",
+      "role": "Stage-switch menu refresh; includes local variable cleanup and retained inline_depth pragmas for MWCC codegen preservation.",
+      "evidence_refs": [
+        "changed_files.jsonl: mnstagesw.c +199/-162 in 20 hunks",
+        "review_comments: fjooord comment discussion_r3429099048, 'possibly remove these pragmas'",
+        "review_comments: fjooord follow-up discussion_r3429270939, removing inline_depth pragmas still compiles but changes MWCC output; kept to preserve codegen; full PR validates with main.dol OK and dol_diff clean"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnitemsw.c",
+      "role": "Item-switch menu refresh; loop, switch, local-lifetime, direct table access, and naming changes for matching.",
+      "evidence_refs": [
+        "changed_files.jsonl: mnitemsw.c +92/-78 in 17 hunks",
+        "diff_excerpt: fn_80233E10 changes item_order indexed loops to pointer-increment loops and if/default logic to switch forms",
+        "diff_excerpt: mnItemSw_802351A0 renames data to user_data and updates user_data field uses"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnruleplus.c",
+      "role": "Rule-plus menu refresh; review flagged dont_inline pragmas for possible repair.",
+      "evidence_refs": [
+        "changed_files.jsonl: mnruleplus.c +93/-74 in 14 hunks",
+        "review_comments: fjooord comment discussion_r3429094189, 'possibly fix these pragmas'",
+        "review hunk: added #pragma dont_inline on near fn_8023201C / mn_80232458"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnname.c",
+      "role": "Name menu refresh with matching improvements reported by bot.",
+      "evidence_refs": [
+        "changed_files.jsonl: mnname.c +76/-137 in 13 hunks",
+        "text_corpus bot report: mnName_8023AC40 and mnName_MainInput improved"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnstagesel.c",
+      "role": "Small stage-select menu adjustment.",
+      "evidence_refs": [
+        "changed_files.jsonl: mnstagesel.c +3/-1 in 2 hunks"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Refreshed the MN rules, name-entry, item-switch, and stage-switch menu split on a current baseline, per PR body.",
+    "Changed seven menu translation units under src/melee/mn: mnitemsw.c, mnmainrule.c, mnname.c, mnnamenew.c, mnruleplus.c, mnstagesel.c, and mnstagesw.c.",
+    "Added or moved MN rules-menu data in mnmainrule.c, including byte arrays, StaticModelDesc pointer tables, u16 arrays, struct arrays, and sdata float/u8 values.",
+    "Reworked several input/menu handlers using switch forms, pointer-increment loops over item_order, local scope adjustments, and clearer local names such as user_data, hover_anim_jobj, cursor_jobj, item_anim, and y_spacing.",
+    "Retained some pragma-based codegen controls in mnstagesw.c after local testing showed removing inline_depth pragmas changed MWCC output.",
+    "The PR body states ninja changes_all completed successfully and reported only MN fuzzy/matched-code/matched-data improvements; the bot report recorded matched code +2724 bytes and matched data +3072 bytes."
+  ],
+  "smart_moves": [
+    {
+      "text": "When a pragma was suspected as removable, the author tested removal and documented the result: compilation still worked, but MWCC output changed, so the pragma was kept for codegen preservation.",
+      "evidence_refs": [
+        "review_comments: discussion_r3429270939"
+      ]
+    },
+    {
+      "text": "The PR preserved verification context in the body: rebase point, applying the slice alone to a production baseline worktree, running ninja changes_all, and reporting the scope of improvements.",
+      "evidence_refs": [
+        "human_pr_text: Verification section"
+      ]
+    },
+    {
+      "text": "Several generated-looking temporaries were renamed to local role names where the role was clear, such as hover_anim_jobj, cursor_jobj, item_anim, and user_data.",
+      "evidence_refs": [
+        "diff_excerpt: mnitemsw.c and mnstagesw.c hunks"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "Pragma cleanup should be tested rather than assumed: in this slice, removing inline_depth pragmas still compiled but changed MWCC output, so the author retained them with explicit codegen evidence.",
+      "scope": [
+        "codegen tactics",
+        "MWCC",
+        "menu TUs"
+      ],
+      "evidence_refs": [
+        "review_comments: discussion_r3429099048",
+        "review_comments: discussion_r3429270939",
+        "decomp_standards: matching-tactics-need-evidence",
+        "decomp_standards: avoid-pragmas-register-asm"
+      ]
+    },
+    {
+      "lesson": "Asset/resource string literals in code-matching PRs should not be replaced with address-style generated symbols without explicit data-ownership evidence; review requested reverting mnNameNew_* named literals back to strings.",
+      "scope": [
+        "mnnamenew.c",
+        "literals",
+        "data ownership"
+      ],
+      "evidence_refs": [
+        "review_comments: discussion_r3440019152",
+        "review hunk: mnNameNew_EnterFromMnCharSel string literals replaced by mnNameNew_803EE38C-style symbols",
+        "decomp_standards: no-string-literal-symbol-regression",
+        "decomp_standards: literals-and-data-ownership"
+      ]
+    },
+    {
+      "lesson": "Local variable naming can improve reviewability when it describes a proven local role, but the PR evidence supports only local-role names, not broader semantic renames.",
+      "scope": [
+        "local variables",
+        "menu jobj handling"
+      ],
+      "evidence_refs": [
+        "diff_excerpt: mnStageSw_80236548 renames sp44 to hover_anim_jobj and data->x28 use to cursor_jobj",
+        "diff_excerpt: mnItemSw_802351A0 renames data to user_data",
+        "decomp_standards: conservative-naming"
+      ]
+    },
+    {
+      "lesson": "Pointer-increment loops over small data tables can be a matching tactic when the accessed base pointer is kept explicit, as shown by item_order loop rewrites in mnitemsw.c.",
+      "scope": [
+        "loops",
+        "table access",
+        "mnitemsw.c"
+      ],
+      "evidence_refs": [
+        "diff_excerpt: fn_80233E10 changes item_order[i] loops to order pointer increments",
+        "diff_excerpt: fn_80234C24 uses u8* order and increments it in the loop"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Use short local role names for HSD_JObj pointers when the role is clear, such as hover_anim_jobj for hover animation jobjs and cursor_jobj for cursor jobjs.",
+      "evidence_refs": [
+        "review hunk: mnstagesw.c mnStageSw_80236548"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "convention": "Use user_data for allocated or recovered GObj user-data storage when distinguishing it from other Mn*Data pointers in the same function.",
+      "evidence_refs": [
+        "diff_excerpt: mnItemSw_802351A0 renames MnItemSwData* data to user_data and uses it for GObj_InitUserData"
+      ],
+      "confidence": 0.68
+    },
+    {
+      "convention": "Do not convert descriptive asset string literals into address-style mnNameNew_803EExxx symbols unless the PR is explicitly doing data ownership work and evidence supports the symbol.",
+      "evidence_refs": [
+        "review_comments: discussion_r3440019152",
+        "decomp_standards: no-string-literal-symbol-regression"
+      ],
+      "confidence": 0.9
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Retain narrowly scoped inline_depth pragmas only after testing removal and confirming MWCC output changes.",
+      "evidence_refs": [
+        "review_comments: discussion_r3429270939"
+      ],
+      "risk": "Pragmas are exceptional codegen steering and should remain evidence-backed rather than style."
+    },
+    {
+      "tactic": "Use switch/default shapes in menu input paths where they improve matching over if/else forms.",
+      "evidence_refs": [
+        "diff_excerpt: mnitemsw.c fn_80233E10 changes confirmed_selection and gm_801A4310 branches to switch forms",
+        "diff_excerpt: mnmainrule.c fn_8022F538 changes gm_801A4310 branch to switch/default"
+      ],
+      "risk": "The slice does not prove switch is a global convention; treat as local matching evidence."
+    },
+    {
+      "tactic": "Adjust local declaration order and lifetimes, including moving temporaries into inner blocks, to match MWCC stack/register behavior.",
+      "evidence_refs": [
+        "diff_excerpt: mnitemsw.c moves y_spacing/anim_val into arg1 block and sp3C into arg2 block",
+        "review hunk: mnstagesw.c introduces inner HSD_JObj* sp3C"
+      ],
+      "risk": "Local lifetime steering should be kept narrow and reviewed under matching-tactics evidence rules."
+    },
+    {
+      "tactic": "Materialize or relocate data objects when bot/report evidence shows matched-data improvements and the PR scope includes data matching.",
+      "evidence_refs": [
+        "diff_excerpt: mnmainrule.c data additions",
+        "text_corpus bot report: mnmainrule .data reaches 100%; matched data +3072 bytes"
+      ],
+      "risk": "Do not generalize this to naming ordinary string literals; review separately rejected named string literals in mnnamenew.c."
+    }
+  ],
+  "review_feedback": [
+    {
+      "path": "src/melee/mn/mnruleplus.c",
+      "author": "fjooord",
+      "comment": "possibly fix these pragmas",
+      "evidence_refs": [
+        "review_comments: discussion_r3429094189"
+      ],
+      "classification": "pragma/codegen-tactic concern"
+    },
+    {
+      "path": "src/melee/mn/mnstagesw.c",
+      "author": "fjooord",
+      "comment": "possibly remove these pragmas",
+      "evidence_refs": [
+        "review_comments: discussion_r3429099048"
+      ],
+      "classification": "pragma cleanup question"
+    },
+    {
+      "path": "src/melee/mn/mnstagesw.c",
+      "author": "fjooord",
+      "comment": "I tested removing these inline_depth pragmas locally; it still compiles, but MWCC output changes, so I kept them to preserve codegen. The full PR validates with main.dol OK and dol_diff clean.",
+      "evidence_refs": [
+        "review_comments: discussion_r3429270939"
+      ],
+      "classification": "documented evidence for retained pragma"
+    },
+    {
+      "path": "src/melee/mn/mnnamenew.c",
+      "author": "ribbanya",
+      "comment": "Revert these named literals.",
+      "evidence_refs": [
+        "review_comments: discussion_r3440019152"
+      ],
+      "classification": "literal/data-symbol regression"
+    }
+  ],
+  "searchable_terms": [
+    "PR2726",
+    "9/14 MN Rules Name Stage",
+    "fjooord",
+    "src/melee/mn/mnmainrule.c",
+    "src/melee/mn/mnnamenew.c",
+    "src/melee/mn/mnstagesw.c",
+    "src/melee/mn/mnitemsw.c",
+    "src/melee/mn/mnruleplus.c",
+    "mnStageSw_80236548",
+    "mnItemSw_802351A0",
+    "fn_80233E10",
+    "fn_80234C24",
+    "fn_8022F538",
+    "mnNameNew_EnterFromMnCharSel",
+    "inline_depth pragma",
+    "dont_inline pragma",
+    "named literals",
+    "MenMainBack_Top_joint",
+    "mnNameNew_803EE38C",
+    "item_order pointer loop",
+    "hover_anim_jobj",
+    "cursor_jobj",
+    "user_data",
+    "ninja changes_all",
+    "main.dol OK",
+    "dol_diff clean"
+  ],
+  "follow_up_queries": [
+    "Find later PRs touching mnnamenew.c after review comment 'Revert these named literals' to confirm whether mnNameNew_803EE38C-style string symbols were reverted.",
+    "Search for retained #pragma dont_inline or inline_depth blocks in src/melee/mn/mnruleplus.c and src/melee/mn/mnstagesw.c with nearby comments documenting MWCC output evidence.",
+    "Search MN menu TUs for pointer-increment item_order loops to compare local authored/matching style.",
+    "Search for MenMainBack_Top_joint and related mnNameNew_EnterFromMnCharSel asset strings to verify current literal-vs-symbol state.",
+    "Search bot reports around PR2726 for mnmainrule .data 100% and mnstagesw .sdata 100% to correlate data materialization with final merged source."
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR number/title/state/author/timestamps/changed files",
+      "human_pr_text: summary and verification",
+      "changed_files.jsonl: seven changed files and hunk counts",
+      "diff_excerpt/raw_diff: representative code/data changes, truncated",
+      "review_comments: four review comments, one truncated loaded file",
+      "text_corpus: bot report excerpt with code/data improvements"
+    ],
+    "notes": [
+      "The loaded diff and review_comments files are truncated, so file-level details are representative rather than exhaustive.",
+      "The PR is marked merged in metadata, but this intake does not independently validate final source state after review comments.",
+      "The PR body reports ninja changes_all success; a review comment reports main.dol OK and dol_diff clean for the full PR. These are accepted as PR evidence, not rerun validation.",
+      "Review comments include one clear reviewer request from ribbanya about named literals and author self-comments about pragmas; do not infer additional reviewer intent beyond the written comments."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "pr_lesson",
+        "title": "PR2726 retained inline_depth pragmas only after MWCC-output testing",
+        "text": "In PR2726, mnstagesw.c had pragmas questioned for removal. The author reported testing removal locally: it still compiled, but MWCC output changed, so the pragmas were kept to preserve codegen; the full PR validated with main.dol OK and dol_diff clean.",
+        "scope": [
+          "src/melee/mn/mnstagesw.c",
+          "codegen tactics",
+          "pragmas"
+        ],
+        "evidence_refs": [
+          "review_comments: discussion_r3429099048",
+          "review_comments: discussion_r3429270939"
+        ],
+        "confidence": 0.88
+      },
+      {
+        "record_type": "pr_lesson",
+        "title": "PR2726 review rejected generated named string literals in mnnamenew.c",
+        "text": "A review comment on mnNameNew_EnterFromMnCharSel requested reverting named literals where inline asset/resource strings such as MenMainBack_Top_joint had been replaced by mnNameNew_803EExxx symbols.",
+        "scope": [
+          "src/melee/mn/mnnamenew.c",
+          "string literals",
+          "asset names"
+        ],
+        "evidence_refs": [
+          "review_comments: discussion_r3440019152"
+        ],
+        "confidence": 0.92
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Add PR2726 as an example for no string-literal symbol regression",
+        "text": "Use PR2726 mnnamenew.c review as an example: replacing asset/resource strings in lbArchive_LoadSections-style calls with address-style mnNameNew_803EExxx symbols prompted reviewer feedback to revert named literals.",
+        "source_path": null,
+        "scope": [
+          "literals-and-data-ownership",
+          "no-string-literal-symbol-regression",
+          "mnnamenew.c"
+        ],
+        "evidence_refs": [
+          "review_comments: discussion_r3440019152",
+          "review hunk: mnNameNew_EnterFromMnCharSel"
+        ],
+        "reason": "This is well aligned with existing standards and provides a concrete historical review example, but should be curated rather than promoted by intake."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Add PR2726 as an example for evidence-backed retained pragmas",
+        "text": "Use PR2726 mnstagesw.c as an example where pragma removal was tested; compilation succeeded but MWCC output changed, so inline_depth pragmas were retained with explicit validation context.",
+        "source_path": null,
+        "scope": [
+          "matching-tactics-need-evidence",
+          "avoid-pragmas-register-asm",
+          "MWCC pragmas"
+        ],
+        "evidence_refs": [
+          "review_comments: discussion_r3429270939"
+        ],
+        "reason": "The PR provides a concise example of the required evidence boundary for keeping exceptional codegen tactics."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "MN menu split has historical pointer-loop and switch-shape matching examples in PR2726",
+        "text": "PR2726 shows mnitemsw.c and mnmainrule.c matching work using pointer-increment loops over menu data and switch/default forms in menu input handlers. Treat as path-local historical evidence, not a global rule.",
+        "source_path": "src/melee/mn",
+        "scope": [
+          "mnitemsw.c",
+          "mnmainrule.c",
+          "menu input handlers"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: fn_80233E10 item_order loops and switch forms",
+          "diff_excerpt: fn_8022F538 switch/default rewrite"
+        ],
+        "reason": "May help future MN menu decomp work search local historical tactics, but the loaded slice is truncated and should be verified before adding a path fact."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote 'use pragmas for MN matching' as a standard; the evidence only supports retaining specific pragmas after removal changed MWCC output.",
+      "Do not promote address-style mnNameNew_803EExxx symbols for asset strings; the only review evidence asks to revert them.",
+      "Do not infer that all switch rewrites or pointer-increment loops are globally preferred; the evidence is local to this PR's matching changes.",
+      "Do not claim final post-review source state for the named literals or pragmas from this slice alone, because the loaded files are truncated and intake did not inspect the merged tree."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "runner": "orchestrator_kernel_pr_indexer",
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "orchestrator_state_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/projects/melee/state",
+    "orchestrator_run_id": "08bfe41e-1b7c-4685-8646-dff5e02a5dab",
+    "orchestrator_project_id": "melee",
+    "orchestrator_prepare_intake": true,
+    "orchestrator_kernel_database_url_configured": true,
+    "legacy_session_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/.pi-sessions/pr-review"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "number": 2728,
+  "title": "gr/itmaterial cleanup",
+  "state": "MERGED",
+  "createdAt": "2026-06-17T16:36:15Z",
+  "updatedAt": "2026-06-17T16:46:34Z",
+  "mergedAt": "2026-06-17T16:46:27Z",
+  "closedAt": "2026-06-17T16:46:27Z",
+  "author": "PsiLupan",
+  "url": "https://github.com/doldecomp/melee/pull/2728",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 10109
+  }
+}

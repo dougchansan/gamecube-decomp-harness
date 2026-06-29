@@ -39,7 +39,7 @@ the state directory. The commit message is `savepoint(<trigger>): <label>`.
 ## Save Points And The Cycle
 
 Save points are created automatically at every phase boundary — init, pause,
-checkpoint, QA, sync, and fresh run — and manually through the CLI
+checkpoint, QA, sync, and fresh run — and manually through server jobs
 (`save-point`) or the dashboard's `Save Point` action. The boundary hooks are
 best-effort: a failed save point logs a warning but never blocks the boundary
 action itself.
@@ -60,12 +60,13 @@ triggered. The `campaign` block of the dashboard payload carries:
 
 ## Relationship To Runs And The Ledger
 
-Runs, leases, and reports continue to key off `run_id` internally; each save
-point records the run that was active when it was taken. The local change
-ledger (carry-forward patches, facts, lessons) flows across save points the
-same way it flows across sessions: only shipped PR candidates leave the system.
-Reverting to a save point is git-native — the commit, its reports, and the
-board state in the same state directory travel together.
+Runs, target claims, worker states, checkpoints, and report artifacts continue
+to key off the active run internally; each save point records the run that was
+active when it was taken. The local change ledger (carry-forward patches, facts,
+lessons) flows across save points the same way it flows across sessions: only
+shipped PR candidates leave the system. Reverting to a save point is git-native
+— the commit, its reports, and the board state in the same state directory
+travel together.
 
 ## Related
 

@@ -1,0 +1,17 @@
+{
+  "number": 2744,
+  "title": "Improve `itkusudama` match",
+  "state": "MERGED",
+  "createdAt": "2026-06-20T08:14:30Z",
+  "updatedAt": "2026-06-20T12:18:22Z",
+  "mergedAt": "2026-06-20T12:18:21Z",
+  "closedAt": "2026-06-20T12:18:21Z",
+  "author": "dberweger2017",
+  "url": "https://github.com/doldecomp/melee/pull/2744",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 777
+  }
+}

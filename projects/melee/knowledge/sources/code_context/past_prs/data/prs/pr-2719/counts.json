@@ -1,0 +1,17 @@
+{
+  "number": 2719,
+  "title": "Lint `clang-format` in CI",
+  "state": "MERGED",
+  "createdAt": "2026-06-17T03:25:44Z",
+  "updatedAt": "2026-06-17T03:32:59Z",
+  "mergedAt": "2026-06-17T03:32:58Z",
+  "closedAt": "2026-06-17T03:32:58Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/2719",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 427405
+  }
+}

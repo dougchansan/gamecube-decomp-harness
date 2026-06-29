@@ -1,0 +1,17 @@
+{
+  "number": 2741,
+  "title": "Link `hsd_40FF`",
+  "state": "MERGED",
+  "createdAt": "2026-06-18T17:58:22Z",
+  "updatedAt": "2026-06-18T18:04:45Z",
+  "mergedAt": "2026-06-18T18:04:43Z",
+  "closedAt": "2026-06-18T18:04:43Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/2741",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 427024
+  }
+}

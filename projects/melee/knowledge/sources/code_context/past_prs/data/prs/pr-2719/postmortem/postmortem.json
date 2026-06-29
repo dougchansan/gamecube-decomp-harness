@@ -1,0 +1,270 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2719",
+  "pr": {
+    "number": 2719,
+    "title": "Lint `clang-format` in CI",
+    "url": "https://github.com/doldecomp/melee/pull/2719",
+    "state": "MERGED",
+    "author": "ribbanya",
+    "created_at": "2026-06-17T03:25:44Z",
+    "merged_at": "2026-06-17T03:32:58Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2719 was a code-style/tooling cleanup that added clang-format linting to GitHub Actions and applied clang-format-driven formatting changes across a large source/header surface. The visible diff shows .github/workflows/lint.yml adding a pre-commit clang-format step, while C changes are formatting-only line wrapping and indentation around asserts, calls, conditions, and arithmetic expressions. A decomp-dev bot issue comment reported 'No changes' for GALE01 over ad1e61c..faf4010.",
+  "change_classification": {
+    "primary_type": "tooling_and_formatting",
+    "categories": [
+      "cleanup",
+      "code-style",
+      "tooling",
+      "ci",
+      "headers",
+      "format-only"
+    ],
+    "systems": [
+      ".github",
+      "fighter",
+      "game-mode",
+      "item",
+      "library",
+      "melee-core",
+      "menu",
+      "stage",
+      "sysdolphin",
+      "interface"
+    ]
+  },
+  "key_files": [
+    {
+      "path": ".github/workflows/lint.yml",
+      "role": "CI workflow changed to run clang-format via pre-commit/action@v3.0.1 with extra_args 'clang-format --all-files' after the existing tools/check run.",
+      "evidence_refs": [
+        "diff_excerpt:.github/workflows/lint.yml",
+        "changed_files:.github/workflows/lint.yml added=4 deleted=0 hunks=1"
+      ]
+    },
+    {
+      "path": "src/melee/cm/camera.c",
+      "role": "Representative formatting-only C source changes: HSD_ASSERTMSG calls, long arithmetic expressions, and wrapped assignments were reformatted.",
+      "evidence_refs": [
+        "diff_excerpt:src/melee/cm/camera.c",
+        "changed_files:src/melee/cm/camera.c added=22 deleted=21 hunks=4"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_0A01.c",
+      "role": "Large representative fighter-source formatting sweep: long conditions, inline returns, function calls, and wrapped expressions were reformatted without visible semantic edits in the loaded excerpt.",
+      "evidence_refs": [
+        "diff_excerpt:src/melee/ft/chara/ftCommon/ftCo_0A01.c",
+        "changed_files:src/melee/ft/chara/ftCommon/ftCo_0A01.c added=88 deleted=120 hunks=42"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grcorneria.c",
+      "role": "Largest changed file by metadata; formatting changes are indicated by changed-file counts but detailed hunks were not loaded in the visible excerpt.",
+      "evidence_refs": [
+        "metadata_json:changed_files src/melee/gr/grcorneria.c added=329 deleted=351 hunks=7"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/psdisp.c",
+      "role": "Large sysdolphin/baselib formatting target by metadata; detailed hunks were not loaded in the visible excerpt.",
+      "evidence_refs": [
+        "metadata_json:changed_files src/sysdolphin/baselib/psdisp.c added=381 deleted=189 hunks=38"
+      ]
+    },
+    {
+      "path": "projects/melee/knowledge/sources/code_context/past_prs/data/prs/pr-2719/extracted/changed_files.jsonl",
+      "role": "Changed-file manifest for the slice; records 202 changed files in the PR activity metadata, including workflow, C sources, and headers across many subsystems.",
+      "evidence_refs": [
+        "metadata_json:activity changed_files=202 added_lines=2068 deleted_lines=2019",
+        "loaded_files:changed_files truncated=true"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Added a GitHub Actions lint step named 'Run clang-format' using pre-commit/action@v3.0.1 with extra_args 'clang-format --all-files'.",
+    "Applied clang-format output across 202 changed files according to the PR activity metadata.",
+    "Visible C excerpts show formatting-only edits such as merging short assert macro calls onto one line, splitting long arithmetic assignments, wrapping long function-call arguments, and moving braces/conditions into clang-format style.",
+    "Changed-file metadata shows broad coverage across camera, fighter common/Crazy Hand/Kirby, game mode, stage/ground, interface, item, menu, platform, lb/mp/ty, and sysdolphin baselib files.",
+    "The loaded changed-files manifest is truncated, so the intake record preserves representative/high-impact files rather than claiming an exhaustive per-file analysis."
+  ],
+  "smart_moves": [
+    {
+      "text": "The PR paired a CI enforcement change with a repository-wide formatting sweep, reducing the chance that enabling clang-format would immediately fail on existing files.",
+      "evidence_refs": [
+        "diff_excerpt:.github/workflows/lint.yml",
+        "metadata_json:activity changed_files=202 added_lines=2068 deleted_lines=2019"
+      ]
+    },
+    {
+      "text": "The clang-format check was added after the existing Python check step in the same lint workflow, keeping style enforcement in the established CI lint path.",
+      "evidence_refs": [
+        "diff_excerpt:.github/workflows/lint.yml"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For this PR slice, the reusable lesson is process-oriented rather than decomp-shape-specific: broad mechanical formatting should be isolated from semantic decomp edits so reviewers and bot reports can treat it as style/tooling churn.",
+      "scope": [
+        "formatting PRs",
+        "CI style enforcement"
+      ],
+      "evidence_refs": [
+        "pr.title:Lint `clang-format` in CI",
+        "raw_pr_json:labels code-style, tooling",
+        "diff_excerpt:.github/workflows/lint.yml",
+        "diff_excerpt formatting-only examples in camera.c and ftCo_0A01.c"
+      ],
+      "confidence": 0.82
+    }
+  ],
+  "naming_conventions": [],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "No assembly, objdiff steering, PAD_STACK, pragma/register steering, symbol renaming, or matching-specific tactic is evidenced in the loaded diff; edits appear to be clang-format mechanical formatting.",
+      "evidence_refs": [
+        "diff_excerpt:visible hunks are whitespace/line wrapping",
+        "text_corpus:decomp-dev bot report 'No changes'"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_issue_comment",
+      "author": "decomp-dev[bot]",
+      "created_at": "2026-06-17T03:30:53Z",
+      "text": "Report for GALE01 (ad1e61c - faf4010): No changes.",
+      "evidence_refs": [
+        "text_corpus:issue_comment https://github.com/doldecomp/melee/pull/2719#issuecomment-4725615590"
+      ]
+    },
+    {
+      "kind": "review_absence",
+      "text": "No review comments or review records are present in the loaded PR slice.",
+      "evidence_refs": [
+        "metadata_json:counts review_comments=0 reviews=0"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2719",
+    "Lint clang-format in CI",
+    "clang-format --all-files",
+    "pre-commit/action@v3.0.1",
+    ".github/workflows/lint.yml",
+    "code-style",
+    "tooling",
+    "format-only",
+    "GALE01 No changes",
+    "ribbanya",
+    "src/melee/cm/camera.c",
+    "src/melee/ft/chara/ftCommon/ftCo_0A01.c",
+    "src/melee/gr/grcorneria.c",
+    "src/sysdolphin/baselib/psdisp.c"
+  ],
+  "follow_up_queries": [
+    "PR 2719 clang-format --all-files pre-commit/action",
+    "format-only PR decomp-dev bot No changes",
+    ".github/workflows/lint.yml clang-format melee",
+    "changed_files pr-2719 clang-format",
+    "code-style tooling labels clang-format CI"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json:complete PR identity, counts, labels, merge metadata, and activity summary",
+      "diff_excerpt:loaded workflow diff and representative formatting hunks",
+      "loaded_files:raw_diff truncated=true original_chars=427405",
+      "loaded_files:changed_files truncated=true original_chars=26436",
+      "text_corpus:PR body empty; one bot issue comment"
+    ],
+    "notes": [
+      "The PR body is empty, so intent is inferred from the title, labels, workflow diff, and mechanical formatting changes.",
+      "The raw diff and changed-files manifest are truncated in the loaded slice; representative files and metadata counts are reliable, but this intake did not inspect every changed file hunk.",
+      "The bot report says 'No changes', but the slice does not include full CI logs, objdiff output, or human review approval details.",
+      "No decomp-specific semantic lessons, naming conventions, or matching tactics are supported beyond the process lesson about isolating format-only sweeps."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "pr_process_lesson",
+        "title": "Keep mechanical clang-format sweeps separate from semantic decomp edits",
+        "text": "PR 2719 supports a process lesson: when enabling clang-format in CI, pair the CI check with a mechanical formatting sweep and avoid mixing in semantic decomp changes. The loaded evidence shows a workflow addition plus formatting-only examples, and the bot reported GALE01 'No changes'.",
+        "scope": [
+          "CI formatting enforcement",
+          "format-only cleanup PRs"
+        ],
+        "evidence_refs": [
+          "pr.title:Lint `clang-format` in CI",
+          "diff_excerpt:.github/workflows/lint.yml",
+          "diff_excerpt:camera.c and ftCo_0A01.c formatting examples",
+          "text_corpus:decomp-dev[bot] No changes"
+        ],
+        "confidence": 0.82
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Format-only PR hygiene for clang-format enforcement",
+        "text": "Consider documenting that clang-format enablement or large formatting sweeps should be kept separate from semantic decomp work, with CI/bot evidence noted when available.",
+        "source_path": null,
+        "scope": [
+          "code-style",
+          "tooling",
+          "review hygiene"
+        ],
+        "evidence_refs": [
+          "PR 2719 title and labels: code-style, tooling",
+          "diff_excerpt:.github/workflows/lint.yml",
+          "metadata_json:activity changed_files=202",
+          "text_corpus:decomp-dev[bot] No changes"
+        ],
+        "reason": "This is a possible global process standard, but it should be curated rather than automatically promoted from one PR."
+      },
+      {
+        "target_source_id": "other",
+        "update_kind": "source_update",
+        "title": "CI lint workflow includes clang-format through pre-commit",
+        "text": "The historical PR evidence shows .github/workflows/lint.yml adding a 'Run clang-format' step using pre-commit/action@v3.0.1 with extra_args 'clang-format --all-files'.",
+        "source_path": ".github/workflows/lint.yml",
+        "scope": [
+          "CI",
+          "lint workflow",
+          "clang-format"
+        ],
+        "evidence_refs": [
+          "diff_excerpt:.github/workflows/lint.yml"
+        ],
+        "reason": "Useful for tooling-history documentation or CI path facts if the curator maintains such records."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer clang-format line length, brace policy, include sorting behavior, or full formatting configuration from this slice; the configuration file was not loaded.",
+      "Do not treat the broad list of touched C files as evidence of semantic source improvements; visible hunks are mechanical formatting.",
+      "Do not infer human reviewer intent or review approval; the loaded slice contains zero review comments and no review records.",
+      "Do not promote any file-specific decomp lesson for grcorneria.c or psdisp.c from this slice because only changed-file counts, not detailed hunks, were loaded for those files."
+    ]
+  },
+  "confidence": 0.86,
+  "agent_runtime": {
+    "runner": "orchestrator_kernel_pr_indexer",
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "orchestrator_state_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/projects/melee/state",
+    "orchestrator_run_id": "08bfe41e-1b7c-4685-8646-dff5e02a5dab",
+    "orchestrator_project_id": "melee",
+    "orchestrator_prepare_intake": true,
+    "orchestrator_kernel_database_url_configured": true,
+    "legacy_session_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/.pi-sessions/pr-review"
+  }
+}

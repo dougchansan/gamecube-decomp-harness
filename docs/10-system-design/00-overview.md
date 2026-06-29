@@ -20,11 +20,11 @@ OWNERSHIP LAYOUT
 
 +----------------------+     +--------------------------+     +----------------------+
 | Scheduler scope      |     | Shared run state         |     | Worker execution     |
-| - run target         |     | - queue/target packets   |---->| - lease A Pi worker  |
-| - indexer output     |<--->| - leases/events/locks    |<----| - lease B Pi worker  |
-| - reducer output     |     | - facts/reports          |     | - lease N Pi worker  |
+| - run target         |     | - epochs/targets         |---->| - claim A Pi worker  |
+| - indexer output     |<--->| - claims/events          |<----| - claim B Pi worker  |
+| - reducer output     |     | - worker states          |     | - claim N Pi worker  |
 | - epoch policy       |     | - artifacts/wakeups      |     | - PR/docs/source     |
-+----------------------+     | - score candidates       |     | - experimental       |
++----------------------+     | - checkpoints/facts      |     | - experimental       |
                              +------------+-------------+     |   search             |
                                           |                   | - permuter handoff   |
                                           v                   +----------------------+
@@ -44,21 +44,21 @@ run target + report/graph evidence
 +---------------------+       epoch policy     +--------------------------+
 | Deterministic       |----------------------->| State substrate          |
 | scheduler           |<-----------------------| wake event + snapshot    |
-| admit/refill/route  |    wake + snapshot     | queue / leases / facts   |
+| admit/drain/route   |    wake + snapshot     | epochs / claims / facts  |
 +---------------------+                        +------------+-------------+
                                           |
                                           v
-                              target packets / leases
+                              target packets / claims
                                           |
                                           v
                              +------------+-------------+
                              | Worker pool              |
-                             | Pi workers under leases  |
+                             | Pi workers under claims  |
                              | selected capabilities    |
                              +------------+-------------+
                                           |
-                              reports / events / facts
-                              score candidates
+                              checkpoints / events
+                              facts / selected patches
                                           |
                                           v
                              +------------+-------------+
@@ -82,9 +82,9 @@ run target + report/graph evidence
 ```
 
 The important split is directional: the scheduler reads durable board state and
-writes reproducible scheduling transitions; workers receive leases and return
-durable evidence; the state substrate is the only coordination surface between
-them.
+writes reproducible scheduling transitions; workers receive target claims and
+produce checkpoint evidence; the state substrate is the only coordination
+surface between them.
 
 ```text
 PROCESS HEALTH LOOP
@@ -104,7 +104,7 @@ PROCESS HEALTH LOOP
            v                                             |
 +---------------------+                                  |
 | Durable state       |<---------------------------------+
-| leases/events/logs  |    incident packet + recovery
+| claims/events/logs  |    incident packet + recovery
 +---------------------+
 ```
 
@@ -114,20 +114,24 @@ decompilation decisions.
 
 ## Core Concepts
 
+- [Session operating flow](01-session-operating-flow.md) covers the target
+  first-read flow for a full Melee project session, from baseline sync through
+  epoch workers, PR review, and next-session intake.
 - [Core principles](05-core-principles.md) covers the Sudoku metaphor,
   run-boundary rule, metric choice, and former-skill mapping.
 - [Run scheduler loop](10-run-director-loop.md) covers how board reads,
-  deterministic admission/refill, sleep, and wake events work.
+  deterministic admission, sleep, and wake events work.
 - [Board prioritization](15-board-prioritization.md) covers helper score inputs
   and scheduler rank signals.
-- [Agent model](20-agent-model.md) covers worker, PR indexer/splitter/reviewer,
-  curator, reconcile, and QA repair agents plus the shared runtime boundary.
+- [Agent model](20-agent-model.md) covers worker, integration resolver, PR
+  indexer/splitter/reviewer, curator, reconcile, and QA repair agents plus the
+  shared runtime boundary.
 - [Process guardians](25-process-guardians.md) covers the babysit wrapper,
   health incidents, recovery policy, and restart boundary.
-- [Durable state and events](30-state-and-events.md) covers the board, leases,
-  reports, facts, and wake handshake.
-- [Write safety](35-write-safety.md) covers write-set leases, file locks,
-  optional workspaces, and integration race prevention.
+- [Durable state and events](30-state-and-events.md) covers the board, target
+  claims, worker states, checkpoints, facts, and wake handshake.
+- [Write safety](35-write-safety.md) covers target-claim write sets, worker
+  workspaces, and integration race prevention.
 - [Worker lifecycle](40-worker-lifecycle.md) covers target packets, research,
   capabilities, validation, and stall behavior.
 - [Worker capabilities](45-worker-capabilities.md) covers the worker tactic

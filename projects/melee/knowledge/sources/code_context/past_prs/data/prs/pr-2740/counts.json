@@ -1,0 +1,17 @@
+{
+  "number": 2740,
+  "title": "Match `lbaudio_ax` data",
+  "state": "MERGED",
+  "createdAt": "2026-06-18T17:26:14Z",
+  "updatedAt": "2026-06-18T17:32:58Z",
+  "mergedAt": "2026-06-18T17:32:56Z",
+  "closedAt": "2026-06-18T17:32:56Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/2740",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 21565
+  }
+}

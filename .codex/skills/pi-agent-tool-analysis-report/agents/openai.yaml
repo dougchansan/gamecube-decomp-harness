@@ -1,0 +1,4 @@
+interface:
+  display_name: "Pi Tool Analysis Report"
+  short_description: "Rerun Pi worker tool analysis reports."
+  default_prompt: "Use $pi-agent-tool-analysis-report to rebuild the latest Pi agent tool-analysis stats JSON and HTML report under reports/."

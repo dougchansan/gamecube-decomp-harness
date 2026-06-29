@@ -1,0 +1,39 @@
+{
+  "id": "past_prs",
+  "kind": "pr_corpus",
+  "title": "Past PR corpus",
+  "trust_tier": "historical",
+  "freshness": "refreshable",
+  "section": "code_context",
+  "access_modes": [
+    "refreshable_corpus",
+    "file_edges",
+    "review_risks",
+    "graph_search",
+    "source_search"
+  ],
+  "description": "Historical PR dump, changed files, PR text, review comments, diffs, and generated postmortems.",
+  "data_paths": [
+    "projects/melee/knowledge/sources/code_context/past_prs/data"
+  ],
+  "index_outputs": [
+    "projects/melee/knowledge/sources/code_context/past_prs/indexes/prs.jsonl",
+    "projects/melee/knowledge/sources/code_context/past_prs/indexes/pr_file_edges.jsonl",
+    "projects/melee/knowledge/sources/code_context/past_prs/indexes/file_rollups.jsonl"
+  ],
+  "commands": {
+    "status": "python3 projects/melee/knowledge/sources/code_context/past_prs/api/status.py --json",
+    "refresh": "python3 projects/melee/knowledge/sources/code_context/past_prs/commands/fetch_recent_pr_dump.py",
+    "refresh_all": "python3 projects/melee/knowledge/sources/code_context/past_prs/commands/fetch_recent_pr_dump.py --all-prs --fetch-jobs 16 --postmortem-mode pi --postmortem-jobs 16 --postmortem-scope all",
+    "postmortems_32": "bun run kg:maintain -- --run-pr-agent --pr-jobs 32 --no-tool-runners --no-tool-index --no-data-sheet-facts --no-rebuild",
+    "index": "bun run kg:rebuild -- --sources past_prs",
+    "search": "python3 projects/melee/knowledge/sources/code_context/past_prs/api/search.py --query <query> --json",
+    "graph_search": "bun run kg:search -- --source past_prs --query <query>"
+  },
+  "capabilities": [
+    "search",
+    "file_edges",
+    "review_risks",
+    "tactic_synthesis"
+  ]
+}

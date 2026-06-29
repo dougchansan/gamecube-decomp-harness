@@ -1,0 +1,10 @@
+{
+  "pr": 2764,
+  "title": "Match `dropcallback`, `un_80312904`, `gm_80173EEC`, and `gm_80164504`",
+  "url": "https://github.com/doldecomp/melee/pull/2764",
+  "text_records_with_body": 2,
+  "review_comments": 0,
+  "changed_files": 7,
+  "added_lines": 24,
+  "deleted_lines": 21
+}

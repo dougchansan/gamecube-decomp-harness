@@ -6,7 +6,6 @@
       "name": "melee-decomp-orchestrator",
       "dependencies": {
         "@earendil-works/pi-coding-agent": "latest",
-        "lucide-react": "^1.17.0",
         "react": "^19.2.7",
         "react-dom": "^19.2.7",
         "tokenizr": "^2.2.1",
@@ -23,41 +22,9 @@
         "vite": "^8.0.16",
       },
     },
-    "apps/agent-viewer": {
-      "name": "@decomp-orchestrator/agent-viewer",
+    "apps/frontend": {
+      "name": "@decomp-orchestrator/frontend",
       "dependencies": {
-        "@decomp-orchestrator/agents": "workspace:*",
-        "@decomp-orchestrator/core": "workspace:*",
-        "@decomp-orchestrator/knowledge": "workspace:*",
-        "@decomp-orchestrator/ui-contract": "workspace:*",
-        "lucide-react": "^1.17.0",
-        "react": "^19.2.7",
-        "react-dom": "^19.2.7",
-        "tokenizr": "^2.2.1",
-      },
-      "devDependencies": {
-        "@tailwindcss/vite": "^4.3.0",
-        "@types/react": "^19.2.17",
-        "@types/react-dom": "^19.2.3",
-        "@vitejs/plugin-react": "^6.0.2",
-        "tailwindcss": "^4.3.0",
-        "typescript": "latest",
-        "vite": "^8.0.16",
-      },
-    },
-    "apps/cli": {
-      "name": "@decomp-orchestrator/cli",
-      "dependencies": {
-        "@decomp-orchestrator/agents": "workspace:*",
-        "@decomp-orchestrator/core": "workspace:*",
-        "@decomp-orchestrator/knowledge": "workspace:*",
-      },
-    },
-    "apps/dashboard": {
-      "name": "@decomp-orchestrator/dashboard",
-      "dependencies": {
-        "@decomp-orchestrator/ui-contract": "workspace:*",
-        "lucide-react": "^1.17.0",
         "react": "^19.2.7",
         "react-dom": "^19.2.7",
       },
@@ -71,33 +38,12 @@
         "vite": "^8.0.16",
       },
     },
-    "apps/dashboard-server": {
-      "name": "@decomp-orchestrator/dashboard-server",
+    "apps/server": {
+      "name": "@decomp-orchestrator/server",
       "dependencies": {
-        "@decomp-orchestrator/agents": "workspace:*",
-        "@decomp-orchestrator/core": "workspace:*",
-        "@decomp-orchestrator/ui-contract": "workspace:*",
+        "drizzle-orm": "^0.45.0",
+        "postgres": "^3.4.7",
       },
-    },
-    "packages/agents": {
-      "name": "@decomp-orchestrator/agents",
-      "dependencies": {
-        "@decomp-orchestrator/core": "workspace:*",
-        "@decomp-orchestrator/knowledge": "workspace:*",
-        "@earendil-works/pi-coding-agent": "0.78.1",
-      },
-    },
-    "packages/core": {
-      "name": "@decomp-orchestrator/core",
-    },
-    "packages/knowledge": {
-      "name": "@decomp-orchestrator/knowledge",
-      "dependencies": {
-        "@decomp-orchestrator/core": "workspace:*",
-      },
-    },
-    "packages/ui-contract": {
-      "name": "@decomp-orchestrator/ui-contract",
     },
   },
   "packages": {
@@ -155,21 +101,9 @@
 
     "@babel/runtime": ["@babel/runtime@7.29.7", "", {}, "sha512-Nq8OhGWiZIZGV6hLHoyAKLLcJihP/xFeBMGJoUrxTX2psI8dCifzLhZISFb+VWS3wFMRDmCGw5R+dOySCqPLhw=="],
 
-    "@decomp-orchestrator/agent-viewer": ["@decomp-orchestrator/agent-viewer@workspace:apps/agent-viewer"],
+    "@decomp-orchestrator/frontend": ["@decomp-orchestrator/frontend@workspace:apps/frontend"],
 
-    "@decomp-orchestrator/agents": ["@decomp-orchestrator/agents@workspace:packages/agents"],
-
-    "@decomp-orchestrator/cli": ["@decomp-orchestrator/cli@workspace:apps/cli"],
-
-    "@decomp-orchestrator/core": ["@decomp-orchestrator/core@workspace:packages/core"],
-
-    "@decomp-orchestrator/dashboard": ["@decomp-orchestrator/dashboard@workspace:apps/dashboard"],
-
-    "@decomp-orchestrator/dashboard-server": ["@decomp-orchestrator/dashboard-server@workspace:apps/dashboard-server"],
-
-    "@decomp-orchestrator/knowledge": ["@decomp-orchestrator/knowledge@workspace:packages/knowledge"],
-
-    "@decomp-orchestrator/ui-contract": ["@decomp-orchestrator/ui-contract@workspace:packages/ui-contract"],
+    "@decomp-orchestrator/server": ["@decomp-orchestrator/server@workspace:apps/server"],
 
     "@earendil-works/pi-agent-core": ["@earendil-works/pi-agent-core@0.78.1", "", { "dependencies": { "@earendil-works/pi-ai": "^0.78.1", "ignore": "7.0.5", "typebox": "1.1.38", "yaml": "2.9.0" } }, "sha512-oPwVRkkAvyKPWyM7E4k+EaTNmynbYn7ZLG/LBh9BUnMNb2gvpMp+VQ420R6JCJ20uogSqrHnWTyosSa/rU8lVw=="],
 
@@ -371,6 +305,8 @@
 
     "diff": ["diff@8.0.4", "", {}, "sha512-DPi0FmjiSU5EvQV0++GFDOJ9ASQUVFh5kD+OzOnYdi7n3Wpm9hWWGfB/O2blfHcMVTL5WkQXSnRiK9makhrcnw=="],
 
+    "drizzle-orm": ["drizzle-orm@0.45.2", "", { "peerDependencies": { "@aws-sdk/client-rds-data": ">=3", "@cloudflare/workers-types": ">=4", "@electric-sql/pglite": ">=0.2.0", "@libsql/client": ">=0.10.0", "@libsql/client-wasm": ">=0.10.0", "@neondatabase/serverless": ">=0.10.0", "@op-engineering/op-sqlite": ">=2", "@opentelemetry/api": "^1.4.1", "@planetscale/database": ">=1.13", "@prisma/client": "*", "@tidbcloud/serverless": "*", "@types/better-sqlite3": "*", "@types/pg": "*", "@types/sql.js": "*", "@upstash/redis": ">=1.34.7", "@vercel/postgres": ">=0.8.0", "@xata.io/client": "*", "better-sqlite3": ">=7", "bun-types": "*", "expo-sqlite": ">=14.0.0", "gel": ">=2", "knex": "*", "kysely": "*", "mysql2": ">=2", "pg": ">=8", "postgres": ">=3", "sql.js": ">=1", "sqlite3": ">=5" }, "optionalPeers": ["@aws-sdk/client-rds-data", "@cloudflare/workers-types", "@electric-sql/pglite", "@libsql/client", "@libsql/client-wasm", "@neondatabase/serverless", "@op-engineering/op-sqlite", "@opentelemetry/api", "@planetscale/database", "@prisma/client", "@tidbcloud/serverless", "@types/better-sqlite3", "@types/pg", "@types/sql.js", "@upstash/redis", "@vercel/postgres", "@xata.io/client", "better-sqlite3", "bun-types", "expo-sqlite", "gel", "knex", "kysely", "mysql2", "pg", "postgres", "sql.js", "sqlite3"] }, "sha512-kY0BSaTNYWnoDMVoyY8uxmyHjpJW1geOmBMdSSicKo9CIIWkSxMIj2rkeSR51b8KAPB7m+qysjuHme5nKP+E5Q=="],
+
     "ecdsa-sig-formatter": ["ecdsa-sig-formatter@1.0.11", "", { "dependencies": { "safe-buffer": "^5.0.1" } }, "sha512-nagl3RYrbNv6kQkeJIpt6NJZy8twLB/2vtz6yN9Z4vRKHN4/QZJIEbqohALSgwKdnksuY3k5Addp5lg8sVoVcQ=="],
 
     "enhanced-resolve": ["enhanced-resolve@5.23.0", "", { "dependencies": { "graceful-fs": "^4.2.4", "tapable": "^2.3.3" } }, "sha512-yJN/BOOLxcOW2aQgeif9mSnaUB8KtvmMMp56oA1kx1CRfBKbhZm2pJ+NBY+3eOboHxix8lfjWpHE0Ei5U8RbSA=="],
@@ -453,8 +389,6 @@
 
     "lru-cache": ["lru-cache@11.5.1", "", {}, "sha512-RPimw/7aMdv2oqRrxKwvZXcPfwBrn/JZ2xYcY9Hus/6LaS3VOAKVWKWgNLCFSiOm1ESXinjsDlidVU7JlnCN2A=="],
 
-    "lucide-react": ["lucide-react@1.17.0", "", { "peerDependencies": { "react": "^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0" } }, "sha512-9FA9evdox/JQL5PT57fdA1x/yg8T7knJ98+zjTL3UfKza6pflQUUh3XtaQIHKvnsJw1lmsEyHVlt5jchYxOQ5w=="],
-
     "magic-string": ["magic-string@0.30.21", "", { "dependencies": { "@jridgewell/sourcemap-codec": "^1.5.5" } }, "sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ=="],
 
     "marked": ["marked@15.0.12", "", { "bin": { "marked": "bin/marked.js" } }, "sha512-8dD6FusOQSrpv9Z1rdNMdlSgQOIP880DHqnohobOmYLElGEqAL/JvxvuxZO16r4HtjTlfPRDC1hbvxC9dPN2nA=="],
@@ -488,6 +422,8 @@
     "picomatch": ["picomatch@4.0.4", "", {}, "sha512-QP88BAKvMam/3NxH6vj2o21R6MjxZUAd6nlwAS/pnGvN9IVLocLHxGYIzFhg6fUQ+5th6P4dv4eW9jX3DSIj7A=="],
 
     "postcss": ["postcss@8.5.15", "", { "dependencies": { "nanoid": "^3.3.12", "picocolors": "^1.1.1", "source-map-js": "^1.2.1" } }, "sha512-FfR8sjd4em2T6fb3I2MwAJU7HWVMr9zba+enmQeeWFfCbm+UOC/0X4DS8XtpUTMwWMGbjKYP7xjfNekzyGmB3A=="],
+
+    "postgres": ["postgres@3.4.9", "", {}, "sha512-GD3qdB0x1z9xgFI6cdRD6xu2Sp2WCOEoe3mtnyB5Ee0XrrL5Pe+e4CCnJrRMnL1zYtRDZmQQVbvOttLnKDLnaw=="],
 
     "proper-lockfile": ["proper-lockfile@4.1.2", "", { "dependencies": { "graceful-fs": "^4.2.4", "retry": "^0.12.0", "signal-exit": "^3.0.2" } }, "sha512-TjNPblN4BwAWMXU8s9AEz4JmQxnD1NNL7bNOY/AKUzyamc379FWASUhc/K1pL2noVb+XmZKLL68cjzLsiOAMaA=="],
 

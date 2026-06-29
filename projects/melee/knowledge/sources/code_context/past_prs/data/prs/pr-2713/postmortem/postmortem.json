@@ -1,0 +1,359 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2713",
+  "pr": {
+    "number": 2713,
+    "title": "link ftmaterial",
+    "url": "https://github.com/doldecomp/melee/pull/2713",
+    "state": "MERGED",
+    "author": "jurrejelle",
+    "created_at": "2026-06-16T06:33:18Z",
+    "merged_at": "2026-06-16T20:23:51Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2713 linked src/melee/ft/ftmaterial.c by marking the object Matching, updating ftmaterial symbols/data labels, adding a local ft_MObjInfo overlay for ftMObj-adjacent template data, adjusting ftMaterial_800BF2B8's signature/header, and making stack/code-shape changes in ftMaterial_800BF6BC. Bot report evidence says ftMaterial_800BF2B8 and ftMaterial_800BF6BC became new 100% matches, but reviewers objected to the stack-relative GXColor pointer arithmetic used to match ftMaterial_800BF6BC.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "headers",
+      "symbols",
+      "codegen-tactic"
+    ],
+    "systems": [
+      "fighter",
+      "ftmaterial",
+      "config",
+      "repo-root"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/ft/ftmaterial.c",
+      "role": "Main matching source changes for ftMaterial functions; introduced ft_MObjInfo overlay, signature/body reshaping, template field access, padding locals, and contested stack pointer arithmetic.",
+      "evidence_refs": [
+        "raw_diff:src/melee/ft/ftmaterial.c",
+        "review_comments:src/melee/ft/ftmaterial.c"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftmaterial.h",
+      "role": "Header prototype updated for ftMaterial_800BF2B8 to include a third unused u32 parameter.",
+      "evidence_refs": [
+        "raw_diff:src/melee/ft/ftmaterial.h"
+      ]
+    },
+    {
+      "path": "configure.py",
+      "role": "Changed ftmaterial.c object status from NonMatching to Matching.",
+      "evidence_refs": [
+        "raw_diff:configure.py"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Updated ftmaterial-related data/sdata labels, scopes, and sizes around ftMObj, ftMaterial_803C69D0, ftMaterial_803C6A44, and local string labels.",
+      "evidence_refs": [
+        "raw_diff:config/GALE01/symbols.txt"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Marked Object(NonMatching, \"melee/ft/ftmaterial.c\") as Object(Matching, \"melee/ft/ftmaterial.c\") in configure.py.",
+    "Added local struct ft_MObjInfo containing HSD_MObjInfo parent, HSD_TevDesc tevdesc_tmpl, and HSD_TECnst texp_tmpl, then replaced raw base+offset template reads from &ftMObj with info->tevdesc_tmpl and info->texp_tmpl.",
+    "Changed ftMaterial_800BF2B8 from two parameters to three parameters, adding u32 unused in both source and header, and cast ftMObj.setup assignment through HSD_MObjSetupFunc/Event.",
+    "Reused the rendermode parameter as the mutable render mode value instead of a separate mobj_rendermode local, and introduced a new_texp temporary before assigning texp1.",
+    "In ftMaterial_800BF6BC, replaced PAD_STACK(160) and prior locals with explicit padding arrays and an unused GXColor, then used stack-relative pointer arithmetic `(GXColor*) ((u8*) &sp_tevdesc - 4)` for a color value.",
+    "Updated symbols.txt to split/rename ftmaterial data around .data:0x803C69D0 and .data:0x803C6A44 and to convert some ftCo string globals at .sdata:0x804D3C00/.sdata:0x804D3C08 to local @ labels.",
+    "PR bot report recorded +1804 matched code bytes, +2724 linked code bytes, +352 linked data bytes, and two new matches in main/melee/ft/ftmaterial: ftMaterial_800BF2B8 and ftMaterial_800BF6BC."
+  ],
+  "smart_moves": [
+    {
+      "text": "Using a small local overlay struct for ftMObj-adjacent template data made repeated `base + 0x50` and `base + 0xC4` reads more typed and reviewable.",
+      "evidence_refs": [
+        "raw_diff:src/melee/ft/ftmaterial.c"
+      ]
+    },
+    {
+      "text": "Updating the public header when ftMaterial_800BF2B8's recovered signature changed kept the declaration aligned with the body.",
+      "evidence_refs": [
+        "raw_diff:src/melee/ft/ftmaterial.h",
+        "raw_diff:src/melee/ft/ftmaterial.c"
+      ]
+    },
+    {
+      "text": "The configure.py status flip was paired with bot report evidence showing two ftmaterial functions reached 100%.",
+      "evidence_refs": [
+        "raw_diff:configure.py",
+        "text_corpus:decomp-dev[bot] issue_comment"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a global object is followed by related template records in data, a narrow temporary struct overlay can express repeated offset loads better than raw char* base pointer arithmetic.",
+      "scope": [
+        "src/melee/ft/ftmaterial.c",
+        "typed access",
+        "template data"
+      ],
+      "evidence_refs": [
+        "raw_diff: replacements of `(HSD_TECnst*) (base + 0xC4)` and `(HSD_TevDesc*) (base + 0x50)` with `info->texp_tmpl` and `info->tevdesc_tmpl`"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "A matching result can still contain review-risk codegen tactics; reviewer comments specifically flagged stack-relative local pointer arithmetic as needing a better match strategy.",
+      "scope": [
+        "src/melee/ft/ftmaterial.c",
+        "ftMaterial_800BF6BC",
+        "stack locals"
+      ],
+      "evidence_refs": [
+        "review_comments:discussion_r3421878711",
+        "review_comments:discussion_r3423124141"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "lesson": "Recovered function signatures should be reflected in the owning header rather than only changing the C definition.",
+      "scope": [
+        "src/melee/ft/ftmaterial.h",
+        "src/melee/ft/ftmaterial.c"
+      ],
+      "evidence_refs": [
+        "raw_diff:ftMaterial_800BF2B8 signature changed in source and header"
+      ],
+      "confidence": 0.86
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "ftMaterial_803C69D0 / ftMaterial_803C6A44",
+      "kind": "address-style data symbols",
+      "lesson": "The PR used ftMaterial_ address-style names for ftmaterial-owned data rather than inventing semantic names for the template objects.",
+      "evidence_refs": [
+        "raw_diff:config/GALE01/symbols.txt"
+      ]
+    },
+    {
+      "name": "struct ft_MObjInfo",
+      "kind": "local helper struct",
+      "lesson": "The local struct name mirrors the ft material/object context and exists to type the ftMObj-adjacent layout used by this TU.",
+      "evidence_refs": [
+        "raw_diff:src/melee/ft/ftmaterial.c"
+      ]
+    },
+    {
+      "name": "@222, @291, @292, @367, @223, @293",
+      "kind": "local string labels",
+      "lesson": "Some prior lbl_/ftCo_ string symbols were converted to local @ labels, indicating the PR did not preserve global semantic names for ordinary local strings in this area.",
+      "evidence_refs": [
+        "raw_diff:config/GALE01/symbols.txt"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Object status flip to Matching after focused function/data reshaping.",
+      "evidence": "configure.py changed ftmaterial.c from NonMatching to Matching; bot reported ftMaterial_800BF2B8 and ftMaterial_800BF6BC as new 100% matches.",
+      "evidence_refs": [
+        "raw_diff:configure.py",
+        "text_corpus:decomp-dev[bot] issue_comment"
+      ],
+      "risk": "Low as an intake fact; exact local verification beyond bot report is not independently reproduced here."
+    },
+    {
+      "tactic": "Use a local overlay struct to align codegen while avoiding repeated raw data offsets.",
+      "evidence": "Added struct ft_MObjInfo and cast &ftMObj to access tevdesc_tmpl and texp_tmpl fields.",
+      "evidence_refs": [
+        "raw_diff:src/melee/ft/ftmaterial.c"
+      ],
+      "risk": "Medium; evidence supports the tactic in this PR, but broader layout ownership should be curated as a path/source fact before reuse."
+    },
+    {
+      "tactic": "Add explicit padding arrays and an unused local GXColor in ftMaterial_800BF6BC to shape the stack.",
+      "evidence": "Added `u8 _padA[84]`, `u8 _padB[80]`, and `GXColor unused`; removed `PAD_STACK(160)` and `sp18`.",
+      "evidence_refs": [
+        "raw_diff:src/melee/ft/ftmaterial.c"
+      ],
+      "risk": "High; active standards require explicit evidence for padding/dummy locals, and reviewer comments objected to the nearby stack arithmetic."
+    },
+    {
+      "tactic": "Use stack-relative pointer arithmetic to target a GXColor slot before sp_tevdesc.",
+      "evidence": "Introduced `(GXColor*) ((u8*) &sp_tevdesc - 4)` with a TODO comment; two reviewers questioned this hunk.",
+      "evidence_refs": [
+        "raw_diff:src/melee/ft/ftmaterial.c",
+        "review_comments:discussion_r3421878711",
+        "review_comments:discussion_r3423124141"
+      ],
+      "risk": "High; conflicts with typed-access and matching-tactic caution unless no cleaner source shape exists and objdiff evidence is recorded."
+    }
+  ],
+  "review_feedback": [
+    {
+      "path": "src/melee/ft/ftmaterial.c",
+      "line": 326,
+      "author": "r-burns",
+      "comment": "🤨",
+      "interpreted_topic": "Reviewer skepticism toward the new stack-relative GXColor pointer arithmetic in ftMaterial_800BF6BC.",
+      "evidence_refs": [
+        "review_comments:discussion_r3421878711"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftmaterial.c",
+      "line": 326,
+      "author": "ThePlayerRolo",
+      "comment": "there HAS to be a better way to match this than something like this.",
+      "interpreted_topic": "Explicit request to find a cleaner matching strategy than pointer arithmetic from &sp_tevdesc - 4.",
+      "evidence_refs": [
+        "review_comments:discussion_r3423124141"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2713",
+    "link ftmaterial",
+    "ftmaterial.c Matching",
+    "ftMaterial_800BF2B8",
+    "ftMaterial_800BF6BC",
+    "ftMaterial_800BF534",
+    "ft_MObjInfo",
+    "ftMObj",
+    "tevdesc_tmpl",
+    "texp_tmpl",
+    "HSD_TevDesc",
+    "HSD_TECnst",
+    "HSD_MObjSetupFunc",
+    "Event cast",
+    "GXColor stack pointer arithmetic",
+    "sp_tevdesc - 4",
+    "PAD_STACK removal",
+    "_padA",
+    "_padB",
+    "ftMaterial_803C69D0",
+    "ftMaterial_803C6A44",
+    "RENDER_SPECULAR",
+    "RENDER_SHADOW",
+    "RENDER_TOON",
+    "RENDER_NO_ZUPDATE",
+    "RENDER_XLU"
+  ],
+  "follow_up_queries": [
+    "src/melee/ft/ftmaterial.c GXColor* color = (GXColor*) ((u8*) &sp_tevdesc - 4)",
+    "ftMaterial_800BF6BC stack pointer arithmetic reviewer better way",
+    "ft_MObjInfo ftMObj tevdesc_tmpl texp_tmpl",
+    "ftMaterial_800BF2B8 HSD_MObjSetupFunc Event unused",
+    "config/GALE01/symbols.txt ftMaterial_803C69D0 ftMaterial_803C6A44",
+    "PAD_STACK dummy padding locals ftMaterial_800BF6BC"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json",
+      "raw_diff",
+      "changed_files.jsonl",
+      "text_corpus.jsonl",
+      "review_comments.md"
+    ],
+    "notes": [
+      "The PR body is empty, so author rationale for tactics and naming is not available.",
+      "The bot report provides PR-local matching/linking evidence, but this intake did not independently run objdiff or builds.",
+      "Two review comments clearly object to the stack pointer arithmetic hunk, but the slice does not include later discussion resolving whether it was accepted as-is or changed after the excerpt.",
+      "Merged state is present in metadata, but merge does not by itself make every tactic an accepted decomp standard."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "type": "decomp_lesson_candidate",
+        "title": "Use narrow local overlay structs for adjacent template data instead of repeated raw offsets",
+        "text": "In PR #2713, ftmaterial replaced `char* base = (char*) &ftMObj` plus offset casts with `struct ft_MObjInfo* info = (struct ft_MObjInfo*) &ftMObj` and field accesses `info->tevdesc_tmpl` / `info->texp_tmpl`. This is a candidate example of typed access improving reviewability while matching.",
+        "scope": [
+          "typed access",
+          "fighter material",
+          "template data"
+        ],
+        "evidence_refs": [
+          "raw_diff:src/melee/ft/ftmaterial.c"
+        ],
+        "confidence": 0.78
+      },
+      {
+        "type": "review_lesson_candidate",
+        "title": "Stack-relative local pointer arithmetic is review-risk even if it matches",
+        "text": "In PR #2713, reviewers questioned the `GXColor* color = (GXColor*) ((u8*) &sp_tevdesc - 4)` tactic in ftMaterial_800BF6BC, with one reviewer saying there had to be a better way to match it.",
+        "scope": [
+          "matching tactics",
+          "stack locals",
+          "ftMaterial_800BF6BC"
+        ],
+        "evidence_refs": [
+          "review_comments:discussion_r3421878711",
+          "review_comments:discussion_r3423124141"
+        ],
+        "confidence": 0.9
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Add explicit example discouraging stack-relative local pointer arithmetic",
+        "text": "Consider adding an example under typed-fields-over-pointer-math or matching-tactics-need-evidence: avoid retaining constructs like `(GXColor*) ((u8*) &some_stack_local - 4)` to address another stack slot unless there is explicit objdiff evidence and no cleaner local declaration/lifetime shape. PR #2713 reviewers objected to this exact tactic.",
+        "source_path": null,
+        "scope": [
+          "matching tactics",
+          "typed access",
+          "stack locals"
+        ],
+        "evidence_refs": [
+          "raw_diff:src/melee/ft/ftmaterial.c",
+          "review_comments:discussion_r3421878711",
+          "review_comments:discussion_r3423124141"
+        ],
+        "reason": "The standards already warn about pointer math and dummy locals, but this PR supplies a concrete reviewed example that may be useful for future QA hints."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "ftmaterial ftMObj-adjacent template layout",
+        "text": "PR #2713 modeled `&ftMObj` as `struct ft_MObjInfo { HSD_MObjInfo parent; HSD_TevDesc tevdesc_tmpl; HSD_TECnst texp_tmpl; }` and used this to access `tevdesc_tmpl` and `texp_tmpl` in ftMaterial_800BF534 and ftMaterial_800BF6BC.",
+        "source_path": "src/melee/ft/ftmaterial.c",
+        "scope": [
+          "ftMObj",
+          "HSD_TevDesc",
+          "HSD_TECnst",
+          "template data"
+        ],
+        "evidence_refs": [
+          "raw_diff:src/melee/ft/ftmaterial.c",
+          "raw_diff:config/GALE01/symbols.txt"
+        ],
+        "reason": "Useful path-scoped context for future work touching ftmaterial data layout, but should be verified against current source/symbol ownership before promotion."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote the stack pointer arithmetic hunk as an accepted tactic; reviewers explicitly questioned it and the slice does not show a clean resolution.",
+      "Do not infer broad symbol naming policy from this PR alone; symbols.txt changes are localized to ftmaterial data/string labels.",
+      "Do not treat the merge as proof that padding arrays or dummy locals are generally acceptable without additional verifier evidence."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "runner": "orchestrator_kernel_pr_indexer",
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "orchestrator_state_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/projects/melee/state",
+    "orchestrator_run_id": "08bfe41e-1b7c-4685-8646-dff5e02a5dab",
+    "orchestrator_project_id": "melee",
+    "orchestrator_prepare_intake": true,
+    "orchestrator_kernel_database_url_configured": true,
+    "legacy_session_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/.pi-sessions/pr-review"
+  }
+}

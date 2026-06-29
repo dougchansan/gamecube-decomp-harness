@@ -1,0 +1,231 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2746",
+  "pr": {
+    "number": 2746,
+    "title": "Improve `grpushon` match",
+    "url": "https://github.com/doldecomp/melee/pull/2746",
+    "state": "MERGED",
+    "author": "dberweger2017",
+    "created_at": "2026-06-21T07:02:46Z",
+    "merged_at": "2026-06-21T07:34:11Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2746 made a one-hunk decomp matching improvement in `src/melee/gr/grpushon.c` for `grPushOn_802190D0`, changing a light-type assert from `HSD_ASSERT(698, HSD_LObjGetType(lobj)==LOBJ_POINT)` to `HSD_ASSERTMSG` with an explicit flags/type-mask condition while preserving the original assert text string.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "assert-cleanup",
+      "typed-access"
+    ],
+    "systems": [
+      "stage",
+      "grpushon",
+      "HSD_LObj"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gr/grpushon.c",
+      "role": "Only changed file; contains `grPushOn_802190D0` assert source-shape adjustment.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gr/grpushon.c added 2 deleted 1 hunks 1",
+        "raw_diff.diff: hunk in grPushOn_802190D0 around line 425"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "path": "src/melee/gr/grpushon.c",
+      "symbol": "grPushOn_802190D0",
+      "change": "Replaced `HSD_ASSERT(698, HSD_LObjGetType(lobj)==LOBJ_POINT)` with `HSD_ASSERTMSG(698, (lobj->flags & LOBJ_TYPE_MASK) == LOBJ_POINT, \"HSD_LObjGetType(lobj)==LOBJ_POINT\")`.",
+      "evidence_refs": [
+        "raw_diff.diff",
+        "human_pr_text.md: Summary"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grpushon.c",
+      "symbol": "grPushOn_802190D0",
+      "change": "Reported objdiff score improved from about 98.35% to 99.19%; PR body states final status was 99.19481% with 2 arg mismatches and 1 replace.",
+      "evidence_refs": [
+        "human_pr_text.md: Verification",
+        "text_corpus.jsonl: decomp-dev[bot] GALE01 report"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "description": "Kept the original assert expression text as the `HSD_ASSERTMSG` message while changing the compiled condition shape to direct `lobj->flags` masking.",
+      "evidence_refs": [
+        "raw_diff.diff",
+        "human_pr_text.md: Summary"
+      ]
+    },
+    {
+      "description": "Limited the matching tactic to a narrow one-line assert condition rewrite instead of broad function churn.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff.diff"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For assert expressions involving HSD light object type checks, the source shape that matches may be an `HSD_ASSERTMSG` preserving the original text while the condition itself uses direct typed field access such as `(lobj->flags & LOBJ_TYPE_MASK) == LOBJ_POINT`.",
+      "scope": [
+        "HSD_LObj assertions",
+        "assert/report macro cleanup",
+        "matching source shape"
+      ],
+      "evidence_refs": [
+        "raw_diff.diff",
+        "human_pr_text.md: Summary",
+        "human_pr_text.md: Verification"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "Preserving assert text can matter independently from the expression used to generate code; here the PR explicitly kept the old `HSD_LObjGetType(lobj)==LOBJ_POINT` text while altering the executable condition.",
+      "scope": [
+        "assert text preservation",
+        "HSD_ASSERTMSG"
+      ],
+      "evidence_refs": [
+        "raw_diff.diff",
+        "human_pr_text.md: Summary"
+      ],
+      "confidence": 0.82
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "No new naming convention was established; existing names such as `grPushOn_802190D0`, `lobj`, `LOBJ_TYPE_MASK`, `LOBJ_POINT`, and `LOBJ_DIFFUSE` were retained.",
+      "evidence_refs": [
+        "raw_diff.diff"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Use direct flag masking for the runtime light-type condition while retaining the original human-readable assert expression as the `HSD_ASSERTMSG` string.",
+      "evidence_refs": [
+        "raw_diff.diff",
+        "human_pr_text.md: Summary"
+      ],
+      "reported_result": "`objdiff-cli`: `grPushOn_802190D0` now 99.19481% with 2 arg mismatches and 1 replace; bot report shows 98.35% before and 99.19% after.",
+      "confidence": 0.84
+    },
+    {
+      "tactic": "Verify the single-object build target and objdiff after the assert-shape change.",
+      "evidence_refs": [
+        "human_pr_text.md: Verification"
+      ],
+      "reported_result": "`ninja build/GALE01/src/melee/gr/grpushon.o` and `objdiff-cli` were listed in the PR body.",
+      "confidence": 0.8
+    }
+  ],
+  "review_feedback": [],
+  "searchable_terms": [
+    "pr-2746",
+    "Improve grpushon match",
+    "dberweger2017",
+    "src/melee/gr/grpushon.c",
+    "grPushOn_802190D0",
+    "HSD_ASSERTMSG",
+    "HSD_ASSERT",
+    "HSD_LObjGetType",
+    "LOBJ_TYPE_MASK",
+    "LOBJ_POINT",
+    "LOBJ_DIFFUSE",
+    "lobj->flags",
+    "light type assert condition",
+    "preserving original assert text",
+    "GALE01",
+    "objdiff-cli",
+    "99.19481"
+  ],
+  "follow_up_queries": [
+    "HSD_ASSERTMSG \"HSD_LObjGetType(lobj)==LOBJ_POINT\"",
+    "grPushOn_802190D0 LOBJ_TYPE_MASK",
+    "src/melee/gr/grpushon.c HSD_LObjGetType",
+    "assert condition source shape LOBJ_POINT",
+    "lobj->flags LOBJ_TYPE_MASK HSD_ASSERTMSG"
+  ],
+  "evidence_quality": {
+    "status": "strong",
+    "evidence_refs": [
+      "metadata_json: PR number, title, author, state, URL, timestamps, changed file counts",
+      "human_pr_text.md: Summary and Verification",
+      "raw_diff.diff: exact code change",
+      "changed_files.jsonl: changed file metadata",
+      "text_corpus.jsonl: decomp-dev[bot] score report"
+    ],
+    "notes": [
+      "No review comments or human reviewer feedback were present in the loaded slice.",
+      "The PR body and bot report provide verification claims, but this intake did not independently run build or objdiff.",
+      "The evidence supports a narrow lesson about this assert-shape tactic; it does not prove a universal rule that all `HSD_LObjGetType` asserts should be rewritten this way."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson",
+        "title": "Preserve assert text while changing assert condition source shape when matching supports it",
+        "text": "In PR #2746, `grPushOn_802190D0` improved by replacing an `HSD_ASSERT` call using `HSD_LObjGetType(lobj)==LOBJ_POINT` with `HSD_ASSERTMSG` whose condition directly masked `lobj->flags` with `LOBJ_TYPE_MASK`, while preserving the original `HSD_LObjGetType(lobj)==LOBJ_POINT` text as the message.",
+        "scope": [
+          "assert/report macros",
+          "HSD_LObj",
+          "src/melee/gr/grpushon.c"
+        ],
+        "evidence_refs": [
+          "raw_diff.diff",
+          "human_pr_text.md: Summary",
+          "human_pr_text.md: Verification"
+        ],
+        "confidence": 0.82
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "grpushon light-type assert matching detail",
+        "text": "For `src/melee/gr/grpushon.c`, PR #2746 indicates `grPushOn_802190D0` matched better when the light-type assertion used `HSD_ASSERTMSG(698, (lobj->flags & LOBJ_TYPE_MASK) == LOBJ_POINT, \"HSD_LObjGetType(lobj)==LOBJ_POINT\")` instead of calling `HSD_LObjGetType` in the condition.",
+        "source_path": "src/melee/gr/grpushon.c",
+        "scope": [
+          "grPushOn_802190D0",
+          "HSD_LObj assertions"
+        ],
+        "evidence_refs": [
+          "raw_diff.diff",
+          "human_pr_text.md: Summary",
+          "text_corpus.jsonl: decomp-dev[bot] GALE01 report"
+        ],
+        "reason": "This is path- and function-specific historical matching evidence useful for future work in `grpushon.c`; it should not be promoted as a global HSD assert rule without more examples."
+      }
+    ],
+    "rejection_notes": [
+      "Do not generalize this PR into a global requirement to replace `HSD_LObjGetType` calls with direct flag masking; the slice only shows one function-specific matching improvement.",
+      "Do not infer reviewer acceptance rationale beyond merge metadata; no review comments were loaded.",
+      "Do not treat the reported objdiff/build verification as independently revalidated by this intake."
+    ]
+  },
+  "confidence": 0.86,
+  "agent_runtime": {
+    "runner": "orchestrator_kernel_pr_indexer",
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "orchestrator_state_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/projects/melee/state",
+    "orchestrator_run_id": "08bfe41e-1b7c-4685-8646-dff5e02a5dab",
+    "orchestrator_project_id": "melee",
+    "orchestrator_prepare_intake": true,
+    "orchestrator_kernel_database_url_configured": true,
+    "legacy_session_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/.pi-sessions/pr-review"
+  }
+}

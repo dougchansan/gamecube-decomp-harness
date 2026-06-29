@@ -1,0 +1,327 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2741",
+  "pr": {
+    "number": 2741,
+    "title": "Link `hsd_40FF`",
+    "url": "https://github.com/doldecomp/melee/pull/2741",
+    "state": "MERGED",
+    "author": "ribbanya",
+    "created_at": "2026-06-18T17:58:22Z",
+    "merged_at": "2026-06-18T18:04:43Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2741 linked the sysdolphin baselib hsd_40FF data unit by adding a large int data array for hsd_8040FF80, marking the symbol as data:int, adding a block relocation for a dbbonus GXColor, and switching hsd_40FF.c from NonMatching to Matching. The bot report shows +134080 linked bytes for main/sysdolphin/baselib/hsd_40FF .data and +7 bytes for main/melee/db/dbbonus .data.",
+  "change_classification": {
+    "primary_type": "data-linking",
+    "categories": [
+      "decomp-matching",
+      "data",
+      "configuration",
+      "headers"
+    ],
+    "systems": [
+      "sysdolphin/baselib",
+      "config/GALE01",
+      "build-configuration"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/sysdolphin/baselib/hsd_40FF.c",
+      "role": "Added the linked .data payload as int hsd_8040FF80[] with force_active pragmas; file grew from effectively empty to 6709 added lines.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/sysdolphin/baselib/hsd_40FF.c added 6709 deleted 1",
+        "diff_excerpt: hsd_40FF.c adds #pragma push, #pragma force_active on, and int hsd_8040FF80[] initializer"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/hsd_40FF.h",
+      "role": "Header touched with 5 added lines; exact content not present in loaded diff excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/sysdolphin/baselib/hsd_40FF.h added 5 deleted 0"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Updated hsd_8040FF80 symbol metadata to include data:int.",
+      "evidence_refs": [
+        "diff_excerpt: hsd_8040FF80 = .data:0x8040FF80 changes from no data type to data:int"
+      ]
+    },
+    {
+      "path": "config/GALE01/config.yml",
+      "role": "Added a block relocation source for a GXColor in dbbonus at 0x803EAE10.",
+      "evidence_refs": [
+        "diff_excerpt: config.yml adds comment '# GXColor in dbbonus' and source 0x803EAE10"
+      ]
+    },
+    {
+      "path": "configure.py",
+      "role": "Changed sysdolphin/baselib/hsd_40FF.c build object status from NonMatching to Matching.",
+      "evidence_refs": [
+        "diff_excerpt: configure.py changes Object(NonMatching, \"sysdolphin/baselib/hsd_40FF.c\") to Object(Matching, \"sysdolphin/baselib/hsd_40FF.c\")"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Linked hsd_8040FF80 as a large int array in src/sysdolphin/baselib/hsd_40FF.c.",
+      "evidence_refs": [
+        "diff_excerpt: int hsd_8040FF80[] = { ... }"
+      ]
+    },
+    {
+      "text": "Marked hsd_8040FF80 in symbols.txt as data:int while preserving address .data:0x8040FF80 and size 0x20BC0.",
+      "evidence_refs": [
+        "diff_excerpt: symbols.txt hsd_8040FF80 line"
+      ]
+    },
+    {
+      "text": "Added block relocation source 0x803EAE10 for a dbbonus GXColor.",
+      "evidence_refs": [
+        "diff_excerpt: config.yml added '# GXColor in dbbonus' and source 0x803EAE10"
+      ]
+    },
+    {
+      "text": "Promoted sysdolphin/baselib/hsd_40FF.c to Matching in configure.py.",
+      "evidence_refs": [
+        "diff_excerpt: configure.py MatchingFor object status change"
+      ]
+    },
+    {
+      "text": "Bot report recorded 2 new data matches: hsd_40FF .data 0.00% to 100.00% (+134080 bytes) and dbbonus .data 91.35% to 100.00% (+7 bytes).",
+      "evidence_refs": [
+        "text_corpus.jsonl: decomp-dev[bot] issue comment report"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "The PR updated symbol typing, relocation config, and build matching status together, which kept the data-unit link reflected across the config surfaces needed by the matcher.",
+      "evidence_refs": [
+        "diff_excerpt: symbols.txt data:int change",
+        "diff_excerpt: config.yml block relocation source",
+        "diff_excerpt: configure.py Matching status change",
+        "text_corpus.jsonl: bot report linked data +134080 bytes"
+      ]
+    },
+    {
+      "text": "The dbbonus block relocation was isolated and documented with a local comment, tying a small +7 byte dbbonus data match to the specific GXColor source address.",
+      "evidence_refs": [
+        "diff_excerpt: '# GXColor in dbbonus' source 0x803EAE10",
+        "text_corpus.jsonl: bot report dbbonus .data +7 bytes"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "text": "For a data-only baselib unit, symbol metadata can be decisive: this PR made hsd_8040FF80 an int-typed .data object in symbols.txt and supplied the corresponding int array in the source TU.",
+      "scope": [
+        "src/sysdolphin/baselib/hsd_40FF.c",
+        "config/GALE01/symbols.txt"
+      ],
+      "evidence_refs": [
+        "diff_excerpt: hsd_8040FF80 = .data:0x8040FF80 ... data:int",
+        "diff_excerpt: int hsd_8040FF80[] initializer"
+      ]
+    },
+    {
+      "text": "Data matching work may need companion block_relocations entries when neighboring or referenced data affects exact linkage; here adding source 0x803EAE10 coincided with dbbonus .data reaching 100%.",
+      "scope": [
+        "config/GALE01/config.yml",
+        "main/melee/db/dbbonus"
+      ],
+      "evidence_refs": [
+        "diff_excerpt: config.yml adds source 0x803EAE10",
+        "text_corpus.jsonl: bot report dbbonus .data 91.35% to 100.00%"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "The PR retained the existing address-style data symbol name hsd_8040FF80 rather than inventing a semantic name for the large data blob.",
+      "evidence_refs": [
+        "diff_excerpt: symbols.txt keeps hsd_8040FF80 name",
+        "diff_excerpt: source declares int hsd_8040FF80[]"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "text": "Used #pragma push and #pragma force_active on around the hsd_8040FF80 data definition so the large data object is retained for linking.",
+      "evidence_refs": [
+        "diff_excerpt: hsd_40FF.c begins with #pragma push and #pragma force_active on"
+      ],
+      "notes": "Loaded excerpt shows force_active but is truncated before any closing pragma, so the exact pragma scope cannot be fully audited from this slice."
+    },
+    {
+      "text": "Changed configure.py object classification from NonMatching to Matching after adding data and config metadata.",
+      "evidence_refs": [
+        "diff_excerpt: Object(NonMatching, \"sysdolphin/baselib/hsd_40FF.c\") to Object(Matching, ...)"
+      ]
+    },
+    {
+      "text": "Added block_relocations source 0x803EAE10 for the dbbonus GXColor to resolve a small data-match gap.",
+      "evidence_refs": [
+        "diff_excerpt: config.yml added block relocation",
+        "text_corpus.jsonl: bot report dbbonus .data +7 bytes"
+      ]
+    }
+  ],
+  "review_feedback": [],
+  "searchable_terms": [
+    "pr-2741",
+    "Link hsd_40FF",
+    "ribbanya",
+    "hsd_40FF.c",
+    "hsd_40FF.h",
+    "hsd_8040FF80",
+    ".data:0x8040FF80",
+    "data:int",
+    "0x20BC0",
+    "force_active",
+    "block_relocations",
+    "GXColor in dbbonus",
+    "0x803EAE10",
+    "main/sysdolphin/baselib/hsd_40FF",
+    "main/melee/db/dbbonus",
+    "Matched data 70.68",
+    "Linked data 52.17",
+    "+134080 bytes",
+    "+134160 bytes"
+  ],
+  "follow_up_queries": [
+    "hsd_8040FF80 data:int",
+    "src/sysdolphin/baselib/hsd_40FF.c force_active",
+    "config/GALE01/config.yml GXColor in dbbonus 0x803EAE10",
+    "block_relocations dbbonus GXColor",
+    "main/sysdolphin/baselib/hsd_40FF .data",
+    "symbols.txt .data:0x8040FF80 size:0x20BC0"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR number/title/state/author/timestamps and changed file counts",
+      "diff_excerpt/raw_diff: config.yml, symbols.txt, configure.py, and start of hsd_40FF.c changes",
+      "changed_files.jsonl: complete changed file list",
+      "text_corpus.jsonl: decomp-dev[bot] matching report"
+    ],
+    "notes": [
+      "Strong evidence for changed files, config edits, symbol typing, build status change, and bot-reported data-match deltas.",
+      "The PR body is empty and there are no review comments, so author motivation and reviewer intent are not available.",
+      "The raw diff is truncated in loaded evidence; hsd_40FF.c is a very large initializer and hsd_40FF.h content is not visible, so detailed header claims are avoided.",
+      "The bot report provides matching/linkage percentages and byte deltas, but no build log, objdiff output, or local validation transcript beyond the report."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "title": "PR 2741 linked hsd_40FF data by pairing source data with symbol typing and build status",
+        "text": "In PR 2741, hsd_40FF.c was promoted from NonMatching to Matching after adding int hsd_8040FF80[] in src/sysdolphin/baselib/hsd_40FF.c and marking hsd_8040FF80 as data:int in config/GALE01/symbols.txt. The bot report showed main/sysdolphin/baselib/hsd_40FF .data moving from 0.00% to 100.00% for +134080 bytes.",
+        "scope": [
+          "src/sysdolphin/baselib/hsd_40FF.c",
+          "config/GALE01/symbols.txt",
+          "configure.py"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: hsd_40FF.c int array",
+          "diff_excerpt: symbols.txt data:int",
+          "diff_excerpt: configure.py Matching status",
+          "text_corpus.jsonl: bot report hsd_40FF .data 100%"
+        ]
+      },
+      {
+        "title": "PR 2741 added a dbbonus GXColor block relocation",
+        "text": "The PR added config/GALE01/config.yml block_relocations entry source 0x803EAE10 under the comment 'GXColor in dbbonus'; the bot report recorded main/melee/db/dbbonus .data improving from 91.35% to 100.00% for +7 bytes.",
+        "scope": [
+          "config/GALE01/config.yml",
+          "main/melee/db/dbbonus"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: config.yml source 0x803EAE10",
+          "text_corpus.jsonl: bot report dbbonus .data 100%"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "hsd_40FF.c is a data-linked baselib unit centered on hsd_8040FF80",
+        "text": "PR 2741 made src/sysdolphin/baselib/hsd_40FF.c a Matching data unit by adding int hsd_8040FF80[] and corresponding symbols.txt data:int metadata for .data:0x8040FF80 size 0x20BC0.",
+        "source_path": "src/sysdolphin/baselib/hsd_40FF.c",
+        "scope": [
+          "sysdolphin/baselib",
+          "data matching"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: int hsd_8040FF80[]",
+          "diff_excerpt: symbols.txt hsd_8040FF80 data:int",
+          "diff_excerpt: configure.py Matching",
+          "text_corpus.jsonl: hsd_40FF .data +134080"
+        ],
+        "reason": "Useful path-scoped context for future hsd_40FF data maintenance; curator should verify full source because loaded diff is truncated."
+      },
+      {
+        "target_source_id": "ssbm_data_sheet",
+        "update_kind": "source_update",
+        "title": "dbbonus GXColor block relocation at 0x803EAE10",
+        "text": "PR 2741 added a GALE01 block_relocations entry labeled 'GXColor in dbbonus' with source 0x803EAE10, and the bot report showed dbbonus .data reaching 100% with +7 bytes.",
+        "source_path": "config/GALE01/config.yml",
+        "scope": [
+          "GALE01",
+          "dbbonus",
+          "GXColor",
+          "block_relocations"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: config.yml block relocation",
+          "text_corpus.jsonl: dbbonus data match report"
+        ],
+        "reason": "Potential data-sheet fact about dbbonus GXColor relocation; curator should confirm ownership and address semantics before promoting."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Data-link PRs should keep symbol metadata, source declarations, relocation config, and build status synchronized",
+        "text": "This PR is an example where a data-linking change touched symbols.txt data typing, source data declaration, config.yml block relocations, and configure.py Matching status together. This may be worth documenting as a review checklist for data-link PRs, not as a new mandatory standard without broader evidence.",
+        "source_path": null,
+        "scope": [
+          "data-linking",
+          "configuration",
+          "matching status"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: symbols.txt data:int",
+          "diff_excerpt: hsd_40FF.c int array",
+          "diff_excerpt: config.yml block relocation",
+          "diff_excerpt: configure.py Matching",
+          "text_corpus.jsonl: bot report"
+        ],
+        "reason": "PR provides a concrete example, but one PR alone is not enough to promote a global rule without curator review."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer semantics for the contents of hsd_8040FF80 beyond an int data array; the PR uses an address-style name and provides no explanatory body text.",
+      "Do not infer detailed hsd_40FF.h declarations; only the 5-line addition count is loaded.",
+      "Do not treat force_active pragmas as generally approved style from this PR alone; the slice shows their use but not the full pragma scope or alternative attempts."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "runner": "orchestrator_kernel_pr_indexer",
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "orchestrator_state_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/projects/melee/state",
+    "orchestrator_run_id": "08bfe41e-1b7c-4685-8646-dff5e02a5dab",
+    "orchestrator_project_id": "melee",
+    "orchestrator_prepare_intake": true,
+    "orchestrator_kernel_database_url_configured": true,
+    "legacy_session_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/.pi-sessions/pr-review"
+  }
+}

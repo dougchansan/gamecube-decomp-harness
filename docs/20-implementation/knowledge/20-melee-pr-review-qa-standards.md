@@ -1,7 +1,7 @@
 ---
 covers: Melee decomp code-quality standards, QA lint coverage, retired rules, and repair examples
 concepts: [past-prs, review-standards, decomp-quality, matching-standards, qa-checklist]
-code-ref: knowledge/sources/injectable/decomp_standards/data/standards.jsonl, tools/source_editing/review_lint/api/_qa_rules.py
+code-ref: projects/melee/knowledge/sources/injectable/decomp_standards/data/standards.jsonl, toolpacks/gamecube-decomp/source_editing/review_lint/api/_qa_rules.py
 ---
 
 # Melee Code Quality Standards
@@ -358,6 +358,6 @@ Detailed examples belong in targeted repair and review contexts:
 | --- | --- |
 | Worker base prompt | Compact summaries from `standards.jsonl`; no bulky examples. |
 | Deterministic lint finding | `review_lint` message, `standard_id`, `rule_id`, and targeted repair hint. |
-| QA repair / PR fixer | Standard-linked examples looked up by `standard_id` and `qa_rule_id`. |
+| QA repair and PR fixer | Standard-linked examples looked up by `standard_id` and `qa_rule_id`. |
 | Pre-ship review | `preship_exhibits.json`, banned-pattern exhibits, and standard-linked examples. |
 | Repeated rejected hunk | `banned_patterns/data/tombstones.jsonl` with the original rejection URL. |

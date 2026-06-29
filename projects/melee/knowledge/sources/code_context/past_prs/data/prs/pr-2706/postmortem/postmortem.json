@@ -1,0 +1,491 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2706",
+  "pr": {
+    "number": 2706,
+    "title": "3/14: GR common and routes",
+    "url": "https://github.com/doldecomp/melee/pull/2706",
+    "state": "MERGED",
+    "author": "fjooord",
+    "created_at": "2026-06-15T18:51:36Z",
+    "merged_at": "2026-06-17T06:24:46Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Implementation-only GR slice covering common ground helpers, animation helpers, material code, route files, push-on, and zako generator work. The PR reported several new matches and unmatched-item improvements, with explicit discussion of narrowly retained codegen crutches: a scoped global_optimizer-off pragma for Ground_801C5878 and Shrine Route unused locals kept because removal regressed local progress.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "cleanup",
+      "decomp-matching",
+      "headers",
+      "types-structs"
+    ],
+    "systems": [
+      "stage",
+      "ground",
+      "routes",
+      "animation"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gr/granime.c",
+      "role": "GR animation helper matching and cleanup; added helper boundaries, renamed locals, looped over JObj/DObj/MObj/PObj/RObj structures, and replaced temp/phi-style locals in excerpts.",
+      "evidence_refs": [
+        "changed_files.jsonl: granime.c +186/-89, 9 hunks",
+        "raw_diff: grAnime_801C6C0C, grAnime_801C7228, grAnime_801C7C1C hunks",
+        "text_corpus: bot report lists grAnime_801C6C0C new 100% match and grAnime_801C7228/grAnime_801C7C1C improvements"
+      ]
+    },
+    {
+      "path": "src/melee/gr/ground.c",
+      "role": "Common ground helper work; contained reviewed pragma exception for Ground_801C5878 and reviewer request to prefer struct-based access in Ground_801C20E0.",
+      "evidence_refs": [
+        "changed_files.jsonl: ground.c +33/-40, 5 hunks",
+        "review_comments.md: discussion_r3416202086 pragma concern",
+        "review_comments.md: discussion_r3416233891 scoped pragma retained after 75.88% -> 75.77% regression",
+        "review_comments.md: discussion_r3418311489 asks whether pointer math can match with struct stuff",
+        "text_corpus: bot report lists Ground_801C5878 new 100% match and Ground_801C20E0 improvement"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grbigblueroute.c",
+      "role": "Big Blue route matching cleanup; excerpts show route update local ordering, Vec3 assignment cleanup, removal of volatile Vec3, PAD_STACK size adjustment, and bit access through an UnkFlagStruct cast.",
+      "evidence_refs": [
+        "changed_files.jsonl: grbigblueroute.c +29/-31, 10 hunks",
+        "raw_diff: grBigBlueRoute_8020CD20 hunk",
+        "text_corpus: bot report lists grBigBlueRoute_8020CD20 improvement 92.65% -> 98.60%"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grkinokoroute.c",
+      "role": "Kinoko route matching improvements; changed-file and bot report evidence available, but detailed diff not loaded in full excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl: grkinokoroute.c +75/-47, 11 hunks",
+        "text_corpus: bot report lists grKinokoRoute_80207C88, grKinokoRoute_80207634, grKinokoRoute_802078F0, and .sdata2 improvements"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grmaterial.c",
+      "role": "GR material matching improvements; file called out as reviewer focus and bot report lists one new match.",
+      "evidence_refs": [
+        "changed_files.jsonl: grmaterial.c +35/-28, 6 hunks",
+        "human_pr_text.md: reviewer focus files include grmaterial.c",
+        "text_corpus: bot report lists grMaterial_801C92C0 new 100% match and fn_801C8EF8 improvement"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grpushon.c",
+      "role": "Push-on route/stage matching improvements; changed-file and bot report evidence available, detailed diff not loaded in excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl: grpushon.c +41/-45, 10 hunks",
+        "text_corpus: bot report lists grPushOn_80218888 and grPushOn_802190D0 improvements"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grshrineroute.c",
+      "role": "Shrine route matching improvements; retained explicit unused locals in two functions after removal reduced local progress.",
+      "evidence_refs": [
+        "changed_files.jsonl: grshrineroute.c +42/-30, 18 hunks",
+        "human_pr_text.md: cleanup note says unused locals in fn_80208A38 / grShrineRoute_8020AE08 were left because removal dropped 74.52% -> 74.49%",
+        "text_corpus: bot report lists fn_80208A38 new 100% match and multiple grShrineRoute improvements"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grzakogenerator.c",
+      "role": "Small Zako generator matching improvements.",
+      "evidence_refs": [
+        "changed_files.jsonl: grzakogenerator.c +8/-6, 2 hunks",
+        "text_corpus: bot report lists grZakoGenerator_801CACB8 and grZakoGenerator_801CAC14 improvements"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Changed eight files under src/melee/gr: granime.c, grbigblueroute.c, grkinokoroute.c, grmaterial.c, ground.c, grpushon.c, grshrineroute.c, and grzakogenerator.c.",
+    "PR body describes this as draft slice 3 of 14 from an aggregate WIP branch, scoped to common GR helpers and route-related files with no intended header/naming churn beyond implementation needs.",
+    "Bot report for the slice recorded four new 100% matches: grAnime_801C6C0C, Ground_801C5878, grMaterial_801C92C0, and fn_80208A38.",
+    "Bot report also recorded 16 improvements in unmatched items across grkinokoroute, grbigblueroute, grpushon, grshrineroute, grmaterial, ground, granime, and grzakogenerator.",
+    "granime.c excerpt replaced temp_rXX/phi-style locals with typed role names such as dobj, mobj, pobj, robj, child, child_robj, grandchild, anim_flags, aobjdesc, and robj, and introduced grAnime_801C7228_for_each_child as a static inline helper.",
+    "grbigblueroute.c excerpt removed volatile from Vec3 rot, adjusted PAD_STACK from 0x4C to 0x44, used direct Vec3 assignments, introduced a temporary t for repeated spline parameter use, and used an UnkFlagStruct cast for bit-field-like access to gp->gv.bigblue.x0.",
+    "ground.c retained a tightly scoped #pragma push / #pragma global_optimizer off / #pragma pop around Ground_801C5878 after author-reported removal caused a nonmatched regression.",
+    "ground.c Ground_801C20E0 hunk switched from LightOverrideEntry indexed struct access to byte-offset pointer access; reviewer asked whether it could match with struct stuff.",
+    "Shrine Route retained explicit unused locals in fn_80208A38 / grShrineRoute_8020AE08 because removal reportedly dropped local progress from 74.52% to 74.49%."
+  ],
+  "smart_moves": [
+    {
+      "text": "The author explicitly tried to remove local pragma/volatile crutches and documented which remaining crutches were retained because removal reduced matching progress.",
+      "evidence_refs": [
+        "human_pr_text.md: cleanup pass note",
+        "human_pr_text.md: issuecomment-4711784611"
+      ]
+    },
+    {
+      "text": "The global_optimizer-off exception in ground.c was scoped narrowly with push/pop around only Ground_801C5878 and tied to a concrete reported regression when removed.",
+      "evidence_refs": [
+        "review_comments.md: discussion_r3416233891",
+        "review_comments.md: discussion_r3426003991"
+      ]
+    },
+    {
+      "text": "granime.c cleanup moved some generated-looking temp/phi variables toward local role names and factored child traversal into a named static inline helper, improving reviewability while matching improved.",
+      "evidence_refs": [
+        "raw_diff: grAnime_801C7228 hunk",
+        "text_corpus: bot report granime improvements"
+      ]
+    },
+    {
+      "text": "grbigblueroute.c replaced repeated component-wise Vec3 copies with whole-struct Vec3 assignment where the diff shows the source shape allowed it.",
+      "evidence_refs": [
+        "raw_diff: grBigBlueRoute_8020CD20 rot = orient / rot = road_rot hunks"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "Before retaining pragmas, volatile locals, PAD_STACK, or explicit unused locals, try removing them and record the exact match/progress effect if they must stay.",
+      "scope": [
+        "GR matching slices",
+        "codegen tactics"
+      ],
+      "evidence_refs": [
+        "human_pr_text.md: cleanup pass note removed local pragma/volatile crutches and left Shrine Route unused locals after 74.52% -> 74.49%",
+        "review_comments.md: discussion_r3416233891 Ground_801C5878 pragma removal caused 75.88% -> 75.77%"
+      ],
+      "confidence": 0.86
+    },
+    {
+      "lesson": "A pragma exception is more reviewable when it is tightly scoped and has concrete regression evidence, but it should remain an exception rather than normal source style.",
+      "scope": [
+        "ground.c",
+        "Ground_801C5878",
+        "codegen tactics"
+      ],
+      "evidence_refs": [
+        "review_comments.md: discussion_r3416202086 concern",
+        "review_comments.md: discussion_r3416233891 scoped push/pop rationale",
+        "review_comments.md: discussion_r3426003991 keep for now"
+      ],
+      "confidence": 0.84
+    },
+    {
+      "lesson": "Reviewer feedback favored struct-based access over byte-offset pointer arithmetic in Ground_801C20E0 when a plausible struct shape exists.",
+      "scope": [
+        "ground.c",
+        "Ground_801C20E0",
+        "typed access"
+      ],
+      "evidence_refs": [
+        "review_comments.md: discussion_r3418311489"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "For traversal-heavy animation helpers, typed local role names and helper extraction can make decompiled control flow easier to review than temp_rXX/phi-style variables.",
+      "scope": [
+        "granime.c",
+        "HSD_JObj traversal",
+        "animation helpers"
+      ],
+      "evidence_refs": [
+        "raw_diff: grAnime_801C7228 hunk replacing temp_r20/temp_r4/phi_* with dobj/mobj/pobj/robj/child names and helper extraction"
+      ],
+      "confidence": 0.72
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "anim_flags",
+      "meaning": "Semantic replacement for var_r29 in grAnime_801C7C1C, used as accumulated animation flag bits passed to grAnime_801C752C.",
+      "evidence_refs": [
+        "raw_diff: grAnime_801C7C1C var_r29 -> anim_flags"
+      ]
+    },
+    {
+      "name": "dobj, mobj, pobj, robj, child, child_robj, grandchild",
+      "meaning": "Short local role names for HSD object traversal in granime.c.",
+      "evidence_refs": [
+        "raw_diff: grAnime_801C7228 and grAnime_801C7228_for_each_child hunks"
+      ]
+    },
+    {
+      "name": "aobjdesc",
+      "meaning": "Temporary local for aj->aobjdesc before HSD_AObjLoadDesc in grAnime_801C7C1C.",
+      "evidence_refs": [
+        "raw_diff: grAnime_801C7C1C HSD_AObjDesc* aobjdesc block"
+      ]
+    },
+    {
+      "name": "road_rot",
+      "meaning": "Vec3 local in grBigBlueRoute_8020CD20 that stores road rotation before assigning it to rot.",
+      "evidence_refs": [
+        "raw_diff: grBigBlueRoute_8020CD20 case 2 hunk"
+      ]
+    },
+    {
+      "name": "t",
+      "meaning": "Temporary spline parameter reused for calls in grBigBlueRoute_8020CD20.",
+      "evidence_refs": [
+        "raw_diff: grBigBlueRoute_8020CD20 spline point / tangent hunks"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Scoped #pragma global_optimizer off around Ground_801C5878.",
+      "evidence": "Author reported removing the guard regressed Ground_801C5878 from 75.88% to 75.77%; review comment says it is tightly scoped with push/pop and PR checks were green.",
+      "risk": "Pragma use is an exceptional codegen tactic and should not generalize without adjacent-function evidence.",
+      "evidence_refs": [
+        "human_pr_text.md: issuecomment-4711784611",
+        "review_comments.md: discussion_r3416233891"
+      ]
+    },
+    {
+      "tactic": "Retained explicit unused locals in fn_80208A38 / grShrineRoute_8020AE08.",
+      "evidence": "Author said removal reduced local progress from 74.52% matched to 74.49% matched across two functions.",
+      "risk": "Dummy or unused locals are codegen crutches; keep narrow and revisit when source shape is better understood.",
+      "evidence_refs": [
+        "human_pr_text.md: issuecomment-4711484718"
+      ]
+    },
+    {
+      "tactic": "PAD_STACK size tuning remains in grBigBlueRoute_8020CD20 after volatile Vec3 rot removal.",
+      "evidence": "Diff excerpt changes volatile Vec3 rot to Vec3 rot and PAD_STACK(0x4C) to PAD_STACK(0x44).",
+      "risk": "PAD_STACK requires verifier evidence; the loaded excerpt shows the edit but not standalone objdiff proof for the exact stack padding.",
+      "evidence_refs": [
+        "raw_diff: grBigBlueRoute_8020CD20 local declarations"
+      ]
+    },
+    {
+      "tactic": "Helper extraction/static inline boundary in grAnime_801C7228_for_each_child.",
+      "evidence": "Diff factors child and grandchild traversal out of grAnime_801C7228 while bot report records grAnime_801C7228 improvement.",
+      "risk": "Inline/helper boundaries should remain tied to local match evidence; excerpt does not include a detailed objdiff explanation for why this boundary was chosen.",
+      "evidence_refs": [
+        "raw_diff: grAnime_801C7228_for_each_child hunk",
+        "text_corpus: bot report grAnime_801C7228 improvement"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "path": "src/melee/gr/ground.c",
+      "topic": "pragma concern",
+      "feedback": "Author flagged concern about the global_optimizer-off pragma.",
+      "resolution_or_response": "Author later documented that removing it caused a nonmatched regression in Ground_801C5878; ribbanya commented, 'Yeah, weird. Let's keep it for now.'",
+      "evidence_refs": [
+        "review_comments.md: discussion_r3416202086",
+        "review_comments.md: discussion_r3416233891",
+        "review_comments.md: discussion_r3426003991"
+      ]
+    },
+    {
+      "path": "src/melee/gr/ground.c",
+      "topic": "typed struct access",
+      "feedback": "jurrejelle asked whether Ground_801C20E0 could match with struct stuff instead of byte-offset pointer arithmetic.",
+      "resolution_or_response": "Loaded evidence does not show a final code resolution for this specific comment.",
+      "evidence_refs": [
+        "review_comments.md: discussion_r3418311489"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2706",
+    "3/14 GR common and routes",
+    "src/melee/gr",
+    "granime.c",
+    "ground.c",
+    "grmaterial.c",
+    "grbigblueroute.c",
+    "grkinokoroute.c",
+    "grpushon.c",
+    "grshrineroute.c",
+    "grzakogenerator.c",
+    "Ground_801C5878",
+    "Ground_801C20E0",
+    "global_optimizer off",
+    "pragma push pop",
+    "struct stuff",
+    "LightOverrideEntry",
+    "LightOverrideFlags",
+    "HSD_LightDesc",
+    "grAnime_801C6C0C",
+    "grAnime_801C7228",
+    "grAnime_801C7228_for_each_child",
+    "grAnime_801C7C1C",
+    "anim_flags",
+    "grBigBlueRoute_8020CD20",
+    "PAD_STACK",
+    "unused locals",
+    "fn_80208A38",
+    "grShrineRoute_8020AE08",
+    "UnkFlagStruct",
+    "Vec3 rot"
+  ],
+  "follow_up_queries": [
+    "Ground_801C20E0 LightOverrideEntry struct byte_off pointer math",
+    "Ground_801C5878 global_optimizer off pragma push pop",
+    "grShrineRoute_8020AE08 unused locals match regression",
+    "fn_80208A38 unused locals 74.52 74.49",
+    "grAnime_801C7228_for_each_child helper inline",
+    "grBigBlueRoute_8020CD20 PAD_STACK volatile Vec3 rot",
+    "UnkFlagStruct gp->gv.bigblue.x0 b1"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR metadata, changed files, review counts",
+      "human_pr_text.md: PR body and issue comments",
+      "review_comments.md: all loaded review comments",
+      "raw_diff: truncated diff excerpt",
+      "text_corpus.jsonl: bot report and comments"
+    ],
+    "notes": [
+      "Evidence is strong for PR identity, changed files, high-level scope, bot-reported match/progress deltas, and ground.c review feedback.",
+      "Diff evidence is truncated; detailed edits in grkinokoroute.c, grmaterial.c, grpushon.c, grshrineroute.c, and grzakogenerator.c are mostly represented by changed-file metadata and bot report rather than full hunks.",
+      "The PR body initially says slice-specific CI/regression was in progress; later comments mention PR checks were green and keeping the pragma made the slice regression-free, but this intake does not independently validate builds or objdiff.",
+      "Reviewer intent beyond the literal comments is not inferred. The dismissed state of jurrejelle's review is recorded in text_corpus but not treated as resolving the struct-access concern.",
+      "Some tactics, such as PAD_STACK size and static inline helper extraction, are visible in diff excerpts but lack detailed standalone author explanation in the loaded evidence."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "pr_lesson",
+        "title": "Scoped pragma exceptions need explicit regression evidence",
+        "text": "PR #2706 retained #pragma global_optimizer off only around Ground_801C5878 after the author reported removal regressed the nonmatched item from 75.88% to 75.77%; reviewer follow-up accepted keeping it for now. Treat as a narrow exception, not general style.",
+        "scope": [
+          "src/melee/gr/ground.c",
+          "Ground_801C5878",
+          "codegen tactics"
+        ],
+        "evidence_refs": [
+          "review_comments.md: discussion_r3416233891",
+          "review_comments.md: discussion_r3426003991",
+          "human_pr_text.md: issuecomment-4711784611"
+        ],
+        "confidence": 0.88
+      },
+      {
+        "record_type": "pr_lesson",
+        "title": "Reviewer preferred struct-backed access over byte-offset access in Ground_801C20E0",
+        "text": "In PR #2706, a Ground_801C20E0 hunk changed LightOverrideEntry-style indexing to byte-offset pointer access; reviewer jurrejelle asked whether it could match with struct stuff. This is useful evidence for revisiting typed access in this function.",
+        "scope": [
+          "src/melee/gr/ground.c",
+          "Ground_801C20E0",
+          "typed access"
+        ],
+        "evidence_refs": [
+          "review_comments.md: discussion_r3418311489"
+        ],
+        "confidence": 0.78
+      },
+      {
+        "record_type": "pr_lesson",
+        "title": "Document retained unused locals or other crutches with match deltas",
+        "text": "PR #2706 documents that explicit Shrine Route unused locals in fn_80208A38 / grShrineRoute_8020AE08 were tried for removal but kept because removal dropped local progress from 74.52% to 74.49%.",
+        "scope": [
+          "src/melee/gr/grshrineroute.c",
+          "fn_80208A38",
+          "grShrineRoute_8020AE08",
+          "codegen tactics"
+        ],
+        "evidence_refs": [
+          "human_pr_text.md: issuecomment-4711484718"
+        ],
+        "confidence": 0.82
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Pragma exceptions should cite exact regression deltas and tight scope",
+        "text": "Consider adding PR #2706 as an example under avoid-pragmas-register-asm / matching-tactics-need-evidence: a #pragma global_optimizer off guard was kept only around Ground_801C5878 after removal reportedly regressed the nonmatched item from 75.88% to 75.77%, with push/pop scoping and reviewer acceptance to keep it for now.",
+        "source_path": null,
+        "scope": [
+          "avoid-pragmas-register-asm",
+          "matching-tactics-need-evidence",
+          "Ground_801C5878"
+        ],
+        "evidence_refs": [
+          "review_comments.md: discussion_r3416233891",
+          "review_comments.md: discussion_r3426003991"
+        ],
+        "reason": "Loaded evidence gives a concrete, bounded historical example matching the existing standard, but curator should decide whether to add it as a standards example."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "ground.c Ground_801C20E0 has unresolved typed-access review concern",
+        "text": "PR #2706 reviewer asked whether the Ground_801C20E0 LightOverrideEntry/light override loop could match with struct stuff after a byte-offset pointer-math edit. This may be useful as a path-scoped hint for future ground.c cleanup.",
+        "source_path": "src/melee/gr/ground.c",
+        "scope": [
+          "Ground_801C20E0",
+          "LightOverrideEntry",
+          "LightOverrideFlags",
+          "typed access"
+        ],
+        "evidence_refs": [
+          "review_comments.md: discussion_r3418311489"
+        ],
+        "reason": "The comment is concrete and path-specific, but the loaded slice does not show whether it was resolved."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "ground.c Ground_801C5878 retained a narrow global_optimizer-off guard",
+        "text": "PR #2706 retained a scoped #pragma global_optimizer off around Ground_801C5878 because removing it reportedly regressed the nonmatched item from 75.88% to 75.77%; reviewer comment said to keep it for now.",
+        "source_path": "src/melee/gr/ground.c",
+        "scope": [
+          "Ground_801C5878",
+          "pragma",
+          "codegen tactic"
+        ],
+        "evidence_refs": [
+          "human_pr_text.md: issuecomment-4711784611",
+          "review_comments.md: discussion_r3416233891",
+          "review_comments.md: discussion_r3426003991"
+        ],
+        "reason": "Useful future-maintenance warning for this function; should remain a path fact candidate rather than a global endorsement of pragmas."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "grshrineroute.c unused locals retained after local progress regression",
+        "text": "PR #2706 author tried removing explicit unused locals in fn_80208A38 / grShrineRoute_8020AE08 but kept them because local progress dropped from 74.52% to 74.49%.",
+        "source_path": "src/melee/gr/grshrineroute.c",
+        "scope": [
+          "fn_80208A38",
+          "grShrineRoute_8020AE08",
+          "unused locals",
+          "codegen tactic"
+        ],
+        "evidence_refs": [
+          "human_pr_text.md: issuecomment-4711484718"
+        ],
+        "reason": "Path-specific historical context may prevent accidental cleanup regressions, but curator should verify against current source before adding."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote the retained ground.c pragma into a normal accepted style; the PR evidence frames it as concerning, weird, and kept for now because of a concrete regression.",
+      "Do not claim all route files were fully matched; the bot report shows a mix of new matches and partial unmatched-item improvements.",
+      "Do not treat the Ground_801C20E0 byte-offset pointer access as accepted style; reviewer explicitly questioned whether struct-backed access could match.",
+      "Do not infer detailed lessons for grkinokoroute.c, grpushon.c, grmaterial.c, grshrineroute.c, or grzakogenerator.c beyond reported match improvements unless full diff/source evidence is inspected."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "runner": "orchestrator_kernel_pr_indexer",
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "orchestrator_state_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/projects/melee/state",
+    "orchestrator_run_id": "08bfe41e-1b7c-4685-8646-dff5e02a5dab",
+    "orchestrator_project_id": "melee",
+    "orchestrator_prepare_intake": true,
+    "orchestrator_kernel_database_url_configured": true,
+    "legacy_session_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/.pi-sessions/pr-review"
+  }
+}

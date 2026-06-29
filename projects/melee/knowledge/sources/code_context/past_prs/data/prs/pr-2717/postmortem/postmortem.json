@@ -1,0 +1,216 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2717",
+  "pr": {
+    "number": 2717,
+    "title": "Address grBigBlue assertion",
+    "url": "https://github.com/doldecomp/melee/pull/2717",
+    "state": "MERGED",
+    "author": "PsiLupan",
+    "created_at": "2026-06-16T17:01:00Z",
+    "merged_at": "2026-06-16T17:07:15Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2717 changed only src/melee/gr/grbigblue.c. The substantive decomp cleanup was replacing two raw __assert(\"grbigblue.c\", line, \"0\") expansions after OSReport calls with HSD_ASSERT(line, 0), while preserving the report side effects. The rest of the diff is mostly formatting of arrays, line wraps, and brace indentation.",
+  "change_classification": {
+    "primary_type": "assert_macro_cleanup",
+    "categories": [
+      "code-change",
+      "assert-cleanup",
+      "formatting"
+    ],
+    "systems": [
+      "stage",
+      "grBigBlue"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gr/grbigblue.c",
+      "role": "Only changed file; Big Blue stage source with assertion macro replacements and formatting-only churn.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gr/grbigblue.c added 91 deleted 191 hunks 20",
+        "raw_diff: __assert at grBigBlue_801E93D8 replaced with HSD_ASSERT(1739, 0)",
+        "raw_diff: __assert at grBigBlue_801EA05C replaced with HSD_ASSERT(1994, 0)"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "path": "src/melee/gr/grbigblue.c",
+      "description": "Replaced raw __assert(\"grbigblue.c\", 0x6CB, \"0\") with HSD_ASSERT(1739, 0) after OSReport(\"*** Not Set Position!(FFlyer)\\n\").",
+      "evidence_refs": [
+        "raw_diff hunk around grBigBlue_801E93D8"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grbigblue.c",
+      "description": "Replaced raw __assert(\"grbigblue.c\", 0x7CA, \"0\") with HSD_ASSERT(1994, 0) after OSReport(\"*** Not Set Position!(Tyukei)\\n\").",
+      "evidence_refs": [
+        "raw_diff hunk around grBigBlue_801EA05C"
+      ]
+    },
+    {
+      "path": "src/melee/gr/grbigblue.c",
+      "description": "Collapsed several static numeric initializer lists and adjusted line wrapping/braces in existing code without evident semantic change in the loaded diff.",
+      "evidence_refs": [
+        "raw_diff hunks for grBb_803E2938, grBb_803E2D84, grBb_803E2DC0, lbl_803E2DFC",
+        "raw_diff assorted line-wrap hunks"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "description": "Preserved the OSReport calls immediately before converting the raw assert expansions, avoiding loss of report side effects.",
+      "evidence_refs": [
+        "raw_diff: FFlyer OSReport remains before HSD_ASSERT(1739, 0)",
+        "raw_diff: Tyukei OSReport remains before HSD_ASSERT(1994, 0)"
+      ]
+    },
+    {
+      "description": "Used decimal source line values in HSD_ASSERT that correspond to the prior hexadecimal __assert line arguments.",
+      "evidence_refs": [
+        "raw_diff: 0x6CB became 1739",
+        "raw_diff: 0x7CA became 1994"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a raw __assert expansion has file grbigblue.c, line number, and expression \"0\", it can map cleanly to HSD_ASSERT(line, 0) if surrounding behavior is preserved.",
+      "scope": [
+        "src/melee/gr/grbigblue.c",
+        "assert/report cleanup"
+      ],
+      "evidence_refs": [
+        "raw_diff: __assert(\"grbigblue.c\", 0x6CB, \"0\") -> HSD_ASSERT(1739, 0)",
+        "raw_diff: __assert(\"grbigblue.c\", 0x7CA, \"0\") -> HSD_ASSERT(1994, 0)",
+        "decomp_standards: assert-report-macros"
+      ],
+      "confidence": 0.86
+    },
+    {
+      "lesson": "Do not remove nearby OSReport diagnostics when collapsing generated assert code into HSD_ASSERT; reports can be real side effects.",
+      "scope": [
+        "assert/report cleanup"
+      ],
+      "evidence_refs": [
+        "raw_diff: OSReport(\"*** Not Set Position!(FFlyer)\\n\") retained",
+        "raw_diff: OSReport(\"*** Not Set Position!(Tyukei)\\n\") retained",
+        "decomp_standards: assert-report-macros"
+      ],
+      "confidence": 0.84
+    }
+  ],
+  "naming_conventions": [],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Macro cleanup tactic: replace raw __assert(file, line, \"0\") with HSD_ASSERT(line, 0) when the macro form matches the source-level assertion and no report side effect is dropped.",
+      "evidence_refs": [
+        "raw_diff hunk around grBigBlue_801E93D8",
+        "raw_diff hunk around grBigBlue_801EA05C",
+        "decomp_standards: assert-report-macros"
+      ],
+      "confidence": 0.82
+    }
+  ],
+  "review_feedback": [],
+  "searchable_terms": [
+    "pr-2717",
+    "Address grBigBlue assertion",
+    "PsiLupan",
+    "src/melee/gr/grbigblue.c",
+    "grBigBlue_801E93D8",
+    "grBigBlue_801EA05C",
+    "FFlyer",
+    "Tyukei",
+    "__assert",
+    "HSD_ASSERT",
+    "OSReport",
+    "grbigblue.c",
+    "0x6CB",
+    "0x7CA",
+    "1739",
+    "1994",
+    "assert-report-macros"
+  ],
+  "follow_up_queries": [
+    "src/melee/gr/grbigblue.c __assert grbigblue.c",
+    "OSReport Not Set Position HSD_ASSERT",
+    "grBigBlue_801E93D8 HSD_ASSERT",
+    "grBigBlue_801EA05C HSD_ASSERT",
+    "raw __assert(\"grbigblue.c\" \"0\")"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR number/title/author/state/merge metadata",
+      "changed_files.jsonl: one changed file",
+      "raw_diff: full diff loaded",
+      "text_corpus.jsonl: empty PR body and bot issue comment"
+    ],
+    "notes": [
+      "PR body is empty and there are no review comments, so author intent and reviewer rationale are inferred only from the diff and title.",
+      "The loaded bot comment says 'No changes' for GALE01, but this intake does not treat it as full build or objdiff validation beyond the text shown.",
+      "Most added/deleted line volume is formatting churn; only two raw assert replacements are clearly substantive from the loaded diff.",
+      "No naming convention changes are supported by the PR evidence."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "title": "Raw assert expansion in grBigBlue converted to HSD_ASSERT while preserving OSReport",
+        "text": "PR 2717 provides a concrete example in src/melee/gr/grbigblue.c where raw __assert(\"grbigblue.c\", line, \"0\") after an OSReport was replaced by HSD_ASSERT(line, 0), with the OSReport retained.",
+        "scope": [
+          "assert/report cleanup",
+          "src/melee/gr/grbigblue.c"
+        ],
+        "evidence_refs": [
+          "raw_diff: grBigBlue_801E93D8",
+          "raw_diff: grBigBlue_801EA05C"
+        ],
+        "confidence": 0.86
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "grbigblue.c raw assert cleanup examples",
+        "text": "In src/melee/gr/grbigblue.c, PR 2717 replaced raw __assert calls for the FFlyer and Tyukei 'Not Set Position' failure paths with HSD_ASSERT(line, 0), while leaving the preceding OSReport diagnostics intact.",
+        "source_path": "src/melee/gr/grbigblue.c",
+        "scope": [
+          "grBigBlue_801E93D8",
+          "grBigBlue_801EA05C",
+          "assert cleanup"
+        ],
+        "evidence_refs": [
+          "raw_diff: __assert(\"grbigblue.c\", 0x6CB, \"0\") -> HSD_ASSERT(1739, 0)",
+          "raw_diff: __assert(\"grbigblue.c\", 0x7CA, \"0\") -> HSD_ASSERT(1994, 0)"
+        ],
+        "reason": "Useful as a path-scoped example for future grBigBlue assertion cleanup, but should be curated rather than promoted automatically."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer a broad formatting standard for numeric arrays from this PR; the diff shows formatting churn but no review discussion or rationale.",
+      "Do not infer that the remaining raw pointer arithmetic in grbigblue.c is accepted style; this PR did not address or discuss those accesses.",
+      "Do not infer any symbol naming convention changes; no renames are shown."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "runner": "orchestrator_kernel_pr_indexer",
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "orchestrator_state_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/projects/melee/state",
+    "orchestrator_run_id": "08bfe41e-1b7c-4685-8646-dff5e02a5dab",
+    "orchestrator_project_id": "melee",
+    "orchestrator_prepare_intake": true,
+    "orchestrator_kernel_database_url_configured": true,
+    "legacy_session_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/.pi-sessions/pr-review"
+  }
+}

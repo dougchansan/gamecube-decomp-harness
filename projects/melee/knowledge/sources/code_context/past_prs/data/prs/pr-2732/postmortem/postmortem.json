@@ -1,0 +1,433 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2732",
+  "pr": {
+    "number": 2732,
+    "title": "13/14: HSD Baselib",
+    "url": "https://github.com/doldecomp/melee/pull/2732",
+    "state": "MERGED",
+    "author": "fjooord",
+    "created_at": "2026-06-17T16:43:38Z",
+    "merged_at": "2026-06-20T02:58:05Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Baselib-focused decomp/matching PR touching 14 files under src/sysdolphin/baselib, with major churn in hsd_3B34.c, particle.c, hsd_3B5C.c, hsd_3AA7.c, texpdag.c, and sislib.c. The PR body reports clean formatting/check/build/diff validation and no regression losses; the bot report records 9 new matches and many unmatched-item improvements.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "cleanup",
+      "decomp-matching",
+      "headers",
+      "types-structs",
+      "implementation"
+    ],
+    "systems": [
+      "sysdolphin",
+      "baselib",
+      "HSD"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/sysdolphin/baselib/hsd_3B34.c",
+      "role": "large baselib helper implementation churn; listed among hsd_3A/3B higher-attention helper files",
+      "evidence_refs": [
+        "changed_files: hsd_3B34.c added 1104 deleted 1108 hunks 16",
+        "pr_body: higher-attention files include hsd_3A/3B helper files",
+        "bot_report: hsd_803B3CD8 and hsd_803B3408 improved"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/particle.c",
+      "role": "large particle implementation/data matching improvements; several new full matches and many item improvements",
+      "evidence_refs": [
+        "changed_files: particle.c added 878 deleted 807 hunks 91",
+        "pr_body: higher-attention files include particle.c",
+        "bot_report: particle new matches include hsd_803962A8, hsd_803941E8, hsd_8039CF4C, hsd_80397520, hsd_80396A20, hsd_80393DA0"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/hsd_3B5C.c",
+      "role": "large baselib helper implementation churn with reported new matches",
+      "evidence_refs": [
+        "changed_files: hsd_3B5C.c added 663 deleted 717 hunks 9",
+        "bot_report: hsd_803B5D70 and hsd_803B5C4C reached 100.00%"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/hsd_3AA7.c",
+      "role": "CARD/baselib state implementation improvements, helper extraction, local macros, typed field access, loop/control-flow and stack-shape matching edits",
+      "evidence_refs": [
+        "changed_files: hsd_3AA7.c added 620 deleted 400 hunks 66",
+        "diff_excerpt: CARD_QUEUE_CMD and CARD_WRITE_BLOCK macros added",
+        "diff_excerpt: x70[file_idx] changed to x70[file_idx].size",
+        "diff_excerpt: fn_803AC634_remaining, fn_803AC7DC_block_count, fn_803ACFC0_payload_dst/header/write_block, fn_803ADF90_read inline helpers added",
+        "diff_excerpt: PAD_STACK(4), PAD_STACK(68), PAD_STACK(64) introduced",
+        "bot_report: hsd_3AA7 functions fn_803B1338, fn_803ADF90, fn_803AD16C, fn_803B0E9C, fn_803B0120 improved"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/texpdag.c",
+      "role": "TExp DAG implementation matching improvements",
+      "evidence_refs": [
+        "changed_files: texpdag.c added 443 deleted 382 hunks 17",
+        "pr_body: higher-attention files include texpdag.c",
+        "bot_report: SimplifyByMerge improved 74.48% to 99.99%; SimplifyThis, HSD_TExpMakeDag, and order_dag also improved"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/sislib.c",
+      "role": "SIS baselib implementation/data matching improvements",
+      "evidence_refs": [
+        "changed_files: sislib.c added 182 deleted 99 hunks 31",
+        "pr_body: higher-attention files include sislib.c",
+        "bot_report: sislib .data and HSD_SisLib_803A84BC improved"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/synth.c",
+      "role": "synth implementation matching improvements",
+      "evidence_refs": [
+        "changed_files: synth.c added 87 deleted 78 hunks 9",
+        "pr_body: higher-attention files include synth.c",
+        "bot_report: HSD_SynthSFXSampleLoadCallback improved 49.05% to 92.83%"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/hsd_3AA7.h",
+      "role": "only local header touched according to PR body",
+      "evidence_refs": [
+        "changed_files: hsd_3AA7.h added 6 deleted 1 hunks 2",
+        "pr_body: Header/naming churn: local hsd_3AA7.h only"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/axdriver.c",
+      "role": "adds baselib audio/AX const data near AXDriver_8038E30C",
+      "evidence_refs": [
+        "changed_files: axdriver.c added 11 deleted 0 hunks 1",
+        "diff_excerpt: adds const RevHiDims AXDriver_803B95F8 and const s32 AXDriver_803B9618[]"
+      ]
+    },
+    {
+      "path": "src/sysdolphin/baselib/hsd_3A94.c",
+      "role": "small hsd_803A949C matching/control-flow and expression-shape edits",
+      "evidence_refs": [
+        "changed_files: hsd_3A94.c added 15 deleted 12 hunks 9",
+        "diff_excerpt: moves hdr_plus_icon assignment into guarded branches; changes -1 comparisons to 0xFFFF; changes loop shape and byte-combine expression order",
+        "bot_report: hsd_803A949C improved 93.40% to 95.18%"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Touched 14 files under src/sysdolphin/baselib: axdriver.c, hsd_3A94.c, hsd_3AA7.c, hsd_3AA7.h, hsd_3B2E.c, hsd_3B34.c, hsd_3B5C.c, leak.c, particle.c, psdisp.c, sislib.c, sobjlib.c, synth.c, and texpdag.c.",
+    "PR body describes the scope as implementation-focused C decomp/match improvements with one local baselib header update and no global build/config changes.",
+    "Diff excerpt shows hsd_3AA7.c adding local CARD_QUEUE_CMD and CARD_WRITE_BLOCK macros, inline helper boundaries for repeated CARD/block operations, explicit PAD_STACK uses, and a typed field access change from x70[file_idx] to x70[file_idx].size.",
+    "Diff excerpt shows hsd_3A94.c local matching edits including delayed hdr_plus_icon assignment, 0xFFFF sentinel comparisons, do-while loop reshaping, and expression order changes for big-endian byte combination.",
+    "Diff excerpt shows axdriver.c adding const data symbols AXDriver_803B95F8 and AXDriver_803B9618.",
+    "Bot report records 9 new full matches and 62 improvements in unmatched items, including particle, hsd_3B2E, hsd_3B5C, texpdag, synth, hsd_3AA7, hsd_3B34, sislib, and psdisp units."
+  ],
+  "smart_moves": [
+    {
+      "text": "Kept the review slice local to sysdolphin baselib and avoided broad build/config churn, reducing cross-system risk for a large matching PR.",
+      "evidence_refs": [
+        "pr_body: Scope: sysdolphin baselib implementation files",
+        "pr_body: No global build/config changes are included"
+      ]
+    },
+    {
+      "text": "Paired large source churn with explicit validation claims and bot-reported match improvements, including build, dol_diff, changes_all, and a structured regression sweep.",
+      "evidence_refs": [
+        "pr_body: ninja build/GALE01/main.dol OK; ninja dol_diff; ninja changes_all; regressions=0",
+        "bot_report: matched code +3508 bytes; 9 new matches"
+      ]
+    },
+    {
+      "text": "Introduced small local inline helpers in hsd_3AA7.c to isolate repeated block-count, payload/header pointer, CARDWrite, and CARDRead shapes instead of leaving all arithmetic and retry loops open-coded.",
+      "evidence_refs": [
+        "diff_excerpt: fn_803AC634_remaining",
+        "diff_excerpt: fn_803AC7DC_block_count",
+        "diff_excerpt: fn_803ACFC0_payload_dst/header/write_block",
+        "diff_excerpt: fn_803ADF90_read"
+      ]
+    },
+    {
+      "text": "Used a real typed field where available in hsd_3AA7.c, changing x70[file_idx] to x70[file_idx].size.",
+      "evidence_refs": [
+        "diff_excerpt: file_desc->x70[file_idx].size = data_size"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For baselib matching work, small helper extraction can be useful when repeated offset arithmetic or retry-loop bodies appear in multiple local contexts, but the evidence here only supports this as a PR-local tactic, not a global rule.",
+      "evidence_refs": [
+        "diff_excerpt: inline helpers added around block-count math, payload/header pointer math, CARDWrite, and CARDRead",
+        "decomp_standard: header-inlines says restore local inline helper boundaries when sibling functions share body shape and objdiff supports the helper call or inline"
+      ]
+    },
+    {
+      "lesson": "When a struct field type is known, prefer a typed field member over raw or aggregate slot access; hsd_3AA7.c demonstrates this with x70[file_idx].size.",
+      "evidence_refs": [
+        "diff_excerpt: x70[file_idx] changed to x70[file_idx].size",
+        "decomp_standard: typed-fields-over-pointer-math"
+      ]
+    },
+    {
+      "lesson": "Loop form and index base can be match-sensitive in CARD/baselib code: the diff changes for-loops to do-while or bounded for-pass forms, adjusts 0-based to 1-based iteration, and changes early-break behavior in hsd_3A94.c and hsd_3AA7.c.",
+      "evidence_refs": [
+        "diff_excerpt: hsd_3A94.c for loop changed to do-while around file_info.fileNo",
+        "diff_excerpt: hsd_3AA7.c while(1) changed to for (pass = 0; pass <= state->x460; pass++)",
+        "diff_excerpt: hsd_3AA7.c for (i = 0; i < total_blocks; i++) changed to for (i = 1; i <= total_blocks; i++)"
+      ]
+    },
+    {
+      "lesson": "Literal spelling can be part of the source-shape hypothesis: hsd_3A94.c changed sentinel comparisons from -1 to 0xFFFF where command fields are compared.",
+      "evidence_refs": [
+        "diff_excerpt: CMD_S32(0x20) != -1 changed to CMD_S32(0x20) != 0xFFFF"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "Local helper and macro names in hsd_3AA7.c remain address-based or operation-scoped rather than speculative semantic renames: fn_803AC634_remaining, fn_803AC7DC_block_count, fn_803ACFC0_payload_dst, fn_803ACFC0_header, fn_803ACFC0_write_block, fn_803ADF90_read, CARD_QUEUE_CMD, CARD_WRITE_BLOCK.",
+      "evidence_refs": [
+        "diff_excerpt: hsd_3AA7.c helper and macro additions",
+        "decomp_standard: conservative-naming"
+      ]
+    },
+    {
+      "text": "New axdriver data symbols keep address-style names AXDriver_803B95F8 and AXDriver_803B9618 rather than invented semantic names.",
+      "evidence_refs": [
+        "diff_excerpt: axdriver.c const RevHiDims AXDriver_803B95F8 and const s32 AXDriver_803B9618[]"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Use explicit PAD_STACK only with validation evidence; this PR introduces PAD_STACK(4), PAD_STACK(68), and PAD_STACK(64) in hsd_3AA7.c and the PR body reports clean build/diff/change sweeps.",
+      "evidence_refs": [
+        "diff_excerpt: PAD_STACK(4), PAD_STACK(68), PAD_STACK(64)",
+        "pr_body: ninja, ninja dol_diff, ninja changes_all, regressions=0",
+        "decomp_standard: matching-tactics-need-evidence"
+      ]
+    },
+    {
+      "tactic": "Adjust local declaration order and local lifetimes in complex CARD functions as a narrow matching tactic; hsd_3AA7.c reorders locals such as result/retries/buf/sector_size/data/offset and introduces saved/file_size/callback_seq ordering changes.",
+      "evidence_refs": [
+        "diff_excerpt: fn_803ACC0C local declaration/order changes",
+        "diff_excerpt: fn_803ADF90 local declaration/order changes",
+        "decomp_standard: matching-tactics-need-evidence"
+      ]
+    },
+    {
+      "tactic": "Try source-level control-flow reshaping before accepting generated-looking loops: examples include do-while retry/slot loops, bounded pass loops, early break insertion, and 1-based block iteration.",
+      "evidence_refs": [
+        "diff_excerpt: hsd_3A94.c do-while loop",
+        "diff_excerpt: hsd_3AA7.c for-pass loop and block iteration changes",
+        "decomp_standard: natural-loops",
+        "decomp_standard: canonical-control-flow-and-macros"
+      ]
+    },
+    {
+      "tactic": "Inline helper boundaries can be a matching tactic for repeated pointer arithmetic and CARD I/O retry loops, as shown by the hsd_3AA7.c helper additions.",
+      "evidence_refs": [
+        "diff_excerpt: fn_803ACFC0_write_block wraps CARDWrite retry loop",
+        "diff_excerpt: fn_803ADF90_read wraps CARDRead call",
+        "decomp_standard: header-inlines"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "text": "No human review comments were loaded for this PR slice.",
+      "evidence_refs": [
+        "metadata_json: review_comments=0, reviews=0"
+      ]
+    },
+    {
+      "text": "PR body self-identifies higher-attention files: particle.c, synth.c, texpdag.c, sislib.c, and hsd_3A/3B helper files.",
+      "evidence_refs": [
+        "human_pr_text: Reviewer Notes"
+      ]
+    },
+    {
+      "text": "Bot feedback was positive for matching: +3508 matched-code bytes, 9 new matches, and many unmatched-item improvements.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev[bot] report for GALE01"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2732",
+    "13/14 HSD Baselib",
+    "fjooord",
+    "src/sysdolphin/baselib",
+    "particle.c",
+    "texpdag.c",
+    "sislib.c",
+    "synth.c",
+    "hsd_3AA7.c",
+    "hsd_3AA7.h",
+    "hsd_3A94.c",
+    "hsd_3B34.c",
+    "hsd_3B5C.c",
+    "CARD_QUEUE_CMD",
+    "CARD_WRITE_BLOCK",
+    "PAD_STACK",
+    "fn_803AC634_remaining",
+    "fn_803AC7DC_block_count",
+    "fn_803ACFC0_payload_dst",
+    "fn_803ACFC0_header",
+    "fn_803ACFC0_write_block",
+    "fn_803ADF90_read",
+    "hsd_803A949C",
+    "AXDriver_803B95F8",
+    "AXDriver_803B9618",
+    "SimplifyByMerge",
+    "HSD_SynthSFXSampleLoadCallback"
+  ],
+  "follow_up_queries": [
+    "PR2732 hsd_3AA7 PAD_STACK CARDWrite CARDRead",
+    "PR2732 texpdag SimplifyByMerge order_dag",
+    "PR2732 particle new matches hsd_803962A8 hsd_803941E8",
+    "PR2732 hsd_3A94 CMD_S32 0xFFFF file_info.fileNo",
+    "PR2732 baselib inline helper fn_803ACFC0_write_block",
+    "PR2732 AXDriver_803B95F8 RevHiDims"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: complete PR metadata and changed-file list",
+      "human_pr_text: PR summary, scope, reviewer notes, and verification",
+      "raw_diff excerpt: representative diffs for axdriver.c, hsd_3A94.c, and hsd_3AA7.c",
+      "text_corpus: bot report with match improvements"
+    ],
+    "notes": [
+      "Evidence is strong for PR identity, changed files, validation claims, and representative tactics in axdriver.c, hsd_3A94.c, and hsd_3AA7.c.",
+      "Raw diff is truncated in the loaded slice, so detailed lessons for particle.c, hsd_3B34.c, hsd_3B5C.c, texpdag.c, sislib.c, synth.c, and other smaller files are limited to changed-file metadata, PR body mentions, and bot report summaries.",
+      "No human review comments are present; reviewer intent beyond the PR body's self-labeled higher-attention files is unsupported.",
+      "PR body reports validation results; this intake did not rerun builds, objdiff, or regression tools."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "pr_lesson_candidate",
+        "title": "hsd_3AA7.c used local inline helpers to isolate repeated CARD/block operations",
+        "text": "In PR #2732, hsd_3AA7.c introduced local inline helpers around block-count math, payload/header pointer computation, CARDWrite retry behavior, and CARDRead calls while improving several hsd_3AA7 functions per the bot report. Treat this as a PR-local matching pattern candidate, not a global rule.",
+        "scope": [
+          "src/sysdolphin/baselib/hsd_3AA7.c"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: fn_803AC634_remaining, fn_803AC7DC_block_count, fn_803ACFC0_payload_dst/header/write_block, fn_803ADF90_read",
+          "bot_report: hsd_3AA7 function improvements"
+        ]
+      },
+      {
+        "record_type": "pr_tactic_candidate",
+        "title": "PAD_STACK retained with PR-level validation in hsd_3AA7.c",
+        "text": "PR #2732 added PAD_STACK in multiple hsd_3AA7.c functions and the PR body reports clean build, dol_diff, changes_all, and regressions=0. This is useful as evidence that stack-shape tactics appeared in the PR, but curator should avoid promoting PAD_STACK as style beyond the existing evidence-required standard.",
+        "scope": [
+          "src/sysdolphin/baselib/hsd_3AA7.c"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: PAD_STACK(4), PAD_STACK(68), PAD_STACK(64)",
+          "pr_body: verification list and regressions=0",
+          "decomp_standard: matching-tactics-need-evidence"
+        ]
+      },
+      {
+        "record_type": "pr_naming_candidate",
+        "title": "Address-style names preserved for uncertain baselib symbols",
+        "text": "PR #2732 used operation-scoped local helper names where behavior was localized and retained address-style names for new axdriver const data symbols, consistent with conservative naming when semantics are not fully proven.",
+        "scope": [
+          "src/sysdolphin/baselib/hsd_3AA7.c",
+          "src/sysdolphin/baselib/axdriver.c"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: fn_803ACFC0_* helpers and AXDriver_803B95F8/AXDriver_803B9618",
+          "decomp_standard: conservative-naming"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "PR #2732 hsd_3AA7.c matching context",
+        "text": "PR #2732 made substantial CARD/baselib matching edits in hsd_3AA7.c, including local CARD_QUEUE_CMD/CARD_WRITE_BLOCK macros, inline helpers for block-count and CARD I/O shapes, typed access x70[file_idx].size, control-flow/index reshaping, and PAD_STACK use with PR-reported clean validation.",
+        "source_path": "src/sysdolphin/baselib/hsd_3AA7.c",
+        "scope": [
+          "sysdolphin",
+          "baselib",
+          "CARD state",
+          "matching tactics"
+        ],
+        "evidence_refs": [
+          "changed_files: hsd_3AA7.c added 620 deleted 400 hunks 66",
+          "diff_excerpt: hsd_3AA7.c changes",
+          "pr_body: verification",
+          "bot_report: hsd_3AA7 improvements"
+        ],
+        "reason": "Could help future curators reviewing hsd_3AA7.c distinguish PR-local helper and stack-shape tactics from global style."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "PR #2732 texpdag.c matching improvements",
+        "text": "PR #2732 touched texpdag.c with 443 additions and 382 deletions; the bot report highlights large improvements for SimplifyByMerge, SimplifyThis, HSD_TExpMakeDag, and order_dag.",
+        "source_path": "src/sysdolphin/baselib/texpdag.c",
+        "scope": [
+          "sysdolphin",
+          "baselib",
+          "TExp DAG"
+        ],
+        "evidence_refs": [
+          "changed_files: texpdag.c added 443 deleted 382 hunks 17",
+          "bot_report: texpdag improvements"
+        ],
+        "reason": "Loaded diff is truncated for texpdag.c, but changed-file metadata and bot report support a path-scoped historical note."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "PR #2732 particle.c matching improvements",
+        "text": "PR #2732 made large particle.c changes and the bot report lists multiple particle functions reaching 100% plus .data/.sdata and several unmatched-item improvements.",
+        "source_path": "src/sysdolphin/baselib/particle.c",
+        "scope": [
+          "sysdolphin",
+          "baselib",
+          "particle"
+        ],
+        "evidence_refs": [
+          "changed_files: particle.c added 878 deleted 807 hunks 91",
+          "bot_report: particle new matches and improvements"
+        ],
+        "reason": "Useful path-scoped historical context, though detailed code-shape lessons are limited by truncated diff evidence."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote PAD_STACK use from this PR into a global style rule; the loaded standards require explicit evidence and narrow use.",
+      "Do not infer detailed source-shape lessons for particle.c, hsd_3B34.c, hsd_3B5C.c, texpdag.c, sislib.c, or synth.c beyond the bot/metadata evidence because their detailed diffs are not loaded here.",
+      "Do not infer human reviewer approval rationale; the loaded slice has no review comments or reviews.",
+      "Do not treat the new axdriver const symbols as proven semantic data names; the diff only shows address-style symbols and values."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "runner": "orchestrator_kernel_pr_indexer",
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "orchestrator_state_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/projects/melee/state",
+    "orchestrator_run_id": "08bfe41e-1b7c-4685-8646-dff5e02a5dab",
+    "orchestrator_project_id": "melee",
+    "orchestrator_prepare_intake": true,
+    "orchestrator_kernel_database_url_configured": true,
+    "legacy_session_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/.pi-sessions/pr-review"
+  }
+}

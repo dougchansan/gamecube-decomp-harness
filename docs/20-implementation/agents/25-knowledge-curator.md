@@ -1,7 +1,7 @@
 ---
 covers: Knowledge-curator agent and graph enrichment reducer
-concepts: [knowledge-curator, graph-enrichment, worker-reports, pr-postmortems]
-code-ref: decomp-orchestrator/packages/agents/src/agents/knowledge/curator, decomp-orchestrator/packages/knowledge/src/curator.ts
+concepts: [knowledge-curator, graph-enrichment, worker-states, checkpoints, pr-postmortems]
+code-ref: decomp-orchestrator/apps/server/src/core/agent-catalog/agents/knowledge/curator, decomp-orchestrator/apps/server/src/core/knowledge/curator.ts
 ---
 
 # Knowledge Curator Agent
@@ -14,20 +14,21 @@ writer, and the agent can optionally add proposal-only source updates.
 
 | File | Purpose |
 | --- | --- |
-| `packages/agents/src/agents/knowledge/curator/index.ts` | Registers the agent slice. |
-| `packages/agents/src/agents/knowledge/curator/prompt.ts` | Builds the curator prompt bundle. |
-| `packages/agents/src/agents/knowledge/curator/schema.json` | Defines the expected JSON shape. |
-| `packages/agents/src/agents/knowledge/curator/templates/system.md` | Defines curation rules and output contract. |
-| `packages/knowledge/src/curator.ts` | Deterministically reduces worker reports and PR postmortems into enrichment records. |
-| `packages/knowledge/src/graph/knowledge-curator.ts` | Emits curator records into internal graph entities, facts, and edges. |
+| `apps/server/src/core/agent-catalog/agents/knowledge/curator/index.ts` | Registers the agent slice. |
+| `apps/server/src/core/agent-catalog/agents/knowledge/curator/agent.ts` | Kernel metadata plus curator prompt, context, and tool wiring. |
+| `apps/server/src/core/agent-catalog/agents/knowledge/curator/prompt.ts` | Defines the stable curator system prompt and bundle entrypoint. |
+| `apps/server/src/core/agent-catalog/agents/knowledge/curator/context.ts` | Builds the injected curator batch packet, tools, and output schema. |
+| `apps/server/src/core/agent-catalog/agents/knowledge/curator/schema.json` | Defines the expected JSON shape. |
+| `apps/server/src/core/knowledge/curator.ts` | Deterministically reduces worker states, selected checkpoints, and PR postmortems into enrichment records. |
+| `apps/server/src/core/knowledge/graph/knowledge-curator.ts` | Emits curator records into internal graph entities, facts, and edges. |
 
 ## Flow
 
 `kg-curate` rewrites
-`knowledge/resource_graph/enrichments/knowledge_curator_updates.jsonl` from
-worker reports and PR postmortems. `kg-maintain` runs pending PR postmortem
-indexing first, then curation, optional `--run-curator-agent`, and graph
-rebuild.
+`projects/melee/knowledge/resource_graph/enrichments/knowledge_curator_updates.jsonl`
+from persisted worker states, selected checkpoints, and PR postmortems.
+`kg-maintain` runs pending PR postmortem indexing first, then curation,
+optional `--run-curator-agent`, and graph rebuild.
 
 When model-reviewed curation is enabled, the curator samples deterministic
 records with `--curator-agent-record-limit`, splits them with

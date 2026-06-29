@@ -4,10 +4,9 @@
     "outDir": "dist"
   },
   "include": [
-    "apps/cli/src/**/*.ts",
-    "apps/dashboard-server/src/**/*.ts",
-    "packages/**/*.ts",
-    "tests/**/*.ts"
+    "apps/server/src/**/*.ts",
+    "apps/frontend/src/**/*.ts",
+    "apps/server/tests/**/*.ts"
   ],
-  "exclude": ["apps/dashboard/dist"]
+  "exclude": ["apps/frontend/dist"]
 }

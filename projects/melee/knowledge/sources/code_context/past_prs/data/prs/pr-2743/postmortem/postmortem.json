@@ -1,0 +1,425 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2743",
+  "pr": {
+    "number": 2743,
+    "title": "Improve `gm_1BA8` data matches",
+    "url": "https://github.com/doldecomp/melee/pull/2743",
+    "state": "MERGED",
+    "author": "ribbanya",
+    "created_at": "2026-06-19T04:38:01Z",
+    "merged_at": "2026-06-19T05:02:18Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2743 improved gm_1BA8 data matching by moving and declaring more gm_1BA8-owned static data, correcting local data sizes and pointer shapes, adding GameScene and callback/data tables, and updating related headers/config metadata. The bot report shows four newly matched gm_1BA8 data sections and improvements to .data and gm_801BB758.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "data-matching",
+      "headers",
+      "config-symbols",
+      "typed-data-layout"
+    ],
+    "systems": [
+      "game-mode",
+      "gm_1BA8",
+      "vi",
+      "config/GALE01"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gm/gm_1BA8.c",
+      "role": "Main data-match source changes: corrected gm_804D6900 and gm_804979D8 access shapes, converted many gm_803DF94C_t externs to static initialized objects, added multiple GameScene tables, included vi1201v1.h, and removed duplicate local static declarations now in the static header.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gm/gm_1BA8.c added 477 deleted 33 hunks 21",
+        "diff_excerpt: gm_1BA8.c pointer-shape edits using gm_804D6900[0], (*gm_804D6900), gm_804979D8[0]",
+        "diff_excerpt: gm_1BA8.c static gm_804D4330..gm_804D44C0 initializers and GameScene table additions"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1BA8.static.h",
+      "role": "Local static data declarations and layout support for gm_1BA8 data sections, including gm_804D6900 array, small load-data placeholders, CSSData/MatchExitInfo storage, and gm_8049E548.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gm/gm_1BA8.static.h added 26 deleted 5 hunks 2",
+        "diff_excerpt: gm_1BA8.static.h changed extern CSSData/StartMeleeData/MatchExitInfo declarations to static storage declarations",
+        "diff_excerpt: gm_1BA8.static.h declares gm_804D6900[2], gm_804D6908..gm_804D693C, gm_80497758..gm_8049E548"
+      ]
+    },
+    {
+      "path": "src/melee/gm/types.h",
+      "role": "Game-mode type surface changed to support recovered gm_1BA8 data layouts.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gm/types.h added 14 deleted 0 hunks 2"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gm_1B03.h",
+      "role": "Removed gm_8049E548_t struct definition from this public header, consistent with relocating type/data ownership away from gm_1B03.h.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/gm/gm_1B03.h added 0 deleted 13 hunks 1",
+        "diff_excerpt: gm_1B03.h removes struct gm_8049E548_t and STATIC_ASSERT"
+      ]
+    },
+    {
+      "path": "config/GALE01/splits.txt",
+      "role": "Updated gm_1BA8 section split metadata; .sdata2 end shrank from 0x804DAC90 to 0x804DAC88.",
+      "evidence_refs": [
+        "changed_files.jsonl: config/GALE01/splits.txt added 1 deleted 1 hunks 1",
+        "diff_excerpt: splits.txt gm_1BA8 .sdata2 end change"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Updated gm_803DF918 symbol size from 0x34 to 0x33.",
+      "evidence_refs": [
+        "changed_files.jsonl: config/GALE01/symbols.txt added 1 deleted 1 hunks 1",
+        "diff_excerpt: symbols.txt gm_803DF918 size 0x34 -> 0x33"
+      ]
+    },
+    {
+      "path": "src/melee/vi/vi0502.h",
+      "role": "Related vi header adjustment; exact declarations not visible in loaded diff excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/vi/vi0502.h added 2 deleted 0 hunks 2"
+      ]
+    },
+    {
+      "path": "src/melee/vi/vi1201v1.c",
+      "role": "Related vi implementation adjustment; exact body change not visible in loaded diff excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/vi/vi1201v1.c added 1 deleted 1 hunks 1"
+      ]
+    },
+    {
+      "path": "src/melee/vi/vi1201v1.h",
+      "role": "Related vi header adjustment and new include target for gm_1BA8.c; exact declarations mostly outside loaded excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/vi/vi1201v1.h added 2 deleted 3 hunks 2",
+        "diff_excerpt: gm_1BA8.c adds #include \"vi/vi1201v1.h\""
+      ]
+    },
+    {
+      "path": "src/melee/vi/vi1201v2.c",
+      "role": "Related vi implementation adjustment; exact body change not visible in loaded diff excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/vi/vi1201v2.c added 1 deleted 2 hunks 2"
+      ]
+    },
+    {
+      "path": "src/melee/vi/vi1201v2.h",
+      "role": "Related vi header adjustment; exact declarations not visible in loaded diff excerpt.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/vi/vi1201v2.h added 5 deleted 4 hunks 2"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Updated GALE01 split metadata for gm_1BA8 .sdata2, reducing the end address from 0x804DAC90 to 0x804DAC88.",
+    "Updated symbol metadata for gm_803DF918, reducing object size from 0x34 to 0x33.",
+    "Removed struct gm_8049E548_t from gm_1B03.h and added/reorganized gm_1BA8-local static data declarations in gm_1BA8.static.h.",
+    "Changed gm_804D6900 from a single static pointer-like declaration to static struct gm_804D6900_t** gm_804D6900[2], then updated users to access gm_804D6900[0] or (*gm_804D6900) as needed.",
+    "Changed gm_804979D8 usage from scalar MatchExitInfo access to gm_804979D8[0] access after declaring it as MatchExitInfo gm_804979D8[2].",
+    "Replaced a large extern declaration list for gm_804D4330..gm_804D44C0 with static gm_803DF94C_t initializers containing recovered function-pointer table contents.",
+    "Added multiple GameScene arrays including gm_803DFA18_Scenes, gm_803DFA48_Scenes, gm_803DFA78_Scenes, gm_803DFAA8_Scenes, gm_803DFAD8_Scenes, gm_803DFB08, gm_803DFB80_Scenes, gm_803DFBC8_Scenes, gm_803DFC70_Scenes, and gm_803DFDA8_Scenes.",
+    "Bot report recorded matched data improvement for GALE01: overall matched data +2.37%, with gm_1BA8 .bss, .sdata, .sbss, and .sdata2 reaching 100%, plus .data and gm_801BB758 improvements."
+  ],
+  "smart_moves": [
+    {
+      "text": "Kept many recovered data objects as address-style gm_804Dxxxx names instead of inventing semantic names, which is conservative for data-layout work with limited semantic evidence.",
+      "evidence_refs": [
+        "diff_excerpt: static gm_804D4330..gm_804D44C0 table objects",
+        "decomp_standards: conservative-naming"
+      ]
+    },
+    {
+      "text": "Moved gm_1BA8-owned static storage declarations into gm_1BA8.static.h, making the data layout explicit instead of relying on extern placeholders for data that the PR is matching.",
+      "evidence_refs": [
+        "diff_excerpt: gm_1BA8.static.h static declarations for gm_80497758, gm_804979D8[2], gm_804D6900[2], gm_8049C178, gm_8049E548",
+        "issue_comment: bot report shows gm_1BA8 .bss/.sdata/.sbss/.sdata2 data matches"
+      ]
+    },
+    {
+      "text": "Adjusted C access expressions to match the recovered aggregate dimensions, such as gm_804D6900[0] and (*gm_804D6900), rather than treating loaded table data as a flat pointer everywhere.",
+      "evidence_refs": [
+        "diff_excerpt: gm_801BAD70 levels = gm_804D6900[0]",
+        "diff_excerpt: gm_801BAC9C uses (*gm_804D6900)[ev->unk_535]->x4",
+        "diff_excerpt: gm_1BA8.static.h declares gm_804D6900[2]"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For data-match PRs, correcting object dimensions and section-owned static declarations can require broad callsite/access-shape updates, not only adding data initializers.",
+      "scope": [
+        "gm_1BA8 data layout",
+        "static data matching"
+      ],
+      "evidence_refs": [
+        "diff_excerpt: gm_1BA8.static.h declares gm_804D6900[2] and gm_804979D8[2]",
+        "diff_excerpt: multiple gm_1BA8.c edits from gm_804D6900 to gm_804D6900[0] or (*gm_804D6900)",
+        "diff_excerpt: gm_804979D8.match_end changed to gm_804979D8[0].match_end"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "lesson": "When section matching shows local ownership, replacing extern declarations with static initialized data in the owning TU/static header can expose and match .sdata/.sbss/.bss layout.",
+      "scope": [
+        "gm_1BA8.static.h",
+        "gm_1BA8.c"
+      ],
+      "evidence_refs": [
+        "diff_excerpt: extern gm_804D4330..gm_804D44C0 list replaced by static initialized gm_803DF94C_t objects",
+        "diff_excerpt: gm_1BA8.static.h static storage declarations",
+        "issue_comment: bot report shows .sdata and .sbss for main/melee/gm/gm_1BA8 reached 100%"
+      ],
+      "confidence": 0.76
+    },
+    {
+      "lesson": "Do not infer broad semantic names from newly recovered data alone; this PR mostly retains address-style names while establishing sizes, storage classes, and initializer contents.",
+      "scope": [
+        "data symbols",
+        "gm_1BA8"
+      ],
+      "evidence_refs": [
+        "diff_excerpt: gm_804D4330..gm_804D44C0 retained as address-style names",
+        "diff_excerpt: gm_803DF918 retained as address-style local symbol with corrected size",
+        "decomp_standards: conservative-naming"
+      ],
+      "confidence": 0.7
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "gm_803DFA18_Scenes / gm_803DFA48_Scenes / similar",
+      "convention": "Scene-table arrays use the address-style gm_ address plus `_Scenes` suffix when symbol metadata already uses that form.",
+      "evidence_refs": [
+        "diff_excerpt: symbols.txt contains gm_803DFA18_Scenes and gm_803DFA48_Scenes",
+        "diff_excerpt: gm_1BA8.c adds GameScene gm_803DFA18_Scenes[] and gm_803DFA48_Scenes[]"
+      ]
+    },
+    {
+      "name": "gm_804D4330..gm_804D44C0",
+      "convention": "Recovered local data objects may keep address-style names when semantics are not proven by the PR evidence.",
+      "evidence_refs": [
+        "diff_excerpt: static gm_803DF94C_t gm_804D4330..gm_804D44C0 initializers",
+        "decomp_standards: conservative-naming"
+      ]
+    },
+    {
+      "name": "UnkSmallLoadData",
+      "convention": "The PR used an explicitly unknown placeholder type for small 8-byte loaded data blocks rather than inventing specific semantic fields.",
+      "evidence_refs": [
+        "diff_excerpt: gm_1BA8.static.h adds struct UnkSmallLoadData { u8 pad[8]; }",
+        "diff_excerpt: gm_804D6908/gm_804D6910/gm_804D6918/gm_804D6920/gm_804D6930 declared as UnkSmallLoadData"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Use section/symbol metadata edits alongside source changes when the recovered data size changes.",
+      "evidence_refs": [
+        "diff_excerpt: splits.txt .sdata2 end 0x804DAC90 -> 0x804DAC88",
+        "diff_excerpt: symbols.txt gm_803DF918 size 0x34 -> 0x33"
+      ],
+      "notes": "The PR evidence shows metadata changes and bot data-match improvements, but not the author's detailed matching process."
+    },
+    {
+      "tactic": "Represent recovered data section contents directly as static C objects and arrays in the owning source/static header.",
+      "evidence_refs": [
+        "diff_excerpt: gm_804D4330..gm_804D44C0 static gm_803DF94C_t initializers",
+        "diff_excerpt: GameScene table additions in gm_1BA8.c",
+        "diff_excerpt: gm_1BA8.static.h static bss/sbss declarations"
+      ],
+      "notes": "Supported by the diff and bot report; not a universal rule without section ownership evidence."
+    },
+    {
+      "tactic": "Use a targeted function-pointer cast only where a callback signature is still unresolved, with an explicit TODO.",
+      "evidence_refs": [
+        "diff_excerpt: gm_804D43E8 initializer contains /// @todo Fix this callback signature and (void (*)(int))(void*) gm_801BEA88"
+      ],
+      "notes": "This is evidence of a retained workaround, not an accepted style recommendation."
+    },
+    {
+      "tactic": "PAD_STACK remained in several touched gm_1BA8 functions while data access shapes changed.",
+      "evidence_refs": [
+        "diff_excerpt: gm_801BAC9C retains PAD_STACK(8)",
+        "diff_excerpt: gm_801BC670 retains PAD_STACK(0x10)",
+        "diff_excerpt: gm_801BC9E8 retains PAD_STACK(0x28)"
+      ],
+      "notes": "Loaded evidence does not show new PAD_STACK additions or verifier details, so this should not be promoted as a lesson."
+    }
+  ],
+  "review_feedback": [
+    {
+      "type": "automated_report",
+      "author": "decomp-dev[bot]",
+      "created_at": "2026-06-19T04:45:20Z",
+      "text": "GALE01 matched data improved by +2.37% (+28648 bytes). Four new matches were reported for main/melee/gm/gm_1BA8: .bss +28128 to 100%, .sdata +408 to 100%, .sbss +60 to 100%, and .sdata2 to 100%. Two unmatched items improved: .data +960 to 64.90% and gm_801BB758 +16 to 99.64%.",
+      "evidence_refs": [
+        "text_corpus.jsonl: issue_comment by decomp-dev[bot]"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2743",
+    "gm_1BA8",
+    "gm_804D6900",
+    "gm_804979D8",
+    "gm_803DF918",
+    "gm_803DF94C",
+    "gm_804D4330",
+    "gm_804D44C0",
+    "gm_803DFA18_Scenes",
+    "gm_803DFA48_Scenes",
+    "GameScene",
+    "GmEvent.dat",
+    "sqEventInitDataLevelTbl",
+    "UnkSmallLoadData",
+    "gm_8049E548_t",
+    "gm_801BB758",
+    "data match",
+    ".bss",
+    ".sdata",
+    ".sbss",
+    ".sdata2",
+    "callback signature TODO",
+    "PAD_STACK"
+  ],
+  "follow_up_queries": [
+    "gm_1BA8 gm_804D6900 array pointer dimension",
+    "gm_1BA8 static data ownership gm_804D4330 gm_804D44C0",
+    "gm_803DF918 size 0x33",
+    "gm_804D43E8 callback signature gm_801BEA88",
+    "gm_804979D8 MatchExitInfo array",
+    "UnkSmallLoadData gm_804D6908 gm_804D6910 gm_804D6918",
+    "GmEvent.dat sqEventInitDataLevelTbl gm_804D6900"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR metadata, changed file list, state MERGED, timestamps",
+      "raw_diff/diff_excerpt: source and config changes, truncated at end",
+      "text_corpus.jsonl: bot report with match deltas",
+      "changed_files.jsonl: all 11 changed files"
+    ],
+    "notes": [
+      "PR body is empty and there are no human review comments in the loaded evidence.",
+      "The loaded raw diff is truncated, so some vi header/source and gm/types.h details are known only from changed-file metadata, not from visible hunks.",
+      "The automated bot report provides strong evidence of data-match improvements, but not of author intent or detailed objdiff methodology.",
+      "No claim is made that TODO callback casts, PAD_STACK uses, or unknown placeholder structs are accepted global style."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "pr_lesson_candidate",
+        "title": "gm_1BA8 data-match PR corrected data object dimensions and access shapes together",
+        "text": "PR 2743 shows a gm_1BA8 data-match improvement where static data declarations such as gm_804D6900[2] and gm_804979D8[2] were paired with source access changes like gm_804D6900[0], (*gm_804D6900), and gm_804979D8[0]. The bot report then showed gm_1BA8 .bss/.sdata/.sbss/.sdata2 at 100%.",
+        "scope": [
+          "src/melee/gm/gm_1BA8.c",
+          "src/melee/gm/gm_1BA8.static.h"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: gm_1BA8.static.h declarations",
+          "diff_excerpt: gm_1BA8.c access-shape edits",
+          "text_corpus.jsonl: decomp-dev bot report"
+        ],
+        "confidence": 0.82
+      },
+      {
+        "record_type": "pr_lesson_candidate",
+        "title": "Address-style data names were retained while recovering gm_1BA8 table contents",
+        "text": "PR 2743 recovered many gm_1BA8 table/data initializers while retaining address-style symbols such as gm_804D4330..gm_804D44C0 and gm_803DF918, matching conservative naming expectations when semantics are not established by PR evidence.",
+        "scope": [
+          "src/melee/gm/gm_1BA8.c",
+          "config/GALE01/symbols.txt"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: static gm_804D4330..gm_804D44C0 initializers",
+          "diff_excerpt: symbols.txt gm_803DF918 size update",
+          "decomp_standards: conservative-naming"
+        ],
+        "confidence": 0.72
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "gm_1BA8 owns several recovered static data objects and scene tables",
+        "text": "PR 2743 moved/declared gm_1BA8-local static storage in gm_1BA8.static.h and added static initialized data/scene tables in gm_1BA8.c, including gm_804D6900[2], gm_804979D8[2], gm_804D4330..gm_804D44C0, and GameScene arrays gm_803DFA18_Scenes through gm_803DFDA8_Scenes.",
+        "source_path": "src/melee/gm/gm_1BA8.c",
+        "scope": [
+          "gm_1BA8 data layout",
+          "GameScene tables",
+          "static storage"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: gm_1BA8.c table additions",
+          "diff_excerpt: gm_1BA8.static.h static declarations",
+          "text_corpus.jsonl: bot report data-section matches"
+        ],
+        "reason": "Potential path-scoped fact for future gm_1BA8 data work; curator should verify against current source before promotion."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "gm_804D6900 represented as a two-element static array of event-level table pointers in this PR",
+        "text": "The PR changed gm_804D6900 to `static struct gm_804D6900_t** gm_804D6900[2]` and updated many uses from flat pointer access to `gm_804D6900[0]`, `gm_804D6900[0][0]`, or `(*gm_804D6900)[idx]` forms.",
+        "source_path": "src/melee/gm/gm_1BA8.static.h",
+        "scope": [
+          "gm_804D6900",
+          "event level data",
+          "GmEvent.dat"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: gm_1BA8.static.h gm_804D6900[2]",
+          "diff_excerpt: gm_1BA8.c access edits",
+          "diff_excerpt: lbArchive_LoadSymbols(\"GmEvent.dat\", &gm_804D6900, \"sqEventInitDataLevelTbl\", 0)"
+        ],
+        "reason": "Useful for future pointer-shape fixes, but should be validated against current source and any later PRs before becoming a path fact."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Keep callback-signature casts as narrow TODO-backed exceptions",
+        "text": "PR 2743 contains a narrow function-pointer cast in a data initializer with `/// @todo Fix this callback signature`. This may be a useful example for the existing evidence-required matching-tactics standard: retain such casts only as localized unresolved-type bridges, with follow-up to recover the real signature.",
+        "source_path": null,
+        "scope": [
+          "function pointer tables",
+          "callback signatures",
+          "temporary casts"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: gm_804D43E8 initializer has TODO and `(void (*)(int))(void*) gm_801BEA88`",
+          "decomp_standards: matching-tactics-need-evidence",
+          "decomp_standards: typed-fields-over-pointer-math"
+        ],
+        "reason": "Candidate example/update only; the PR does not include review discussion proving this as accepted global policy."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote PAD_STACK retention from this PR as a tactic; loaded evidence does not show new PAD_STACK rationale or verifier details.",
+      "Do not infer semantic meanings for address-style gm_804Dxxxx symbols beyond the data layout and initializer contents visible in the diff.",
+      "Do not treat the function-pointer cast on gm_804D43E8 as preferred style; the PR itself marks it as a TODO.",
+      "Do not add path facts for vi0502/vi1201v1/vi1201v2 details from this intake because the loaded diff excerpt does not show enough of those hunks."
+    ]
+  },
+  "confidence": 0.78,
+  "agent_runtime": {
+    "runner": "orchestrator_kernel_pr_indexer",
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "orchestrator_state_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/projects/melee/state",
+    "orchestrator_run_id": "08bfe41e-1b7c-4685-8646-dff5e02a5dab",
+    "orchestrator_project_id": "melee",
+    "orchestrator_prepare_intake": true,
+    "orchestrator_kernel_database_url_configured": true,
+    "legacy_session_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/.pi-sessions/pr-review"
+  }
+}

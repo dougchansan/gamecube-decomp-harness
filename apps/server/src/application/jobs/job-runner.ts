@@ -1,0 +1,92 @@
+import { basename, dirname } from "node:path";
+
+import { closeDefaultMeleeKernelRuntime, resetDefaultMeleeKernelRuntimeForTests } from "@server/infrastructure/kernel/bridge/runtime";
+import { loadLocalEnv } from "@server/infrastructure/env";
+import { parse } from "@server/core/project-registry/runtime-options.js";
+import { babysit } from "@server/core/session-runtime/phases/running/jobs/babysit.js";
+import { checkpointRun } from "@server/core/session-runtime/phases/pr/jobs/checkpoint-run.js";
+import { prDraftQa } from "@server/core/session-runtime/phases/pr/jobs/pr-draft-qa.js";
+import { prPreshipReview } from "@server/core/session-runtime/phases/pr/jobs/pr-preship-review.js";
+import { prSplitPlan } from "@server/core/session-runtime/phases/pr/jobs/pr-split-plan.js";
+import { qaRepair } from "@server/core/session-runtime/phases/pr/jobs/qa-repair.js";
+import { reconcile } from "@server/core/session-runtime/phases/pr/jobs/reconcile.js";
+import { savePoint } from "@server/core/session-runtime/phases/pr/jobs/save-point.js";
+import {
+  kgCurate,
+  kgFileCard,
+  kgImportAgentState,
+  kgKnowledgeIntakeAgent,
+  kgMaintain,
+  kgPrIndexerAgent,
+  kgRankFeatures,
+  kgRebuildGraph,
+  kgSearch,
+  kgSmoke,
+  kgSources,
+  kgStatus,
+} from "@server/core/knowledge/jobs/kg.js";
+import { epochRun } from "@server/core/session-runtime/phases/running/epochs/epoch-run.js";
+import { integrationResolve } from "@server/core/session-runtime/phases/running/integration/index.js";
+import { recoverClaims } from "@server/core/session-runtime/phases/running/jobs/recover-claims.js";
+import { tick } from "@server/core/session-runtime/phases/running/scheduler/tick.js";
+import { runLoop } from "@server/core/session-runtime/phases/running/scheduler/run-loop.js";
+import { initRun } from "@server/core/session-runtime/phases/running/service/init-run.js";
+import { status } from "@server/core/session-runtime/phases/running/service/status.js";
+import { worker } from "@server/core/session-runtime/phases/running/workers/worker-cycle.js";
+import { regressionCheck } from "@server/core/validation/jobs/regression-check.js";
+import { reportRun } from "@server/core/validation/jobs/report-run.js";
+
+export async function main(argv = process.argv.slice(2)): Promise<void> {
+  loadLocalEnv();
+  const { command, globals, args } = parse(argv);
+  if (globals.project) {
+    loadLocalEnv({
+      root: dirname(globals.project.localEnvPath),
+      filenames: [basename(globals.project.localEnvPath)],
+    });
+  }
+
+  try {
+    if (command === "init-run") await initRun(globals, args);
+    else if (command === "tick") await tick(globals, args);
+    else if (command === "worker") await worker(globals, args);
+    else if (command === "run-loop") await runLoop(globals, args);
+    else if (command === "babysit") await babysit(globals, args);
+    else if (command === "checkpoint-run") await checkpointRun(globals, args);
+    else if (command === "recover-claims") await recoverClaims(globals, args);
+    else if (command === "epoch-run") await epochRun(globals, args);
+    else if (command === "integration-resolve") await integrationResolve(globals, args);
+    else if (command === "report-run") await reportRun(globals, args);
+    else if (command === "save-point") await savePoint(globals, args);
+    else if (command === "regression-check") await regressionCheck(globals, args);
+    else if (command === "reconcile") await reconcile(globals, args);
+    else if (command === "qa-repair") await qaRepair(globals, args);
+    else if (command === "pr-split-plan") await prSplitPlan(globals, args);
+    else if (command === "pr-draft-qa") await prDraftQa(globals, args);
+    else if (command === "pr-preship-review") await prPreshipReview(globals, args);
+    else if (command === "kg-sources") await kgSources();
+    else if (command === "kg-status") await kgStatus(globals, args);
+    else if (command === "kg-import-agent-state") await kgImportAgentState(args);
+    else if (command === "kg-curate") await kgCurate(globals, args);
+    else if (command === "kg-maintain") await kgMaintain(globals, args);
+    else if (command === "kg-pr-indexer-agent") await kgPrIndexerAgent(globals, args);
+    else if (command === "kg-knowledge-intake-agent") await kgKnowledgeIntakeAgent(globals, args);
+    else if (command === "kg-rebuild-graph") await kgRebuildGraph(globals, args);
+    else if (command === "kg-search") await kgSearch(globals, args);
+    else if (command === "kg-smoke") await kgSmoke(globals, args);
+    else if (command === "kg-file-card") await kgFileCard(globals, args);
+    else if (command === "kg-rank-features") await kgRankFeatures(globals, args);
+    else if (command === "status") await status(globals);
+    else throw new Error(`Unknown server job: ${command}`);
+  } finally {
+    await closeDefaultMeleeKernelRuntime();
+    resetDefaultMeleeKernelRuntimeForTests();
+  }
+}
+
+if (import.meta.main) {
+  main().catch((error) => {
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exit(1);
+  });
+}

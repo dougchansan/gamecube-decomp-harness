@@ -1,0 +1,17 @@
+{
+  "number": 2713,
+  "title": "link ftmaterial",
+  "state": "MERGED",
+  "createdAt": "2026-06-16T06:33:18Z",
+  "updatedAt": "2026-06-16T20:23:51Z",
+  "mergedAt": "2026-06-16T20:23:51Z",
+  "closedAt": "2026-06-16T20:23:51Z",
+  "author": "jurrejelle",
+  "url": "https://github.com/doldecomp/melee/pull/2713",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 2,
+    "reviews": 2,
+    "diff_bytes": 11361
+  }
+}

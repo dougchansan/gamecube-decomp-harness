@@ -1,0 +1,403 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2752",
+  "pr": {
+    "number": 2752,
+    "title": "Re-split `ty` and match data",
+    "url": "https://github.com/doldecomp/melee/pull/2752",
+    "state": "OPEN",
+    "author": "ribbanya",
+    "created_at": "2026-06-22T15:32:59Z",
+    "merged_at": null
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Open draft PR re-splits the `ty` region, adjusts GALE01 split and symbol metadata, and makes broad source/header updates centered on `src/melee/ty` plus adjacent `if/text*`, fighter, game-mode, stage, and runtime files. Evidence is mostly file metadata and a truncated diff; there are no human review comments and the PR body is empty.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "data-split",
+      "symbols",
+      "headers",
+      "source-reorganization"
+    ],
+    "systems": [
+      "ty",
+      "config",
+      "if",
+      "fighter",
+      "game-mode",
+      "stage",
+      "runtime",
+      "library"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "config/GALE01/splits.txt",
+      "role": "Updated split ownership and section ranges around `if/textdraw.c`, `if/textlib.c`, `ty/toy.c`, `ty/tylist.c`, `ty/tyfigupon.c`, `ty/tydisplay.c`, and nearby vi/sbss/bss ownership.",
+      "evidence_refs": [
+        "diff_excerpt:splits.txt hunk around melee/if/textdraw.c through melee/vi/vi0501.c",
+        "changed_files:config/GALE01/splits.txt added=28 deleted=16 hunks=5"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Large symbol rename/scope update for toy/ty functions, replacing many `un_`/`fn_` names with `Toy_` or `_Toy_` names and changing some symbols to local scope.",
+      "evidence_refs": [
+        "diff_excerpt:symbols.txt hunk around 0x80304870-0x8031C1D0",
+        "changed_files:config/GALE01/symbols.txt added=848 deleted=733 hunks=10"
+      ]
+    },
+    {
+      "path": "src/melee/ty/toy.c",
+      "role": "Largest source change in PR; central toy/ty code reshaped to match new split/symbol/data ownership.",
+      "evidence_refs": [
+        "changed_files:src/melee/ty/toy.c added=1496 deleted=1295 hunks=225",
+        "diff_excerpt:splits.txt shows toy.c text range changed from 0x80305058-0x803124BC to 0x80304870-0x80312834 and adds bss/sbss ranges"
+      ]
+    },
+    {
+      "path": "src/melee/ty/types.h",
+      "role": "Large type/header expansion for ty code.",
+      "evidence_refs": [
+        "changed_files:src/melee/ty/types.h added=536 deleted=55 hunks=8"
+      ]
+    },
+    {
+      "path": "src/melee/ty/toy.static.h",
+      "role": "New static header introduced for toy-local declarations or data split support.",
+      "evidence_refs": [
+        "changed_files:src/melee/ty/toy.static.h added=282 deleted=0 hunks=1"
+      ]
+    },
+    {
+      "path": "src/melee/ty/toy.h",
+      "role": "Public toy header substantially reduced/reworked alongside new static header.",
+      "evidence_refs": [
+        "changed_files:src/melee/ty/toy.h added=71 deleted=191 hunks=1"
+      ]
+    },
+    {
+      "path": "src/melee/ty/tydisplay.c",
+      "role": "Major tydisplay source update and split range adjustment.",
+      "evidence_refs": [
+        "changed_files:src/melee/ty/tydisplay.c added=311 deleted=482 hunks=60",
+        "diff_excerpt:splits.txt shows tydisplay.c text start moved from 0x803182D4 to 0x80318B1C and adds bss range"
+      ]
+    },
+    {
+      "path": "src/melee/ty/tyfigupon.c",
+      "role": "Major tyfigupon source update and text/sbss range adjustment.",
+      "evidence_refs": [
+        "changed_files:src/melee/ty/tyfigupon.c added=414 deleted=364 hunks=56",
+        "diff_excerpt:splits.txt shows tyfigupon.c text end moved from 0x803182D4 to 0x80318B1C and adds sbss range"
+      ]
+    },
+    {
+      "path": "src/melee/ty/tylist.c",
+      "role": "Major tylist source update and added bss/sbss split ownership.",
+      "evidence_refs": [
+        "changed_files:src/melee/ty/tylist.c added=241 deleted=386 hunks=43",
+        "diff_excerpt:splits.txt shows tylist.c text start moved to 0x80312834 and adds bss/sbss ranges"
+      ]
+    },
+    {
+      "path": "src/melee/if/textlib.c",
+      "role": "Text library code shrank and split ownership changed, likely due boundary movement between if/text and ty.",
+      "evidence_refs": [
+        "changed_files:src/melee/if/textlib.c added=42 deleted=279 hunks=8",
+        "diff_excerpt:splits.txt shows textlib.c text range changed from 0x80302834-0x80305058 to 0x803029B4-0x80304870 and adds rodata"
+      ]
+    },
+    {
+      "path": "src/melee/ft/ftdata.c",
+      "role": "Fighter data source reduced as part of cross-file data/prototype cleanup.",
+      "evidence_refs": [
+        "changed_files:src/melee/ft/ftdata.c added=34 deleted=166 hunks=2"
+      ]
+    },
+    {
+      "path": "configure.py",
+      "role": "Build/config logic touched in support of the split/data changes.",
+      "evidence_refs": [
+        "changed_files:configure.py added=13 deleted=6 hunks=6"
+      ]
+    }
+  ],
+  "what_changed": [
+    "PR metadata reports 205 changed files, 4841 added lines, and 4415 deleted lines.",
+    "`config/GALE01/splits.txt` reassigns section ownership around the `if/text*` and `ty` region, including new bss/sbss/sdata2 ranges for `textdraw.c`, `toy.c`, `tylist.c`, `tyfigupon.c`, and `tydisplay.c`.",
+    "`config/GALE01/symbols.txt` performs a large rename/scope pass in the 0x80304870+ area, replacing many `un_803...`/`fn_803...` names with `Toy_803...` or `_Toy_803...` names and preserving some semantic names such as `Toy_GetTrophyTotal`, `Toy_SetUnlockState`, `Toy_RemoveUserData`, and `Toy_LoadLObjList`.",
+    "Core `src/melee/ty` sources and headers were heavily edited: `toy.c`, `tydisplay.c`, `tyfigupon.c`, `tylist.c`, `types.h`, `toy.h`, `toy.static.h`, `forward.h`, `tydisplay.h`, `tylist.h`, and `tyfigupon.h`.",
+    "The PR touches many one-line or small hunks across fighter, game-mode, stage, item, menu, vi, lb, and if code, consistent with propagated declarations/includes/symbol name updates from the re-split.",
+    "A new `src/melee/ft/chara/ft_459A.h` header appears in the changed-file metadata, and splits add a `melee/ft/ft_459A.c` bss range."
+  ],
+  "smart_moves": [
+    {
+      "text": "The split metadata and symbol metadata were updated together for the same address neighborhood, which is useful for data-matching work where section boundaries and symbol names must stay coordinated.",
+      "evidence_refs": [
+        "diff_excerpt:splits.txt ty/text region",
+        "diff_excerpt:symbols.txt 0x80304870+ rename block"
+      ]
+    },
+    {
+      "text": "The symbol rename pattern keeps unknown functions address-bearing while adding a subsystem prefix (`Toy_803...`) rather than inventing full semantics for every function.",
+      "evidence_refs": [
+        "diff_excerpt:symbols.txt examples `Toy_803048C0`, `Toy_80304924`, `_Toy_80304D30`"
+      ]
+    },
+    {
+      "text": "The introduction of `toy.static.h` alongside a reduced `toy.h` suggests separation between internal/static declarations and public toy interfaces, but the loaded slice does not show the header contents.",
+      "evidence_refs": [
+        "changed_files:src/melee/ty/toy.static.h added=282 deleted=0",
+        "changed_files:src/melee/ty/toy.h added=71 deleted=191"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "Large data re-splits can require synchronized edits to splits, symbols, source files, and headers; reviewers should inspect section ownership and symbol scope/name changes as one unit rather than as isolated source churn.",
+      "scope": [
+        "data split work",
+        "symbol metadata",
+        "headers"
+      ],
+      "evidence_refs": [
+        "diff_excerpt:splits.txt reassigns text/rodata/data/bss/sbss/sdata2 around if/text and ty",
+        "diff_excerpt:symbols.txt mass renames and local/global scope changes",
+        "changed_files:205 files total"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "lesson": "When semantics are only partially known, a subsystem-prefixed address-style name such as `Toy_803048C0` can improve locality without claiming unsupported behavior; semantic names should be reserved for functions with supporting evidence.",
+      "scope": [
+        "naming",
+        "symbol triage"
+      ],
+      "evidence_refs": [
+        "diff_excerpt:symbols.txt uses both semantic `Toy_GetTrophyTotal`/`Toy_SetUnlockState` and address-style `Toy_803...` names"
+      ],
+      "confidence": 0.72
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Toy subsystem globals use `Toy_` prefix plus either a semantic suffix or address suffix.",
+      "examples": [
+        "Toy_GetTrophyTotal",
+        "Toy_SetUnlockState",
+        "Toy_RemoveUserData",
+        "Toy_LoadLObjList",
+        "Toy_803048C0"
+      ],
+      "evidence_refs": [
+        "diff_excerpt:symbols.txt"
+      ],
+      "confidence": 0.86
+    },
+    {
+      "convention": "Toy subsystem local/static symbols in symbols.txt may use `_Toy_` prefix plus address suffix when scope is marked local.",
+      "examples": [
+        "_Toy_80304D30",
+        "_Toy_803053C4",
+        "_Toy_803062EC",
+        "_Toy_80309404"
+      ],
+      "evidence_refs": [
+        "diff_excerpt:symbols.txt local-scope examples"
+      ],
+      "confidence": 0.82
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Adjust split section boundaries before or alongside source matching so text/data/bss/sbss ownership reflects the intended translation-unit layout.",
+      "evidence_refs": [
+        "diff_excerpt:splits.txt `textdraw.c`, `textlib.c`, `toy.c`, `tylist.c`, `tyfigupon.c`, `tydisplay.c` range changes"
+      ],
+      "confidence": 0.8
+    },
+    {
+      "tactic": "Use symbol-file scope changes (`scope:local`) to represent functions that remain address-named but are no longer exported/global in the recovered split.",
+      "evidence_refs": [
+        "diff_excerpt:symbols.txt changes `un_80304D30` global to `_Toy_80304D30` local and similar entries"
+      ],
+      "confidence": 0.75
+    }
+  ],
+  "review_feedback": [
+    {
+      "kind": "bot_report",
+      "author": "decomp-dev[bot]",
+      "text": "Report for GALE01 (7e2e444 - 4172931): No changes.",
+      "evidence_refs": [
+        "text_corpus:issue_comment 2026-06-22T15:37:04Z"
+      ],
+      "notes": "Loaded slice contains no human review comments and no review records. The bot phrase is preserved as written; no validation or merge conclusion is inferred."
+    }
+  ],
+  "searchable_terms": [
+    "pr-2752",
+    "Re-split ty and match data",
+    "ribbanya",
+    "Toy_GetTrophyTotal",
+    "Toy_SetUnlockState",
+    "Toy_RemoveUserData",
+    "Toy_LoadLObjList",
+    "Toy_803048C0",
+    "_Toy_80304D30",
+    "_Toy_80309404",
+    "src/melee/ty/toy.c",
+    "src/melee/ty/toy.static.h",
+    "src/melee/ty/types.h",
+    "src/melee/ty/tydisplay.c",
+    "src/melee/ty/tyfigupon.c",
+    "src/melee/ty/tylist.c",
+    "src/melee/if/textlib.c",
+    "src/melee/if/textdraw.c",
+    "config/GALE01/splits.txt",
+    "config/GALE01/symbols.txt",
+    "ft_459A",
+    "data split",
+    "symbol scope local",
+    "Toy_ prefix"
+  ],
+  "follow_up_queries": [
+    "Toy_803048C0",
+    "_Toy_80304D30",
+    "src/melee/ty/toy.static.h",
+    "src/melee/ty/types.h trophy",
+    "config/GALE01/splits.txt melee/ty/toy.c",
+    "symbols.txt _Toy_ scope:local",
+    "ft_459A bss 80459A98",
+    "textlib.c toy.c 80304870 split boundary"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json:pr number/title/state/author/created_at/url",
+      "metadata_json:activity changed_files=205 added_lines=4841 deleted_lines=4415",
+      "raw_pr_json:body null, draft true, merged_at null",
+      "raw_diff:truncated original_chars=625660",
+      "changed_files.jsonl:truncated original_chars=26445",
+      "text_corpus:empty PR body and one bot issue comment"
+    ],
+    "notes": [
+      "Diff and changed-file listing are truncated in the loaded slice, so file-level details are strongest for the shown high-churn files and excerpted split/symbol hunks.",
+      "No human review comments are present; reviewer intent and acceptance cannot be inferred.",
+      "The PR is open and draft in raw PR JSON; no merge or final validation status is claimed.",
+      "The bot report says `No changes`, but the slice does not explain the report semantics; it is not treated as proof of a successful build, objdiff result, or no source diff."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "decomp_lesson_candidate",
+        "title": "Coordinate split metadata, symbol metadata, and headers during data re-splits",
+        "text": "PR evidence shows a large ty-region re-split edited `config/GALE01/splits.txt`, `config/GALE01/symbols.txt`, central `src/melee/ty` sources, and many dependent headers/source callsites. This supports a reusable lesson that data split work should be reviewed across section boundaries, symbol names/scopes, and declaration surfaces together.",
+        "scope": [
+          "data splits",
+          "symbols",
+          "headers",
+          "ty"
+        ],
+        "evidence_refs": [
+          "diff_excerpt:splits.txt",
+          "diff_excerpt:symbols.txt",
+          "changed_files:205 files total"
+        ],
+        "confidence": 0.78
+      },
+      {
+        "record_type": "naming_convention_candidate",
+        "title": "Toy subsystem address-style names",
+        "text": "The PR changes many toy-region symbols from generic `un_`/`fn_` names to `Toy_803...` for globals and `_Toy_803...` for local-scope symbols, while preserving semantic names only where present. Curator should consider whether this is a path-scoped naming convention for `src/melee/ty` and corresponding symbols.",
+        "scope": [
+          "symbols.txt",
+          "src/melee/ty"
+        ],
+        "evidence_refs": [
+          "diff_excerpt:symbols.txt Toy_ and _Toy_ examples"
+        ],
+        "confidence": 0.82
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "ty split ownership around if/text and toy",
+        "text": "PR 2752 evidence indicates the ty/text split boundary moved: `textdraw.c` text ends at 0x803029B4, `textlib.c` covers 0x803029B4-0x80304870, and `toy.c` begins at 0x80304870, with added bss/sbss/sdata2 ownership in several ty/text files. Curator should verify against current splits before adding path facts.",
+        "source_path": "config/GALE01/splits.txt",
+        "scope": [
+          "src/melee/if/textdraw.c",
+          "src/melee/if/textlib.c",
+          "src/melee/ty/toy.c",
+          "src/melee/ty/tylist.c",
+          "src/melee/ty/tyfigupon.c",
+          "src/melee/ty/tydisplay.c"
+        ],
+        "evidence_refs": [
+          "diff_excerpt:splits.txt"
+        ],
+        "reason": "Useful path-scoped split context, but current source verification is needed because the PR is open/draft and the diff slice is truncated."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "toy.static.h introduced for toy internals",
+        "text": "PR 2752 adds `src/melee/ty/toy.static.h` and substantially rewrites `toy.h`, suggesting internal/static declarations were separated from public toy declarations. Curator should inspect the full file contents before recording a header-organization fact.",
+        "source_path": "src/melee/ty/toy.static.h",
+        "scope": [
+          "src/melee/ty/toy.c",
+          "src/melee/ty/toy.h",
+          "src/melee/ty/toy.static.h"
+        ],
+        "evidence_refs": [
+          "changed_files:src/melee/ty/toy.static.h added=282 deleted=0",
+          "changed_files:src/melee/ty/toy.h added=71 deleted=191"
+        ],
+        "reason": "The changed-file metadata supports the structural change, but the loaded slice does not include full header contents."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Consider documenting subsystem-prefixed address names for partially understood symbols",
+        "text": "This PR uses `Toy_803...` and `_Toy_803...` rather than inventing semantic names for many still-address-style functions. This aligns with conservative naming, but curator could decide whether a short example belongs in naming guidance.",
+        "source_path": null,
+        "scope": [
+          "naming",
+          "symbols"
+        ],
+        "evidence_refs": [
+          "diff_excerpt:symbols.txt"
+        ],
+        "reason": "Potential example for existing conservative-naming standard; do not promote as a new global rule without broader evidence."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that the PR matched all data or passed validation; the only loaded bot comment says `No changes` without context.",
+      "Do not infer reviewer approval or requested changes; no human reviews or review comments are present.",
+      "Do not promote every `Toy_` rename as semantically proven; many names remain address-style and only indicate subsystem association in the shown diff.",
+      "Do not claim final split boundaries as accepted current facts without verifying current source because the PR is open/draft and the loaded diff is truncated."
+    ]
+  },
+  "confidence": 0.67,
+  "agent_runtime": {
+    "runner": "orchestrator_kernel_pr_indexer",
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "orchestrator_state_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/projects/melee/state",
+    "orchestrator_run_id": "08bfe41e-1b7c-4685-8646-dff5e02a5dab",
+    "orchestrator_project_id": "melee",
+    "orchestrator_prepare_intake": true,
+    "orchestrator_kernel_database_url_configured": true,
+    "legacy_session_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/.pi-sessions/pr-review"
+  }
+}

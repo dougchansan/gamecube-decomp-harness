@@ -1,0 +1,17 @@
+{
+  "number": 2753,
+  "title": "Match ft_0899",
+  "state": "MERGED",
+  "createdAt": "2026-06-23T09:35:33Z",
+  "updatedAt": "2026-06-23T10:07:09Z",
+  "mergedAt": "2026-06-23T10:07:08Z",
+  "closedAt": "2026-06-23T10:07:08Z",
+  "author": "dberweger2017",
+  "url": "https://github.com/doldecomp/melee/pull/2753",
+  "counts": {
+    "issue_comments": 2,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 7270
+  }
+}

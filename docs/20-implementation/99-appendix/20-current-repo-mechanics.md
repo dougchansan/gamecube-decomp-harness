@@ -1,7 +1,7 @@
 ---
 covers: Current Melee repo mechanics that the orchestrator indexes or wraps
 concepts: [repo-mechanics, report-json, objdiff, configure, progress-terms, commands]
-code-ref: decomp-orchestrator/tools, decomp-orchestrator/packages/core/src/board, decomp-orchestrator/packages/core/src/shell
+code-ref: decomp-orchestrator/tools, decomp-orchestrator/apps/server/src/core/session-runtime/phases/running/board, decomp-orchestrator/apps/server/src/infrastructure/shell
 ---
 
 # Current Repo Mechanics
@@ -37,7 +37,7 @@ should not fork the compiler, report, objdiff, or progress machinery.
 python configure.py
 ninja build/GALE01/report.json
 ninja progress
-bun run orch -- --project melee kg-rank-features --limit 200
+bun run server:job -- --project melee kg-rank-features --limit 200
 build/tools/objdiff-cli diff -p . -u <unit> <symbol>
 (cd tools/table-typer && go run . dups)
 ```

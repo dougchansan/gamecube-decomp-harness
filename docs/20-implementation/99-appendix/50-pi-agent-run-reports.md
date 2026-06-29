@@ -1,7 +1,7 @@
 ---
 covers: How to build and evaluate the Pi worker run-analysis reports (outcomes, durations, tool effectiveness)
 concepts: [run-reports, tool-analysis, kill-threshold, runner-validation, lift, experiments]
-code-ref: decomp-orchestrator/scripts/analyze-pi-agent-tools.py, decomp-orchestrator/scripts/render-pi-agent-tool-report.py, decomp-orchestrator/reports
+code-ref: decomp-orchestrator/reports
 ---
 
 # Pi Agent Run Reports
@@ -26,27 +26,13 @@ lease):
 "Confirmed" always means **runner-owned validation passed** (`result`
 exact/improved + `rv_status: passed`), never the worker's local claim.
 
-## Building a report
+## Generator Status
 
-1. **Add the run ID(s)** to the `RUNS` dict at the top of
-   `scripts/analyze-pi-agent-tools.py`. The render script hardcodes the labels
-   `run1`/`run2` for its side-by-side funnel, so map the **baseline/control run
-   to `run1`** and the **new/experiment run to `run2`**.
-2. Build the stats JSON:
-
-   ```sh
-   python3 scripts/analyze-pi-agent-tools.py /tmp/pi-tool-stats.json
-   ```
-
-3. Render the HTML:
-
-   ```sh
-   python3 scripts/render-pi-agent-tool-report.py /tmp/pi-tool-stats.json \
-     reports/pi-agent-tool-analysis-$(date +%F).html
-   ```
-
-Both scripts are pure readers — rerunnable any time, including mid-run
-(in-flight leases are excluded from terminal stats).
+The old report generator lived in root `scripts/` and was retired when
+orchestration moved behind the server job/API surface. Treat existing reports as
+historical experiment artifacts. If this analysis becomes operational again,
+reintroduce it as a server-owned job or a tested report module instead of a
+standalone root script.
 
 ### Analyzer behavior worth knowing
 
@@ -56,9 +42,10 @@ Both scripts are pure readers — rerunnable any time, including mid-run
   `exact_rejected` (locally exact, failed gates), `improved_rejected`,
   `no_change`, `error`, `aborted`. A lease with an error/no-change outcome and
   **zero tool calls** is reclassified `aborted` (empty-return plague detector).
-- **Tier lists are hardcoded in the render script**
-  (`PRIMARY_SURFACE_TOOLS`, `SPECIALIST_TOOLS`, etc.). After a surface change,
-  update them or the tier tables misreport.
+- **Tier lists were hardcoded in the retired renderer**
+  (`PRIMARY_SURFACE_TOOLS`, `SPECIALIST_TOOLS`, etc.). Any replacement report
+  module should keep those labels data-driven so surface changes do not silently
+  misreport.
 - The "advertised" tool set is whatever the prompt's `<available_tools>` block
   contained at lease time, so mixed-surface runs are visible per lease.
 

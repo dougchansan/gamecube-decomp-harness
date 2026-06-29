@@ -1,0 +1,20 @@
+import { ImprovedTable } from "@/components/work-tables/_components/improved-table";
+import { WorkStatusTable } from "@/components/work-tables/_components/work-status-table";
+import type { WorkTablesProps } from "@/components/work-tables/_lib/types";
+
+export type { ImprovedMode, WorkMode, WorkTablesProps } from "@/components/work-tables/_lib/types";
+
+export function WorkTables(props: WorkTablesProps) {
+  return (
+    <div className="grid items-start border-b border-line min-[1180px]:grid-cols-[3fr_2fr]">
+      <ImprovedTable
+        dashboard={props.dashboard}
+        mode={props.improvedMode}
+        page={props.improvedPage}
+        setMode={props.setImprovedMode}
+        setPage={props.setImprovedPage}
+      />
+      <WorkStatusTable dashboard={props.dashboard} mode={props.workMode} setMode={props.setWorkMode} />
+    </div>
+  );
+}

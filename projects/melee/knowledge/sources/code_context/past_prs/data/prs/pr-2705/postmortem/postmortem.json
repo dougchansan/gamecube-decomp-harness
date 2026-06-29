@@ -1,0 +1,448 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2705",
+  "pr": {
+    "number": 2705,
+    "title": "2/14: GM mode-specific work",
+    "url": "https://github.com/doldecomp/melee/pull/2705",
+    "state": "MERGED",
+    "author": "fjooord",
+    "created_at": "2026-06-15T18:51:27Z",
+    "merged_at": "2026-06-17T06:03:16Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Mode-specific GM implementation slice touching seven src/melee/gm files. The slice improved several GM functions and data sections, with reviewer feedback focused on keeping ordinary literals/strings inline rather than promoting them to data symbols or pointer-offset string references. The PR body says slice-specific CI/regression QA was still in progress at intake time, while bot output reported three new matches and multiple unmatched-item improvements.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "implementation",
+      "types-structs",
+      "data-literal-cleanup"
+    ],
+    "systems": [
+      "game-mode",
+      "gm",
+      "all-star",
+      "camera",
+      "classic",
+      "regular-clear",
+      "result-player",
+      "staff-roll",
+      "tournament"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gm/gmregclear.c",
+      "role": "largest changed file; focus file; included gm_80182174 matching work and reviewed string/data-offset usage",
+      "evidence_refs": [
+        "changed_files.jsonl: gmregclear.c added 237 deleted 206 hunks 17",
+        "human_pr_text: Reviewer Notes list gmregclear.c as a focus file",
+        "review_comments: discussion_r3418299197 asks to replace data[n] string references with identified strings",
+        "text_corpus: bot report says gm_80182174 improved 96.46% -> 99.82% and fn_8017EE40 became a new match"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmtou.c",
+      "role": "tournament GM implementation/data cleanup; reviewed string-literal handling",
+      "evidence_refs": [
+        "changed_files.jsonl: gmtou.c added 89 deleted 86 hunks 24",
+        "review_comments: discussion_r3418302408 says inline added string/data objects in their uses",
+        "review_comments: discussion_r3418304371 says put inline string literals back instead of strbase offsets",
+        "text_corpus: bot report says gmtou .data improved 27.41% -> 82.56% and gm_8019ECAC_OnEnter improved 99.41% -> 99.94%"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmcamera.c",
+      "role": "camera GM matching work; gained matches and received literal-inlining review",
+      "evidence_refs": [
+        "changed_files.jsonl: gmcamera.c added 84 deleted 47 hunks 11",
+        "review_comments: discussion_r3418295704 says inline const f32 values",
+        "diff_excerpt: gmCamera_801A2AAC converted range branch ladder to switch cases",
+        "diff_excerpt: gmCamera_801A2BF0 uses inline helper returning 5.0f/-5.0f and HSD_JObjSetTranslateX",
+        "text_corpus: bot report says gmCamera_801A2AAC and gmCamera_801A2BF0 became new matches"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmallstar.c",
+      "role": "All-Star GM implementation matching and type cleanup",
+      "evidence_refs": [
+        "changed_files.jsonl: gmallstar.c added 44 deleted 74 hunks 9",
+        "diff_excerpt: gm_801B5324 replaces generated-looking copy blocks with a for loop over count_processed",
+        "diff_excerpt: PreloadCacheScene/game_cache nested access changed to struct GameCache* and gc->entries/gc->stage_id",
+        "text_corpus: bot report says gm_801B5324 improved 74.53% -> 87.49% and gm_801B60A4_OnLoad improved 80.20% -> 88.62%"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmclassic.c",
+      "role": "Classic GM implementation matching and scene-data typing",
+      "evidence_refs": [
+        "changed_files.jsonl: gmclassic.c added 55 deleted 49 hunks 4",
+        "diff_excerpt: gmClassic_801B2BA4 reshaped loop/control flow using order pointer and labels",
+        "diff_excerpt: gmClassic_OnLoad introduces gmClassicSceneData* scene_data and gmClassic_80490880Data* o",
+        "text_corpus: bot report says gmClassic_OnLoad improved 84.01% -> 87.80% and gmClassic_801B2BA4 improved 93.87% -> 97.13%"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmresultplayer.c",
+      "role": "result-player GM implementation slice",
+      "evidence_refs": [
+        "changed_files.jsonl: gmresultplayer.c added 73 deleted 56 hunks 8",
+        "human_pr_text: Reviewer Notes list gmresultplayer.c as a focus file",
+        "text_corpus: bot report says fn_80179990 improved 80.74% -> 91.56%, fn_8017AA78 improved 62.74% -> 75.36%, and .sdata improved 39.53% -> 81.75%"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmstaffroll.c",
+      "role": "staff-roll GM implementation/data matching",
+      "evidence_refs": [
+        "changed_files.jsonl: gmstaffroll.c added 88 deleted 37 hunks 18",
+        "text_corpus: bot report says gmstaffroll .data improved 0.61% -> 3.78%, fn_801AAB74 improved 91.86% -> 99.54%, and gm_801AC6D8_OnEnter improved 99.50% -> 99.95%"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Changed seven mode-specific GM implementation files under src/melee/gm: gmallstar.c, gmcamera.c, gmclassic.c, gmregclear.c, gmresultplayer.c, gmstaffroll.c, and gmtou.c.",
+    "PR body frames the work as draft slice 2 of 14 from an aggregate WIP branch, limited to GM mode-specific implementation files and not intended to include header/naming churn beyond implementation needs.",
+    "Bot report recorded three new matches: gmregclear fn_8017EE40, gmcamera gmCamera_801A2AAC, and gmcamera gmCamera_801A2BF0.",
+    "Bot report recorded improvements across 25 unmatched items including GM .data/.sdata sections and functions in gmstaffroll, gmtou, gmresultplayer, gmallstar, gmcamera, gmclassic, and gmregclear.",
+    "Diff excerpt shows cleanup from generated-looking unrolled copy blocks to a simple for loop in gmallstar gm_801B5324.",
+    "Diff excerpt shows typed access cleanup in gmallstar by using struct GameCache* and direct entries/stage_id fields instead of nested game_cache accesses through a broader PreloadCacheScene pointer.",
+    "Diff excerpt shows gmcamera branch dispatch in gmCamera_801A2AAC reshaped into switch cases.",
+    "Review comments requested literal cleanup: inline const floats in gmcamera, inline or restore string literals in gmtou, and replace gmregclear data-offset string references with identified strings."
+  ],
+  "smart_moves": [
+    {
+      "title": "Kept risky validation claims bounded",
+      "detail": "The PR body distinguishes aggregate WIP validation from slice-specific validation, saying aggregate WIP was clean but slice-specific CI/regression QA was in progress.",
+      "evidence_refs": [
+        "human_pr_text: Verification section"
+      ]
+    },
+    {
+      "title": "Dropped gmresult.c from this slice to avoid known .sdata regression",
+      "detail": "The PR body explicitly says gmresult.c was intentionally not included because it was dropped from the aggregate branch to remove the .sdata regression.",
+      "evidence_refs": [
+        "human_pr_text: Reviewer Notes"
+      ]
+    },
+    {
+      "title": "Restored only narrow volatile accesses for one matching issue",
+      "detail": "Author comment says normal field accesses in gm_80182174 caused a nonmatched regression and that restoring only volatile accesses around initialized state fields preserved the match.",
+      "evidence_refs": [
+        "human_pr_text issue comment 4711784593"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For code-matching PRs, ordinary float constants and asset/resource strings should generally stay inline unless data ownership evidence justifies named storage or pointer-offset access.",
+      "scope": [
+        "src/melee/gm/gmcamera.c",
+        "src/melee/gm/gmtou.c"
+      ],
+      "evidence_refs": [
+        "review_comments: discussion_r3418295704 inline these floats",
+        "review_comments: discussion_r3418302408 inline these in their uses",
+        "review_comments: discussion_r3418304371 put these back"
+      ],
+      "related_standards": [
+        "literals-and-data-ownership",
+        "no-string-literal-symbol-regression"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "lesson": "When repeated generated-looking copies differ only by index, a natural counted loop is a supported source-shape candidate.",
+      "scope": [
+        "src/melee/gm/gmallstar.c"
+      ],
+      "evidence_refs": [
+        "diff_excerpt: gm_801B5324 removes unrolled copy blocks and uses for (count_processed = 0; count_processed < count; count_processed++)"
+      ],
+      "related_standards": [
+        "natural-loops"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "lesson": "Typed subobject pointers can simplify recovered field access when the diff shows the real substructure, but matching side effects still need verifier evidence.",
+      "scope": [
+        "src/melee/gm/gmallstar.c"
+      ],
+      "evidence_refs": [
+        "diff_excerpt: gc = &lbDvd_8001822C()->game_cache; gc->entries and gc->stage_id used directly"
+      ],
+      "related_standards": [
+        "typed-fields-over-pointer-math"
+      ],
+      "confidence": 0.72
+    },
+    {
+      "lesson": "Volatile or access-shape steering should be narrow and evidence-backed; in this PR the author reports restoring only the volatile accesses needed to avoid a specific gm_80182174 nonmatch regression.",
+      "scope": [
+        "src/melee/gm/gmregclear.c"
+      ],
+      "evidence_refs": [
+        "human_pr_text issue comment 4711784593: normal field accesses regressed 96.46% -> 96.39%; narrow volatile accesses preserved match"
+      ],
+      "related_standards": [
+        "matching-tactics-need-evidence"
+      ],
+      "confidence": 0.8
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name_or_pattern": "mode-specific GM files keep address-style function names where semantics are not recovered",
+      "examples": [
+        "gm_80182174",
+        "fn_8017EE40",
+        "gm_801B5324",
+        "fn_80179990"
+      ],
+      "evidence_refs": [
+        "text_corpus: bot report item names",
+        "diff_excerpt: function names in changed hunks"
+      ],
+      "notes": "No broad rename policy is proven; PR body says header/naming churn was not intended beyond implementation needs."
+    },
+    {
+      "name_or_pattern": "local role names for clearer typed accesses",
+      "examples": [
+        "gcus",
+        "scene_data",
+        "chars_ptr",
+        "cpu_level",
+        "order"
+      ],
+      "evidence_refs": [
+        "diff_excerpt: gmcamera introduces gmCameraUnkStruct* gcus",
+        "diff_excerpt: gmclassic introduces gmClassicSceneData* scene_data",
+        "diff_excerpt: gmallstar introduces chars_ptr and cpu_level"
+      ],
+      "notes": "These are observed local names in the diff, not promoted as a global naming standard."
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "PAD_STACK size adjustments",
+      "evidence_refs": [
+        "diff_excerpt: gmallstar changes PAD_STACK(16) to PAD_STACK(8) in gm_801B5324 and PAD_STACK(8) to PAD_STACK(16) in gm_801B5624",
+        "diff_excerpt: gmcamera adds PAD_STACK(4) in gmCamera_801A292C and PAD_STACK(24) in gmCamera_801A31FC"
+      ],
+      "notes": "PR evidence shows usage but does not include per-function objdiff reasoning beyond bot summary improvements; keep as tactic evidence, not source style."
+    },
+    {
+      "tactic": "Pointer temporaries to preserve access/register shape",
+      "evidence_refs": [
+        "diff_excerpt: gmcamera uses px8 and px18 helper access in gmCamera_801A2BF0",
+        "diff_excerpt: gmallstar uses chars_ptr and cpu_level pointer locals",
+        "human_pr_text issue comment 4711784593: access shape in gm_80182174 affected match percentage"
+      ],
+      "notes": "Supported only as observed matching tactics in this PR."
+    },
+    {
+      "tactic": "Control-flow reshaping to switch or goto-labelled loop",
+      "evidence_refs": [
+        "diff_excerpt: gmCamera_801A2AAC range checks converted to grouped switch cases",
+        "diff_excerpt: gmClassic_801B2BA4 changed from do/while shape to labelled loop/check flow"
+      ],
+      "notes": "The gmcamera switch aligns with canonical control-flow cleanup; the gmclassic goto shape should not be generalized without more matching evidence."
+    },
+    {
+      "tactic": "Literal inlining after review",
+      "evidence_refs": [
+        "review_comments: inline these floats",
+        "review_comments: inline these in their uses",
+        "review_comments: put these back"
+      ],
+      "notes": "Reviewer comments directly identify named floats and string-pointer offsets as cleanup targets."
+    }
+  ],
+  "review_feedback": [
+    {
+      "path": "src/melee/gm/gmcamera.c",
+      "author": "jurrejelle",
+      "comment": "inline these floats",
+      "interpretation": "Do not introduce const f32 symbols for simple 5.0f, -5.0f, 1.0f, or 2.0f values in this code-matching context; keep them inline unless ownership evidence exists.",
+      "evidence_refs": [
+        "review_comments: discussion_r3418295704"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmregclear.c",
+      "author": "jurrejelle",
+      "comment": "These \"data[n]\" entries are strings, can you let the AI figure those out and put them in here?",
+      "interpretation": "Raw data-offset references to strings in lbArchive_80016DBC should be resolved to readable string literals where possible.",
+      "evidence_refs": [
+        "review_comments: discussion_r3418299197"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmtou.c",
+      "author": "jurrejelle",
+      "comment": "inline these in their uses",
+      "interpretation": "Static char objects for ordinary string literals such as ScGamTour_scene_data and SIS_TournamentData should be inlined in uses for this PR.",
+      "evidence_refs": [
+        "review_comments: discussion_r3418302408"
+      ]
+    },
+    {
+      "path": "src/melee/gm/gmtou.c",
+      "author": "jurrejelle",
+      "comment": "put these back",
+      "interpretation": "Replace strbase + offsets with the prior readable string literals in lbArchive_80016DBC and HSD_SisLib_803A62A0 calls.",
+      "evidence_refs": [
+        "review_comments: discussion_r3418304371"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2705",
+    "2/14 GM mode-specific work",
+    "src/melee/gm",
+    "gmregclear.c",
+    "gmtou.c",
+    "gmcamera.c",
+    "gmresultplayer.c",
+    "gmstaffroll.c",
+    "gmallstar.c",
+    "gmclassic.c",
+    "gm_80182174",
+    "fn_8017EE40",
+    "gmCamera_801A2AAC",
+    "gmCamera_801A2BF0",
+    "gm_801B5324",
+    "gmClassic_801B2BA4",
+    "gmClassic_OnLoad",
+    "inline floats",
+    "inline string literals",
+    "strbase + 0xC4",
+    "strbase + 0xDC",
+    "ScGamTour_scene_data",
+    "SIS_TournamentData",
+    "PAD_STACK",
+    "volatile accesses",
+    "nonmatched regression",
+    "GameCache",
+    "lbArchive_80016DBC"
+  ],
+  "follow_up_queries": [
+    "PR2705 gm_80182174 volatile accesses initialized state fields",
+    "PR2705 inline these floats gmCamera_801A2BF0",
+    "PR2705 gmtou strbase ScGamTour_scene_data SIS_TournamentData",
+    "PR2705 gmregclear data[0x490] strings lbArchive_80016DBC",
+    "src/melee/gm gmallstar GameCache entries stage_id typed access",
+    "gmCamera_801A2AAC switch grouped cases match"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json: PR metadata, changed file counts, state MERGED",
+      "human_pr_text: PR body and author issue comment",
+      "review_comments: four loaded review comments",
+      "diff_excerpt/raw_diff: partial diff, raw diff truncated",
+      "text_corpus: bot report and review text"
+    ],
+    "notes": [
+      "Changed-file list and review comments are strong evidence.",
+      "Raw diff is truncated in loaded context; details for gmresultplayer.c and gmstaffroll.c are mostly from changed-file metadata and bot report rather than full hunks.",
+      "PR body says slice-specific CI/regression QA was in progress, so only loaded bot report improvements are recorded; no final isolated validation result is inferred.",
+      "Review comments identify requested cleanup, but loaded evidence does not show the final post-review diff for every comment.",
+      "The dismissed review state is loaded, but reviewer intent or final acceptance of individual comments is not inferred."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "pr_lesson",
+        "title": "Inline ordinary literals in code-matching GM work unless data ownership is evidenced",
+        "text": "In PR2705, reviewer feedback requested inlining simple const floats in gmcamera and restoring/inlining ordinary string literals in gmtou rather than using static char objects or strbase offsets. This supports the existing standards around literals/data ownership and no string-literal symbol regression.",
+        "scope": [
+          "src/melee/gm/gmcamera.c",
+          "src/melee/gm/gmtou.c"
+        ],
+        "evidence_refs": [
+          "review_comments: discussion_r3418295704",
+          "review_comments: discussion_r3418302408",
+          "review_comments: discussion_r3418304371"
+        ],
+        "confidence": 0.9
+      },
+      {
+        "record_type": "pr_lesson",
+        "title": "Narrow matching tactics need explicit regression evidence",
+        "text": "The author reported that normal field accesses in gm_80182174 caused a nonmatched regression from 96.46% to 96.39%, and that restoring only volatile accesses around initialized state fields preserved the match. Treat this as narrow tactic evidence, not a general style rule.",
+        "scope": [
+          "src/melee/gm/gmregclear.c"
+        ],
+        "evidence_refs": [
+          "human_pr_text issue comment 4711784593"
+        ],
+        "confidence": 0.82
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Use PR2705 as an example for literal inlining review",
+        "text": "Possible example for literals-and-data-ownership/no-string-literal-symbol-regression: reviewer asked to inline simple float constants in gmCamera_801A2BF0 and to restore ordinary string literals such as ScGamTour_scene_data and SIS_TournamentData instead of static char objects or strbase offsets.",
+        "source_path": null,
+        "scope": [
+          "gmcamera literal floats",
+          "gmtou string literals"
+        ],
+        "evidence_refs": [
+          "review_comments: discussion_r3418295704",
+          "review_comments: discussion_r3418302408",
+          "review_comments: discussion_r3418304371"
+        ],
+        "reason": "The loaded standards already cover the rule; this PR provides a concrete historical review example for curator consideration."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "GM mode-specific files have recurring literal/data ownership review risk",
+        "text": "PR2705 review comments in src/melee/gm/gmcamera.c, src/melee/gm/gmtou.c, and src/melee/gm/gmregclear.c focused on replacing named simple constants, static char string objects, strbase offsets, and data[n] string offsets with readable inline literals where supported.",
+        "source_path": "src/melee/gm",
+        "scope": [
+          "src/melee/gm/gmcamera.c",
+          "src/melee/gm/gmtou.c",
+          "src/melee/gm/gmregclear.c"
+        ],
+        "evidence_refs": [
+          "review_comments: discussion_r3418295704",
+          "review_comments: discussion_r3418299197",
+          "review_comments: discussion_r3418302408",
+          "review_comments: discussion_r3418304371"
+        ],
+        "reason": "Could help future reviewers search for literal/data ownership pitfalls in GM files, but should be curated as a path hint rather than a global rule."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote PAD_STACK changes in this PR as accepted source style; the diff shows them but loaded evidence does not include specific objdiff justification per use.",
+      "Do not infer final slice-specific CI/regression status from the PR body; it says QA was in progress, though bot output reported improvements.",
+      "Do not generalize the gmClassic_801B2BA4 labelled-goto shape as preferred authored style; it appears in the diff as a matching/control-flow tactic only.",
+      "Do not claim all review comments were resolved; loaded evidence includes comments but not full final post-review hunks."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "runner": "orchestrator_kernel_pr_indexer",
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "orchestrator_state_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/projects/melee/state",
+    "orchestrator_run_id": "08bfe41e-1b7c-4685-8646-dff5e02a5dab",
+    "orchestrator_project_id": "melee",
+    "orchestrator_prepare_intake": true,
+    "orchestrator_kernel_database_url_configured": true,
+    "legacy_session_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/.pi-sessions/pr-review"
+  }
+}

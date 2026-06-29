@@ -14,13 +14,14 @@ server may die while the detached process continues running, so a constant name
 keeps the saved process file, status view, drain/stop controls, and kill command
 easy to find.
 
-## Agent Viewer Prompt Previews
+## Dashboard Agent Prompt Previews
 
 When changing agent prompt templates, prompt placeholders, or injected prompt
-context, update the Agent Viewer preview path at the same time. Keep the sample
-rendering and placeholder hydration in `apps/agent-viewer/src/server.ts` and the
-viewer-side parsing/fallbacks in `apps/agent-viewer/src/components/AgentViewer.tsx`
-aligned with the real prompt builder, so rendering changes are visible in the UI
-and do not leak raw `{{PLACEHOLDER}}` text. If the existing viewer server is
-serving `apps/agent-viewer/dist`, rebuild the viewer bundle; do not start a new
-viewer server unless the user asks.
+context, update the dashboard Agent preview path at the same time. Keep the
+sample rendering and placeholder hydration in
+`apps/server/src/core/agent-catalog/kernel-preview.ts`, the kernel catalog conversion in
+`apps/server/src/core/agent-catalog/kernel-catalog.ts`, and the dashboard viewer rendering in
+`apps/frontend/src/pages/workspace/agents/index.tsx` aligned with the real
+prompt builder, so rendering changes are visible in the UI and do not leak raw
+`{{PLACEHOLDER}}` text. Cover prompt/catalog/context changes with the nearby
+Bun tests; do not start a new dashboard server unless the user asks.

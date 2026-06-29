@@ -1,0 +1,41 @@
+{
+  "id": "opseq",
+  "title": "Opcode sequence lookup",
+  "trust_tier": "tool_evidence",
+  "description": "Find similar matched and unmatched functions by live opcode-sequence indexes generated from build/GALE01/asm, with report-based function-shape rows retained as supplemental lookup evidence.",
+  "operation_mode": "live_runner_v1",
+  "runner_status": "live_smoke_required",
+  "status_message": "Live runner v1: opcode fingerprints are generated locally from build/GALE01/asm by toolpacks/gamecube-decomp/research/opseq/runners/extract_opcode_sequences.py.",
+  "limitations": [
+    "Opcode fingerprints come from generated assembly artifacts; rerun the runner after rebuilding asm/report outputs.",
+    "Similarity search is lexical over indexed opcode fingerprints and metadata, not a full edit-distance engine."
+  ],
+  "commands": {
+    "status": "python3 toolpacks/gamecube-decomp/research/opseq/api/status.py --repo-root <repo_root> --json",
+    "similar_functions": "python3 toolpacks/gamecube-decomp/research/opseq/api/similar_functions.py --query <query> --json",
+    "runner": "python3 toolpacks/gamecube-decomp/research/opseq/runners/extract_opcode_sequences.py --repo-root <repo_root>"
+  },
+  "capabilities": [
+    "similar_functions",
+    "duplicate_shape"
+  ],
+  "category": "research",
+  "path": "research/opseq",
+  "process_role": "similar_function_lookup",
+  "usage": {
+    "invocation_mode": "on_demand",
+    "mutates_source": false,
+    "blocks_on_failure": false,
+    "triggers": [
+      "needs_analog_function",
+      "has_opcode_pattern",
+      "matching_strategy_unclear"
+    ],
+    "outputs": [
+      "similar_functions",
+      "opcode_fingerprints",
+      "function_shape_rows"
+    ],
+    "agent_guidance": "Use before inventing a source shape when similar opcode or function-shape evidence could point to a local analog."
+  }
+}

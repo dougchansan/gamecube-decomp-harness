@@ -1,0 +1,17 @@
+{
+  "number": 2734,
+  "title": "Split and mostly link `gm_1B03`",
+  "state": "MERGED",
+  "createdAt": "2026-06-17T22:47:23Z",
+  "updatedAt": "2026-06-17T22:52:14Z",
+  "mergedAt": "2026-06-17T22:52:13Z",
+  "closedAt": "2026-06-17T22:52:13Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/2734",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 98620
+  }
+}

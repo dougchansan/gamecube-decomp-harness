@@ -1,23 +1,32 @@
 ---
-covers: Worker target packet lifecycle, research loop, capabilities, validation, and stall policy
-concepts: [worker, target-packet, capabilities, validation, qa-lint, write-safety, stall-policy]
+covers: Worker target packet lifecycle, target claims, runner validation, checkpoints, timeout/error classification, and continuation policy
+concepts: [worker, target-packet, target-claim, worker-state, checkpoints, validation, qa-lint, write-safety]
 ---
 
 # Worker Lifecycle
 
-A worker is a bounded decompilation attempt. It receives one target packet,
-works inside one lease, records evidence, and exits with a durable report.
+A worker is a bounded decompilation attempt for one claimed epoch target. The
+worker keeps trying to reach an exact match; the runner owns lifecycle,
+validation, checkpointing, best-attempt selection, timeout handling, and final
+classification.
 
 ## Lifecycle
 
-1. Receive target packet and lease.
-2. Build a compact context pack from local source, reports, resources, and PR
-   evidence.
-3. Decide which capabilities are justified by the evidence.
-4. Attempt source edits or focused experiments inside the write set.
-5. Run local validation and undo retained regressions.
-6. Report progress, facts, blockers, or a grounded stall.
-7. Release the lease and emit the wake event.
+1. Receive one target packet and active target claim.
+2. Build a compact context pack from local source, report/objdiff evidence,
+   resources, and PR evidence.
+3. Attempt source edits or focused experiments inside the explicit write set.
+4. Signal validation readiness with a compact checkpoint note, or simply reach
+   a worker turn boundary for runner validation.
+5. Runner validates the current workspace, records a checkpoint, and selects
+   the best selectable checkpoint so far.
+6. Exact checkpoints close the worker state as exact. Non-exact checkpoints
+   continue the same worker conversation while budget remains.
+7. Runner timeout closes with the best prior selectable checkpoint, or baseline
+   if none improved. Provider, infrastructure, or tool failures close as error
+   while preserving any prior selectable checkpoint.
+8. The closed worker state emits a wake event for scheduler and dashboard
+   follow-up.
 
 ## Worker Cycle
 
@@ -25,12 +34,12 @@ works inside one lease, records evidence, and exits with a durable report.
 +------------------+     +--------------------+     +------------------+
 | Target packet    |---->| Collect context    |---->| Hypothesis plan  |
 | - unit/symbol    |     | - report/objdiff   |     | - constraints    |
-| - budget         |     | - target asm       |     | - capabilities   |
-| - stop rule      |     | - current C        |     | - stop test      |
-| - write set      |     | - siblings         |     +--------+---------+
-+------------------+     | - headers/types    |              |
-                         | - PRs/docs         |              v
-                         | - past attempts    |     +--------+---------+
+| - claim id       |     | - target asm       |     | - capabilities   |
+| - stop rule:     |     | - current C        |     | - exact target   |
+|   exact only     |     | - siblings         |     +--------+---------+
+| - write set      |     | - headers/types    |              |
++------------------+     | - PRs/docs         |              v
+                         | - checkpoints      |     +--------+---------+
                          +--------------------+     | Attempt loop     |
                                                     | - focused edit   |
                                                     | - duplicate      |
@@ -39,39 +48,37 @@ works inside one lease, records evidence, and exits with a durable report.
                                                     |   search         |
                                                     | - permuter       |
                                                     |   handoff        |
-                                                    | - fact request   |
                                                     | - cleanup        |
                                                     +--------+---------+
                                                              |
                                                              v
                                                     +--------+---------+
-                                                    | Verify           |
-                                                    | - compile        |
-                                                    | - objdiff        |
-                                                    | - baseline cmp   |
-                                                    | - broaden only   |
-                                                    |   when needed    |
+                                                    | Runner validate |
+                                                    | - compile       |
+                                                    | - objdiff       |
+                                                    | - QA lint       |
+                                                    | - baseline cmp  |
                                                     +--------+---------+
                                                              |
                                 +----------------------------+----------------+
                                 |                                             |
                                 v                                             v
                       +---------+--------+                         +----------+-------+
-                      | Refine plan      |                         | Report shard     |
-                      | if evidence      |                         | - patch/delta    |
-                      | gets sharper     |                         | - facts/blockers |
-                      | and budget stays |                         | - wake event     |
-                      +---------+--------+                         +----------+-------+
-                                |                                             |
-                                +-------> attempt loop                         v
-                                                        scheduler/reducer update future
-                                                        target packets through state
+                      | Continue same    |                         | Close worker    |
+                      | worker session   |                         | state           |
+                      | with repair      |                         | - exact         |
+                      | feedback         |                         | - timeout       |
+                      +---------+--------+                         | - error         |
+                                |                                  +----------+-------+
+                                +-------> attempt loop                         |
+                                                                               v
+                                                        scheduler/dashboard consume
+                                                        worker-state evidence
 ```
 
-The worker can loop from verification back into planning while evidence is
-getting sharper and budget remains. New facts leave through durable reports and
-future target packets; workers do not coordinate through direct worker-to-worker
-chat.
+The worker can loop from validation back into planning while evidence is getting
+sharper and budget remains. New facts and blockers are evidence attached to the
+worker state; workers do not coordinate through direct worker-to-worker chat.
 
 ## Capabilities
 
@@ -88,101 +95,68 @@ results, and learned patterns rather than unreviewable random mutations.
 The full capability table and guardrails live in
 [worker capabilities](45-worker-capabilities.md).
 
-## Validation
+## Runner Validation
 
-Workers protect the run with local validation before reporting progress. They
-track the leased target and affected neighbors, run narrow checks, compare
-object or objdiff signal, and undo their own retained hunks when those hunks
-regress local evidence.
+Runner validation is the source of truth for progress. The runner captures a
+pre-worker baseline, diffs the claimed write set after each attempt, runs local
+validation, records a checkpoint, and decides whether that checkpoint is
+selectable.
 
-The worker return is also mechanically gated. The runner captures the write-set
-diff before the first worker attempt, then evaluates every returned report.
-`progress` and `score_candidate` reports are accepted only when the structured
-report includes a passed `local_regression_check`, no target regression, no
-neighbor regressions, baseline and final validation artifacts that exist on
-disk, and edited paths that remain inside the lease write set. A worker that
-returns `stalled_no_useful_guess` or `needs_fact` must not leave new write-set
-edits behind.
+A checkpoint records:
 
-If the post-return gate fails, the runner keeps the lease held and sends a
-`repair_request` back to the worker for a configurable number of repair turns.
-Only after the return passes or the repair budget is exhausted does the runner
-record the worker report, release file locks, and emit the wake event. An
-optional runner-owned post-return command can be configured for additional
-narrow validation before accepting `progress` or `score_candidate`.
+- Validation status, score before/after, delta, and exact-match flag.
+- Hard-gate result, build status, QA status, objdiff status, and failure
+  reasons.
+- Artifact paths for validation summaries, patches, and diffs.
+- Worker note metadata, facts, blockers, and post-validation feedback.
+
+Only checkpoints that pass hard gates and improve over the worker state's
+baseline are selectable. Best-checkpoint selection is deterministic: exact match
+wins, then highest target score, then earliest validation time. Failed or
+neutral checkpoints remain useful evidence, but they are not integration
+candidates.
 
 Runner-owned validation also runs the worker-side QA lint (the QA ship gate's
 L1 layer; see [score and PR handoff](60-score-and-pr-handoff.md)). The runner
 diffs the attempt's touched files against the pre-worker source snapshot and
-runs the deterministic `review_lint` maintainer-rejection scan over that diff,
-producing one of `clean`, `warnings`, `violations`, or `tool_unavailable`.
-Warnings and violations both demote an otherwise passing attempt to failed: a
-score-improving attempt that re-adds or leaves a QA finding is the exact
-failure mode this layer exists to stop, because the finding may be what
-inflates the score. Each finding is fed verbatim into the next repair prompt
-(rule, severity, `file:line`, message, violated standard, excerpt) plus the
-standing instruction that removing every QA lint finding is correct even when
-it lowers the match percentage. If findings survive the final attempt, the
-report is classified
-`runner_validation_qa_lint_failed` — a rework kind, so the target routes to
-`needs_rework` and stays re-queueable; it is never `tool_error` and never hits
-the error-target quarantine path. The lint itself fails open: on scanner
-infrastructure errors the attempt's score verdict is unchanged
-(`tool_unavailable` is recorded so operators can see the gate was blind),
-unlike the L2 ship gate, which fails closed.
+runs the deterministic maintainer-rejection scan over that diff. Findings
+become repair feedback. A score-improving attempt that re-adds or leaves a QA
+finding is rejected because the finding may be what inflated the score.
+
+Scanner infrastructure errors are recorded as blind spots rather than mass
+worker failures. The PR handoff gate remains stricter and fails closed.
 
 Global score integration happens outside the worker's local loop. A worker can
-surface a score candidate, but the run baseline changes only after the
-integration gate validates it.
+produce a selectable checkpoint, but the run baseline changes only after the
+integration and epoch gates validate it.
 
-## Report Outcomes
+## Worker State Outcomes
 
-Worker reports separate outcome into two fields:
+Worker state lifecycle status describes why execution ended:
 
-- `result`: what happened to the target. Valid values are `exact`, `improved`,
-  and `no_progress`.
-- `stop_reason`: why this worker is done with the current lease. Valid values
-  are `target_complete`, `needs_fact`, and `no_useful_hypothesis`.
+- **Exact**: runner validation selected an exact checkpoint.
+- **Timeout**: the runner-controlled timeout ended the attempt; the best prior
+  selectable checkpoint is preserved, or baseline is selected when none
+  improved.
+- **Error**: a provider, infrastructure, tool, build, parse, or session failure
+  blocked trustworthy evaluation. Prior selectable checkpoints remain usable.
+- **Cancelled**: an operator or process-control path stopped the worker before
+  normal lifecycle close.
 
-The UI renders these as combined outcome filters:
+Improvement, neutrality, regression, and exactness are validation/verdict facts,
+not worker-authored stop claims. The dashboard and knowledge curator read
+worker states and checkpoints rather than asking the worker to classify its own
+durable outcome.
 
-- Exact: `result: "exact"` or `stop_reason: "target_complete"`. The target
-  reached a 100% local match.
-- Improved / Stalled: `result: "improved"` and
-  `stop_reason: "no_useful_hypothesis"`. The worker retained positive score
-  movement, then exhausted evidence-backed next hypotheses.
-- Improved / Needs: `result: "improved"` and `stop_reason: "needs_fact"`. The
-  worker retained positive score movement, then hit a specific missing
-  fact/resource.
-- No Progress / Stalled: `result: "no_progress"` and
-  `stop_reason: "no_useful_hypothesis"`. The worker did not retain positive
-  score movement and has no evidence-backed next move.
-- No Progress / Needs: `result: "no_progress"` and
-  `stop_reason: "needs_fact"`. The worker did not retain positive score movement
-  because a specific missing fact/resource blocks progress.
-- Needs Rework: the runner could not verify the return — the report failed the
-  structured acceptance gate or runner-owned validation, or repair attempts
-  were exhausted with reasons outstanding. The claim and the canonical
-  measurement disagree; the direction may still be promising, so the target
-  stays visible and re-queueable rather than being treated as failed.
-- Tool Error: a tool, build, parse, or session infrastructure failure blocked
-  trustworthy evaluation. This is the only category treated as a system
-  failure (it trips `--exit-on-worker-error` and babysit incident recovery).
+## Continuation Policy
 
-`report_type` remains the runner compatibility field for acceptance and wake
-events. `progress` and `score_candidate` describe accepted progress-style
-returns; they are not proof of score movement by themselves. `needs_fact` is used
-when the missing fact is the primary no-edit outcome. `stalled_no_useful_guess`
-is used when no retained progress remains and no specific missing fact is known.
-`needs_rework` is runner-assigned only — agents never self-report it — and marks
-gate-rejected returns. `tool_error` is reserved for infrastructure failures.
+A worker should continue while it has evidence-backed paths toward exact match
+and the runner keeps the session alive. When the runner rejects a checkpoint or
+accepts a non-exact checkpoint, the same worker conversation receives repair or
+continuation feedback. That feedback names the validation failure, QA finding,
+or non-exact score so the worker can refine without losing context.
 
-## Stall Policy
-
-A worker should stop when it cannot name an evidence-backed next hypothesis.
-Useful stalls are not failures. They preserve context, cool down the target, and
-turn missing constraints into fact-research work for the board.
-
-Workers should not keep spending budget on guesses after PRs, docs, source
-siblings, duplicate groups, resource evidence, and measured diff signal stop
-supporting a clear next move.
+Workers should not keep spending effort on unsupported guesses after PRs, docs,
+source siblings, duplicate groups, resource evidence, and measured diff signal
+stop supporting a clear next move. At timeout, the runner chooses the best
+validated state rather than trusting the worker's self-assessment.

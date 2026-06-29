@@ -72,11 +72,11 @@ Project
 |   |   +-- epochs
 |   |   |   +-- epoch
 |   |   |       +-- admitted target set
-|   |   |       +-- ready queue
-|   |   |       +-- workers
-|   |   |       |   +-- leases
-|   |   |       |   +-- reports
-|   |   |       |   +-- artifacts
+    |   |   |       +-- workers
+    |   |   |       |   +-- target claims
+    |   |   |       |   +-- worker states
+    |   |   |       |   +-- checkpoints
+    |   |   |       |   +-- artifacts
 |   |   |       +-- boundary checkpoint
 |   |   |       +-- repair routing
 |   |   +-- run summary
@@ -118,6 +118,95 @@ project object in this model; it is the autonomous work phase inside the
 session. PR mode is the second half of the same session, not a separate
 afterthought.
 
+## Implemented Canonical State
+
+The active session is represented by the SQLite `project_sessions` table. This
+table is the canonical workflow state root for a project session; it does not
+replace detailed run, PR, save-point, process, or kernel trace records.
+
+```text
+project_sessions
+  id
+  project_id
+  session_uuid
+  status                  idle | active | blocked | complete
+  phase                   preparing | running | pr | complete
+  active_run_id
+  base_ref
+  base_sha
+  preparing_state_json
+  running_state_json
+  pr_state_json
+  complete_state_json
+  process_state_json
+  kernel_trace_json
+  created_at
+  updated_at
+  completed_at
+```
+
+A partial unique index enforces one active or blocked project session per
+project. Completed sessions remain as history and can be superseded by the next
+active row.
+
+Each phase JSON object stores the same small envelope:
+
+```text
+status
+subphase
+subphase_detail
+started_at
+completed_at
+blockers
+```
+
+The active phase selects the active phase object. `activeSubphase` in API/UI
+payloads is derived from `phase` plus the phase JSON object; it is not a second
+stored truth source. Known subphase vocabularies remain phase-local and include
+an `other` escape hatch with `subphase_detail`.
+
+`running_state_json` records stop reasons and manual stop modes. The accepted
+stop reasons are `hit_100_percent`, `manual_stop`, `error`, and `other`; manual
+stops can be `finish_epoch` or `hard_stop`. A hard stop or error can be forced
+into PR, but PR always starts at `final_build`. QA and later PR subphases are
+guarded until the final build is recorded complete.
+
+`process_state_json` stores enough `melee-live` identity to reconnect a
+detached process after the UI/server restarts: process name, project id,
+session uuid, status, pid/process group, process file path, command, repo root,
+state dir, graph DB path, and timestamps. `kernel_trace_json` stores the
+session UUID, derived app session id, and container pointers.
+
+The server exposes this state through a `projectSession` dashboard payload and
+`/api/project-session/*` operator gates. The dashboard renders phase,
+subphase, gates, blockers, process recovery, and trace identity from that
+server-owned projection instead of inferring workflow state from scattered
+run/process/PR evidence.
+
+The implemented source ownership is role-based and uses three server roots:
+
+- `apps/server/src/core/project-session/`: state vocabulary, defaults,
+  normalization, gates, blockers, projection, durable store, stable identifiers,
+  and process-state shaping.
+- `apps/server/src/core/session-runtime/`: the thin phase dispatcher and
+  phase-owned runtime modules for `preparing`, `running`, `pr`, and
+  `complete`.
+- `apps/server/src/core/knowledge/`, `apps/server/src/core/tools/`, and
+  `apps/server/src/core/agent-catalog/`: domain knowledge, tool profiles, prompt
+  registry contracts, and role definitions.
+- `apps/server/src/core/project-registry/`: project descriptors, resolved
+  project defaults, and project-aware job option parsing.
+- `apps/server/src/application/dashboard/`: dashboard read models and
+  operation/process status projections.
+- `apps/server/src/application/jobs/`: server job dispatch entrypoint.
+- `apps/server/src/infrastructure/`: raw adapters for shell execution, SQLite,
+  env loading, kernel/Pi runtime, managed process control, HTTP, and saved
+  process files.
+- `apps/server/src/api/project-session/`: HTTP route boundary for canonical
+  session reads and operator gates.
+- `apps/server/src/api/routes/`: dashboard, run, process-control, PR handoff,
+  kernel, knowledge, and validation HTTP route boundaries.
+
 ## Branch Shape
 
 ```text
@@ -135,7 +224,7 @@ upstream baseline
 ```
 
 The session branch is the workbench for the whole session. Run mode writes
-there under epoch, lease, and score-gate rules. PR mode does not keep adding
+there under epoch, claim, and score-gate rules. PR mode does not keep adding
 new autonomous run work; it packages the verified part of that branch into
 reviewable local PR worktrees first. Only an explicit bounded publication batch
 pushes local-ready PR objects as GitHub drafts; the remaining local PRs stay
@@ -159,7 +248,7 @@ run mode active
     +-- epoch admitted
     |       |
     |       v
-    |   workers run target leases
+    |   workers run target claims
     |       |
     |       v
     |   epoch checkpoint and refresh
@@ -211,7 +300,7 @@ each fact belongs to.
 
 The project gate should block a new session when any of these are true:
 
-- The active session is still running workers or has unreleased leases.
+- The active session is still running workers or has active claims.
 - The active session is in PR mode with planned, draft, open, or
   changes-requested PRs.
 - The active session has merged PRs that have not been intaken and reconciled.
@@ -254,7 +343,7 @@ Dashboard
 |   +-- bounds and run setup
 |   +-- epoch table
 |   +-- worker table
-|   +-- queue and leases
+|   +-- admitted targets and claims
 |   +-- run logs
 |
 +-- PR Mode
@@ -282,7 +371,7 @@ Run mode should optimize for live control and observability:
 
 - Is the run allowed to continue?
 - Which epoch is active?
-- Which workers hold leases?
+- Which workers hold claims?
 - What did the last boundary checkpoint prove?
 - What bound will stop the run?
 
@@ -318,5 +407,5 @@ the work surface, not the identity of the session.
 - Whether a session may be abandoned while PRs are open, and what explicit
   cleanup state that requires.
 - Whether the human review loop should be per PR slice, session-wide, or both.
-- Whether PR mode should allow limited repair workers under PR-slice leases, or
+- Whether PR mode should allow limited repair workers under PR-slice claims, or
   only named fixer/reviewer agents.

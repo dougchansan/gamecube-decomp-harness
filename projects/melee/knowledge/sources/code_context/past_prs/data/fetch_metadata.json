@@ -1,0 +1,20 @@
+{
+  "schema_version": "melee_pr_dump_fetch_metadata_v1",
+  "repo": "doldecomp/melee",
+  "activity": "created",
+  "since": "2026-06-29",
+  "since_source": "last_sync",
+  "months": 3,
+  "limit": 1000,
+  "query": "created:>=2026-06-29",
+  "dump_root": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/projects/melee/knowledge/sources/code_context/past_prs/data",
+  "fetched_at": "2026-06-29T15:54:41Z",
+  "discovered_pr_count": 1,
+  "fetched_pr_count": 0,
+  "fetched_or_refreshed_pr_count": 0,
+  "postmortem_mode": "off",
+  "postmortem_scope": "fetched",
+  "fetch_jobs": 16,
+  "postmortem_jobs": 16,
+  "layout_note": "The sync window is recorded here instead of being encoded in a dump folder name. PR slices live under prs/pr-NNNN with raw/, extracted/, and postmortem/ subfolders."
+}

@@ -1,0 +1,45 @@
+{
+  "id": "source_permuter",
+  "title": "Source permutation and mutation preview",
+  "trust_tier": "tool_evidence",
+  "description": "Run or preview tool-local source-level mutations that compile candidates with MWCC and score them with objdiff.",
+  "operation_mode": "tool_local_impl",
+  "runner_status": "on_demand",
+  "status_message": "Tool-local implementation: APIs invoke toolpacks/gamecube-decomp/_impl/gamecube/tools/permute.py and src_mutate.py with safe non-mutating defaults.",
+  "limitations": [
+    "Full permutation search can be expensive and requires tree-sitter, libclang, MWCC compiler artifacts, objdiff-cli JSON diff support, current build artifacts, and an MWCC runner. The runner may be repo-local wibo, wibo on PATH, MWCC_WIBO, or Wine.",
+    "Worker-facing permutation defaults to --apply never so candidates are evidence, not silent checkout edits.",
+    "Mutation preview is syntactic source-shape exploration; compile and objdiff are still required before retaining a source edit."
+  ],
+  "commands": {
+    "status": "python3 toolpacks/gamecube-decomp/source_editing/source_permuter/api/status.py --repo-root <repo_root> --json",
+    "run": "python3 toolpacks/gamecube-decomp/source_editing/source_permuter/api/run.py --repo-root <repo_root> --function <symbol> --json",
+    "replay": "python3 toolpacks/gamecube-decomp/source_editing/source_permuter/api/replay.py --repo-root <repo_root> --replay <recipe.json> --json",
+    "preview_mutation": "python3 toolpacks/gamecube-decomp/source_editing/source_permuter/api/preview_mutation.py --repo-root <repo_root> --source-path <src.c> --function <symbol> --json"
+  },
+  "capabilities": [
+    "source_permutation",
+    "mutation_preview",
+    "objdiff_scored_search",
+    "replay_recipe"
+  ],
+  "category": "source_editing",
+  "path": "source_editing/source_permuter",
+  "process_role": "source_shape_exploration",
+  "usage": {
+    "invocation_mode": "on_demand",
+    "mutates_source": "conditional",
+    "blocks_on_failure": false,
+    "triggers": [
+      "near_match_stuck",
+      "candidate_search_needed",
+      "mutation_preview_requested"
+    ],
+    "outputs": [
+      "candidate_diff",
+      "score_delta",
+      "replay_recipe"
+    ],
+    "agent_guidance": "Use as a bounded source-shape search surface. Default worker calls should not apply candidates directly."
+  }
+}

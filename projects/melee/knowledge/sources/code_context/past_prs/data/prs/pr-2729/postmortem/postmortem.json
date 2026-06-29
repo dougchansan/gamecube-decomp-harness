@@ -1,0 +1,433 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2729",
+  "pr": {
+    "number": 2729,
+    "title": "10/14: MN Misc Menus",
+    "url": "https://github.com/doldecomp/melee/pull/2729",
+    "state": "MERGED",
+    "author": "fjooord",
+    "created_at": "2026-06-17T16:43:32Z",
+    "merged_at": "2026-06-21T22:31:55Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Implementation-local C decomp/matching improvements across miscellaneous menu translation units under src/melee/mn, with review-driven cleanup for CSSAllData placement, mndiagram .sdata2 ordering anchors, and typed animation table access.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "cleanup",
+      "decomp-matching",
+      "headers",
+      "naming",
+      "types-structs",
+      "matching-tactics"
+    ],
+    "systems": [
+      "melee-core",
+      "mn-menu"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/mn/mncharsel.c",
+      "role": "Character select decomp cleanup; introduced CSSAllData typedef at file scope and adjusted CSS icon/model access patterns.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mncharsel.c added=117 deleted=93 hunks=15",
+        "raw_diff: mncharsel.c adds typedef CSSAllData near includes and uses CSSAllData* all_data in mnCharSel_8025FDEC",
+        "review_comments.md: ribbanya requested moving struct fix to top of file",
+        "human_pr_text.md: author says CSSAllData moved to file scope"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mndatadel.c",
+      "role": "Data delete warning modal and related menu function matching cleanup; helper and local lifetime/stack-shape edits.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mndatadel.c added=147 deleted=111 hunks=17",
+        "raw_diff: adds mnDataDel_GetWarnData inline helper and changes local declarations/PAD_STACK in fn_8024ECCC, mnDataDel_8024EEC0, fn_8024F318"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mndiagram.c",
+      "role": "Diagram menu matching cleanup; .sdata2 ordering and animation table typing were reviewed.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mndiagram.c added=33 deleted=12 hunks=10",
+        "review_comments.md: reviewer requested separate static order_sdata2 helper and S32_TO_F32",
+        "review_comments.md: reviewer requested changing mnDiagram_803EE728 type declaration instead of casting",
+        "human_pr_text.md: author says .sdata2 anchors split into order_sdata2 and raw bias literal replaced with S32_TO_F32"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mndiagram.static.h",
+      "role": "Small static header adjustment associated with mndiagram changes.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mndiagram.static.h added=0 deleted=1 hunks=1"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mndiagram3.c",
+      "role": "Small diagram3 implementation adjustment.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mndiagram3.c added=2 deleted=2 hunks=2"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnevent.c",
+      "role": "Event menu decomp/matching cleanup.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mnevent.c added=43 deleted=39 hunks=5",
+        "text_corpus.jsonl: bot report lists mnEvent_8024D15C and mnEvent_8024E524 improvements"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mninfo.c",
+      "role": "Info menu decomp/matching cleanup.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mninfo.c added=117 deleted=96 hunks=10",
+        "text_corpus.jsonl: bot report lists mnInfo_80251AFC, fn_80251FE4, fn_802523D8, fn_80252548, mnInfo_80252758 improvements"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnsnap.c",
+      "role": "Snapshot menu decomp/matching cleanup.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mnsnap.c added=119 deleted=98 hunks=22",
+        "text_corpus.jsonl: bot report lists multiple mnSnap improvements"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnsound.c",
+      "role": "Sound menu decomp/matching cleanup.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mnsound.c added=69 deleted=31 hunks=10",
+        "text_corpus.jsonl: bot report lists mnSound_802492CC, fn_80249A1C, mnSound_80249C08 improvements"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnsoundtest.c",
+      "role": "Sound test menu decomp/matching cleanup including a new full match.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mnsoundtest.c added=59 deleted=50 hunks=7",
+        "text_corpus.jsonl: bot report lists mnSoundTest_8024BEE0 as 100.00% and improvements in fn_8024B2B0/fn_8024AED0"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mnvibration.c",
+      "role": "Vibration menu decomp/matching cleanup.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/melee/mn/mnvibration.c added=117 deleted=100 hunks=20",
+        "text_corpus.jsonl: bot report lists fn_80247510, fn_802487A8, fn_80248A78 improvements"
+      ]
+    }
+  ],
+  "what_changed": [
+    "Touched 11 files under src/melee/mn, mostly implementation C files for miscellaneous menu screens.",
+    "Improved matching for character select, data delete, diagram, event, info, snapshot, sound, sound test, and vibration menu code without shared header or build-system churn according to PR body.",
+    "Introduced CSSAllData as a file-scope typedef in mncharsel.c after review flagged an inline function-local struct definition.",
+    "Adjusted mndiagram constant-pool/.sdata2 ordering approach after review: author reports a separate order_sdata2 helper and S32_TO_F32 replaced a raw bias literal.",
+    "Adjusted mndiagram popup animation table typing after review: author reports call sites use a typed table helper instead of casting mnDiagram_803EE728.",
+    "Verification reported by PR body: clang-format, tools/check main.py, ninja, ninja dol_diff, ninja changes_all, structured report sweep with regressions=0.",
+    "Bot report showed 4 new matches and 30 improvements in unmatched items, including mnSoundTest_8024BEE0 and mndiagram .sdata2 reaching 100%."
+  ],
+  "smart_moves": [
+    {
+      "text": "Kept the PR scoped to implementation-local menu translation units and avoided shared header/build-system churn.",
+      "evidence_refs": [
+        "human_pr_text.md: Scope and PR Shape sections"
+      ]
+    },
+    {
+      "text": "Responded to type-shape review by moving a recovered aggregate typedef to file scope so the function body uses a shared typedef rather than defining a struct inline.",
+      "evidence_refs": [
+        "review_comments.md: Fix this at the top of the file, not the function body",
+        "human_pr_text.md: Addressed review comments in 1dfed6ae4"
+      ]
+    },
+    {
+      "text": "For mndiagram .sdata2 ordering, isolated ordering anchors into a dedicated static helper instead of leaving dead literal anchors inside the functional body.",
+      "evidence_refs": [
+        "review_comments.md: separate static function order_sdata2 suggestion",
+        "human_pr_text.md: Split the .sdata2 ordering anchors into a separate order_sdata2 helper"
+      ]
+    },
+    {
+      "text": "Changed a table declaration/access pattern rather than relying on an expression-site cast for mnDiagram_803EE728.",
+      "evidence_refs": [
+        "review_comments.md: Change the type declaration of mnDiagram_803EE728 instead of casting",
+        "human_pr_text.md: Reworked diagram popup animation table typing"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When a recovered temporary struct models a shared data layout used by a function, prefer a file-scope typedef over defining the struct inside the function body.",
+      "scope": [
+        "src/melee/mn/mncharsel.c",
+        "menu TU-local recovered structs"
+      ],
+      "evidence_refs": [
+        "review_comments.md: mncharsel.c reviewer comment",
+        "raw_diff: CSSAllData typedef added near top of mncharsel.c",
+        "human_pr_text.md: CSSAllData moved to file scope"
+      ]
+    },
+    {
+      "lesson": "For unavoidable .sdata2 constant-pool ordering anchors, keep the hack isolated and documented in a separate static helper instead of mixing dead anchors into normal function logic.",
+      "scope": [
+        "src/melee/mn/mndiagram.c",
+        ".sdata2 ordering hacks"
+      ],
+      "evidence_refs": [
+        "review_comments.md: reviewer suggested order_sdata2 helper",
+        "human_pr_text.md: author says anchors were split into order_sdata2"
+      ]
+    },
+    {
+      "lesson": "When a data table has a recoverable type, update the declaration or provide typed access instead of casting at the call site.",
+      "scope": [
+        "src/melee/mn/mndiagram.c",
+        "typed table access"
+      ],
+      "evidence_refs": [
+        "review_comments.md: Change the type declaration of mnDiagram_803EE728 instead of casting",
+        "human_pr_text.md: Reworked diagram popup animation table typing"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Use a semantic TU-local typedef such as CSSAllData when the aggregate layout is evidenced by neighboring fields and repeated access, rather than leaving a function-local anonymous struct.",
+      "evidence_refs": [
+        "raw_diff: typedef struct CSSAllData with gnw_name, mode_info, icons",
+        "human_pr_text.md: kept mnCharSel_8025FDEC using the shared typedef"
+      ]
+    },
+    {
+      "convention": "Helper name order_sdata2 was reviewer-suggested for a narrow .sdata2 order hack.",
+      "evidence_refs": [
+        "review_comments.md: suggested static void order_sdata2(void)"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Used local variable type/lifetime reshaping and PAD_STACK in menu functions to improve matching; evidence shows these edits in diff but does not explain each individual codegen reason.",
+      "evidence_refs": [
+        "raw_diff: mndatadel.c PAD_STACK changes and added locals in fn_8024F318",
+        "raw_diff: mncharsel.c temporary pointers name_color, used_name_color, ddata, hval_f"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "tactic": "Used .sdata2 ordering anchors for mndiagram constants; review required isolating them into a static helper and using S32_TO_F32 for the s32-to-f32 bias constant.",
+      "evidence_refs": [
+        "review_comments.md: .sdata2 order hack helper suggestion",
+        "human_pr_text.md: raw bias literal replaced with S32_TO_F32"
+      ],
+      "confidence": "high"
+    },
+    {
+      "tactic": "Changed declarations/types instead of retaining expression-site casts where a table type was recoverable.",
+      "evidence_refs": [
+        "review_comments.md: mnDiagram_803EE728 type declaration comment",
+        "human_pr_text.md: typed table helper instead of casting"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "review_feedback": [
+    {
+      "path": "src/melee/mn/mncharsel.c",
+      "reviewer": "ribbanya",
+      "feedback": "Fix the recovered CSSAllData struct at the top of the file, not in the function body.",
+      "resolution_evidence": [
+        "human_pr_text.md: Moved CSSAllData to file scope and kept mnCharSel_8025FDEC using the shared typedef",
+        "raw_diff: CSSAllData typedef appears near top of mncharsel.c"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mndiagram.c",
+      "reviewer": "ribbanya",
+      "feedback": "Create a separate static order_sdata2 helper for .sdata2 order anchors and use S32_TO_F32 instead of the raw bias literal.",
+      "resolution_evidence": [
+        "human_pr_text.md: Split .sdata2 ordering anchors into order_sdata2 and replaced raw bias literal with S32_TO_F32"
+      ]
+    },
+    {
+      "path": "src/melee/mn/mndiagram.c",
+      "reviewer": "ribbanya",
+      "feedback": "Change the type declaration of mnDiagram_803EE728 instead of casting it at the use site.",
+      "resolution_evidence": [
+        "human_pr_text.md: Reworked diagram popup animation table typing so call sites use the typed table helper instead of casting mnDiagram_803EE728"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2729",
+    "10/14 MN Misc Menus",
+    "src/melee/mn",
+    "mncharsel.c",
+    "mndatadel.c",
+    "mndiagram.c",
+    "mndiagram.static.h",
+    "mndiagram3.c",
+    "mnevent.c",
+    "mninfo.c",
+    "mnsnap.c",
+    "mnsound.c",
+    "mnsoundtest.c",
+    "mnvibration.c",
+    "CSSAllData",
+    "mnCharSel_8025FDEC",
+    "mnDiagram_803EE728",
+    "order_sdata2",
+    "S32_TO_F32",
+    ".sdata2 order hack",
+    "constant-pool anchors",
+    "typed table helper",
+    "expression-site cast",
+    "PAD_STACK",
+    "mnSoundTest_8024BEE0",
+    "mnDiagram_80243434",
+    "mnDiagram_802437E8"
+  ],
+  "follow_up_queries": [
+    "CSSAllData mnCharSel_8025FDEC file scope typedef",
+    "order_sdata2 S32_TO_F32 mndiagram .sdata2",
+    "mnDiagram_803EE728 typed table helper cast",
+    "PAD_STACK mndatadel fn_8024F318 menu matching",
+    "mn menu implementation-local decomp matching PR2729"
+  ],
+  "evidence_quality": {
+    "status": "strong",
+    "evidence_refs": [
+      "metadata_json: PR number/title/state/author/timestamps and changed files",
+      "human_pr_text.md: PR scope, verification, and review resolution comment",
+      "review_comments.md: 3 concrete review comments",
+      "raw_diff: excerpts for mncharsel.c and mndatadel.c plus mndiagram reviewed hunks",
+      "text_corpus.jsonl: bot report with match improvements and review states"
+    ],
+    "notes": [
+      "The full raw diff is truncated in the loaded slice, so detailed file-by-file edits outside visible excerpts are summarized only from changed-file metadata and bot report.",
+      "Verification claims are taken from PR body and comments; no independent build or objdiff was run during intake.",
+      "Review intent is limited to the three loaded review comments and the later approval state; no unstated reviewer rationale is inferred.",
+      "The mndiagram final code is not fully shown in the diff excerpt, but the author explicitly reported the review resolutions in a later issue comment."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "pr_lesson",
+        "title": "Recovered aggregate typedefs belong at file scope when used as a shared TU-local type",
+        "text": "PR #2729 review rejected defining CSSAllData inside mnCharSel_8025FDEC and the author resolved it by moving CSSAllData to file scope while using the shared typedef in the function.",
+        "scope": [
+          "src/melee/mn/mncharsel.c",
+          "type recovery",
+          "TU-local typedefs"
+        ],
+        "evidence_refs": [
+          "review_comments.md: Fix this at the top of the file, not the function body",
+          "human_pr_text.md: Moved CSSAllData to file scope"
+        ]
+      },
+      {
+        "record_type": "pr_lesson",
+        "title": "Prefer typed declarations/accessors over call-site casts for recovered tables",
+        "text": "PR #2729 review requested changing mnDiagram_803EE728's type declaration rather than casting it at the use site; the author reported reworking popup animation table typing so call sites use a typed table helper.",
+        "scope": [
+          "src/melee/mn/mndiagram.c",
+          "typed table access"
+        ],
+        "evidence_refs": [
+          "review_comments.md: Change the type declaration of mnDiagram_803EE728 instead of casting",
+          "human_pr_text.md: typed table helper instead of casting"
+        ]
+      },
+      {
+        "record_type": "pr_lesson",
+        "title": "Isolate .sdata2 ordering anchors in a helper",
+        "text": "PR #2729 review asked for mndiagram .sdata2 constant-pool anchors to live in a separate static order_sdata2 helper and to use S32_TO_F32 rather than a raw bias literal.",
+        "scope": [
+          "src/melee/mn/mndiagram.c",
+          ".sdata2 ordering"
+        ],
+        "evidence_refs": [
+          "review_comments.md: order_sdata2 helper suggestion",
+          "human_pr_text.md: anchors split into order_sdata2 and raw bias literal replaced"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Recovered local structs should not be hidden inside function bodies when they are reusable TU types",
+        "text": "Consider adding an example under typed access/naming standards: if a recovered aggregate layout is used as a stable TU-local type, define a named typedef at file scope instead of declaring a one-off struct inside a function body.",
+        "source_path": null,
+        "scope": [
+          "type recovery",
+          "TU-local typedef placement",
+          "src/melee/mn/mncharsel.c"
+        ],
+        "evidence_refs": [
+          "review_comments.md: Fix this at the top of the file, not the function body",
+          "human_pr_text.md: Moved CSSAllData to file scope"
+        ],
+        "reason": "The review comment is concrete and reusable, but curator should decide whether it belongs as a global standard or only as a path-local lesson."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Isolate constant-pool/.sdata2 order hacks and use project macros for special literals",
+        "text": "Consider adding a standards example: when constant-pool anchors are needed for .sdata2 ordering, isolate them in a small documented static helper such as order_sdata2 and prefer existing macros such as S32_TO_F32 over raw magic literals.",
+        "source_path": null,
+        "scope": [
+          ".sdata2",
+          "constant-pool anchors",
+          "matching tactics"
+        ],
+        "evidence_refs": [
+          "review_comments.md: reviewer suggested order_sdata2 and S32_TO_F32",
+          "human_pr_text.md: author reports implementing this"
+        ],
+        "reason": "This is supported by review evidence and aligns with existing matching-tactics and literals standards, but should be curated before becoming a general rule."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "mndiagram.c uses order_sdata2-style helper for .sdata2 ordering",
+        "text": "PR #2729 indicates src/melee/mn/mndiagram.c needed .sdata2 ordering anchors for -1.0f and the s32-to-f32 bias, later isolated into order_sdata2 with S32_TO_F32.",
+        "source_path": "src/melee/mn/mndiagram.c",
+        "scope": [
+          "src/melee/mn/mndiagram.c",
+          ".sdata2 ordering"
+        ],
+        "evidence_refs": [
+          "review_comments.md: .sdata2 order hack helper suggestion",
+          "human_pr_text.md: anchors split into order_sdata2"
+        ],
+        "reason": "May be useful as path-local context if future mndiagram edits encounter the same data-order issue."
+      }
+    ],
+    "rejection_notes": [
+      "Do not generalize that all constant-pool anchors are acceptable; this PR shows a reviewed narrow exception with explicit matching context.",
+      "Do not infer that PAD_STACK/local lifetime tactics in the visible diff are preferred style; the PR evidence shows their presence and match improvements but not detailed justification for each instance.",
+      "Do not treat the changed files as having no remaining mismatches; bot report lists improvements and some new 100% items, not universal full matching."
+    ]
+  },
+  "confidence": 0.86,
+  "agent_runtime": {
+    "runner": "orchestrator_kernel_pr_indexer",
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "orchestrator_state_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/projects/melee/state",
+    "orchestrator_run_id": "08bfe41e-1b7c-4685-8646-dff5e02a5dab",
+    "orchestrator_project_id": "melee",
+    "orchestrator_prepare_intake": true,
+    "orchestrator_kernel_database_url_configured": true,
+    "legacy_session_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/.pi-sessions/pr-review"
+  }
+}

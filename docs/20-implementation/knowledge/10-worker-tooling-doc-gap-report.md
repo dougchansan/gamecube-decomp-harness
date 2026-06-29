@@ -1,7 +1,7 @@
 ---
 covers: Worker-facing tool discoverability for decomp knowledge tools
 concepts: [worker-tools, available-tools, knowledge-tools, prompt-surface]
-code-ref: packages/agents/src/tools/profile-data.ts, packages/agents/src/agents/run/worker/templates
+code-ref: apps/server/src/core/tools/profiles, apps/server/src/core/tools/wrappers, apps/server/src/core/agent-catalog/agents/running/worker/context.ts
 ---
 
 # Worker Tooling Prompt Surface
@@ -17,21 +17,28 @@ Worker launches attach first-class Pi tools from the default worker tool profile
 The worker user prompt also includes a generated `<available_tools>` block so the
 prompt artifact names the same callable tools in a compact, readable form.
 
-`packages/agents/src/tools/profile-data.ts` owns:
+`apps/server/src/core/tools/profiles/defaults.ts` owns the default
+role tool bundles, including worker tool order.
 
-- The default worker tool order.
-- The worker-facing `provider`, `type`, and `useWhen` labels used by the prompt.
+Wrapper-local metadata files own the worker-facing `provider`, `type`, and
+`useWhen` labels used by the prompt:
+`apps/server/src/core/tools/metadata/knowledge.ts` for
+knowledge-source wrappers and
+`apps/server/src/core/tools/metadata/capabilities.ts` for
+callable decomp capabilities.
 
-`packages/agents/src/tools/profiles.ts` resolves the active profile, builds the
-actual Pi tool definitions, and renders `<available_tools>` from those resolved
-tools. This keeps the prompt text aligned with the tools Pi can call.
+`apps/server/src/core/tools/profiles/index.ts` resolves the active
+profile, builds the actual Pi tool definitions, and renders
+`<available_tools>` from those resolved tools. This keeps the prompt text
+aligned with the tools Pi can call.
 
-`packages/agents/src/agents/run/worker/templates/system.md` owns the universal worker
+`apps/server/src/core/agent-catalog/agents/running/worker/prompt.ts` owns the universal worker
 contract: edit boundary, evidence priority, validation, local regression ledger,
 stop conditions, and JSON output shape.
 
-`packages/agents/src/agents/run/worker/templates/initial_user.md` owns the target packet:
-current state, available tools, standards, embedded target file, and the task.
+`apps/server/src/core/agent-catalog/agents/running/worker/context.ts` owns the
+target packet: current state, available tools, standards, embedded target file,
+and the task.
 
 ## Worker Tool Policy
 
@@ -54,7 +61,8 @@ should be reported as weak evidence rather than converted into source churn.
 ## Related
 
 - [Knowledge overview](00-overview.md)
-- `packages/agents/src/tools/profile-data.ts`
-- `packages/agents/src/tools/profiles.ts`
-- `packages/agents/src/agents/run/worker/templates/system.md`
-- `packages/agents/src/agents/run/worker/templates/initial_user.md`
+- `apps/server/src/core/tools/profiles/`
+- `apps/server/src/core/tools/wrappers/knowledge.ts`
+- `apps/server/src/core/tools/wrappers/capabilities.ts`
+- `apps/server/src/core/agent-catalog/agents/running/worker/prompt.ts`
+- `apps/server/src/core/agent-catalog/agents/running/worker/context.ts`

@@ -1,0 +1,17 @@
+{
+  "number": 2765,
+  "title": "gronett down to 2 non-data matches",
+  "state": "MERGED",
+  "createdAt": "2026-06-28T13:25:31Z",
+  "updatedAt": "2026-06-28T14:35:14Z",
+  "mergedAt": "2026-06-28T14:35:14Z",
+  "closedAt": "2026-06-28T14:35:14Z",
+  "author": "jurrejelle",
+  "url": "https://github.com/doldecomp/melee/pull/2765",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 1337
+  }
+}

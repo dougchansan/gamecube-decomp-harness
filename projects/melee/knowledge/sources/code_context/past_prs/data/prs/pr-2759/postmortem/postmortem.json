@@ -1,0 +1,187 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2759",
+  "pr": {
+    "number": 2759,
+    "title": "Link `itpikachuthunder`",
+    "url": "https://github.com/doldecomp/melee/pull/2759",
+    "state": "MERGED",
+    "author": "ribbanya",
+    "created_at": "2026-06-25T02:48:22Z",
+    "merged_at": "2026-06-25T02:57:44Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2759 was a one-line configure.py linkage update that moved melee/it/items/itpikachuthunder.c from NonMatching to Matching in the MatchingFor object list. The loaded evidence includes no source-body changes, no review comments, and only a bot progress report plus a brief issue comment.",
+  "change_classification": {
+    "primary_type": "linkage_status_update",
+    "categories": [
+      "code-change",
+      "build-configuration",
+      "matching-status"
+    ],
+    "systems": [
+      "configure.py",
+      "items",
+      "itpikachuthunder"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "configure.py",
+      "role": "Build/link configuration changed to classify melee/it/items/itpikachuthunder.c as Matching instead of NonMatching.",
+      "evidence_refs": [
+        "changed_files.jsonl: configure.py added=1 deleted=1 hunks=1",
+        "raw_diff.diff: Object(NonMatching, \"melee/it/items/itpikachuthunder.c\") changed to Object(Matching, \"melee/it/items/itpikachuthunder.c\")"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "In configure.py inside MatchingFor, the itpikachuthunder item object was changed from NonMatching to Matching.",
+      "evidence_refs": [
+        "raw_diff.diff"
+      ]
+    },
+    {
+      "text": "No C source diff for melee/it/items/itpikachuthunder.c is present in this PR slice; the PR only updates its build/matching classification.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff.diff"
+      ]
+    },
+    {
+      "text": "The bot report for GALE01 shows linked code increased by 1908 bytes and linked data increased by 93 bytes for the PR comparison.",
+      "evidence_refs": [
+        "text_corpus.jsonl: decomp-dev[bot] issue comment created_at=2026-06-25T02:52:11Z"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Kept the PR scoped to the linkage-status flip for one object file, avoiding unrelated cleanup or source churn in the submitted diff.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "raw_diff.diff"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "text": "A file can be promoted from NonMatching to Matching through configure.py once its object is ready to link as matching; this PR is evidence of the repository workflow for reflecting that status in the build list, not evidence about the source tactics used to achieve the match.",
+      "scope": [
+        "configure.py",
+        "matching status updates"
+      ],
+      "evidence_refs": [
+        "raw_diff.diff",
+        "text_corpus.jsonl: bot report"
+      ],
+      "confidence": 0.82
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "The item source path/name used in the build list is melee/it/items/itpikachuthunder.c, preserving the lowercase item naming convention visible among neighboring item files.",
+      "evidence_refs": [
+        "raw_diff.diff"
+      ],
+      "confidence": 0.75
+    }
+  ],
+  "assembly_or_matching_tactics": [],
+  "review_feedback": [],
+  "searchable_terms": [
+    "PR 2759",
+    "Link itpikachuthunder",
+    "configure.py",
+    "MatchingFor",
+    "Object(Matching)",
+    "Object(NonMatching)",
+    "melee/it/items/itpikachuthunder.c",
+    "Pikachu Thunder item",
+    "GALE01",
+    "linked code",
+    "linked data",
+    "ribbanya"
+  ],
+  "follow_up_queries": [
+    "itpikachuthunder.c matching history",
+    "melee/it/items/itpikachuthunder.c",
+    "configure.py Object(Matching) itpikachuthunder",
+    "PRs changing itpikachuthunder before 2759",
+    "GALE01 linked code +1908 itpikachuthunder"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json",
+      "raw_diff.diff",
+      "changed_files.jsonl",
+      "text_corpus.jsonl",
+      "human_pr_text.md"
+    ],
+    "notes": [
+      "Strong evidence for the exact changed file and one-line configure.py status change.",
+      "No review comments are loaded, so there is no reviewer feedback to extract.",
+      "No C source-body diff is loaded, so source-level matching tactics, naming rationale, or decomp style lessons for itpikachuthunder.c cannot be inferred.",
+      "The PR body is empty in text_corpus.jsonl; human_pr_text.md captures only a later ':)' issue comment by dberweger2017, not the PR author's rationale.",
+      "The bot report gives linked-code and linked-data deltas, but the slice does not include detailed validation logs or objdiff output."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "pr_postmortem_fact",
+        "title": "PR 2759 linked itpikachuthunder as Matching",
+        "text": "PR #2759 changed configure.py so melee/it/items/itpikachuthunder.c is listed as Object(Matching, ...) instead of Object(NonMatching, ...) in MatchingFor.",
+        "scope": [
+          "configure.py",
+          "melee/it/items/itpikachuthunder.c"
+        ],
+        "evidence_refs": [
+          "raw_diff.diff",
+          "changed_files.jsonl"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "itpikachuthunder matching-status history",
+        "text": "Historical PR evidence shows PR #2759 promoted melee/it/items/itpikachuthunder.c from NonMatching to Matching in configure.py.",
+        "source_path": "melee/it/items/itpikachuthunder.c",
+        "scope": [
+          "matching-status-history",
+          "configure.py"
+        ],
+        "evidence_refs": [
+          "raw_diff.diff",
+          "metadata_json.pr.merged_at"
+        ],
+        "reason": "May be useful as a path-scoped historical fact, but should be curated rather than automatically promoted."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer how itpikachuthunder.c was matched; this PR slice contains no C source changes or objdiff details.",
+      "Do not treat the bot report alone as a full validation record beyond the displayed linked-code and linked-data deltas.",
+      "Do not infer reviewer approval rationale; no reviews or review comments are loaded."
+    ]
+  },
+  "confidence": 0.84,
+  "agent_runtime": {
+    "runner": "orchestrator_kernel_pr_indexer",
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "orchestrator_state_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/projects/melee/state",
+    "orchestrator_run_id": "08bfe41e-1b7c-4685-8646-dff5e02a5dab",
+    "orchestrator_project_id": "melee",
+    "orchestrator_prepare_intake": true,
+    "orchestrator_kernel_database_url_configured": true,
+    "legacy_session_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/.pi-sessions/pr-review"
+  }
+}

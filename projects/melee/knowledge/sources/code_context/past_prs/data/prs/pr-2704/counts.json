@@ -1,0 +1,17 @@
+{
+  "number": 2704,
+  "title": "1/14: GM mode flow",
+  "state": "MERGED",
+  "createdAt": "2026-06-15T18:51:17Z",
+  "updatedAt": "2026-06-17T05:51:14Z",
+  "mergedAt": "2026-06-17T05:51:14Z",
+  "closedAt": "2026-06-17T05:51:14Z",
+  "author": "fjooord",
+  "url": "https://github.com/doldecomp/melee/pull/2704",
+  "counts": {
+    "issue_comments": 2,
+    "review_comments": 9,
+    "reviews": 4,
+    "diff_bytes": 100457
+  }
+}

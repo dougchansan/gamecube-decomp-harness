@@ -1,25 +1,26 @@
 ---
-covers: Deterministic run scheduler responsibilities, run-loop process semantics, epoch queue cycle, wake handling, and worker report contract
-concepts: [scheduler, run-loop, board, queue, epochs, wake-events, reports]
+covers: Deterministic run scheduler responsibilities, run-loop process semantics, epoch admission, wake handling, and worker checkpoint flow
+concepts: [scheduler, run-loop, board, epochs, target-claims, worker-state, wake-events, checkpoints]
 ---
 
 # Run Scheduler Loop
 
 The run scheduler is the board-level control loop. It reads durable run state,
-refreshes queue priorities from the ranked board, admits deterministic work,
-starts workers under leases, and handles wake events without requiring a
-model-driven scheduling session in the hot path.
+refreshes epoch-target priorities from the ranked board, admits deterministic
+work, starts workers through target claims, and handles wake events without
+requiring a model-driven scheduling session in the hot path.
 
 ## Behavior
 
 Each scheduler pass has five phases:
 
-1. Board read: observe active leases, queued targets, worker reports, wake
-   events, locked sources, run status, and graph-ranked candidates.
-2. Queue maintenance: refill or refresh the ready queue according to explicit
-   epoch, ready-queue, candidate-window, lock, cooldown, and exhaustion policy.
-3. Worker realization: start workers only for open slots and schedulable queued
-   targets, with leases and file locks as the authority.
+1. Board read: observe active claims, epoch targets, worker states, checkpoints,
+   wake events, run status, and graph-ranked candidates.
+2. Epoch maintenance: create or refresh the active epoch according to explicit
+   epoch-size, worker-pool, candidate-window, cooldown, and exhaustion policy.
+3. Worker realization: start workers only for open slots and admitted,
+   unclaimed epoch targets, with target claims and explicit write sets as the
+   authority.
 4. Boundary checks: trigger fast run-evidence refreshes during an epoch and full
    truth rebuilds at epoch boundaries.
 5. Rest: mark handled wake events, record observable state, and sleep until
@@ -35,17 +36,17 @@ handling follow deterministic policy.
 +------------------+     +------------------+     +------------------+
 | Wake event       |---->| Board snapshot   |---->| Deterministic    |
 | - run started    |     | - ranked targets |     | scheduler policy |
-| - worker report  |     | - queue/leases   |     | admission/refill |
-| - pool pressure  |     | - locks/stalls   |     | refresh/routing  |
+| - worker closed  |     | - epoch targets  |     | admission/drain  |
+| - pool pressure  |     | - claims/states  |     | refresh/routing  |
 +--------+---------+     +------------------+     +--------+---------+
          ^                                                 |
          |                                                 v
          |                  +------------------+     +-----+------------+
          |                  | Durable state    |<----| Scheduler result |
-         |                  | - queue rows     |     | - admitted work  |
+         |                  | - epoch targets  |     | - admitted work  |
          |                  | - handled events |     | - refreshed rank |
          |                  | - epoch status   |     | - boundary state |
-         |                  | - reports        |     | - routing notes  |
+         |                  | - checkpoints    |     | - routing notes  |
          |                  +--------+---------+     +------------------+
          |                           |
          |                           v
@@ -54,15 +55,15 @@ handling follow deterministic policy.
 
 The run loop is the non-agent process component that gives the scheduler a
 resting shape. It checks durable events, runs one deterministic scheduler tick
-when an unhandled event exists, keeps worker slots filled from leaseable queue
-rows, runs maintenance cadence checks, and then sleeps without keeping a
+when an unhandled event exists, keeps worker slots filled from admitted epoch
+targets, runs maintenance cadence checks, and then sleeps without keeping a
 board-level model session alive.
 
 The scheduler does not perform source archaeology or source edits. Workers own
-target-local source work; the scheduler owns target admission, queue movement,
+target-local source work; the scheduler owns target admission, claim pressure,
 refresh cadence, boundary routing, and process realization.
 
-## Epoch Queue Cycle
+## Epoch Cycle
 
 An epoch is a bounded scheduling wave admitted from the freshest authoritative
 report and graph state available at epoch start.
@@ -73,14 +74,13 @@ Each epoch:
    schedulable unmatched target in `Full` mode. Admission scans the ranked board
    through the candidate window and expands when needed until the epoch target
    is satisfied or the board is exhausted.
-2. Ready-queue refill keeps immediately leaseable work available from the
-   admitted set. Queued-but-not-leased targets can receive priority refreshes
-   from graph-ranked evidence while the epoch is running.
-3. Workers lease targets. Active leases and file locks remain authoritative, so
-   queued work behind active locks does not bypass the lock model.
-4. Fast run-evidence refreshes can ingest completed worker reports, facts,
-   blockers, stalls, and deterministic curator output. Fast refresh updates
-   learning and ranking inputs only; it does not rebuild report truth.
+2. Priority refresh keeps admitted-but-unclaimed epoch targets aligned with
+   graph-ranked evidence while the epoch is running.
+3. Workers claim admitted targets. Each claim creates one worker state and an
+   explicit write set; checkpoints hang from that worker state.
+4. Fast run-evidence refreshes can ingest closed worker states, selected
+   checkpoints, facts, blockers, and deterministic curator output. Fast refresh
+   updates learning and ranking inputs only; it does not rebuild report truth.
 5. The epoch boundary pauses intake, rebuilds report truth, runs full
    maintenance, records a progress save point, removes exact matches from
    future scheduling, routes regressions to repair priority, and admits the next
@@ -91,8 +91,8 @@ Three sizes stay distinct:
 | Concept | Purpose |
 | --- | --- |
 | Epoch size | Total target admissions for one epoch. |
-| Ready queue size | Number of queued targets kept immediately leaseable. |
-| Candidate window | Number of ranked board candidates scanned to satisfy admission or refill. |
+| Worker pool size | Number of worker slots the run loop tries to keep active. |
+| Candidate window | Number of ranked board candidates scanned to satisfy admission. |
 
 ## Wake Events
 
@@ -100,40 +100,38 @@ Wake events are durable work notices, not requests for model judgment:
 
 - A run starts.
 - Active workers drop below the desired count.
-- A worker finishes, stalls, asks for a fact, hits provider trouble, or produces
-  a score candidate.
-- Queue pressure shows too little schedulable work or too many locks.
+- A worker state closes as exact, timeout, error, or cancellation.
+- Claim pressure shows too little schedulable admitted work for available worker
+  slots.
 - An epoch boundary, pause, retry, or stop condition is recorded.
 
-A scheduler tick handles one wake event by refreshing deterministic queue state,
+A scheduler tick handles one wake event by refreshing deterministic epoch state,
 recording the result, and marking the event handled. If no schedulable board
-work exists, the scheduler records queue pressure and backs off according to
+work exists, the scheduler records claim pressure and backs off according to
 policy rather than spinning or falling back to a model-driven replan.
 
 ## Worker Delegation
 
-A queued target is the bounded delegation contract. It names the unit, symbol,
-source path, current score evidence, priority, reason, and leaseable write set.
-The worker receives target-local context and validation expectations, but it
-does not receive board-level authority.
+An epoch target plus target claim is the bounded delegation contract. It names
+the unit, symbol, source path, current score evidence, priority, reason, and
+explicit write set. The worker receives target-local context and validation
+expectations, but it does not receive board-level authority.
 
-The scheduler can requeue a previously attempted target only when deterministic
-routing has authority to do so, such as regression repair, accepted new facts,
-or explicit operator policy. Normal board refill stays biased toward fresh,
-unlocked, distinct-source work.
+The scheduler can admit a previously attempted target into a later epoch only
+when deterministic routing has authority to do so, such as regression repair,
+accepted new facts, or explicit operator policy. Normal admission stays biased
+toward fresh, graph-ranked work.
 
-## Worker Report Contract
+## Worker Checkpoint Contract
 
-A worker report should tell the board what changed:
+The runner records worker progress as validation checkpoints:
 
-- Progress: verified source improvement or a candidate ready for the score
-  integration gate.
-- Facts: reusable type, symbol, source-shape, duplicate, resource, or PR-derived
-  evidence.
-- Negative results: grounded hypotheses that failed and should not be repeated.
-- Blockers: exact missing constraints that justify a fact/tool/research lane.
-- Stall state: evidence is exhausted and the worker should stop before random
-  mutation.
+- Validation status, score movement, exactness, and hard-gate result.
+- Patch/diff and validation artifact paths when they exist.
+- Failure reasons for rejected checkpoints.
+- Facts, blockers, and negative evidence preserved in the worker-state summary.
 
-The report is more important than the worker session. Future scheduling consumes
-durable evidence, not hidden conversation state.
+Only hard-gate-passing improvements are selectable. Exact checkpoints win over
+non-exact checkpoints, then highest score wins, then earliest validation time.
+Future scheduling consumes durable worker states and checkpoint evidence, not
+hidden conversation state.

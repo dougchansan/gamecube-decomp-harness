@@ -1,0 +1,368 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2710",
+  "pr": {
+    "number": 2710,
+    "title": "link ft co shouldered",
+    "url": "https://github.com/doldecomp/melee/pull/2710",
+    "state": "MERGED",
+    "author": "jurrejelle",
+    "created_at": "2026-06-16T05:50:31Z",
+    "merged_at": "2026-06-16T19:50:38Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR #2710 converted ftCo_Shouldered.c from NonMatching to Matching, with the bot report showing ftCo_Shouldered_Anim reaching 100.00%. The patch removed TU-local named float/double constants from source and changed their symbol entries back to local @ labels, adjusted stack-padding/declaration shape, cleaned includes, restored a real ftColl_80078710 call, and corrected shouldered motion state field usage in ftCo_Shouldered_Anim.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "fighter-common",
+      "build-config",
+      "symbol-config",
+      "stack-shape"
+    ],
+    "systems": [
+      "fighter",
+      "ftCommon",
+      "config",
+      "repo-root"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_Shouldered.c",
+      "role": "Primary decomp source update for ftCo_Shouldered; includes cleanup, stack/declaration changes, and ftCo_Shouldered_Anim matching edits.",
+      "evidence_refs": [
+        "changed_files.jsonl: ftCo_Shouldered.c added 34 deleted 37 hunks 4",
+        "raw_diff: src/melee/ft/chara/ftCommon/ftCo_Shouldered.c diff",
+        "text_corpus: bot report lists ftCo_Shouldered_Anim as new 100.00% match"
+      ]
+    },
+    {
+      "path": "configure.py",
+      "role": "Build configuration switched ftCo_Shouldered.c from NonMatching to Matching.",
+      "evidence_refs": [
+        "raw_diff: Object(NonMatching, \"melee/ft/chara/ftCommon/ftCo_Shouldered.c\") changed to Object(Matching, ...)"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Symbol config changed three .sdata2 constants at 0x804D8750, 0x804D8754, and 0x804D8758 from global ftCo_ names to local @ labels.",
+      "evidence_refs": [
+        "raw_diff: ftCo_804D8750/8754/8758 replaced with @219/@220/@237"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "ftCo_Shouldered.c was linked as matching in configure.py.",
+      "evidence_refs": [
+        "raw_diff: configure.py MatchingFor hunk"
+      ]
+    },
+    {
+      "text": "The bot report credited one new match: main/melee/ft/chara/ftCommon/ftCo_Shouldered, item ftCo_Shouldered_Anim, +33 bytes, 92.98% to 100.00%.",
+      "evidence_refs": [
+        "text_corpus: decomp-dev[bot] report"
+      ]
+    },
+    {
+      "text": "Three source-level const definitions, ftCo_804D8750, ftCo_804D8754, and ftCo_804D8758, were removed from ftCo_Shouldered.c, and corresponding symbols were made local @ labels in symbols.txt.",
+      "evidence_refs": [
+        "raw_diff: ftCo_Shouldered.c top-of-file const removals",
+        "raw_diff: symbols.txt .sdata2 label changes"
+      ]
+    },
+    {
+      "text": "Unused includes for ftCaptain/types.h and ftCommon/ftCo_CaptureCut.h were removed.",
+      "evidence_refs": [
+        "raw_diff: ftCo_Shouldered.c include hunk"
+      ]
+    },
+    {
+      "text": "Stack/declaration shape changed: ftCo_8009C5A4 replaced a zeroed u8[8] local with u32 unused locals, ftCo_8009C640 gained PAD_STACK(8), and ftCo_Shouldered_Anim moved several locals to the top of the function before a PAD_STACK(16).",
+      "evidence_refs": [
+        "raw_diff: ftCo_8009C5A4 hunk",
+        "raw_diff: ftCo_8009C640 hunk",
+        "raw_diff: ftCo_Shouldered_Anim hunk"
+      ]
+    },
+    {
+      "text": "ftCo_Shouldered_Anim replaced a commented-out ftColl_80078710 call with an active call using gobj1, fp1->victim_gobj, and &fp1->dmg.facing_dir_1.",
+      "evidence_refs": [
+        "raw_diff: ftCo_Shouldered_Anim damage-handling hunk"
+      ]
+    },
+    {
+      "text": "The final shouldered countdown logic now uses fp->mv.co.shouldered.x0 rather than fp->mv.ca.specials.grav.",
+      "evidence_refs": [
+        "raw_diff: ftCo_Shouldered_Anim tail hunk"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Demoted generated-looking address-named constants back to local symbol labels instead of keeping source globals for ordinary 0, 1, and S32_TO_F32 constants.",
+      "evidence_refs": [
+        "raw_diff: removed ftCo_804D8750/8754/8758 source definitions",
+        "raw_diff: symbols.txt local @219/@220/@237 labels"
+      ],
+      "related_standard_ids": [
+        "literals-and-data-ownership"
+      ]
+    },
+    {
+      "text": "Kept PAD_STACK use where the diff placed it after declarations, while leaving earlier stack shaping as u32 unused locals when a reviewer/commenter noted PAD_STACK placement limitations.",
+      "evidence_refs": [
+        "review_comments: ThePlayerRolo asked whether u32 unused local should use PAD_STACK",
+        "review_comments: jellejurre replied that PAD_STACK can only be used at the end of the declarations list",
+        "raw_diff: PAD_STACK(8) in ftCo_8009C640 and PAD_STACK(16) in ftCo_Shouldered_Anim"
+      ],
+      "related_standard_ids": [
+        "matching-tactics-need-evidence"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "For ftCommon matching work, do not keep generated address-named float/double constants in source when the patch evidence only supports local literal storage; symbol config can represent them as local @ labels instead.",
+      "scope": [
+        "src/melee/ft/chara/ftCommon/ftCo_Shouldered.c",
+        "config/GALE01/symbols.txt"
+      ],
+      "evidence_refs": [
+        "raw_diff: removed ftCo_804D8750 = 0, ftCo_804D8754 = 1, ftCo_804D8758 = S32_TO_F32",
+        "raw_diff: changed those .sdata2 symbols to local @219/@220/@237"
+      ],
+      "confidence": 0.84
+    },
+    {
+      "lesson": "Stack-shaping macros are sensitive to declaration placement; in this PR discussion, PAD_STACK was considered unsuitable for the early u32 unused locals because it could only be placed at the end of the declaration list.",
+      "scope": [
+        "src/melee/ft/chara/ftCommon/ftCo_Shouldered.c"
+      ],
+      "evidence_refs": [
+        "review_comments: 'shouldn't this use the PAD_STACK macro?'",
+        "review_comments: 'No, you van only do that at the end of the list of declarations'"
+      ],
+      "confidence": 0.72
+    },
+    {
+      "lesson": "When matching animation/damage code, replacing a placeholder/commented helper call with the recovered real call can be part of the final match, as shown by ftColl_80078710 in ftCo_Shouldered_Anim.",
+      "scope": [
+        "src/melee/ft/chara/ftCommon/ftCo_Shouldered.c"
+      ],
+      "evidence_refs": [
+        "raw_diff: commented ftColl_80078710(gobj) replaced with ftColl_80078710(gobj1, fp1->victim_gobj, &fp1->dmg.facing_dir_1)",
+        "text_corpus: bot report shows ftCo_Shouldered_Anim reached 100.00%"
+      ],
+      "confidence": 0.78
+    }
+  ],
+  "naming_conventions": [
+    {
+      "name": "ftCo_804D8750 / ftCo_804D8754 / ftCo_804D8758",
+      "convention": "Do not retain address-style global names for these ordinary local .sdata2 constants when PR evidence supports local @ labels.",
+      "evidence_refs": [
+        "raw_diff: symbols.txt global ftCo_ names changed to @219/@220/@237",
+        "raw_diff: source const definitions removed"
+      ]
+    },
+    {
+      "name": "fp, fp1, fp2, gobj1, hit, pos",
+      "convention": "The patch used short role/local names for Fighter pointers, Fighter_GObj pointers, HitCapsule, and Vec3 locals in ftCo_Shouldered_Anim.",
+      "evidence_refs": [
+        "raw_diff: ftCo_Shouldered_Anim local declarations"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "Switched object status from NonMatching to Matching after source changes; bot report confirms ftCo_Shouldered_Anim reached 100.00%.",
+      "evidence_refs": [
+        "raw_diff: configure.py change",
+        "text_corpus: decomp-dev[bot] report"
+      ]
+    },
+    {
+      "tactic": "Used declaration-order and lifetime shaping: locals were hoisted to the start of ftCo_Shouldered_Anim, and explicit u32 unused locals replaced a zeroed u8 array in ftCo_8009C5A4.",
+      "evidence_refs": [
+        "raw_diff: ftCo_Shouldered_Anim local declarations moved before Fighter* fp",
+        "raw_diff: ftCo_8009C5A4 u8 _[8] replaced by u32 unused1/unused2"
+      ]
+    },
+    {
+      "tactic": "Used PAD_STACK in functions where placement fit the declaration layout, specifically PAD_STACK(8) in ftCo_8009C640 and PAD_STACK(16) in ftCo_Shouldered_Anim.",
+      "evidence_refs": [
+        "raw_diff: ftCo_8009C640 PAD_STACK(8)",
+        "raw_diff: ftCo_Shouldered_Anim PAD_STACK(16)",
+        "review_comments: PAD_STACK placement discussion"
+      ]
+    },
+    {
+      "tactic": "Corrected control/data flow in ftCo_Shouldered_Anim by removing an inner scope with redeclared fp1/fp2 and directly deriving fp2 from fp1->victim_gobj->user_data.",
+      "evidence_refs": [
+        "raw_diff: ftCo_Shouldered_Anim damage-handling rewrite"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_Shouldered.c",
+      "author": "ThePlayerRolo",
+      "comment": "Asked whether the new u32 unused local should use the PAD_STACK macro.",
+      "evidence_refs": [
+        "review_comments: discussion_r3423142936"
+      ]
+    },
+    {
+      "path": "src/melee/ft/chara/ftCommon/ftCo_Shouldered.c",
+      "author": "jellejurre",
+      "comment": "Replied that PAD_STACK could only be used at the end of the declaration list.",
+      "evidence_refs": [
+        "review_comments: discussion_r3423572741"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "PR2710",
+    "link ft co shouldered",
+    "ftCo_Shouldered.c",
+    "ftCo_Shouldered_Anim",
+    "ftCo_8009C5A4",
+    "ftCo_8009C640",
+    "ftCo_8009C744",
+    "ftColl_80078710",
+    "PAD_STACK",
+    "u32 unused1",
+    "u32 unused2",
+    "ftCo_804D8750",
+    "ftCo_804D8754",
+    "ftCo_804D8758",
+    "@219",
+    "@220",
+    "@237",
+    "S32_TO_F32",
+    "ftCommon_GrabMash",
+    "ftCommon_InitGrab",
+    "ftCo_MS_ShoulderedWait",
+    "MatchingFor",
+    "Object(Matching)",
+    "Object(NonMatching)"
+  ],
+  "follow_up_queries": [
+    "ftCo_Shouldered_Anim PAD_STACK unused locals",
+    "ftCo_804D8750 ftCo_804D8754 ftCo_804D8758 local @ labels",
+    "ftColl_80078710 facing_dir_1 shouldered damage",
+    "PAD_STACK end of declarations review comment",
+    "ftCommon shouldered x0 grav field correction"
+  ],
+  "evidence_quality": {
+    "status": "strong",
+    "evidence_refs": [
+      "metadata_json: PR number/title/author/state/merge timestamps",
+      "changed_files.jsonl: changed file list and line counts",
+      "raw_diff: complete diff excerpt for all three changed files",
+      "text_corpus: bot match report and review comments",
+      "review_comments.md: PAD_STACK discussion"
+    ],
+    "notes": [
+      "PR body was empty, so author rationale is inferred only from diff, bot report, and comments.",
+      "No full final source file beyond the diff was loaded; claims are limited to changed hunks.",
+      "The bot report supports matching improvement for ftCo_Shouldered_Anim, but no local build or objdiff was run by this intake agent.",
+      "The PAD_STACK placement statement is preserved as PR review discussion, not promoted as a universal accepted standard."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "pr_lesson",
+        "title": "ftCo_Shouldered matching used local .sdata2 labels instead of source-level address-named constants",
+        "text": "In PR #2710, ftCo_Shouldered.c removed source definitions for ftCo_804D8750, ftCo_804D8754, and ftCo_804D8758, while config/GALE01/symbols.txt changed those addresses to local @219, @220, and @237 labels. This is a concrete example of avoiding source globals for ordinary constants when only local literal storage is evidenced.",
+        "scope": [
+          "src/melee/ft/chara/ftCommon/ftCo_Shouldered.c",
+          "config/GALE01/symbols.txt"
+        ],
+        "evidence_refs": [
+          "raw_diff: source const removals",
+          "raw_diff: symbols.txt label changes"
+        ],
+        "related_standard_ids": [
+          "literals-and-data-ownership",
+          "no-string-literal-symbol-regression"
+        ]
+      },
+      {
+        "record_type": "pr_lesson",
+        "title": "PAD_STACK placement was constrained by declaration order in ftCo_Shouldered",
+        "text": "A reviewer asked whether explicit unused stack locals should use PAD_STACK; the author replied that PAD_STACK could only be used at the end of the declaration list. Keep this as PR-specific evidence for stack-shape tactics in this file rather than as a global rule without further corroboration.",
+        "scope": [
+          "src/melee/ft/chara/ftCommon/ftCo_Shouldered.c"
+        ],
+        "evidence_refs": [
+          "review_comments: discussion_r3423142936",
+          "review_comments: discussion_r3423572741"
+        ],
+        "related_standard_ids": [
+          "matching-tactics-need-evidence"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "ftCo_Shouldered.c matched in PR #2710",
+        "text": "PR #2710 changed configure.py to mark melee/ft/chara/ftCommon/ftCo_Shouldered.c as Matching. The bot report listed ftCo_Shouldered_Anim as a new 100.00% match.",
+        "source_path": "src/melee/ft/chara/ftCommon/ftCo_Shouldered.c",
+        "scope": [
+          "ftCo_Shouldered_Anim",
+          "configure.py MatchingFor"
+        ],
+        "evidence_refs": [
+          "raw_diff: configure.py Object(Matching) change",
+          "text_corpus: decomp-dev[bot] report"
+        ],
+        "reason": "May be useful path-scoped history for future ftCommon/shouldered matching work."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Clarify PAD_STACK placement only if corroborated",
+        "text": "PR #2710 contains a review exchange where PAD_STACK was not used for early unused locals because it could only be placed at the end of the declaration list. Consider adding an example or note only after curator verifies this is a broader project rule and not just a local matching constraint.",
+        "source_path": null,
+        "scope": [
+          "matching tactics",
+          "stack padding",
+          "declaration order"
+        ],
+        "evidence_refs": [
+          "review_comments: 'shouldn't this use the PAD_STACK macro?'",
+          "review_comments: 'No, you van only do that at the end of the list of declarations'"
+        ],
+        "reason": "The exchange is actionable but too narrow to promote automatically as a global standard."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that all u32 unused locals are preferable to PAD_STACK; this PR only documents a placement-specific discussion.",
+      "Do not claim the author intentionally fixed gameplay behavior; the evidence supports decomp matching and code-shape changes, not runtime intent.",
+      "Do not promote the local names fp1/fp2/gobj1 as semantic conventions beyond this function; they are only observed in the diff."
+    ]
+  },
+  "confidence": 0.86,
+  "agent_runtime": {
+    "runner": "orchestrator_kernel_pr_indexer",
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "orchestrator_state_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/projects/melee/state",
+    "orchestrator_run_id": "08bfe41e-1b7c-4685-8646-dff5e02a5dab",
+    "orchestrator_project_id": "melee",
+    "orchestrator_prepare_intake": true,
+    "orchestrator_kernel_database_url_configured": true,
+    "legacy_session_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/.pi-sessions/pr-review"
+  }
+}

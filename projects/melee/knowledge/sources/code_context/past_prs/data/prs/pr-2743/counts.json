@@ -1,0 +1,17 @@
+{
+  "number": 2743,
+  "title": "Improve `gm_1BA8` data matches",
+  "state": "MERGED",
+  "createdAt": "2026-06-19T04:38:01Z",
+  "updatedAt": "2026-06-19T05:02:19Z",
+  "mergedAt": "2026-06-19T05:02:18Z",
+  "closedAt": "2026-06-19T05:02:18Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/2743",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 23855
+  }
+}

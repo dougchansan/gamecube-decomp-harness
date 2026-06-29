@@ -1,0 +1,17 @@
+{
+  "number": 2742,
+  "title": "Match `gmmain_lib` data",
+  "state": "MERGED",
+  "createdAt": "2026-06-18T18:28:23Z",
+  "updatedAt": "2026-06-18T18:34:09Z",
+  "mergedAt": "2026-06-18T18:34:07Z",
+  "closedAt": "2026-06-18T18:34:07Z",
+  "author": "ribbanya",
+  "url": "https://github.com/doldecomp/melee/pull/2742",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 1692
+  }
+}

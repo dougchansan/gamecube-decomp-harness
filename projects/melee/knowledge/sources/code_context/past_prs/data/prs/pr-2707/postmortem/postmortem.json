@@ -1,0 +1,405 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2707",
+  "pr": {
+    "number": 2707,
+    "title": "Match grIceMt_801F686C",
+    "url": "https://github.com/doldecomp/melee/pull/2707",
+    "state": "MERGED",
+    "author": "davidfeira",
+    "created_at": "2026-06-15T18:51:51Z",
+    "merged_at": "2026-06-17T02:21:26Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Matched Icicle Mountain stage function grIceMt_801F686C in src/melee/gr/gricemt.c, with associated symbol/split metadata and data cleanup. Review feedback focused on preserving HSD_ASSERT/HSD_JObj helper forms and keeping ordinary strings inline rather than routing through extern char symbols.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "stage",
+      "headers",
+      "symbols",
+      "splits",
+      "data-layout"
+    ],
+    "systems": [
+      "stage",
+      "Icicle Mountain",
+      "config/GALE01"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/melee/gr/gricemt.c",
+      "role": "Main source change: matched grIceMt_801F686C, converted local data definitions, adjusted StageData/StageCallbacks, used HSD_ASSERT and HSD_JObjSetTranslateY in final excerpt, and retained a PAD_STACK tactic.",
+      "evidence_refs": [
+        "changed_files.jsonl",
+        "human_pr_text.md",
+        "raw_diff.diff",
+        "review_comments.md"
+      ]
+    },
+    {
+      "path": "src/melee/gr/gricemt.h",
+      "role": "Header surface changed; metadata reports two deleted lines, but loaded diff excerpt does not show the exact header hunk.",
+      "evidence_refs": [
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Updated gricemt-related symbol sizes, scopes, and data classifications, including grIm_803B825C, grIm_803E4068, grIm_803E40B0, grIm_803E4544, grIm_803E46F8, grIm_803E4800, and several local lbl_ string symbols.",
+      "evidence_refs": [
+        "raw_diff.diff",
+        "changed_files.jsonl"
+      ]
+    },
+    {
+      "path": "config/GALE01/splits.txt",
+      "role": "Adjusted gricemt rodata/data/sdata split end addresses.",
+      "evidence_refs": [
+        "raw_diff.diff",
+        "changed_files.jsonl"
+      ]
+    }
+  ],
+  "what_changed": [
+    "PR body states one matched function: grIceMt_801F686C in gricemt.c for Icicle Mountain.",
+    "grIceMt_801F686C was implemented as background-platform setup: captures ground state, initializes stage flags, scans terrain-row table grIm_803E4068 three times for distinct row ids, accumulates Y offsets through grIceMt_801F993C, positions three background GObjs, and clears GObj slots on the fallback path.",
+    "The diff excerpt shows grIceMt_801F686C using three natural for loops over ICEMT_FIELD_MAX and HSD_ASSERT checks at lines 600, 609, 619, 636, 637, 641, 642, 646, and 647.",
+    "The diff excerpt shows use of HSD_JObjSetTranslateY for the three platform JObjs rather than the reviewed Fake_HSD_JObjSetTranslateY form.",
+    "The source diff expands and reclassifies gricemt data arrays and structs, including GrIm825C, IceMtRowData, S16Vec3 table data, grIm_803E4544, StageCallbacks, StageData grIm_803E4800, and several small GrIm588 constants.",
+    "The diff excerpt adds order_sdata2 and order_data0 helper functions that reference float literals, S32_TO_F32, __FILE__, and \"i<ICEMT_FIELD_MAX\" for ordering pressure.",
+    "symbols.txt was updated to reflect smaller split ranges, changed object sizes, local/global scope changes, and string/object classifications for gricemt data.",
+    "splits.txt shortened gricemt .rodata, .data, and .sdata end addresses.",
+    "The PR body reports build and objdiff verification: main.dol SHA1 OK, strict build with --require-protos and --map links cleanly, grIceMt_801F686C at 100.0%, and no fuzzy regressions in adjacent functions/TUs.",
+    "A bot report recorded seven new matches for main/melee/gr/gricemt, including .data, .sdata2, .rodata, .sdata, grIceMt_801F686C, grIceMt_801F8CDC, and grIceMt_801F9ACC."
+  ],
+  "smart_moves": [
+    {
+      "text": "Kept the recovered repeated row-selection behavior as natural for loops over ICEMT_FIELD_MAX rather than unrolled repeated blocks.",
+      "evidence_refs": [
+        "raw_diff.diff"
+      ]
+    },
+    {
+      "text": "Restored HSD_ASSERT/HSD_JObjSetTranslateY style in the final diff excerpt after review objected to raw __assert expansions and fake helper use.",
+      "evidence_refs": [
+        "review_comments.md",
+        "raw_diff.diff"
+      ]
+    },
+    {
+      "text": "Moved ordinary asset path usage into StageData as inline string literal \"/GrIm.dat\" instead of maintaining a separate char array in the shown final diff.",
+      "evidence_refs": [
+        "raw_diff.diff"
+      ]
+    },
+    {
+      "text": "Updated config symbol and split metadata alongside source changes, keeping data ownership and section ranges aligned with the matched unit.",
+      "evidence_refs": [
+        "raw_diff.diff"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "When matching stage code with repeated table scans, first try natural loops with the exact counter and bounds before preserving generated-looking repetition.",
+      "scope": [
+        "src/melee/gr/gricemt.c",
+        "stage TUs",
+        "table scans"
+      ],
+      "evidence_refs": [
+        "raw_diff.diff",
+        "decomp_standards:natural-loops"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "lesson": "Reviewer feedback in this PR supports keeping HSD_ASSERT rather than expanding to ternary __assert forms when the macro can be used.",
+      "scope": [
+        "assert cleanup",
+        "gricemt.c"
+      ],
+      "evidence_refs": [
+        "review_comments.md",
+        "raw_diff.diff",
+        "decomp_standards:assert-report-macros"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "lesson": "Reviewer feedback in this PR supports keeping ordinary strings inline rather than introducing extern char declarations solely for matching, even if the inline literal gives a slightly lower match.",
+      "scope": [
+        "string literals",
+        "extern data symbols",
+        "gricemt.c"
+      ],
+      "evidence_refs": [
+        "review_comments.md",
+        "decomp_standards:no-string-literal-symbol-regression",
+        "decomp_standards:literals-and-data-ownership"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "lesson": "Header/helper inline evidence matters for jobj operations: prefer HSD_JObjSetTranslateY when that is the identifiable source operation rather than a fake helper used to steer codegen.",
+      "scope": [
+        "HSD_JObj",
+        "stage code"
+      ],
+      "evidence_refs": [
+        "review_comments.md",
+        "raw_diff.diff",
+        "decomp_standards:header-inlines"
+      ],
+      "confidence": 0.78
+    }
+  ],
+  "naming_conventions": [
+    {
+      "convention": "Use short role names such as gobj and jobj for clear local object pointers; final diff changes bg_gobj to gobj in grIceMt_801F686C.",
+      "evidence_refs": [
+        "raw_diff.diff",
+        "decomp_standards:conservative-naming"
+      ],
+      "confidence": 0.72
+    },
+    {
+      "convention": "Keep address-style grIm_* data names where semantic meaning is not proven; the PR defines and reclassifies many grIm address-style symbols rather than inventing broad semantic names.",
+      "evidence_refs": [
+        "raw_diff.diff",
+        "decomp_standards:conservative-naming"
+      ],
+      "confidence": 0.68
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "PAD_STACK(0x10) appears in grIceMt_801F686C as a retained stack-shape tactic.",
+      "evidence_refs": [
+        "raw_diff.diff"
+      ],
+      "risk": "Loaded PR evidence reports successful build/objdiff verification, but does not explain why PAD_STACK was necessary.",
+      "related_standard": "matching-tactics-need-evidence"
+    },
+    {
+      "tactic": "order_sdata2 and order_data0 dummy helper functions were added to reference literals and ordering-sensitive values.",
+      "evidence_refs": [
+        "raw_diff.diff"
+      ],
+      "risk": "This looks like data-order pressure; PR body reports full-unit verification, but the loaded evidence does not include reviewer discussion accepting this as general style.",
+      "related_standard": "literals-and-data-ownership"
+    },
+    {
+      "tactic": "Source and config changes were paired with symbol/split updates to make gricemt .data, .rodata, .sdata, and .sdata2 match.",
+      "evidence_refs": [
+        "raw_diff.diff",
+        "text_corpus.jsonl"
+      ],
+      "risk": "Useful for this PR, but not enough evidence to generalize specific symbol sizes or ownership beyond this file."
+    }
+  ],
+  "review_feedback": [
+    {
+      "author": "jurrejelle",
+      "path": "src/melee/gr/gricemt.c",
+      "comment": "Don't replace HSD_ASSERT wiith __asserts if it can be avoided",
+      "evidence_refs": [
+        "review_comments.md",
+        "text_corpus.jsonl"
+      ],
+      "mapped_standard": "assert-report-macros"
+    },
+    {
+      "author": "jurrejelle",
+      "path": "src/melee/gr/gricemt.c",
+      "comment": "dont use extern chars, just unline the actual strings (even if that means a slightly lower match)",
+      "evidence_refs": [
+        "review_comments.md",
+        "text_corpus.jsonl"
+      ],
+      "mapped_standard": "no-string-literal-symbol-regression"
+    },
+    {
+      "author": "ribbanya",
+      "path": null,
+      "comment": "The data in this file is a total mess. I'm going to clean it up a little at least.",
+      "evidence_refs": [
+        "text_corpus.jsonl"
+      ],
+      "mapped_standard": "literals-and-data-ownership"
+    }
+  ],
+  "searchable_terms": [
+    "pr-2707",
+    "Match grIceMt_801F686C",
+    "gricemt.c",
+    "Icicle Mountain",
+    "grIceMt_801F686C",
+    "grIm_803E4068",
+    "ICEMT_FIELD_MAX",
+    "IceMtRowData",
+    "IceMountainParams",
+    "grIm_804D69E8",
+    "grIm_804D69EC",
+    "grIm_804D69F0",
+    "HSD_ASSERT",
+    "__assert",
+    "HSD_JObjSetTranslateY",
+    "Fake_HSD_JObjSetTranslateY",
+    "extern char strings",
+    "inline strings",
+    "PAD_STACK(0x10)",
+    "order_sdata2",
+    "order_data0",
+    "config/GALE01/symbols.txt",
+    "config/GALE01/splits.txt",
+    "StageCallbacks",
+    "StageData",
+    "grIm_803E4800",
+    "grIm_803B825C",
+    "grIm_803E40B0",
+    "grIm_803E4544"
+  ],
+  "follow_up_queries": [
+    "Find other review comments saying not to replace HSD_ASSERT with __assert.",
+    "Find PRs that introduced extern char declarations for strings and were asked to inline literals.",
+    "Search gricemt.c for order_sdata2/order_data0-style data ordering helpers.",
+    "Search stage TUs for PAD_STACK retained with objdiff evidence.",
+    "Search Icicle Mountain grIm_* data definitions for address-style symbols that might need stronger ownership evidence."
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json",
+      "human_pr_text.md",
+      "review_comments.md",
+      "raw_diff.diff",
+      "changed_files.jsonl",
+      "text_corpus.jsonl"
+    ],
+    "notes": [
+      "PR metadata, PR body, review comments, changed-file counts, and a substantial diff excerpt are loaded.",
+      "raw_diff.diff is truncated, so the exact gricemt.h deletion and later gricemt.c hunks are not visible in the provided slice.",
+      "Verification claims come from the PR body and bot comment; this intake did not run builds or objdiff.",
+      "Review comments show intermediate code with raw __assert, Fake_HSD_JObjSetTranslateY, and extern char declarations; the final diff excerpt shows HSD_ASSERT and HSD_JObjSetTranslateY in grIceMt_801F686C, but the full final state is not fully visible because the diff is truncated.",
+      "Data-order helper functions are visible in the diff excerpt, but loaded evidence does not include reviewer rationale or acceptance as a reusable tactic."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "type": "review_lesson",
+        "title": "Prefer HSD_ASSERT over raw __assert expansion when possible",
+        "text": "In PR #2707, review explicitly objected to replacing HSD_ASSERT with ternary __assert expansions in gricemt.c. The later diff excerpt shows HSD_ASSERT forms in grIceMt_801F686C.",
+        "scope": [
+          "assert cleanup",
+          "src/melee/gr/gricemt.c"
+        ],
+        "evidence_refs": [
+          "review_comments.md",
+          "raw_diff.diff"
+        ]
+      },
+      {
+        "type": "review_lesson",
+        "title": "Do not introduce extern char symbols for ordinary strings just to improve match",
+        "text": "In PR #2707, review explicitly said to inline actual strings instead of using extern chars, even if this gives a slightly lower match.",
+        "scope": [
+          "string literals",
+          "extern data",
+          "src/melee/gr/gricemt.c"
+        ],
+        "evidence_refs": [
+          "review_comments.md"
+        ]
+      },
+      {
+        "type": "matching_lesson",
+        "title": "Natural loops can express repeated stage table scans",
+        "text": "grIceMt_801F686C uses three for loops over ICEMT_FIELD_MAX to select distinct row ids from grIm_803E4068, matching the PR body's description of successive scans.",
+        "scope": [
+          "stage table scans",
+          "src/melee/gr/gricemt.c"
+        ],
+        "evidence_refs": [
+          "human_pr_text.md",
+          "raw_diff.diff"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Add PR #2707 as an example for assert macro preservation",
+        "text": "Use PR #2707 as an example under assert-report-macros/header-inlines: reviewer rejected replacing HSD_ASSERT with raw __assert expansions in gricemt.c when HSD_ASSERT could be retained.",
+        "source_path": null,
+        "scope": [
+          "assert-report-macros",
+          "header-inlines"
+        ],
+        "evidence_refs": [
+          "review_comments.md",
+          "raw_diff.diff"
+        ],
+        "reason": "The current standards already contain this rule; this PR provides a concrete review-backed example."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Add PR #2707 as an example for inline string literals over extern char symbols",
+        "text": "Use PR #2707 as an example under no-string-literal-symbol-regression/literals-and-data-ownership: reviewer said to inline actual strings instead of using extern chars, even if the match is slightly lower.",
+        "source_path": null,
+        "scope": [
+          "no-string-literal-symbol-regression",
+          "literals-and-data-ownership"
+        ],
+        "evidence_refs": [
+          "review_comments.md"
+        ],
+        "reason": "The current standards already cover string literal regressions; this PR adds explicit reviewer wording about accepting a lower match to keep literals inline."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "gricemt.c data layout is sensitive and was reviewed as messy in PR #2707",
+        "text": "PR #2707 changed many gricemt data definitions and config symbol/split records. A reviewer noted, 'The data in this file is a total mess. I'm going to clean it up a little at least.' Curator should verify whether a path fact is useful for future gricemt.c data work.",
+        "source_path": "src/melee/gr/gricemt.c",
+        "scope": [
+          "gricemt data",
+          "symbols",
+          "splits"
+        ],
+        "evidence_refs": [
+          "text_corpus.jsonl",
+          "raw_diff.diff"
+        ],
+        "reason": "Potential path-scoped warning; should not be promoted without curator checking current source history and final cleanup state."
+      }
+    ],
+    "rejection_notes": [
+      "Do not promote order_sdata2/order_data0 as accepted general style; the diff shows them, but loaded evidence does not include reviewer approval or rationale beyond match claims.",
+      "Do not infer that all grIm_* address-style symbols have final semantic ownership from this PR; the slice only shows this PR's symbol/split adjustments.",
+      "Do not treat the PR body's verification as independently reproduced by this intake."
+    ]
+  },
+  "confidence": 0.84,
+  "agent_runtime": {
+    "runner": "orchestrator_kernel_pr_indexer",
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "orchestrator_state_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/projects/melee/state",
+    "orchestrator_run_id": "08bfe41e-1b7c-4685-8646-dff5e02a5dab",
+    "orchestrator_project_id": "melee",
+    "orchestrator_prepare_intake": true,
+    "orchestrator_kernel_database_url_configured": true,
+    "legacy_session_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/.pi-sessions/pr-review"
+  }
+}

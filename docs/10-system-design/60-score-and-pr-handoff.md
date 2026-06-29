@@ -30,10 +30,11 @@ The visual map of this cycle lives in
 A candidate should pass through these checks before it affects the board
 baseline:
 
-- The worker still owns the lease and write set for the candidate.
-- The worker report's local-regression block passed the runner acceptance gate:
-  target regression is false, neighbor regressions are empty, validation
-  artifacts exist on disk, and edited paths stay inside the write set.
+- The runner has a selected checkpoint from the worker's target claim and write
+  set.
+- The checkpoint passed the runner acceptance gate: target regression is false,
+  neighbor regressions are empty, validation artifacts exist on disk, and
+  edited paths stay inside the write set.
 - The worker post-return repair gate is clean: no unaccepted write-set diff is
   retained, configured runner-owned post-return checks passed, and any
   `repair_request` loop has resolved rather than exhausted.
@@ -88,14 +89,14 @@ allocation decision happen outside the worker loop.
 ## Handoff Pause
 
 PR preparation begins by preventing new worker edits from entering the checkout.
-The handoff pause is a run-level scheduling state, not a deletion or reset: the
-current reports, leases, checkpoints, and artifacts remain durable, but
-worker scheduling refuses to start while the run status is not
+The handoff pause is a run-level scheduling state, not a deletion or reset:
+current reports, target claims, worker states, checkpoints, and artifacts remain
+durable, but worker scheduling refuses to start while the run status is not
 `active`.
 
 The dashboard's `Pause Intake` action requests a process drain and marks the run
 `paused`. Draining stops the supervisor from introducing more workers while
-allowing the operator to recover or finish existing leases intentionally. The
+allowing the operator to recover or finish existing claims intentionally. The
 matching `Resume` action marks the same run `active` again if the operator
 decides to keep working before or after PR packaging.
 
@@ -179,7 +180,7 @@ does not mass-reject worker attempts; the blind spot is recorded in the
 attempt artifacts.
 
 Disposition is consistent with the promotion policy: symbols blocked by the
-gate become `needs_rework` and requeue at repair priority; a slice ships
+gate become `needs_rework` and are readmitted at repair priority; a slice ships
 without them or not at all. MATCHES-only shipping is unchanged — the gate
 narrows what a match is allowed to contain.
 
@@ -204,7 +205,7 @@ not silently included in match PRs. The flow and implementation details live in
 
 ## PR Boundary
 
-The orchestrator does not create one PR per file, worker, symbol, or lease, and
+The orchestrator does not create one PR per file, worker, symbol, or claim, and
 it does not publish GitHub PRs automatically. Human-facing PR packaging is a
 separate step after the run produces a coherent improvement bundle.
 
@@ -260,7 +261,7 @@ presented as independent.
 The PR splitter shapes the handoff series before PRs exist; the PR indexer
 analyzes merged PRs for reusable knowledge after the fact. Final branch
 creation, presentation, reviewer coordination, and merge readiness stay
-operator-owned outside the worker lease loop. Once opened, PRs become tracked
+operator-owned outside the worker claim loop. Once opened, PRs become tracked
 state — slice, branch, number, draft/open/merged status, comments, CI — per
 [operator flow and PR tracking](65-operator-flow-and-pr-tracking.md).
 
@@ -297,25 +298,25 @@ which stage is running, its detail, and where a failure happened:
 5. QA build & regression gate   `ninja changes_all` on the rebased branch,
                                 regression + promotion gates vs the new
                                 baseline. Informational: branch regressions
-                                are rework to requeue, not PR blockers,
+                                are rework to readmit, not PR blockers,
                                 because the branch carries local-only work
                                 that never ships
-6. checkpoint                   classify worker reports: matches ship,
+6. checkpoint                   classify worker states/checkpoints: matches ship,
                                 notable improvements and the rest carry
                                 forward; any symbol that broke an exact match
                                 or regressed against the new baseline is
                                 forced to `needs_rework`. The checkpoint
                                 lands even when the QA gate fails, so the
                                 rework ledger survives.
-7. requeue rework               regressed symbols go back into the queue at
-                                repair priority (same machinery as the epoch
-                                cycle), so the next working session fixes
-                                them first instead of leaving them parked
+7. readmit rework               regressed symbols become priority epoch
+                                targets (same machinery as the epoch cycle),
+                                so the next working session fixes them first
+                                instead of leaving them parked
 8. QA repair lane               candidate files from the checkpoint are
                                 scanned with the deterministic QA rules,
                                 error findings become per-file repair queue
                                 items, and the bounded qa-repair lane writes
-                                queue/report/ship-filter artifacts. Only
+                                repair-list, report, and ship-filter artifacts. Only
                                 clean survivors continue to split planning.
 9. plan PR slices               match slices ship, local-only slices stay;
                                 lanes merge the checkpoint items with the
@@ -369,7 +370,7 @@ which stage is running, its detail, and where a failure happened:
 Prepare fails only when the ship set itself is dirty (the match files cause
 regressions — fix with Reconcile or drop the offending slice) or when there is
 nothing to ship. A blocked branch QA by itself does not stop the pipeline:
-those regressions are recorded as needs_rework and requeued at repair
+those regressions are recorded as needs_rework and readmitted at repair
 priority. Rebase conflicts fail step 2 with git's message; resolve them in
 the checkout (or via `reconcile --mode sync-merge`) and re-run.
 
@@ -381,6 +382,6 @@ evidence for future sessions.
 
 ## Related
 
-- [CLI overview](../20-implementation/cli/00-overview.md)
+- [Server jobs overview](../20-implementation/server-jobs/00-overview.md)
 - [State implementation](../20-implementation/state/00-overview.md)
 - [UI implementation](../20-implementation/ui/00-overview.md)

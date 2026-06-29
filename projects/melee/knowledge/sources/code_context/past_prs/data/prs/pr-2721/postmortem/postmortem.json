@@ -1,0 +1,252 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2721",
+  "pr": {
+    "number": 2721,
+    "title": "Run `--fix` in style-check pre-commit hook",
+    "url": "https://github.com/doldecomp/melee/pull/2721",
+    "state": "MERGED",
+    "author": "ribbanya",
+    "created_at": "2026-06-17T04:22:06Z",
+    "merged_at": "2026-06-17T04:29:43Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "PR 2721 changes the style-check pre-commit hook to run `tools/check/main.py --fix --quiet`, updates the fixer runner to accept and honor `quiet`, applies the JOBJ_HIDDEN fixer to one touched C callsite in `src/melee/ty/tyfigupon.c`, and reformats related Python tests.",
+  "change_classification": {
+    "primary_type": "tooling_cleanup",
+    "categories": [
+      "tooling",
+      "code-quality",
+      "cleanup",
+      "auto-fix"
+    ],
+    "systems": [
+      "pre-commit",
+      "tools/check",
+      "jobj_flags",
+      "src/melee/ty"
+    ]
+  },
+  "key_files": [
+    {
+      "path": ".pre-commit-config.yaml",
+      "role": "Enables automatic fixer mode for the style-check pre-commit hook by adding `--fix` to the hook entry.",
+      "evidence_refs": [
+        "raw_diff:.pre-commit-config.yaml"
+      ]
+    },
+    {
+      "path": "tools/check/main.py",
+      "role": "Extends `run_fix` with a `quiet` parameter and suppresses fix summary output when only one file changed under quiet mode.",
+      "evidence_refs": [
+        "raw_diff:tools/check/main.py"
+      ]
+    },
+    {
+      "path": "tools/check/tests/jobj_flags.py",
+      "role": "Reformats existing tests for the JOBJ hidden-literal fixer; no new test cases are evident beyond formatting expansion.",
+      "evidence_refs": [
+        "raw_diff:tools/check/tests/jobj_flags.py"
+      ]
+    },
+    {
+      "path": "src/melee/ty/tyfigupon.c",
+      "role": "Example source cleanup replacing raw hidden flag literal `0x10` with `JOBJ_HIDDEN` and formatting the adjacent call.",
+      "evidence_refs": [
+        "raw_diff:src/melee/ty/tyfigupon.c"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "The pre-commit style-check entry changed from `python tools/check/main.py --quiet` to `python tools/check/main.py --fix --quiet`.",
+      "evidence_refs": [
+        "raw_diff:.pre-commit-config.yaml"
+      ]
+    },
+    {
+      "text": "`run_fix` now takes `quiet: bool`, and `main` passes `args.quiet` when `--fix` is selected.",
+      "evidence_refs": [
+        "raw_diff:tools/check/main.py"
+      ]
+    },
+    {
+      "text": "Fix-mode status output is now gated by `files_changed > 1 or not quiet`; the remaining-issues warning is printed only inside that output block.",
+      "evidence_refs": [
+        "raw_diff:tools/check/main.py"
+      ]
+    },
+    {
+      "text": "In `fn_803168DC`, `HSD_JObjClearFlagsAll(data->jobj[1], 0x10)` became `HSD_JObjClearFlagsAll(data->jobj[1], JOBJ_HIDDEN)`, matching the existing symbolic flag style used by `HSD_JObjSetFlagsAll`.",
+      "evidence_refs": [
+        "raw_diff:src/melee/ty/tyfigupon.c"
+      ]
+    },
+    {
+      "text": "Python test lines in `tools/check/tests/jobj_flags.py` were reformatted to multiline style for a token list and an assert tuple.",
+      "evidence_refs": [
+        "raw_diff:tools/check/tests/jobj_flags.py"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Wiring `--fix` into pre-commit applies existing style-check fixers automatically for C files, reducing manual cleanup for known patterns.",
+      "evidence_refs": [
+        "raw_diff:.pre-commit-config.yaml",
+        "raw_diff:tools/check/main.py"
+      ]
+    },
+    {
+      "text": "The quiet-mode adjustment avoids noisy pre-commit output for the common one-file auto-fix case while still reporting when quiet is disabled or multiple files changed.",
+      "evidence_refs": [
+        "raw_diff:tools/check/main.py"
+      ]
+    },
+    {
+      "text": "The source example keeps JObj hidden-flag usage symbolic with `JOBJ_HIDDEN` instead of a raw numeric literal.",
+      "evidence_refs": [
+        "raw_diff:src/melee/ty/tyfigupon.c"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "text": "For JObj flag calls, raw literal forms equivalent to hidden flag value 16 are intended style-check targets for replacement with `JOBJ_HIDDEN` where the fixer recognizes the call pattern.",
+      "scope": [
+        "HSD_JObjSetFlagsAll",
+        "HSD_JObjClearFlagsAll",
+        "tools/check/tests/jobj_flags.py"
+      ],
+      "evidence_refs": [
+        "raw_diff:src/melee/ty/tyfigupon.c",
+        "raw_diff:tools/check/tests/jobj_flags.py"
+      ],
+      "confidence": "medium"
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "Use the symbolic constant `JOBJ_HIDDEN` for the JObj hidden flag instead of spelling the value as `0x10` in recognized JObj flag helper calls.",
+      "scope": [
+        "JObj flag helper calls"
+      ],
+      "evidence_refs": [
+        "raw_diff:src/melee/ty/tyfigupon.c",
+        "raw_diff:tools/check/tests/jobj_flags.py"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "assembly_or_matching_tactics": [],
+  "review_feedback": [],
+  "searchable_terms": [
+    "PR 2721",
+    "Run --fix in style-check pre-commit hook",
+    "style-check",
+    "pre-commit",
+    "--fix",
+    "--quiet",
+    "tools/check/main.py",
+    "run_fix",
+    "dry_run",
+    "quiet",
+    "jobj_flags",
+    "_HIDDEN_LITERAL",
+    "JOBJ_HIDDEN",
+    "HSD_JObjClearFlagsAll",
+    "HSD_JObjSetFlagsAll",
+    "src/melee/ty/tyfigupon.c",
+    "fn_803168DC"
+  ],
+  "follow_up_queries": [
+    "style-check --fix quiet run_fix",
+    "JOBJ_HIDDEN raw literal 0x10 fixer",
+    "tools/check/tests/jobj_flags.py _HIDDEN_LITERAL",
+    "pre-commit style-check --fix --quiet"
+  ],
+  "evidence_quality": {
+    "status": "strong",
+    "evidence_refs": [
+      "metadata_json",
+      "raw_diff",
+      "changed_files.jsonl",
+      "text_corpus.jsonl"
+    ],
+    "notes": [
+      "Diff and changed-file metadata are complete for the four changed files.",
+      "PR body is empty and there are no issue comments, review comments, or reviews in the supplied slice, so reviewer intent and discussion-driven rationale are unavailable.",
+      "No build, test, or objdiff validation output is present in the slice.",
+      "The only C source change is a style cleanup; no matching tactic or decompilation result is evidenced."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "record_type": "tooling_behavior",
+        "title": "style-check pre-commit hook runs fix mode",
+        "text": "As of PR 2721, the `style-check` pre-commit hook entry includes `--fix --quiet`, so recognized style-check fixers can modify staged C files during pre-commit.",
+        "scope": [
+          ".pre-commit-config.yaml",
+          "tools/check/main.py"
+        ],
+        "evidence_refs": [
+          "raw_diff:.pre-commit-config.yaml",
+          "raw_diff:tools/check/main.py"
+        ]
+      },
+      {
+        "record_type": "local_style_cleanup",
+        "title": "JObj hidden flag literal cleanup",
+        "text": "The PR demonstrates replacement of the raw hidden flag literal `0x10` with `JOBJ_HIDDEN` in `HSD_JObjClearFlagsAll`, consistent with the JObj flag fixer tests for value-16 literal forms.",
+        "scope": [
+          "src/melee/ty/tyfigupon.c",
+          "tools/check/tests/jobj_flags.py"
+        ],
+        "evidence_refs": [
+          "raw_diff:src/melee/ty/tyfigupon.c",
+          "raw_diff:tools/check/tests/jobj_flags.py"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Prefer named JObj flag constants over raw hidden-flag literals in helper calls",
+        "text": "Consider documenting that raw numeric literals equivalent to the JObj hidden flag, such as `0x10` or `16`, should be written as `JOBJ_HIDDEN` in recognized `HSD_JObj*FlagsAll` calls. PR 2721 supplies evidence through the style-check fixer tests and a source cleanup.",
+        "source_path": null,
+        "scope": [
+          "JObj flag helper calls",
+          "code-quality tooling"
+        ],
+        "evidence_refs": [
+          "raw_diff:src/melee/ty/tyfigupon.c",
+          "raw_diff:tools/check/tests/jobj_flags.py"
+        ],
+        "reason": "This may be a general code-quality convention, but curator review should decide whether it belongs in global standards or remains a tool-specific rule."
+      }
+    ],
+    "rejection_notes": [
+      "Do not infer that all numeric flag literals should be replaced globally; the evidence is limited to hidden flag value forms recognized by the JObj flags checker.",
+      "Do not claim this PR validated matching or assembly equivalence; no objdiff/build evidence is included.",
+      "Do not infer reviewer rationale because the supplied slice has no comments or review records."
+    ]
+  },
+  "confidence": 0.9,
+  "agent_runtime": {
+    "runner": "orchestrator_kernel_pr_indexer",
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "orchestrator_state_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/projects/melee/state",
+    "orchestrator_run_id": "08bfe41e-1b7c-4685-8646-dff5e02a5dab",
+    "orchestrator_project_id": "melee",
+    "orchestrator_prepare_intake": true,
+    "orchestrator_kernel_database_url_configured": true,
+    "legacy_session_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/.pi-sessions/pr-review"
+  }
+}

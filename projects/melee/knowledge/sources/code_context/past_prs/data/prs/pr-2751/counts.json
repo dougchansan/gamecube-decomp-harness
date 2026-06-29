@@ -1,0 +1,17 @@
+{
+  "number": 2751,
+  "title": "Improve `gmmain_lib` match",
+  "state": "MERGED",
+  "createdAt": "2026-06-22T07:21:29Z",
+  "updatedAt": "2026-06-22T10:37:07Z",
+  "mergedAt": "2026-06-22T10:37:07Z",
+  "closedAt": "2026-06-22T10:37:07Z",
+  "author": "dberweger2017",
+  "url": "https://github.com/doldecomp/melee/pull/2751",
+  "counts": {
+    "issue_comments": 1,
+    "review_comments": 0,
+    "reviews": 0,
+    "diff_bytes": 6429
+  }
+}

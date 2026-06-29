@@ -1,0 +1,520 @@
+{
+  "schema_version": "melee_pr_postmortem_v1",
+  "object_id": "pr-2757",
+  "pr": {
+    "number": 2757,
+    "title": "texpdag matches",
+    "url": "https://github.com/doldecomp/melee/pull/2757",
+    "state": "MERGED",
+    "author": "r-burns",
+    "created_at": "2026-06-24T13:17:28Z",
+    "merged_at": "2026-06-24T14:31:15Z"
+  },
+  "agent_status": "agent_completed",
+  "intake_role": "pr_intake",
+  "summary": "Matched and improved parts of sysdolphin baselib texpdag by reshaping generated pointer-walking code into indexed loops, replacing split scalar clear data with a typed HSD_TEArg struct object, recovering a switch-shaped SimplifyThis region, and updating GALE01 symbol metadata for .data/.sdata including jump table alignment and string labels.",
+  "change_classification": {
+    "primary_type": "decomp-matching",
+    "categories": [
+      "decomp-matching",
+      "data-symbols",
+      "types-structs",
+      "control-flow-cleanup",
+      "naming"
+    ],
+    "systems": [
+      "sysdolphin",
+      "baselib",
+      "texpdag",
+      "config/GALE01"
+    ]
+  },
+  "key_files": [
+    {
+      "path": "src/sysdolphin/baselib/texpdag.c",
+      "role": "Primary decomp source change for order_dag, HSD_TExpMakeDag, HSD_TExpSchedule, SimplifySrc, SimplifyThis, typed clear argument data, loops, and switch recovery.",
+      "evidence_refs": [
+        "changed_files.jsonl: src/sysdolphin/baselib/texpdag.c added 195 deleted 306 hunks 23",
+        "diff_excerpt: src/sysdolphin/baselib/texpdag.c",
+        "review r3467572093",
+        "review r3467603280",
+        "review r3467613973",
+        "review r3467648015",
+        "review r3467787783",
+        "bot report issuecomment-4789726052"
+      ]
+    },
+    {
+      "path": "config/GALE01/symbols.txt",
+      "role": "Symbol metadata updates for texpdag .data/.sdata, including splitting HSD_TExpDag_80407AA0 into lbl_* entries, adding jumptable align:8, and representing HSD_TExpDag_804D5FF8 as one 8-byte object.",
+      "evidence_refs": [
+        "changed_files.jsonl: config/GALE01/symbols.txt added 8 deleted 4 hunks 2",
+        "diff_excerpt: config/GALE01/symbols.txt",
+        "review r3467446958",
+        "review r3467881890",
+        "bot report issuecomment-4789726052"
+      ]
+    }
+  ],
+  "what_changed": [
+    {
+      "text": "Bot report recorded 5 new matches: texpdag .data, SimplifyThis, SimplifySrc, .sdata, and order_dag; HSD_TExpMakeDag improved from 82.04% to 92.07%.",
+      "evidence_refs": [
+        "text_corpus.jsonl issue_comment by decomp-dev[bot] issuecomment-4789726052"
+      ]
+    },
+    {
+      "text": "order_dag was simplified from pointer/counter temporaries into direct indexed access: blocked = ready_set | dep_bits and full_dep[i].",
+      "evidence_refs": [
+        "diff_excerpt: order_dag hunk"
+      ]
+    },
+    {
+      "text": "HSD_TExpMakeDag was heavily refactored from pointer-walking, gotos, manual unrolled initialization, and extra locals into indexed for-loops over c_in/a_in and sp94/sp14 arrays, while retaining PAD_STACK(4).",
+      "evidence_refs": [
+        "diff_excerpt: HSD_TExpMakeDag hunk",
+        "review r3467648015"
+      ]
+    },
+    {
+      "text": "HSD_TExpSchedule changed args from static int args[8] to args[5] while retaining four initializer entries.",
+      "evidence_refs": [
+        "diff_excerpt: HSD_TExpSchedule hunk"
+      ]
+    },
+    {
+      "text": "Two scalar globals at 0x804D5FF8 and 0x804D5FFC were replaced by one typed static HSD_TEArg HSD_TExpDag_804D5FF8 = { 0x00, 0x07, 0xFF }, and symbols.txt changed the sdata object size from two 4-byte entries to one 8-byte entry.",
+      "evidence_refs": [
+        "diff_excerpt: HSD_TExpDag_804D5FF8 hunks",
+        "review r3467572093"
+      ]
+    },
+    {
+      "text": "SimplifySrc switched from HSD_TEArg pointer variables and raw u32 writes to indexed c_in[i]/a_in[i] assignments and HSD_TEArg struct copies; result became bool-style true/false.",
+      "evidence_refs": [
+        "diff_excerpt: SimplifySrc hunk",
+        "review r3467613973"
+      ]
+    },
+    {
+      "text": "CLEAR_ARG was reduced from copying separate u32 and exp fields to assigning the HSD_TEArg clear object directly.",
+      "evidence_refs": [
+        "diff_excerpt: CLEAR_ARG hunk",
+        "review r3467613973"
+      ]
+    },
+    {
+      "text": "SimplifyThis replaced a deeply nested scalar-comparison region with a switch over arg0->tev.a_op and indexed accesses to a_in[i]/c_in[i].",
+      "evidence_refs": [
+        "diff_excerpt: SimplifyThis hunk",
+        "review r3467603280",
+        "review r3467787783"
+      ]
+    },
+    {
+      "text": "symbols.txt split a former HSD_TExpDag_80407AA0 0x78-byte global object into several lbl_80407AA0..lbl_80407B04 entries and marked jumptable_80407B18 as local align:8.",
+      "evidence_refs": [
+        "diff_excerpt: config/GALE01/symbols.txt data hunk",
+        "review r3467446958"
+      ]
+    }
+  ],
+  "smart_moves": [
+    {
+      "text": "Used the real aggregate type HSD_TEArg for the clear argument constant rather than forcing separate scalar globals, which explained both instruction ordering and sdata placement.",
+      "evidence_refs": [
+        "review r3467572093",
+        "diff_excerpt: static HSD_TEArg HSD_TExpDag_804D5FF8"
+      ]
+    },
+    {
+      "text": "Recovered indexed array access over tev.c_in and tev.a_in instead of preserving generated pointer arithmetic through HSD_TEArg-sized object stepping.",
+      "evidence_refs": [
+        "review r3467787783",
+        "diff_excerpt: SimplifyThis and SimplifySrc hunks"
+      ]
+    },
+    {
+      "text": "Used a switch form for a deeply nested scalar-comparison region in SimplifyThis, aligning the code with the author's stated source-shape hypothesis.",
+      "evidence_refs": [
+        "review r3467603280",
+        "diff_excerpt: SimplifyThis switch hunk"
+      ]
+    },
+    {
+      "text": "Verified jump table/data correctness with objdiff's aggressive 'Name or address, data value' diffing while cross-checking assembly labels for not-yet-linked jump labels.",
+      "evidence_refs": [
+        "review r3467446958"
+      ]
+    },
+    {
+      "text": "Kept uncertainty visible for HSD_TExpMakeDag rather than overclaiming the refactor as trustworthy source reconstruction.",
+      "evidence_refs": [
+        "review r3467648015"
+      ]
+    }
+  ],
+  "decomp_lessons": [
+    {
+      "lesson": "If instruction order or data placement looks strange around adjacent scalars, test whether the original source used one typed aggregate; a contiguous initialized struct can keep a zero-valued trailing field in initialized data rather than BSS-like storage.",
+      "scope": [
+        "data layout",
+        "typed aggregates",
+        "sdata"
+      ],
+      "evidence_refs": [
+        "review r3467572093",
+        "diff_excerpt: HSD_TExpDag_804D5FF8 symbols and source hunks"
+      ]
+    },
+    {
+      "lesson": "Deeply nested scalar comparisons may be decompiler output for a switch statement; consider switch recovery, including non-jumptable switch codegen, before preserving the comparison ladder.",
+      "scope": [
+        "control flow",
+        "switch recovery",
+        "m2c cleanup"
+      ],
+      "evidence_refs": [
+        "review r3467603280",
+        "diff_excerpt: SimplifyThis switch hunk"
+      ]
+    },
+    {
+      "lesson": "An incrementing array index may compile into a forward-marching pointer dereference, so pointer-walking decompiler output can often be written as ordinary indexed array access.",
+      "scope": [
+        "array indexing",
+        "pointer walking",
+        "loop cleanup"
+      ],
+      "evidence_refs": [
+        "review r3467787783",
+        "diff_excerpt: SimplifyThis c_in/a_in loop hunk"
+      ]
+    },
+    {
+      "lesson": "Struct assignment can replace raw field-by-field or word-plus-pointer copies when the target field has a recovered struct type.",
+      "scope": [
+        "typed fields",
+        "struct copies",
+        "cleanup"
+      ],
+      "evidence_refs": [
+        "review r3467613973",
+        "diff_excerpt: CLEAR_ARG and SimplifySrc hunks"
+      ]
+    },
+    {
+      "lesson": "When a refactor improves matching but lacks a close match and risks index/increment mistakes, preserve that uncertainty and consider restarting from decomp.py for a future pass.",
+      "scope": [
+        "risk management",
+        "refactor confidence",
+        "HSD_TExpMakeDag"
+      ],
+      "evidence_refs": [
+        "review r3467648015"
+      ]
+    }
+  ],
+  "naming_conventions": [
+    {
+      "text": "Unproven data fragments in symbols.txt were named with address-style lbl_80407AA0/lbl_80407AAC/etc. rather than a semantic aggregate name.",
+      "evidence_refs": [
+        "diff_excerpt: symbols.txt HSD_TExpDag_80407AA0 split into lbl_* entries"
+      ]
+    },
+    {
+      "text": "Typed source retained address-style global HSD_TExpDag_804D5FF8 while changing its C type to HSD_TEArg; the PR evidence supports type recovery more strongly than semantic renaming.",
+      "evidence_refs": [
+        "diff_excerpt: static HSD_TEArg HSD_TExpDag_804D5FF8",
+        "review r3467572093"
+      ]
+    },
+    {
+      "text": "Temporary/generated-style locals such as cur, cur2, p, loop_count3, loop_count4, clear_arg, and clear_exp were removed or replaced with scoped role locals and direct indexed fields.",
+      "evidence_refs": [
+        "diff_excerpt: HSD_TExpMakeDag and SimplifySrc hunks"
+      ]
+    }
+  ],
+  "assembly_or_matching_tactics": [
+    {
+      "tactic": "For jump table data labels, compare objdiff and assembly views: objdiff may show unresolved '????' labels, while asm has useful labels; use aggressive 'Name or address, data value' diffing to validate data correctness.",
+      "evidence_refs": [
+        "review r3467446958"
+      ]
+    },
+    {
+      "tactic": "Recovering a contiguous struct object can affect both instruction scheduling and data-section placement for initialized/zero-valued adjacent fields.",
+      "evidence_refs": [
+        "review r3467572093"
+      ]
+    },
+    {
+      "tactic": "Try natural indexed loops over fixed-size arrays when generated output steps through a struct by adding sizeof(HSD_TEArg).",
+      "evidence_refs": [
+        "review r3467787783",
+        "diff_excerpt: SimplifyThis loop hunk"
+      ]
+    },
+    {
+      "tactic": "Try switch statements for branch ladders over scalar operation codes; m2c may not reconstruct this source shape automatically.",
+      "evidence_refs": [
+        "review r3467603280"
+      ]
+    },
+    {
+      "tactic": "PAD_STACK(4) remained in HSD_TExpMakeDag; PR evidence shows it was retained but does not include a standalone justification beyond the diff context.",
+      "evidence_refs": [
+        "diff_excerpt: HSD_TExpMakeDag hunk"
+      ]
+    }
+  ],
+  "review_feedback": [
+    {
+      "author": "r-burns",
+      "path": "config/GALE01/symbols.txt",
+      "feedback": "Jump tables are finicky; useful workflow was flipping between objdiff and asm, then verifying data with aggressive 'Name or address, data value' diffing.",
+      "evidence_refs": [
+        "review r3467446958"
+      ]
+    },
+    {
+      "author": "r-burns",
+      "path": "src/sysdolphin/baselib/texpdag.c",
+      "feedback": "HSD_TExpDag_804D5FF8 being a struct, not separate scalars, explains weird instruction order and why the following zero-looking data should remain contiguous with initialized data.",
+      "evidence_refs": [
+        "review r3467572093"
+      ]
+    },
+    {
+      "author": "r-burns",
+      "path": "src/sysdolphin/baselib/texpdag.c",
+      "feedback": "Deeply nested scalar comparisons usually hint at a switch statement; m2c may miss switch recovery.",
+      "evidence_refs": [
+        "review r3467603280"
+      ]
+    },
+    {
+      "author": "r-burns",
+      "path": "src/sysdolphin/baselib/texpdag.c",
+      "feedback": "Struct copy made the SimplifySrc/CLEAR_ARG cleanup easier; a leftover helper/shape might be removable in a future less-constrained diff.",
+      "evidence_refs": [
+        "review r3467613973"
+      ]
+    },
+    {
+      "author": "r-burns",
+      "path": "src/sysdolphin/baselib/texpdag.c",
+      "feedback": "The HSD_TExpMakeDag improvement was not fully trusted; future work may be better started from scratch with decomp.py because index/increment mistakes are easy.",
+      "evidence_refs": [
+        "review r3467648015"
+      ]
+    },
+    {
+      "author": "r-burns",
+      "path": "src/sysdolphin/baselib/texpdag.c",
+      "feedback": "Array indexing on an incrementing counter can compile as a dereference of a forward-marching pointer.",
+      "evidence_refs": [
+        "review r3467787783"
+      ]
+    },
+    {
+      "author": "r-burns",
+      "path": "config/GALE01/symbols.txt",
+      "feedback": "Objdiff hover can show offsets from the function base for unresolved labels, but the author still preferred asm for lower friction and copy/paste workflows.",
+      "evidence_refs": [
+        "review r3467881890 excerpt"
+      ]
+    }
+  ],
+  "searchable_terms": [
+    "pr-2757",
+    "texpdag matches",
+    "src/sysdolphin/baselib/texpdag.c",
+    "config/GALE01/symbols.txt",
+    "HSD_TExpDag_804D5FF8",
+    "HSD_TExpDag_804D5FFC",
+    "HSD_TEArg",
+    "CLEAR_ARG",
+    "SimplifySrc",
+    "SimplifyThis",
+    "HSD_TExpMakeDag",
+    "HSD_TExpSchedule",
+    "order_dag",
+    "CalcDistance",
+    "jumptable_80407B18",
+    "lbl_80407AA0",
+    "lbl_80407AAC",
+    "lbl_80407AD0",
+    "switch statement",
+    "deeply nested scalar comparisons",
+    "forward-marching pointer",
+    "array indexing",
+    "Name or address, data value",
+    "PAD_STACK(4)",
+    "decomp.py"
+  ],
+  "follow_up_queries": [
+    "HSD_TExpMakeDag PAD_STACK(4) retained justification",
+    "texpdag HSD_TExpMakeDag future decomp.py restart",
+    "HSD_TEArg clear constant HSD_TExpDag_804D5FF8",
+    "jump table objdiff ???? asm labels Name or address data value",
+    "m2c scalar comparisons switch statement recovery",
+    "HSD_TEArg array indexing forward marching pointer"
+  ],
+  "evidence_quality": {
+    "status": "mixed",
+    "evidence_refs": [
+      "metadata_json",
+      "changed_files.jsonl",
+      "diff_excerpt",
+      "review_comments excerpt",
+      "text_corpus bot report"
+    ],
+    "notes": [
+      "PR body is empty, so intent comes from diff and review comments.",
+      "Loaded raw diff and review comments are truncated; the record only uses visible hunks and metadata.",
+      "Bot report provides matching improvement evidence, but no local build or objdiff run was performed during intake.",
+      "Several comments are self-review notes by the PR author; they are evidence of technique and uncertainty, not independent reviewer acceptance.",
+      "HSD_TExpMakeDag was explicitly described by the author as improved but not fully trusted, so related lessons are framed as caution rather than accepted correctness."
+    ]
+  },
+  "curator_handoff": {
+    "accepted_candidate_records": [
+      {
+        "type": "decomp_lesson",
+        "title": "Struct aggregate can explain scalar-looking data and section placement",
+        "text": "In texpdag, replacing separate scalar globals at 0x804D5FF8/0x804D5FFC with one HSD_TEArg object explained unusual instruction ordering and why a zero-looking trailing value stayed contiguous with initialized sdata.",
+        "scope": [
+          "src/sysdolphin/baselib/texpdag.c",
+          "data layout",
+          "typed aggregates"
+        ],
+        "evidence_refs": [
+          "review r3467572093",
+          "diff_excerpt: HSD_TExpDag_804D5FF8 source and symbols hunks"
+        ]
+      },
+      {
+        "type": "decomp_lesson",
+        "title": "Generated pointer walks may be indexed array loops",
+        "text": "In SimplifyThis/SimplifySrc, HSD_TEArg-sized pointer stepping over c_in/a_in was rewritten as arg0->tev.c_in[i] and arg0->tev.a_in[i]; the author noted MWCC can compile incrementing array indexing into a forward-marching pointer dereference.",
+        "scope": [
+          "src/sysdolphin/baselib/texpdag.c",
+          "loops",
+          "array indexing"
+        ],
+        "evidence_refs": [
+          "review r3467787783",
+          "diff_excerpt: SimplifyThis/SimplifySrc hunks"
+        ]
+      },
+      {
+        "type": "matching_tactic",
+        "title": "Use asm alongside objdiff for unresolved jump table labels",
+        "text": "For jumptable_80407B18, the author found objdiff useful but noted unresolved labels display as '????'; assembly labels and the aggressive 'Name or address, data value' diffing type helped verify the data match.",
+        "scope": [
+          "config/GALE01/symbols.txt",
+          "jump tables",
+          "data matching"
+        ],
+        "evidence_refs": [
+          "review r3467446958"
+        ]
+      }
+    ],
+    "source_update_candidates": [
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Document struct aggregate recovery for scalar-looking adjacent data",
+        "text": "When adjacent scalar-looking data has odd instruction ordering or section-placement pressure, test whether it is a single typed aggregate. PR #2757 shows HSD_TExpDag_804D5FF8/HSD_TExpDag_804D5FFC becoming one HSD_TEArg object, explaining contiguous initialized sdata despite a zero-valued trailing field.",
+        "source_path": null,
+        "scope": [
+          "typed-fields-over-pointer-math",
+          "literals-and-data-ownership",
+          "matching tactics"
+        ],
+        "evidence_refs": [
+          "review r3467572093",
+          "diff_excerpt: HSD_TExpDag_804D5FF8 source and symbols hunks"
+        ],
+        "reason": "Potentially reusable beyond this PR, but curator should decide whether it belongs in global standards or as a narrower lesson."
+      },
+      {
+        "target_source_id": "decomp_standards",
+        "update_kind": "global_standard",
+        "title": "Add jump table matching workflow note",
+        "text": "For jump table data, objdiff may show unresolved '????' labels while asm contains useful labels; compare both views and consider aggressive 'Name or address, data value' diffing to validate symbol/data matches.",
+        "source_path": null,
+        "scope": [
+          "assembly_or_matching_tactics",
+          "data symbols",
+          "jump tables"
+        ],
+        "evidence_refs": [
+          "review r3467446958",
+          "review r3467881890 excerpt"
+        ],
+        "reason": "The workflow is concrete and evidenced, but should be curated as a tactic rather than treated as a mandatory standard."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "texpdag uses HSD_TEArg arrays and switch-like TEV simplification patterns",
+        "text": "In src/sysdolphin/baselib/texpdag.c, c_in/a_in fixed-size HSD_TEArg arrays and TEV op simplification code were successfully matched using indexed loops, struct copies, and switch recovery.",
+        "source_path": "src/sysdolphin/baselib/texpdag.c",
+        "scope": [
+          "SimplifySrc",
+          "SimplifyThis",
+          "HSD_TEArg",
+          "TEV ops"
+        ],
+        "evidence_refs": [
+          "diff_excerpt: SimplifySrc and SimplifyThis hunks",
+          "review r3467603280",
+          "review r3467787783"
+        ],
+        "reason": "Could help future work in this file, but should remain path-scoped because evidence is local to texpdag."
+      },
+      {
+        "target_source_id": "path_facts",
+        "update_kind": "path_fact",
+        "title": "HSD_TExpMakeDag remained partially uncertain after PR #2757",
+        "text": "PR #2757 improved HSD_TExpMakeDag matching but the author explicitly did not fully trust the refactor and suggested restarting from decomp.py for future work because wrong array indices or dropped increments are easy.",
+        "source_path": "src/sysdolphin/baselib/texpdag.c",
+        "scope": [
+          "HSD_TExpMakeDag",
+          "future cleanup",
+          "risk note"
+        ],
+        "evidence_refs": [
+          "review r3467648015",
+          "bot report issuecomment-4789726052"
+        ],
+        "reason": "Useful caution for future agents touching this function; should be curated as a risk/path note, not as a correctness claim."
+      }
+    ],
+    "rejection_notes": [
+      "Do not generalize that every nested comparison ladder is a switch; the evidence supports using it as a hint and testing switch forms.",
+      "Do not treat PAD_STACK(4) in HSD_TExpMakeDag as a proven reusable tactic from this PR; the diff shows it remained, but no comment justifies it.",
+      "Do not infer semantic names for lbl_80407AA0 or related labels; PR evidence only supports address-style splitting and data classification.",
+      "Do not promote HSD_TExpMakeDag as fully matched or trusted; bot report says it improved to 92.07%, and the author explicitly expressed low trust."
+    ]
+  },
+  "confidence": 0.82,
+  "agent_runtime": {
+    "runner": "orchestrator_kernel_pr_indexer",
+    "provider": "codex-lb",
+    "model": "gpt-5.5",
+    "thinking": "medium",
+    "tools": "read,grep,find,ls",
+    "agent_timeout_seconds": 900,
+    "orchestrator_state_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/projects/melee/state",
+    "orchestrator_run_id": "08bfe41e-1b7c-4685-8646-dff5e02a5dab",
+    "orchestrator_project_id": "melee",
+    "orchestrator_prepare_intake": true,
+    "orchestrator_kernel_database_url_configured": true,
+    "legacy_session_dir": "/Users/Ford/Github Repos/oss/gamecube-decomp-harness/.pi-sessions/pr-review"
+  }
+}
