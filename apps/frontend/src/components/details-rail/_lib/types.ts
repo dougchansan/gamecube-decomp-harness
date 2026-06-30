@@ -1,6 +1,6 @@
 import type { Dashboard, RunDetails } from "@/lib/format";
 
-export type DetailsTab = "logs" | "run" | "agents";
+export type DetailsTab = "logs" | "run";
 
 export interface DetailsRailProps {
   collapsed: boolean;

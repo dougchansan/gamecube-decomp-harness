@@ -274,7 +274,7 @@ def main() -> int:
         "risky_neighbors": [],
         "validation_commands": [
             "export WINEDEBUG=-all",
-            "python configure.py --require-protos",
+            "python3 configure.py --require-protos --wrapper build/tools/wibo",
             f"ninja {unit_info.get('base_path', '<target-object>')}",
             f"build/tools/objdiff-cli diff -p . -u {unit_name or '<unit>'} <symbol> --format json-pretty -o {args.runs_dir}/{run_slug}/artifacts/diff_json/final.<symbol>.json",
         ],
@@ -471,7 +471,7 @@ Start with rows from these families:
 - Compile candidate.
 - Run symbol objdiff.
 - Run TU objdiff when candidate is TU-sensitive.
-- Run `python configure.py --require-protos`.
+- Run `python3 configure.py --require-protos --wrapper build/tools/wibo`.
 - Run target object build.
 - Run full `ninja` when data, headers, splits, or shared helpers changed.
 

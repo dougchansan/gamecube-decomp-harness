@@ -109,6 +109,13 @@ function combineEpochAdmissions(previous: EpochAdmissionResult | undefined, next
   };
 }
 
+function historicalTargetKeyCount(store: StateStore, runId: string): number {
+  const row = store.db.query("SELECT COUNT(DISTINCT target_key) AS count FROM epoch_targets WHERE session_id = ?").get(runId) as
+    | Record<string, unknown>
+    | undefined;
+  return nonNegativeInt(Number(row?.count ?? 0));
+}
+
 export function ensureSchedulerEpochFromBoard(params: {
   config: SchedulerEpochConfig;
   globals: GlobalArgs;
@@ -125,7 +132,9 @@ export function ensureSchedulerEpochFromBoard(params: {
 
   const remaining = progress.admitted === 0 ? remainingFixedAdmission(params.config.size, progress) : 0;
   if (remaining > 0) {
-    const board = loadKnowledgeBoardSnapshot(params.globals.repoRoot, candidateWindow, { graphDbPath: params.graphDbPath });
+    const admissionCandidateWindow =
+      params.config.size.mode === "full" ? candidateWindow : candidateWindow + historicalTargetKeyCount(params.store, params.runId);
+    const board = loadKnowledgeBoardSnapshot(params.globals.repoRoot, admissionCandidateWindow, { graphDbPath: params.graphDbPath });
     const passSize: EpochSizeSpec = params.config.size.mode === "full" ? params.config.size : { mode: "fixed", value: remaining };
     admission = combineEpochAdmissions(
       admission,
@@ -137,7 +146,7 @@ export function ensureSchedulerEpochFromBoard(params: {
         workerPoolSize: params.config.workerPoolSize,
       }),
     );
-    boardExhausted = board.candidates.length < candidateWindow;
+    boardExhausted = board.candidates.length < admissionCandidateWindow;
     progress = schedulerEpochProgress(params.store, epoch.id);
   }
 

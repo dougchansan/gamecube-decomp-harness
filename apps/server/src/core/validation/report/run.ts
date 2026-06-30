@@ -1,5 +1,5 @@
-import { copyFile, readFile, rm, stat } from "node:fs/promises";
-import { resolve } from "node:path";
+import { chmod, copyFile, mkdir, readFile, rm, stat } from "node:fs/promises";
+import { dirname, resolve } from "node:path";
 import { runCommand, type CommandResult } from "@server/infrastructure/shell/index.js";
 
 export interface ReportRunStep extends CommandResult {
@@ -64,6 +64,61 @@ async function pathExists(path: string): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+function shellQuote(value: string): string {
+  return `'${value.replace(/'/g, "'\\''")}'`;
+}
+
+async function pathCommandExists(command: string): Promise<boolean> {
+  const pathValue = process.env.PATH ?? "";
+  for (const entry of pathValue.split(":")) {
+    if (!entry) continue;
+    if (await pathExists(resolve(entry, command))) return true;
+  }
+  return false;
+}
+
+async function stateWiboPath(repoRoot: string): Promise<string | null> {
+  const stateDir = process.env.ORCH_PROJECT_STATE_DIR;
+  if (stateDir) {
+    const candidate = resolve(stateDir, "tools", "wibo");
+    if (await pathExists(candidate)) return candidate;
+  }
+  let current = resolve(repoRoot);
+  while (true) {
+    const name = current.split("/").at(-1);
+    if (name === "worktrees") {
+      const candidate = resolve(current, "..", "state", "tools", "wibo");
+      if (await pathExists(candidate)) return candidate;
+    }
+    const candidate = resolve(current, "state", "tools", "wibo");
+    if (await pathExists(candidate)) return candidate;
+    const parent = resolve(current, "..");
+    if (parent === current) return null;
+    current = parent;
+  }
+}
+
+async function preferredConfigureCommand(repoRoot: string): Promise<string[]> {
+  const localWibo = resolve(repoRoot, "build", "tools", "wibo");
+  if (process.platform === "darwin" || process.platform === "linux") {
+    if (!(await pathExists(localWibo))) {
+      const source = await stateWiboPath(repoRoot);
+      if (source) {
+        await mkdir(dirname(localWibo), { recursive: true });
+        await copyFile(source, localWibo);
+        await chmod(localWibo, 0o755).catch(() => {});
+      }
+    }
+    if (await pathExists(localWibo)) {
+      return ["/bin/sh", "-c", `python3 configure.py --require-protos --wrapper ${shellQuote("build/tools/wibo")}`];
+    }
+  }
+  if ((process.platform === "darwin" || process.platform === "linux") && (await pathCommandExists("wibo"))) {
+    return ["/bin/sh", "-c", "python3 configure.py --require-protos --wrapper wibo"];
+  }
+  return ["python3", "configure.py", "--require-protos"];
 }
 
 function asObject(value: unknown): Record<string, unknown> {
@@ -134,7 +189,7 @@ async function ensureConfigured(repoRoot: string, steps: ReportRunStep[]): Promi
   if (!(await pathExists(resolve(repoRoot, "configure.py")))) {
     throw new Error(`configure failed: build.ninja is missing and configure.py was not found in ${repoRoot}`);
   }
-  await runStep(repoRoot, steps, "configure", ["python3", "configure.py"]);
+  await runStep(repoRoot, steps, "configure", await preferredConfigureCommand(repoRoot));
 }
 
 export async function forceReportRun(repoRoot: string, options: ReportRunOptions = {}): Promise<ReportRunResult> {

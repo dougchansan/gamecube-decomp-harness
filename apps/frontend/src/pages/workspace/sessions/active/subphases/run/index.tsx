@@ -1,9 +1,9 @@
-import { ProgressPanel } from "@/components/progress-panel";
+import { ProgressPanel } from "./components/progress-panel";
 import {
   type ImprovedMode,
   type WorkMode,
   WorkTables,
-} from "@/components/work-tables";
+} from "./components/work-tables";
 import type { Dashboard, FormState } from "@/lib/format";
 import type {
   DashboardAction,
@@ -21,16 +21,12 @@ export function RunModePage(props: {
   setImprovedMode: (mode: ImprovedMode) => void;
   setImprovedPage: (page: number | ((page: number) => number)) => void;
   setWorkMode: (mode: WorkMode) => void;
-  streamState: string;
   view: SessionView;
   workMode: WorkMode;
 }) {
   return (
     <div className="grid gap-4">
-      <ProgressPanel
-        dashboard={props.dashboard}
-        streamState={props.streamState}
-      />
+      <ProgressPanel dashboard={props.dashboard} />
       <WorkTables
         dashboard={props.dashboard}
         improvedMode={props.improvedMode}

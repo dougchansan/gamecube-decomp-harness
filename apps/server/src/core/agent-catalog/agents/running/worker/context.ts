@@ -11,6 +11,7 @@ import {
   defaultKernelTurnPrompt,
   rootContextLoaderDeclaration,
 } from "@server/core/agent-catalog/kernel-context.js";
+import { workerCanonicalToolPathsXml } from "./tool-paths.js";
 
 const loaders = [
   rootContextLoaderDeclaration,
@@ -65,6 +66,8 @@ const WORKER_PACKET_CONTEXT_TEMPLATE = `<task>
 {{DECOMP_STANDARDS_XML}}
 
 {{AVAILABLE_TOOLS_XML}}
+
+{{CANONICAL_TOOL_PATHS_XML}}
 
 `;
 
@@ -418,6 +421,7 @@ export function buildWorkerKernelContext(options: WorkerPromptOptions): NonNulla
   const values = {
     AVAILABLE_TOOLS_XML: availableToolsPromptXml(toolContext),
     BASELINE_XML: inputXml.baselineXml,
+    CANONICAL_TOOL_PATHS_XML: workerCanonicalToolPathsXml(options.repoRoot),
     DECOMP_STANDARDS_XML: globalStandardsPromptXml(),
     REPAIR_REQUEST_XML: repairRequestXml(options.packet),
     TARGET_GRAPH_FILE_CARD_XML: inputXml.targetGraphFileCardXml,

@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { loadKnowledgeBoardSnapshot, packageRoot, resourceGraphDbPath } from "@server/core/knowledge";
 import {
@@ -378,6 +379,31 @@ function schedulerTickArgs(
   ]);
 }
 
+function shellQuote(value: string): string {
+  return `'${value.replace(/'/g, `'\\''`)}'`;
+}
+
+function defaultConfigureCommand(globals: Pick<GlobalArgs, "repoRoot" | "stateDir">): string {
+  const localWibo = resolve(globals.repoRoot, "build", "tools", "wibo");
+  if ((process.platform === "darwin" || process.platform === "linux") && existsSync(localWibo)) {
+    return "python3 configure.py --require-protos --wrapper build/tools/wibo";
+  }
+  const wibo = resolve(globals.stateDir, "tools", "wibo");
+  if ((process.platform === "darwin" || process.platform === "linux") && existsSync(wibo)) {
+    return `python3 configure.py --require-protos --wrapper ${shellQuote(wibo)}`;
+  }
+  return "python3 configure.py --require-protos";
+}
+
+function workerProcessEnv(globals: Pick<GlobalArgs, "stateDir">): Record<string, string | undefined> {
+  const env: Record<string, string | undefined> = { ...Bun.env };
+  const wibo = resolve(globals.stateDir, "tools", "wibo");
+  if ((process.platform === "darwin" || process.platform === "linux") && existsSync(wibo)) {
+    env.MWCC_WIBO = wibo;
+  }
+  return env;
+}
+
 function workerCommand(
   globals: GlobalArgs,
   params: {
@@ -386,7 +412,6 @@ function workerCommand(
     baseRev: string;
     ttlSeconds: number;
     thinkingLevel: string;
-    repairAttempts: number;
     postReturnCheckCommand: string;
     workerConfigureCommand: string;
     graphDbPath: string;
@@ -420,8 +445,6 @@ function workerCommand(
     params.baseRev,
     "--ttl-seconds",
     String(params.ttlSeconds),
-    "--repair-attempts",
-    String(params.repairAttempts),
   );
   if (params.postReturnCheckCommand) command.push("--post-return-check-command", params.postReturnCheckCommand);
   if (params.workerConfigureCommand) command.push("--worker-configure-command", params.workerConfigureCommand);
@@ -437,7 +460,6 @@ async function runWorkerProcess(
     baseRev: string;
     ttlSeconds: number;
     thinkingLevel: string;
-    repairAttempts: number;
     postReturnCheckCommand: string;
     workerConfigureCommand: string;
     graphDbPath: string;
@@ -447,6 +469,7 @@ async function runWorkerProcess(
   const command = workerCommand(globals, params);
   const proc = Bun.spawn(command, {
     cwd: orchestratorRoot(),
+    env: workerProcessEnv(globals),
     stdout: "pipe",
     stderr: "pipe",
   });
@@ -482,6 +505,7 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
   let runningKnowledgeMaintenance: Promise<void> | null = null;
   let stoppedReason = "running";
   let stopRequested = false;
+  let drainRequested = false;
   let iterations = 0;
   let idleIterations = 0;
   let workersStarted = 0;
@@ -496,9 +520,14 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
     stopRequested = true;
     stoppedReason = "signal";
   };
+  const drain = () => {
+    drainRequested = true;
+    stoppedReason = "draining";
+  };
 
   process.once("SIGINT", stop);
   process.once("SIGTERM", stop);
+  process.once("SIGUSR1", drain);
 
   try {
     const runId = stringArg(args, "--run-id", getLatestRun(store)?.id ?? "");
@@ -529,18 +558,17 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
     );
     const baseRev = stringArg(args, "--base-rev", "unknown");
     const ttlSeconds = numberArg(args, "--ttl-seconds", DEFAULT_WORKER_TTL_SECONDS);
-    const repairAttempts = Math.max(0, Math.trunc(numberArg(args, "--repair-attempts", globals.dryRunAgents ? 0 : 2)));
     const postReturnCheckCommand = stringArg(args, "--post-return-check-command", "");
     const graphDbPath = stringArg(args, "--graph-db", globals.graphDbPath ?? resourceGraphDbPath());
     const exitOnWorkerError = booleanArg(args, "--exit-on-worker-error");
     const workerThinkingLevel = stringArg(args, "--worker-thinking-level", globals.thinkingLevel);
-    const workerConfigureCommand = stringArg(args, "--worker-configure-command", "python3 configure.py --require-protos");
+    const workerConfigureCommand = stringArg(args, "--worker-configure-command", defaultConfigureCommand(globals));
     const maintenanceIntervalMs = knowledgeMaintenanceIntervalMs(globals, args);
     const epochCycleEnabled = true;
     const schedulerEpochConfig = schedulerEpochConfigFromArgs(globals, args, { admissionTargetSize, candidateWindow });
     const workerPoolTargetSize = schedulerEpochConfig.workerPoolSize;
     const epochWorktreeDir = stringArg(args, "--epoch-worktree", resolve(globals.stateDir, "epoch_worktree"));
-    const epochConfigureCommand = stringArg(args, "--epoch-configure-command", "python3 configure.py --require-protos");
+    const epochConfigureCommand = stringArg(args, "--epoch-configure-command", defaultConfigureCommand(globals));
     const epochLinkPaths = stringArg(args, "--epoch-link-paths", "orig")
       .split(",")
       .map((path) => path.trim())
@@ -572,7 +600,7 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
     while (!stopRequested) {
       let didWork = false;
 
-      if (!runningKnowledgeMaintenance && maintenanceIntervalMs > 0 && Date.now() - lastKnowledgeMaintenanceMs >= maintenanceIntervalMs) {
+      if (!drainRequested && !runningKnowledgeMaintenance && maintenanceIntervalMs > 0 && Date.now() - lastKnowledgeMaintenanceMs >= maintenanceIntervalMs) {
         lastKnowledgeMaintenanceMs = Date.now();
         let task: Promise<void>;
         task = runKnowledgeMaintenance(globals, knowledgeMaintenanceArgs(args, runId, !globals.dryRunAgents))
@@ -762,7 +790,7 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
         runningEpoch = task;
       };
 
-      if (epochCycleEnabled && fastMaintenanceIntervalMs > 0 && !runningEpoch) {
+      if (!drainRequested && epochCycleEnabled && fastMaintenanceIntervalMs > 0 && !runningEpoch) {
         const reportsSinceFast = workerStateCloseCountSince(store, runId, lastFastMaintenanceReportIso);
         const fastDecision = evaluateFastKnowledgeMaintenanceDecision({
           intervalMs: fastMaintenanceIntervalMs,
@@ -855,7 +883,7 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
         }
       }
 
-      if (epochCycleEnabled) {
+      if (!drainRequested && epochCycleEnabled) {
         if (!runningEpoch && nowMs >= nextEpochAllowedMs && !epochPaused) {
           const epochResult = ensureSchedulerEpochFromBoard({
             config: schedulerEpochConfig,
@@ -908,7 +936,7 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
         }
       }
 
-      if (providerPausedSinceMs != null && !runningProviderProbe && Date.now() >= nextProviderProbeMs) {
+      if (!drainRequested && providerPausedSinceMs != null && !runningProviderProbe && Date.now() >= nextProviderProbeMs) {
         const probeDir = resolve(globals.stateDir, "runs", runId, "provider_probes");
         let probeTask: Promise<void>;
         probeTask = probeProvider(globals, probeDir, runId)
@@ -943,7 +971,7 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
         activeLocalWorkers,
       });
       const iterationBudgetExhausted = maxIterations > 0 && iterations >= maxIterations;
-      const workersToStart = providerPausedSinceMs != null || iterationBudgetExhausted ? 0 : Math.min(openSlots, schedulableTargets);
+      const workersToStart = drainRequested || providerPausedSinceMs != null || iterationBudgetExhausted ? 0 : Math.min(openSlots, schedulableTargets);
       for (let index = 0; index < workersToStart; index += 1) {
         workerOrdinal += 1;
         workersStarted += 1;
@@ -958,7 +986,6 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
             baseRev,
             ttlSeconds,
             thinkingLevel: workerThinkingLevel,
-            repairAttempts,
             postReturnCheckCommand,
             workerConfigureCommand,
             graphDbPath,
@@ -1015,7 +1042,7 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
         runningWorkerIds.add(workerId);
       }
 
-      if (!runningScheduler && nextUnhandledEvent(store, runId)) {
+      if (!drainRequested && !runningScheduler && nextUnhandledEvent(store, runId)) {
         const tickArgs = schedulerTickArgs(args, { admissionTargetSize: workerPoolTargetSize, candidateLimit, candidateWindow, runId });
         let task: Promise<void>;
         task = runSchedulerTick(globals, tickArgs)
@@ -1055,6 +1082,18 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
       }
       if (maxIterations > 0 && iterations >= maxIterations && runningWorkers.size === 0 && !runningEpoch) {
         stoppedReason = "max_iterations";
+        break;
+      }
+      if (
+        drainRequested &&
+        runningWorkers.size === 0 &&
+        !runningEpoch &&
+        !runningScheduler &&
+        !runningFastKnowledgeMaintenance &&
+        !runningKnowledgeMaintenance &&
+        !runningProviderProbe
+      ) {
+        stoppedReason = "drained";
         break;
       }
 
@@ -1126,6 +1165,7 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
   } finally {
     process.off("SIGINT", stop);
     process.off("SIGTERM", stop);
+    process.off("SIGUSR1", drain);
     store.db.close();
   }
 }

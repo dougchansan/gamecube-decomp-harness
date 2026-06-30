@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
+import shutil
 import sys
 
 sys.path.append(str(Path(__file__).resolve().parents[3] / "_shared"))
@@ -25,7 +26,9 @@ def main() -> None:
     command_args: list[str] = ["--no-copy"]
     if args.no_context:
         command_args.append("--no-context")
-    if args.format:
+    format_applied = bool(args.format and shutil.which("clang-format"))
+    format_skip_reason = "clang-format not found" if args.format and not format_applied else None
+    if format_applied:
         command_args.append("--format")
     command_args.append(args.input)
     command_args.extend(args.extra_arg)
@@ -38,7 +41,17 @@ def main() -> None:
         operation="m2c_decomp:decompile",
         timeout_seconds=clamp_int(args.timeout_seconds, default=120, minimum=10, maximum=600),
     )
-    payload.update({"input": args.input, "no_context": bool(args.no_context), "format": bool(args.format), "extra_args": args.extra_arg})
+    payload.update(
+        {
+            "input": args.input,
+            "no_context": bool(args.no_context),
+            "format": format_applied,
+            "format_requested": bool(args.format),
+            "format_applied": format_applied,
+            "format_skip_reason": format_skip_reason,
+            "extra_args": args.extra_arg,
+        }
+    )
     print_json(payload)
 
 

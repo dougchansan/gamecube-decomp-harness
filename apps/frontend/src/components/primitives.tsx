@@ -2,6 +2,10 @@ import type { ComponentProps, ReactNode } from "react";
 import { Fragment } from "react";
 
 type ButtonTone = "default" | "primary" | "warning" | "danger";
+type ButtonProps = Omit<ComponentProps<"button">, "ref"> & { icon?: ReactNode; tone?: ButtonTone };
+type FieldProps = Omit<ComponentProps<"input">, "ref"> & { label: string };
+type SelectFieldProps = Omit<ComponentProps<"select">, "ref"> & { label: string; options: Array<string | number> };
+type CheckboxFieldProps = Omit<ComponentProps<"input">, "ref" | "type"> & { label: string };
 
 const buttonTone: Record<ButtonTone, string> = {
   default: "border-line2 bg-raised text-soft hover:border-faint hover:text-fg",
@@ -16,7 +20,7 @@ export function Button({
   icon,
   tone = "default",
   ...props
-}: ComponentProps<"button"> & { icon?: ReactNode; tone?: ButtonTone }) {
+}: ButtonProps) {
   return (
     <button
       className={`inline-flex min-h-7 items-center justify-center gap-1.5 border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] disabled:cursor-not-allowed disabled:opacity-45 ${buttonTone[tone]} ${className}`}
@@ -53,7 +57,7 @@ export function Field({
   label,
   className = "",
   ...props
-}: ComponentProps<"input"> & { label: string }) {
+}: FieldProps) {
   return (
     <label className={`mb-3 block text-[10px] uppercase tracking-[0.08em] text-dim ${className}`} title={props.title}>
       <span>{label}</span>
@@ -67,7 +71,7 @@ export function SelectField({
   options,
   className = "",
   ...props
-}: ComponentProps<"select"> & { label: string; options: Array<string | number> }) {
+}: SelectFieldProps) {
   return (
     <label className={`mb-3 block text-[10px] uppercase tracking-[0.08em] text-dim ${className}`} title={props.title}>
       <span>{label}</span>
@@ -85,7 +89,7 @@ export function SelectField({
 export function CheckboxField({
   label,
   ...props
-}: Omit<ComponentProps<"input">, "type"> & { label: string }) {
+}: CheckboxFieldProps) {
   return (
     <label className="mt-2 flex items-center gap-2.5 text-xs text-dim" title={props.title}>
       <input className="min-h-4 w-4" type="checkbox" {...props} />

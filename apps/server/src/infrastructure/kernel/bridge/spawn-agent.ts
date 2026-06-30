@@ -19,6 +19,7 @@ import {
 import type { TraceEvent } from "@agent-kernel/protocol";
 import type { PiRunResult } from "@server/core/shared/types";
 import type { PiRunOptions } from "@server/infrastructure/agent-runtime/runtime";
+import { applyProcessEnvPatch } from "@server/infrastructure/agent-runtime/runtime/process-env";
 
 import type { MeleeKernelBridgeConfig } from "./config.js";
 import type {
@@ -329,34 +330,39 @@ export function createMeleeKernelSpawnAgent(
       },
     });
     const userPrompt = promptWithRenderedContext(options.piOptions, prompt);
-    const result = await kernelSpawn(name, userPrompt, null, kernelOptions).finally(
-      timeoutSignal.cleanup,
-    );
-    const sessionId = String((result.session as { sessionId?: unknown }).sessionId ?? randomUUID());
-    const paths = resultPaths(options.piOptions, sessionId);
-    await writeOutput(paths.systemPromptPath, parsedAgent.body);
-    await writeOutput(paths.userPromptPath, userPrompt);
-    await writeOutput(paths.outputPath, result.responseText);
-    result.session.dispose?.();
+    const restoreEnv = applyProcessEnvPatch(options.piOptions.env);
+    try {
+      const result = await kernelSpawn(name, userPrompt, null, kernelOptions).finally(
+        timeoutSignal.cleanup,
+      );
+      const sessionId = String((result.session as { sessionId?: unknown }).sessionId ?? randomUUID());
+      const paths = resultPaths(options.piOptions, sessionId);
+      await writeOutput(paths.systemPromptPath, parsedAgent.body);
+      await writeOutput(paths.userPromptPath, userPrompt);
+      await writeOutput(paths.outputPath, result.responseText);
+      result.session.dispose?.();
 
-    return {
-      sessionId,
-      sessionFile:
-        typeof (result.session as { sessionFile?: unknown }).sessionFile === "string"
-          ? (result.session as { sessionFile: string }).sessionFile
+      return {
+        sessionId,
+        sessionFile:
+          typeof (result.session as { sessionFile?: unknown }).sessionFile === "string"
+            ? (result.session as { sessionFile: string }).sessionFile
+            : undefined,
+        sessionDir: spawnContext.appSessionId
+          ? sessionDirFor(options.runtime, spawnContext.appSessionId, options.piOptions)
           : undefined,
-      sessionDir: spawnContext.appSessionId
-        ? sessionDirFor(options.runtime, spawnContext.appSessionId, options.piOptions)
-        : undefined,
-      ...paths,
-      rawText: result.responseText,
-      dryRun: false,
-      failed: result.aborted ? true : undefined,
-      error: result.aborted
-        ? timeoutSignal.timedOut()
-          ? timeoutMessage(options.piOptions)
-          : "Pi session aborted"
-        : undefined,
-    };
+        ...paths,
+        rawText: result.responseText,
+        dryRun: false,
+        failed: result.aborted ? true : undefined,
+        error: result.aborted
+          ? timeoutSignal.timedOut()
+            ? timeoutMessage(options.piOptions)
+            : "Pi session aborted"
+          : undefined,
+      };
+    } finally {
+      restoreEnv();
+    }
   };
 }

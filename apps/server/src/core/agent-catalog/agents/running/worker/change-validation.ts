@@ -1,6 +1,6 @@
-import { existsSync } from "node:fs";
-import { copyFile, mkdir, readFile, writeFile } from "node:fs/promises";
-import { dirname, isAbsolute, resolve } from "node:path";
+import { existsSync, statSync } from "node:fs";
+import { copyFile, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { basename, dirname, isAbsolute, resolve } from "node:path";
 import { runQaScanDiff, type QaScanFinding, type QaScanInvocation, type RunQaScanDiffOptions } from "@server/core/validation/qa";
 import { runCommand, type CommandResult } from "@server/infrastructure/shell";
 import { packageRoot } from "@server/core/knowledge";
@@ -8,6 +8,9 @@ import type { WorkerRunnerValidation } from "./runner-validation.js";
 
 const SCORE_EPSILON = 0.000001;
 const EXACT_SCORE = 99.99999;
+const DEFAULT_WORKER_NINJA_CONCURRENCY = 12;
+const WORKER_NINJA_SLOT_STALE_MS = 60 * 60 * 1000;
+const WORKER_NINJA_SLOT_MISSING_OWNER_STALE_MS = 30 * 1000;
 
 export interface WorkerUnitScore {
   name: string;
@@ -224,7 +227,9 @@ function snapshotFromObjdiffReport(params: {
 async function runValidationCommand(repoRoot: string, command: string[], stdoutPath: string, stderrPath: string): Promise<WorkerValidationCommandResult> {
   let result: CommandResult;
   try {
-    result = await runCommand(repoRoot, command);
+    result = command[0] === "ninja"
+      ? await withWorkerNinjaSlot(repoRoot, () => runCommand(repoRoot, command))
+      : await runCommand(repoRoot, command);
   } catch (error) {
     const message = error instanceof Error ? error.stack ?? error.message : String(error);
     result = { exitCode: 127, stdout: "", stderr: message };
@@ -232,6 +237,87 @@ async function runValidationCommand(repoRoot: string, command: string[], stdoutP
   await writeFile(stdoutPath, result.stdout);
   await writeFile(stderrPath, result.stderr);
   return { ...result, command, stdoutPath, stderrPath };
+}
+
+function workerNinjaConcurrency(): number {
+  const parsed = Number(process.env.ORCH_WORKER_COMPILE_CONCURRENCY ?? process.env.ORCH_WORKER_NINJA_CONCURRENCY);
+  if (!Number.isFinite(parsed)) return DEFAULT_WORKER_NINJA_CONCURRENCY;
+  return Math.max(1, Math.min(64, Math.floor(parsed)));
+}
+
+function workerNinjaQueueDir(repoRoot: string): string {
+  const worktreeDir = dirname(repoRoot);
+  const workersDir = dirname(worktreeDir);
+  if (basename(workersDir) === "workers") return resolve(dirname(workersDir), ".worker-ninja-slots");
+  return resolve(dirname(worktreeDir), ".worker-ninja-slots");
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolveSleep) => setTimeout(resolveSleep, ms));
+}
+
+async function workerNinjaSlotIsStale(slotDir: string): Promise<boolean> {
+  const ageMs = (() => {
+    try {
+      return Date.now() - statSync(slotDir).mtimeMs;
+    } catch {
+      return WORKER_NINJA_SLOT_STALE_MS + 1;
+    }
+  })();
+
+  try {
+    const owner = JSON.parse(await readFile(resolve(slotDir, "owner.json"), "utf8")) as { pid?: unknown };
+    const pid = typeof owner.pid === "number" ? owner.pid : 0;
+    if (pid > 0) {
+      try {
+        process.kill(pid, 0);
+        return ageMs > WORKER_NINJA_SLOT_STALE_MS;
+      } catch {
+        return true;
+      }
+    }
+  } catch {
+    return ageMs > WORKER_NINJA_SLOT_MISSING_OWNER_STALE_MS;
+  }
+
+  return ageMs > WORKER_NINJA_SLOT_STALE_MS;
+}
+
+async function acquireWorkerNinjaSlot(repoRoot: string): Promise<() => Promise<void>> {
+  const queueDir = workerNinjaQueueDir(repoRoot);
+  const limit = workerNinjaConcurrency();
+  await mkdir(queueDir, { recursive: true });
+  for (;;) {
+    for (let index = 0; index < limit; index += 1) {
+      const slotDir = resolve(queueDir, `slot-${index}`);
+      try {
+        await mkdir(slotDir);
+        await writeFile(
+          resolve(slotDir, "owner.json"),
+          JSON.stringify({ pid: process.pid, repoRoot, acquiredAt: new Date().toISOString() }, null, 2),
+        );
+        return async () => {
+          await rm(slotDir, { recursive: true, force: true });
+        };
+      } catch (error) {
+        if ((error as { code?: string }).code !== "EEXIST") throw error;
+        if (await workerNinjaSlotIsStale(slotDir)) {
+          await rm(slotDir, { recursive: true, force: true });
+          continue;
+        }
+      }
+    }
+    await sleep(250 + Math.floor(Math.random() * 500));
+  }
+}
+
+async function withWorkerNinjaSlot<T>(repoRoot: string, run: () => Promise<T>): Promise<T> {
+  const release = await acquireWorkerNinjaSlot(repoRoot);
+  try {
+    return await run();
+  } finally {
+    await release();
+  }
 }
 
 function isSafeRepoRelativePath(path: string): boolean {

@@ -508,32 +508,25 @@ export class ManagedProcessController {
 
     this.appendLog("ui", `drain requested for ${name} pid=${pid}`);
     const signaled: number[] = [];
+    const drainSignal: NodeJS.Signals = "SIGUSR1";
     if (children.length > 0) {
       for (const childPid of children) {
         try {
-          process.kill(childPid, "SIGTERM");
+          process.kill(childPid, drainSignal);
           signaled.push(childPid);
         } catch (error) {
-          this.appendLog("stderr", `soft SIGTERM failed for child ${childPid}: ${error instanceof Error ? error.message : String(error)}`);
+          this.appendLog("stderr", `drain signal failed for child ${childPid}: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
     } else {
       try {
-        process.kill(pid, "SIGTERM");
+        process.kill(pid, drainSignal);
         signaled.push(pid);
       } catch (error) {
-        this.appendLog("stderr", `soft SIGTERM failed for process ${pid}: ${error instanceof Error ? error.message : String(error)}`);
+        this.appendLog("stderr", `drain signal failed for process ${pid}: ${error instanceof Error ? error.message : String(error)}`);
       }
     }
-
-    if (children.length > 0) {
-      try {
-        process.kill(pid, "SIGKILL");
-        this.appendLog("ui", `stopped supervisor ${pid}; workers remain in process group to finish`);
-      } catch (error) {
-        this.appendLog("stderr", `supervisor stop failed for ${pid}: ${error instanceof Error ? error.message : String(error)}`);
-      }
-    }
+    this.appendLog("ui", `sent drain signal to ${signaled.length} process${signaled.length === 1 ? "" : "es"}; supervisor remains active until workers finish`);
     return { draining: signaled.length > 0, signaled, process: this.status({ freshRunActive: false, operation: null, project, projectSyncActive: false, stateDir }) };
   }
 }

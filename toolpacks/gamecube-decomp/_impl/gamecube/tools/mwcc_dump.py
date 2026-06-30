@@ -14,6 +14,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import platform
 import re
 import shlex
 import shutil
@@ -1090,10 +1091,11 @@ def wibo_path() -> Path:
     """Resolve a wibo runner. Order:
 
       1. $MWCC_WIBO                          explicit override
-      2. <tool impl>/bin/wibo                optional tool-local install
-      3. <tool impl>/wibo/build/release/wibo raw cmake output
-      4. <melee>/build/tools/wibo            project tool artifact
-      5. wibo on PATH                        last-resort fallback
+      2. $ORCH_PROJECT_STATE_DIR/tools/wibo  orchestrator-managed install
+      3. <tool impl>/bin/wibo                optional tool-local install
+      4. <tool impl>/wibo/build/release/wibo raw cmake output
+      5. <melee>/build/tools/wibo            project tool artifact
+      6. wibo on PATH                        last-resort fallback
 
     If no runner exists, returning the project path keeps the eventual compiler
     error pointed at the missing prerequisite expected by the Melee checkout.
@@ -1101,6 +1103,9 @@ def wibo_path() -> Path:
     override = os.environ.get("MWCC_WIBO")
     if override:
         return Path(override)
+    state_wibo = state_wibo_path()
+    if state_wibo is not None:
+        return state_wibo
     impl_root = Path(__file__).resolve().parents[1]
     for sub in (("bin", "wibo"), ("wibo", "build", "release", "wibo")):
         cand = impl_root.joinpath(*sub)
@@ -1113,6 +1118,36 @@ def wibo_path() -> Path:
     if found:
         return Path(found)
     return project_wibo
+
+
+def state_wibo_path() -> Path | None:
+    state_dir = os.environ.get("ORCH_PROJECT_STATE_DIR")
+    if state_dir:
+        candidate = Path(state_dir).expanduser() / "tools" / "wibo"
+        if candidate.is_file():
+            return candidate
+    for parent in (ROOT, *ROOT.parents):
+        if parent.name == "worktrees":
+            candidate = parent.parent / "state" / "tools" / "wibo"
+            if candidate.is_file():
+                return candidate
+        candidate = parent / "state" / "tools" / "wibo"
+        if candidate.is_file():
+            return candidate
+    return None
+
+
+def auto_wibo_available() -> bool:
+    override = os.environ.get("MWCC_WIBO")
+    if override:
+        return Path(override).is_file()
+    machine = platform.machine()
+    supported = (
+        sys.platform == "linux" and machine in ("i386", "x86_64", "aarch64", "arm64")
+    ) or (
+        sys.platform == "darwin" and machine in ("x86_64", "aarch64", "arm64")
+    )
+    return supported and wibo_path().is_file()
 
 
 def absolute_repo_path(path: str) -> str:
@@ -1228,7 +1263,7 @@ def main() -> int:
     # installed (macOS checkouts build with Wine only).
     runner = args.runner
     if runner == "auto":
-        runner = "wibo" if wibo_path().is_file() else "wine"
+        runner = "wibo" if auto_wibo_available() else "wine"
     proc, pcdump = run_compiler(runner, cc, cflags, src, func)
 
     if args.runner == "auto" and proc.returncode == -10:

@@ -1,6 +1,6 @@
 import { asArray, asObject, clock, numberValue, text, type Dashboard } from "@/lib/format";
-import { strictNumber, timeMs } from "@/components/progress-panel/_lib/numbers";
-import type { ChartMark, ChartModel } from "@/components/progress-panel/_lib/types";
+import { strictNumber, timeMs } from "./numbers";
+import type { ChartMark, ChartModel } from "./types";
 
 // Chart geometry in viewBox units (0-100). Headroom above TOP keeps the
 // marker labels inside the box when the line touches the top of the scale.

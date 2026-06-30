@@ -25,12 +25,12 @@ export const capabilityToolPromptMetadata: Record<string, AgentToolPromptMetadat
   checkdiff_run: {
     provider: "checkdiff",
     type: "verification",
-    useWhen: "Run focused checkdiff/objdiff output for one function.",
+    useWhen: "Run focused checkdiff/objdiff output for one function instead of raw asm-differ shell commands.",
   },
   checkdiff_summary: {
     provider: "checkdiff",
     type: "verification",
-    useWhen: "Run PASS/FAIL summaries for a target and affected neighbors.",
+    useWhen: "Run PASS/FAIL summaries for a target and affected neighbors instead of raw asm-differ shell commands.",
   },
   direct_compile_tu: {
     provider: "checkdiff",
@@ -70,12 +70,12 @@ export const capabilityToolPromptMetadata: Record<string, AgentToolPromptMetadat
   source_permuter_run: {
     provider: "source_permuter",
     type: "exploration",
-    useWhen: "Run bounded non-mutating source-shape search after a named axis is too tedious to test manually.",
+    useWhen: "Run last-resort bounded non-mutating source-shape search only after cheaper evidence is exhausted; may return queue_busy instead of waiting.",
   },
   source_permuter_replay: {
     provider: "source_permuter",
     type: "exploration",
-    useWhen: "Replay a saved non-mutating source-permutation recipe against the current checkout.",
+    useWhen: "Replay a saved non-mutating source-permutation recipe against the current checkout when a slot is available; may return queue_busy instead of waiting.",
   },
   source_mutation_preview: {
     provider: "source_permuter",
@@ -95,7 +95,7 @@ export const capabilityToolPromptMetadata: Record<string, AgentToolPromptMetadat
   m2c_decompile: {
     provider: "m2c_decomp",
     type: "exploration",
-    useWhen: "Generate an m2c scaffold as a reading aid only.",
+    useWhen: "Generate an m2c scaffold as a reading aid only; formatting is best-effort.",
   },
   include_fixer_preview: {
     provider: "include_fixer",

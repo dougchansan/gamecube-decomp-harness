@@ -38,6 +38,7 @@ export function admitPriorityTargets(store: StateStore, runId: string, candidate
     candidates: eligible,
     size: { mode: "fixed", value: eligible.length },
     workerPoolSize: eligible.length,
+    allowPreviouslyFinished: true,
   });
   return result.admitted;
 }

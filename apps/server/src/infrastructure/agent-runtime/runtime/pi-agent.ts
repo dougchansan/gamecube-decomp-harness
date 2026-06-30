@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import type { PiPromptBundle, PiRunResult, RuntimeAgentRole } from "@server/core/shared/types";
 import { loadLocalEnv } from "@server/infrastructure/env";
 import { buildAgentTools, type AgentToolProfileInput, type AgentToolRuntimeContext } from "@server/core/tools/index.js";
+import { applyProcessEnvPatch } from "./process-env.js";
 
 export interface PiRunOptions {
   role: RuntimeAgentRole;
@@ -17,6 +18,7 @@ export interface PiRunOptions {
   thinkingLevel?: string;
   timeoutMs?: number;
   sessionDir?: string;
+  env?: Record<string, string | undefined>;
   toolProfile?: AgentToolProfileInput;
   toolContext?: Partial<Omit<AgentToolRuntimeContext, "role" | "cwd">>;
   /** Pi built-in tool names to disable for this session (e.g. ["write"]). */
@@ -82,6 +84,7 @@ function dryRunTranscript(
     `model: ${config.model}`,
     `thinking: ${config.thinkingLevel}`,
     `session_dir: ${options.sessionDir ?? defaultPiSessionDir(options.role)}`,
+    `env_overrides: ${Object.keys(options.env ?? {}).sort().join(", ") || "(none)"}`,
     `system_template: ${options.prompt.systemTemplatePath}`,
     `user_template: ${options.prompt.userTemplatePath}`,
     `system_prompt_artifact: ${paths.systemPromptPath}`,
@@ -241,6 +244,7 @@ export async function runPiAgent(options: PiRunOptions): Promise<PiRunResult> {
     await resourceLoader.reload?.();
   }
   const previousCwd = process.cwd();
+  const restoreEnv = applyProcessEnvPatch(options.env);
   let rawText = "";
   let finalAssistantText = "";
   let session: any;
@@ -326,5 +330,6 @@ export async function runPiAgent(options: PiRunOptions): Promise<PiRunResult> {
     unsubscribe?.();
     session?.dispose?.();
     process.chdir(previousCwd);
+    restoreEnv();
   }
 }

@@ -27,8 +27,8 @@ The worker slice builds prompts for one claimed epoch target. It carries the
 target packet, write-set rule, local regression requirements, selected worker
 context, resource map, optional repair request, and checkpoint-note guidance.
 The worker return path lets the runner validate the current worktree, record a
-`worker_checkpoints` row, and either continue the same worker session toward
-exact match or close the paired `worker_state`.
+`worker_checkpoints` row, and either continue the same worker session under the
+bounded attempt-tail policy or close the paired `worker_state`.
 
 | File | Purpose |
 | --- | --- |
@@ -85,7 +85,11 @@ of queue mutation, epoch acceptance, and full validation after the agent returns
 - Worker context is selected by role defaults and capability routes before
   prompt rendering.
 - Unsafe or non-exact worker returns can be bounced back with `repair_request`
-  before the worker state is closed.
+  before the worker state is closed, but continuation is bounded by the runner.
+- A selectable improvement is saved immediately, then the worker receives at
+  most three follow-up checkpoints unless it finds a higher best or exact.
+- A 100% target score that fails hard gates is not selectable exact; it becomes
+  a bounded gate-repair continuation with at most three follow-up checkpoints.
 
 ## Related
 

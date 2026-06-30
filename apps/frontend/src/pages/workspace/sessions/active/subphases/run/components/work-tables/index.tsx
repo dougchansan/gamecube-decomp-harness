@@ -1,8 +1,8 @@
-import { ImprovedTable } from "@/components/work-tables/_components/improved-table";
-import { WorkStatusTable } from "@/components/work-tables/_components/work-status-table";
-import type { WorkTablesProps } from "@/components/work-tables/_lib/types";
+import { ImprovedTable } from "./_components/improved-table";
+import { WorkStatusTable } from "./_components/work-status-table";
+import type { WorkTablesProps } from "./_lib/types";
 
-export type { ImprovedMode, WorkMode, WorkTablesProps } from "@/components/work-tables/_lib/types";
+export type { ImprovedMode, ImprovedResultMode, WorkMode, WorkTablesProps } from "./_lib/types";
 
 export function WorkTables(props: WorkTablesProps) {
   return (

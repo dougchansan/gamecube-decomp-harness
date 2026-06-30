@@ -73,7 +73,7 @@ async function reconcileContext(globals: GlobalArgs, args: Map<string, string | 
     merge_conflicts: conflicts ? conflicts.split("\n").filter(Boolean) : [],
     regression_check: mode === "ship-validate" ? latestRegressionSummary(globals.stateDir, runId) : null,
     validation: {
-      configure_command: "python configure.py --require-protos",
+      configure_command: "python3 configure.py --require-protos --wrapper build/tools/wibo",
       build_command: "ninja",
       regression_command: `regression-check --target ${globals.project?.validation.qaTarget ?? "changes_all"}`,
     },

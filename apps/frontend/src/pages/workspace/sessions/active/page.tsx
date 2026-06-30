@@ -59,7 +59,6 @@ function ActiveSessionSubPage(
         setImprovedMode={props.setImprovedMode}
         setImprovedPage={props.setImprovedPage}
         setWorkMode={props.setWorkMode}
-        streamState={props.streamState}
         view={props.view}
         workMode={props.workMode}
       />

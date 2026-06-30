@@ -61,6 +61,7 @@ export interface WorkerCheckpointRecord extends WorkerCheckpointInput {
 export interface WorkerStateCloseInput {
   workerStateId: string;
   lifecycleStatus: Exclude<WorkerLifecycleStatus, "running">;
+  epochTargetStatus?: Extract<EpochTargetStatus, "admitted" | "finished">;
   summary?: Record<string, unknown>;
   timeoutSummary?: string | null;
   errorSummary?: string | null;
@@ -204,6 +205,17 @@ export function activeClaimsForSession(store: StateStore, sessionId: string): Ac
   }));
 }
 
+export function workerStateHasExecutionEvidence(store: StateStore, workerStateId: string): boolean {
+  const row = store.db
+    .query("SELECT worker_session_ids_json FROM worker_state WHERE id = ?")
+    .get(workerStateId) as Record<string, unknown> | undefined;
+  if (parseStringArray(row?.worker_session_ids_json).length > 0) return true;
+  const checkpoints = store.db
+    .query("SELECT COUNT(*) AS count FROM worker_checkpoints WHERE worker_state_id = ?")
+    .get(workerStateId) as Record<string, unknown> | undefined;
+  return Number(checkpoints?.count ?? 0) > 0;
+}
+
 export function claimNextEpochTarget(params: {
   store: StateStore;
   sessionId: string;
@@ -216,7 +228,17 @@ export function claimNextEpochTarget(params: {
     const target = params.store.db
       .query(
         `
-          SELECT epoch_targets.*
+          SELECT
+            epoch_targets.*,
+            (
+              SELECT COUNT(*)
+              FROM epoch_targets AS active_targets
+              JOIN target_claims AS active_claims
+                ON active_claims.epoch_target_id = active_targets.id
+              WHERE active_targets.epoch_id = epoch_targets.epoch_id
+                AND active_targets.source_path = epoch_targets.source_path
+                AND active_claims.status = 'active'
+            ) AS active_source_claims
           FROM epoch_targets
           JOIN epochs ON epochs.id = epoch_targets.epoch_id
           WHERE epoch_targets.session_id = ?
@@ -226,8 +248,9 @@ export function claimNextEpochTarget(params: {
               SELECT 1
               FROM target_claims
               WHERE target_claims.epoch_target_id = epoch_targets.id
+                AND target_claims.status = 'active'
             )
-          ORDER BY epoch_targets.priority DESC, epoch_targets.admission_index ASC
+          ORDER BY active_source_claims ASC, epoch_targets.priority DESC, epoch_targets.admission_index ASC
           LIMIT 1
         `,
       )
@@ -243,6 +266,70 @@ export function claimNextEpochTarget(params: {
     const ttl = new Date(Date.now() + (params.ttlSeconds ?? DEFAULT_WORKER_TTL_SECONDS) * 1000).toISOString();
     const claimedAt = now();
     const key = targetKey(String(target.unit), String(target.symbol));
+    const reusable = params.store.db
+      .query(
+        `
+          SELECT target_claims.id AS claim_id, worker_state.id AS worker_state_id
+          FROM target_claims
+          JOIN worker_state ON worker_state.target_claim_id = target_claims.id
+          WHERE target_claims.epoch_target_id = ?
+            AND target_claims.status = 'closed'
+          LIMIT 1
+        `,
+      )
+      .get(String(target.id)) as Record<string, unknown> | undefined;
+
+    if (reusable) {
+      const reusableClaimId = String(reusable.claim_id);
+      const reusableWorkerStateId = String(reusable.worker_state_id);
+      const hasExecutionEvidence = workerStateHasExecutionEvidence(params.store, reusableWorkerStateId);
+      if (hasExecutionEvidence && bestCheckpointForWorkerState(params.store, reusableWorkerStateId)) {
+        throw new Error(`Cannot recycle claimed target ${String(target.id)} because worker state ${reusableWorkerStateId} has selectable execution evidence`);
+      }
+      if (hasExecutionEvidence) {
+        params.store.db.query("DELETE FROM worker_checkpoints WHERE worker_state_id = ?").run(reusableWorkerStateId);
+      }
+      params.store.db
+        .query(
+          `
+            UPDATE target_claims
+            SET worker_id = ?,
+                base_rev = ?,
+                worktree_path = NULL,
+                ttl = ?,
+                heartbeat_at = ?,
+                status = 'active',
+                claimed_at = ?,
+                closed_at = NULL,
+                close_reason = NULL
+            WHERE id = ?
+          `,
+        )
+        .run(params.workerId, params.baseRev ?? "unknown", ttl, claimedAt, claimedAt, reusableClaimId);
+      params.store.db
+        .query(
+          `
+            UPDATE worker_state
+            SET worker_id = ?,
+                lifecycle_status = 'running',
+                worker_session_ids_json = '[]',
+                artifact_dir = ?,
+                worktree_path = NULL,
+                started_at = ?,
+                ended_at = NULL,
+                best_checkpoint_id = NULL,
+                best_score = ?,
+                exact = 0,
+                timeout_summary = NULL,
+                error_summary = NULL,
+                summary_json = '{}'
+            WHERE id = ?
+          `,
+        )
+        .run(params.workerId, params.artifactDir ?? null, claimedAt, finiteOrNull(Number(target.baseline_score)), reusableWorkerStateId);
+      params.store.db.query("UPDATE epoch_targets SET status = 'claimed', claimed_at = ?, finished_at = NULL WHERE id = ?").run(claimedAt, String(target.id));
+      return epochTargetToClaim(target, { claimId: reusableClaimId, workerStateId: reusableWorkerStateId, workerId: params.workerId, ttl });
+    }
 
     params.store.db
       .query(
@@ -372,6 +459,20 @@ export function bestCheckpointForWorkerState(store: StateStore, workerStateId: s
   return row ? checkpointFromRow(row) : null;
 }
 
+export function workerCheckpointsForWorkerState(store: StateStore, workerStateId: string): WorkerCheckpointRecord[] {
+  const rows = store.db
+    .query(
+      `
+        SELECT *
+        FROM worker_checkpoints
+        WHERE worker_state_id = ?
+        ORDER BY attempt_index ASC, validation_time ASC
+      `,
+    )
+    .all(workerStateId) as Record<string, unknown>[];
+  return rows.map(checkpointFromRow);
+}
+
 export function recordWorkerCheckpoint(store: StateStore, input: WorkerCheckpointInput): WorkerCheckpointRecord {
   const id = randomUUID();
   const validationTime = now();
@@ -447,6 +548,7 @@ export function recordWorkerCheckpoint(store: StateStore, input: WorkerCheckpoin
 
 export function closeWorkerState(store: StateStore, input: WorkerStateCloseInput): void {
   const endedAt = now();
+  const epochTargetStatus = input.epochTargetStatus ?? "finished";
   immediateTransaction(store.db, () => {
     const row = store.db
       .query(
@@ -482,7 +584,11 @@ export function closeWorkerState(store: StateStore, input: WorkerStateCloseInput
     store.db
       .query("UPDATE target_claims SET status = 'closed', closed_at = ?, close_reason = ? WHERE id = ?")
       .run(endedAt, input.lifecycleStatus, String(row.target_claim_id));
-    store.db.query("UPDATE epoch_targets SET status = 'finished', finished_at = ? WHERE id = ?").run(endedAt, String(row.epoch_target_id));
+    if (epochTargetStatus === "admitted") {
+      store.db.query("UPDATE epoch_targets SET status = 'admitted', claimed_at = NULL, finished_at = NULL WHERE id = ?").run(String(row.epoch_target_id));
+    } else {
+      store.db.query("UPDATE epoch_targets SET status = 'finished', finished_at = ? WHERE id = ?").run(endedAt, String(row.epoch_target_id));
+    }
     store.db
       .query(
         `

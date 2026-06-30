@@ -1,6 +1,18 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { activeClaimsForSession, addEvent, closeWorkerState, getLatestRun, getRun, openState, type ActiveClaimRecord } from "@server/core/session-runtime/run-state";
+import {
+  activeClaimsForSession,
+  addEvent,
+  bestCheckpointForWorkerState,
+  closeWorkerState,
+  enqueueWorkerOutputIntegration,
+  getLatestRun,
+  getRun,
+  openState,
+  workerStateHasExecutionEvidence,
+  type ActiveClaimRecord,
+} from "@server/core/session-runtime/run-state";
+import { processWorkerOutputIntegrationQueue, type WorkerOutputIntegrationApplyResult } from "@server/core/session-runtime/phases/running/integration/worker-output-queue.js";
 import { booleanArg, stringArg, type GlobalArgs } from "@server/core/project-registry/runtime-options.js";
 
 function claimExpired(ttl: string): boolean {
@@ -12,9 +24,14 @@ function recoveryArtifactDir(globals: GlobalArgs, runId: string, workerStateId: 
   return resolve(globals.stateDir, "runs", runId, "worker_state", workerStateId, "state");
 }
 
+function recordString(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
 async function writeRecoverySummary(params: {
   claim: ActiveClaimRecord;
   globals: GlobalArgs;
+  requeued: boolean;
   reason: string;
   runId: string;
 }): Promise<string> {
@@ -35,6 +52,8 @@ async function writeRecoverySummary(params: {
         write_set: params.claim.writeSet,
         worktree_path: params.claim.worktreePath ?? null,
         lifecycle_status: "error",
+        epoch_target_status: params.requeued ? "admitted" : "finished",
+        requeued: params.requeued,
         recovered_by: "recover-claims",
         recovery_reason: params.reason,
         ttl: params.claim.ttl,
@@ -70,12 +89,17 @@ export async function recoverClaims(globals: GlobalArgs, args: Map<string, strin
     });
     const skippedClaims = activeClaims.filter((claim) => !selectedClaims.some((selected) => selected.claimId === claim.claimId));
     const recovered: Record<string, unknown>[] = [];
+    const queuedIntegrations: string[] = [];
 
     for (const claim of selectedClaims) {
-      const summaryPath = await writeRecoverySummary({ claim, globals, reason, runId });
+      const hadExecutionEvidence = workerStateHasExecutionEvidence(store, claim.workerStateId);
+      const bestCheckpoint = bestCheckpointForWorkerState(store, claim.workerStateId);
+      const requeued = bestCheckpoint == null;
+      const summaryPath = await writeRecoverySummary({ claim, globals, requeued, reason, runId });
       closeWorkerState(store, {
         workerStateId: claim.workerStateId,
         lifecycleStatus: "error",
+        epochTargetStatus: requeued ? "admitted" : "finished",
         errorSummary: `Recovered interrupted active worker: ${reason}`,
         summary: {
           session_id: runId,
@@ -89,6 +113,10 @@ export async function recoverClaims(globals: GlobalArgs, args: Map<string, strin
           summary_path: summaryPath,
           recovered_by: "recover-claims",
           recovery_reason: reason,
+          execution_evidence: hadExecutionEvidence,
+          selected_checkpoint_id: bestCheckpoint?.id ?? null,
+          epoch_target_status: requeued ? "admitted" : "finished",
+          requeued,
         },
       });
       const wakeEvent = addEvent(store, runId, "worker_error", "recover-claims", {
@@ -97,9 +125,38 @@ export async function recoverClaims(globals: GlobalArgs, args: Map<string, strin
         epoch_target_id: claim.epochTargetId,
         worker_id: claim.workerId,
         lifecycle_status: "error",
+        execution_evidence: hadExecutionEvidence,
+        selected_checkpoint_id: bestCheckpoint?.id ?? null,
+        epoch_target_status: requeued ? "admitted" : "finished",
+        requeued,
         summary_path: summaryPath,
         reason,
       });
+      let integrationItemId: string | null = null;
+      if (bestCheckpoint) {
+        const item = enqueueWorkerOutputIntegration(store, {
+          sessionId: runId,
+          epochId: claim.epochId,
+          epochTargetId: claim.epochTargetId,
+          targetClaimId: claim.claimId,
+          workerStateId: claim.workerStateId,
+          workerCheckpointId: bestCheckpoint.id,
+          targetKey: `${recordString(claim.target.unit)}::${recordString(claim.target.symbol)}`,
+          patchPath: bestCheckpoint.patchPath,
+          diffPath: bestCheckpoint.diffPath,
+          writeSet: claim.writeSet,
+          metadata: {
+            lifecycle_status: "error",
+            recovered_by: "recover-claims",
+            recovery_reason: reason,
+            worker_state_summary_path: summaryPath,
+            worker_worktree_path: claim.worktreePath ?? null,
+            target: claim.target,
+          },
+        });
+        integrationItemId = item.id;
+        queuedIntegrations.push(item.id);
+      }
       recovered.push({
         claimId: claim.claimId,
         workerStateId: claim.workerStateId,
@@ -107,9 +164,29 @@ export async function recoverClaims(globals: GlobalArgs, args: Map<string, strin
         workerId: claim.workerId,
         target: claim.target,
         writeSet: claim.writeSet,
+        executionEvidence: hadExecutionEvidence,
+        selectedCheckpointId: bestCheckpoint?.id ?? null,
+        epochTargetStatus: requeued ? "admitted" : "finished",
+        requeued,
         wakeEvent,
         workerStateSummary: summaryPath,
+        workerOutputIntegrationItemId: integrationItemId,
       });
+    }
+    let workerOutputIntegration: { queued: string[]; processed: WorkerOutputIntegrationApplyResult[] } | null = null;
+    if (queuedIntegrations.length > 0) {
+      const integration = await processWorkerOutputIntegrationQueue({
+        dryRun: globals.dryRunAgents,
+        repoRoot: run.project?.repoRoot ?? globals.repoRoot,
+        sessionId: runId,
+        stateDir: globals.stateDir,
+        store,
+        limit: Math.max(16, queuedIntegrations.length),
+      });
+      workerOutputIntegration = {
+        queued: queuedIntegrations,
+        processed: integration.processed,
+      };
     }
 
     console.log(
@@ -120,6 +197,7 @@ export async function recoverClaims(globals: GlobalArgs, args: Map<string, strin
           scannedActiveClaims: activeClaims.length,
           recoveredClaims: recovered.length,
           recovered,
+          workerOutputIntegration,
           skippedActiveClaims: skippedClaims.map((claim) => ({
             claimId: claim.claimId,
             workerStateId: claim.workerStateId,

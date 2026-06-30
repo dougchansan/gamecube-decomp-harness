@@ -1,7 +1,7 @@
 import type { AppRoute, SessionFocus, SessionStage, SessionSubPage } from "@/routing";
 import type { Dashboard, FormState, JsonObject, UiConfig } from "@/lib/format";
 import type { GrainSettings, GrainSettingsPatch } from "@/lib/styleSettings";
-import type { ImprovedMode, WorkMode } from "@/components/work-tables";
+import type { ImprovedMode, WorkMode } from "@/pages/workspace/sessions/active/subphases/run/components/work-tables";
 import type { processView } from "@/lib/processView";
 
 export type DashboardAction =
@@ -152,6 +152,5 @@ export interface ProjectWorkspaceProps {
   setImprovedMode: (mode: ImprovedMode) => void;
   setImprovedPage: (page: number | ((page: number) => number)) => void;
   setWorkMode: (mode: WorkMode) => void;
-  streamState: string;
   workMode: WorkMode;
 }

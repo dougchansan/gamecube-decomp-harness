@@ -475,6 +475,7 @@ function workerStatesForRun(stateDir: string, runId: string, limit = 100): JsonO
             worker_state.timeout_summary,
             worker_state.error_summary,
             worker_state.summary_json,
+            epochs.ordinal AS epoch_ordinal,
             epoch_targets.unit,
             epoch_targets.symbol,
             epoch_targets.source_path,
@@ -512,6 +513,7 @@ function workerStatesForRun(stateDir: string, runId: string, limit = 100): JsonO
             latest.failure_reasons_json AS latest_failure_reasons_json,
             latest.metadata_json AS latest_metadata_json
           FROM worker_state
+          LEFT JOIN epochs ON epochs.id = worker_state.epoch_id
           LEFT JOIN epoch_targets ON epoch_targets.id = worker_state.epoch_target_id
           LEFT JOIN worker_checkpoints AS best ON best.id = worker_state.best_checkpoint_id
           LEFT JOIN worker_checkpoints AS latest ON latest.id = (
@@ -556,6 +558,9 @@ function workerStatesForRun(stateDir: string, runId: string, limit = 100): JsonO
       return {
         id: workerStateId,
         workerStateId,
+        epochId: row.epoch_id,
+        epochOrdinal: numberValue(row.epoch_ordinal, NaN),
+        epochTargetId: row.epoch_target_id,
         workerCheckpointId: stringValue(row.best_checkpoint_id, stringValue(row.latest_checkpoint_id)),
         claimId: row.target_claim_id,
         targetClaimId: row.target_claim_id,
@@ -754,6 +759,7 @@ function activeFilesForRun(stateDir: string, runId: string): JsonObject[] {
         `
           SELECT
             target_claims.id AS claim_id,
+            target_claims.epoch_id,
             target_claims.epoch_target_id,
             target_claims.worker_id,
             target_claims.base_rev,
@@ -762,6 +768,7 @@ function activeFilesForRun(stateDir: string, runId: string): JsonObject[] {
             target_claims.heartbeat_at,
             target_claims.claimed_at,
             worker_state.id AS worker_state_id,
+            epochs.ordinal AS epoch_ordinal,
             epoch_targets.id AS target_id,
             epoch_targets.unit,
             epoch_targets.symbol,
@@ -772,6 +779,7 @@ function activeFilesForRun(stateDir: string, runId: string): JsonObject[] {
             epoch_targets.reason
           FROM target_claims
           JOIN worker_state ON worker_state.target_claim_id = target_claims.id
+          LEFT JOIN epochs ON epochs.id = target_claims.epoch_id
           JOIN epoch_targets ON epoch_targets.id = target_claims.epoch_target_id
           WHERE target_claims.session_id = ?
             AND target_claims.status = 'active'
@@ -782,6 +790,8 @@ function activeFilesForRun(stateDir: string, runId: string): JsonObject[] {
     return rows.map((row) => ({
       claimId: row.claim_id,
       workerStateId: row.worker_state_id,
+      epochId: row.epoch_id,
+      epochOrdinal: numberValue(row.epoch_ordinal, NaN),
       epochTargetId: row.epoch_target_id,
       workerId: row.worker_id,
       baseRev: row.base_rev,
@@ -834,9 +844,10 @@ function workerStateValidationFailed(workerState: JsonObject): boolean {
   const validation = asObject(workerState.runnerValidation);
   const repairAttempts = asObject(workerState.repairAttempts);
   const validationStatus = stringValue(validation.status);
+  const exhaustedFiniteRepairBudget = repairAttempts.exhausted === true && stringValue(repairAttempts.policy) !== "unbounded_until_claim_timeout";
   return (
     (validationStatus !== "" && validationStatus !== "passed" && validationStatus !== "skipped") ||
-    repairAttempts.exhausted === true
+    exhaustedFiniteRepairBudget
   );
 }
 
@@ -1150,6 +1161,7 @@ function targetClaimsForRun(stateDir: string, runId: string): JsonObject[] {
           `
             SELECT
               target_claims.id,
+              target_claims.epoch_id,
               target_claims.epoch_target_id,
               target_claims.worker_id,
               target_claims.base_rev,
@@ -1163,11 +1175,13 @@ function targetClaimsForRun(stateDir: string, runId: string): JsonObject[] {
               target_claims.close_reason,
               worker_state.id AS worker_state_id,
               worker_state.lifecycle_status,
+              epochs.ordinal AS epoch_ordinal,
               epoch_targets.unit,
               epoch_targets.symbol,
               epoch_targets.source_path
             FROM target_claims
             JOIN worker_state ON worker_state.target_claim_id = target_claims.id
+            LEFT JOIN epochs ON epochs.id = target_claims.epoch_id
             JOIN epoch_targets ON epoch_targets.id = target_claims.epoch_target_id
             WHERE target_claims.session_id = ?
             ORDER BY COALESCE(target_claims.closed_at, target_claims.heartbeat_at, target_claims.ttl) DESC
@@ -1177,6 +1191,8 @@ function targetClaimsForRun(stateDir: string, runId: string): JsonObject[] {
     ).map((row) => ({
       id: row.id,
       claimId: row.id,
+      epochId: row.epoch_id,
+      epochOrdinal: numberValue(row.epoch_ordinal, NaN),
       epochTargetId: row.epoch_target_id,
       workerStateId: row.worker_state_id,
       workerId: row.worker_id,
@@ -1208,6 +1224,7 @@ function epochTargetsForRun(stateDir: string, runId: string): JsonObject[] {
           `
             SELECT
               epoch_targets.id AS epoch_target_id,
+              epoch_targets.epoch_id,
               epoch_targets.priority AS epoch_target_priority,
               epoch_targets.reason AS epoch_target_reason,
               epoch_targets.status AS epoch_target_status,
@@ -1222,8 +1239,10 @@ function epochTargetsForRun(stateDir: string, runId: string): JsonObject[] {
               epoch_targets.status AS target_status,
               epoch_targets.priority AS target_priority,
               epoch_targets.reason AS target_reason,
-              epoch_targets.admitted_at AS target_created_at
+              epoch_targets.admitted_at AS target_created_at,
+              epochs.ordinal AS epoch_ordinal
             FROM epoch_targets
+            LEFT JOIN epochs ON epochs.id = epoch_targets.epoch_id
             WHERE epoch_targets.session_id = ?
             ORDER BY epoch_targets.admitted_at DESC
           `,
@@ -1231,6 +1250,8 @@ function epochTargetsForRun(stateDir: string, runId: string): JsonObject[] {
         .all(runId) as JsonObject[]
     ).map((row) => ({
       epochTargetId: row.epoch_target_id,
+      epochId: row.epoch_id,
+      epochOrdinal: numberValue(row.epoch_ordinal, NaN),
       targetId: row.target_id,
       epochTargetStatus: row.epoch_target_status,
       targetStatus: row.target_status,

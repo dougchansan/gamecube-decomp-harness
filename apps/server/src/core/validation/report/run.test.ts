@@ -57,7 +57,7 @@ exit 1
 
     const originalPath = Bun.env.PATH;
     const originalLog = Bun.env.REPORT_RUN_TEST_LOG;
-    Bun.env.PATH = `${binDir}:${originalPath ?? ""}`;
+    Bun.env.PATH = `${binDir}:/bin:/usr/bin`;
     Bun.env.REPORT_RUN_TEST_LOG = logPath;
     try {
       const result = await forceReportRun(repoRoot, { resetBaseline: true });
@@ -74,7 +74,7 @@ exit 1
         incompleteUnits: 3,
       });
       expect(readFileSync(logPath, "utf8").trim().split("\n")).toEqual([
-        "python3 configure.py",
+        "python3 configure.py --require-protos",
         "ninja build/GALE01/report.json",
         "ninja changes_all",
       ]);
@@ -83,6 +83,56 @@ exit 1
       else Bun.env.PATH = originalPath;
       if (originalLog === undefined) delete Bun.env.REPORT_RUN_TEST_LOG;
       else Bun.env.REPORT_RUN_TEST_LOG = originalLog;
+    }
+  });
+
+  test("prefers a state-managed wibo wrapper for fresh configure", async () => {
+    const root = tempDir();
+    const repoRoot = resolve(root, "repo");
+    const stateDir = resolve(root, "state");
+    const binDir = resolve(root, "bin");
+    const logPath = resolve(root, "commands.log");
+    mkdirSync(repoRoot, { recursive: true });
+    mkdirSync(resolve(stateDir, "tools"), { recursive: true });
+    mkdirSync(binDir, { recursive: true });
+    writeFileSync(resolve(stateDir, "tools", "wibo"), "wibo\n");
+    chmodSync(resolve(stateDir, "tools", "wibo"), 0o755);
+    writeFileSync(resolve(repoRoot, "configure.py"), "# fixture\n");
+    writeExecutable(
+      resolve(binDir, "python3"),
+      `#!/bin/sh
+echo "python3 $*" >> "$REPORT_RUN_TEST_LOG"
+touch build.ninja
+`,
+    );
+    writeExecutable(
+      resolve(binDir, "ninja"),
+      `#!/bin/sh
+echo "ninja $*" >> "$REPORT_RUN_TEST_LOG"
+mkdir -p build/GALE01
+printf '%s\\n' '{"measures":{}}' > build/GALE01/report.json
+printf '{"ok":true}\\n' > build/GALE01/report_changes.json
+`,
+    );
+
+    const originalPath = Bun.env.PATH;
+    const originalLog = Bun.env.REPORT_RUN_TEST_LOG;
+    const originalStateDir = Bun.env.ORCH_PROJECT_STATE_DIR;
+    Bun.env.PATH = `${binDir}:/bin:/usr/bin`;
+    Bun.env.REPORT_RUN_TEST_LOG = logPath;
+    Bun.env.ORCH_PROJECT_STATE_DIR = stateDir;
+    try {
+      await forceReportRun(repoRoot);
+
+      expect(readFileSync(logPath, "utf8").trim().split("\n")[0]).toBe("python3 configure.py --require-protos --wrapper build/tools/wibo");
+      expect(readFileSync(resolve(repoRoot, "build", "tools", "wibo"), "utf8")).toBe("wibo\n");
+    } finally {
+      if (originalPath === undefined) delete Bun.env.PATH;
+      else Bun.env.PATH = originalPath;
+      if (originalLog === undefined) delete Bun.env.REPORT_RUN_TEST_LOG;
+      else Bun.env.REPORT_RUN_TEST_LOG = originalLog;
+      if (originalStateDir === undefined) delete Bun.env.ORCH_PROJECT_STATE_DIR;
+      else Bun.env.ORCH_PROJECT_STATE_DIR = originalStateDir;
     }
   });
 });

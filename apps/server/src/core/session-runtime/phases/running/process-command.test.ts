@@ -60,6 +60,56 @@ describe("running process command", () => {
     expect(plan.command.slice(timeoutFlag, timeoutFlag + 2)).toEqual(["--agent-timeout-seconds", "3000"]);
   });
 
+  test("forwards configure command overrides to babysit", () => {
+    const plan = buildRunningProcessCommand({
+      body: {
+        epochConfigureCommand: "python3 configure.py --require-protos --wrapper /state/tools/wibo",
+        maxWorkers: 4,
+        workerConfigureCommand: "python3 configure.py --require-protos --wrapper /state/tools/wibo",
+      },
+      graphDbPath: "/state/graph.sqlite",
+      noRefillBatch: false,
+      project: { projectId: "melee", processName: "melee-live" },
+      repoRoot: "/repo",
+      runId: "run-1",
+      serverJobPath: "/orch/apps/server/src/job-runner.ts",
+      stateDir: "/state",
+    });
+
+    expect(plan.command.slice(plan.command.indexOf("--worker-configure-command"), plan.command.indexOf("--worker-configure-command") + 2)).toEqual([
+      "--worker-configure-command",
+      "python3 configure.py --require-protos --wrapper /state/tools/wibo",
+    ]);
+    expect(plan.command.slice(plan.command.indexOf("--epoch-configure-command"), plan.command.indexOf("--epoch-configure-command") + 2)).toEqual([
+      "--epoch-configure-command",
+      "python3 configure.py --require-protos --wrapper /state/tools/wibo",
+    ]);
+  });
+
+  test("honors explicit queue and candidate-window overrides", () => {
+    const plan = buildRunningProcessCommand({
+      body: {
+        candidateWindow: 256,
+        epochReadyQueueSize: 64,
+        maxWorkers: 64,
+        queueLowWatermark: 64,
+        queueTargetSize: 64,
+      },
+      graphDbPath: "/state/graph.sqlite",
+      noRefillBatch: false,
+      project: { projectId: "melee", processName: "melee-live" },
+      repoRoot: "/repo",
+      runId: "run-1",
+      serverJobPath: "/orch/apps/server/src/job-runner.ts",
+      stateDir: "/state",
+    });
+
+    expect(plan.command.slice(plan.command.indexOf("--queue-target-size"), plan.command.indexOf("--queue-target-size") + 2)).toEqual(["--queue-target-size", "64"]);
+    expect(plan.command.slice(plan.command.indexOf("--queue-low-watermark"), plan.command.indexOf("--queue-low-watermark") + 2)).toEqual(["--queue-low-watermark", "64"]);
+    expect(plan.command.slice(plan.command.indexOf("--epoch-ready-queue-size"), plan.command.indexOf("--epoch-ready-queue-size") + 2)).toEqual(["--epoch-ready-queue-size", "64"]);
+    expect(plan.command.slice(plan.command.indexOf("--candidate-window"), plan.command.indexOf("--candidate-window") + 2)).toEqual(["--candidate-window", "256"]);
+  });
+
   test("uses project dashboard worker timeout default", () => {
     const plan = buildRunningProcessCommand({
       body: {

@@ -84,6 +84,7 @@ const SYSTEM_ARG_ALLOWLIST = new Set([
   "--epoch-regression-pause-threshold",
   "--epoch-regression-requeue-limit",
   "--epoch-retry-ms",
+  "--exit-on-worker-error",
   "--epoch-size",
   "--epoch-worktree",
   "--fast-kg-maintenance-interval-ms",
@@ -116,7 +117,6 @@ const SYSTEM_ARG_ALLOWLIST = new Set([
   "--queue-target-size",
   "--replan-cooldown-ms",
   "--replan-interval-ms",
-  "--repair-attempts",
   "--rerun-existing-prs",
   "--run-id",
   "--run-curator-agent",
@@ -189,7 +189,6 @@ function systemArgs(args: Map<string, string | true>): string[] {
     out.push(key);
     if (typeof value === "string") out.push(value);
   }
-  out.push("--exit-on-worker-error");
   return out;
 }
 

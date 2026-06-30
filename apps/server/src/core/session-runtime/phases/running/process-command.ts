@@ -9,6 +9,7 @@ export interface RunningProcessCommandBody {
   fastKgMaintenanceReportCount?: unknown;
   fullKgMaintenanceMode?: unknown;
   idleSleepMs?: unknown;
+  epochConfigureCommand?: unknown;
   maxWorkers?: unknown;
   model?: unknown;
   processName?: unknown;
@@ -17,6 +18,7 @@ export interface RunningProcessCommandBody {
   queueTargetSize?: unknown;
   runId?: unknown;
   thinkingLevel?: unknown;
+  workerConfigureCommand?: unknown;
   workerThinkingLevel?: unknown;
 }
 
@@ -117,9 +119,9 @@ export function buildRunningProcessCommand(input: RunningProcessCommandInput): R
   const normalScheduling = runningScheduling(body.maxWorkers);
   const maxWorkers = normalScheduling.maxWorkers;
   const candidateLimit = noRefillBatch ? 0 : normalScheduling.candidateLimit;
-  const candidateWindow = noRefillBatch ? 0 : normalScheduling.candidateWindow;
-  const queueLowWatermark = noRefillBatch ? 0 : normalScheduling.queueLowWatermark;
-  const queueTargetSize = noRefillBatch ? 0 : normalScheduling.queueTargetSize;
+  const candidateWindow = noRefillBatch ? 0 : intValue(body.candidateWindow, normalScheduling.candidateWindow, 0);
+  const queueLowWatermark = noRefillBatch ? 0 : intValue(body.queueLowWatermark, normalScheduling.queueLowWatermark, 0);
+  const queueTargetSize = noRefillBatch ? 0 : intValue(body.queueTargetSize, normalScheduling.queueTargetSize, 0);
   const epochSize = noRefillBatch ? "1" : text(body.epochSize, String(project?.dashboard?.epochSize ?? normalScheduling.epochSize));
   const epochReadyQueueSize = noRefillBatch ? 1 : intValue(body.epochReadyQueueSize, numberValue(project?.dashboard?.epochReadyQueueSize, normalScheduling.epochReadyQueueSize), 1);
   const fastKgMaintenanceEnabled = !noRefillBatch && body.fastKgMaintenanceEnabled !== false;
@@ -137,6 +139,8 @@ export function buildRunningProcessCommand(input: RunningProcessCommandInput): R
   const schedulableLowWatermark = noRefillBatch ? 0 : maxWorkers;
   const queueRefreshIntervalMs = noRefillBatch ? 0 : 60000;
   const idleSleepMs = intValue(body.idleSleepMs, 5000, 100);
+  const workerConfigureCommand = text(body.workerConfigureCommand).trim();
+  const epochConfigureCommand = text(body.epochConfigureCommand).trim();
   const agentTimeoutSeconds = numberValue(
     body.agentTimeoutSeconds,
     numberValue(project?.dashboard?.agentTimeoutSeconds, noRefillBatch ? 3000 : 0),
@@ -182,8 +186,10 @@ export function buildRunningProcessCommand(input: RunningProcessCommandInput): R
     "--force-recover-claims",
   );
   if (!fastKgMaintenanceEnabled) command.push("--no-fast-kg-maintenance");
+  if (workerConfigureCommand) command.push("--worker-configure-command", workerConfigureCommand);
+  if (epochConfigureCommand) command.push("--epoch-configure-command", epochConfigureCommand);
   if (noRefillBatch) {
-    command.push("--no-epoch-cycle", "--no-blocked-queue-replan", "--repair-attempts", "0", "--max-idle-iterations", "3");
+    command.push("--no-epoch-cycle", "--no-blocked-queue-replan", "--max-idle-iterations", "3");
   }
   if (runId) command.push("--run-id", runId);
   return { command, graphDbPath, maxWorkers, name, repoRoot, runId, stateDir };

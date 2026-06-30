@@ -40,9 +40,12 @@ describe("workerPrompt", () => {
       "worker-packet",
       "knowledge-graph-file-card",
     ]);
-    expect(renderedContext).toContain("<decomp_standards>");
-    expect(renderedContext).toContain("<target_file");
-    expect(renderedContext).toContain("<target_graph_file_card");
+	    expect(renderedContext).toContain("<decomp_standards>");
+	    expect(renderedContext).toContain("<target_file");
+	    expect(renderedContext).toContain("<canonical_tool_paths>");
+	    expect(renderedContext).toContain('relative_path="build/binutils/powerpc-eabi-objdump"');
+	    expect(renderedContext).toContain("Broad find roots");
+	    expect(renderedContext).toContain("<target_graph_file_card");
     expect(renderedContext).not.toContain("<standard_examples");
     expect(renderedContext).not.toContain("<bad_pattern>");
     expect(renderedContext).not.toContain("<preferred_shape>");
@@ -57,8 +60,17 @@ describe("workerPrompt", () => {
     expect(systemPrompt).toContain("Use already-solved references as the first pass:");
     expect(systemPrompt).toContain("Solved sibling squares can constrain what belongs in this square.");
     expect(systemPrompt).toContain("Assume a small original author pool left repeatable idioms");
+	    expect(systemPrompt).toContain(
+	      "`source_permuter_run` is expensive and opportunistic. Use it only as a last resort",
+	    );
+	    expect(systemPrompt).toContain("Use the injected `canonical_tool_paths` block");
+	    expect(systemPrompt).toContain("Do not run broad filesystem `find` sweeps");
+	    expect(systemPrompt).toContain("Do not rerun it for the same function unless source/header/context/asm inputs or m2c args changed");
+	    expect(systemPrompt).toContain(
+	      "If `source_permuter_run` returns `queue_busy`, do not retry or wait on it",
+    );
     expect(systemPrompt).toContain(
-      "When a target is near exact, use source mutation previews, permutation evidence, and mismatch-specific probes to push toward 100%.",
+      "When a target is near exact, use mismatch-specific probes and source mutation previews first",
     );
     expect(referencePass).toBeGreaterThanOrEqual(0);
     expect(deeperPass).toBeGreaterThan(referencePass);

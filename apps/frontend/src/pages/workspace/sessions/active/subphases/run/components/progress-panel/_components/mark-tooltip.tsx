@@ -1,6 +1,6 @@
 import { delta, pct, whole } from "@/lib/format";
-import { strictNumber, tapeClass } from "@/components/progress-panel/_lib/numbers";
-import type { ChartMark } from "@/components/progress-panel/_lib/types";
+import { strictNumber, tapeClass } from "../_lib/numbers";
+import type { ChartMark } from "../_lib/types";
 
 const measureRowSpecs = [
   { key: "complete_code_percent", label: "Complete code" },

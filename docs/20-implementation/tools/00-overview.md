@@ -1,6 +1,6 @@
 ---
 covers: Reusable GameCube decomp toolpack, project tool bindings, agent tool wrappers, validation tools, and scoped tool data
-concepts: [tools, toolpacks, project-bindings, worker-tools, pi-extensions, validation, research, worktree-cache]
+concepts: [tools, toolpacks, project-bindings, worker-tools, pi-extensions, validation, research, worktree-cache, wibo, tool-slots]
 code-ref: toolpacks/gamecube-decomp, projects/melee/project.json, projects/melee/tool-bindings, apps/server/src/core/tools/resolver.ts, apps/server/src/core/tools
 ---
 
@@ -50,6 +50,52 @@ project state dir, shared data root, worktree cache root, implementation root,
 and a command environment. Agent wrappers call tools by stable ids such as
 `checkdiff`, `ghidra`, and `review_lint`; they do not hardcode physical script
 paths.
+
+When `projects/<id>/state/tools/wibo` exists, the resolver exports it to tool
+APIs as `MWCC_WIBO`. Toolpack helpers also auto-discover the same state install
+from worker worktree paths. This makes wibo the preferred MWCC process runner
+for checkdiff, direct compile, source permutation, and mwcc debug operations.
+Wine remains a fallback for hosts or debug modes where wibo is unavailable or a
+specific tool path requests it.
+
+## Worker Tool Concurrency
+
+Compile-heavy tool APIs queue through epoch/worktree-scoped slot directories
+instead of launching unbounded MWCC processes from every active worker. The
+shared helper `toolpacks/gamecube-decomp/_shared/toolpack_runtime.py` wraps
+tool-local API commands in `worker_tool_slot`.
+
+Default tool slot limits:
+
+| Operation family | Default concurrent slots |
+| --- | --- |
+| `source_permuter:run`, `source_permuter:replay` | 1 |
+| `checkdiff:*` | 12 |
+| `m2c_decomp:*` | 8 |
+| `mwcc_debug:*` | 2 |
+| Other tool APIs | 16 |
+
+Source-permuter run/replay calls use a fail-fast policy: if another
+source-permuter call is active, the API returns `queue_busy` instead of waiting
+behind it. The outer source-permuter slot is separate from the permuter's
+internal worker count; `ORCH_SOURCE_PERMUTER_MAX_JOBS` caps requested internal
+jobs and defaults to `1`.
+
+Operators can tune the pool with environment variables:
+
+| Variable | Effect |
+| --- | --- |
+| `ORCH_TOOL_CONCURRENCY_<TOOL>` | Per-tool override, where `<TOOL>` is the uppercase operation prefix such as `CHECKDIFF`, `SOURCE_PERMUTER`, or `MWCC_DEBUG`. |
+| `ORCH_WORKER_TOOL_CONCURRENCY_<TOOL>` | Worker-specific per-tool override. |
+| `ORCH_WORKER_TOOL_CONCURRENCY` | Shared default for all worker tool pools without a per-tool override. |
+| `ORCH_TOOL_QUEUE_DISABLED` / `ORCH_WORKER_TOOL_QUEUE_DISABLED` | Disable queueing for diagnosis only. |
+
+Runner-owned validation has a separate shared compile pool for `ninja` commands
+executed during worker checkpoint validation and MWCC/wibo direct compile
+helpers. Set `ORCH_WORKER_COMPILE_CONCURRENCY` to tune it, or
+`ORCH_WORKER_NINJA_CONCURRENCY` as a compatibility fallback; the default is
+`12`. The worker count can therefore be higher than the number of simultaneous
+local compiles.
 
 ## Suite Roles
 

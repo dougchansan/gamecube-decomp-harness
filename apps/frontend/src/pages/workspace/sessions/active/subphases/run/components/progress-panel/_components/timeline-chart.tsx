@@ -1,8 +1,8 @@
 import { Fragment, useState } from "react";
-import { chartModel } from "@/components/progress-panel/_lib/chart-model";
-import { MarkTooltip } from "@/components/progress-panel/_components/mark-tooltip";
-import type { ChartMark } from "@/components/progress-panel/_lib/types";
 import { pct, type Dashboard } from "@/lib/format";
+import { MarkTooltip } from "./mark-tooltip";
+import { chartModel } from "../_lib/chart-model";
+import type { ChartMark } from "../_lib/types";
 
 function markLabelTransform(mark: ChartMark): string {
   if (mark.x < 8) return "translateX(0)";

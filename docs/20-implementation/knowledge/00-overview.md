@@ -310,7 +310,7 @@ The current live runner paths are:
 | `ghidra` | Homebrew Ghidra/OpenJDK `analyzeHeadless` imports `build/GALE01/main.elf` and writes `ghidra_headless_probe.jsonl`. |
 | `opseq` | Generated assembly under `build/GALE01/asm` is parsed into opcode fingerprints. |
 | `mismatch_db` | `build/tools/objdiff-cli diff` runs against an imperfect function and writes tool-local objdiff mismatch summaries. Generalized pattern knowledge is surfaced through graph `mismatch_patterns`. |
-| `mwcc_debug` | Wine runs `GC/1.2.5n/mwcceppc.exe -version` and the runner records MWCC build-rule snippets. |
+| `mwcc_debug` | The MWCC runner smoke records `GC/1.2.5n/mwcceppc.exe -version` output and build-rule snippets. Runtime dump/diagnose calls prefer wibo when provisioned, with Wine as fallback. |
 
 Generated lookup rows such as symbol lookup, function shapes, and live runner
 summaries remain useful tool-local API evidence, but they do not alone satisfy

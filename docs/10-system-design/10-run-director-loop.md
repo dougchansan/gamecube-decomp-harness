@@ -1,6 +1,6 @@
 ---
 covers: Deterministic run scheduler responsibilities, run-loop process semantics, epoch admission, wake handling, and worker checkpoint flow
-concepts: [scheduler, run-loop, board, epochs, target-claims, worker-state, wake-events, checkpoints]
+concepts: [scheduler, run-loop, board, epochs, target-claims, worker-state, wake-events, checkpoints, tool-slots]
 ---
 
 # Run Scheduler Loop
@@ -93,6 +93,20 @@ Three sizes stay distinct:
 | Epoch size | Total target admissions for one epoch. |
 | Worker pool size | Number of worker slots the run loop tries to keep active. |
 | Candidate window | Number of ranked board candidates scanned to satisfy admission. |
+
+Worker pool size is the claim/process target, not the raw compiler parallelism
+target. Worker processes can be active while their expensive validation or
+tool calls are queued behind per-epoch tool slots. The active epoch still owns a
+fixed admitted target set; the slot queues only smooth local CPU/build pressure
+inside the already-claimed work.
+
+There are three hot-path capacity controls:
+
+| Control | Owns |
+| --- | --- |
+| Worker pool | Number of live worker claims/processes. |
+| Epoch ready queue | Number of admitted, unclaimed targets kept available to feed worker slots. |
+| Tool/build slots | Number of concurrent compile-heavy validation and Pi tool operations allowed across worker worktrees in an epoch. |
 
 ## Wake Events
 

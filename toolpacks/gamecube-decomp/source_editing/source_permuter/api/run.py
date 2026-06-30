@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import re
 from pathlib import Path
 import sys
@@ -21,6 +22,14 @@ def split_symbols(values: list[str], joined: str | None) -> list[str]:
     return [value.strip() for value in raw if value.strip()]
 
 
+def max_jobs() -> int:
+    try:
+        parsed = int(os.environ.get("ORCH_SOURCE_PERMUTER_MAX_JOBS", "1"))
+    except ValueError:
+        parsed = 1
+    return max(1, min(16, parsed))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", help="Target project checkout root.")
@@ -29,7 +38,7 @@ def main() -> None:
     parser.add_argument("--mutate-functions", help="Comma- or space-separated mutation targets.")
     parser.add_argument("--max-iters", type=int, default=32, help="Maximum compiled candidates.")
     parser.add_argument("--timeout-seconds", type=int, default=90, help="Maximum search runtime.")
-    parser.add_argument("--jobs", type=int, default=4, help="Worker threads for permutation.")
+    parser.add_argument("--jobs", type=int, default=1, help="Worker threads for permutation.")
     parser.add_argument("--seed", type=int, default=0, help="Base random seed.")
     parser.add_argument("--keep-prob", type=float, default=0.25, help="Probability of stacking another mutation.")
     parser.add_argument("--no-narrow", action="store_true", help="Skip post-search diff minimization.")
@@ -39,11 +48,12 @@ def main() -> None:
     args = parser.parse_args()
 
     mutate_functions = split_symbols(args.mutate_function, args.mutate_functions)
+    jobs = clamp_int(args.jobs, default=1, minimum=1, maximum=max_jobs())
     command_args = [
         args.function,
         *mutate_functions,
         "-j",
-        str(clamp_int(args.jobs, default=4, minimum=1, maximum=16)),
+        str(jobs),
         "--batch",
         str(min(16, clamp_int(args.max_iters, default=32, minimum=1, maximum=10_000))),
         "--timeout",
@@ -75,6 +85,8 @@ def main() -> None:
             "function": args.function,
             "mutate_functions": mutate_functions or [args.function],
             "max_iters": clamp_int(args.max_iters, default=32, minimum=1, maximum=10_000),
+            "jobs": jobs,
+            "requested_jobs": args.jobs,
             "apply": args.apply,
         }
     )

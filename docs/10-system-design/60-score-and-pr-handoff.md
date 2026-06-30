@@ -35,6 +35,9 @@ baseline:
 - The checkpoint passed the runner acceptance gate: target regression is false,
   neighbor regressions are empty, validation artifacts exist on disk, and
   edited paths stay inside the write set.
+- An exact target score counts as exact only when the checkpoint also passed
+  hard gates. A 100% score with failed hard gates remains repair evidence and
+  is not selectable for integration or PR handoff.
 - The worker post-return repair gate is clean: no unaccepted write-set diff is
   retained, configured runner-owned post-return checks passed, and any
   `repair_request` loop has resolved rather than exhausted.
@@ -146,7 +149,9 @@ and rollout in
 - **L1 — worker attempt lint.** Any attempt with deterministic QA findings,
   including warning-only findings, is rejected at attempt time inside the
   worker post-return gate, with the findings fed back as repair feedback (see
-  [worker lifecycle](40-worker-lifecycle.md)).
+  [worker lifecycle](40-worker-lifecycle.md)). When the same attempt measured
+  an exact score, the runner treats it as failed-gate exact repair evidence,
+  not as an accepted match.
 - **L2 — regression-check hard gate.** `regression-check` runs the
   deterministic `review_lint` diff scan against the upstream base by default;
   the only bypass is an explicit `--skip-qa-gate`. The summary gains

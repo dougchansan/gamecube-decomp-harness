@@ -1,6 +1,6 @@
 ---
 covers: Worker target packet lifecycle, target claims, runner validation, checkpoints, timeout/error classification, and continuation policy
-concepts: [worker, target-packet, target-claim, worker-state, checkpoints, validation, qa-lint, write-safety]
+concepts: [worker, target-packet, target-claim, worker-state, checkpoints, validation, qa-lint, write-safety, tool-slots]
 ---
 
 # Worker Lifecycle
@@ -20,8 +20,9 @@ classification.
    a worker turn boundary for runner validation.
 5. Runner validates the current workspace, records a checkpoint, and selects
    the best selectable checkpoint so far.
-6. Exact checkpoints close the worker state as exact. Non-exact checkpoints
-   continue the same worker conversation while budget remains.
+6. Exact checkpoints that pass hard gates close the worker state as exact.
+   Non-exact checkpoints continue the same worker conversation while the
+   bounded continuation policy allows it.
 7. Runner timeout closes with the best prior selectable checkpoint, or baseline
    if none improved. Provider, infrastructure, or tool failures close as error
    while preserving any prior selectable checkpoint.
@@ -102,6 +103,13 @@ pre-worker baseline, diffs the claimed write set after each attempt, runs local
 validation, records a checkpoint, and decides whether that checkpoint is
 selectable.
 
+The pre-worker object build and later validation builds are narrow worker-local
+commands, not full project report rebuilds. Compile-heavy `ninja` calls acquire
+an epoch-scoped worker Ninja slot before running in the worker worktree. Worker
+Pi tools that invoke MWCC or objdiff use the toolpack's own per-tool slot pools,
+so a worker may keep its conversation alive while waiting for a local build or
+checkdiff/permuter slot.
+
 A checkpoint records:
 
 - Validation status, score before/after, delta, and exact-match flag.
@@ -115,6 +123,12 @@ baseline are selectable. Best-checkpoint selection is deterministic: exact match
 wins, then highest target score, then earliest validation time. Failed or
 neutral checkpoints remain useful evidence, but they are not integration
 candidates.
+
+A checkpoint can measure an exact target score while still failing hard gates
+such as QA lint, post-return checks, or local validation. That checkpoint is
+not selectable and does not close the worker as exact. It is treated as
+high-value repair evidence and receives the bounded failed-gate exact repair
+budget described below.
 
 Runner-owned validation also runs the worker-side QA lint (the QA ship gate's
 L1 layer; see [score and PR handoff](60-score-and-pr-handoff.md)). The runner
@@ -150,13 +164,30 @@ durable outcome.
 
 ## Continuation Policy
 
-A worker should continue while it has evidence-backed paths toward exact match
-and the runner keeps the session alive. When the runner rejects a checkpoint or
-accepts a non-exact checkpoint, the same worker conversation receives repair or
-continuation feedback. That feedback names the validation failure, QA finding,
-or non-exact score so the worker can refine without losing context.
+A worker continues only while runner-owned evidence says more attempts are
+worth spending:
 
-Workers should not keep spending effort on unsupported guesses after PRs, docs,
-source siblings, duplicate groups, resource evidence, and measured diff signal
-stop supporting a clear next move. At timeout, the runner chooses the best
-validated state rather than trusting the worker's self-assessment.
+- An accepted exact checkpoint stops immediately.
+- A cold worker with no selectable improvement and no failed-gate exact
+  checkpoint stops after the fifth human attempt.
+- The first selectable non-exact improvement is saved immediately. The worker
+  can spend up to three follow-up checkpoints looking for a new best or exact.
+- A higher selectable best resets the three-follow-up budget.
+- If three follow-up checkpoints after the latest best do not produce a higher
+  selectable best or exact, the worker stops and the saved best checkpoint is
+  preserved.
+- An exact score that fails hard gates starts a failed-gate exact repair lane.
+  The runner can spend up to three follow-up checkpoints repairing the gates,
+  even when the cold budget would otherwise stop the worker.
+- If the failed-gate exact repair lane does not produce an accepted exact or a
+  selectable best within its follow-up budget, the worker stops.
+
+When the runner rejects a checkpoint or accepts a non-exact checkpoint for
+continued work, the same worker conversation receives repair or continuation
+feedback. That feedback names the validation failure, QA finding, non-exact
+score, and continuation reason so the worker can refine without losing
+context.
+
+The claim deadline, dry-run mode, provider failures, and missing repair reasons
+still stop continuation. At timeout, the runner chooses the best validated state
+rather than trusting the worker's self-assessment.

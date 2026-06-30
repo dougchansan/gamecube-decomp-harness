@@ -2,6 +2,7 @@ import type { CSSProperties, HTMLAttributes } from "react";
 
 import activitySvg from "./assets/activity.svg?raw";
 import alertTriangleSvg from "./assets/alert-triangle.svg?raw";
+import arrowRightSvg from "./assets/arrow-right.svg?raw";
 import archiveSvg from "./assets/archive.svg?raw";
 import banSvg from "./assets/ban.svg?raw";
 import botSvg from "./assets/bot.svg?raw";
@@ -83,6 +84,7 @@ function createIcon(svg: string, displayName: string) {
 
 export const Activity = createIcon(activitySvg, "Activity");
 export const AlertTriangle = createIcon(alertTriangleSvg, "AlertTriangle");
+export const ArrowRight = createIcon(arrowRightSvg, "ArrowRight");
 export const Archive = createIcon(archiveSvg, "Archive");
 export const Ban = createIcon(banSvg, "Ban");
 export const Bot = createIcon(botSvg, "Bot");

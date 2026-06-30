@@ -379,7 +379,7 @@ export function resourceMap(repoRoot: string, options: ResourceMapOptions): Reco
         purpose: "run kernel-backed pr-indexer postmortems for missing, draft, or failed records in the orchestrator-owned PR dump",
       },
       {
-        command: "python configure.py --require-protos",
+        command: "python3 configure.py --require-protos --wrapper build/tools/wibo",
         purpose: "regenerate build metadata with prototype checks when needed",
       },
       {

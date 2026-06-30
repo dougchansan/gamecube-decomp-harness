@@ -5,7 +5,7 @@ last-mile compiler behavior notes.
 
 Current state: live runner v1 plus tool-local dump/diagnose APIs.
 `python3 toolpacks/gamecube-decomp/compiler/mwcc_debug/runners/probe_mwcc_compiler.py --repo-root <repo_root>`
-runs the local `GC/1.2.5n` MWCC executable through Wine with `-version`,
+smokes the local `GC/1.2.5n` MWCC executable with `-version`,
 captures the compiler output, extracts representative build-rule snippets from
 `build.ninja`, and writes:
 

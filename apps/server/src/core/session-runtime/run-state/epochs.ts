@@ -118,10 +118,23 @@ function normalizePositiveInt(value: number, fallback: number): number {
   return Math.max(1, Math.floor(value));
 }
 
-function existingTargetKeys(store: StateStore, sessionId: string, epochId?: string): Set<string> {
-  const rows = epochId
-    ? (store.db.query("SELECT target_key FROM epoch_targets WHERE epoch_id = ?").all(epochId) as Record<string, unknown>[])
-    : (store.db.query("SELECT target_key FROM epoch_targets WHERE session_id = ? AND status != 'finished'").all(sessionId) as Record<string, unknown>[]);
+function existingTargetKeys(
+  store: StateStore,
+  sessionId: string,
+  params: { epochId: string; allowPreviouslyFinished?: boolean },
+): Set<string> {
+  const rows = params.allowPreviouslyFinished
+    ? (store.db
+        .query(
+          `
+            SELECT target_key
+            FROM epoch_targets
+            WHERE session_id = ?
+              AND (status != 'finished' OR epoch_id = ?)
+          `,
+        )
+        .all(sessionId, params.epochId) as Record<string, unknown>[])
+    : (store.db.query("SELECT target_key FROM epoch_targets WHERE session_id = ?").all(sessionId) as Record<string, unknown>[]);
   return new Set(rows.map((row) => String(row.target_key)));
 }
 
@@ -140,6 +153,7 @@ export function selectEpochAdmissionCandidates(params: {
   let skippedExisting = 0;
   let skippedMissingSource = 0;
   const seenKeys = new Set<string>();
+  const bySource = new Map<string, AdmissionCandidate[]>();
 
   for (const candidate of params.candidates) {
     const sourcePath = candidate.sourcePath.trim();
@@ -153,11 +167,27 @@ export function selectEpochAdmissionCandidates(params: {
       continue;
     }
     seenKeys.add(key);
-    eligible.push({ candidate, key, sourcePath });
-    if (eligible.length >= limit) break;
+    const entry = { candidate, key, sourcePath };
+    eligible.push(entry);
+    const sourceEntries = bySource.get(sourcePath);
+    if (sourceEntries) sourceEntries.push(entry);
+    else bySource.set(sourcePath, [entry]);
   }
 
-  return { selected: eligible.map((entry) => entry.candidate), skippedExisting, skippedMissingSource };
+  const selected: AdmissionCandidate[] = [];
+  while (selected.length < limit && selected.length < eligible.length) {
+    let added = false;
+    for (const sourceEntries of bySource.values()) {
+      const next = sourceEntries.shift();
+      if (!next) continue;
+      selected.push(next);
+      added = true;
+      if (selected.length >= limit) break;
+    }
+    if (!added) break;
+  }
+
+  return { selected: selected.map((entry) => entry.candidate), skippedExisting, skippedMissingSource };
 }
 
 function rowToEpoch(row: Record<string, unknown>): SchedulerEpochRecord {
@@ -276,6 +306,7 @@ export function admitEpochTargets(
     candidates: TargetCandidate[];
     size: EpochSizeSpec;
     workerPoolSize: number;
+    allowPreviouslyFinished?: boolean;
   },
 ): EpochAdmissionResult {
   const insertTarget = store.db.query(
@@ -298,7 +329,10 @@ export function admitEpochTargets(
     const startIndex = Number(startIndexRow?.start_index ?? 0);
     const selected = selectEpochAdmissionCandidates({
       candidates: params.candidates,
-      existingKeys: existingTargetKeys(store, sessionId, params.epochId),
+      existingKeys: existingTargetKeys(store, sessionId, {
+        epochId: params.epochId,
+        allowPreviouslyFinished: params.allowPreviouslyFinished,
+      }),
       size: params.size,
     });
     const admittedAt = now();

@@ -302,6 +302,9 @@ export function createMeleeKernelPiAgentRunner(
             config: {
               workingDir: piOptions.cwd,
             },
+            database: {
+              maxConnections: 1,
+            },
           })
         : null);
     const spawnTraceWriter = traceWriter ?? runtime?.traceWriter;

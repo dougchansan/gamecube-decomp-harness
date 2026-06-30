@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
-import { existsSync, mkdirSync, readdirSync, statSync, symlinkSync } from "node:fs";
-import { copyFile, mkdir, readFile, writeFile } from "node:fs/promises";
-import { basename, dirname, isAbsolute, relative, resolve } from "node:path";
+import { existsSync, lstatSync, mkdirSync, readdirSync, statSync, symlinkSync } from "node:fs";
+import { chmod, copyFile, cp, mkdir, readFile, readdir, rm, utimes, writeFile } from "node:fs/promises";
+import { basename, delimiter, dirname, isAbsolute, relative, resolve } from "node:path";
 import { createMeleeKernelSpawnContext } from "@server/infrastructure/kernel/bridge/spawn-context";
 import {
   appendWorkerActivityEvent,
@@ -11,6 +11,7 @@ import {
   targetPacketTarget,
   validateWorkerChange,
   workerPrompt,
+  WORKER_CANONICAL_TOOL_PATHS,
   workerPacket,
   type WorkerChangeBaseline,
   type WorkerReviewLint,
@@ -43,7 +44,9 @@ import {
   openState,
   recordWorkerCheckpoint,
   setClaimWorktreePath,
+  workerCheckpointsForWorkerState,
   type StateStore,
+  type WorkerCheckpointRecord,
 } from "@server/core/session-runtime/run-state";
 import {
   processWorkerOutputIntegrationQueue,
@@ -86,6 +89,7 @@ interface WorkerAttemptEvaluation {
   parsedError?: string;
   runnerValidation: WorkerChangeValidation;
   repairReasons: string[];
+  continuationDecision: WorkerContinuationDecision;
   writeSetDiffChanged: boolean;
   postAttemptDiffPath: string;
   repairFeedbackPath?: string;
@@ -257,6 +261,153 @@ export function workerAttemptRepairReasons(params: {
   return reasons;
 }
 
+export function shouldRequestWorkerRepairAfterAttempt(params: {
+  repairReasons: string[];
+  dryRun: boolean;
+  claimDeadlineMs?: number | null;
+  nowMs?: number;
+}): boolean {
+  if (params.repairReasons.length === 0 || params.dryRun) return false;
+  if (params.claimDeadlineMs != null && Number.isFinite(params.claimDeadlineMs) && params.claimDeadlineMs <= (params.nowMs ?? Date.now())) return false;
+  return true;
+}
+
+export const WORKER_ATTEMPT_TAIL_POLICY = {
+  mode: "bounded_attempt_tail_v1",
+  maxColdAttempts: 5,
+  followUpAttemptsAfterBest: 3,
+  followUpAttemptsAfterGateFailedExact: 3,
+} as const;
+
+export interface WorkerContinuationDecision {
+  policy: typeof WORKER_ATTEMPT_TAIL_POLICY.mode;
+  shouldContinue: boolean;
+  exhausted: boolean;
+  stopReason: string | null;
+  continueReason: string | null;
+  attemptIndex: number;
+  humanAttempt: number;
+  maxColdAttempts: number;
+  followUpAttemptsAfterBest: number;
+  followUpAttemptsAfterGateFailedExact: number;
+  latestBestAttemptIndex: number | null;
+  latestBestScore: number | null;
+  failedGateExactAttemptIndex: number | null;
+  followUpsSinceBest: number | null;
+  followUpsSinceFailedGateExact: number | null;
+  stoppedByDeadline: boolean;
+  unresolvedRepairReasons: boolean;
+  latestReasons: string[];
+}
+
+type WorkerContinuationCheckpoint = Pick<WorkerCheckpointRecord, "attemptIndex" | "exactMatch" | "hardGatesPassed" | "selectable" | "newScore">;
+
+function orderedContinuationCheckpoints(checkpoints: WorkerContinuationCheckpoint[], attemptIndex: number): WorkerContinuationCheckpoint[] {
+  return checkpoints
+    .filter((checkpoint) => Number.isFinite(checkpoint.attemptIndex) && checkpoint.attemptIndex <= attemptIndex)
+    .slice()
+    .sort((left, right) => left.attemptIndex - right.attemptIndex);
+}
+
+function latestBestSelectableCheckpoint(checkpoints: WorkerContinuationCheckpoint[]): { attemptIndex: number | null; score: number | null } {
+  let bestAttemptIndex: number | null = null;
+  let bestScore: number | null = null;
+  for (const checkpoint of checkpoints) {
+    if (!checkpoint.selectable) continue;
+    if (checkpoint.newScore == null || !Number.isFinite(checkpoint.newScore)) continue;
+    if (bestScore == null || checkpoint.newScore > bestScore) {
+      bestScore = checkpoint.newScore;
+      bestAttemptIndex = checkpoint.attemptIndex;
+    }
+  }
+  return { attemptIndex: bestAttemptIndex, score: bestScore };
+}
+
+function firstFailedGateExactAfterBest(checkpoints: WorkerContinuationCheckpoint[], bestAttemptIndex: number | null): number | null {
+  const afterAttemptIndex = bestAttemptIndex ?? -1;
+  const checkpoint = checkpoints.find((item) => item.attemptIndex > afterAttemptIndex && item.exactMatch && !item.hardGatesPassed);
+  return checkpoint?.attemptIndex ?? null;
+}
+
+export function workerContinuationDecision(params: {
+  attemptIndex: number;
+  checkpoints: WorkerContinuationCheckpoint[];
+  repairReasons: string[];
+  dryRun: boolean;
+  claimDeadlineMs?: number | null;
+  nowMs?: number;
+}): WorkerContinuationDecision {
+  const attemptIndex = Math.max(0, Math.trunc(params.attemptIndex));
+  const checkpoints = orderedContinuationCheckpoints(params.checkpoints, attemptIndex);
+  const acceptedExact = checkpoints.some((checkpoint) => checkpoint.selectable && checkpoint.exactMatch && checkpoint.hardGatesPassed);
+  const best = latestBestSelectableCheckpoint(checkpoints);
+  const failedGateExactAttemptIndex = firstFailedGateExactAfterBest(checkpoints, best.attemptIndex);
+  const stoppedByDeadline =
+    params.repairReasons.length > 0 &&
+    params.claimDeadlineMs != null &&
+    Number.isFinite(params.claimDeadlineMs) &&
+    params.claimDeadlineMs <= (params.nowMs ?? Date.now());
+  const base = {
+    policy: WORKER_ATTEMPT_TAIL_POLICY.mode,
+    attemptIndex,
+    humanAttempt: attemptIndex + 1,
+    maxColdAttempts: WORKER_ATTEMPT_TAIL_POLICY.maxColdAttempts,
+    followUpAttemptsAfterBest: WORKER_ATTEMPT_TAIL_POLICY.followUpAttemptsAfterBest,
+    followUpAttemptsAfterGateFailedExact: WORKER_ATTEMPT_TAIL_POLICY.followUpAttemptsAfterGateFailedExact,
+    latestBestAttemptIndex: best.attemptIndex,
+    latestBestScore: best.score,
+    failedGateExactAttemptIndex,
+    followUpsSinceBest: best.attemptIndex == null ? null : attemptIndex - best.attemptIndex,
+    followUpsSinceFailedGateExact: failedGateExactAttemptIndex == null ? null : attemptIndex - failedGateExactAttemptIndex,
+    stoppedByDeadline,
+    unresolvedRepairReasons: params.repairReasons.length > 0,
+    latestReasons: params.repairReasons,
+  };
+
+  const stop = (stopReason: string, exhausted: boolean): WorkerContinuationDecision => ({
+    ...base,
+    shouldContinue: false,
+    exhausted,
+    stopReason,
+    continueReason: null,
+  });
+  const resume = (continueReason: string): WorkerContinuationDecision => ({
+    ...base,
+    shouldContinue: true,
+    exhausted: false,
+    stopReason: null,
+    continueReason,
+  });
+
+  if (acceptedExact) return stop("accepted_exact", false);
+  if (!shouldRequestWorkerRepairAfterAttempt(params)) {
+    if (params.dryRun) return stop("dry_run", false);
+    if (stoppedByDeadline) return stop("claim_deadline", false);
+    return stop("accepted_or_no_repair_reasons", false);
+  }
+
+  if (failedGateExactAttemptIndex != null) {
+    const followUps = attemptIndex - failedGateExactAttemptIndex;
+    if (followUps >= WORKER_ATTEMPT_TAIL_POLICY.followUpAttemptsAfterGateFailedExact) {
+      return stop("gate_failed_exact_followup_budget_exhausted", true);
+    }
+    return resume("gate_failed_exact_repair");
+  }
+
+  if (best.attemptIndex != null) {
+    const followUps = attemptIndex - best.attemptIndex;
+    if (followUps >= WORKER_ATTEMPT_TAIL_POLICY.followUpAttemptsAfterBest) {
+      return stop("improvement_followup_budget_exhausted", true);
+    }
+    return resume("post_improvement_followup");
+  }
+
+  if (attemptIndex + 1 >= WORKER_ATTEMPT_TAIL_POLICY.maxColdAttempts) {
+    return stop("cold_attempt_budget_exhausted", true);
+  }
+  return resume("cold_attempt_budget_available");
+}
+
 function renderPostReturnCheckCommand(
   template: string,
 	  params: {
@@ -415,6 +566,219 @@ const WORKER_REPORT_ARTIFACT_RELATIVE_PATHS = [
   "build/GALE01/baseline.json",
 ];
 
+const WORKER_TOOL_ARTIFACTS = [
+  { relativePath: "build/tools", mode: "copy" },
+  { relativePath: "build/compilers", mode: "link" },
+  { relativePath: "build/binutils", mode: "link" },
+] as const;
+const WORKER_TOOL_ARTIFACT_RELATIVE_PATHS = WORKER_TOOL_ARTIFACTS.map((artifact) => artifact.relativePath);
+const WORKER_WORKTREE_LOCK_STALE_MS = 10 * 60 * 1000;
+const WORKER_WORKTREE_LOCK_MISSING_OWNER_STALE_MS = 30 * 1000;
+const WORKER_SHELL_BIN_DIRNAME = "worker_shell_bin";
+
+const WORKER_FIND_GUARD_SCRIPT = `#!/bin/sh
+real_find="\${ORCH_REAL_FIND:-/usr/bin/find}"
+
+blocked_find() {
+  root="$1"
+  cat >&2 <<'EOF'
+orchestrator: blocked broad worker find sweep.
+
+Use canonical worker-local tool paths instead:
+  powerpc-eabi-objdump -> build/binutils/powerpc-eabi-objdump
+  powerpc-eabi-nm      -> build/binutils/powerpc-eabi-nm
+  powerpc-eabi-readelf -> build/binutils/powerpc-eabi-readelf
+  dtk                  -> build/tools/dtk
+  objdiff-cli          -> build/tools/objdiff-cli
+  sjiswrap             -> build/tools/sjiswrap.exe
+  wibo                 -> build/tools/wibo
+
+Narrow find inside the worker checkout is allowed, for example:
+  find src include build -name '<pattern>'
+EOF
+  echo "blocked root: $root" >&2
+  exit 2
+}
+
+pwd_logical="\${PWD:-$(pwd)}"
+pwd_physical="$(pwd -P 2>/dev/null || pwd)"
+
+for arg in "$@"; do
+  case "$arg" in
+    -*|"("|")"|"!") break ;;
+  esac
+  case "$arg" in
+    ""|".") ;;
+    ..|../*|*/../*|*/..) blocked_find "$arg" ;;
+    /*)
+      case "$arg" in
+        "$pwd_logical"|"$pwd_logical"/*|"$pwd_physical"|"$pwd_physical"/*) ;;
+        *) blocked_find "$arg" ;;
+      esac
+      ;;
+  esac
+done
+
+exec "$real_find" "$@"
+`;
+
+interface WorkerToolArtifactSource {
+  relativePath: string;
+  sourcePath: string;
+}
+
+interface WorkerConfigureToolPaths {
+  wrapper?: string;
+  binutils?: string;
+  compilers?: string;
+  dtk?: string;
+  objdiff?: string;
+  sjiswrap?: string;
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolveSleep) => setTimeout(resolveSleep, ms));
+}
+
+function envKeyForToolPath(id: string): string {
+  return `ORCH_WORKER_TOOL_${id.replace(/[^A-Za-z0-9]+/g, "_").replace(/^_+|_+$/g, "").toUpperCase()}`;
+}
+
+function uniquePathEntries(entries: string[]): string[] {
+  const seen = new Set<string>();
+  const result: string[] = [];
+  for (const entry of entries) {
+    if (!entry || seen.has(entry)) continue;
+    seen.add(entry);
+    result.push(entry);
+  }
+  return result;
+}
+
+export function workerAgentToolEnvironment(params: { workerRepoRoot: string; shellBin?: string | null }): Record<string, string> {
+  const existingPath = process.env.PATH ? process.env.PATH.split(delimiter) : [];
+  const pathEntries = uniquePathEntries([
+    params.shellBin ?? "",
+    resolve(params.workerRepoRoot, "build/binutils"),
+    resolve(params.workerRepoRoot, "build/tools"),
+    ...existingPath,
+  ]);
+  const env: Record<string, string> = {
+    PATH: pathEntries.join(delimiter),
+    ORCH_REAL_FIND: process.env.ORCH_REAL_FIND ?? "/usr/bin/find",
+    ORCH_WORKER_CANONICAL_TOOL_PATHS: JSON.stringify(WORKER_CANONICAL_TOOL_PATHS),
+  };
+  for (const tool of WORKER_CANONICAL_TOOL_PATHS) {
+    env[envKeyForToolPath(tool.id)] = tool.relativePath;
+  }
+  return env;
+}
+
+export async function writeWorkerShellGuardBin(params: { outputDir: string }): Promise<string> {
+  const binDir = resolve(params.outputDir, WORKER_SHELL_BIN_DIRNAME);
+  const findPath = resolve(binDir, "find");
+  await mkdir(binDir, { recursive: true });
+  await writeFile(findPath, WORKER_FIND_GUARD_SCRIPT);
+  await chmod(findPath, 0o755);
+  return binDir;
+}
+
+function existsOrSymlink(path: string): boolean {
+  try {
+    lstatSync(path);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function touchTreeMtime(path: string, at = new Date()): Promise<void> {
+  let stats: ReturnType<typeof statSync>;
+  try {
+    stats = statSync(path);
+  } catch {
+    return;
+  }
+  if (stats.isDirectory()) {
+    for (const entry of await readdir(path, { withFileTypes: true })) {
+      await touchTreeMtime(resolve(path, entry.name), at);
+    }
+  }
+  await utimes(path, at, at).catch(() => {});
+}
+
+export function workerWorktreeLockDir(workerRepoRoot: string): string {
+  return resolve(dirname(dirname(workerRepoRoot)), ".git-worktree-add.lock");
+}
+
+async function lockLooksStale(lockDir: string): Promise<boolean> {
+  const ageMs = (() => {
+    try {
+      return Date.now() - statSync(lockDir).mtimeMs;
+    } catch {
+      return WORKER_WORKTREE_LOCK_STALE_MS + 1;
+    }
+  })();
+
+  try {
+    const owner = JSON.parse(await readFile(resolve(lockDir, "owner.json"), "utf8")) as { pid?: unknown };
+    const pid = typeof owner.pid === "number" ? owner.pid : 0;
+    if (pid > 0) {
+      try {
+        process.kill(pid, 0);
+        return false;
+      } catch {
+        return true;
+      }
+    }
+  } catch {
+    return ageMs > WORKER_WORKTREE_LOCK_MISSING_OWNER_STALE_MS;
+  }
+
+  return ageMs > WORKER_WORKTREE_LOCK_STALE_MS;
+}
+
+async function acquireWorkerWorktreeLock(lockDir: string, owner: Record<string, unknown>): Promise<() => Promise<void>> {
+  const startedAt = Date.now();
+  for (;;) {
+    try {
+      await mkdir(lockDir);
+      await writeFile(
+        resolve(lockDir, "owner.json"),
+        JSON.stringify({ ...owner, pid: process.pid, acquiredAt: new Date().toISOString() }, null, 2),
+      );
+      return async () => {
+        await rm(lockDir, { recursive: true, force: true });
+      };
+    } catch (error) {
+      if ((error as { code?: string }).code !== "EEXIST") throw error;
+      if (await lockLooksStale(lockDir)) {
+        await rm(lockDir, { recursive: true, force: true });
+        continue;
+      }
+      if (Date.now() - startedAt > WORKER_WORKTREE_LOCK_STALE_MS) {
+        throw new Error(`Timed out waiting for worker git worktree lock at ${lockDir}`);
+      }
+      await sleep(200 + Math.floor(Math.random() * 300));
+    }
+  }
+}
+
+export function workerToolArtifactSourceRoots(globals: Pick<GlobalArgs, "repoRoot" | "project">): string[] {
+  const roots = [globals.repoRoot];
+  if (globals.project?.projectDir) roots.push(resolve(globals.project.projectDir, "worktrees", "upstream-current"));
+  return Array.from(new Set(roots));
+}
+
+function toolArtifactSourcesForWorker(globals: Pick<GlobalArgs, "repoRoot" | "project">): WorkerToolArtifactSource[] {
+  return WORKER_TOOL_ARTIFACT_RELATIVE_PATHS.flatMap((relativePath) => {
+    const sourcePath = workerToolArtifactSourceRoots(globals)
+      .map((root) => resolve(root, relativePath))
+      .find((candidate) => existsSync(candidate));
+    return sourcePath ? [{ relativePath, sourcePath }] : [];
+  });
+}
+
 function latestArtifactSourcePath(store: StateStore, runId: string, artifactType: string, artifactKey: string): string | null {
   const row = store.db
     .query(
@@ -495,6 +859,141 @@ async function seedWorkerReportArtifacts(params: {
   );
 }
 
+export async function seedWorkerToolArtifacts(params: {
+  workerRepoRoot: string;
+  outputDir: string;
+  sources: WorkerToolArtifactSource[];
+}): Promise<void> {
+  await mkdir(params.outputDir, { recursive: true });
+  const linked: Array<Record<string, string>> = [];
+  const copied: Array<Record<string, string>> = [];
+  const existing: string[] = [];
+  const sourceByRelativePath = new Map(params.sources.map((source) => [source.relativePath, source.sourcePath]));
+  for (const artifact of WORKER_TOOL_ARTIFACTS) {
+    const { relativePath } = artifact;
+    const targetPath = resolve(params.workerRepoRoot, relativePath);
+    if (existsOrSymlink(targetPath)) {
+      if (!existsSync(targetPath)) {
+        await rm(targetPath, { recursive: true, force: true });
+      } else {
+        const isSharedSymlink = lstatSync(targetPath).isSymbolicLink();
+        if (artifact.mode === "copy" && !isSharedSymlink) {
+          const sourcePath = sourceByRelativePath.get(relativePath);
+          if (sourcePath && existsSync(sourcePath)) {
+            await cp(sourcePath, targetPath, { recursive: true, dereference: true, force: true });
+            await touchTreeMtime(targetPath);
+            copied.push({ relativePath, sourcePath, targetPath });
+          } else {
+            existing.push(relativePath);
+          }
+          continue;
+        }
+        if (artifact.mode === "link" && isSharedSymlink) {
+          existing.push(relativePath);
+          continue;
+        }
+        await rm(targetPath, { recursive: true, force: true });
+      }
+    }
+    const sourcePath = sourceByRelativePath.get(relativePath);
+    if (!sourcePath || !existsSync(sourcePath)) continue;
+    await mkdir(dirname(targetPath), { recursive: true });
+    if (artifact.mode === "copy") {
+      await cp(sourcePath, targetPath, { recursive: true, dereference: true });
+      await touchTreeMtime(targetPath);
+      copied.push({ relativePath, sourcePath, targetPath });
+    } else {
+      const sourceType = statSync(sourcePath).isDirectory() ? "dir" : "file";
+      symlinkSync(sourcePath, targetPath, sourceType);
+      linked.push({ relativePath, sourcePath, targetPath });
+    }
+  }
+  await writeFile(
+    resolve(params.outputDir, "worker_worktree_tool_artifacts.json"),
+    JSON.stringify(
+      {
+        copied,
+        linked,
+        existing,
+        missing: WORKER_TOOL_ARTIFACT_RELATIVE_PATHS.filter(
+          (relativePath) =>
+            !existing.includes(relativePath) &&
+            !copied.some((item) => item.relativePath === relativePath) &&
+            !linked.some((item) => item.relativePath === relativePath),
+        ),
+      },
+      null,
+      2,
+    ),
+  );
+}
+
+function localWorkerConfigureToolPaths(workerRepoRoot: string): WorkerConfigureToolPaths {
+  const relativePaths: Required<WorkerConfigureToolPaths> = {
+    wrapper: "build/tools/wibo",
+    binutils: "build/binutils",
+    compilers: "build/compilers",
+    dtk: "build/tools/dtk",
+    objdiff: "build/tools/objdiff-cli",
+    sjiswrap: "build/tools/sjiswrap.exe",
+  };
+  const toolPaths: WorkerConfigureToolPaths = {};
+  for (const [key, relativePath] of Object.entries(relativePaths) as Array<[keyof WorkerConfigureToolPaths, string]>) {
+    if (key === "wrapper" && process.platform !== "linux" && process.platform !== "darwin") continue;
+    if (existsSync(resolve(workerRepoRoot, relativePath))) toolPaths[key] = relativePath;
+  }
+  return toolPaths;
+}
+
+function hasShellFlag(command: string, flag: string): boolean {
+  const escaped = flag.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(`(?:^|\\s)${escaped}(?:\\s|=|$)`).test(command);
+}
+
+function setShellFlag(command: string, flag: string, value: string): string {
+  const escaped = flag.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const pattern = new RegExp(`(^|\\s)${escaped}(?:\\s+|=)(?:"[^"]*"|'[^']*'|\\S+)`);
+  const replacement = `${flag} ${shellQuote(value)}`;
+  if (pattern.test(command)) return command.replace(pattern, (_match, prefix: string) => `${prefix}${replacement}`);
+  return `${command} ${replacement}`;
+}
+
+export function configureCommandWithWorkerToolPaths(command: string, toolPaths: WorkerConfigureToolPaths): string {
+  if (!/\bconfigure\.py\b/.test(command)) return command;
+  let next = command;
+  if (toolPaths.wrapper) {
+    next = setShellFlag(next, "--wrapper", toolPaths.wrapper);
+  }
+  const additions: string[] = [];
+  const maybeAppend = (flag: string, value: string | undefined) => {
+    if (!value || hasShellFlag(next, flag)) return;
+    additions.push(flag, shellQuote(value));
+  };
+  maybeAppend("--binutils", toolPaths.binutils);
+  maybeAppend("--compilers", toolPaths.compilers);
+  maybeAppend("--dtk", toolPaths.dtk);
+  maybeAppend("--objdiff", toolPaths.objdiff);
+  maybeAppend("--sjiswrap", toolPaths.sjiswrap);
+  return additions.length > 0 ? `${next} ${additions.join(" ")}` : next;
+}
+
+export function workerBuildNinjaNeedsToolReconfigure(buildNinjaText: string, toolPaths: WorkerConfigureToolPaths): boolean {
+  if (toolPaths.wrapper && /(?:^|\n)\s*command\s*=\s*wine(?:\s|$)/.test(buildNinjaText)) return true;
+  if (toolPaths.wrapper && !buildNinjaText.includes(`--wrapper ${toolPaths.wrapper}`)) return true;
+  const staleToolEdges = [
+    ["compilers", "build/compilers"],
+    ["binutils", "build/binutils"],
+    ["dtk", "build/tools/dtk"],
+    ["objdiff", "build/tools/objdiff-cli"],
+    ["sjiswrap", "build/tools/sjiswrap.exe"],
+  ] as const;
+  return staleToolEdges.some(([tool, output]) => {
+    if (!toolPaths[tool]) return false;
+    const escapedOutput = output.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return new RegExp(`(?:^|\\n)build\\s+${escapedOutput}:\\s+download_tool(?:\\s|$)`).test(buildNinjaText);
+  });
+}
+
 async function runLoggedWorkerSetupCommand(params: { workerRepoRoot: string; outputDir: string; logPrefix: string; command: string[]; label: string }): Promise<void> {
   const stdoutPath = resolve(params.outputDir, `${params.logPrefix}.stdout.txt`);
   const stderrPath = resolve(params.outputDir, `${params.logPrefix}.stderr.txt`);
@@ -506,16 +1005,25 @@ async function runLoggedWorkerSetupCommand(params: { workerRepoRoot: string; out
   }
 }
 
-async function runWorkerConfigure(params: { workerRepoRoot: string; outputDir: string; command: string }): Promise<void> {
+async function runWorkerConfigure(params: { workerRepoRoot: string; outputDir: string; command: string; toolPaths?: WorkerConfigureToolPaths }): Promise<void> {
   const buildNinjaPath = resolve(params.workerRepoRoot, "build.ninja");
   const objdiffCliPath = resolve(params.workerRepoRoot, "build/tools/objdiff-cli");
-  if (existsSync(buildNinjaPath) && existsSync(objdiffCliPath)) return;
-  if (!existsSync(buildNinjaPath) && params.command.trim()) {
+  const toolPaths = params.toolPaths ?? {};
+  let needsToolReconfigure = false;
+  if (existsSync(buildNinjaPath) && params.command.trim()) {
+    const buildNinjaText = await readFile(buildNinjaPath, "utf8");
+    const commandRequestsWrapper = hasShellFlag(params.command, "--wrapper");
+    needsToolReconfigure =
+      workerBuildNinjaNeedsToolReconfigure(buildNinjaText, toolPaths) ||
+      (commandRequestsWrapper && /(?:^|\n)\s*command\s*=\s*wine(?:\s|$)/.test(buildNinjaText));
+  }
+  if (existsSync(buildNinjaPath) && existsSync(objdiffCliPath) && !needsToolReconfigure) return;
+  if ((!existsSync(buildNinjaPath) || needsToolReconfigure) && params.command.trim()) {
     await runLoggedWorkerSetupCommand({
       workerRepoRoot: params.workerRepoRoot,
       outputDir: params.outputDir,
       logPrefix: "worker_worktree_configure",
-      command: ["/bin/sh", "-c", params.command],
+      command: ["/bin/sh", "-c", configureCommandWithWorkerToolPaths(params.command, toolPaths)],
       label: "worker worktree configure",
     });
   }
@@ -533,6 +1041,26 @@ async function runWorkerConfigure(params: { workerRepoRoot: string; outputDir: s
   }
 }
 
+async function resetDisposableWorkerWorktree(params: { workerRepoRoot: string; outputDir: string; baseRev: string }): Promise<void> {
+  if (!existsSync(resolve(params.workerRepoRoot, ".git"))) return;
+  if (!isDisposableWorkerScratchPath(params.workerRepoRoot)) return;
+
+  await runLoggedWorkerSetupCommand({
+    workerRepoRoot: params.workerRepoRoot,
+    outputDir: params.outputDir,
+    logPrefix: "worker_worktree_reset",
+    command: ["git", "reset", "--hard", params.baseRev],
+    label: "worker worktree reset",
+  });
+  await runLoggedWorkerSetupCommand({
+    workerRepoRoot: params.workerRepoRoot,
+    outputDir: params.outputDir,
+    logPrefix: "worker_worktree_clean",
+    command: ["git", "clean", "-fd"],
+    label: "worker worktree clean",
+  });
+}
+
 function linkWorkerLogs(workerRepoRoot: string, outputDir: string): void {
   const logsPath = resolve(dirname(workerRepoRoot), "logs");
   if (existsSync(logsPath)) return;
@@ -543,6 +1071,18 @@ function linkWorkerLogs(workerRepoRoot: string, outputDir: string): void {
   }
 }
 
+function isDisposableWorkerScratchPath(path: string): boolean {
+  const resolved = resolve(path);
+  const parts = resolved.split(/[\\/]+/);
+  return (
+    basename(resolved) === "source" &&
+    parts.includes("worktrees") &&
+    parts.includes("sessions") &&
+    parts.includes("epochs") &&
+    parts.includes("workers")
+  );
+}
+
 async function ensureWorkerWorktree(params: {
   sourceRepoRoot: string;
   workerRepoRoot: string;
@@ -550,6 +1090,7 @@ async function ensureWorkerWorktree(params: {
   outputDir: string;
   configureCommand: string;
   reportArtifactSources: WorkerReportArtifactSource[];
+  toolArtifactSources: WorkerToolArtifactSource[];
   dryRun: boolean;
 }): Promise<void> {
   await mkdir(params.outputDir, { recursive: true });
@@ -562,25 +1103,54 @@ async function ensureWorkerWorktree(params: {
       outputDir: params.outputDir,
       sources: params.reportArtifactSources,
     });
+    await seedWorkerToolArtifacts({
+      workerRepoRoot: params.workerRepoRoot,
+      outputDir: params.outputDir,
+      sources: params.toolArtifactSources,
+    });
     return;
   }
   if (!existsSync(resolve(params.workerRepoRoot, ".git"))) {
     if (existsSync(params.workerRepoRoot)) {
-      throw new Error(`Worker worktree path exists but is not a Git worktree: ${params.workerRepoRoot}`);
+      if (!isDisposableWorkerScratchPath(params.workerRepoRoot)) {
+        throw new Error(`Worker worktree path exists but is not a Git worktree: ${params.workerRepoRoot}`);
+      }
+      await rm(params.workerRepoRoot, { recursive: true, force: true });
     }
     await mkdir(dirname(params.workerRepoRoot), { recursive: true });
-    await runGit(params.sourceRepoRoot, ["worktree", "prune"]);
-    const add = await runGit(params.sourceRepoRoot, ["worktree", "add", "--detach", params.workerRepoRoot, params.baseRev]);
-    if (!add.ok) throw new Error(`git worktree add failed for worker checkout: ${outputTail(add.stderr || add.stdout)}`);
+    const releaseWorktreeLock = await acquireWorkerWorktreeLock(workerWorktreeLockDir(params.workerRepoRoot), {
+      workerRepoRoot: params.workerRepoRoot,
+      sourceRepoRoot: params.sourceRepoRoot,
+      baseRev: params.baseRev,
+    });
+    try {
+      await runGit(params.sourceRepoRoot, ["worktree", "prune"]);
+      const add = await runGit(params.sourceRepoRoot, ["worktree", "add", "--detach", params.workerRepoRoot, params.baseRev]);
+      if (!add.ok) throw new Error(`git worktree add failed for worker checkout: ${outputTail(add.stderr || add.stdout)}`);
+    } finally {
+      await releaseWorktreeLock();
+    }
   }
+  await resetDisposableWorkerWorktree({
+    workerRepoRoot: params.workerRepoRoot,
+    outputDir: params.outputDir,
+    baseRev: params.baseRev,
+  });
 
   const origSource = resolve(params.sourceRepoRoot, "orig");
   const origTarget = resolve(params.workerRepoRoot, "orig");
   if (existsSync(origSource)) linkMissingTree(origSource, origTarget);
+  await seedWorkerToolArtifacts({
+    workerRepoRoot: params.workerRepoRoot,
+    outputDir: params.outputDir,
+    sources: params.toolArtifactSources,
+  });
+  const configureToolPaths = localWorkerConfigureToolPaths(params.workerRepoRoot);
   await runWorkerConfigure({
     workerRepoRoot: params.workerRepoRoot,
     outputDir: params.outputDir,
     command: params.configureCommand,
+    toolPaths: configureToolPaths,
   });
   await seedWorkerReportArtifacts({
     workerRepoRoot: params.workerRepoRoot,
@@ -686,7 +1256,6 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
     const workerId = stringArg(args, "--worker-id", `worker-${process.pid}-${Date.now()}-${randomUUID().slice(0, 8)}`);
     const baseRev = await resolveBaseRev(globals.repoRoot, stringArg(args, "--base-rev", "unknown"));
     const ttlSeconds = numberArg(args, "--ttl-seconds", DEFAULT_WORKER_TTL_SECONDS);
-    const repairAttempts = Math.max(0, Math.trunc(numberArg(args, "--repair-attempts", globals.dryRunAgents ? 0 : 2)));
     const postReturnCheckCommand = stringArg(args, "--post-return-check-command", "");
     const workerConfigureCommand = stringArg(args, "--worker-configure-command", "python3 configure.py --require-protos");
     const graphDbPath = stringArg(args, "--graph-db", globals.graphDbPath ?? resourceGraphDbPath());
@@ -705,6 +1274,7 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
       outputDir,
       configureCommand: workerConfigureCommand,
       reportArtifactSources: reportArtifactSourcesForWorker({ store, runId, globals }),
+      toolArtifactSources: toolArtifactSourcesForWorker(globals),
       dryRun: globals.dryRunAgents,
     });
     const claimWithWorktree = { ...claimed, worktreePath: workerRepoRoot };
@@ -724,6 +1294,8 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
     await mkdir(reportDir, { recursive: true });
     const validationDir = resolve(outputDir, "runner_validation");
     await mkdir(validationDir, { recursive: true });
+    const workerShellBin = await writeWorkerShellGuardBin({ outputDir });
+    const workerAgentEnv = workerAgentToolEnvironment({ workerRepoRoot, shellBin: workerShellBin });
     const summaryPath = resolve(reportDir, "worker_state.json");
     const factsPath = resolve(reportDir, "facts.json");
     const preAttemptDiffPath = resolve(validationDir, "pre_worker_write_set.diff");
@@ -752,7 +1324,9 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
     });
     let repairRequest: Record<string, unknown> | null = null;
     let finalEvaluation: WorkerAttemptEvaluation | null = null;
-    for (let attemptIndex = 0; attemptIndex <= repairAttempts; attemptIndex += 1) {
+    let attemptIndex = 0;
+    const claimDeadlineMs = Date.parse(claimed.ttl);
+    while (true) {
       const attemptPacket = repairRequest
         ? {
             ...packet,
@@ -789,6 +1363,7 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
           model: globals.model,
           thinkingLevel: globals.thinkingLevel,
           timeoutMs: globals.agentTimeoutSeconds ? globals.agentTimeoutSeconds * 1000 : undefined,
+          env: workerAgentEnv,
           // Whole-file writes conflict with the preserve-dirty-work rule and were
           // used in 0% of confirmed exacts (-51pt lift); edit/bash cover the need.
           excludeBuiltinTools: ["write"],
@@ -964,6 +1539,13 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
           `runner checkpoint was not exact${typeof before === "number" && typeof after === "number" ? ` (${before.toFixed(5)} -> ${after.toFixed(5)})` : ""}; continue the same target toward exact match`,
         );
       }
+      const continuationDecision = workerContinuationDecision({
+        attemptIndex,
+        checkpoints: workerCheckpointsForWorkerState(store, claimed.workerStateId),
+        repairReasons,
+        dryRun: result.dryRun,
+        claimDeadlineMs: Number.isFinite(claimDeadlineMs) ? claimDeadlineMs : null,
+      });
       const attemptGatePath = resolve(validationDir, `attempt-${attemptIndex}.return_gate.json`);
       const evaluation: WorkerAttemptEvaluation = {
         result,
@@ -971,6 +1553,7 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
         parsedError: parsedAgentNote.error,
         runnerValidation,
         repairReasons,
+        continuationDecision,
         writeSetDiffChanged,
         postAttemptDiffPath,
       };
@@ -979,7 +1562,14 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
         JSON.stringify(
           {
             attempt_index: attemptIndex,
-            max_repair_attempts: repairAttempts,
+            repair_policy: {
+              mode: WORKER_ATTEMPT_TAIL_POLICY.mode,
+              claim_ttl: claimed.ttl,
+              max_cold_attempts: WORKER_ATTEMPT_TAIL_POLICY.maxColdAttempts,
+              follow_up_attempts_after_best: WORKER_ATTEMPT_TAIL_POLICY.followUpAttemptsAfterBest,
+              follow_up_attempts_after_gate_failed_exact: WORKER_ATTEMPT_TAIL_POLICY.followUpAttemptsAfterGateFailedExact,
+              decision: continuationDecision,
+            },
             agent_output_path: result.outputPath,
             agent_note_parse_error: parsedAgentNote.error ?? null,
             agent_note_status: recordString(agentNote?.status) || null,
@@ -1001,17 +1591,21 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
       // A dead provider can't repair anything — retrying just burns ~20 minutes of
       // timeout-retries per attempt while the endpoint is down.
       if (result.providerError && !agentNote) break;
-      if (runnerValidation.target?.exact || repairReasons.length === 0 || attemptIndex >= repairAttempts || result.dryRun) break;
+      if (!continuationDecision.shouldContinue) break;
 
       const repairFeedbackPath = resolve(validationDir, `attempt-${attemptIndex}.repair_request.json`);
+      const repairInstruction =
+        continuationDecision.continueReason === "gate_failed_exact_repair"
+          ? "The runner measured an exact target score, but hard gates failed, so this is a bounded gate-repair continuation. Keep the retained useful edits, repair the runner-listed gate failures without reintroducing QA findings, preserve pre-existing dirty work, and return a compact validation-ready JSON note. Do not use whole-file destructive reset/restore/checkout/clean commands."
+          : "The runner checkpointed the current worktree under the bounded attempt-tail policy and has not accepted an exact match. Keep retained useful edits, fix any runner-listed validation issues, preserve pre-existing dirty work, and continue only if there is a concrete path to a new best or exact. Return a compact validation-ready JSON note when you want the runner to checkpoint again. Do not use whole-file destructive reset/restore/checkout/clean commands.";
       repairRequest = {
         attempt: attemptIndex + 1,
         previous_agent_output_path: result.outputPath,
         previous_return_gate_path: attemptGatePath,
         previous_post_attempt_diff_path: postAttemptDiffPath,
         reasons: repairReasons,
-        instruction:
-          "The runner validated the current worktree but has not accepted an exact match. Keep the retained useful edits, fix any runner-listed validation issues, preserve pre-existing dirty work, and continue this same target toward exact. Return a compact validation-ready JSON note when you want the runner to checkpoint again. Do not use whole-file destructive reset/restore/checkout/clean commands.",
+        continuation_policy: continuationDecision,
+        instruction: repairInstruction,
       };
       evaluation.repairFeedbackPath = repairFeedbackPath;
       await writeFile(repairFeedbackPath, JSON.stringify(repairRequest, null, 2));
@@ -1026,6 +1620,7 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
         summary: clampSummary(`runner rejected the return; repair attempt ${attemptIndex + 1} requested: ${repairReasons.join("; ")}`),
         artifact_path: repairFeedbackPath,
       });
+      attemptIndex += 1;
     }
 
     if (!finalEvaluation) throw new Error("Worker loop ended without an attempt evaluation");
@@ -1089,8 +1684,18 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
       error: errorClassification,
       latest_runner_validation: finalEvaluation.runnerValidation,
       continuation_attempts: {
-        configured: repairAttempts,
-        exhausted: finalEvaluation.repairReasons.length > 0,
+        policy: WORKER_ATTEMPT_TAIL_POLICY.mode,
+        configured: {
+          max_cold_attempts: WORKER_ATTEMPT_TAIL_POLICY.maxColdAttempts,
+          follow_up_attempts_after_best: WORKER_ATTEMPT_TAIL_POLICY.followUpAttemptsAfterBest,
+          follow_up_attempts_after_gate_failed_exact: WORKER_ATTEMPT_TAIL_POLICY.followUpAttemptsAfterGateFailedExact,
+        },
+        claim_ttl: claimed.ttl,
+        decision: finalEvaluation.continuationDecision,
+        stopped_by_deadline: finalEvaluation.continuationDecision.stoppedByDeadline,
+        exhausted: finalEvaluation.continuationDecision.exhausted,
+        stop_reason: finalEvaluation.continuationDecision.stopReason,
+        unresolved_repair_reasons: finalEvaluation.repairReasons.length > 0,
         latest_reasons: finalEvaluation.repairReasons,
         latest_write_set_diff_path: finalEvaluation.postAttemptDiffPath,
         repair_feedback_path: finalEvaluation.repairFeedbackPath ?? null,

@@ -1,13 +1,28 @@
 import { describe, expect, test } from "bun:test";
+import { existsSync, lstatSync, mkdirSync, readFileSync, symlinkSync, writeFileSync } from "node:fs";
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { delimiter, join, resolve } from "node:path";
 import { QA_LINT_REPAIR_INSTRUCTION, type WorkerChangeValidation, type WorkerQaLint } from "@server/core/agent-catalog/agents/running/worker/change-validation";
 import type { QaScanFinding } from "@server/core/validation/qa";
 import type { PiRunResult } from "@server/core/shared/types";
 import {
   classifyWorkerError,
+  configureCommandWithWorkerToolPaths,
   isReworkErrorKind,
+  seedWorkerToolArtifacts,
+  shouldRequestWorkerRepairAfterAttempt,
+  WORKER_ATTEMPT_TAIL_POLICY,
+  workerContinuationDecision,
+  workerAgentToolEnvironment,
+  workerBuildNinjaNeedsToolReconfigure,
   workerAttemptRepairReasons,
+  writeWorkerShellGuardBin,
+  workerToolArtifactSourceRoots,
+  workerWorktreeLockDir,
   workerWorktreePath,
 } from "@server/core/session-runtime/phases/running/workers/worker-cycle.js";
+import { runCommand } from "@server/infrastructure/shell";
 
 function finding(overrides: Partial<QaScanFinding> = {}): QaScanFinding {
   return {
@@ -38,6 +53,20 @@ function piResult(): PiRunResult {
     userPromptPath: "/tmp/worker.user.md",
     rawText: "{}",
     dryRun: false,
+  };
+}
+
+function continuationCheckpoint(
+  attemptIndex: number,
+  overrides: Partial<{ exactMatch: boolean; hardGatesPassed: boolean; selectable: boolean; newScore: number | null }> = {},
+) {
+  return {
+    attemptIndex,
+    exactMatch: false,
+    hardGatesPassed: false,
+    selectable: false,
+    newScore: null,
+    ...overrides,
   };
 }
 
@@ -105,6 +134,191 @@ describe("workerWorktreePath", () => {
   });
 });
 
+describe("workerWorktreeLockDir", () => {
+  test("serializes git worktree mutations through one epoch-level lock", () => {
+    const first = workerWorktreeLockDir("/project/worktrees/sessions/session-uuid/epochs/0012/workers/claim-1/source");
+    const second = workerWorktreeLockDir("/project/worktrees/sessions/session-uuid/epochs/0012/workers/claim-2/source");
+
+    expect(first).toBe("/project/worktrees/sessions/session-uuid/epochs/0012/workers/.git-worktree-add.lock");
+    expect(second).toBe(first);
+  });
+});
+
+describe("workerToolArtifactSourceRoots", () => {
+  test("uses the active repo then upstream-current as tool artifact sources", () => {
+    expect(
+      workerToolArtifactSourceRoots({
+        repoRoot: "/project/worktrees/sessions/session-uuid/current",
+        project: { projectDir: "/project" },
+      } as never),
+    ).toEqual(["/project/worktrees/sessions/session-uuid/current", "/project/worktrees/upstream-current"]);
+  });
+
+  test("copies mutable build tools and links large shared tool bundles into worker worktrees", async () => {
+    const root = await mkdtemp(join(tmpdir(), "worker-tool-artifacts-"));
+    try {
+      const source = resolve(root, "source");
+      const worker = resolve(root, "worker");
+      const outputDir = resolve(root, "out");
+      mkdirSync(resolve(source, "build/tools"), { recursive: true });
+      mkdirSync(resolve(source, "build/compilers"), { recursive: true });
+      mkdirSync(resolve(source, "build/binutils"), { recursive: true });
+      writeFileSync(resolve(source, "build/tools/sjiswrap.exe"), "tool-v2");
+      writeFileSync(resolve(source, "build/compilers/mwcceppc.exe"), "compiler");
+      writeFileSync(resolve(source, "build/binutils/powerpc-eabi-ld"), "ld");
+
+      mkdirSync(resolve(worker, "build"), { recursive: true });
+      symlinkSync(resolve(source, "build/tools"), resolve(worker, "build/tools"), "dir");
+      mkdirSync(resolve(worker, "build/compilers"), { recursive: true });
+      writeFileSync(resolve(worker, "build/compilers/old-local-copy"), "old");
+
+      await seedWorkerToolArtifacts({
+        workerRepoRoot: worker,
+        outputDir,
+        sources: [
+          { relativePath: "build/tools", sourcePath: resolve(source, "build/tools") },
+          { relativePath: "build/compilers", sourcePath: resolve(source, "build/compilers") },
+          { relativePath: "build/binutils", sourcePath: resolve(source, "build/binutils") },
+        ],
+      });
+
+      expect(lstatSync(resolve(worker, "build/tools")).isSymbolicLink()).toBe(false);
+      expect(readFileSync(resolve(worker, "build/tools/sjiswrap.exe"), "utf8")).toBe("tool-v2");
+      expect(lstatSync(resolve(worker, "build/compilers")).isSymbolicLink()).toBe(true);
+      expect(readFileSync(resolve(worker, "build/compilers/mwcceppc.exe"), "utf8")).toBe("compiler");
+      expect(lstatSync(resolve(worker, "build/binutils")).isSymbolicLink()).toBe(true);
+      expect(readFileSync(resolve(worker, "build/binutils/powerpc-eabi-ld"), "utf8")).toBe("ld");
+      expect(existsSync(resolve(outputDir, "worker_worktree_tool_artifacts.json"))).toBe(true);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  test("refreshes existing mutable build tool directories", async () => {
+    const root = await mkdtemp(join(tmpdir(), "worker-tool-refresh-"));
+    try {
+      const source = resolve(root, "source");
+      const worker = resolve(root, "worker");
+      const outputDir = resolve(root, "out");
+      mkdirSync(resolve(source, "build/tools"), { recursive: true });
+      writeFileSync(resolve(source, "build/tools/wibo"), "wibo");
+      writeFileSync(resolve(source, "build/tools/sjiswrap.exe"), "sjiswrap-v2");
+      mkdirSync(resolve(worker, "build/tools"), { recursive: true });
+      writeFileSync(resolve(worker, "build/tools/sjiswrap.exe"), "sjiswrap-v1");
+
+      await seedWorkerToolArtifacts({
+        workerRepoRoot: worker,
+        outputDir,
+        sources: [{ relativePath: "build/tools", sourcePath: resolve(source, "build/tools") }],
+      });
+
+      expect(readFileSync(resolve(worker, "build/tools/wibo"), "utf8")).toBe("wibo");
+      expect(readFileSync(resolve(worker, "build/tools/sjiswrap.exe"), "utf8")).toBe("sjiswrap-v2");
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  test("passes worker-local seeded tools to configure.py", () => {
+    expect(
+      configureCommandWithWorkerToolPaths("python3 configure.py --require-protos", {
+        binutils: "build/binutils",
+        compilers: "build/compilers",
+        dtk: "build/tools/dtk",
+        objdiff: "build/tools/objdiff-cli",
+        sjiswrap: "build/tools/sjiswrap.exe",
+      }),
+    ).toBe(
+      "python3 configure.py --require-protos --binutils 'build/binutils' --compilers 'build/compilers' --dtk 'build/tools/dtk' --objdiff 'build/tools/objdiff-cli' --sjiswrap 'build/tools/sjiswrap.exe'",
+    );
+  });
+
+  test("does not override explicit configure.py tool paths", () => {
+    expect(
+      configureCommandWithWorkerToolPaths("python3 configure.py --require-protos --compilers /shared/compilers", {
+        compilers: "build/compilers",
+        objdiff: "build/tools/objdiff-cli",
+      }),
+    ).toBe("python3 configure.py --require-protos --compilers /shared/compilers --objdiff 'build/tools/objdiff-cli'");
+  });
+
+  test("prefers worker-local wibo over an absolute wrapper path with spaces", () => {
+    expect(
+      configureCommandWithWorkerToolPaths("python3 configure.py --require-protos --wrapper '/Users/Ford/Github Repos/project/state/tools/wibo'", {
+        wrapper: "build/tools/wibo",
+        objdiff: "build/tools/objdiff-cli",
+      }),
+    ).toBe("python3 configure.py --require-protos --wrapper 'build/tools/wibo' --objdiff 'build/tools/objdiff-cli'");
+  });
+
+  test("detects stale build.ninja tool download edges when local tools are seeded", () => {
+    expect(
+      workerBuildNinjaNeedsToolReconfigure("rule download_tool\n  command = $python tools/download_tool.py $tool $out --tag $tag\nbuild build/compilers: download_tool | tools/download_tool.py\n  tool = compilers", {
+        compilers: "build/compilers",
+      }),
+    ).toBe(true);
+    expect(
+      workerBuildNinjaNeedsToolReconfigure("build build/compilers: phony\n", {
+        compilers: "build/compilers",
+      }),
+    ).toBe(false);
+    expect(
+      workerBuildNinjaNeedsToolReconfigure("command = python3 tools/download_tool.py compilers build/compilers --tag 20251118", {}),
+    ).toBe(false);
+  });
+
+  test("detects stale build.ninja wrapper paths when worker-local wibo is available", () => {
+    expect(
+      workerBuildNinjaNeedsToolReconfigure("configure_args = --require-protos --wrapper /Users/Ford/Github $\\n  Repos/project/state/tools/wibo\\n", {
+        wrapper: "build/tools/wibo",
+      }),
+    ).toBe(true);
+    expect(
+      workerBuildNinjaNeedsToolReconfigure("configure_args = --require-protos --wrapper build/tools/wibo\\n", {
+        wrapper: "build/tools/wibo",
+      }),
+    ).toBe(false);
+  });
+});
+
+describe("worker shell tool environment", () => {
+  test("puts the worker guard and canonical tool directories first on PATH", () => {
+    const env = workerAgentToolEnvironment({ workerRepoRoot: "/project/workers/claim/source", shellBin: "/state/worker/bin" });
+    const pathEntries = env.PATH.split(delimiter);
+
+    expect(pathEntries.slice(0, 3)).toEqual([
+      "/state/worker/bin",
+      "/project/workers/claim/source/build/binutils",
+      "/project/workers/claim/source/build/tools",
+    ]);
+    expect(env.ORCH_WORKER_TOOL_POWERPC_EABI_OBJDUMP).toBe("build/binutils/powerpc-eabi-objdump");
+    expect(env.ORCH_WORKER_TOOL_DTK).toBe("build/tools/dtk");
+    expect(env.ORCH_WORKER_CANONICAL_TOOL_PATHS).toContain("powerpc-eabi-objdump");
+  });
+
+  test("guards broad find sweeps while allowing narrow worker-local find", async () => {
+    const root = await mkdtemp(join(tmpdir(), "worker-find-guard-"));
+    try {
+      const worker = resolve(root, "worker");
+      const outputDir = resolve(root, "out");
+      mkdirSync(resolve(worker, "src"), { recursive: true });
+      const shellBin = await writeWorkerShellGuardBin({ outputDir });
+      const env = workerAgentToolEnvironment({ workerRepoRoot: worker, shellBin });
+
+      const localFind = await runCommand(worker, ["find", ".", "-maxdepth", "1", "-type", "d"], { env });
+      expect(localFind.exitCode).toBe(0);
+      expect(localFind.stdout).toContain(".");
+
+      const broadFind = await runCommand(worker, ["find", root, "-name", "*objdump*"], { env });
+      expect(broadFind.exitCode).toBe(2);
+      expect(broadFind.stderr).toContain("blocked broad worker find sweep");
+      expect(broadFind.stderr).toContain("build/binutils/powerpc-eabi-objdump");
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+});
+
 describe("workerAttemptRepairReasons", () => {
   test("violations append one verbatim qa_lint_finding reason per finding plus the instruction", () => {
     const validation = rejectedValidation(violationsQaLint());
@@ -135,6 +349,182 @@ describe("workerAttemptRepairReasons", () => {
   test("clean qaLint on a passed attempt yields no repair reasons", () => {
     const qaLint: WorkerQaLint = { status: "clean", exitCode: 0, findings: [], scanPath: null, toolError: null };
     expect(workerAttemptRepairReasons({ writeSetDiffChanged: true, runnerValidation: passedValidation(qaLint) })).toEqual([]);
+  });
+});
+
+describe("shouldRequestWorkerRepairAfterAttempt", () => {
+  test("an exact score with QA lint failure still gets a repair attempt", () => {
+    const validation = rejectedValidation(violationsQaLint());
+    const repairReasons = workerAttemptRepairReasons({ writeSetDiffChanged: true, runnerValidation: validation });
+    expect(validation.target?.exact).toBe(true);
+    expect(shouldRequestWorkerRepairAfterAttempt({ repairReasons, dryRun: false, claimDeadlineMs: Date.now() + 60_000 })).toBe(true);
+  });
+
+  test("accepted attempts, expired claim deadlines, and dry-run attempts do not continue", () => {
+    expect(shouldRequestWorkerRepairAfterAttempt({ repairReasons: [], dryRun: false, claimDeadlineMs: Date.now() + 60_000 })).toBe(false);
+    expect(shouldRequestWorkerRepairAfterAttempt({ repairReasons: ["runner validation: failed"], dryRun: false, claimDeadlineMs: Date.now() - 1 })).toBe(false);
+    expect(shouldRequestWorkerRepairAfterAttempt({ repairReasons: ["runner validation: failed"], dryRun: true, claimDeadlineMs: Date.now() + 60_000 })).toBe(false);
+  });
+
+  test("the basic repair gate stays open while the claim deadline is open", () => {
+    expect(
+      shouldRequestWorkerRepairAfterAttempt({
+        repairReasons: ["runner validation: failed"],
+        dryRun: false,
+        claimDeadlineMs: Date.now() + 60_000,
+      }),
+    ).toBe(true);
+  });
+});
+
+describe("workerContinuationDecision", () => {
+  const futureDeadline = Date.now() + 60_000;
+
+  test("stops cold workers after the fifth human attempt when nothing improved", () => {
+    const checkpoints = [0, 1, 2, 3, 4].map((attempt) => continuationCheckpoint(attempt));
+    const decision = workerContinuationDecision({
+      attemptIndex: 4,
+      checkpoints,
+      repairReasons: ["runner checkpoint was not exact"],
+      dryRun: false,
+      claimDeadlineMs: futureDeadline,
+    });
+
+    expect(decision.shouldContinue).toBe(false);
+    expect(decision.exhausted).toBe(true);
+    expect(decision.stopReason).toBe("cold_attempt_budget_exhausted");
+    expect(decision.humanAttempt).toBe(WORKER_ATTEMPT_TAIL_POLICY.maxColdAttempts);
+  });
+
+  test("continues before the cold attempt budget is exhausted", () => {
+    const checkpoints = [0, 1, 2, 3].map((attempt) => continuationCheckpoint(attempt));
+    const decision = workerContinuationDecision({
+      attemptIndex: 3,
+      checkpoints,
+      repairReasons: ["runner checkpoint was not exact"],
+      dryRun: false,
+      claimDeadlineMs: futureDeadline,
+    });
+
+    expect(decision.shouldContinue).toBe(true);
+    expect(decision.continueReason).toBe("cold_attempt_budget_available");
+  });
+
+  test("allows three follow-up checkpoints after an early selectable improvement", () => {
+    const checkpoints = [
+      continuationCheckpoint(0),
+      continuationCheckpoint(1, { hardGatesPassed: true, selectable: true, newScore: 81 }),
+      continuationCheckpoint(2, { hardGatesPassed: true, selectable: true, newScore: 80.5 }),
+      continuationCheckpoint(3, { hardGatesPassed: true, selectable: true, newScore: 80.75 }),
+    ];
+    const decision = workerContinuationDecision({
+      attemptIndex: 3,
+      checkpoints,
+      repairReasons: ["runner checkpoint was not exact"],
+      dryRun: false,
+      claimDeadlineMs: futureDeadline,
+    });
+
+    expect(decision.shouldContinue).toBe(true);
+    expect(decision.continueReason).toBe("post_improvement_followup");
+    expect(decision.followUpsSinceBest).toBe(2);
+  });
+
+  test("stops after three follow-up checkpoints without a new best", () => {
+    const checkpoints = [
+      continuationCheckpoint(0),
+      continuationCheckpoint(1, { hardGatesPassed: true, selectable: true, newScore: 81 }),
+      continuationCheckpoint(2, { hardGatesPassed: true, selectable: true, newScore: 80.5 }),
+      continuationCheckpoint(3, { hardGatesPassed: true, selectable: true, newScore: 80.75 }),
+      continuationCheckpoint(4, { hardGatesPassed: true, selectable: true, newScore: 80.9 }),
+    ];
+    const decision = workerContinuationDecision({
+      attemptIndex: 4,
+      checkpoints,
+      repairReasons: ["runner checkpoint was not exact"],
+      dryRun: false,
+      claimDeadlineMs: futureDeadline,
+    });
+
+    expect(decision.shouldContinue).toBe(false);
+    expect(decision.exhausted).toBe(true);
+    expect(decision.stopReason).toBe("improvement_followup_budget_exhausted");
+    expect(decision.followUpsSinceBest).toBe(3);
+  });
+
+  test("a new best resets the follow-up budget", () => {
+    const checkpoints = [
+      continuationCheckpoint(0),
+      continuationCheckpoint(1, { hardGatesPassed: true, selectable: true, newScore: 81 }),
+      continuationCheckpoint(2, { hardGatesPassed: true, selectable: true, newScore: 82 }),
+      continuationCheckpoint(3, { hardGatesPassed: true, selectable: true, newScore: 81.5 }),
+      continuationCheckpoint(4, { hardGatesPassed: true, selectable: true, newScore: 81.75 }),
+    ];
+    const decision = workerContinuationDecision({
+      attemptIndex: 4,
+      checkpoints,
+      repairReasons: ["runner checkpoint was not exact"],
+      dryRun: false,
+      claimDeadlineMs: futureDeadline,
+    });
+
+    expect(decision.shouldContinue).toBe(true);
+    expect(decision.latestBestAttemptIndex).toBe(2);
+    expect(decision.followUpsSinceBest).toBe(2);
+  });
+
+  test("accepted exact checkpoints stop immediately", () => {
+    const decision = workerContinuationDecision({
+      attemptIndex: 1,
+      checkpoints: [continuationCheckpoint(1, { exactMatch: true, hardGatesPassed: true, selectable: true, newScore: 100 })],
+      repairReasons: ["runner checkpoint was not exact"],
+      dryRun: false,
+      claimDeadlineMs: futureDeadline,
+    });
+
+    expect(decision.shouldContinue).toBe(false);
+    expect(decision.stopReason).toBe("accepted_exact");
+  });
+
+  test("exact score with failed gates gets bounded gate repair after the cold budget", () => {
+    const checkpoints = [
+      continuationCheckpoint(0),
+      continuationCheckpoint(1),
+      continuationCheckpoint(2),
+      continuationCheckpoint(3),
+      continuationCheckpoint(4, { exactMatch: true, hardGatesPassed: false, selectable: false, newScore: 100 }),
+    ];
+    const decision = workerContinuationDecision({
+      attemptIndex: 4,
+      checkpoints,
+      repairReasons: ["runner validation: qa lint failed"],
+      dryRun: false,
+      claimDeadlineMs: futureDeadline,
+    });
+
+    expect(decision.shouldContinue).toBe(true);
+    expect(decision.continueReason).toBe("gate_failed_exact_repair");
+  });
+
+  test("failed-gate exact repair stops after three follow-up attempts", () => {
+    const checkpoints = [
+      continuationCheckpoint(4, { exactMatch: true, hardGatesPassed: false, selectable: false, newScore: 100 }),
+      continuationCheckpoint(5, { exactMatch: true, hardGatesPassed: false, selectable: false, newScore: 100 }),
+      continuationCheckpoint(6, { exactMatch: true, hardGatesPassed: false, selectable: false, newScore: 100 }),
+      continuationCheckpoint(7, { exactMatch: true, hardGatesPassed: false, selectable: false, newScore: 100 }),
+    ];
+    const decision = workerContinuationDecision({
+      attemptIndex: 7,
+      checkpoints,
+      repairReasons: ["runner validation: qa lint failed"],
+      dryRun: false,
+      claimDeadlineMs: futureDeadline,
+    });
+
+    expect(decision.shouldContinue).toBe(false);
+    expect(decision.exhausted).toBe(true);
+    expect(decision.stopReason).toBe("gate_failed_exact_followup_budget_exhausted");
+    expect(decision.followUpsSinceFailedGateExact).toBe(3);
   });
 });
 

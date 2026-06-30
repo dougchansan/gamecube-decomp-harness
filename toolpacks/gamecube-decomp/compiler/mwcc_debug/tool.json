@@ -2,12 +2,12 @@
   "id": "mwcc_debug",
   "title": "MWCC debug lookup",
   "trust_tier": "tool_evidence",
-  "description": "Search cached MWCC/Wine compiler probes and run tool-local mwcc_debug dump/diagnosis tools for specific functions.",
+  "description": "Search cached MWCC runner probes and run tool-local mwcc_debug dump/diagnosis tools for specific functions.",
   "operation_mode": "live_runner_v1",
   "runner_status": "live_smoke_required",
   "status_message": "Live runner v1: MWCC version/build-rule evidence is generated locally by toolpacks/gamecube-decomp/compiler/mwcc_debug/runners/probe_mwcc_compiler.py.",
   "limitations": [
-    "The cached runner smokes the local Wine/MWCC compiler path and build-rule metadata; live dump/diagnose APIs require the instrumented mwcceppc_debug compiler built from toolpacks/gamecube-decomp/_impl/gamecube/mwcc_debug.",
+    "The cached runner smokes the local MWCC runner path and build-rule metadata; live dump/diagnose APIs prefer wibo when provisioned and require the instrumented mwcceppc_debug compiler built from toolpacks/gamecube-decomp/_impl/gamecube/mwcc_debug.",
     "Generated lookup indexes remain supplemental and should be verified against local build, pcdump, diagnose, or objdiff output for a specific target.",
     "Dump and diagnose calls can be slow because they compile the owning translation unit and filter the pcdump for one function."
   ],

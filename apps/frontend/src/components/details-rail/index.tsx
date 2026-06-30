@@ -1,7 +1,6 @@
 import { useEffect, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { ChevronLeft, ChevronRight } from "@/icons";
 
-import { AgentsTab } from "./_components/agents-tab";
 import { OperationLogsTab } from "./_components/logs-tab";
 import { RunTab } from "./_components/run-tab";
 import { TabButton } from "./_components/tab-button";
@@ -24,15 +23,11 @@ export function DetailsRail({
   const [activeTab, setActiveTab] = useState<DetailsTab>(() => {
     try {
       const requested = new URLSearchParams(window.location.search).get("details");
-      return requested === "run" || requested === "agents" || requested === "logs" ? requested : "run";
+      return requested === "run" || requested === "logs" ? requested : "run";
     } catch {
       return "run";
     }
   });
-
-  useEffect(() => {
-    if (activeTab === "agents" && !runDetails && !loadingRunDetails) loadRunDetails();
-  }, [activeTab, loadRunDetails, loadingRunDetails, runDetails]);
 
   useEffect(() => {
     if (tabRequest) setActiveTab(tabRequest.tab);
@@ -78,9 +73,6 @@ export function DetailsRail({
           <TabButton active={activeTab === "run"} onClick={() => setActiveTab("run")}>
             Run
           </TabButton>
-          <TabButton active={activeTab === "agents"} onClick={() => setActiveTab("agents")}>
-            Agents
-          </TabButton>
           <TabButton active={activeTab === "logs"} onClick={() => setActiveTab("logs")}>
             Logs
           </TabButton>
@@ -88,10 +80,8 @@ export function DetailsRail({
         <div className="min-h-0 overflow-auto" role="tabpanel">
           {activeTab === "logs" ? (
             <OperationLogsTab dashboard={dashboard} />
-          ) : activeTab === "run" ? (
-            <RunTab dashboard={dashboard} loadRunDetails={loadRunDetails} loadingRunDetails={loadingRunDetails} runDetails={runDetails} />
           ) : (
-            <AgentsTab loadRunDetails={loadRunDetails} loadingRunDetails={loadingRunDetails} runDetails={runDetails} />
+            <RunTab dashboard={dashboard} loadRunDetails={loadRunDetails} loadingRunDetails={loadingRunDetails} runDetails={runDetails} />
           )}
         </div>
       </div>

@@ -35,7 +35,8 @@ def main() -> None:
         message=(
             "Checkdiff is ready when tool-local helper scripts, project build metadata, "
             "objdiff-cli, sjiswrap, dtk, and an MWCC runner are present. The runner "
-            "may be repo-local wibo, wibo on PATH, MWCC_WIBO, or Wine."
+            "prefers MWCC_WIBO or project-state wibo, then repo-local/PATH wibo, "
+            "with Wine as fallback."
         ),
     )
     payload["compiler_runner"] = runner

@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, symlinkSync } from "node:fs";
-import { copyFile, mkdir, rm, writeFile } from "node:fs/promises";
-import { isAbsolute, relative, resolve } from "node:path";
+import { chmod, copyFile, mkdir, rm, writeFile } from "node:fs/promises";
+import { dirname, isAbsolute, relative, resolve } from "node:path";
 import { closenessScore } from "../board/candidates.js";
 import { readRegressionReport, type RegressionReport, type ReportEntry } from "@server/core/validation/objdiff/report.js";
 import { runQaScanDiff, type QaScanFinding } from "@server/core/validation/qa/scan-diff.js";
@@ -206,6 +206,29 @@ async function runConfigure(worktreeDir: string, command: string): Promise<void>
   }
 }
 
+async function seedEpochWibo(worktreeDir: string, stateDir: string): Promise<boolean> {
+  if (process.platform !== "darwin" && process.platform !== "linux") return false;
+  const source = resolve(stateDir, "tools", "wibo");
+  if (!existsSync(source)) return false;
+  const destination = resolve(worktreeDir, "build", "tools", "wibo");
+  await mkdir(dirname(destination), { recursive: true });
+  await copyFile(source, destination);
+  await chmod(destination, 0o755).catch(() => {});
+  return true;
+}
+
+function shellQuote(value: string): string {
+  return `'${value.replace(/'/g, "'\\''")}'`;
+}
+
+function configureCommandWithLocalWrapper(command: string, wrapperPath: string): string {
+  if (!/\bconfigure\.py\b/.test(command)) return command;
+  const pattern = /(^|\s)--wrapper(?:\s+|=)(?:"[^"]*"|'[^']*'|\S+)/;
+  const replacement = `--wrapper ${shellQuote(wrapperPath)}`;
+  if (pattern.test(command)) return command.replace(pattern, (_match, prefix: string) => `${prefix}${replacement}`);
+  return `${command} ${replacement}`;
+}
+
 function readJsonObject(path: string): Record<string, unknown> {
   const parsed = JSON.parse(readFileSync(path, "utf8")) as unknown;
   return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? (parsed as Record<string, unknown>) : {};
@@ -384,7 +407,11 @@ async function runEpochCycleInner(store: StateStore, runId: string, repoRoot: st
     commitSha: snapshot.commitSha,
     linkPaths: options.linkPaths ?? ["orig"],
   });
-  await runConfigure(options.worktreeDir, options.configureCommand ?? "python3 configure.py --require-protos");
+  const hasLocalWibo = await seedEpochWibo(options.worktreeDir, stateDir);
+  const configureCommand = hasLocalWibo
+    ? configureCommandWithLocalWrapper(options.configureCommand ?? "python3 configure.py --require-protos", "build/tools/wibo")
+    : (options.configureCommand ?? "python3 configure.py --require-protos");
+  await runConfigure(options.worktreeDir, configureCommand);
 
   const worktreeBaselinePath = resolve(options.worktreeDir, baselineRelPath);
   const buildResult = await forceReportRun(options.worktreeDir, { resetBaseline: !existsSync(worktreeBaselinePath) });

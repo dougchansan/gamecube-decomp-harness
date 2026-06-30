@@ -134,6 +134,11 @@ function projectToolsConfig(paths: ProjectRuntimePaths): ProjectToolConfig {
   };
 }
 
+function projectWiboPath(stateDir: string): string | null {
+  const path = resolve(stateDir, "tools", "wibo");
+  return existsSync(path) ? path : null;
+}
+
 function normalizeToolEntry(entry: string | ToolpackToolEntry): ToolpackToolEntry {
   if (typeof entry === "string") return { id: entry, path: entry };
   return { ...entry, path: entry.path ?? entry.id };
@@ -273,6 +278,8 @@ export function resolveRegisteredTool(context: ToolRuntimeContext, toolId: strin
     ORCH_TOOL_BINDING_PATH: bindingPath,
     ORCH_TOOL_IMPL_ROOT: resolve(packRoot, "_impl/gamecube"),
   };
+  const wibo = projectWiboPath(paths.stateDir);
+  if (wibo) env.MWCC_WIBO = wibo;
   for (const [key, value] of Object.entries(binding.env ?? {})) {
     env[key] = replaceTokens(value, tokens);
   }

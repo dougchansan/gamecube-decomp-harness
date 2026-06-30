@@ -110,7 +110,7 @@ describe("epoch size parsing", () => {
 });
 
 describe("epoch admission selection", () => {
-  test("allows multiple targets from the same source file in one epoch", () => {
+  test("round-robins targets by source file while admitting duplicates", () => {
     const selected = selectEpochAdmissionCandidates({
       candidates: [
         candidate(1, "src/a.c", 500),
@@ -121,7 +121,7 @@ describe("epoch admission selection", () => {
       size: { mode: "fixed", value: 3 },
     });
 
-    expect(selected.selected.map((entry) => entry.symbol)).toEqual(["fn_1", "fn_2", "fn_3"]);
+    expect(selected.selected.map((entry) => entry.symbol)).toEqual(["fn_1", "fn_3", "fn_4"]);
     expect(selected.skippedExisting).toBe(0);
   });
 
@@ -148,7 +148,7 @@ describe("epoch admission selection", () => {
       candidates: [candidate(1, "src/a.c"), candidate(2, "src/a.c"), candidate(3, "src/b.c")],
       size: { mode: "full", value: null },
     });
-    expect(full.selected.map((entry) => entry.symbol)).toEqual(["fn_1", "fn_2", "fn_3"]);
+    expect(full.selected.map((entry) => entry.symbol)).toEqual(["fn_1", "fn_3", "fn_2"]);
 
     const empty = selectEpochAdmissionCandidates({ candidates: [], size: { mode: "full", value: null } });
     expect(empty.selected).toEqual([]);
@@ -182,6 +182,82 @@ describe("scheduler epoch and worker state lifecycle", () => {
     }
   });
 
+  test("board admission skips target keys already finished in previous epochs", () => {
+    const { store } = tempState();
+    try {
+      const { run, epoch } = setupEpoch(store, [candidate(1, "src/a.c")], 1);
+      const claim = claimNextEpochTarget({ store, sessionId: run.id, workerId: "worker-1", baseRev: "base" });
+      expect(claim).not.toBeNull();
+      closeWorkerState(store, {
+        workerStateId: claim?.workerStateId ?? "",
+        lifecycleStatus: "finished",
+        summary: { source: "test" },
+      });
+      closeSchedulerEpoch(store, epoch.id, { status: "completed" });
+
+      const nextEpoch = startSchedulerEpoch(store, run.id, {
+        size: { mode: "fixed", value: 2 },
+        workerPoolSize: 2,
+        candidateWindow: 2,
+      });
+      const admission = admitEpochTargets(store, {
+        epochId: nextEpoch.id,
+        runId: run.id,
+        candidates: [candidate(1, "src/a.c"), candidate(2, "src/b.c")],
+        size: { mode: "fixed", value: 2 },
+        workerPoolSize: 2,
+      });
+
+      expect(admission).toMatchObject({ admitted: 1, skippedExisting: 1 });
+      const rows = store.db.query("SELECT target_key FROM epoch_targets WHERE epoch_id = ?").all(nextEpoch.id) as Record<string, unknown>[];
+      expect(rows.map((row) => row.target_key)).toEqual(["unit_2::fn_2"]);
+    } finally {
+      store.db.close();
+    }
+  });
+
+  test("repair admission can intentionally requeue a previously finished target once per epoch", () => {
+    const { store } = tempState();
+    try {
+      const { run, epoch } = setupEpoch(store, [candidate(1, "src/a.c")], 1);
+      const claim = claimNextEpochTarget({ store, sessionId: run.id, workerId: "worker-1", baseRev: "base" });
+      expect(claim).not.toBeNull();
+      closeWorkerState(store, {
+        workerStateId: claim?.workerStateId ?? "",
+        lifecycleStatus: "finished",
+        summary: { source: "test" },
+      });
+      closeSchedulerEpoch(store, epoch.id, { status: "completed" });
+
+      const nextEpoch = startSchedulerEpoch(store, run.id, {
+        size: { mode: "fixed", value: 1 },
+        workerPoolSize: 1,
+        candidateWindow: 1,
+      });
+      const admission = admitEpochTargets(store, {
+        epochId: nextEpoch.id,
+        runId: run.id,
+        candidates: [candidate(1, "src/a.c")],
+        size: { mode: "fixed", value: 1 },
+        workerPoolSize: 1,
+        allowPreviouslyFinished: true,
+      });
+      const duplicateAdmission = admitEpochTargets(store, {
+        epochId: nextEpoch.id,
+        runId: run.id,
+        candidates: [candidate(1, "src/a.c")],
+        size: { mode: "fixed", value: 1 },
+        workerPoolSize: 1,
+        allowPreviouslyFinished: true,
+      });
+
+      expect(admission).toMatchObject({ admitted: 1, skippedExisting: 0 });
+      expect(duplicateAdmission).toMatchObject({ admitted: 0, skippedExisting: 1 });
+    } finally {
+      store.db.close();
+    }
+  });
+
   test("does not file-lock same-source targets across separate claims", () => {
     const { store } = tempState();
     try {
@@ -196,6 +272,103 @@ describe("scheduler epoch and worker state lifecycle", () => {
       expect(second?.writeSet).toEqual(["src/shared.c"]);
       expect(activeClaimsForSession(store, run.id)).toHaveLength(2);
       expect(schedulerEpochProgress(store, epoch.id)).toMatchObject({ available: 0, claimed: 2, finished: 0 });
+    } finally {
+      store.db.close();
+    }
+  });
+
+  test("claim selection prefers source files with fewer active claims", () => {
+    const { store } = tempState();
+    try {
+      const { run } = setupEpoch(
+        store,
+        [candidate(1, "src/a.c", 500), candidate(2, "src/a.c", 499), candidate(3, "src/b.c", 300)],
+        3,
+      );
+
+      const first = claimNextEpochTarget({ store, sessionId: run.id, workerId: "worker-1", baseRev: "base" });
+      const second = claimNextEpochTarget({ store, sessionId: run.id, workerId: "worker-2", baseRev: "base" });
+
+      expect(first?.target.source_path).toBe("src/a.c");
+      expect(second?.target.source_path).toBe("src/b.c");
+      expect(activeClaimsForSession(store, run.id)).toHaveLength(2);
+    } finally {
+      store.db.close();
+    }
+  });
+
+  test("can requeue a setup-failed target after closing the claim", () => {
+    const { store } = tempState();
+    try {
+      const { run, epoch } = setupEpoch(store, [candidate(1, "src/a.c")], 1);
+      const first = claimNextEpochTarget({ store, sessionId: run.id, workerId: "worker-1", baseRev: "base" });
+      expect(first).not.toBeNull();
+
+      closeWorkerState(store, {
+        workerStateId: first?.workerStateId ?? "",
+        lifecycleStatus: "error",
+        epochTargetStatus: "admitted",
+        errorSummary: "setup failed before worker session",
+        summary: { source: "test" },
+      });
+
+      expect(activeClaimsForSession(store, run.id)).toHaveLength(0);
+      expect(schedulerEpochProgress(store, epoch.id)).toMatchObject({ available: 1, claimed: 0, finished: 0, remaining: 1 });
+
+      const second = claimNextEpochTarget({ store, sessionId: run.id, workerId: "worker-2", baseRev: "base" });
+      expect(second).not.toBeNull();
+      expect(second?.epochTargetId).toBe(first?.epochTargetId);
+      expect(second?.claimId).toBe(first?.claimId);
+      expect(second?.workerStateId).toBe(first?.workerStateId);
+      expect(count(store, "SELECT COUNT(*) AS count FROM target_claims WHERE epoch_target_id = ?", first?.epochTargetId ?? "")).toBe(1);
+      expect(activeClaimsForSession(store, run.id)[0]?.workerId).toBe("worker-2");
+      const row = store.db.query("SELECT lifecycle_status, worker_id, ended_at FROM worker_state WHERE id = ?").get(first?.workerStateId ?? "") as
+        | Record<string, unknown>
+        | undefined;
+      expect(row?.lifecycle_status).toBe("running");
+      expect(row?.worker_id).toBe("worker-2");
+      expect(row?.ended_at).toBeNull();
+    } finally {
+      store.db.close();
+    }
+  });
+
+  test("requeued target with prior nonselectable evidence can be claimed again", () => {
+    const { store } = tempState();
+    try {
+      const { run, epoch } = setupEpoch(store, [candidate(1, "src/a.c")], 1);
+      const first = claimNextEpochTarget({ store, sessionId: run.id, workerId: "worker-1", baseRev: "base" });
+      expect(first).not.toBeNull();
+      recordWorkerCheckpoint(store, {
+        workerStateId: first?.workerStateId ?? "",
+        sessionId: run.id,
+        epochId: first?.epochId ?? "",
+        epochTargetId: first?.epochTargetId ?? "",
+        targetClaimId: first?.claimId ?? "",
+        attemptIndex: 0,
+        oldScore: 98.99,
+        newScore: 99.1,
+        exactMatch: false,
+        hardGatesPassed: false,
+        validationStatus: "failed",
+      });
+
+      closeWorkerState(store, {
+        workerStateId: first?.workerStateId ?? "",
+        lifecycleStatus: "error",
+        epochTargetStatus: "admitted",
+        errorSummary: "interrupted after validation evidence",
+        summary: { source: "test" },
+      });
+
+      expect(schedulerEpochProgress(store, epoch.id)).toMatchObject({ available: 1, claimed: 0, finished: 0, remaining: 1 });
+      const second = claimNextEpochTarget({ store, sessionId: run.id, workerId: "worker-2", baseRev: "base" });
+      expect(second).not.toBeNull();
+      expect(second?.epochTargetId).toBe(first?.epochTargetId);
+      expect(second?.claimId).toBe(first?.claimId);
+      expect(second?.workerStateId).toBe(first?.workerStateId);
+      expect(count(store, "SELECT COUNT(*) AS count FROM target_claims WHERE epoch_target_id = ?", first?.epochTargetId ?? "")).toBe(1);
+      expect(count(store, "SELECT COUNT(*) AS count FROM worker_checkpoints WHERE worker_state_id = ?", first?.workerStateId ?? "")).toBe(0);
     } finally {
       store.db.close();
     }

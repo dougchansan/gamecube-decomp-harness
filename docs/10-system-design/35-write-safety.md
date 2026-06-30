@@ -1,6 +1,6 @@
 ---
 covers: Target-claim write sets, worker workspaces, integration validation, and shared artifact safety
-concepts: [write-safety, target-claims, write-sets, workspaces, validation, integration]
+concepts: [write-safety, target-claims, write-sets, workspaces, validation, integration, tool-slots]
 ---
 
 # Write Safety
@@ -100,6 +100,25 @@ identity. The runner owns queue mutation, final acceptance, and epoch truth; the
 integration resolver only edits inside the supplied conflict group and returns
 worker-output dispositions.
 
+## Build And Tool Slot Rule
+
+Worker worktrees isolate source and build outputs, but the host still has a
+finite amount of CPU, disk, and MWCC runner capacity. The runner therefore uses
+slot pools for expensive local operations instead of letting every active
+worker invoke them at once.
+
+Runner-owned Ninja validation acquires an epoch-scoped worker Ninja slot before
+running `ninja` in a worker worktree. Toolpack API calls such as `checkdiff`,
+direct compile, source permutation, `m2c_decomp`, and `mwcc_debug` acquire a
+tool-specific slot before launching their helper command. Slot directories live
+beside the epoch worker worktrees, include an `owner.json` with the owning PID,
+and are pruned when stale.
+
+These pools do not weaken write isolation: each command still runs against the
+claim's own worktree and write set. They only cap concurrent compiler/tool
+pressure so a large worker pool keeps making progress without turning every
+validation boundary into a machine-wide stampede.
+
 ## Risk Rules
 
 | Risk | Rule |
@@ -107,7 +126,7 @@ worker-output dispositions.
 | Two workers edit the same file | Allow concurrent isolated workspaces; integrate only selected checkpoints through explicit write sets. |
 | Header/data owner edits | Start with explicit write sets and widen to dependent files or target groups when evidence shows invalidation risk. |
 | Stale patch base | Score integration checks `base_rev`; stale patches are rebased, revalidated, or rejected. |
-| Shared build output contention | Serialize build/report generation in v1 with one global validation path. |
+| Shared build/tool pressure | Use worker-local worktrees plus epoch-scoped Ninja and tool slot pools; tune pool sizes before raising the worker count. |
 | Shared CSV/artifact races | Workers write shards; reducers own shared summaries, charts, and merged artifacts. |
 | Bad integration | Run patch apply checks, narrow objdiff, neighbor/unit checks when needed, then update the baseline only after validation. |
 

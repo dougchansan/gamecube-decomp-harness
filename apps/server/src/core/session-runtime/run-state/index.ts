@@ -33,6 +33,8 @@ export {
   DEFAULT_WORKER_TTL_SECONDS,
   recordWorkerCheckpoint,
   setClaimWorktreePath,
+  workerCheckpointsForWorkerState,
+  workerStateHasExecutionEvidence,
   type ActiveClaimRecord,
   type ClaimedTarget,
   type WorkerCheckpointInput,

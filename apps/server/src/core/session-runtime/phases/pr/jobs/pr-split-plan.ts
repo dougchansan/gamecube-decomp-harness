@@ -1218,7 +1218,7 @@ export async function prSplitPlan(globals: GlobalArgs, args: Map<string, string 
 
   const branchPrefix = stringArg(args, "--branch-prefix", globals.project?.pr.branchPrefix ?? "pr-split");
   const titlePrefix = stringArg(args, "--title-prefix", globals.project?.pr.titlePrefix ?? "Melee decomp");
-  const sliceCheckCommand = stringArg(args, "--slice-check-command", "python configure.py --require-protos && ninja changes_all");
+  const sliceCheckCommand = stringArg(args, "--slice-check-command", "python3 configure.py --require-protos --wrapper build/tools/wibo && ninja changes_all");
   const includeBranchDiff = !booleanArg(args, "--worktree-only");
   const includeWorktree = !booleanArg(args, "--committed-only");
   const includeUntracked = !booleanArg(args, "--no-untracked");

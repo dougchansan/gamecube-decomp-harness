@@ -1,10 +1,10 @@
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
 import { ChevronDown, ChevronLeft, ChevronRight, RefreshCw } from "@/icons";
 
 import { Button } from "@/components/primitives";
-import { asArray, asObject, ago, clock, delta, num, shortId, text, type JsonObject } from "@/lib/format";
+import { asArray, asObject, ago, delta, num, shortId, text, type JsonObject } from "@/lib/format";
 
-import type { RunTabProps } from "../_lib/types";
+import type { RunTabProps } from "../../_lib/types";
 import {
   attemptNumber,
   attemptScoreText,
@@ -21,84 +21,54 @@ import {
   reportResult,
   reportScoreDelta,
   reportStopReason,
-  reportTotalCounts,
   reportWindowText,
   reportsPageSize,
   runnerAttemptBuildLabel,
   runnerAttemptScoreText,
   statusText,
   stopReasonLabel,
-  traceEventLabel,
-  traceEventTone,
-  traceScoreText,
   workerStateStatusLabel,
   type WorkerStateFilter,
-} from "../_lib/worker-reports";
+} from "../../_lib/worker-reports";
+import { MetaItem, TraceSection } from "./shared";
 
-function MetaItem({ label, value, valueClassName = "" }: { label: string; value: ReactNode; valueClassName?: string }) {
-  return (
-    <div className="min-w-0">
-      <span className="mr-1 text-faint">{label}</span>
-      <span className={`break-words text-soft ${valueClassName}`}>{value}</span>
-    </div>
-  );
-}
+type CompletedWorkerStatesProps = Pick<RunTabProps, "loadRunDetails" | "loadingRunDetails"> & {
+  loadedAll: boolean;
+  workerStates: JsonObject[];
+};
 
-function TraceSection({ report, loadedAll }: { report: JsonObject; loadedAll: boolean }) {
-  const activity = asObject(report.activity);
-  const events = asArray(activity.recentEvents).map(asObject);
-  if (events.length === 0) {
-    if (loadedAll) return null;
-    return <div className="mt-2 border-t border-line pt-2 text-[11px] text-faint">Load all worker states to see the runner trace for this claim.</div>;
-  }
-  return (
-    <div className="mt-2 border-t border-line pt-2">
-      <div className="mb-1 flex items-baseline justify-between gap-2">
-        <span className="text-[11px] font-bold uppercase text-dim" title="Runner-owned claim timeline from activity.jsonl: attempts, gate decisions, validation results, repairs.">
-          Trace
-        </span>
-        <span className="text-[10px] text-faint">{text(activity.source) === "return_gates" ? "from return gates" : `${events.length} events`}</span>
-      </div>
-      <div className="grid gap-1 border-l-2 border-line pl-2.5">
-        {events.map((event, index) => {
-          const scoreText = traceScoreText(event);
-          return (
-            <div className="grid grid-cols-[52px_minmax(0,1fr)] gap-2 text-xs leading-5" key={`${text(event.createdAt)}-${index}`}>
-              <span className="whitespace-nowrap pt-px text-[10px] text-faint" title={text(event.createdAt)}>{clock(event.createdAt)}</span>
-              <span className="min-w-0">
-                <span className={`mr-1.5 font-semibold ${traceEventTone(text(event.eventType))}`}>{traceEventLabel(event)}</span>
-                <span className="[overflow-wrap:anywhere] text-soft">{text(event.summary)}</span>
-                {scoreText ? <span className="ml-1.5 whitespace-nowrap text-dim">{scoreText}</span> : null}
-              </span>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-export function WorkerStates({
-  dashboard,
+export function CompletedWorkerStates({
+  loadedAll,
   loadRunDetails,
   loadingRunDetails,
-  runDetails,
-}: RunTabProps) {
+  workerStates,
+}: CompletedWorkerStatesProps) {
   const [filter, setFilter] = useState<WorkerStateFilter>("all");
   const [page, setPage] = useState(0);
   const [expandedWorkerStateId, setExpandedWorkerStateId] = useState<string | null>(null);
-  const recentWorkerStates = (dashboard?.workerStates || []).map(asObject);
-  const fullWorkerStates = asArray(runDetails?.workerStates).map(asObject);
-  const workerStates = fullWorkerStates.length > 0 ? fullWorkerStates : recentWorkerStates;
   const loadedCounts = reportCountsForReports(workerStates);
-  const totalCounts = reportTotalCounts(dashboard, loadedCounts);
+  const totalCounts = loadedCounts;
   const filteredWorkerStates = workerStates.filter((workerState) => reportMatchesFilter(workerState, filter));
   const pages = Math.max(1, Math.ceil(filteredWorkerStates.length / reportsPageSize));
   const safePage = Math.min(page, pages - 1);
   const visibleWorkerStates = filteredWorkerStates.slice(safePage * reportsPageSize, safePage * reportsPageSize + reportsPageSize);
-  const loadedAll = fullWorkerStates.length > 0;
 
-  if (workerStates.length === 0) return <div className="text-dim">No worker states yet</div>;
+  if (workerStates.length === 0) {
+    return (
+      <div className="grid gap-2">
+        {!loadedAll ? (
+          <div className="flex justify-end">
+            <Button className="min-h-6 px-2 py-0.5" icon={<RefreshCw size={13} />} onClick={loadRunDetails} type="button">
+              {loadingRunDetails ? "Loading" : "Load All"}
+            </Button>
+          </div>
+        ) : null}
+        <div className="border border-dashed border-line2 bg-card p-3 text-sm text-dim">
+          {loadedAll ? "No completed worker states for this epoch." : "No loaded completed worker states for this epoch yet."}
+        </div>
+      </div>
+    );
+  }
 
   function selectFilter(nextFilter: WorkerStateFilter) {
     setFilter(nextFilter);
@@ -125,9 +95,7 @@ export function WorkerStates({
         <div className="flex flex-wrap gap-1.5" role="tablist" aria-label="Worker state filters">
           {reportFilters.map((option) => {
             const active = filter === option.id;
-            const loadedCount = loadedCounts[option.id];
             const count = totalCounts[option.id];
-            const title = loadedCount === count ? option.description : `${option.description} Showing ${num(loadedCount)} of ${num(count)} loaded rows.`;
             return (
               <button
                 aria-selected={active}
@@ -137,7 +105,6 @@ export function WorkerStates({
                 key={option.id}
                 onClick={() => selectFilter(option.id)}
                 role="tab"
-                title={title}
                 type="button"
               >
                 {option.label} <span className="text-faint">{count}</span>
@@ -234,7 +201,7 @@ export function WorkerStates({
                   </div>
                   {neededFact ? <div className="mt-2 rounded-none border border-warn/40 bg-warn/5 p-2 text-xs leading-5 text-warn">needed fact: {neededFact}</div> : null}
                   {nextRecommendation ? <div className="mt-2 rounded-none border border-line bg-inset p-2 text-xs leading-5 text-soft">next: {nextRecommendation}</div> : null}
-                  <TraceSection loadedAll={loadedAll} report={report} />
+                  <TraceSection activity={asObject(report.activity)} emptyText="Load all worker states to see the runner trace for this claim." showEmpty={!loadedAll} />
                   {runnerAttempts.length > 0 ? (
                     <div className="mt-2 border-t border-line pt-2">
                       <div className="mb-1 text-[11px] font-bold uppercase text-dim" title="Deterministic build + score evidence recorded by the runner for each validation attempt.">

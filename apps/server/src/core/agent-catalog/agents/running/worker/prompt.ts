@@ -97,7 +97,13 @@ export const prompt = definePrompt({
         item("Prefer local evidence over generated or external hints:", [
           bulletList(["Source", "Headers", "Symbols and splits", "Assembly", "Objdiff", "Regression output"]),
         ]),
-        "Validate retained edits with narrow build/objdiff/checkdiff/review evidence.",
+	        "Validate retained edits with narrow build/objdiff/checkdiff/review evidence.",
+	        "Use `checkdiff_run` or `checkdiff_summary` for function diff evidence; do not run raw `tools/asm-differ/diff.py` from shell.",
+	        "Use the injected `canonical_tool_paths` block for objdump, dtk, objdiff-cli, sjiswrap, wibo, binutils, and compilers; do not search the filesystem for these tools.",
+	        "Do not run broad filesystem `find` sweeps such as `find /`, `find /Users`, `find /opt`, `find /Applications`, or upward `find ../../..`; use narrow searches inside the worker checkout only.",
+	        "`m2c_decompile` is a live scaffold generator, not a changing fact lookup. Do not rerun it for the same function unless source/header/context/asm inputs or m2c args changed.",
+	        "`source_permuter_run` is expensive and opportunistic. Use it only as a last resort after local source review, solved references, mismatch lookup, mutation preview, and checkdiff evidence fail to produce a concrete next move.",
+	        "If `source_permuter_run` returns `queue_busy`, do not retry or wait on it; continue with cheaper analysis, validation, or a checkpoint note.",
         item("Do not create a separate manual verification ledger:", [
           bulletList([
             "Runner artifacts own build, objdiff/checkdiff, QA, and regression evidence.",
@@ -173,7 +179,7 @@ export const prompt = definePrompt({
         bulletList([
           "After the reference pass yields competing hypotheses or stalls, use targeted analysis tools.",
           "Only go deeper for concrete questions that choose between hypotheses or explain a mismatch.",
-          "When a target is near exact, use source mutation previews, permutation evidence, and mismatch-specific probes to push toward 100%.",
+          "When a target is near exact, use mismatch-specific probes and source mutation previews first; use source-permuter evidence only when the remaining source-shape search is too tedious to do manually.",
           item("Examples:", [
             bulletList([
               "Ghidra context",

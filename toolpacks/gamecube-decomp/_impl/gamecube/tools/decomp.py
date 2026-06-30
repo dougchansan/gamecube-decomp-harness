@@ -27,6 +27,7 @@ and degrade gracefully if absent.
 import argparse
 import os
 import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -232,19 +233,23 @@ def main() -> None:
                 print("Failed to import pyperclip; could not copy", file=stderr)
 
         if cast(bool, args.format):
-            proc = subprocess.Popen(
-                ["clang-format", "-"],
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-            )
-            out, err = proc.communicate(output.encode())
+            if shutil.which("clang-format") is None:
+                print("clang-format not found; leaving m2c output unformatted", file=stderr)
+            else:
+                proc = subprocess.Popen(
+                    ["clang-format", "-"],
+                    stdin=subprocess.PIPE,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                )
+                out, err = proc.communicate(output.encode())
 
-            output = out.decode()
+                output = out.decode()
 
-            if proc.returncode != 0:
-                print(output, file=sys.stderr)
-                print(err.decode(), file=sys.stderr)
-                exit(1)
+                if proc.returncode != 0:
+                    print(output, file=sys.stderr)
+                    print(err.decode(), file=sys.stderr)
+                    exit(1)
 
         if cast(bool, args.print):
             colorized = output

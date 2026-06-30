@@ -44,7 +44,7 @@ export function schedulingForWorkers(
   };
 }
 
-export const workerCountOptions = [1, 2, 4, 8, 16, 32] as const;
+export const workerCountOptions = [1, 2, 4, 8, 16, 32, 64] as const;
 
 export const epochSizeOptions = [4, 8, 16, 32, 64, 128, 256, 512, 1024] as const;
 

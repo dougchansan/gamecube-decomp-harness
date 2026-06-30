@@ -191,38 +191,16 @@
     background: rgba(255, 255, 255, 0.015);
   }
 
-  /* Fixed-rhythm work tables: the matches table runs on a 32px baseline and
-     the work-status table on 64px units (44px main + 20px activity row, or one
-     64px queue row), so 2 match rows always line up with 1 work entry and the
-     containers keep a constant height as rows page in and out. Row heights are
-     exact: cell content is single-block nowrap/hidden, so rows cannot grow. */
+  /* Fixed-rhythm work tables: matches and active runners use 32px rows, while
+     epoch queue rows use 64px rows for their secondary priority/status line.
+     Cell content is nowrap/hidden so rows cannot grow. */
   .row-rhythm-1 td {
     height: 32px;
     vertical-align: middle;
   }
 
-  .row-rhythm-main td {
-    height: 44px;
-    padding-bottom: 0;
-    line-height: 1.25;
-    /* The main row and its activity sub-row read as one entry: no divider
-       inside the pair, a stronger divider between entries. */
-    border-bottom: none;
-  }
-
-  .row-rhythm-main td span {
-    line-height: 1.25;
-  }
-
-  .row-rhythm-sub td {
-    height: 20px;
-    padding-top: 0;
-    line-height: 14px;
-    border-bottom: 1px solid var(--color-line2);
-  }
-
-  /* Per-entry tint instead of the default per-row zebra, so a symbol row and
-     its status row always share a background. */
+  /* Per-entry tint instead of the default per-row zebra, controlled from the
+     active row index so pagination keeps a stable stripe rhythm. */
   .active-table tbody tr:nth-child(even) td {
     background: transparent;
   }
@@ -645,6 +623,55 @@
   .style-range::-moz-range-thumb {
     width: 10px;
     height: 18px;
+    border: 1px solid var(--color-fg);
+    border-radius: 0;
+    background: var(--color-fg);
+    box-shadow: 0 0 0 2px var(--color-ink);
+  }
+
+  .epoch-range {
+    min-height: 28px;
+    padding: 0;
+    appearance: none;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .epoch-range:focus-visible {
+    outline: none;
+  }
+
+  .epoch-range::-webkit-slider-runnable-track {
+    height: 16px;
+    border: 0;
+    background: transparent;
+  }
+
+  .epoch-range::-webkit-slider-thumb {
+    width: 8px;
+    height: 16px;
+    margin-top: 0;
+    -webkit-appearance: none;
+    appearance: none;
+    border: 1px solid var(--color-fg);
+    background: var(--color-fg);
+    box-shadow: 0 0 0 2px var(--color-ink);
+  }
+
+  .epoch-range:focus-visible::-webkit-slider-thumb {
+    box-shadow: 0 0 0 2px var(--color-ink), 0 0 0 4px rgba(94, 193, 247, 0.28);
+  }
+
+  .epoch-range::-moz-range-track {
+    height: 16px;
+    border: 0;
+    background: transparent;
+  }
+
+  .epoch-range::-moz-range-thumb {
+    width: 8px;
+    height: 16px;
     border: 1px solid var(--color-fg);
     border-radius: 0;
     background: var(--color-fg);

@@ -1,6 +1,6 @@
 import type { AppRoute } from "@/routing";
 import type { Dashboard, FormState } from "@/lib/format";
-import type { ImprovedMode, WorkMode } from "@/components/work-tables";
+import type { ImprovedMode, WorkMode } from "@/pages/workspace/sessions/active/subphases/run/components/work-tables";
 import type { DashboardAction, SessionView, WorkspaceNav } from "@/pages/workspace/_lib/types";
 
 export interface SessionsPageProps {
@@ -19,7 +19,6 @@ export interface SessionsPageProps {
   setImprovedMode: (mode: ImprovedMode) => void;
   setImprovedPage: (page: number | ((page: number) => number)) => void;
   setWorkMode: (mode: WorkMode) => void;
-  streamState: string;
   view: SessionView;
   workMode: WorkMode;
 }

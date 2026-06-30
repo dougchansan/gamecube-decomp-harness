@@ -12,7 +12,7 @@ export const reportFilters: Array<{ description: string; id: WorkerStateFilter; 
   { id: "exact", label: "Exact", description: "Worker states whose runner-selected checkpoint reached exact match." },
   { id: "improved", label: "Improved", description: "Worker states with runner-validated positive score movement." },
   { id: "no_progress", label: "No Progress", description: "Worker states with no runner-validated positive score movement." },
-  { id: "validation_failed", label: "Validation Failed", description: "Worker states whose latest validation failed hard gates or exhausted runner repair." },
+  { id: "validation_failed", label: "Validation Failed", description: "Worker states whose latest validation failed hard gates." },
   { id: "tool_error", label: "Tool Error", description: "A tool, command, build, or parse infrastructure failure blocked trustworthy worker evaluation." },
   { id: "provider_error", label: "Provider Error", description: "The LLM provider failed before the target was really attempted; worker spawns paused until a probe succeeded." },
 ];
@@ -76,10 +76,11 @@ function reportFailed(report: JsonObject): boolean {
   const validation = asObject(report.runnerValidation);
   const repairAttempts = asObject(report.repairAttempts);
   const validationStatus = text(validation.status);
+  const exhaustedFiniteRepairBudget = repairAttempts.exhausted === true && text(repairAttempts.policy) !== "unbounded_until_claim_timeout";
   return (
     gate.accepted === false ||
     (validationStatus !== "" && validationStatus !== "passed" && validationStatus !== "skipped") ||
-    repairAttempts.exhausted === true
+    exhaustedFiniteRepairBudget
   );
 }
 
@@ -203,7 +204,7 @@ export function reportOutcomeDescription(report: JsonObject): string {
   if (outcome === "exact") return "Exact: the runner-selected checkpoint reached 100%.";
   if (outcome === "improved") return "Improved: runner validation recorded positive percent score movement.";
   if (outcome === "no_progress") return "No Progress: runner validation did not record positive percent score movement.";
-  if (outcome === "validation_failed") return "Validation Failed: runner hard gates failed or validation repair was exhausted.";
+  if (outcome === "validation_failed") return "Validation Failed: runner hard gates failed.";
   if (outcome === "tool_error") return "Tool Error: a tool, command, build, or parse infrastructure failure blocked trustworthy worker evaluation.";
   if (outcome === "provider_error") return "Provider Error: the LLM provider failed before the target was really attempted; worker spawns paused until a provider probe succeeded.";
   return "Worker state outcome is unknown.";

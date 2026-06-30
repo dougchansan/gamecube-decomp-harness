@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, statSync, symlinkSync, writeFileSync } from "node:fs";
+import { chmodSync, copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, statSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, resolve } from "node:path";
 import type { RegressionReport } from "@server/core/validation/objdiff/report";
@@ -97,6 +97,40 @@ function linkMissingFiles(sourceDir: string, targetDir: string): number {
   return linked;
 }
 
+function pathCommandExists(command: string): boolean {
+  for (const entry of (process.env.PATH ?? "").split(":")) {
+    if (!entry) continue;
+    if (existsSync(resolve(entry, command))) return true;
+  }
+  return false;
+}
+
+function seedLocalWibo(paths: PrWorktreeProjectContext, worktreeDir: string): boolean {
+  if (process.platform !== "darwin" && process.platform !== "linux") return false;
+  const localWibo = resolve(worktreeDir, "build", "tools", "wibo");
+  if (existsSync(localWibo)) return true;
+  const source = resolve(paths.stateDir, "tools", "wibo");
+  if (!existsSync(source)) return false;
+  mkdirSync(dirname(localWibo), { recursive: true });
+  copyFileSync(source, localWibo);
+  try {
+    chmodSync(localWibo, 0o755);
+  } catch {
+    // Best effort; copied project tools are usually already executable.
+  }
+  return true;
+}
+
+function preferredConfigureCommand(paths: PrWorktreeProjectContext, worktreeDir: string): string[] {
+  if (seedLocalWibo(paths, worktreeDir)) {
+    return ["/bin/sh", "-c", "python3 configure.py --require-protos --wrapper build/tools/wibo"];
+  }
+  if ((process.platform === "darwin" || process.platform === "linux") && pathCommandExists("wibo")) {
+    return ["/bin/sh", "-c", "python3 configure.py --require-protos --wrapper wibo"];
+  }
+  return ["python3", "configure.py", "--require-protos"];
+}
+
 function sourcePathFromUnit(name: string): string {
   const unit = name.split("::")[0] ?? "";
   const parts = unit.split("/").filter(Boolean);
@@ -157,7 +191,7 @@ export function createPrWorktreeService<Context extends PrWorktreeProjectContext
       }
       if (!existsSync(resolve(worktreeDir, "build.ninja"))) {
         appendLog("ui", "baseline configure started");
-        const configure = await runCli(["python3", "configure.py"], worktreeDir);
+        const configure = await runCli(preferredConfigureCommand(paths, worktreeDir), worktreeDir);
         if (configure.exitCode !== 0) {
           throw new Error(`Baseline configure failed (${configure.exitCode}): ${outputTail(configure.stderr || configure.stdout, 4000)}`);
         }

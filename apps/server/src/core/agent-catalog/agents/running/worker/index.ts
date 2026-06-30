@@ -12,6 +12,7 @@ export type { WorkerReviewLint, WorkerReviewLintFinding } from "./review-lint.js
 export type { WorkerRunnerValidation } from "./runner-validation.js";
 export { workerPrompt } from "./prompt.js";
 export { workerPromptInputXml, type WorkerPromptInputXml, type WorkerPromptInputXmlOptions, type WorkerPromptOptions } from "./context.js";
+export { WORKER_CANONICAL_TOOL_PATHS, workerCanonicalToolPathsXml, type WorkerCanonicalToolPath } from "./tool-paths.js";
 export {
   appendWorkerActivityEvent,
   appendWorkerToolEvent,

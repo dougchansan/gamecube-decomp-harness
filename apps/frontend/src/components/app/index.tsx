@@ -4,7 +4,7 @@ import { asObject, numberValue, type Dashboard, type FormState, type JsonObject,
 import { useDashboardStream } from "@/hooks/useDashboardStream";
 import { DetailsRail } from "@/components/details-rail";
 import { ProjectWorkspace, type DashboardAction } from "@/pages/workspace";
-import { type ImprovedMode, type WorkMode } from "@/components/work-tables";
+import { type ImprovedMode, type WorkMode } from "@/pages/workspace/sessions/active/subphases/run/components/work-tables";
 import { type AppRoute, routeFromUrl, saveRoute } from "@/routing";
 import { loadGrainSettings, normalizeGrainSettings, saveGrainSettings, type GrainSettings, type GrainSettingsPatch } from "@/lib/styleSettings";
 import { DashboardPage } from "@/pages/dashboard";
@@ -44,6 +44,59 @@ function sessionPhaseSummary(session: JsonObject): string {
 function sessionScopedBody(body: JsonObject, projectSession: JsonObject): JsonObject {
   const sessionUuid = String(projectSession.sessionUuid || projectSession.id || "");
   return sessionUuid ? { ...body, sessionUuid, sessionId: sessionUuid } : body;
+}
+
+function positiveInteger(value: unknown): number | null {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? Math.trunc(parsed) : null;
+}
+
+function stringConfigValue(value: unknown): string | null {
+  if (value === null || value === undefined) return null;
+  const stringValue = String(value);
+  return stringValue ? stringValue : null;
+}
+
+function projectSessionRunConfigPatch(projectSession: JsonObject): Partial<FormState> | null {
+  const phases = asObject(projectSession.phases);
+  const preparing = asObject(phases.preparing);
+  const completion = asObject(preparing.completion);
+  const workerConfig = asObject(completion.workerConfig);
+  const schedulerConfig = asObject(completion.schedulerConfig);
+  if (Object.keys(workerConfig).length === 0 && Object.keys(schedulerConfig).length === 0) return null;
+
+  const patch: Partial<FormState> = {};
+  const maxWorkers = positiveInteger(workerConfig.maxWorkers) ?? positiveInteger(workerConfig.workerCount);
+  if (maxWorkers !== null) Object.assign(patch, schedulingForWorkers(maxWorkers));
+
+  const epochSize = stringConfigValue(workerConfig.epochSize);
+  if (epochSize !== null) patch.epochSize = epochSize;
+
+  const epochReadyQueueSize = positiveInteger(schedulerConfig.epochReadyQueueSize) ?? positiveInteger(workerConfig.batchSize);
+  if (epochReadyQueueSize !== null) patch.epochReadyQueueSize = epochReadyQueueSize;
+
+  const agentTimeoutSeconds = positiveInteger(workerConfig.agentTimeoutSeconds);
+  if (agentTimeoutSeconds !== null) patch.agentTimeoutSeconds = agentTimeoutSeconds;
+
+  const fullKgMaintenanceMode = stringConfigValue(workerConfig.fullKgMaintenanceMode);
+  if (fullKgMaintenanceMode !== null) patch.fullKgMaintenanceMode = fullKgMaintenanceMode;
+
+  const workerThinkingLevel = stringConfigValue(workerConfig.workerThinkingLevel);
+  if (workerThinkingLevel !== null) patch.workerThinkingLevel = workerThinkingLevel;
+
+  const candidateLimit = positiveInteger(schedulerConfig.candidateLimit);
+  if (candidateLimit !== null) patch.candidateLimit = candidateLimit;
+
+  const candidateWindow = positiveInteger(schedulerConfig.candidateWindow);
+  if (candidateWindow !== null) patch.candidateWindow = candidateWindow;
+
+  const queueTargetSize = positiveInteger(schedulerConfig.queueTargetSize);
+  if (queueTargetSize !== null) patch.queueTargetSize = queueTargetSize;
+
+  const queueLowWatermark = positiveInteger(schedulerConfig.queueLowWatermark);
+  if (queueLowWatermark !== null) patch.queueLowWatermark = queueLowWatermark;
+
+  return patch;
 }
 
 function styleSofteningVars(settings: GrainSettings): CSSProperties {
@@ -112,7 +165,7 @@ export function App() {
   const [workMode, setWorkMode] = useState<WorkMode>("active");
   const [runDetails, setRunDetails] = useState<RunDetails | null>(null);
   const [loadingRunDetails, setLoadingRunDetails] = useState(false);
-  const [detailsTabRequest, setDetailsTabRequest] = useState<{ nonce: number; tab: "agents" | "logs" | "run" } | null>(null);
+  const [detailsTabRequest, setDetailsTabRequest] = useState<{ nonce: number; tab: "logs" | "run" } | null>(null);
   const [route, setRouteState] = useState<AppRoute>(routeFromUrl);
   const [grainSettings, setGrainSettingsState] = useState<GrainSettings>(loadGrainSettings);
 
@@ -137,7 +190,7 @@ export function App() {
     setErrorMessage(error.message);
   }, []);
 
-  const { dashboard, manualRefresh, streamState } = useDashboardStream({
+  const { dashboard, manualRefresh } = useDashboardStream({
     enabled: Boolean(config && (form.projectId || (form.repoRoot && form.stateDir))),
     form,
     intervalMs: config?.dashboardStreamIntervalMs || 2500,
@@ -220,6 +273,23 @@ export function App() {
 
   const currentDashboard = dashboard as Dashboard | null;
   const busy = action !== null;
+
+  useEffect(() => {
+    const projectSession = asObject(currentDashboard?.projectSession);
+    const patch = projectSessionRunConfigPatch(projectSession);
+    if (!patch) return;
+    setFormState((current) => {
+      let changed = false;
+      const next = { ...current };
+      for (const [key, value] of Object.entries(patch)) {
+        const typedKey = key as keyof FormState;
+        if (next[typedKey] === value) continue;
+        (next as Record<string, unknown>)[key] = value;
+        changed = true;
+      }
+      return changed ? next : current;
+    });
+  }, [currentDashboard?.projectSession]);
 
   const loadRunDetails = useCallback(async () => {
     const run = asObject(currentDashboard?.status?.run);
@@ -492,7 +562,6 @@ export function App() {
         setWorkMode={setWorkMode}
         improvedMode={improvedMode}
         improvedPage={improvedPage}
-        streamState={streamState}
         workMode={workMode}
       />
       <DetailsRail

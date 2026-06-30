@@ -214,7 +214,7 @@ export const checkdiffRunToolRegistration = knowledgeApiTool({
   label: "Checkdiff Run",
   purpose: "Run focused checkdiff/objdiff output for one function.",
   description: "Compile the owning translation unit through the tool-local helper and return focused checkdiff output for one function.",
-  guidance: "Use checkdiff_run after a concrete source edit or mismatch hypothesis needs verifier evidence; preserve stdout/stderr and command provenance in the report.",
+  guidance: "Use checkdiff_run after a concrete source edit or mismatch hypothesis needs verifier evidence; prefer it over raw tools/asm-differ/diff.py shell commands and preserve stdout/stderr plus command provenance in the report.",
   parameters: {
     type: "object",
     properties: {
@@ -242,7 +242,7 @@ export const checkdiffSummaryToolRegistration = knowledgeApiTool({
   label: "Checkdiff Summary",
   purpose: "Run PASS/FAIL checkdiff summaries for one or more functions.",
   description: "Compile each owning translation unit once and return checkdiff PASS/FAIL summary lines.",
-  guidance: "Use checkdiff_summary for batch validation or neighbor checks when full diffs are unnecessary.",
+  guidance: "Use checkdiff_summary for batch validation or neighbor checks when full diffs are unnecessary; prefer it over raw tools/asm-differ/diff.py shell commands.",
   parameters: functionsParameters,
   args(params, context) {
     const functions = stringListParam(params.functions);
@@ -465,7 +465,7 @@ export const sourcePermuterRunToolRegistration = knowledgeApiTool({
   label: "Source Permuter Run",
   purpose: "Run a bounded non-mutating source permutation search for one function.",
   description: "Search source-level mutations, compile candidates with MWCC, and return the best diff without applying it.",
-  guidance: "Use source_permuter_run only after a named source-shape axis is too tedious to test manually; default output is candidate evidence, not an edit to keep blindly.",
+  guidance: "Use source_permuter_run only as a last-resort source-shape search after cheaper source review, reference matching, mismatch lookup, mutation preview, and checkdiff evidence are exhausted; it is expensive, opportunistic, and may return queue_busy instead of waiting.",
   parameters: {
     type: "object",
     properties: {
@@ -473,7 +473,7 @@ export const sourcePermuterRunToolRegistration = knowledgeApiTool({
       mutate_functions: { type: "array", items: { type: "string" }, description: "Optional functions in the same TU to mutate." },
       max_iters: { type: "number", description: "Maximum compiled candidates." },
       timeout_seconds: { type: "number", description: "Maximum search runtime." },
-      jobs: { type: "number", description: "Worker threads." },
+      jobs: { type: "number", description: "Worker threads, capped by the source-permuter API policy." },
       seed: { type: "number", description: "Random seed." },
       keep_prob: { type: "number", description: "Probability of stacking another mutation." },
       no_narrow: { type: "boolean", description: "Skip post-search narrowing." },
@@ -495,7 +495,7 @@ export const sourcePermuterRunToolRegistration = knowledgeApiTool({
       "--timeout-seconds",
       String(boundedNumber(params.timeout_seconds, 90, 5, 900)),
       "--jobs",
-      String(boundedNumber(params.jobs, 4, 1, 16)),
+      String(boundedNumber(params.jobs, 1, 1, 16)),
       "--seed",
       String(boundedNumber(params.seed, 0, 0, 2_147_483_647)),
       "--apply",
@@ -519,7 +519,7 @@ export const sourcePermuterReplayToolRegistration = knowledgeApiTool({
   label: "Source Permuter Replay",
   purpose: "Replay a saved source-permutation recipe without writing source.",
   description: "Replay a permuter recipe against current source and return the resulting candidate diff/score.",
-  guidance: "Use source_permuter_replay when a previous candidate recipe needs validation against the current checkout; inspect the diff before applying anything.",
+  guidance: "Use source_permuter_replay when a previous candidate recipe needs validation against the current checkout; inspect the diff before applying anything, and treat queue_busy as a signal to continue without waiting.",
   parameters: {
     type: "object",
     properties: {
@@ -662,13 +662,13 @@ export const m2cDecompileToolRegistration = knowledgeApiTool({
   label: "m2c Decompile",
   purpose: "Generate an m2c scaffold for a function or translation unit.",
   description: "Run the tool-local m2c wrapper with --no-copy and return scaffold output.",
-  guidance: "Use m2c_decompile as a reading aid only; do not paste m2c output into reviewable source without natural rewriting and verification.",
+  guidance: "Use m2c_decompile as a reading aid only; formatting is best-effort, and m2c output must be naturally rewritten and verified before it becomes reviewable source.",
   parameters: {
     type: "object",
     properties: {
       input: { type: "string", description: "Function symbol or translation unit path." },
       no_context: { type: "boolean", description: "Skip context generation." },
-      format: { type: "boolean", description: "Run clang-format on output." },
+      format: { type: "boolean", description: "Format output with clang-format when available." },
       extra_args: { type: "array", items: { type: "string" }, description: "Additional m2c arguments." },
       timeout_seconds: { type: "number", description: "Maximum runtime in seconds." },
     },

@@ -1,5 +1,5 @@
 import { asObject, text, whole, type Dashboard } from "@/lib/format";
-import { strictNumber } from "@/components/progress-panel/_lib/numbers";
+import { strictNumber } from "./numbers";
 
 export function checkpointCountdown(dashboard: Dashboard | null): string {
   const epoch = asObject(asObject(dashboard?.status).schedulerEpoch);

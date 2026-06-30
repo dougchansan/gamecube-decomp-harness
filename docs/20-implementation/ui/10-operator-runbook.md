@@ -42,7 +42,10 @@ additionally needs the run paused, Sync is locked while a run is active.
 1. **Sync Merged PRs** (only when starting from an idle, post-merge state) —
    pulls upstream, runs PR intake agents, rebuilds knowledge.
 2. **Start Working** — init run, start workers. Watch progress in the center
-   column; the epoch cycle commits and re-reports as batches drain.
+   column; the epoch cycle commits and re-reports as batches drain. Worker
+   count controls live claims/processes, while compile-heavy validation and
+   tool calls queue through their own slot pools, so "active workers" can be
+   higher than simultaneous MWCC compiles.
 3. **Pause Intake** when you want to ship — drains workers, pauses the run.
 4. **Prepare Handoff** — the full ship pipeline and the hard save point that
    ends the session (pause → pull & rebase → PR intake for anything newly
