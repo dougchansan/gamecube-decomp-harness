@@ -4,7 +4,12 @@ import { booleanArg, type GlobalArgs } from "@server/core/project-registry/runti
 
 export async function reportRun(globals: GlobalArgs, args: Map<string, string | true>): Promise<void> {
   const resetBaseline = booleanArg(args, "--reset-baseline");
-  const result = await forceReportRun(globals.repoRoot, { resetBaseline });
+  const result = await forceReportRun(globals.repoRoot, {
+    changesTarget: globals.project?.validation.qaTarget,
+    reportChangesPath: globals.project?.validation.reportChangesPath,
+    reportPath: globals.project?.validation.reportPath,
+    resetBaseline,
+  });
   const store = openState(globals.stateDir);
   try {
     const run = getLatestRun(store);

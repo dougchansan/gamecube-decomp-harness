@@ -528,7 +528,12 @@ export async function kgRankFeatures(globals: GlobalArgs, args: Map<string, stri
   const dbPath = await ensureGraphReady(globals, args);
   const limit = numberArg(args, "--limit", 50);
   const candidateLimit = numberArg(args, "--candidate-limit", limit);
-  const snapshot = loadKnowledgeBoardSnapshot(knowledgeRepoRoot(globals), candidateLimit, { graphDbPath: dbPath });
+  const snapshot = loadKnowledgeBoardSnapshot(knowledgeRepoRoot(globals), candidateLimit, {
+    graphDbPath: dbPath,
+    objdiffPath: globals.project?.validation.objdiffPath,
+    projectId: globals.project?.projectId ?? globals.projectId,
+    reportPath: globals.project?.validation.reportPath,
+  });
   const store = openKnowledgeGraph(dbPath);
   try {
     const features = snapshot.candidates.slice(0, limit).map((candidate) => {

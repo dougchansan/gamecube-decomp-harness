@@ -29,6 +29,7 @@ export interface EpochCycleOptions {
   regressionRequeueLimit?: number;
   /** Added to repair-target priority so repairs outrank every board candidate. */
   repairPriorityBase?: number;
+  changesTarget?: string;
   reportRelPath?: string;
   reportChangesRelPath?: string;
   baselineRelPath?: string;
@@ -414,7 +415,13 @@ async function runEpochCycleInner(store: StateStore, runId: string, repoRoot: st
   await runConfigure(options.worktreeDir, configureCommand);
 
   const worktreeBaselinePath = resolve(options.worktreeDir, baselineRelPath);
-  const buildResult = await forceReportRun(options.worktreeDir, { resetBaseline: !existsSync(worktreeBaselinePath) });
+  const buildResult = await forceReportRun(options.worktreeDir, {
+    baselinePath: baselineRelPath,
+    changesTarget: options.changesTarget,
+    reportChangesPath: reportChangesRelPath,
+    reportPath: reportRelPath,
+    resetBaseline: !existsSync(worktreeBaselinePath),
+  });
 
   const worktreeReportPath = resolve(options.worktreeDir, reportRelPath);
   const worktreeChangesPath = resolve(options.worktreeDir, reportChangesRelPath);

@@ -20,7 +20,12 @@ export async function initRun(globals: GlobalArgs, args: Map<string, string | tr
       candidateLimit,
       numberArg(args, "--candidate-window", globals.project?.dashboard.candidateWindow ?? candidateLimit * 8),
     );
-    const snapshot = loadKnowledgeBoardSnapshot(globals.repoRoot, candidateWindow, { graphDbPath });
+    const snapshot = loadKnowledgeBoardSnapshot(globals.repoRoot, candidateWindow, {
+      graphDbPath,
+      objdiffPath: globals.project?.validation.objdiffPath,
+      projectId: globals.project?.projectId ?? globals.projectId,
+      reportPath: globals.project?.validation.reportPath,
+    });
     const schedulableSources = new Set(snapshot.candidates.map((candidate) => candidate.sourcePath).filter(Boolean)).size;
 
     await mkdir(resolve(globals.stateDir, "runs", run.id, "snapshots"), { recursive: true });

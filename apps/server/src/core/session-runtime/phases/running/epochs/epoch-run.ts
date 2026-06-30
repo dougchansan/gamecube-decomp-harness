@@ -17,6 +17,7 @@ export async function epochRun(globals: GlobalArgs, args: Map<string, string | t
     const result = await runEpochCycle(store, runId, globals.repoRoot, globals.stateDir, {
       baseRef: globals.project?.baseRef,
       configureCommand: stringArg(args, "--configure-command", "python3 configure.py --require-protos"),
+      changesTarget: globals.project?.validation.qaTarget,
       label: stringArg(args, "--label", "") || null,
       linkPaths: stringArg(args, "--link-paths", "orig")
         .split(",")

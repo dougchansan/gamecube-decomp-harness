@@ -1,5 +1,5 @@
 import { chmod, copyFile, mkdir, readFile, rm, stat } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
+import { dirname, isAbsolute, resolve } from "node:path";
 import { runCommand, type CommandResult } from "@server/infrastructure/shell/index.js";
 
 export interface ReportRunStep extends CommandResult {
@@ -41,7 +41,12 @@ export interface ReportRunResult {
 }
 
 export interface ReportRunOptions {
+  baselinePath?: string;
+  changesTarget?: string;
   generateChanges?: boolean;
+  reportChangesPath?: string;
+  reportPath?: string;
+  reportTarget?: string;
   resetBaseline?: boolean;
 }
 
@@ -184,6 +189,10 @@ async function runStep(repoRoot: string, steps: ReportRunStep[], name: string, c
   }
 }
 
+function resolveRepoPath(repoRoot: string, path: string): string {
+  return isAbsolute(path) ? resolve(path) : resolve(repoRoot, path);
+}
+
 async function ensureConfigured(repoRoot: string, steps: ReportRunStep[]): Promise<void> {
   if (await pathExists(resolve(repoRoot, "build.ninja"))) return;
   if (!(await pathExists(resolve(repoRoot, "configure.py")))) {
@@ -193,10 +202,13 @@ async function ensureConfigured(repoRoot: string, steps: ReportRunStep[]): Promi
 }
 
 export async function forceReportRun(repoRoot: string, options: ReportRunOptions = {}): Promise<ReportRunResult> {
-  const buildDir = resolve(repoRoot, "build/GALE01");
-  const reportPath = resolve(buildDir, "report.json");
-  const baselinePath = resolve(buildDir, "baseline.json");
-  const reportChangesPath = resolve(buildDir, "report_changes.json");
+  const reportRelPath = options.reportPath ?? "build/GALE01/report.json";
+  const reportPath = resolveRepoPath(repoRoot, reportRelPath);
+  const buildDir = dirname(reportPath);
+  const baselinePath = options.baselinePath ? resolveRepoPath(repoRoot, options.baselinePath) : resolve(buildDir, "baseline.json");
+  const reportChangesPath = options.reportChangesPath ? resolveRepoPath(repoRoot, options.reportChangesPath) : resolve(buildDir, "report_changes.json");
+  const reportTarget = options.reportTarget ?? reportRelPath;
+  const changesTarget = options.changesTarget ?? "changes_all";
   const generateChanges = options.generateChanges !== false;
   const resetBaseline = options.resetBaseline === true;
   const steps: ReportRunStep[] = [];
@@ -204,14 +216,14 @@ export async function forceReportRun(repoRoot: string, options: ReportRunOptions
   await ensureConfigured(repoRoot, steps);
   await removeIfExists(reportChangesPath);
   await removeIfExists(reportPath);
-  await runStep(repoRoot, steps, "generate report", ["ninja", "build/GALE01/report.json"]);
+  await runStep(repoRoot, steps, "generate report", ["ninja", reportTarget]);
 
   if (resetBaseline) {
     await copyFile(reportPath, baselinePath);
   }
 
   if (generateChanges) {
-    await runStep(repoRoot, steps, "generate report changes", ["ninja", "changes_all"]);
+    await runStep(repoRoot, steps, "generate report changes", ["ninja", changesTarget]);
   }
 
   return {

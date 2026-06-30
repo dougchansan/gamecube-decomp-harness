@@ -642,6 +642,7 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
                 console.error(`[run-loop] epoch ${epochOrdinal}: ${trigger}; snapshotting and rebuilding report`);
                 const result = await runEpochCycle(store, runId, globals.repoRoot, globals.stateDir, {
                   baseRef: globals.project?.baseRef,
+                  changesTarget: globals.project?.validation.qaTarget,
                   configureCommand: epochConfigureCommand,
                   label: `epoch-${epochOrdinal}`,
                   linkPaths: epochLinkPaths,
@@ -840,6 +841,9 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
                   recordSchedulerEpochFastRefresh(store, epoch.id);
                   const board = loadKnowledgeBoardSnapshot(globals.repoRoot, schedulerEpochConfig.candidateWindow, {
                     graphDbPath,
+                    objdiffPath: globals.project?.validation.objdiffPath,
+                    projectId: globals.project?.projectId ?? globals.projectId,
+                    reportPath: globals.project?.validation.reportPath,
                   });
                   priorityRefreshes = refreshEpochTargetPriorities(store, {
                     epochId: epoch.id,

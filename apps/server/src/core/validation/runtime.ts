@@ -25,7 +25,12 @@ export function createValidationRuntime(deps: ValidationRuntimeDeps): Validation
     const repoRoot = paths.repoRoot;
     const resetBaseline = boolValue(body.resetBaseline);
     deps.appendLog("ui", `report-run${resetBaseline ? " --reset-baseline" : ""} started`);
-    const result = await forceReportRun(repoRoot, { resetBaseline });
+    const result = await forceReportRun(repoRoot, {
+      changesTarget: paths.project?.validation.qaTarget,
+      reportChangesPath: paths.project?.validation.reportChangesPath,
+      reportPath: paths.project?.validation.reportPath,
+      resetBaseline,
+    });
     const store = openState(paths.stateDir);
     try {
       const run = getLatestRun(store);

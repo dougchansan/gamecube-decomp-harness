@@ -1279,7 +1279,12 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
     });
     const claimWithWorktree = { ...claimed, worktreePath: workerRepoRoot };
     const project = projectMetadata(globals, { graphDbPath, repoRoot: workerRepoRoot });
-    const snapshot = loadKnowledgeBoardSnapshot(globals.repoRoot, 12, { graphDbPath });
+    const snapshot = loadKnowledgeBoardSnapshot(globals.repoRoot, 12, {
+      graphDbPath,
+      objdiffPath: globals.project?.validation.objdiffPath,
+      projectId: globals.project?.projectId ?? globals.projectId,
+      reportPath: globals.project?.validation.reportPath,
+    });
     const target = targetPacketTarget(claimed.target);
     const knowledgeContext = buildWorkerKnowledgeContext(String(target.source_path ?? ""), graphDbPath);
     const packet = workerPacket({

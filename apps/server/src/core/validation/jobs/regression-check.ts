@@ -1,5 +1,5 @@
 import { mkdir, writeFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { artifactTimestamp } from "@server/infrastructure/agent-runtime/runtime";
 import {
   DEFAULT_PR_PROMOTION_POLICY,
@@ -48,7 +48,10 @@ export async function regressionCheck(globals: GlobalArgs, args: Map<string, str
     throw new Error("--target must be one Ninja target name, for example changes_all");
   }
   const runId = stringArg(args, "--run-id", "manual");
-  const reportTitle = stringArg(args, "--report-title", "Expected local report for GALE01");
+  const reportRelPath = globals.project?.validation.reportPath ?? "build/GALE01/report.json";
+  const reportChangesRelPath = globals.project?.validation.reportChangesPath ?? "build/GALE01/report_changes.json";
+  const baselineRelPath = join(dirname(reportRelPath), "baseline.json");
+  const reportTitle = stringArg(args, "--report-title", `Expected local report for ${globals.project?.displayName ?? "GALE01"}`);
   const reportMaxRows = numberArg(args, "--report-max-rows", 30);
   if (!Number.isInteger(reportMaxRows) || reportMaxRows < 0) {
     throw new Error("--report-max-rows must be a non-negative integer");
@@ -80,7 +83,7 @@ export async function regressionCheck(globals: GlobalArgs, args: Map<string, str
   const stdoutPath = resolve(outputDir, "stdout.txt");
   const stderrPath = resolve(outputDir, "stderr.txt");
   const summaryPath = resolve(outputDir, "summary.json");
-  const reportChangesPath = resolve(globals.repoRoot, "build/GALE01/report_changes.json");
+  const reportChangesPath = resolve(globals.repoRoot, reportChangesRelPath);
   const prReportPath = resolve(outputDir, "pr_report.md");
   const prReportErrorPath = resolve(outputDir, "pr_report_error.txt");
   await writeFile(stdoutPath, result.stdout);
@@ -149,7 +152,7 @@ export async function regressionCheck(globals: GlobalArgs, args: Map<string, str
     artifactDir: outputDir,
     stdoutPath,
     stderrPath,
-    baselinePath: resolve(globals.repoRoot, "build/GALE01/baseline.json"),
+    baselinePath: resolve(globals.repoRoot, baselineRelPath),
     reportChangesPath,
     prReportPath,
     prReportGenerator: "decomp-orchestrator/apps/server/src/core/validation/objdiff/report.ts",
@@ -165,9 +168,9 @@ export async function regressionCheck(globals: GlobalArgs, args: Map<string, str
     qaScanPath: skipQaGate ? null : qaScanPath,
     hint:
       reportError !== null
-        ? "Inspect stdout/stderr and pr_report_error.txt. The regression gate could not parse build/GALE01/report_changes.json."
+        ? `Inspect stdout/stderr and pr_report_error.txt. The regression gate could not parse ${reportChangesRelPath}.`
         : hasReportRegressions
-          ? "Inspect pr_report.md and build/GALE01/report_changes.json. Broken matches, fuzzy regressions, or metric regressions must be fixed before PR handoff."
+          ? `Inspect pr_report.md and ${reportChangesRelPath}. Broken matches, fuzzy regressions, or metric regressions must be fixed before PR handoff.`
           : result.exitCode !== 0
             ? "Inspect stdout/stderr. If the baseline is missing, run ninja baseline on the upstream base before checking the branch."
             : qaGate.hint !== null

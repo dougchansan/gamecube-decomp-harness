@@ -134,7 +134,12 @@ export function ensureSchedulerEpochFromBoard(params: {
   if (remaining > 0) {
     const admissionCandidateWindow =
       params.config.size.mode === "full" ? candidateWindow : candidateWindow + historicalTargetKeyCount(params.store, params.runId);
-    const board = loadKnowledgeBoardSnapshot(params.globals.repoRoot, admissionCandidateWindow, { graphDbPath: params.graphDbPath });
+    const board = loadKnowledgeBoardSnapshot(params.globals.repoRoot, admissionCandidateWindow, {
+      graphDbPath: params.graphDbPath,
+      objdiffPath: params.globals.project?.validation.objdiffPath,
+      projectId: params.globals.project?.projectId ?? params.globals.projectId,
+      reportPath: params.globals.project?.validation.reportPath,
+    });
     const passSize: EpochSizeSpec = params.config.size.mode === "full" ? params.config.size : { mode: "fixed", value: remaining };
     admission = combineEpochAdmissions(
       admission,
@@ -150,7 +155,12 @@ export function ensureSchedulerEpochFromBoard(params: {
     progress = schedulerEpochProgress(params.store, epoch.id);
   }
 
-  const refreshBoard = loadKnowledgeBoardSnapshot(params.globals.repoRoot, candidateWindow, { graphDbPath: params.graphDbPath });
+  const refreshBoard = loadKnowledgeBoardSnapshot(params.globals.repoRoot, candidateWindow, {
+    graphDbPath: params.graphDbPath,
+    objdiffPath: params.globals.project?.validation.objdiffPath,
+    projectId: params.globals.project?.projectId ?? params.globals.projectId,
+    reportPath: params.globals.project?.validation.reportPath,
+  });
   const priorityRefreshes = refreshEpochTargetPriorities(params.store, {
     epochId: epoch.id,
     runId: params.runId,

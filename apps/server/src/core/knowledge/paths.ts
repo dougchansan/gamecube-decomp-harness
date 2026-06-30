@@ -34,20 +34,20 @@ export function sourceDataRoot(sourceId: string): string {
   return resolve(sourceStorageRoot(sourceId), "data");
 }
 
-export function knowledgeSourcesRoot(): string {
-  return resolve(projectKnowledgeRoot(), "sources");
+export function knowledgeSourcesRoot(projectId?: string): string {
+  return resolve(projectKnowledgeRoot(projectId), "sources");
 }
 
-export function sourceRoot(sourceId: string): string {
-  return resolve(knowledgeSourcesRoot(), sourceRegistryPath(sourceId));
+export function sourceRoot(sourceId: string, projectId?: string): string {
+  return resolve(knowledgeSourcesRoot(projectId), sourceRegistryPath(sourceId));
 }
 
-export function sourceStorageRoot(sourceId: string): string {
-  return resolve(projectKnowledgeRoot(), "sources", sourceRegistryPath(sourceId));
+export function sourceStorageRoot(sourceId: string, projectId?: string): string {
+  return resolve(projectKnowledgeRoot(projectId), "sources", sourceRegistryPath(sourceId));
 }
 
-export function codeGraphFunctionsIndexPath(): string {
-  return resolve(sourceStorageRoot("code_graph"), "indexes/functions.jsonl");
+export function codeGraphFunctionsIndexPath(projectId?: string): string {
+  return resolve(sourceStorageRoot("code_graph", projectId), "indexes/functions.jsonl");
 }
 
 export function knowledgeSourceRegistryPath(): string {

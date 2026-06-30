@@ -1,0 +1,52 @@
+{
+  "id": "pkmn-colosseum",
+  "displayName": "Pokemon Colosseum",
+  "kind": "dtk-pokemon-colosseum",
+  "repoRoot": "./checkout",
+  "stateDir": "./state",
+  "graphDb": "./graph/graph.sqlite",
+  "processName": "pkmn-colosseum-live",
+  "baseRef": "origin/master",
+  "localEnv": "./local.env",
+  "validation": {
+    "qaTarget": "changes_all",
+    "reportPath": "build/GC6E01/report.json",
+    "reportChangesPath": "build/GC6E01/report_changes.json",
+    "objdiffPath": "objdiff.json"
+  },
+  "dashboard": {
+    "candidateLimit": 64,
+    "queueTargetSize": 64,
+    "queueLowWatermark": 16,
+    "candidateWindow": 1024,
+    "goalValue": 100
+  },
+  "pr": {
+    "groupMode": "top-dir",
+    "titlePrefix": "Pokemon Colosseum decomp",
+    "branchPrefix": "decomp",
+    "maxFilesPerPr": 8,
+    "splitStrategy": "agent",
+    "improvementMinGainPoints": 2.0,
+    "improvementMinMatchedBytes": 64
+  },
+  "knowledge": {
+    "globalSources": [
+      "decomp_standards",
+      "powerpc_docs",
+      "external_mirrors",
+      "path_facts"
+    ],
+    "projectSources": [
+      "code_graph"
+    ]
+  },
+  "tools": {
+    "toolpacks": [
+      "gamecube-decomp"
+    ],
+    "bindingsRoot": "./tool-bindings",
+    "sharedDataRoot": "./shared/tool-data",
+    "worktreeCacheRoot": "./worktrees/{worktree_id}/tool-cache"
+  }
+}
