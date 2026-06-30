@@ -137,8 +137,9 @@ function blockerIsExplicitlyNonBlocking(record: Record<string, unknown>): boolea
   return /(?:non[_ -]?blocking|optional|did not block|does not block|not block normal|regular .* sufficient|usable .* evidence|rerunning .* succeeded)/i.test(text);
 }
 
-// fatal: the agent explicitly declared a tool failure (note status or a structured
-// blocker kind) — trustworthy enough to drain the pool via --exit-on-worker-error.
+// fatal: the agent included a structured blocker that explicitly marks a tool
+// failure. Free-form worker notes are not authoritative enough to drain the pool:
+// runner-owned validation still gets the final say.
 // advisory: a regex hunch over free text. Worth classifying as tool_error for triage,
 // but a hunch must never have pool-drain authority.
 export function agentNoteSignalsToolError(agentNote: Record<string, unknown> | null): { fatal: string[]; advisory: string[] } {
@@ -146,7 +147,7 @@ export function agentNoteSignalsToolError(agentNote: Record<string, unknown> | n
   const fatal: string[] = [];
   const advisory: string[] = [];
   const noteStatus = recordString(agentNote.status);
-  if (noteStatus === "tool_error") fatal.push("agent note status is tool_error");
+  if (noteStatus === "tool_error") advisory.push("agent note status is tool_error");
   const blockers = Array.isArray(agentNote.blockers) ? agentNote.blockers : [];
   for (const blocker of blockers) {
     const record = blocker && typeof blocker === "object" && !Array.isArray(blocker) ? (blocker as Record<string, unknown>) : {};
@@ -200,20 +201,6 @@ export function classifyWorkerError(params: {
     };
   }
   const agentToolErrors = agentNoteSignalsToolError(params.agentNote);
-  if (agentToolErrors.fatal.length > 0) {
-    return {
-      kind: "agent_noted_tool_error",
-      summary: `Worker note describes a tool/build/validation failure: ${agentToolErrors.fatal.join("; ")}`,
-      reasons: agentToolErrors.fatal,
-    };
-  }
-  if (agentToolErrors.advisory.length > 0) {
-    return {
-      kind: "agent_noted_tool_error_advisory",
-      summary: `Worker note text resembles a tool/build/validation failure (heuristic): ${agentToolErrors.advisory.join("; ")}`,
-      reasons: agentToolErrors.advisory,
-    };
-  }
   const validationReasons = runnerValidationFailureReasons(params.runnerValidation);
   // L1 QA lint rejection: the attempt re-added or left a QA finding.
   // The runner_validation_ prefix keeps this a rework kind for repair/continue
@@ -231,6 +218,20 @@ export function classifyWorkerError(params: {
       kind: `runner_validation_${params.runnerValidation.status}`,
       summary: `Runner validation failed: ${validationReasons.join("; ")}`,
       reasons: validationReasons,
+    };
+  }
+  if (params.runnerValidation.status === "skipped" && agentToolErrors.fatal.length > 0) {
+    return {
+      kind: "agent_noted_tool_error",
+      summary: `Worker note describes a tool/build/validation failure: ${agentToolErrors.fatal.join("; ")}`,
+      reasons: agentToolErrors.fatal,
+    };
+  }
+  if (params.runnerValidation.status === "skipped" && agentToolErrors.advisory.length > 0) {
+    return {
+      kind: "agent_noted_tool_error_advisory",
+      summary: `Worker note text resembles a tool/build/validation failure (heuristic): ${agentToolErrors.advisory.join("; ")}`,
+      reasons: agentToolErrors.advisory,
     };
   }
   return null;
@@ -274,9 +275,9 @@ export function shouldRequestWorkerRepairAfterAttempt(params: {
 
 export const WORKER_ATTEMPT_TAIL_POLICY = {
   mode: "bounded_attempt_tail_v1",
-  maxColdAttempts: 5,
-  followUpAttemptsAfterBest: 3,
-  followUpAttemptsAfterGateFailedExact: 3,
+  maxColdAttempts: 3,
+  followUpAttemptsAfterBest: 2,
+  followUpAttemptsAfterGateFailedExact: 1,
 } as const;
 
 export interface WorkerContinuationDecision {
@@ -1475,12 +1476,11 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
       const parsedAgentNote =
         result.dryRun || result.failed ? { note: null as Record<string, unknown> | null, error: result.error } : parseWorkerCheckpointNote(result.rawText);
       const agentNote = parsedAgentNote.note;
-      const agentToolErrors = agentNoteSignalsToolError(agentNote);
       const postAttemptDiffPath = resolve(validationDir, `attempt-${attemptIndex}.write_set.diff`);
       const postAttemptDiff = await captureWriteSetDiff(workerRepoRoot, claimed.writeSet, postAttemptDiffPath);
       const writeSetDiffChanged = postAttemptDiff.stdout !== preAttemptDiff.stdout;
       const reviewLint = lintWorkerReviewDiff(postAttemptDiff.stdout);
-      const shouldRunRunnerValidation = !result.failed && !result.providerError && agentToolErrors.fatal.length === 0;
+      const shouldRunRunnerValidation = !result.failed && !result.providerError;
       const changeValidation = await validateWorkerChange({
         repoRoot: workerRepoRoot,
         outputDir: validationDir,
@@ -1674,9 +1674,10 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
             }
           : null;
     const agentToolErrors = agentNoteSignalsToolError(agentNote);
+    const runnerValidationSkipped = finalEvaluation.runnerValidation.status === "skipped";
     const errorClassification =
       infraError ??
-      (agentToolErrors.fatal.length > 0
+      (!result.dryRun && runnerValidationSkipped && agentToolErrors.fatal.length > 0
         ? {
             kind: "agent_noted_tool_error",
             summary: `Worker note describes a tool/build/validation failure: ${agentToolErrors.fatal.join("; ")}`,

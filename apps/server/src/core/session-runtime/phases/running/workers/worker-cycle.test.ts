@@ -22,7 +22,6 @@ import {
   workerWorktreeLockDir,
   workerWorktreePath,
 } from "@server/core/session-runtime/phases/running/workers/worker-cycle.js";
-import { runCommand } from "@server/infrastructure/shell";
 
 function finding(overrides: Partial<QaScanFinding> = {}): QaScanFinding {
   return {
@@ -313,7 +312,7 @@ describe("worker shell tool environment", () => {
     expect(env.ORCH_WORKER_CANONICAL_TOOL_PATHS).toContain("powerpc-eabi-objdump");
   });
 
-  test("guards broad find sweeps while allowing narrow worker-local find", async () => {
+  test("writes a find guard that blocks broad sweeps while allowing narrow worker-local roots", async () => {
     const root = await mkdtemp(join(tmpdir(), "worker-find-guard-"));
     try {
       const worker = resolve(root, "worker");
@@ -321,15 +320,16 @@ describe("worker shell tool environment", () => {
       mkdirSync(resolve(worker, "src"), { recursive: true });
       const shellBin = await writeWorkerShellGuardBin({ outputDir });
       const env = workerAgentToolEnvironment({ workerRepoRoot: worker, shellBin });
+      const guardedFind = resolve(shellBin, "find");
+      const script = readFileSync(guardedFind, "utf8");
 
-      const localFind = await runCommand(worker, ["find", ".", "-maxdepth", "1", "-type", "d"], { env });
-      expect(localFind.exitCode).toBe(0);
-      expect(localFind.stdout).toContain(".");
-
-      const broadFind = await runCommand(worker, ["find", root, "-name", "*objdump*"], { env });
-      expect(broadFind.exitCode).toBe(2);
-      expect(broadFind.stderr).toContain("blocked broad worker find sweep");
-      expect(broadFind.stderr).toContain("build/binutils/powerpc-eabi-objdump");
+      expect(env.PATH.split(delimiter)[0]).toBe(shellBin);
+      expect(script).toContain('real_find="${ORCH_REAL_FIND:-/usr/bin/find}"');
+      expect(script).toContain('""|".") ;;');
+      expect(script).toContain('*/../*|*/..) blocked_find "$arg" ;;');
+      expect(script).toContain('blocked broad worker find sweep');
+      expect(script).toContain("build/binutils/powerpc-eabi-objdump");
+      expect(script).toContain('exec "$real_find" "$@"');
     } finally {
       await rm(root, { recursive: true, force: true });
     }
@@ -397,10 +397,10 @@ describe("shouldRequestWorkerRepairAfterAttempt", () => {
 describe("workerContinuationDecision", () => {
   const futureDeadline = Date.now() + 60_000;
 
-  test("stops cold workers after the fifth human attempt when nothing improved", () => {
-    const checkpoints = [0, 1, 2, 3, 4].map((attempt) => continuationCheckpoint(attempt));
+  test("stops cold workers after the configured human attempt budget when nothing improved", () => {
+    const checkpoints = [0, 1, 2].map((attempt) => continuationCheckpoint(attempt));
     const decision = workerContinuationDecision({
-      attemptIndex: 4,
+      attemptIndex: 2,
       checkpoints,
       repairReasons: ["runner checkpoint was not exact"],
       dryRun: false,
@@ -414,9 +414,9 @@ describe("workerContinuationDecision", () => {
   });
 
   test("continues before the cold attempt budget is exhausted", () => {
-    const checkpoints = [0, 1, 2, 3].map((attempt) => continuationCheckpoint(attempt));
+    const checkpoints = [0, 1].map((attempt) => continuationCheckpoint(attempt));
     const decision = workerContinuationDecision({
-      attemptIndex: 3,
+      attemptIndex: 1,
       checkpoints,
       repairReasons: ["runner checkpoint was not exact"],
       dryRun: false,
@@ -427,7 +427,26 @@ describe("workerContinuationDecision", () => {
     expect(decision.continueReason).toBe("cold_attempt_budget_available");
   });
 
-  test("allows three follow-up checkpoints after an early selectable improvement", () => {
+  test("allows a bounded follow-up checkpoint after an early selectable improvement", () => {
+    const checkpoints = [
+      continuationCheckpoint(0),
+      continuationCheckpoint(1, { hardGatesPassed: true, selectable: true, newScore: 81 }),
+      continuationCheckpoint(2, { hardGatesPassed: true, selectable: true, newScore: 80.5 }),
+    ];
+    const decision = workerContinuationDecision({
+      attemptIndex: 2,
+      checkpoints,
+      repairReasons: ["runner checkpoint was not exact"],
+      dryRun: false,
+      claimDeadlineMs: futureDeadline,
+    });
+
+    expect(decision.shouldContinue).toBe(true);
+    expect(decision.continueReason).toBe("post_improvement_followup");
+    expect(decision.followUpsSinceBest).toBe(1);
+  });
+
+  test("stops after the configured follow-up budget without a new best", () => {
     const checkpoints = [
       continuationCheckpoint(0),
       continuationCheckpoint(1, { hardGatesPassed: true, selectable: true, newScore: 81 }),
@@ -442,31 +461,10 @@ describe("workerContinuationDecision", () => {
       claimDeadlineMs: futureDeadline,
     });
 
-    expect(decision.shouldContinue).toBe(true);
-    expect(decision.continueReason).toBe("post_improvement_followup");
-    expect(decision.followUpsSinceBest).toBe(2);
-  });
-
-  test("stops after three follow-up checkpoints without a new best", () => {
-    const checkpoints = [
-      continuationCheckpoint(0),
-      continuationCheckpoint(1, { hardGatesPassed: true, selectable: true, newScore: 81 }),
-      continuationCheckpoint(2, { hardGatesPassed: true, selectable: true, newScore: 80.5 }),
-      continuationCheckpoint(3, { hardGatesPassed: true, selectable: true, newScore: 80.75 }),
-      continuationCheckpoint(4, { hardGatesPassed: true, selectable: true, newScore: 80.9 }),
-    ];
-    const decision = workerContinuationDecision({
-      attemptIndex: 4,
-      checkpoints,
-      repairReasons: ["runner checkpoint was not exact"],
-      dryRun: false,
-      claimDeadlineMs: futureDeadline,
-    });
-
     expect(decision.shouldContinue).toBe(false);
     expect(decision.exhausted).toBe(true);
     expect(decision.stopReason).toBe("improvement_followup_budget_exhausted");
-    expect(decision.followUpsSinceBest).toBe(3);
+    expect(decision.followUpsSinceBest).toBe(WORKER_ATTEMPT_TAIL_POLICY.followUpAttemptsAfterBest);
   });
 
   test("a new best resets the follow-up budget", () => {
@@ -475,10 +473,9 @@ describe("workerContinuationDecision", () => {
       continuationCheckpoint(1, { hardGatesPassed: true, selectable: true, newScore: 81 }),
       continuationCheckpoint(2, { hardGatesPassed: true, selectable: true, newScore: 82 }),
       continuationCheckpoint(3, { hardGatesPassed: true, selectable: true, newScore: 81.5 }),
-      continuationCheckpoint(4, { hardGatesPassed: true, selectable: true, newScore: 81.75 }),
     ];
     const decision = workerContinuationDecision({
-      attemptIndex: 4,
+      attemptIndex: 3,
       checkpoints,
       repairReasons: ["runner checkpoint was not exact"],
       dryRun: false,
@@ -487,7 +484,7 @@ describe("workerContinuationDecision", () => {
 
     expect(decision.shouldContinue).toBe(true);
     expect(decision.latestBestAttemptIndex).toBe(2);
-    expect(decision.followUpsSinceBest).toBe(2);
+    expect(decision.followUpsSinceBest).toBe(1);
   });
 
   test("accepted exact checkpoints stop immediately", () => {
@@ -523,15 +520,13 @@ describe("workerContinuationDecision", () => {
     expect(decision.continueReason).toBe("gate_failed_exact_repair");
   });
 
-  test("failed-gate exact repair stops after three follow-up attempts", () => {
+  test("failed-gate exact repair stops after the configured follow-up budget", () => {
     const checkpoints = [
       continuationCheckpoint(4, { exactMatch: true, hardGatesPassed: false, selectable: false, newScore: 100 }),
       continuationCheckpoint(5, { exactMatch: true, hardGatesPassed: false, selectable: false, newScore: 100 }),
-      continuationCheckpoint(6, { exactMatch: true, hardGatesPassed: false, selectable: false, newScore: 100 }),
-      continuationCheckpoint(7, { exactMatch: true, hardGatesPassed: false, selectable: false, newScore: 100 }),
     ];
     const decision = workerContinuationDecision({
-      attemptIndex: 7,
+      attemptIndex: 5,
       checkpoints,
       repairReasons: ["runner validation: qa lint failed"],
       dryRun: false,
@@ -541,7 +536,7 @@ describe("workerContinuationDecision", () => {
     expect(decision.shouldContinue).toBe(false);
     expect(decision.exhausted).toBe(true);
     expect(decision.stopReason).toBe("gate_failed_exact_followup_budget_exhausted");
-    expect(decision.followUpsSinceFailedGateExact).toBe(3);
+    expect(decision.followUpsSinceFailedGateExact).toBe(WORKER_ATTEMPT_TAIL_POLICY.followUpAttemptsAfterGateFailedExact);
   });
 });
 
@@ -587,6 +582,24 @@ describe("classifyWorkerError with QA lint violations", () => {
       runnerValidation: passedValidation(qaLint),
     });
     expect(classification).toBeNull();
+  });
+
+  test("agent-declared tool_error does not override runner-owned passed validation", () => {
+    const classification = classifyWorkerError({
+      result: piResult(),
+      agentNote: { status: "tool_error", summary: "checkdiff failed locally" },
+      runnerValidation: passedValidation(null),
+    });
+    expect(classification).toBeNull();
+  });
+
+  test("agent-declared tool_error is advisory only when runner validation is skipped", () => {
+    const classification = classifyWorkerError({
+      result: piResult(),
+      agentNote: { status: "tool_error", summary: "checkdiff failed locally" },
+      runnerValidation: { status: "skipped", reasons: ["runner checkpoint validation was not requested"], qaLint: null },
+    });
+    expect(classification?.kind).toBe("agent_noted_tool_error_advisory");
   });
 
   test("clean qaLint on a passed attempt produces no error classification", () => {
