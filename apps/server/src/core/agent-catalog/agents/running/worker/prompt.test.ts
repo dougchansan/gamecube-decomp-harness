@@ -5,9 +5,9 @@ function sampleWorkerPrompt() {
   return workerPrompt({
     packet: {
       target: {
-        unit: "GALE01:test",
+        unit: "GC6E01:test",
         symbol: "test_symbol",
-        source_path: "src/melee/test/missing.c",
+        source_path: "src/colosseum/test/missing.c",
       },
       baseline: {
         fuzzy_match_percent: 91.25,

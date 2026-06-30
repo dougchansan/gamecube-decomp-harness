@@ -10,7 +10,6 @@ export const agent = defineAgent({
   model: "codex-lb/gpt-5.5",
   coreTools: [
       "code_graph_search",
-      "past_prs_search",
       "path_facts_resolve",
       "review_lint_scan",
   ],

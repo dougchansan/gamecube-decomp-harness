@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build a first-pass evidence packet for a Melee decomp target."""
+"""Build a first-pass evidence packet for a Colosseum decomp target."""
 
 from __future__ import annotations
 
@@ -22,12 +22,12 @@ def package_root() -> Path:
 
 
 PACKAGE_ROOT = package_root()
-PROJECT_ROOT = PACKAGE_ROOT / "projects" / "melee"
+PROJECT_ROOT = PACKAGE_ROOT / "projects" / "pkmn-colosseum"
 CHECKOUT_ROOT = PROJECT_ROOT / "checkout"
 
 COMMON_STOP_TERMS = {
     "src",
-    "melee",
+    "pkmn-colosseum",
     "common",
     "chara",
     "items",
@@ -174,7 +174,7 @@ def terms_from_metadata(lines: list[str]) -> list[str]:
 def compact_report_lookup(
     target: str | None, symbol: str | None, terms: list[str], max_results: int
 ) -> list[str]:
-    report_path = CHECKOUT_ROOT / "build/GALE01/report.json"
+    report_path = CHECKOUT_ROOT / "build/GC6E01/report.json"
     if not report_path.exists():
         return []
 
@@ -212,7 +212,7 @@ def compact_report_lookup(
             if isinstance(va, str) and va.isdecimal():
                 va = f"0x{int(va):08X}"
             detail = (
-                f"build/GALE01/report.json: unit={unit_name} "
+                f"build/GC6E01/report.json: unit={unit_name} "
                 f"function={func_name} size={size} fuzzy={fuzzy} va={va}"
             )
             if exact_symbol:
@@ -270,8 +270,8 @@ def main() -> None:
         rg_search(
             target_patterns,
             [
-                "config/GALE01/symbols.txt",
-                "config/GALE01/splits.txt",
+                "config/GC6E01/symbols.txt",
+                "config/GC6E01/splits.txt",
                 "objdiff.json",
                 "docs/symbols.md",
                 "docs/splits.md",
@@ -290,10 +290,10 @@ def main() -> None:
         rg_search(
             terms[:12],
             [
-                "projects/melee/checkout/src",
-                "projects/melee/checkout/docs/glossary.md",
-                "projects/melee/checkout/docs",
-                "projects/melee/checkout/config/GALE01/symbols.txt",
+                "projects/pkmn-colosseum/checkout/src",
+                "projects/pkmn-colosseum/checkout/docs/glossary.md",
+                "projects/pkmn-colosseum/checkout/docs",
+                "projects/pkmn-colosseum/checkout/config/GC6E01/symbols.txt",
             ],
             args.max_results,
         ),
@@ -304,29 +304,24 @@ def main() -> None:
         rg_search(
             terms[:12],
             [
-                "projects/melee/knowledge/sources/code_context/past_prs/data/aggregate/changed_files.jsonl",
-                "projects/melee/knowledge/sources/code_context/past_prs/data/aggregate/human_pr_text.md",
-                "projects/melee/knowledge/sources/code_context/past_prs/data/aggregate/review_comments.md",
-                "projects/melee/knowledge/sources/code_context/past_prs/data/aggregate/diff_lines.jsonl",
-                "projects/melee/knowledge/sources/code_context/past_prs/data/library/index.csv",
-                "projects/melee/knowledge/sources/code_context/past_prs/data/library/index.jsonl",
-                "projects/melee/knowledge/sources/code_context/past_prs/data/library/known_fixes.md",
+                "projects/pkmn-colosseum/knowledge/sources/code_context/past_prs/data/aggregate/changed_files.jsonl",
+                "projects/pkmn-colosseum/knowledge/sources/code_context/past_prs/data/aggregate/human_pr_text.md",
+                "projects/pkmn-colosseum/knowledge/sources/code_context/past_prs/data/aggregate/review_comments.md",
+                "projects/pkmn-colosseum/knowledge/sources/code_context/past_prs/data/aggregate/diff_lines.jsonl",
+                "projects/pkmn-colosseum/knowledge/sources/code_context/past_prs/data/library/index.csv",
+                "projects/pkmn-colosseum/knowledge/sources/code_context/past_prs/data/library/index.jsonl",
+                "projects/pkmn-colosseum/knowledge/sources/code_context/past_prs/data/library/known_fixes.md",
             ],
             args.max_results,
         ),
     )
 
     print_section(
-        "Data Sheet And Reference Sources",
+        "Reference Sources",
         rg_search(
             resource_terms[:16],
             [
-                "projects/melee/knowledge/sources/code_context/ssbm_data_sheet/data/csv/cells.csv",
-                "projects/melee/knowledge/sources/code_context/ssbm_data_sheet/data/csv/sheet_index.csv",
-                "projects/melee/knowledge/sources/rag_search/powerpc_docs/data/indexes/powerpc_pdf_pages.csv",
-                "projects/melee/knowledge/sources/code_context/external_mirrors/data/training_mode/indexes/gtme01_map_symbols.csv",
-                "projects/melee/knowledge/sources/code_context/external_mirrors/data/m_ex/indexes/header_symbols.csv",
-                "projects/melee/knowledge/sources/code_context/external_mirrors/data/tockdom/compiler.txt",
+                "projects/pkmn-colosseum/knowledge/sources/rag_search/powerpc_docs/data/indexes/powerpc_pdf_pages.csv",
             ],
             args.max_results,
         ),

@@ -98,7 +98,7 @@ export function createProcessControlRuntime(deps: ProcessControlRuntimeDeps): {
       const paths = deps.resolveDashboardProject(body, { useDefaultProject: true });
       const { stateDir } = paths;
       const runId = stringValue(body.runId) || latestRunId(stateDir);
-      const name = paths.project?.processName ?? stringValue(body.processName, "melee-live");
+      const name = paths.project?.processName ?? stringValue(body.processName, "colosseum-live");
       const recoveryCommand =
         runId && body.recoverClaims !== false
           ? [
@@ -123,7 +123,7 @@ export function createProcessControlRuntime(deps: ProcessControlRuntimeDeps): {
 
     async drainManaged(body): Promise<JsonObject> {
       const paths = deps.resolveDashboardProject(body, { useDefaultProject: true });
-      const name = paths.project?.processName ?? stringValue(body.processName, "melee-live");
+      const name = paths.project?.processName ?? stringValue(body.processName, "colosseum-live");
       return deps.processController.drain({ name, project: paths.project, stateDir: paths.stateDir });
     },
 

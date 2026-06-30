@@ -4,10 +4,10 @@
 # dependencies = ["tree-sitter", "tree-sitter-c", "libclang"]
 # ///
 """
-Source-level mutation engine for the melee permuter (permute.py).
+Source-level mutation engine for the colosseum permuter (permute.py).
 
 Unlike decomp-permuter, this mutates the **real** source text. It parses the
-actual .c with tree-sitter-c (robust to melee's macros: unknown macro calls
+actual .c with tree-sitter-c (robust to colosseum's macros: unknown macro calls
 parse as ordinary call/identifier nodes) and applies behaviour-preserving
 edits as *byte-span splices* into the original bytes. Everything the mutation
 does not touch stays byte-identical -- macros, comments, indentation -- so a
@@ -1679,7 +1679,7 @@ def _block_site(ctx: Ctx, run: List[Node], locals_: set, fname: str,
     # Optional re-derivation: rather than receive an in-param by value, the
     # helper can re-declare it from its own initializer (verbatim, e.g.
     # `Item* ip = GET_ITEM(gobj);`) and take that initializer's freevars as
-    # params instead -- the melee shape where helpers recompute ip from gobj.
+    # params instead -- the colosseum shape where helpers recompute ip from gobj.
     # Freevar params are spelled from their verbatim declarations (`spell`), not
     # the type oracle: the key freevar (gobj) usually appears only inside a
     # macro (GET_ITEM) where clang exposes no per-token type.

@@ -269,7 +269,7 @@ function catalogEntry(
   };
 }
 
-export const meleeKernelAgentCatalog = [
+export const colosseumKernelAgentCatalog = [
   catalogEntry("worker", {
     group: "running",
     phase: "worker",
@@ -295,7 +295,7 @@ export const meleeKernelAgentCatalog = [
     ),
     contextLoaderKinds: [...ROOT_CONTEXT_LOADERS, "integration-conflict-item", "integration-queue-summary"],
     resultContract: resultContract(
-      "melee_integration_resolver_result_v1",
+      "colosseum_integration_resolver_result_v1",
       "apps/server/src/core/agent-catalog/agents/running/integration-resolver/schema.json",
       "validateIntegrationResolverAgentResult",
       "Integration resolver results are validated before runner-owned queue status updates and epoch acceptance.",
@@ -311,7 +311,7 @@ export const meleeKernelAgentCatalog = [
     ),
     contextLoaderKinds: [...ROOT_CONTEXT_LOADERS, "pr-index-context"],
     resultContract: resultContract(
-      "melee_pr_postmortem_v1",
+      "colosseum_pr_postmortem_v1",
       "apps/server/src/core/agent-catalog/agents/knowledge/pr-indexer/schema.json",
       null,
       "Current PR postmortem output is schema-described and handed to the curator pipeline.",
@@ -327,7 +327,7 @@ export const meleeKernelAgentCatalog = [
     ),
     contextLoaderKinds: [...ROOT_CONTEXT_LOADERS, "pr-slice-diff", "review-lint-findings", "standard-examples"],
     resultContract: resultContract(
-      "melee_pr_preship_review_v1",
+      "colosseum_pr_preship_review_v1",
       "apps/server/src/core/agent-catalog/agents/pr/reviewer/schema.json",
       "validatePreshipReview",
       "Preship review findings are structurally validated before repair routing.",
@@ -343,7 +343,7 @@ export const meleeKernelAgentCatalog = [
     ),
     contextLoaderKinds: [...ROOT_CONTEXT_LOADERS, "pr-fixer-context", "standard-examples"],
     resultContract: resultContract(
-      "melee_pr_fixer_result_v1",
+      "colosseum_pr_fixer_result_v1",
       "apps/server/src/core/agent-catalog/agents/pr/fixer/schema.json",
       "validatePrFixerAgentResult",
       "PR fixer results are validated before runner-owned source validation and remote PR state updates.",
@@ -359,7 +359,7 @@ export const meleeKernelAgentCatalog = [
     ),
     contextLoaderKinds: [...ROOT_CONTEXT_LOADERS, "pr-split-context"],
     resultContract: resultContract(
-      "melee_pr_splitter_plan_v1",
+      "colosseum_pr_splitter_plan_v1",
       "apps/server/src/core/agent-catalog/agents/pr/splitter/schema.json",
       "validatePrSplitterPlan",
       "PR split plans are validated before slice worktrees/publication.",
@@ -407,7 +407,7 @@ export const meleeKernelAgentCatalog = [
     ),
     contextLoaderKinds: [...ROOT_CONTEXT_LOADERS, "qa-repair-item", "qa-repair-queue-summary", "standard-examples"],
     resultContract: resultContract(
-      "melee_qa_repair_result_v1",
+      "colosseum_qa_repair_result_v1",
       "apps/server/src/core/agent-catalog/agents/pr/qa-repair/schema.json",
       "validateQaRepairAgentResult",
       "QA repair results are validated before runner-owned source validation and PR routing.",
@@ -415,12 +415,12 @@ export const meleeKernelAgentCatalog = [
   }),
 ] as const satisfies readonly KernelAgentCatalogEntry[];
 
-export const meleeKernelAgentCatalogById = Object.fromEntries(
-  meleeKernelAgentCatalog.map((entry) => [entry.id, entry]),
+export const colosseumKernelAgentCatalogById = Object.fromEntries(
+  colosseumKernelAgentCatalog.map((entry) => [entry.id, entry]),
 ) as Record<KernelAgentId, KernelAgentCatalogEntry>;
 
-export function meleeKernelAgent(id: KernelAgentId): KernelAgentCatalogEntry {
-  return meleeKernelAgentCatalogById[id];
+export function colosseumKernelAgent(id: KernelAgentId): KernelAgentCatalogEntry {
+  return colosseumKernelAgentCatalogById[id];
 }
 
 export function toKernelParsedAgentFromBundle(
@@ -525,14 +525,14 @@ export function toKernelAgentViewerDefinition(
   };
 }
 
-export function assertMeleeKernelCatalogComplete(): void {
+export function assertColosseumKernelCatalogComplete(): void {
   const registered = Object.keys(agentRegistry).sort();
   const catalog = [...KERNEL_AGENT_IDS].sort();
   const missing = registered.filter((id) => !catalog.includes(id as KernelAgentId));
   const extra = catalog.filter((id) => !registered.includes(id));
   if (missing.length || extra.length) {
     throw new Error(
-      `Melee kernel agent catalog mismatch: missing=[${missing.join(", ")}] extra=[${extra.join(", ")}]`,
+      `Colosseum kernel agent catalog mismatch: missing=[${missing.join(", ")}] extra=[${extra.join(", ")}]`,
     );
   }
 }

@@ -20,7 +20,7 @@ def find_orchestrator_root(start: Path) -> Path:
 
 
 ORCHESTRATOR_ROOT = find_orchestrator_root(REVIEW_LINT_DIR)
-MELEE_CHECKOUT = ORCHESTRATOR_ROOT / "projects" / "melee" / "checkout"
+COLOSSEUM_CHECKOUT = ORCHESTRATOR_ROOT / "projects" / "pkmn-colosseum" / "checkout"
 FIXTURES_DIR = TESTS_DIR / "fixtures"
 SCAN_DIFF = API_DIR / "scan_diff.py"
 
@@ -28,7 +28,7 @@ sys.path.insert(0, str(API_DIR))
 
 
 @pytest.fixture(scope="session")
-def melee_checkout() -> Path:
-    if not (MELEE_CHECKOUT / "config" / "GALE01" / "splits.txt").is_file():
-        pytest.skip(f"melee checkout not available at {MELEE_CHECKOUT}")
-    return MELEE_CHECKOUT
+def colosseum_checkout() -> Path:
+    if not (COLOSSEUM_CHECKOUT / "config" / "GC6E01" / "splits.txt").is_file():
+        pytest.skip(f"colosseum checkout not available at {COLOSSEUM_CHECKOUT}")
+    return COLOSSEUM_CHECKOUT

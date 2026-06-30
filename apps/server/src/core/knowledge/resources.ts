@@ -4,7 +4,6 @@ import {
   knowledgeSourcesRoot,
   knowledgeToolsRoot,
   packageRoot,
-  pastPrsRoot,
   resourceGraphDbPath,
   resourceGraphRoot,
   sourceDataRoot,
@@ -38,12 +37,7 @@ export function resourceMap(repoRoot: string, options: ResourceMapOptions): Reco
   const graphDb = project?.graphDbPath ?? resourceGraphDbPath();
   const stateDir = project?.stateDir ?? "";
   const projectFlag = project?.projectId ? ` --project ${project.projectId}` : "";
-  const pastPrs = pastPrsRoot();
-  const dataSheetData = sourceDataRoot("ssbm_data_sheet");
-  const dataSheetCsvDir = resolve(dataSheetData, "csv");
-  const dataSheetGeneratedDir = resolve(dataSheetData, "generated");
   const powerpcData = sourceDataRoot("powerpc_docs");
-  const externalMirrorsData = sourceDataRoot("external_mirrors");
   const scripts = options.scripts;
   const activeSources = readSourceRegistry();
   const activeSourceIds = activeSources.map((source) => source.id);
@@ -77,11 +71,11 @@ export function resourceMap(repoRoot: string, options: ResourceMapOptions): Reco
         "reviewable text-section/source code fixes, code-match blockers, and reusable source-shape facts",
       secondary_work_policy:
         "data, literal, symbol, and split cleanup is secondary; include it only when explicitly scoped, required for a code match, or blocking code-match validation",
-      quality_bar: "reviewable Melee decomp source backed by local evidence and verifier output",
+      quality_bar: "reviewable Colosseum decomp source backed by local evidence and verifier output",
     },
     progress_inputs: [
       {
-        path: resolve(repoRoot, "build/GALE01/report.json"),
+        path: resolve(repoRoot, "build/GC6E01/report.json"),
         purpose: "current match metrics, function/unit status, and progress telemetry",
       },
       {
@@ -91,11 +85,11 @@ export function resourceMap(repoRoot: string, options: ResourceMapOptions): Reco
     ],
     target_metadata: [
       {
-        path: resolve(repoRoot, "config/GALE01/symbols.txt"),
+        path: resolve(repoRoot, "config/GC6E01/symbols.txt"),
         purpose: "symbol names and addresses",
       },
       {
-        path: resolve(repoRoot, "config/GALE01/splits.txt"),
+        path: resolve(repoRoot, "config/GC6E01/splits.txt"),
         purpose: "translation-unit and object ownership boundaries",
       },
       {
@@ -113,78 +107,9 @@ export function resourceMap(repoRoot: string, options: ResourceMapOptions): Reco
         purpose: "project headers and struct/type definitions when present",
       },
     ],
-    past_prs: {
-      structured_index: {
-        path: resolve(pastPrs, "library/index.jsonl"),
-        fields: ["pr", "title", "summary", "searchable_terms", "postmortem_json"],
-        purpose: "distilled searchable PR lessons and pointers to per-PR postmortems",
-      },
-      known_fixes: resolve(pastPrs, "library/known_fixes.md"),
-      raw_analysis: [
-        {
-          path: resolve(pastPrs, "aggregate/changed_files.jsonl"),
-          purpose: "find PRs that touched a concrete source/config path",
-        },
-        {
-          path: resolve(pastPrs, "aggregate/text_corpus.jsonl"),
-          purpose: "PR bodies, bot reports, comments, and reviews keyed by PR number",
-        },
-        {
-          path: resolve(pastPrs, "aggregate/human_pr_text.md"),
-          purpose: "human-authored PR bodies and issue comments",
-        },
-        {
-          path: resolve(pastPrs, "aggregate/review_comments.md"),
-          purpose: "review feedback, naming corrections, and review warnings",
-        },
-        {
-          path: resolve(pastPrs, "aggregate/decomp_tips_library.md"),
-          purpose: "cross-PR matching and review lessons",
-        },
-      ],
-      per_pr_detail_pattern: resolve(pastPrs, "prs/pr-<number>/postmortem/postmortem.json"),
-      search_examples: [
-        `rg -n "<symbol>|<source_path>|<subsystem>|<mismatch_term>" "${resolve(pastPrs, "library/index.jsonl")}" "${resolve(pastPrs, "library/known_fixes.md")}"`,
-        `jq 'select(.file=="<source_path>")' "${resolve(pastPrs, "aggregate/changed_files.jsonl")}"`,
-        `jq 'select(.pr == <number>)' "${resolve(pastPrs, "aggregate/text_corpus.jsonl")}"`,
-      ],
-    },
     decomp_resources: {
-      data_sheet_csv_dir: dataSheetCsvDir,
-      data_sheet_generated_dir: dataSheetGeneratedDir,
-      data_sheet_csvs: [
-        resolve(dataSheetCsvDir, "cells.csv"),
-        resolve(dataSheetCsvDir, "sheet_index.csv"),
-        resolve(dataSheetCsvDir, "function_addresses.csv"),
-        resolve(dataSheetCsvDir, "global_addresses.csv"),
-        resolve(dataSheetCsvDir, "char_data_offsets.csv"),
-        resolve(dataSheetCsvDir, "character_attributes.csv"),
-        resolve(dataSheetCsvDir, "action_state_reference.csv"),
-        resolve(dataSheetCsvDir, "hitbox_offsets.csv"),
-        resolve(dataSheetCsvDir, "hurtbox_offsets.csv"),
-        resolve(dataSheetCsvDir, "stage_data_offsets.csv"),
-        resolve(dataSheetCsvDir, "entity_data_offsets.csv"),
-        resolve(dataSheetCsvDir, "id_lists.csv"),
-        resolve(dataSheetCsvDir, "subaction_events.csv"),
-        resolve(dataSheetCsvDir, "bones.csv"),
-        resolve(dataSheetCsvDir, "debug_menu_map.csv"),
-      ],
-      data_sheet_generated_csvs: [
-        resolve(dataSheetGeneratedDir, "function_addresses.csv"),
-        resolve(dataSheetGeneratedDir, "data_symbols.csv"),
-        resolve(dataSheetGeneratedDir, "source_references.csv"),
-        resolve(dataSheetGeneratedDir, "curator_updates.csv"),
-        resolve(dataSheetGeneratedDir, "sheet_reconciliation.csv"),
-      ],
-      data_sheet_generated_index: resolve(dataSheetData, "..", "indexes", "codebase_facts.jsonl"),
-      data_sheet_refresh_command: `${sourceScriptCommand("ssbm_data_sheet", "commands/build_codebase_facts.py")} --repo-root ${projectRepoRoot} --json`,
       powerpc_index: resolve(powerpcData, "indexes/powerpc_pdf_pages.csv"),
-      external_hint_indexes: [
-        resolve(externalMirrorsData, "training_mode/indexes/gtme01_map_symbols.csv"),
-        resolve(externalMirrorsData, "m_ex/indexes/header_symbols.csv"),
-        resolve(externalMirrorsData, "tockdom/compiler.txt"),
-      ],
-      trust_rule: "local source, headers, symbols, splits, assembly, and objdiff outrank PR notes and mirrored external resources",
+      trust_rule: "local source, headers, symbols, splits, assembly, and objdiff outrank injected standards and generated graph context",
     },
     knowledge_graph: {
       sources_root: knowledgeSourcesRoot(),
@@ -204,7 +129,7 @@ export function resourceMap(repoRoot: string, options: ResourceMapOptions): Reco
         {
           command: `bun run kg:rebuild --${projectFlag} --repo-root <repo_root> --graph-db <graph_db>`,
           cwd: packageRoot(),
-          purpose: "rebuild the SQLite resource graph from code_graph, PRs, and graph-owned enrichments",
+          purpose: "rebuild the SQLite resource graph from code_graph and graph-owned enrichments",
         },
         {
           command: `bun run kg:curate --${projectFlag} --repo-root <repo_root> --state-dir <state_dir>`,
@@ -214,17 +139,12 @@ export function resourceMap(repoRoot: string, options: ResourceMapOptions): Reco
         {
           command: `bun run kg:maintain --${projectFlag} --repo-root <repo_root> --state-dir <state_dir> --graph-db <graph_db>`,
           cwd: packageRoot(),
-          purpose: "process pending PR postmortems, curate knowledge updates, and rebuild the graph",
+          purpose: "curate knowledge updates and rebuild the graph",
         },
         {
           command: `bun run kg:file-card --${projectFlag} --repo-root <repo_root> --source <source_path> --graph-db <graph_db>`,
           cwd: packageRoot(),
-          purpose: "summarize file graph context, editability, PR history, resource hits, and graph scheduling signals",
-        },
-        {
-          command: `bun run kg:search --${projectFlag} --repo-root <repo_root> --source past_prs --query <term> --limit 10 --graph-db <graph_db>`,
-          cwd: packageRoot(),
-          purpose: "search indexed graph chunks for a source slice such as past_prs",
+          purpose: "summarize file graph context, editability, resource hits, and graph scheduling signals",
         },
         {
           command: "python3 projects/<id>/knowledge/sources/<section>/<source_id>/api/search.py --query <term> --limit 10 --json",
@@ -274,23 +194,11 @@ export function resourceMap(repoRoot: string, options: ResourceMapOptions): Reco
     helper_scripts: [
       {
         path: scripts.decomp_context_lookup.path,
-        purpose: "first-pass target packet across local source, report metadata, PR corpus, data sheets, PowerPC docs, and external mirrors",
+        purpose: "first-pass target packet across local source, report metadata, active graph context, and PowerPC docs",
       },
       {
         path: scripts.rank_decomp_candidates.path,
-        purpose: "scheduler target ranking from build/GALE01/report.json",
-      },
-      {
-        path: scripts.fetch_recent_pr_dump.path,
-        purpose: "fetch only missing PR dump slices and searchable PR library records",
-      },
-      {
-        path: scripts.build_pr_postmortems.path,
-        purpose: "build or rerun PR postmortem knowledge records",
-      },
-      {
-        path: scripts.sync_repo_and_pr_library.path,
-        purpose: "sync the repo branch and missing PR knowledge entries in one operator workflow",
+        purpose: "scheduler target ranking from build/GC6E01/report.json",
       },
     ],
     optional_experimental_tools: [
@@ -323,30 +231,7 @@ export function resourceMap(repoRoot: string, options: ResourceMapOptions): Reco
       },
       {
         command: `python3 "${scripts.decomp_context_lookup.path}" --target <source_path> --symbol <symbol>`,
-        purpose: "assemble first-pass local, PR, and resource evidence",
-      },
-      {
-        command: `rg -i "<offset>|<address>|<field>|<action_state>|<hitbox>|<sfx>" "${dataSheetCsvDir}"`,
-        purpose: "search data-sheet offsets, IDs, states, attributes, and lookup terms",
-      },
-      {
-        command: `rg -n "<symbol>|<file>|<mismatch_term>" "${resolve(pastPrs, "library/index.jsonl")}" "${resolve(pastPrs, "aggregate")}"`,
-        purpose: "search past PR summaries, comments, reviews, and diffs",
-      },
-      {
-        command: `${sourceScriptCommand("discord_knowledge", "api/search.py")} --query <compiler_or_review_term> --limit 10 --json`,
-        cwd: packageRoot(),
-        purpose: "search Discord-derived compiler and workflow knowledge with citations",
-      },
-      {
-        command: `${sourceScriptCommand("discord_knowledge", "api/semantic_search.py")} --query <question> --limit 10 --json`,
-        cwd: packageRoot(),
-        purpose: "semantic RAG lookup over vectorized Discord-derived compiler and workflow knowledge",
-      },
-      {
-        command: `${sourceScriptCommand("ssbm_data_sheet", "api/search.py")} --query <address_or_offset_or_id> --limit 10 --json`,
-        cwd: packageRoot(),
-        purpose: "search normalized data-sheet cells with row and CSV provenance",
+        purpose: "assemble first-pass local and active resource evidence",
       },
       {
         command: `${sourceScriptCommand("powerpc_docs", "api/lookup_instruction.py")} --mnemonic <mnemonic> --limit 10 --json`,
@@ -362,21 +247,6 @@ export function resourceMap(repoRoot: string, options: ResourceMapOptions): Reco
         command: "python3 toolpacks/gamecube-decomp/research/mismatch_db/api/search.py --query <mismatch_pattern> --limit 10 --json",
         cwd: packageRoot(),
         purpose: "search local mismatch-pattern/tool evidence",
-      },
-      {
-        command: `${sourceScriptCommand("past_prs", "commands/fetch_recent_pr_dump.py")} --dry-run`,
-        cwd: packageRoot(),
-        purpose: "preview the missing PR knowledge sync scope without writing",
-      },
-      {
-        command: `${sourceScriptCommand("past_prs", "commands/fetch_recent_pr_dump.py")} --postmortem-mode scaffold`,
-        cwd: packageRoot(),
-        purpose: "fetch missing recent PRs and build deterministic PR knowledge records",
-      },
-      {
-        command: "bun run kg:maintain -- --run-pr-agent --pr-jobs 16 --no-tool-runners --no-tool-index --no-data-sheet-facts --no-rebuild",
-        cwd: packageRoot(),
-        purpose: "run kernel-backed pr-indexer postmortems for missing, draft, or failed records in the orchestrator-owned PR dump",
       },
       {
         command: "python3 configure.py --require-protos --wrapper build/tools/wibo",
@@ -396,7 +266,7 @@ export function resourceMap(repoRoot: string, options: ResourceMapOptions): Reco
         purpose: "operator-only branch regression/progression report against the saved upstream baseline; use regression-check for the enforced gate and PR Markdown report",
       },
       {
-        command: "ninja build/GALE01/<object>.o",
+        command: "ninja build/GC6E01/<object>.o",
         purpose: "narrow object rebuild for the claimed source file",
       },
       {

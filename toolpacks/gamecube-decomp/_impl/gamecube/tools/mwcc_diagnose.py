@@ -57,7 +57,7 @@ def _arg_value(*names: str) -> Optional[str]:
 
 
 def _looks_like_project_root(path: Path) -> bool:
-    return (path / "build/GALE01/report.json").is_file() and (path / "src").is_dir()
+    return (path / "build/GC6E01/report.json").is_file() and (path / "src").is_dir()
 
 
 def _bootstrap_project_root() -> None:
@@ -1983,7 +1983,7 @@ def print_guidance(
 def diagnose_stack(args: argparse.Namespace) -> int:
     if not REPORT_PATH.exists():
         print(
-            f"error: missing {REPORT_PATH}; pass --root/ORCH_PROJECT_REPO_ROOT for the Melee checkout",
+            f"error: missing {REPORT_PATH}; pass --root/ORCH_PROJECT_REPO_ROOT for the Colosseum checkout",
             file=sys.stderr,
         )
         return 1
@@ -2092,7 +2092,7 @@ def print_regflow_lines(lines: list[RegFlowLine]) -> None:
 def diagnose_regflow(args: argparse.Namespace) -> int:
     if not REPORT_PATH.exists():
         print(
-            f"error: missing {REPORT_PATH}; pass --root/ORCH_PROJECT_REPO_ROOT for the Melee checkout",
+            f"error: missing {REPORT_PATH}; pass --root/ORCH_PROJECT_REPO_ROOT for the Colosseum checkout",
             file=sys.stderr,
         )
         return 1
@@ -2166,7 +2166,7 @@ def diagnose_regflow(args: argparse.Namespace) -> int:
 def diagnose_inlines(args: argparse.Namespace) -> int:
     if not REPORT_PATH.exists():
         print(
-            f"error: missing {REPORT_PATH}; pass --root/ORCH_PROJECT_REPO_ROOT for the Melee checkout",
+            f"error: missing {REPORT_PATH}; pass --root/ORCH_PROJECT_REPO_ROOT for the Colosseum checkout",
             file=sys.stderr,
         )
         return 1
@@ -2232,7 +2232,7 @@ def diagnose_inlines(args: argparse.Namespace) -> int:
 def diagnose_raw(args: argparse.Namespace) -> int:
     if not REPORT_PATH.exists():
         print(
-            f"error: missing {REPORT_PATH}; pass --root/ORCH_PROJECT_REPO_ROOT for the Melee checkout",
+            f"error: missing {REPORT_PATH}; pass --root/ORCH_PROJECT_REPO_ROOT for the Colosseum checkout",
             file=sys.stderr,
         )
         return 1

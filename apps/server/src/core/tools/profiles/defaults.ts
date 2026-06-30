@@ -8,21 +8,12 @@
 /**
  * Default worker Pi tools attached to worker launches.
  *
- * Pruned 2026-06-12 per reports/pi-agent-tool-analysis-2026-06-12.html: tools
- * used in <2% of 749 terminal xhigh worker states (powerpc_*, discord topics,
- * include_fixer_preview, struct_infer_from_asm, item_state_table_preview,
- * ssbm search/offset, mwcc_debug_raw_dump) are no longer advertised to
- * workers. Registrations stay in the registry; re-enable per run via the
- * profile `enable` override.
+ * Colosseum default profiles only advertise sources active in the project
+ * registry plus reusable GameCube decomp toolpack APIs.
  */
 export const defaultWorkerToolProfile = [
   "code_graph_file_card",
   "code_graph_search",
-  "past_prs_search",
-  "discord_knowledge_search",
-  "ssbm_data_sheet_lookup_address",
-  "external_mirrors_search",
-  "external_symbol_lookup",
   "path_facts_resolve",
   "ghidra_lookup",
   "opseq_similar_functions",
@@ -48,7 +39,6 @@ export const defaultWorkerToolProfile = [
 export const defaultIntegrationResolverToolProfile = [
   "code_graph_file_card",
   "code_graph_search",
-  "past_prs_search",
   "path_facts_resolve",
   "mismatch_db_search",
   "checkdiff_run",
@@ -71,7 +61,6 @@ export const defaultPrIndexerToolProfile = [
 /** Default PR splitter tools attached to handoff planning launches. */
 export const defaultPrSplitterToolProfile = [
   "code_graph_search",
-  "past_prs_search",
   "path_facts_resolve",
   "review_lint_scan",
 ] as const;
@@ -80,7 +69,6 @@ export const defaultPrSplitterToolProfile = [
 export const defaultPrFixerToolProfile = [
   "code_graph_file_card",
   "code_graph_search",
-  "past_prs_search",
   "path_facts_resolve",
   "mismatch_db_search",
   "checkdiff_run",
@@ -97,7 +85,6 @@ export const defaultPrFixerToolProfile = [
 export const defaultReconcileToolProfile = [
   "code_graph_file_card",
   "code_graph_search",
-  "past_prs_search",
   "path_facts_resolve",
   "mismatch_db_search",
   "checkdiff_run",
@@ -113,7 +100,6 @@ export const defaultReconcileToolProfile = [
 export const defaultQaRepairToolProfile = [
   "code_graph_file_card",
   "code_graph_search",
-  "past_prs_search",
   "path_facts_resolve",
   "mismatch_db_search",
   "checkdiff_run",
@@ -128,7 +114,6 @@ export const defaultQaRepairToolProfile = [
 /** Default knowledge-curator tools attached to curator launches. */
 export const defaultKnowledgeCuratorToolProfile = [
   "code_graph_search",
-  "past_prs_search",
   "decomp_standards_context",
   "decomp_standards_proposals",
   "path_facts_resolve",

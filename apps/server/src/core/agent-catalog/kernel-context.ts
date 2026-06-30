@@ -1,7 +1,7 @@
 import type { AgentContextResolver, LoadedMap, LoaderDeclaration, SpawnContext } from "@agent-kernel/kernel/context";
 import type { PiPromptKernelContextInput } from "@server/core/shared/types/agents.js";
 
-export const ROOT_CONTEXT_LOADER_KIND = "melee-session-context";
+export const ROOT_CONTEXT_LOADER_KIND = "colosseum-session-context";
 
 export const rootContextLoaderDeclaration = {
   kind: ROOT_CONTEXT_LOADER_KIND,

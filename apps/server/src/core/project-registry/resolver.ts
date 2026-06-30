@@ -123,8 +123,8 @@ const projectIdPattern = /^[A-Za-z0-9][A-Za-z0-9_.-]*$/;
 
 const defaultValidation: Required<ProjectValidationDefaults> = {
   qaTarget: "changes_all",
-  reportPath: "build/GALE01/report.json",
-  reportChangesPath: "build/GALE01/report_changes.json",
+  reportPath: "build/GC6E01/report.json",
+  reportChangesPath: "build/GC6E01/report_changes.json",
   objdiffPath: "objdiff.json",
 };
 
@@ -144,8 +144,8 @@ const defaultDashboard: Required<ProjectDashboardDefaults> = {
 };
 
 const defaultPr: Required<ProjectPrDefaults> = {
-  groupMode: "melee-subsystem",
-  titlePrefix: "Melee decomp",
+  groupMode: "colosseum-subsystem",
+  titlePrefix: "Colosseum decomp",
   branchPrefix: "pr-split",
   maxFilesPerPr: 30,
   splitStrategy: "deterministic",
@@ -154,14 +154,7 @@ const defaultPr: Required<ProjectPrDefaults> = {
 };
 
 const defaultKnowledge: Required<ProjectKnowledgeConfig> = {
-  globalSources: [
-    "past_prs",
-    "decomp_standards",
-    "ssbm_data_sheet",
-    "powerpc_docs",
-    "external_mirrors",
-    "path_facts",
-  ],
+  globalSources: ["decomp_standards", "powerpc_docs", "path_facts"],
   projectSources: ["code_graph"],
 };
 

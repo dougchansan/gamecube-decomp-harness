@@ -72,13 +72,13 @@ adding behavior, put it beside the agent as context and route it through
 PR and worker learning enters through a maintenance pipeline:
 
 1. PR refresh/sync updates
-   `projects/melee/knowledge/sources/code_context/past_prs/data`.
+   `projects/pkmn-colosseum/knowledge/sources/code_context/past_prs/data`.
    Full corpus refresh uses the source-local
-   `projects/melee/knowledge/sources/code_context/past_prs/commands/fetch_recent_pr_dump.py`
+   `projects/pkmn-colosseum/knowledge/sources/code_context/past_prs/commands/fetch_recent_pr_dump.py`
    helper with `--all-prs`; routine postmortem indexing runs through
    `bun run kg:maintain`.
 2. The PR indexer pass creates missing per-PR postmortems under
-   `projects/melee/knowledge/sources/code_context/past_prs/data/prs/pr-NNNN/postmortem`.
+   `projects/pkmn-colosseum/knowledge/sources/code_context/past_prs/data/prs/pr-NNNN/postmortem`.
 3. Source indexers generate source-local `indexes/*.jsonl` files for active
    injected context, searchable documents, CSVs, PDF page text, and external
    mirrors.
@@ -94,7 +94,7 @@ PR and worker learning enters through a maintenance pipeline:
 6. Workers persist worker states, checkpoints, and artifact files after runner
    validation.
 7. The knowledge curator reduces worker states, selected checkpoints, and PR postmortems into
-   `projects/melee/knowledge/resource_graph/enrichments/knowledge_curator_updates.jsonl`.
+   `projects/pkmn-colosseum/knowledge/resource_graph/enrichments/knowledge_curator_updates.jsonl`.
 8. Graph rebuild ingests selected project code data, active registered sources,
    legacy/curator enrichments, and derived mismatch-pattern records into the
    selected graph database.
@@ -107,7 +107,7 @@ source updates, and deterministic graph ingestion owns the final write.
 
 ## Banned Patterns
 
-`projects/melee/knowledge/sources/injectable/banned_patterns` is the executable record of
+`projects/pkmn-colosseum/knowledge/sources/injectable/banned_patterns` is the executable record of
 maintainer rejections — the QA ship gate's L4 feedback loop (see
 [score and PR handoff](60-score-and-pr-handoff.md)). Once a maintainer rejects
 a pattern, the record blocks it mechanically instead of relying on an LLM

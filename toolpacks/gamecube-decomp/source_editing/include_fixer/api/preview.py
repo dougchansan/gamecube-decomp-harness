@@ -54,7 +54,7 @@ def main() -> None:
             except ValueError:
                 rel = header
             parts = rel.as_posix().split("/")
-            if parts and parts[0] == "melee":
+            if parts and parts[0] == "pkmn-colosseum":
                 parts = parts[1:]
             inc_path = "/".join(parts)
             if inc_path in already or Path(inc_path).name in already_base:

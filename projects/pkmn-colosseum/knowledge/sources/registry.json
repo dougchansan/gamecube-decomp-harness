@@ -1,0 +1,42 @@
+{
+  "sections": {
+    "injectable": {
+      "title": "Injected Context",
+      "description": "Compact facts selected before or during worker boot."
+    },
+    "rag_search": {
+      "title": "Searchable Knowledge Bases",
+      "description": "Standalone corpora that workers query with source-local APIs or graph search."
+    },
+    "code_context": {
+      "title": "Code-Connected Evidence",
+      "description": "Sources that attach to files, symbols, graph cards, PR history, or external reference edges."
+    }
+  },
+  "sources": [
+    {
+      "id": "decomp_standards",
+      "section": "injectable",
+      "path": "injectable/decomp_standards",
+      "access_modes": ["global_injection", "worker_bootstrap", "proposal_listing"]
+    },
+    {
+      "id": "path_facts",
+      "section": "injectable",
+      "path": "injectable/path_facts",
+      "access_modes": ["path_scoped_injection", "worker_bootstrap", "resolve_for_path", "proposal_listing"]
+    },
+    {
+      "id": "powerpc_docs",
+      "section": "rag_search",
+      "path": "rag_search/powerpc_docs",
+      "access_modes": ["source_search", "instruction_lookup", "graph_search"]
+    },
+    {
+      "id": "code_graph",
+      "section": "code_context",
+      "path": "code_context/code_graph",
+      "access_modes": ["file_card", "rank_features", "editability", "graph_search"]
+    }
+  ]
+}

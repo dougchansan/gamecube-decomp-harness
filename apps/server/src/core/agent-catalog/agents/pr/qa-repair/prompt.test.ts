@@ -11,7 +11,7 @@ function finding(overrides: Partial<QaScanFinding> = {}): QaScanFinding {
   return {
     rule_id: "m2c_residue_names",
     severity: "error",
-    file: "src/melee/gr/grsmoke.c",
+    file: "src/colosseum/gr/grsmoke.c",
     line: 23,
     excerpt: "s32 temp_r30 = var_r4 + phi_f1;",
     message: "Generated m2c local name remains in source.",
@@ -37,7 +37,7 @@ function queueItem(): QaRepairQueueItem {
     runId: "test-run",
     repoRoot: "/repo",
     scanResult: scanResult([finding()]),
-    candidateFiles: ["src/melee/gr/grsmoke.c"],
+    candidateFiles: ["src/colosseum/gr/grsmoke.c"],
     createdAt: "2026-06-13T00:00:00.000Z",
   });
   return queue.items[0] as QaRepairQueueItem;
@@ -47,8 +47,8 @@ describe("validateQaRepairAgentResult", () => {
   test("accepts a valid qa-repair result", () => {
     const validated = validateQaRepairAgentResult({
       schema_version: QA_REPAIR_AGENT_SCHEMA_VERSION,
-      item_id: "src-melee-gr-grsmoke",
-      source_path: "src/melee/gr/grsmoke.c",
+      item_id: "src-colosseum-gr-grsmoke",
+      source_path: "src/colosseum/gr/grsmoke.c",
       outcome: "fixed",
       score_impact: "same_match",
 	      summary: "Removed generated local names.",
@@ -66,8 +66,8 @@ describe("validateQaRepairAgentResult", () => {
   test("normalizes unmeasured score aliases to unknown", () => {
     const validated = validateQaRepairAgentResult({
       schema_version: QA_REPAIR_AGENT_SCHEMA_VERSION,
-      item_id: "src-melee-gr-grsmoke",
-      source_path: "src/melee/gr/grsmoke.c",
+      item_id: "src-colosseum-gr-grsmoke",
+      source_path: "src/colosseum/gr/grsmoke.c",
       outcome: "fixed",
       score_impact: "not_measured",
 	      summary: "Removed generated local names.",
@@ -85,8 +85,8 @@ describe("validateQaRepairAgentResult", () => {
   test("normalizes warning-only validation statuses to passed", () => {
     const validated = validateQaRepairAgentResult({
       schema_version: QA_REPAIR_AGENT_SCHEMA_VERSION,
-      item_id: "src-melee-gr-grsmoke",
-      source_path: "src/melee/gr/grsmoke.c",
+      item_id: "src-colosseum-gr-grsmoke",
+      source_path: "src/colosseum/gr/grsmoke.c",
       outcome: "fixed",
       score_impact: "lower_score",
 	      summary: "Removed generated local names.",
@@ -105,7 +105,7 @@ describe("validateQaRepairAgentResult", () => {
     const validated = validateQaRepairAgentResult({
       schema_version: "wrong",
       item_id: "",
-      source_path: "src/melee/gr/grsmoke.c",
+      source_path: "src/colosseum/gr/grsmoke.c",
       outcome: "clean",
       score_impact: "higher",
       summary: "",
@@ -136,8 +136,8 @@ describe("qaRepairPrompt", () => {
     const injectedContext = bundle.kernelContext?.renderedContext ?? "";
 
     expect(promptOnly).toContain("Repair one PR-bound candidate file");
-    expect(promptOnly).not.toContain("src/melee/gr/grsmoke.c");
-    expect(injectedContext).toContain("src/melee/gr/grsmoke.c");
+    expect(promptOnly).not.toContain("src/colosseum/gr/grsmoke.c");
+    expect(injectedContext).toContain("src/colosseum/gr/grsmoke.c");
     expect(injectedContext).toContain("m2c_residue_names");
     expect(promptOnly).toContain("lower_score");
     expect(injectedContext).toContain("<available_tools>");

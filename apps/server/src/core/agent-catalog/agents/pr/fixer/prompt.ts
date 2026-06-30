@@ -15,7 +15,7 @@ import {
 } from "./context.js";
 export { type PrFixerPromptOptions } from "./context.js";
 
-export const PR_FIXER_SCHEMA_VERSION = "melee_pr_fixer_result_v1";
+export const PR_FIXER_SCHEMA_VERSION = "colosseum_pr_fixer_result_v1";
 
 export type PrFixerOutcome = "fixed" | "needs_rework" | "blocked" | "manual_review_required";
 export type PrFixerDisposition = "fixed_source" | "fixed_by_minimal_revert" | "left_with_evidence" | "manual_review" | "false_positive";
@@ -58,8 +58,8 @@ function agentFilePath(): string {
 }
 
 export const prompt = definePrompt({
-  id: "melee.pr-fixer.system",
-  title: "Melee PR Fixer System Prompt",
+  id: "colosseum.pr-fixer.system",
+  title: "Colosseum PR Fixer System Prompt",
   archetype: "workflow",
   nodes: [
     section("goal", [

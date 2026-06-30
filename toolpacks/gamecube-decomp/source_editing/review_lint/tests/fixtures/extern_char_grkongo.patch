@@ -1,7 +1,7 @@
-diff --git a/src/melee/gr/grkongo.c b/src/melee/gr/grkongo.c
+diff --git a/src/colosseum/gr/grkongo.c b/src/colosseum/gr/grkongo.c
 index c4d86c9..33d3752 100644
---- a/src/melee/gr/grkongo.c
-+++ b/src/melee/gr/grkongo.c
+--- a/src/colosseum/gr/grkongo.c
++++ b/src/colosseum/gr/grkongo.c
 @@ -98,6 +98,8 @@ static const lbColl_80008D30_arg1 grKg_803B7FB0 = {
      1, 1, 361, 0, 0, 180, 0, 0, 0,
  };

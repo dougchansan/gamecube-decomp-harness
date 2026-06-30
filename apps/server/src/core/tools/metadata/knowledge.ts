@@ -12,36 +12,6 @@ export const knowledgeToolPromptMetadata: Record<string, AgentToolPromptMetadata
     type: "local_search",
     useWhen: "Search local source paths, symbols, functions, units, and graph metadata.",
   },
-  past_prs_search: {
-    provider: "past_prs",
-    type: "history",
-    useWhen: "Find prior accepted or rejected PR evidence for a file, subsystem, tactic, or review risk.",
-  },
-  discord_knowledge_search: {
-    provider: "discord_knowledge",
-    type: "community_knowledge",
-    useWhen: "Search community/compiler notes for concrete decomp or review terms.",
-  },
-  discord_knowledge_topics_for_terms: {
-    provider: "discord_knowledge",
-    type: "community_knowledge",
-    useWhen: "Expand several loose compiler, review, or workflow terms into topic-style hits.",
-  },
-  ssbm_data_sheet_search: {
-    provider: "ssbm_data_sheet",
-    type: "reference_data",
-    useWhen: "Search data-sheet rows for addresses, offsets, IDs, action states, hitboxes, attributes, or resources.",
-  },
-  ssbm_data_sheet_lookup_address: {
-    provider: "ssbm_data_sheet",
-    type: "reference_data",
-    useWhen: "Look up one concrete address in normalized SSBM data-sheet rows.",
-  },
-  ssbm_data_sheet_lookup_offset: {
-    provider: "ssbm_data_sheet",
-    type: "reference_data",
-    useWhen: "Look up one concrete typed or untyped offset in normalized SSBM data-sheet rows.",
-  },
   powerpc_docs_search: {
     provider: "powerpc_docs",
     type: "reference_data",
@@ -51,16 +21,6 @@ export const knowledgeToolPromptMetadata: Record<string, AgentToolPromptMetadata
     provider: "powerpc_docs",
     type: "reference_data",
     useWhen: "Look up documentation for one concrete PowerPC instruction mnemonic.",
-  },
-  external_mirrors_search: {
-    provider: "external_mirrors",
-    type: "external_reference",
-    useWhen: "Search supplemental external mirrors for names, symbols, headers, or reference hints.",
-  },
-  external_symbol_lookup: {
-    provider: "external_mirrors",
-    type: "external_reference",
-    useWhen: "Look up one specific external symbol or name, then verify locally.",
   },
   path_facts_resolve: {
     provider: "path_facts",

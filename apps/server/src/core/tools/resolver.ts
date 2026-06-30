@@ -111,7 +111,7 @@ function stringMapField(value: unknown): Record<string, string> | undefined {
 }
 
 function projectRuntimePaths(context: ToolRuntimeContext): ProjectRuntimePaths {
-  const projectId = context.project?.projectId ?? "melee";
+  const projectId = context.project?.projectId ?? "colosseum";
   const descriptorPath = context.project?.descriptorPath ?? resolve(projectRoot(projectId), "project.json");
   const projectDir = dirname(descriptorPath);
   return {

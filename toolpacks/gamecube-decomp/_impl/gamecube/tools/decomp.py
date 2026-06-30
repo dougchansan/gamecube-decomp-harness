@@ -6,20 +6,20 @@
 """
 Decompile a function or translation unit with the vendored m2c fork.
 
-Vendored from the melee tree's tools/decomp.py and rewired for this tool suite:
+Vendored from the colosseum tree's tools/decomp.py and rewired for this tool suite:
   - the project checkout is resolved via ORCH_PROJECT_REPO_ROOT,
     matching the other tool-local helper scripts;
   - m2c is the vendored fork at <tool impl>/m2c, injected onto
     PYTHONPATH for the m2c subprocess (no install step, no venv dependency);
-  - m2ctx still runs from the melee tree (it is pure stdlib and self-locating).
+  - m2ctx still runs from the colosseum tree (it is pure stdlib and self-locating).
 
 Usage (run in place, like the other tools/ scripts):
 
-  ORCH_PROJECT_REPO_ROOT=~/melee python toolpacks/gamecube-decomp/_impl/gamecube/tools/decomp.py <function|tu> [m2c args...]
+  ORCH_PROJECT_REPO_ROOT=~/colosseum python toolpacks/gamecube-decomp/_impl/gamecube/tools/decomp.py <function|tu> [m2c args...]
 
 The PEP 723 block above declares the hard deps so `uv run` provisions
 them automatically: pyelftools (function -> obj/asm lookup) and pcpp
-(used by the melee tree's m2ctx.py --preprocessor when generating
+(used by the colosseum tree's m2ctx.py --preprocessor when generating
 ctx.c). The clipboard (--copy) and colorize (-c) extras remain optional
 and degrade gracefully if absent.
 """
@@ -38,13 +38,13 @@ from elftools.elf.elffile import ELFFile
 from elftools.elf.sections import SymbolTableSection
 
 # Project checkout root: explicit override, then Claude Code's project dir,
-# then assume this script lives at <melee>/tools/ (matches checkdiff.py etc.).
+# then assume this script lives at <colosseum>/tools/ (matches checkdiff.py etc.).
 from project_root import resolve_root
 
 ROOT = resolve_root()
 # The vendored m2c fork lives at the implementation root, next to this tools/ dir.
 M2C_ROOT = Path(__file__).resolve().parents[1] / "m2c"
-DTK_ROOT = ROOT / "build/GALE01"
+DTK_ROOT = ROOT / "build/GC6E01"
 OBJ_ROOT = DTK_ROOT / "obj"
 ASM_ROOT = DTK_ROOT / "asm"
 SRC_ROOT = ROOT / "src"
@@ -107,9 +107,9 @@ def run_cmd(
 
 
 def gen_ctx() -> None:
-    # m2ctx's pcpp resolves its -i include dirs (src, src/melee, ...)
+    # m2ctx's pcpp resolves its -i include dirs (src, src/colosseum, ...)
     # relative to cwd; the upstream decomp.py relied on being run from the
-    # melee root. We run from the tool implementation, so pin cwd to <melee>.
+    # colosseum root. We run from the tool implementation, so pin cwd to <colosseum>.
     _ = run_cmd(
         [
             "python",
@@ -129,7 +129,7 @@ def main() -> None:
     _ = parser.add_argument(
         "m2c_input",
         type=str,
-        help="name of a function (i.e. it_8026B9A8) or translation unit (i.e. melee/it/items/itheiho)",
+        help="name of a function (i.e. it_8026B9A8) or translation unit (i.e. colosseum/it/items/itheiho)",
     )
     _ = parser.add_argument(
         dest="m2c_args",
@@ -218,7 +218,7 @@ def main() -> None:
         # Run the tool-local m2c fork: prepend it to PYTHONPATH so
         # `-m m2c.main` (and its bundled m2c_pycparser) resolve to
         # <tool impl>/m2c regardless of which interpreter was selected. No
-        # install, no melee .venv dependency.
+        # install, no colosseum .venv dependency.
         m2c_env = dict(os.environ)
         m2c_env["PYTHONPATH"] = os.pathsep.join(
             [str(M2C_ROOT)] + ([p] if (p := os.environ.get("PYTHONPATH")) else [])

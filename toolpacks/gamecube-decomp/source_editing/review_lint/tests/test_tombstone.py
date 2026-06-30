@@ -1,5 +1,5 @@
 """Resubmission tombstone test: the particle.c blob, rejected once on
-doldecomp/melee#2659, must be blocked forever with the original comment URL.
+dougchansan/pkmn-colosseum#2659, must be blocked forever with the original comment URL.
 """
 
 from __future__ import annotations
@@ -15,7 +15,7 @@ import scan_diff as scan_diff_mod
 
 from conftest import FIXTURES_DIR, SCAN_DIFF
 
-COMMENT_URL = "https://github.com/doldecomp/melee/pull/2659#discussion_r3399334540"
+COMMENT_URL = "https://github.com/dougchansan/pkmn-colosseum/pull/2659#discussion_r3399334540"
 
 
 def _particle_blob_hunk_text() -> str:
@@ -30,13 +30,13 @@ def _particle_blob_hunk_text() -> str:
     raise AssertionError("particle blob hunk not found in fixture")
 
 
-def test_tombstone_blocks_resubmitted_particle_blob(melee_checkout, tmp_path: Path):
+def test_tombstone_blocks_resubmitted_particle_blob(colosseum_checkout, tmp_path: Path):
     blob_text = _particle_blob_hunk_text()
     tombstone = {
         "id": "particle-mcc-string-blob",
         "file": "src/sysdolphin/baselib/particle.c",
         "symbol": "lbl_8040A540",
-        "source_pr": "doldecomp/melee#2659",
+        "source_pr": "dougchansan/pkmn-colosseum#2659",
         "comment_url": COMMENT_URL,
         "threshold": 0.7,
         "shingles": sorted(_qa_rules.normalized_shingles(blob_text)),
@@ -54,7 +54,7 @@ def test_tombstone_blocks_resubmitted_particle_blob(melee_checkout, tmp_path: Pa
             "python3",
             str(SCAN_DIFF),
             "--repo",
-            str(melee_checkout),
+            str(colosseum_checkout),
             "--diff-file",
             str(FIXTURES_DIR / "string_blob_particle.patch"),
             "--gate",

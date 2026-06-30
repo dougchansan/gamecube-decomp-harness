@@ -147,10 +147,10 @@ def main() -> None:
         objdiff_path = import_tool_module("objdiff_path", repo_root)
         unit = args.unit or ninja_compile.find_unit_for_function(args.function)
         if not unit:
-            payload.update({"status": "function_not_found", "message": "Function was not found in build/GALE01/report.json."})
+            payload.update({"status": "function_not_found", "message": "Function was not found in build/GC6E01/report.json."})
             print_json(payload)
             return
-        target = repo_root / "build" / "GALE01" / "obj" / f"{unit}.o"
+        target = repo_root / "build" / "GC6E01" / "obj" / f"{unit}.o"
         if not target.exists():
             payload.update({"status": "target_object_not_found", "unit": unit, "target_object": str(target)})
             print_json(payload)

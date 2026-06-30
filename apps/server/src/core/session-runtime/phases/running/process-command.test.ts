@@ -24,14 +24,14 @@ describe("running process command", () => {
       },
       graphDbPath: "/state/graph.sqlite",
       noRefillBatch: false,
-      project: { projectId: "melee", processName: "melee-live", dashboard: { epochSize: "64" } },
+      project: { projectId: "colosseum", processName: "colosseum-live", dashboard: { epochSize: "64" } },
       repoRoot: "/repo",
       runId: "run-1",
       serverJobPath: "/orch/apps/server/src/job-runner.ts",
       stateDir: "/state",
     });
 
-    expect(plan.name).toBe("melee-live");
+    expect(plan.name).toBe("colosseum-live");
     expect(plan.maxWorkers).toBe(4);
     expect(plan.command).toContain("babysit");
     expect(plan.command).toContain("--dry-run-agents");
@@ -49,7 +49,7 @@ describe("running process command", () => {
       },
       graphDbPath: "/state/graph.sqlite",
       noRefillBatch: false,
-      project: { projectId: "melee", processName: "melee-live" },
+      project: { projectId: "colosseum", processName: "colosseum-live" },
       repoRoot: "/repo",
       runId: "run-1",
       serverJobPath: "/orch/apps/server/src/job-runner.ts",
@@ -69,7 +69,7 @@ describe("running process command", () => {
       },
       graphDbPath: "/state/graph.sqlite",
       noRefillBatch: false,
-      project: { projectId: "melee", processName: "melee-live" },
+      project: { projectId: "colosseum", processName: "colosseum-live" },
       repoRoot: "/repo",
       runId: "run-1",
       serverJobPath: "/orch/apps/server/src/job-runner.ts",
@@ -97,7 +97,7 @@ describe("running process command", () => {
       },
       graphDbPath: "/state/graph.sqlite",
       noRefillBatch: false,
-      project: { projectId: "melee", processName: "melee-live" },
+      project: { projectId: "colosseum", processName: "colosseum-live" },
       repoRoot: "/repo",
       runId: "run-1",
       serverJobPath: "/orch/apps/server/src/job-runner.ts",
@@ -117,7 +117,7 @@ describe("running process command", () => {
       },
       graphDbPath: "/state/graph.sqlite",
       noRefillBatch: false,
-      project: { projectId: "melee", processName: "melee-live", dashboard: { agentTimeoutSeconds: 2400 } },
+      project: { projectId: "colosseum", processName: "colosseum-live", dashboard: { agentTimeoutSeconds: 2400 } },
       repoRoot: "/repo",
       runId: "run-1",
       serverJobPath: "/orch/apps/server/src/job-runner.ts",
@@ -133,7 +133,7 @@ describe("running process command", () => {
       body: { maxWorkers: 4 },
       graphDbPath: "/state/graph.sqlite",
       noRefillBatch: true,
-      project: { projectId: "melee" },
+      project: { projectId: "colosseum" },
       repoRoot: "/repo",
       runId: "run-1",
       serverJobPath: "/orch/apps/server/src/job-runner.ts",

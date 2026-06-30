@@ -72,9 +72,9 @@ apps/server/src/
 Run a job with:
 
 ```sh
-bun run server:job -- --project melee status
-bun run server:job -- --project melee init-run --desired-workers 16 --goal-kind matched_code_percent --goal-value 72
-bun run server:job -- --project melee babysit --max-workers 16 --idle-sleep-ms 5000
+bun run server:job -- --project pkmn-colosseum status
+bun run server:job -- --project pkmn-colosseum init-run --desired-workers 16 --goal-kind matched_code_percent --goal-value 72
+bun run server:job -- --project pkmn-colosseum babysit --max-workers 16 --idle-sleep-ms 5000
 ```
 
 `qa-repair` is the resolver runtime for QA repair queue items. The job builds

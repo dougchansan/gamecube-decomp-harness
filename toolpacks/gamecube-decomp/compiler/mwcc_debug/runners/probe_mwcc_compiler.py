@@ -20,7 +20,7 @@ from search_index import package_root_for_tool, tool_storage_root  # type: ignor
 
 PACKAGE_ROOT = package_root_for_tool(TOOL_ROOT)
 TOOL_STORAGE_ROOT = tool_storage_root(TOOL_ROOT)
-DEFAULT_REPO_ROOT = PACKAGE_ROOT.parent / "melee"
+DEFAULT_REPO_ROOT = PACKAGE_ROOT.parent / "pkmn-colosseum"
 
 
 def parse_args() -> argparse.Namespace:

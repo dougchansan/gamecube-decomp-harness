@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
-import { existsSync, lstatSync, mkdirSync, readdirSync, statSync, symlinkSync } from "node:fs";
+import { existsSync, lstatSync, mkdirSync, readFileSync, readdirSync, statSync, symlinkSync } from "node:fs";
 import { chmod, copyFile, cp, mkdir, readFile, readdir, rm, utimes, writeFile } from "node:fs/promises";
 import { basename, delimiter, dirname, isAbsolute, relative, resolve } from "node:path";
-import { createMeleeKernelSpawnContext } from "@server/infrastructure/kernel/bridge/spawn-context";
+import { createColosseumKernelSpawnContext } from "@server/infrastructure/kernel/bridge/spawn-context";
 import {
   appendWorkerActivityEvent,
   captureWorkerChangeBaseline,
@@ -17,8 +17,8 @@ import {
   type WorkerReviewLint,
   type WorkerRunnerValidation,
 } from "@server/core/agent-catalog/agents/running/worker";
-import { qaLintRepairReasons, type WorkerChangeValidation } from "@server/core/agent-catalog/agents/running/worker/change-validation";
-import { runMeleeKernelPiAgent as runPiAgent } from "@server/infrastructure/agent-runtime/kernel-pi-runner";
+import { objectBuildDirFromReportPath, qaLintRepairReasons, type WorkerChangeValidation } from "@server/core/agent-catalog/agents/running/worker/change-validation";
+import { runColosseumKernelPiAgent as runPiAgent } from "@server/infrastructure/agent-runtime/kernel-pi-runner";
 import { defaultWorkerToolProfile } from "@server/core/tools";
 import {
   fileGraphCard,
@@ -561,9 +561,9 @@ interface WorkerReportArtifactSource {
 }
 
 const WORKER_REPORT_ARTIFACT_RELATIVE_PATHS = [
-  "build/GALE01/report.json",
-  "build/GALE01/report_changes.json",
-  "build/GALE01/baseline.json",
+  "build/GC6E01/report.json",
+  "build/GC6E01/report_changes.json",
+  "build/GC6E01/baseline.json",
 ];
 
 const WORKER_TOOL_ARTIFACTS = [
@@ -801,15 +801,15 @@ function reportArtifactSourcesForWorker(params: { store: StateStore; runId: stri
     resolve(projectDir, "worktrees", "upstream-current"),
   ];
   const dashboardSources: Record<string, Array<string | null>> = {
-    "build/GALE01/report.json": [
+    "build/GC6E01/report.json": [
       latestArtifactSourcePath(params.store, params.runId, "board_snapshot", "current"),
       latestArtifactSourcePath(params.store, params.runId, "board_snapshot", "initial"),
     ],
-    "build/GALE01/report_changes.json": [
+    "build/GC6E01/report_changes.json": [
       latestArtifactSourcePath(params.store, params.runId, "trusted_report", "current"),
       latestArtifactSourcePath(params.store, params.runId, "trusted_report", "baseline"),
     ],
-    "build/GALE01/baseline.json": [],
+    "build/GC6E01/baseline.json": [],
   };
   const sources: WorkerReportArtifactSource[] = [];
   for (const relativePath of WORKER_REPORT_ARTIFACT_RELATIVE_PATHS) {
@@ -958,14 +958,33 @@ function setShellFlag(command: string, flag: string, value: string): string {
   return `${command} ${replacement}`;
 }
 
-export function configureCommandWithWorkerToolPaths(command: string, toolPaths: WorkerConfigureToolPaths): string {
+function configurePySupportedFlags(repoRoot: string): Set<string> | null {
+  try {
+    const text = readFileSync(resolve(repoRoot, "configure.py"), "utf8");
+    const flags = new Set([...text.matchAll(/["'](--[A-Za-z0-9][A-Za-z0-9-]*)["']/g)].map((match) => match[1]));
+    return flags.size > 0 ? flags : null;
+  } catch {
+    return null;
+  }
+}
+
+function configureSupports(flags: Set<string> | null | undefined, flag: string): boolean {
+  return flags == null || flags.has(flag);
+}
+
+export function configureCommandWithWorkerToolPaths(
+  command: string,
+  toolPaths: WorkerConfigureToolPaths,
+  options: { supportedFlags?: Set<string> | null } = {},
+): string {
   if (!/\bconfigure\.py\b/.test(command)) return command;
   let next = command;
-  if (toolPaths.wrapper) {
+  if (toolPaths.wrapper && configureSupports(options.supportedFlags, "--wrapper")) {
     next = setShellFlag(next, "--wrapper", toolPaths.wrapper);
   }
   const additions: string[] = [];
   const maybeAppend = (flag: string, value: string | undefined) => {
+    if (!configureSupports(options.supportedFlags, flag)) return;
     if (!value || hasShellFlag(next, flag)) return;
     additions.push(flag, shellQuote(value));
   };
@@ -1023,7 +1042,11 @@ async function runWorkerConfigure(params: { workerRepoRoot: string; outputDir: s
       workerRepoRoot: params.workerRepoRoot,
       outputDir: params.outputDir,
       logPrefix: "worker_worktree_configure",
-      command: ["/bin/sh", "-c", configureCommandWithWorkerToolPaths(params.command, toolPaths)],
+      command: [
+        "/bin/sh",
+        "-c",
+        configureCommandWithWorkerToolPaths(params.command, toolPaths, { supportedFlags: configurePySupportedFlags(params.workerRepoRoot) }),
+      ],
       label: "worker worktree configure",
     });
   }
@@ -1279,7 +1302,12 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
     });
     const claimWithWorktree = { ...claimed, worktreePath: workerRepoRoot };
     const project = projectMetadata(globals, { graphDbPath, repoRoot: workerRepoRoot });
-    const snapshot = loadKnowledgeBoardSnapshot(globals.repoRoot, 12, { graphDbPath });
+    const snapshot = loadKnowledgeBoardSnapshot(globals.repoRoot, 12, {
+      graphDbPath,
+      objdiffPath: globals.project?.validation.objdiffPath,
+      projectId: globals.project?.projectId ?? globals.projectId,
+      reportPath: globals.project?.validation.reportPath,
+    });
     const target = targetPacketTarget(claimed.target);
     const knowledgeContext = buildWorkerKnowledgeContext(String(target.source_path ?? ""), graphDbPath);
     const packet = workerPacket({
@@ -1305,6 +1333,7 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
       outputDir: validationDir,
       target,
       dryRun: globals.dryRunAgents,
+      objectBuildDir: objectBuildDirFromReportPath(globals.project?.validation.reportPath),
     });
     await writeFile(resolve(validationDir, "pre_worker_baseline.summary.json"), JSON.stringify(workerChangeBaseline, null, 2));
     const targetUnit = String(target.unit ?? "");
@@ -1378,7 +1407,7 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
             claimId: claimed.claimId,
             attemptIndex,
           },
-          kernelContext: createMeleeKernelSpawnContext({
+          kernelContext: createColosseumKernelSpawnContext({
             kind: "worker",
             projectId: project?.projectId ?? globals.projectId,
             sessionId: runId,

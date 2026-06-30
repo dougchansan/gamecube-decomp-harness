@@ -1,9 +1,9 @@
 /**
  * Source-specific Pi tools for each knowledge silo.
  *
- * The model should choose the source it needs, such as Discord, PowerPC docs,
- * external mirrors, or SSBM data sheets, instead of sending every query through
- * one generic lookup endpoint.
+ * The model should choose the source it needs, such as code graph, PowerPC
+ * docs, standards, or path facts, instead of sending every query through one
+ * generic lookup endpoint.
  */
 import { globalStandardsContext, resolvePathFactsContext } from "@server/core/knowledge";
 import { graphFileCard, graphSearch, runSourceApi } from "../runtime/execution.js";
@@ -24,7 +24,7 @@ const sourceContextToolRoles = [
 const searchParameters = {
   type: "object",
   properties: {
-    query: { type: "string", description: "Concrete term, source path, symbol, address, field, opcode, review term, or data-sheet term to search." },
+    query: { type: "string", description: "Concrete term, source path, symbol, address, field, opcode, or review term to search." },
     limit: { type: "number", description: "Maximum results to return. Values are clamped to a small safe bound." },
   },
   required: ["query"],
@@ -50,37 +50,6 @@ const pathFactsParameters = {
   additionalProperties: false,
 };
 
-const dataSheetAddressParameters = {
-  type: "object",
-  properties: {
-    address: { type: "string", description: "Hex or decimal address to look up in normalized SSBM data sheet rows." },
-    limit: { type: "number", description: "Maximum results to return." },
-  },
-  required: ["address"],
-  additionalProperties: false,
-};
-
-const dataSheetOffsetParameters = {
-  type: "object",
-  properties: {
-    type: { type: "string", description: "Data type/category for the offset lookup, when known." },
-    offset: { type: "string", description: "Hex or decimal offset to look up in normalized SSBM data sheet rows." },
-    limit: { type: "number", description: "Maximum results to return." },
-  },
-  required: ["offset"],
-  additionalProperties: false,
-};
-
-const externalSymbolParameters = {
-  type: "object",
-  properties: {
-    symbol: { type: "string", description: "External mirror symbol or name to look up." },
-    limit: { type: "number", description: "Maximum results to return." },
-  },
-  required: ["symbol"],
-  additionalProperties: false,
-};
-
 const powerpcInstructionParameters = {
   type: "object",
   properties: {
@@ -88,16 +57,6 @@ const powerpcInstructionParameters = {
     limit: { type: "number", description: "Maximum documentation chunks to return." },
   },
   required: ["mnemonic"],
-  additionalProperties: false,
-};
-
-const termsParameters = {
-  type: "object",
-  properties: {
-    terms: { type: "string", description: "Space-separated terms to expand into source-specific topic lookups." },
-    limit: { type: "number", description: "Maximum results to return. Values are clamped to a small safe bound." },
-  },
-  required: ["terms"],
   additionalProperties: false,
 };
 
@@ -236,91 +195,6 @@ export const codeGraphSearchToolRegistration = sourceSearchTool({
   graphBacked: true,
 });
 
-/** Tool for searching distilled historical PR lessons and review evidence. */
-export const pastPrsSearchToolRegistration = sourceSearchTool({
-  id: "past_prs_search",
-  sourceId: "past_prs",
-  label: "Past PR Search",
-  purpose: "Search distilled historical PR lessons, touched files, review notes, and tactics.",
-  description: "Search past PR summaries and postmortem records for exact files, symbols, subsystems, review risks, and matching tactics.",
-  guidance: "Use past_prs_search when historical accepted or rejected PR work might explain a name, tactic, review risk, or subsystem pattern.",
-  graphBacked: true,
-});
-
-/** Tool for searching Discord-derived compiler and workflow knowledge. */
-export const discordKnowledgeSearchToolRegistration = sourceSearchTool({
-  id: "discord_knowledge_search",
-  sourceId: "discord_knowledge",
-  label: "Discord Knowledge Search",
-  purpose: "Search Discord-derived compiler, workflow, and decomp discussion notes.",
-  description: "Search Discord-derived knowledge chunks for compiler behavior, review warnings, workflow tips, and decomp folklore.",
-  guidance: "Use discord_knowledge_search for community notes, compiler anecdotes, or review/workflow advice; verify against local source and objdiff.",
-});
-
-/** Tool for topic-style Discord lookup when the query starts as loose terms. */
-export const discordKnowledgeTopicsToolRegistration = fixedSourceApiTool({
-  id: "discord_knowledge_topics_for_terms",
-  sourceId: "discord_knowledge",
-  label: "Discord Topics For Terms",
-  purpose: "Expand compiler, review, or workflow terms into Discord-derived topic hits.",
-  description: "Search Discord-derived knowledge with the topics-for-terms API.",
-  guidance: "Use discord_knowledge_topics_for_terms when you have several loose compiler/review terms and want topic-style Discord hits before a narrower search.",
-  parameters: termsParameters,
-  scriptName: "topics_for_terms.py",
-  args(params) {
-    const terms = String(params.terms ?? "").trim();
-    if (!terms) return { status: "missing_terms" };
-    return ["--terms", terms, "--limit", String(boundedLimit(params.limit)), "--json"];
-  },
-});
-
-/** Tool for searching normalized SSBM data sheet rows. */
-export const ssbmDataSheetSearchToolRegistration = sourceSearchTool({
-  id: "ssbm_data_sheet_search",
-  sourceId: "ssbm_data_sheet",
-  label: "SSBM Data Sheet Search",
-  purpose: "Search normalized SSBM data sheet rows for addresses, IDs, offsets, action states, hitboxes, and attributes.",
-  description: "Search SSBM data sheet CSV indexes for addresses, offsets, IDs, action states, hitbox/hurtbox data, attributes, and resource rows.",
-  guidance: "Use ssbm_data_sheet_search for concrete data-sheet terms such as addresses, offsets, IDs, SFX, action states, attributes, or hitbox fields.",
-});
-
-/** Tool for exact SSBM data sheet address lookup. */
-export const ssbmDataSheetAddressLookupToolRegistration = fixedSourceApiTool({
-  id: "ssbm_data_sheet_lookup_address",
-  sourceId: "ssbm_data_sheet",
-  label: "SSBM Address Lookup",
-  purpose: "Look up one address in normalized SSBM data sheet rows.",
-  description: "Lookup a concrete address in the SSBM data sheet source.",
-  guidance: "Use ssbm_data_sheet_lookup_address when the question is a specific address rather than a broad data-sheet term.",
-  parameters: dataSheetAddressParameters,
-  scriptName: "lookup_address.py",
-  args(params) {
-    const address = String(params.address ?? "").trim();
-    if (!address) return { status: "missing_address" };
-    return ["--address", address, "--limit", String(boundedLimit(params.limit)), "--json"];
-  },
-});
-
-/** Tool for exact SSBM data sheet offset lookup. */
-export const ssbmDataSheetOffsetLookupToolRegistration = fixedSourceApiTool({
-  id: "ssbm_data_sheet_lookup_offset",
-  sourceId: "ssbm_data_sheet",
-  label: "SSBM Offset Lookup",
-  purpose: "Look up one typed offset in normalized SSBM data sheet rows.",
-  description: "Lookup a concrete offset, optionally within a type/category, in the SSBM data sheet source.",
-  guidance: "Use ssbm_data_sheet_lookup_offset when a struct/category offset is the concrete fact being checked.",
-  parameters: dataSheetOffsetParameters,
-  scriptName: "lookup_offset.py",
-  args(params) {
-    const offset = String(params.offset ?? "").trim();
-    if (!offset) return { status: "missing_offset" };
-    const type = String(params.type ?? "").trim();
-    const args = ["--offset", offset, "--limit", String(boundedLimit(params.limit)), "--json"];
-    if (type) args.push("--type", type);
-    return args;
-  },
-});
-
 /** Tool for searching indexed PowerPC reference documentation. */
 export const powerpcDocsSearchToolRegistration = sourceSearchTool({
   id: "powerpc_docs_search",
@@ -345,33 +219,6 @@ export const powerpcInstructionLookupToolRegistration = fixedSourceApiTool({
     const mnemonic = String(params.mnemonic ?? "").trim();
     if (!mnemonic) return { status: "missing_mnemonic" };
     return ["--mnemonic", mnemonic, "--limit", String(boundedLimit(params.limit)), "--json"];
-  },
-});
-
-/** Tool for searching external mirror snapshots and supplemental references. */
-export const externalMirrorsSearchToolRegistration = sourceSearchTool({
-  id: "external_mirrors_search",
-  sourceId: "external_mirrors",
-  label: "External Mirrors Search",
-  purpose: "Search mirrored external references such as m-ex headers, Training Mode map symbols, Tockdom, and ppc2cpp.",
-  description: "Search external mirror indexes for supplemental names, symbols, headers, compiler notes, and reference snippets.",
-  guidance: "Use external_mirrors_search for supplemental external hints; local source, symbols, splits, assembly, and objdiff still outrank mirror data.",
-});
-
-/** Tool for exact external mirror symbol lookup. */
-export const externalSymbolLookupToolRegistration = fixedSourceApiTool({
-  id: "external_symbol_lookup",
-  sourceId: "external_mirrors",
-  label: "External Symbol Lookup",
-  purpose: "Look up one symbol/name in external mirror indexes.",
-  description: "Lookup a concrete symbol in external mirror indexes.",
-  guidance: "Use external_symbol_lookup for a specific external symbol/name, then verify against local source and graph evidence.",
-  parameters: externalSymbolParameters,
-  scriptName: "lookup_external_symbol.py",
-  args(params) {
-    const symbol = String(params.symbol ?? "").trim();
-    if (!symbol) return { status: "missing_symbol" };
-    return ["--symbol", symbol, "--limit", String(boundedLimit(params.limit)), "--json"];
   },
 });
 
@@ -452,16 +299,8 @@ export const pathFactsProposalsToolRegistration = proposalSourceApiTool({
 export const knowledgeToolRegistrations = [
   codeGraphFileCardToolRegistration,
   codeGraphSearchToolRegistration,
-  pastPrsSearchToolRegistration,
-  discordKnowledgeSearchToolRegistration,
-  discordKnowledgeTopicsToolRegistration,
-  ssbmDataSheetSearchToolRegistration,
-  ssbmDataSheetAddressLookupToolRegistration,
-  ssbmDataSheetOffsetLookupToolRegistration,
   powerpcDocsSearchToolRegistration,
   powerpcInstructionLookupToolRegistration,
-  externalMirrorsSearchToolRegistration,
-  externalSymbolLookupToolRegistration,
   decompStandardsProposalsToolRegistration,
   decompStandardsContextToolRegistration,
   pathFactsResolveToolRegistration,

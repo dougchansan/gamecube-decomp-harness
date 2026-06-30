@@ -1,7 +1,7 @@
-diff --git a/src/melee/gr/gricemt.c b/src/melee/gr/gricemt.c
+diff --git a/src/colosseum/gr/gricemt.c b/src/colosseum/gr/gricemt.c
 index c0ed48c..a83cc2c 100644
---- a/src/melee/gr/gricemt.c
-+++ b/src/melee/gr/gricemt.c
+--- a/src/colosseum/gr/gricemt.c
++++ b/src/colosseum/gr/gricemt.c
 @@ -1087,13 +1087,13 @@ void grIceMt_801F8CDC(Ground_GObj* gobj, s16* joint_indices, int count,
                        HSD_GObj** output_array)
  {

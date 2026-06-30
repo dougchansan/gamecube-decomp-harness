@@ -20,7 +20,7 @@ export function knowledgeRoot(): string {
   return projectKnowledgeRoot();
 }
 
-export function projectKnowledgeRoot(projectId = "melee"): string {
+export function projectKnowledgeRoot(projectId = "pkmn-colosseum"): string {
   const override = process.env.ORCH_PROJECT_KNOWLEDGE_ROOT ?? process.env.ORCHESTRATOR_PROJECT_KNOWLEDGE_ROOT;
   if (override) return isAbsolute(override) ? override : resolve(packageRoot(), override);
   return resolve(packageRoot(), "projects", projectId, "knowledge");
@@ -34,20 +34,20 @@ export function sourceDataRoot(sourceId: string): string {
   return resolve(sourceStorageRoot(sourceId), "data");
 }
 
-export function knowledgeSourcesRoot(): string {
-  return resolve(projectKnowledgeRoot(), "sources");
+export function knowledgeSourcesRoot(projectId?: string): string {
+  return resolve(projectKnowledgeRoot(projectId), "sources");
 }
 
-export function sourceRoot(sourceId: string): string {
-  return resolve(knowledgeSourcesRoot(), sourceRegistryPath(sourceId));
+export function sourceRoot(sourceId: string, projectId?: string): string {
+  return resolve(knowledgeSourcesRoot(projectId), sourceRegistryPath(sourceId));
 }
 
-export function sourceStorageRoot(sourceId: string): string {
-  return resolve(projectKnowledgeRoot(), "sources", sourceRegistryPath(sourceId));
+export function sourceStorageRoot(sourceId: string, projectId?: string): string {
+  return resolve(projectKnowledgeRoot(projectId), "sources", sourceRegistryPath(sourceId));
 }
 
-export function codeGraphFunctionsIndexPath(): string {
-  return resolve(sourceStorageRoot("code_graph"), "indexes/functions.jsonl");
+export function codeGraphFunctionsIndexPath(projectId?: string): string {
+  return resolve(sourceStorageRoot("code_graph", projectId), "indexes/functions.jsonl");
 }
 
 export function knowledgeSourceRegistryPath(): string {
@@ -90,23 +90,23 @@ export function toolpackToolRegistryPath(toolpackId = defaultToolpackId()): stri
   return resolve(toolpackRoot(toolpackId), "registry.json");
 }
 
-export function projectRoot(projectId = "melee"): string {
+export function projectRoot(projectId = "pkmn-colosseum"): string {
   return resolve(packageRoot(), "projects", projectId);
 }
 
-export function projectToolBindingRoot(projectId = "melee"): string {
+export function projectToolBindingRoot(projectId = "pkmn-colosseum"): string {
   return resolve(projectRoot(projectId), "tool-bindings");
 }
 
-export function projectSharedToolDataRoot(projectId = "melee"): string {
+export function projectSharedToolDataRoot(projectId = "pkmn-colosseum"): string {
   return resolve(projectRoot(projectId), "shared/tool-data");
 }
 
-export function projectWorktreeRoot(projectId = "melee", worktreeId = "main"): string {
+export function projectWorktreeRoot(projectId = "pkmn-colosseum", worktreeId = "main"): string {
   return resolve(projectRoot(projectId), "worktrees", worktreeId);
 }
 
-export function projectWorktreeToolCacheRoot(projectId = "melee", worktreeId = "main"): string {
+export function projectWorktreeToolCacheRoot(projectId = "pkmn-colosseum", worktreeId = "main"): string {
   return resolve(projectWorktreeRoot(projectId, worktreeId), "tool-cache");
 }
 
@@ -127,7 +127,7 @@ export function knowledgeCuratorEnrichmentPath(): string {
 }
 
 export function resourceGraphDbPath(): string {
-  return resolve(packageRoot(), "projects/melee/graph/graph.sqlite");
+  return resolve(packageRoot(), "projects/pkmn-colosseum/graph/graph.sqlite");
 }
 
 function sourceRegistryPath(sourceId: string): string {

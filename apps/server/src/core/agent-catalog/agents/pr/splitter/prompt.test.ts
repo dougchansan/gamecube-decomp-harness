@@ -12,10 +12,10 @@ function validPlan(): Record<string, unknown> {
       {
         id: "shared-prep",
         display_name: "Shared Prep",
-        title: "Melee decomp: shared prep",
+        title: "Colosseum decomp: shared prep",
         lane: "match",
-        scope: "src/melee/shared",
-        files: ["src/melee/shared/types.h"],
+        scope: "src/colosseum/shared",
+        files: ["src/colosseum/shared/types.h"],
         depends_on: [],
         independence_kind: "shared-prep",
         review_focus: "Shared declaration needed by later subsystem matches.",
@@ -77,7 +77,7 @@ describe("prSplitterPrompt", () => {
       },
       changed_files: [
         {
-          path: "src/melee/gm/gm_1601.c",
+          path: "src/colosseum/gm/gm_1601.c",
           deterministic_lane: "match",
         },
       ],
@@ -85,7 +85,7 @@ describe("prSplitterPrompt", () => {
         {
           id: "gm",
           lane: "match",
-          files: ["src/melee/gm/gm_1601.c"],
+          files: ["src/colosseum/gm/gm_1601.c"],
         },
       ],
     };
@@ -93,8 +93,8 @@ describe("prSplitterPrompt", () => {
     const promptOnly = `${bundle.systemPrompt}\n${bundle.userPrompt}`;
     const injectedContext = bundle.kernelContext?.renderedContext ?? "";
     expect(promptOnly).toContain("PR splitter agent");
-    expect(promptOnly).not.toContain("src/melee/gm/gm_1601.c");
-    expect(injectedContext).toContain("src/melee/gm/gm_1601.c");
+    expect(promptOnly).not.toContain("src/colosseum/gm/gm_1601.c");
+    expect(injectedContext).toContain("src/colosseum/gm/gm_1601.c");
     expect(injectedContext).toContain(PR_SPLITTER_SCHEMA_VERSION);
     expect(injectedContext).toContain("<available_tools>");
     expect(`${promptOnly}\n${injectedContext}`).not.toMatch(/\{\{[A-Z0-9_]+\}\}/);

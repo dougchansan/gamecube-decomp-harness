@@ -2,10 +2,10 @@
   "id": "opseq",
   "title": "Opcode sequence lookup",
   "trust_tier": "tool_evidence",
-  "description": "Find similar matched and unmatched functions by live opcode-sequence indexes generated from build/GALE01/asm, with report-based function-shape rows retained as supplemental lookup evidence.",
+  "description": "Find similar matched and unmatched functions by live opcode-sequence indexes generated from build/GC6E01/asm, with report-based function-shape rows retained as supplemental lookup evidence.",
   "operation_mode": "live_runner_v1",
   "runner_status": "live_smoke_required",
-  "status_message": "Live runner v1: opcode fingerprints are generated locally from build/GALE01/asm by toolpacks/gamecube-decomp/research/opseq/runners/extract_opcode_sequences.py.",
+  "status_message": "Live runner v1: opcode fingerprints are generated locally from build/GC6E01/asm by toolpacks/gamecube-decomp/research/opseq/runners/extract_opcode_sequences.py.",
   "limitations": [
     "Opcode fingerprints come from generated assembly artifacts; rerun the runner after rebuilding asm/report outputs.",
     "Similarity search is lexical over indexed opcode fingerprints and metadata, not a full edit-distance engine."

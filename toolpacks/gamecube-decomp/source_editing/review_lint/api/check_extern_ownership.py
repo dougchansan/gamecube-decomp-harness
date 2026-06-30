@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Evaluate whether a TU owns the data behind an address-style extern.
 
-Parses ``config/GALE01/splits.txt`` from the melee repo into per-TU section
+Parses ``config/GC6E01/splits.txt`` from the colosseum repo into per-TU section
 address ranges and answers "does TU X own address Y?". A newly added extern
 whose encoded address falls inside the declaring TU's own data section
 ranges is the extern-to-dodge-data-ordering cheat by definition; an address
@@ -26,7 +26,7 @@ from search_index import tool_storage_root  # type: ignore
 
 TOOL_ROOT = Path(__file__).resolve().parents[1]
 CACHE_DIR = tool_storage_root(TOOL_ROOT) / "cache"
-SPLITS_REL_PATH = Path("config") / "GALE01" / "splits.txt"
+SPLITS_REL_PATH = Path("config") / "GC6E01" / "splits.txt"
 
 # Sections that hold a TU's own data (the targets of literal-anchoring externs).
 DATA_SECTIONS = {".data", ".sdata", ".sdata2", ".rodata", ".bss", ".sbss"}
@@ -72,7 +72,7 @@ def parse_splits(splits_path: Path) -> dict[str, dict[str, list[list[int]]]]:
 
 
 def load_splits_ranges(repo_root: Path) -> dict[str, dict[str, list[list[int]]]]:
-    """Load (and cache) per-TU section ranges for the given melee repo."""
+    """Load (and cache) per-TU section ranges for the given colosseum repo."""
 
     splits_path = _splits_path(repo_root)
     if not splits_path.is_file():
@@ -99,7 +99,7 @@ def load_splits_ranges(repo_root: Path) -> dict[str, dict[str, list[list[int]]]]
 
 
 def normalize_tu_path(path: str) -> str:
-    """Map a diff path (src/melee/gm/gm_1832.c) to a splits.txt TU path."""
+    """Map a diff path (src/colosseum/gm/gm_1832.c) to a splits.txt TU path."""
 
     normalized = path.replace("\\", "/").lstrip("./")
     if normalized.startswith("src/"):
@@ -131,9 +131,9 @@ def tu_owns_address(repo_root: Path | str, tu_rel_path: str, address: int) -> bo
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--repo", required=True, help="Melee repo root.")
+    parser.add_argument("--repo", required=True, help="Colosseum repo root.")
     parser.add_argument(
-        "--file", required=True, help="Repo-relative TU path (src/... or melee/...)."
+        "--file", required=True, help="Repo-relative TU path (src/... or colosseum/...)."
     )
     parser.add_argument(
         "--address", required=True, help="Address to check (e.g. 0x804DA60C)."

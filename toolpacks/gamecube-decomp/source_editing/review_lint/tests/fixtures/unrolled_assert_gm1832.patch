@@ -1,7 +1,7 @@
-diff --git a/src/melee/gm/gm_1832.c b/src/melee/gm/gm_1832.c
+diff --git a/src/colosseum/gm/gm_1832.c b/src/colosseum/gm/gm_1832.c
 index 169af69..21cb5ff 100644
---- a/src/melee/gm/gm_1832.c
-+++ b/src/melee/gm/gm_1832.c
+--- a/src/colosseum/gm/gm_1832.c
++++ b/src/colosseum/gm/gm_1832.c
 @@ -192,9 +192,9 @@ extern ClassicStageEntry lbl_803D9910[65];
  void fn_8018325C(HSD_GObj* arg0, int arg1)
  {
@@ -264,7 +264,7 @@ index 169af69..21cb5ff 100644
                      sub->menu_values[sub->x00]--;
                  } else {
                      sub->menu_values[sub->x00] = 2;
-@@ -2658,8 +2666,8 @@ TrainingModeState* gm_80189CDC(StartMeleeData* arg0)
+@@ -2658,8 +2666,8 @@ TrainingModeState* gm_80189CDC(StartColosseumData* arg0)
  
  inline void resetText(HSD_Text* text)
  {

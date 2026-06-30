@@ -1,5 +1,5 @@
 {
-  "schema_version": "melee_pr_preship_review_v1",
+  "schema_version": "colosseum_pr_preship_review_v1",
   "slice_id": "",
   "slice_verdict": "approve | reject",
   "findings": [

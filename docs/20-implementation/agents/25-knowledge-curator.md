@@ -25,7 +25,7 @@ writer, and the agent can optionally add proposal-only source updates.
 ## Flow
 
 `kg-curate` rewrites
-`projects/melee/knowledge/resource_graph/enrichments/knowledge_curator_updates.jsonl`
+`projects/pkmn-colosseum/knowledge/resource_graph/enrichments/knowledge_curator_updates.jsonl`
 from persisted worker states, selected checkpoints, and PR postmortems.
 `kg-maintain` runs pending PR postmortem indexing first, then curation,
 optional `--run-curator-agent`, and graph rebuild.

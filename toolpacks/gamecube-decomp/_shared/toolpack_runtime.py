@@ -77,9 +77,9 @@ def looks_like_project_repo(path: Path) -> bool:
     """Return true when ``path`` has enough GameCube decomp checkout shape."""
 
     return (path / "src").is_dir() and (
-        (path / "build" / "GALE01").exists()
+        (path / "build" / "GC6E01").exists()
         or (path / "compile_commands.json").exists()
-        or (path / "config" / "GALE01").exists()
+        or (path / "config" / "GC6E01").exists()
     )
 
 
@@ -94,7 +94,7 @@ def resolve_repo_root(value: str | Path | None = None) -> Path:
     cwd = Path.cwd().resolve()
     if looks_like_project_repo(cwd):
         return cwd
-    project_id = os.environ.get("ORCH_PROJECT_ID", "melee")
+    project_id = os.environ.get("ORCH_PROJECT_ID", "pkmn-colosseum")
     return (package_root() / "projects" / project_id / "checkout").resolve()
 
 

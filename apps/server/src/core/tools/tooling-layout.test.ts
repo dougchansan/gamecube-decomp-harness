@@ -9,8 +9,8 @@ const selfPath = fileURLToPath(import.meta.url);
 const retiredPaths = [
   "apps/server/resources",
   "apps/server/src/core/tools/agent-tools",
-  "projects/melee/knowledge/tools",
-  "toolpacks/gamecube-decomp/_impl/melee",
+  "projects/pkmn-colosseum/knowledge/tools",
+  "toolpacks/gamecube-decomp/_impl/colosseum",
 ];
 
 const retiredStrings = [
@@ -22,11 +22,11 @@ const retiredStrings = [
   "ORCH_LEGACY_PROJECT_TOOL_DATA_ROOT",
   "legacyProjectToolDataRoot",
   "legacy_project_tool_data_root",
-  "looks_like_melee_root",
-  "melee_tooling",
+  "looks_like_colosseum_root",
+  "colosseum_tooling",
 ];
 
-const scanRoots = ["package.json", "apps", "docs", "projects/README.md", "projects/melee/project.json", "toolpacks"];
+const scanRoots = ["package.json", "apps", "docs", "projects/README.md", "projects/pkmn-colosseum/project.json", "toolpacks"];
 const textExtensions = new Set([
   ".cjs",
   ".cts",

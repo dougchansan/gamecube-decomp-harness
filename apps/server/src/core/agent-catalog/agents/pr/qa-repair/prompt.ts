@@ -16,7 +16,7 @@ import {
 } from "./context.js";
 export { type QaRepairPromptOptions } from "./context.js";
 
-export const QA_REPAIR_AGENT_SCHEMA_VERSION = "melee_qa_repair_result_v1";
+export const QA_REPAIR_AGENT_SCHEMA_VERSION = "colosseum_qa_repair_result_v1";
 
 export type QaRepairAgentOutcome = "fixed" | "needs_rework" | "blocked" | "false_positive";
 export type QaRepairScoreImpact = "same_match" | "lower_score" | "unknown";
@@ -55,8 +55,8 @@ function agentFilePath(): string {
 }
 
 export const prompt = definePrompt({
-  id: "melee.qa-repair.system",
-  title: "Melee QA Repair System Prompt",
+  id: "colosseum.qa-repair.system",
+  title: "Colosseum QA Repair System Prompt",
   archetype: "workflow",
   nodes: [
     section("goal", [

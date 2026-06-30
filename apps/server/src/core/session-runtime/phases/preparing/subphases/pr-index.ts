@@ -338,7 +338,7 @@ export async function runMergedPrIntakeForPrepare(
     "python3",
     resolve(deps.sourceRoot("past_prs"), "commands/fetch_recent_pr_dump.py"),
     "--repo",
-    "doldecomp/melee",
+    "dougchansan/pkmn-colosseum",
     "--postmortem-mode",
     postmortemMode,
     "--postmortem-scope",

@@ -28,7 +28,7 @@ describe("dashboard artifacts", () => {
     try {
       recordDashboardArtifact(store, {
         runId: "run-a",
-        projectId: "melee",
+        projectId: "colosseum",
         sessionUuid: "session-a",
         artifactType: "board_snapshot",
         artifactKey: "current",
@@ -37,7 +37,7 @@ describe("dashboard artifacts", () => {
       });
       recordDashboardArtifact(store, {
         runId: "run-a",
-        projectId: "melee",
+        projectId: "colosseum",
         sessionUuid: "session-a",
         artifactType: "board_snapshot",
         artifactKey: "current",
@@ -46,7 +46,7 @@ describe("dashboard artifacts", () => {
       });
       recordDashboardArtifact(store, {
         runId: "run-b",
-        projectId: "melee",
+        projectId: "colosseum",
         sessionUuid: "session-b",
         artifactType: "board_snapshot",
         artifactKey: "current",
@@ -64,7 +64,7 @@ describe("dashboard artifacts", () => {
 
       expect(
         latestDashboardArtifactPayload(store, {
-          projectId: "melee",
+          projectId: "colosseum",
           sessionUuid: "session-b",
           artifactType: "board_snapshot",
           artifactKey: "current",

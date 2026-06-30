@@ -203,8 +203,8 @@ export function createHandoffRuntime(deps: HandoffRuntimeDeps): HandoffRuntime {
   }
 
   function prGroupMode(value: unknown): string {
-    const groupMode = stringValue(value, "melee-subsystem");
-    return groupMode === "top-dir" ? groupMode : "melee-subsystem";
+    const groupMode = stringValue(value, "colosseum-subsystem");
+    return groupMode === "top-dir" ? groupMode : "colosseum-subsystem";
   }
 
   function prSplitStrategy(value: unknown): string {
@@ -319,7 +319,7 @@ export function createHandoffRuntime(deps: HandoffRuntimeDeps): HandoffRuntime {
       "--target",
       target,
       "--report-title",
-      stringValue(body.qaReportTitle, "Report for GALE01 PR handoff"),
+      stringValue(body.qaReportTitle, "Report for GC6E01 PR handoff"),
       "--report-max-rows",
       String(intValue(body.qaReportMaxRows, 300, 0)),
     ];
@@ -475,7 +475,7 @@ export function createHandoffRuntime(deps: HandoffRuntimeDeps): HandoffRuntime {
       "--base-ref",
       stringValue(body.prBaseRef, paths.project?.baseRef ?? "origin/master").trim() || "origin/master",
       "--group-mode",
-      prGroupMode(stringValue(body.prGroupMode, paths.project?.pr.groupMode ?? "melee-subsystem")),
+      prGroupMode(stringValue(body.prGroupMode, paths.project?.pr.groupMode ?? "colosseum-subsystem")),
       "--strategy",
       prSplitStrategy(stringValue(body.prSplitStrategy, paths.project?.pr.splitStrategy ?? "deterministic")),
       "--max-files-per-pr",
@@ -483,7 +483,7 @@ export function createHandoffRuntime(deps: HandoffRuntimeDeps): HandoffRuntime {
       "--branch-prefix",
       stringValue(body.prBranchPrefix, paths.project?.pr.branchPrefix ?? "pr-split").trim() || "pr-split",
       "--title-prefix",
-      stringValue(body.prTitlePrefix, paths.project?.pr.titlePrefix ?? "Melee decomp"),
+      stringValue(body.prTitlePrefix, paths.project?.pr.titlePrefix ?? "Colosseum decomp"),
       "--output",
       outputPath,
       "--agent-output-dir",
@@ -493,7 +493,7 @@ export function createHandoffRuntime(deps: HandoffRuntimeDeps): HandoffRuntime {
       "--json",
     ];
     if (checkpointPath && existsSync(checkpointPath)) command.push("--checkpoint", checkpointPath);
-    const reportChangesRelative = paths.project?.validation.reportChangesPath ?? "build/GALE01/report_changes.json";
+    const reportChangesRelative = paths.project?.validation.reportChangesPath ?? "build/GC6E01/report_changes.json";
     if (existsSync(resolve(paths.repoRoot, reportChangesRelative))) command.push("--report-changes", reportChangesRelative);
     const shipStatusPath = stringValue(body.prShipStatusPath);
     if (shipStatusPath && existsSync(shipStatusPath)) command.push("--ship-status", shipStatusPath);
@@ -551,7 +551,7 @@ export function createHandoffRuntime(deps: HandoffRuntimeDeps): HandoffRuntime {
         summaryPath,
         checkpointPath: checkpointPath || null,
         baseRef: stringValue(body.prBaseRef, paths.project?.baseRef ?? "origin/master").trim() || "origin/master",
-        groupMode: prGroupMode(stringValue(body.prGroupMode, paths.project?.pr.groupMode ?? "melee-subsystem")),
+        groupMode: prGroupMode(stringValue(body.prGroupMode, paths.project?.pr.groupMode ?? "colosseum-subsystem")),
         requestedPlanningStrategy: prSplitStrategy(stringValue(body.prSplitStrategy, paths.project?.pr.splitStrategy ?? "deterministic")),
         maxFilesPerPr: intValue(body.prMaxFilesPerPr, paths.project?.pr.maxFilesPerPr ?? 30, 1),
         command,
@@ -566,7 +566,7 @@ export function createHandoffRuntime(deps: HandoffRuntimeDeps): HandoffRuntime {
   }
 
   async function regressionReportFromChanges(repoRoot: string): Promise<RegressionReport | null> {
-    const reportChangesPath = resolve(repoRoot, "build/GALE01/report_changes.json");
+    const reportChangesPath = resolve(repoRoot, "build/GC6E01/report_changes.json");
     if (!existsSync(reportChangesPath)) return null;
     try {
       return await readRegressionReport(reportChangesPath, "prepare handoff", 0);
@@ -616,7 +616,7 @@ export function createHandoffRuntime(deps: HandoffRuntimeDeps): HandoffRuntime {
       operationStepDetail("verify slice locally", `${numberValue(validation.newMatches)} new match(es), ${stringValue(validation.issuesCheck)} issues check`);
 
       operationStep("prepare local worktree", branch);
-      const title = stringValue(record.title, `Melee decomp: ${stringValue(record.displayName, branch)}`);
+      const title = stringValue(record.title, `Colosseum decomp: ${stringValue(record.displayName, branch)}`);
       const prepared = await prWorktrees.prepareLocalPrWorkspace({
         baseSha,
         branch,
@@ -754,7 +754,7 @@ export function createHandoffRuntime(deps: HandoffRuntimeDeps): HandoffRuntime {
     const forkOwner = prWorktrees.remoteOwner(repoRoot, "fork");
     if (!repoSlug || !forkOwner) throw new Error("Need an `origin` (upstream) and `fork` (push target) remote on the checkout.");
 
-    const title = stringValue(record.title, `Melee decomp: ${stringValue(record.displayName, branch)}`);
+    const title = stringValue(record.title, `Colosseum decomp: ${stringValue(record.displayName, branch)}`);
     let publicationRunId = stringValue(record.runId);
     if (!publicationRunId) {
       try {
@@ -783,7 +783,7 @@ export function createHandoffRuntime(deps: HandoffRuntimeDeps): HandoffRuntime {
       const baselineStatus = await prWorktrees.ensureOpenPrBaseline(paths);
       const baseSha = stringValue(baselineStatus.baseSha);
       const baselineWorktree = stringValue(baselineStatus.worktreeDir);
-      const baselineJson = baselineWorktree ? resolve(baselineWorktree, "build/GALE01/baseline.json") : "";
+      const baselineJson = baselineWorktree ? resolve(baselineWorktree, "build/GC6E01/baseline.json") : "";
       if (!baseSha || !baselineWorktree || !existsSync(baselineJson)) {
         failOperationStep("prepare baseline");
         throw new Error("Baseline worktree missing; run Prepare Handoff to rebuild the production baseline.");
@@ -915,8 +915,8 @@ export function createHandoffRuntime(deps: HandoffRuntimeDeps): HandoffRuntime {
     );
     if (planned.length === 0) throw new Error("No planned PR records to open. Run Prepare Handoff (or Plan PRs + Sync PR Status) first.");
     const ordered = [...planned].sort((left, right) => {
-      const leftSubsystem = stringValue(left.scope).startsWith("melee/") ? 1 : 0;
-      const rightSubsystem = stringValue(right.scope).startsWith("melee/") ? 1 : 0;
+      const leftSubsystem = stringValue(left.scope).startsWith("colosseum/") ? 1 : 0;
+      const rightSubsystem = stringValue(right.scope).startsWith("colosseum/") ? 1 : 0;
       return leftSubsystem - rightSubsystem || stringValue(left.branch).localeCompare(stringValue(right.branch));
     });
     return withOperation("open-all-prs", "Open All Draft PRs", ordered.map((record) => stringValue(record.branch)), async () => {

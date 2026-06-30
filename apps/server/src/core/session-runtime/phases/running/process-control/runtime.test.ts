@@ -10,16 +10,16 @@ import { createProcessControlRuntime } from "./runtime.js";
 describe("process control runtime", () => {
   test("starts a run from the run's recorded session worktree", async () => {
     const stateDir = mkdtempSync(join(tmpdir(), "process-control-runtime-"));
-    const sessionRepoRoot = "/tmp/melee-session-worktree/source";
-    const sessionGraphDb = "/tmp/melee-session-worktree/graph.sqlite";
+    const sessionRepoRoot = "/tmp/colosseum-session-worktree/source";
+    const sessionGraphDb = "/tmp/colosseum-session-worktree/graph.sqlite";
     const store = openState(stateDir);
     const run = createRun(store, "matched_code_percent", 100, 2, {
-      projectId: "melee",
-      projectKind: "doldecomp-melee",
+      projectId: "colosseum",
+      projectKind: "dtk-pokemon-colosseum",
       repoRoot: sessionRepoRoot,
       stateDir,
       graphDbPath: sessionGraphDb,
-      descriptorPath: "/tmp/melee/project.json",
+      descriptorPath: "/tmp/colosseum/project.json",
     });
     store.db.close();
 
@@ -32,12 +32,12 @@ describe("process control runtime", () => {
     } as unknown as ManagedProcessController;
 
     const project = {
-      projectId: "melee",
-      processName: "melee-live",
+      projectId: "colosseum",
+      processName: "colosseum-live",
       dashboard: {},
-      repoRoot: "/tmp/melee-default-checkout",
+      repoRoot: "/tmp/colosseum-default-checkout",
       stateDir,
-      graphDbPath: "/tmp/melee-default-graph.sqlite",
+      graphDbPath: "/tmp/colosseum-default-graph.sqlite",
     } as unknown as ResolvedProject;
 
     const runtime = createProcessControlRuntime({
@@ -46,15 +46,15 @@ describe("process control runtime", () => {
       processController,
       processStatus: () => ({}),
       projectToSummary: () => ({
-        id: "melee",
-        displayName: "Melee",
-        kind: "doldecomp-melee",
+        id: "colosseum",
+        displayName: "Colosseum",
+        kind: "dtk-pokemon-colosseum",
         repoRoot: project.repoRoot,
         stateDir,
         graphDbPath: project.graphDbPath,
-        processName: "melee-live",
+        processName: "colosseum-live",
         baseRef: "origin/master",
-        descriptorPath: "/tmp/melee/project.json",
+        descriptorPath: "/tmp/colosseum/project.json",
         repoRootExists: true,
         stateDirExists: true,
         graphDbExists: true,
@@ -70,7 +70,7 @@ describe("process control runtime", () => {
       serverJobPath: "/tmp/orchestrator/apps/server/src/job-runner.ts",
     });
 
-    const response = await runtime.startManagedProcess({ projectId: "melee", runId: run.id, maxWorkers: 2 });
+    const response = await runtime.startManagedProcess({ projectId: "colosseum", runId: run.id, maxWorkers: 2 });
     const payload = (await response.json()) as { command: string[] };
     const repoRootFlag = payload.command.indexOf("--repo-root");
     const graphDbFlag = payload.command.indexOf("--graph-db");

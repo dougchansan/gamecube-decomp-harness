@@ -4,7 +4,7 @@
 # dependencies = ["tree-sitter", "tree-sitter-c", "libclang"]
 # ///
 """
-Source-level permuter for melee. Unlike the vendored decomp-permuter (which
+Source-level permuter for colosseum. Unlike the vendored decomp-permuter (which
 mutates a macro-expanded, pretty-printed copy of the source), this mutates the
 **real** translation unit text via tree-sitter byte-span edits (src_mutate.py),
 compiles the real TU with the exact mwcc command from build.ninja
@@ -135,7 +135,7 @@ class ObjdiffScorer:
     def __init__(self, unit: str, fn: str) -> None:
         self.unit = unit
         self.fn = fn
-        self.target = str(ROOT / f"build/GALE01/obj/{unit}.o")
+        self.target = str(ROOT / f"build/GC6E01/obj/{unit}.o")
         self.proc = None
         self.proc = subprocess.Popen(
             [str(objdiff_cli()), "score", self.target, fn],
@@ -221,7 +221,7 @@ def run_objdiff_json(unit: str, fn: str, cand_o: Path, *, timeout: int) -> subpr
     return subprocess.run(
         [objdiff_cli(), "diff", "--format", "json", "--output", "-",
          "-c", "functionRelocDiffs=data_value",
-         "-1", str(ROOT / f"build/GALE01/obj/{unit}.o"),
+         "-1", str(ROOT / f"build/GC6E01/obj/{unit}.o"),
          "-2", str(cand_o), fn],
         capture_output=True, text=True, timeout=timeout,
     )

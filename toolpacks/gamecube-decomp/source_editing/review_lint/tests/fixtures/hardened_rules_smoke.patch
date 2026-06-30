@@ -1,7 +1,7 @@
-diff --git a/src/melee/gr/grsmoke.c b/src/melee/gr/grsmoke.c
+diff --git a/src/colosseum/gr/grsmoke.c b/src/colosseum/gr/grsmoke.c
 index 1111111..2222222 100644
---- a/src/melee/gr/grsmoke.c
-+++ b/src/melee/gr/grsmoke.c
+--- a/src/colosseum/gr/grsmoke.c
++++ b/src/colosseum/gr/grsmoke.c
 @@ -20,8 +20,30 @@ void grSmoke(void)
  {
 -    HSD_ASSERTMSG(100, obj != NULL, "obj");

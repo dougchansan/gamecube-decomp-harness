@@ -166,7 +166,7 @@ escape hatch, but the intended reviewer-friendly flow is private local
 preparation followed by explicit small publication batches. Draft means nothing
 pings maintainers until the operator reviews the body and un-drafts. A slice
 that regresses in isolation fails with a stacking hint instead of publishing; a
-slice that fails the lint (the same `ghcr.io/doldecomp/melee/check-issues`
+slice that fails the lint (the same `ghcr.io/dougchansan/pkmn-colosseum/check-issues`
 container CI runs, so things like `-Wself-assign` permuter slop or conflicting
 prototypes) fails before pushing instead of failing on the PR. Ship-set
 verification runs the same lint each survivor round and drops offending files to

@@ -9,7 +9,7 @@
   "limitations": [
     "The vendored m2c fork is GPL-3.0 licensed and lives under toolpacks/gamecube-decomp/_impl/gamecube/m2c.",
     "m2c output is a scaffold for understanding control/data flow, not reviewable source and not a substitute for natural decompilation.",
-    "Requires pyelftools, pcpp, generated object/asm artifacts, and the melee m2ctx.py helper."
+    "Requires pyelftools, pcpp, generated object/asm artifacts, and the colosseum m2ctx.py helper."
   ],
   "commands": {
     "status": "python3 toolpacks/gamecube-decomp/research/m2c_decomp/api/status.py --repo-root <repo_root> --json",

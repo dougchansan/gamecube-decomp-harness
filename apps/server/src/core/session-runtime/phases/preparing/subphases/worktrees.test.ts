@@ -21,7 +21,7 @@ afterEach(() => {
 function pathsFor(root: string): PreparingRuntimeProjectContext {
   return {
     graphDbPath: resolve(root, "graph.sqlite"),
-    project: { projectDir: root, projectId: "melee" },
+    project: { projectDir: root, projectId: "colosseum" },
     repoRoot: resolve(root, "checkout"),
     stateDir: resolve(root, "state"),
   } as unknown as PreparingRuntimeProjectContext;

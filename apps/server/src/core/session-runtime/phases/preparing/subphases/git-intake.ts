@@ -18,7 +18,7 @@ export function mergedPullRequestNumbers(logText: string): number[] {
   for (const match of logText.matchAll(/^Merge (?:pull request|PR) #(\d+)/gim)) {
     numbers.add(Number(match[1]));
   }
-  // Squash-and-merge commits (doldecomp/melee's merge style) reference the PR
+  // Squash-and-merge commits (dougchansan/pkmn-colosseum's merge style) reference the PR
   // as a trailing "(#NNNN)" in the subject line instead of a merge commit.
   for (const match of logText.matchAll(/\(#(\d+)\)\s*$/gm)) {
     numbers.add(Number(match[1]));

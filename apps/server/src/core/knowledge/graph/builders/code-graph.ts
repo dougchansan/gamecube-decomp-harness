@@ -23,7 +23,7 @@ interface FileRecord {
 }
 
 export function buildCodeGraphRecords(repoRoot: string): GraphRecords {
-  const reportPath = resolve(repoRoot, "build/GALE01/report.json");
+  const reportPath = resolve(repoRoot, "build/GC6E01/report.json");
   const objdiffPath = resolve(repoRoot, "objdiff.json");
   if (!existsSync(reportPath) || !existsSync(objdiffPath)) return buildCodeGraphRecordsFromIndexes(reportPath, objdiffPath);
 

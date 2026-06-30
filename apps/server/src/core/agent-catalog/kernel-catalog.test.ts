@@ -18,10 +18,10 @@ import {
 } from "@server/core/agent-catalog";
 import { agentRegistry } from "@server/core/agent-catalog/registry";
 import {
-  assertMeleeKernelCatalogComplete,
+  assertColosseumKernelCatalogComplete,
   KERNEL_AGENT_IDS,
-  meleeKernelAgent,
-  meleeKernelAgentCatalog,
+  colosseumKernelAgent,
+  colosseumKernelAgentCatalog,
   toKernelAgentViewerDefinition,
   toKernelParsedAgentFromBundle,
   type KernelAgentId,
@@ -39,9 +39,9 @@ function samplePrompt(agentId: KernelAgentId): PiPromptBundle {
       return workerPrompt({
         packet: {
           target: {
-            unit: "GALE01:test",
+            unit: "GC6E01:test",
             symbol: "ftDemo_Target",
-            source_path: "src/melee/ft/chara/ftDemo.c",
+            source_path: "src/colosseum/ft/chara/ftDemo.c",
           },
           baseline: {
             fuzzy_match_percent: 91.25,
@@ -57,24 +57,24 @@ function samplePrompt(agentId: KernelAgentId): PiPromptBundle {
         integrationItem: {
           schema_version: "integration_conflict_item_v1",
           id: "sample-integration-conflict",
-          conflict_group_id: "src-melee-ft-demo",
+          conflict_group_id: "src-colosseum-ft-demo",
           run_id: "sample-run",
           epoch_id: "sample-epoch",
           failed_apply: {
             command: "git apply --check worker.patch",
-            stderr: "patch failed: src/melee/ft/chara/ftDemo.c:24",
+            stderr: "patch failed: src/colosseum/ft/chara/ftDemo.c:24",
           },
           worker_outputs: [
             {
               worker_state_id: "sample-worker-state",
               checkpoint_id: "sample-checkpoint",
-              target: "GALE01:ftDemo::ftDemo_Target",
-              source_paths: ["src/melee/ft/chara/ftDemo.c"],
+              target: "GC6E01:ftDemo::ftDemo_Target",
+              source_paths: ["src/colosseum/ft/chara/ftDemo.c"],
               validation: { exact: true, hard_gates_passed: true },
             },
           ],
-          conflict_paths: ["src/melee/ft/chara/ftDemo.c"],
-          explicit_write_set: ["src/melee/ft/chara/ftDemo.c"],
+          conflict_paths: ["src/colosseum/ft/chara/ftDemo.c"],
+          explicit_write_set: ["src/colosseum/ft/chara/ftDemo.c"],
         },
         queueSummary: { queued_items: 1, conflict_groups: 1 },
         repoRoot: sampleRepoRoot,
@@ -86,9 +86,9 @@ function samplePrompt(agentId: KernelAgentId): PiPromptBundle {
           schema_version: "pr_context_v1",
           object_id: "sample-pr-1",
           pr: { number: 1, title: "Sample PR" },
-          changed_files: [{ path: "src/melee/ft/chara/ftDemo.c" }],
+          changed_files: [{ path: "src/colosseum/ft/chara/ftDemo.c" }],
           human_text_excerpt: "Match ftDemo target.",
-          diff_excerpt: "diff --git a/src/melee/ft/chara/ftDemo.c b/src/melee/ft/chara/ftDemo.c",
+          diff_excerpt: "diff --git a/src/colosseum/ft/chara/ftDemo.c b/src/colosseum/ft/chara/ftDemo.c",
         },
         repoRoot: sampleRepoRoot,
         stateDir: sampleStateDir,
@@ -96,7 +96,7 @@ function samplePrompt(agentId: KernelAgentId): PiPromptBundle {
     case "pr-reviewer":
       return prPreshipReviewPrompt({
         sliceId: "slice-001",
-        sliceDiff: "diff --git a/src/melee/ft/chara/ftDemo.c b/src/melee/ft/chara/ftDemo.c\n+int ftDemo_Target(void) { return 1; }\n",
+        sliceDiff: "diff --git a/src/colosseum/ft/chara/ftDemo.c b/src/colosseum/ft/chara/ftDemo.c\n+int ftDemo_Target(void) { return 1; }\n",
         lintFindings: { findings: [] },
         exhibits: [],
       });
@@ -111,14 +111,14 @@ function samplePrompt(agentId: KernelAgentId): PiPromptBundle {
           comments: [
             {
               id: "sample-review-comment",
-              file: "src/melee/ft/chara/ftDemo.c",
+              file: "src/colosseum/ft/chara/ftDemo.c",
               line: 24,
               body: "Please restore the project assert helper here instead of open-coding this.",
               standard_id: "global_standard:canonical-asserts",
               rule_id: "raw_assert_idiom",
             },
           ],
-          diff_excerpt: "diff --git a/src/melee/ft/chara/ftDemo.c b/src/melee/ft/chara/ftDemo.c",
+          diff_excerpt: "diff --git a/src/colosseum/ft/chara/ftDemo.c b/src/colosseum/ft/chara/ftDemo.c",
         },
         repoRoot: sampleRepoRoot,
         stateDir: sampleStateDir,
@@ -126,8 +126,8 @@ function samplePrompt(agentId: KernelAgentId): PiPromptBundle {
     case "pr-splitter":
       return prSplitterPrompt({
         splitContext: {
-          changed_files: ["src/melee/ft/chara/ftDemo.c"],
-          lanes: { match: ["src/melee/ft/chara/ftDemo.c"] },
+          changed_files: ["src/colosseum/ft/chara/ftDemo.c"],
+          lanes: { match: ["src/colosseum/ft/chara/ftDemo.c"] },
           max_files_per_pr: 3,
         },
         repoRoot: sampleRepoRoot,
@@ -157,7 +157,7 @@ function samplePrompt(agentId: KernelAgentId): PiPromptBundle {
       return qaRepairPrompt({
         item: {
           id: "qa-sample-1",
-          source_path: "src/melee/ft/chara/ftDemo.c",
+          source_path: "src/colosseum/ft/chara/ftDemo.c",
           lane: "match",
           repair_warnings: false,
           findings: [
@@ -178,17 +178,17 @@ function samplePrompt(agentId: KernelAgentId): PiPromptBundle {
   }
 }
 
-describe("meleeKernelAgentCatalog", () => {
+describe("colosseumKernelAgentCatalog", () => {
   test("covers every registered backend agent exactly once", () => {
     const registeredIds = Object.keys(agentRegistry) as KernelAgentId[];
 
-    expect(() => assertMeleeKernelCatalogComplete()).not.toThrow();
+    expect(() => assertColosseumKernelCatalogComplete()).not.toThrow();
     expect([...KERNEL_AGENT_IDS].sort()).toEqual(registeredIds.sort());
-    expect(new Set(meleeKernelAgentCatalog.map((entry) => entry.id)).size).toBe(meleeKernelAgentCatalog.length);
+    expect(new Set(colosseumKernelAgentCatalog.map((entry) => entry.id)).size).toBe(colosseumKernelAgentCatalog.length);
   });
 
   test("keeps default tool allowlists aligned with existing tool profiles", () => {
-    for (const entry of meleeKernelAgentCatalog) {
+    for (const entry of colosseumKernelAgentCatalog) {
       expect(entry.promptPaths.systemTemplatePath.endsWith("/agent.ts")).toBeTrue();
       expect(entry.promptPaths.promptModulePath.endsWith("/prompt.ts")).toBeTrue();
       expect(entry.promptPaths.contextModulePath.endsWith("/context.ts")).toBeTrue();
@@ -198,13 +198,13 @@ describe("meleeKernelAgentCatalog", () => {
     }
   });
 
-  test("loads Melee agent.ts files as a kernel registry catalog", async () => {
+  test("loads Colosseum agent.ts files as a kernel registry catalog", async () => {
     const registry = await buildRegistry({
       catalogRoot: resolve(repoRoot, "apps/server/src/core/agent-catalog/agents"),
     });
 
     expect(registry.list().map((agent) => agent.name).sort()).toEqual([...KERNEL_AGENT_IDS].sort());
-    for (const entry of meleeKernelAgentCatalog) {
+    for (const entry of colosseumKernelAgentCatalog) {
       const definition = registry.get(entry.name);
       expect(definition.agentFile).toBe(resolve(repoRoot, entry.promptPaths.systemTemplatePath));
       expect(definition.source).toBe("typed");
@@ -217,7 +217,7 @@ describe("meleeKernelAgentCatalog", () => {
 
   test("converts existing prompt bundles into kernel ParsedAgent inputs", () => {
     for (const agentId of KERNEL_AGENT_IDS) {
-      const entry = meleeKernelAgent(agentId);
+      const entry = colosseumKernelAgent(agentId);
       const bundle = samplePrompt(agentId);
       const converted = toKernelParsedAgentFromBundle(entry, bundle);
 
@@ -235,7 +235,7 @@ describe("meleeKernelAgentCatalog", () => {
 
   test("builds kernel viewer definitions from rendered prompt bundles", () => {
     for (const agentId of KERNEL_AGENT_IDS) {
-      const entry = meleeKernelAgent(agentId);
+      const entry = colosseumKernelAgent(agentId);
       const bundle = samplePrompt(agentId);
       const viewerDefinition = toKernelAgentViewerDefinition(entry, bundle, {
         generatedAt: "2026-06-24T18:00:00.000Z",

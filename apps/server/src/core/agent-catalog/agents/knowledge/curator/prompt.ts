@@ -21,8 +21,8 @@ function agentFilePath(): string {
 }
 
 export const prompt = definePrompt({
-  id: "melee.knowledge-curator.system",
-  title: "Melee Knowledge Curator System Prompt",
+  id: "colosseum.knowledge-curator.system",
+  title: "Colosseum Knowledge Curator System Prompt",
   archetype: "workflow",
   nodes: [
     section("goal", [

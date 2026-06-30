@@ -39,7 +39,7 @@ describe("project session durable state", () => {
     const store = openState(dir);
     try {
       const record = createProjectSession(store.db, {
-        projectId: "melee",
+        projectId: "colosseum",
         sessionUuid: "typed-session",
         id: "project-session:typed-session",
       });
@@ -50,7 +50,7 @@ describe("project session durable state", () => {
         .get();
 
       expect(row?.sessionUuid).toBe("typed-session");
-      expect(row?.projectId).toBe("melee");
+      expect(row?.projectId).toBe("colosseum");
     } finally {
       store.db.close();
     }
@@ -59,7 +59,7 @@ describe("project session durable state", () => {
   test("creates a canonical row with phase-local subphase storage and derived activeSubphase", () => {
     const { db } = openTestDb();
     const record = createProjectSession(db, {
-      projectId: "melee",
+      projectId: "colosseum",
       baseRef: "origin/master",
       baseSha: "abc123",
       now: "2026-06-25T12:00:00.000Z",
@@ -67,7 +67,7 @@ describe("project session durable state", () => {
       id: "project-session:session-uuid",
     });
 
-    expect(record.project_id).toBe("melee");
+    expect(record.project_id).toBe("colosseum");
     expect(record.phase).toBe("preparing");
     expect(record.preparing_state_json.subphase).toBe("config");
     expect(record.running_state_json.subphase).toBe("candidate_list");
@@ -80,9 +80,9 @@ describe("project session durable state", () => {
 
   test("enforces one active project session per project", () => {
     const { db } = openTestDb();
-    createProjectSession(db, { projectId: "melee", sessionUuid: "one", id: "project-session:one" });
+    createProjectSession(db, { projectId: "colosseum", sessionUuid: "one", id: "project-session:one" });
 
-    expect(() => createProjectSession(db, { projectId: "melee", sessionUuid: "two", id: "project-session:two" })).toThrow();
+    expect(() => createProjectSession(db, { projectId: "colosseum", sessionUuid: "two", id: "project-session:two" })).toThrow();
     expect(() => createProjectSession(db, { projectId: "other", sessionUuid: "three", id: "project-session:three" })).not.toThrow();
     db.close();
   });
@@ -90,7 +90,7 @@ describe("project session durable state", () => {
   test("falls back from row id selector to session UUID selector", () => {
     const { db } = openTestDb();
     const record = createProjectSession(db, {
-      projectId: "melee",
+      projectId: "colosseum",
       sessionUuid: "session-uuid",
       id: "project-session:session-uuid",
     });
@@ -98,27 +98,27 @@ describe("project session durable state", () => {
     const selected = getProjectSessionBySelector(db, {
       id: "session-uuid",
       sessionUuid: "session-uuid",
-      projectId: "melee",
+      projectId: "colosseum",
     });
 
     expect(selected?.id).toBe(record.id);
     db.close();
   });
 
-  test("persists process recovery identity for melee-live", () => {
+  test("persists process recovery identity for colosseum-live", () => {
     const { db } = openTestDb();
     const record = createProjectSession(db, {
-      projectId: "melee",
+      projectId: "colosseum",
       sessionUuid: "session-uuid",
       id: "project-session:session-uuid",
     });
     const processState = sessionProcessState({
       command: ["bun", "apps/server/src/job-runner.ts", "babysit"],
       graphDbPath: "/tmp/graph.sqlite",
-      name: "melee-live",
+      name: "colosseum-live",
       pid: 1234,
-      processFilePath: "/tmp/melee-live.json",
-      projectId: "melee",
+      processFilePath: "/tmp/colosseum-live.json",
+      projectId: "colosseum",
       repoRoot: "/repo",
       sessionUuid: record.session_uuid,
       startedAt: "2026-06-25T12:00:00.000Z",
@@ -128,12 +128,12 @@ describe("project session durable state", () => {
     });
 
     const saved = updateProjectSession(db, record.id, { process_state_json: processState });
-    const active = getActiveProjectSession(db, "melee");
-    expect(active?.process_state_json?.process_name).toBe("melee-live");
-    expect(active?.process_state_json?.project_id).toBe("melee");
+    const active = getActiveProjectSession(db, "colosseum");
+    expect(active?.process_state_json?.process_name).toBe("colosseum-live");
+    expect(active?.process_state_json?.project_id).toBe("colosseum");
     expect(active?.process_state_json?.session_uuid).toBe("session-uuid");
     expect(active?.process_state_json?.process_group).toBe(-1234);
-    expect(projectSessionView(saved).process?.process_file_path).toBe("/tmp/melee-live.json");
+    expect(projectSessionView(saved).process?.process_file_path).toBe("/tmp/colosseum-live.json");
     db.close();
   });
 });

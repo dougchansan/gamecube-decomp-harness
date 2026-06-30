@@ -9,7 +9,7 @@ code-ref: decomp-orchestrator/
 The package is organized as a Bun workspace around two first-party apps:
 `apps/frontend` for the React/Vite dashboard and `apps/server` for API routes,
 operator jobs, orchestration, validation, handoff, agents, tools, knowledge,
-project resolution, and platform helpers. The server owns its Melee-specific
+project resolution, and platform helpers. The server owns its Colosseum-specific
 Agent Kernel runtime bridge under `apps/server/src/infrastructure/kernel/bridge`;
 the external kernel packages live under `packages/agent-kernel`. Project
 descriptors and project-local runtime workspaces live under top-level `projects/`.
@@ -43,7 +43,7 @@ decomp-orchestrator/
 
 ### What This Section Does Not Own
 
-- Repo-wide Melee docs.
+- Repo-wide Colosseum docs.
 - Generated run state, SQLite databases, prompt artifacts, or PR dump contents.
 - System-level design language that belongs in
   [../10-system-design/00-overview.md](../10-system-design/00-overview.md).
@@ -62,7 +62,7 @@ decomp-orchestrator/
   rails, and PR handoff controls.
 - [Appendix](99-appendix/10-design-source.md): original design source and
   preserved HTML artifact.
-- [Current repo mechanics](99-appendix/20-current-repo-mechanics.md): Melee
+- [Current repo mechanics](99-appendix/20-current-repo-mechanics.md): Colosseum
   report/objdiff/configure/progress surfaces that the orchestrator wraps.
 - [Implementation roadmap](99-appendix/30-implementation-roadmap.md): original
   phases, current status, and v1 defaults.
@@ -70,4 +70,4 @@ decomp-orchestrator/
   every HTML design section to the markdown docs.
 - [Pi agent run reports](99-appendix/50-pi-agent-run-reports.md): historical
   Pi worker-run outcome analysis, tool-effectiveness reporting, and
-  deterministic validation logging requirements from Melee runs.
+  deterministic validation logging requirements from Colosseum runs.

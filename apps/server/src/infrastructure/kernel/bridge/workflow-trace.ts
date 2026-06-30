@@ -5,31 +5,31 @@ import {
   type TraceEvent,
 } from "@agent-kernel/protocol";
 
-import type { MeleeKernelSpawnContext } from "./kernel.js";
-import type { MeleeKernelRuntime } from "./runtime.js";
+import type { ColosseumKernelSpawnContext } from "./kernel.js";
+import type { ColosseumKernelRuntime } from "./runtime.js";
 import {
-  buildMeleeContainer,
-  meleeAppSessionId,
-  type MeleeContainerKind,
-  type MeleeProjectSessionRef,
+  buildColosseumContainer,
+  colosseumAppSessionId,
+  type ColosseumContainerKind,
+  type ColosseumProjectSessionRef,
 } from "./session-mapping.js";
 import type { AppTraceEventInput } from "./trace-writer.js";
 
-export type MeleeWorkflowTraceStatus =
+export type ColosseumWorkflowTraceStatus =
   | "started"
   | "completed"
   | "failed"
   | "skipped";
 
-export interface MeleeWorkflowTraceRuntime {
-  upsertSpawnContainers: MeleeKernelRuntime["upsertSpawnContainers"];
-  traceWriter: Pick<MeleeKernelRuntime["traceWriter"], "submitAppEvent">;
+export interface ColosseumWorkflowTraceRuntime {
+  upsertSpawnContainers: ColosseumKernelRuntime["upsertSpawnContainers"];
+  traceWriter: Pick<ColosseumKernelRuntime["traceWriter"], "submitAppEvent">;
 }
 
-export interface SubmitMeleeWorkflowTraceEventInput {
-  runtime: MeleeWorkflowTraceRuntime;
+export interface SubmitColosseumWorkflowTraceEventInput {
+  runtime: ColosseumWorkflowTraceRuntime;
   kind: Extract<
-    MeleeContainerKind,
+    ColosseumContainerKind,
     | "session"
     | "prepare"
     | "sync-intake"
@@ -49,7 +49,7 @@ export interface SubmitMeleeWorkflowTraceEventInput {
   projectId: string;
   sessionId: string;
   operation: string;
-  status?: MeleeWorkflowTraceStatus;
+  status?: ColosseumWorkflowTraceStatus;
   prId?: string | null;
   workingDir?: string | null;
   worktreePath?: string | null;
@@ -60,14 +60,14 @@ export interface SubmitMeleeWorkflowTraceEventInput {
   timestamp?: string;
 }
 
-export interface SubmittedMeleeWorkflowTraceEvent {
+export interface SubmittedColosseumWorkflowTraceEvent {
   appSessionId: string;
   containerId: string;
   containers: NewContainer[];
   event: TraceEvent;
 }
 
-function containerStatus(status: MeleeWorkflowTraceStatus): NewContainer["status"] {
+function containerStatus(status: ColosseumWorkflowTraceStatus): NewContainer["status"] {
   switch (status) {
     case "completed":
     case "skipped":
@@ -85,7 +85,7 @@ function eventTypePhase(phase: string): string {
 
 function withEventStatus(
   container: NewContainer,
-  status: MeleeWorkflowTraceStatus,
+  status: ColosseumWorkflowTraceStatus,
   timestamp?: string,
 ): NewContainer {
   const completedAt =
@@ -100,16 +100,16 @@ function withEventStatus(
 }
 
 function childContainerLineage(input: {
-  ref: MeleeProjectSessionRef;
-  kind: SubmitMeleeWorkflowTraceEventInput["kind"];
-  status: MeleeWorkflowTraceStatus;
+  ref: ColosseumProjectSessionRef;
+  kind: SubmitColosseumWorkflowTraceEventInput["kind"];
+  status: ColosseumWorkflowTraceStatus;
   prId?: string | null;
   workingDir?: string | null;
   worktreePath?: string | null;
   timestamp?: string;
   metadata?: Record<string, unknown>;
 }): NewContainer[] {
-  const root = buildMeleeContainer({
+  const root = buildColosseumContainer({
     kind: "session",
     ref: input.ref,
     workingDir: input.workingDir,
@@ -118,7 +118,7 @@ function childContainerLineage(input: {
   });
   if (input.kind === "session") return [withEventStatus(root, input.status, input.timestamp)];
 
-  const prepare = buildMeleeContainer({
+  const prepare = buildColosseumContainer({
     kind: "prepare",
     ref: input.ref,
     workingDir: input.workingDir,
@@ -137,7 +137,7 @@ function childContainerLineage(input: {
     input.kind === "intake-postmortem" ||
     input.kind === "intake-knowledge"
   ) {
-    const intake = buildMeleeContainer({
+    const intake = buildColosseumContainer({
       kind: "intake",
       ref: input.ref,
       workingDir: input.workingDir,
@@ -146,7 +146,7 @@ function childContainerLineage(input: {
     });
     if (input.kind === "intake") return [root, prepare, withEventStatus(intake, input.status, input.timestamp)];
 
-    const item = buildMeleeContainer({
+    const item = buildColosseumContainer({
       kind: "intake-item",
       ref: input.ref,
       workingDir: input.workingDir,
@@ -156,7 +156,7 @@ function childContainerLineage(input: {
     if (input.kind === "intake-item") return [root, prepare, intake, withEventStatus(item, input.status, input.timestamp)];
 
     const child = withEventStatus(
-      buildMeleeContainer({
+      buildColosseumContainer({
         kind: input.kind,
         ref: input.ref,
         workingDir: input.workingDir,
@@ -170,7 +170,7 @@ function childContainerLineage(input: {
   }
 
   const child = withEventStatus(
-    buildMeleeContainer({
+    buildColosseumContainer({
       kind: input.kind,
       ref: input.ref,
       workingDir: input.workingDir,
@@ -182,7 +182,7 @@ function childContainerLineage(input: {
   );
 
   if (input.kind === "pr-publication") {
-    const pr = buildMeleeContainer({
+    const pr = buildColosseumContainer({
       kind: "pr",
       ref: input.ref,
       workingDir: input.workingDir,
@@ -204,12 +204,12 @@ function childContainerLineage(input: {
   return [root, child];
 }
 
-export async function submitMeleeWorkflowTraceEvent(
-  input: SubmitMeleeWorkflowTraceEventInput,
-): Promise<SubmittedMeleeWorkflowTraceEvent> {
+export async function submitColosseumWorkflowTraceEvent(
+  input: SubmitColosseumWorkflowTraceEventInput,
+): Promise<SubmittedColosseumWorkflowTraceEvent> {
   const status = input.status ?? "completed";
   const ref = { projectId: input.projectId, sessionId: input.sessionId };
-  const appSessionId = meleeAppSessionId(ref);
+  const appSessionId = colosseumAppSessionId(ref);
   const containers = childContainerLineage({
     ref,
     kind: input.kind,
@@ -221,7 +221,7 @@ export async function submitMeleeWorkflowTraceEvent(
     metadata: input.metadata,
   });
   const container = containers.at(-1);
-  if (!container) throw new Error("Unable to build Melee workflow trace container lineage");
+  if (!container) throw new Error("Unable to build Colosseum workflow trace container lineage");
   const phase = String(container.phase ?? input.kind);
   const eventData: EventData = {
     phase,
@@ -234,7 +234,7 @@ export async function submitMeleeWorkflowTraceEvent(
     ...(input.detail ? { detail: input.detail } : {}),
     ...(input.metadata ?? {}),
   };
-  const context: MeleeKernelSpawnContext = {
+  const context: ColosseumKernelSpawnContext = {
     appSessionId,
     containerId: container.id,
     containerLineage: containers,
@@ -247,7 +247,7 @@ export async function submitMeleeWorkflowTraceEvent(
   const event = await input.runtime.traceWriter.submitAppEvent({
     appSessionId,
     containerId: container.id,
-    type: input.type ?? `melee:${eventTypePhase(phase)}_${status}`,
+    type: input.type ?? `colosseum:${eventTypePhase(phase)}_${status}`,
     eventData,
     traceLevel: input.traceLevel ?? TraceLevel.SUMMARY,
     timestamp: input.timestamp,

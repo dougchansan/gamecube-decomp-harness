@@ -15,12 +15,7 @@ export { buildMismatchPatternGraphRecords, type BuildMismatchPatternGraphRecords
 export { buildPastPrsGraphRecords } from "./past-prs.js";
 export { rankFeatureForSourcePath, rankFeatureMapForCandidates } from "./rank.js";
 export { defaultGraphSources, rebuildKnowledgeGraph } from "./rebuild.js";
-export {
-  buildDiscordKnowledgeGraphRecords,
-  buildExternalMirrorsGraphRecords,
-  buildPowerpcDocsGraphRecords,
-  buildSsbmDataSheetGraphRecords,
-} from "./source-slices.js";
+export { buildPowerpcDocsGraphRecords } from "./source-slices.js";
 export {
   readSourceDescriptor,
   readSourceRegistry,

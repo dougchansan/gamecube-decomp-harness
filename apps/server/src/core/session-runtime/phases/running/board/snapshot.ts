@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from "node:fs";
-import { basename, dirname, resolve } from "node:path";
+import { basename, dirname, isAbsolute, resolve } from "node:path";
 import type { BoardMeasures, BoardRankBreakdown, BoardSnapshot, TargetCandidate } from "@server/core/shared/types/index.js";
 import { candidateFromReportFunction, closenessPriority, closenessScore, objdiffSourceMap } from "./candidates.js";
 import { asArray, asObject, numberValue, stringValue, type JsonObject } from "./json.js";
@@ -16,7 +16,9 @@ function readJson(path: string): JsonObject {
 
 export interface LoadBoardSnapshotOptions {
   codeGraphFunctionsIndexPath?: string;
+  objdiffPath?: string;
   rankFeatureProvider?: BoardRankFeatureProvider;
+  reportPath?: string;
 }
 
 export type BoardRankFeatureProvider = (candidate: TargetCandidate) => BoardRankFeature | null | undefined;
@@ -64,12 +66,14 @@ function sessionBaselineRepoRoot(repoRoot: string): string | null {
 }
 
 export function loadBoardSnapshot(repoRoot: string, limit: number, options: LoadBoardSnapshotOptions = {}): BoardSnapshot {
-  let reportPath = resolve(repoRoot, "build/GALE01/report.json");
-  let objdiffPath = resolve(repoRoot, "objdiff.json");
+  const reportRelPath = options.reportPath ?? "build/GC6E01/report.json";
+  const objdiffRelPath = options.objdiffPath ?? "objdiff.json";
+  let reportPath = resolveRepoPath(repoRoot, reportRelPath);
+  let objdiffPath = resolveRepoPath(repoRoot, objdiffRelPath);
   if (!existsSync(reportPath) || !existsSync(objdiffPath)) {
     const baselineRoot = sessionBaselineRepoRoot(repoRoot);
-    const baselineReportPath = baselineRoot ? resolve(baselineRoot, "build/GALE01/report.json") : "";
-    const baselineObjdiffPath = baselineRoot ? resolve(baselineRoot, "objdiff.json") : "";
+    const baselineReportPath = baselineRoot ? resolveRepoPath(baselineRoot, reportRelPath) : "";
+    const baselineObjdiffPath = baselineRoot ? resolveRepoPath(baselineRoot, objdiffRelPath) : "";
     if (baselineReportPath && existsSync(baselineReportPath) && existsSync(baselineObjdiffPath)) {
       reportPath = baselineReportPath;
       objdiffPath = baselineObjdiffPath;
@@ -88,12 +92,16 @@ export function loadBoardSnapshot(repoRoot: string, limit: number, options: Load
     const unitName = stringValue(unit.name);
     if (!unitName) continue;
     const metadata = asObject(unit.metadata);
-    const sourcePath = stringValue(metadata.source_path, sourceByUnit.get(unitName) ?? "");
+    const unitSourcePath = stringValue(metadata.source_path, sourceByUnit.get(unitName) ?? "");
     for (const fnValue of asArray(unit.functions)) {
+      const fn = asObject(fnValue);
+      const fnMetadata = asObject(fn.metadata);
+      const symbol = stringValue(fn.name);
+      const sourcePath = stringValue(fnMetadata.source_path, unitSourcePath);
       const candidate = candidateFromReportFunction({
         unitName,
         sourcePath,
-        fn: asObject(fnValue),
+        fn,
       });
       if (candidate) candidates.push(candidate);
     }
@@ -109,6 +117,10 @@ export function loadBoardSnapshot(repoRoot: string, limit: number, options: Load
     measures,
     candidates: candidates.slice(0, limit),
   };
+}
+
+function resolveRepoPath(repoRoot: string, path: string): string {
+  return isAbsolute(path) ? resolve(path) : resolve(repoRoot, path);
 }
 
 function loadBoardSnapshotFromCodeGraphIndex(

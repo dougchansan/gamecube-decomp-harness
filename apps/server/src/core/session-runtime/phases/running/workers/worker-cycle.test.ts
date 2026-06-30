@@ -28,7 +28,7 @@ function finding(overrides: Partial<QaScanFinding> = {}): QaScanFinding {
   return {
     rule_id: "packed_string_blob",
     severity: "error",
-    file: "src/melee/mn/mncount.c",
+    file: "src/colosseum/mn/mncount.c",
     line: 782,
     excerpt: 'static char lbl_803EE888[0x18] = "a\\0b";',
     message: "hand-packed string blob",
@@ -75,7 +75,7 @@ function rejectedValidation(qaLint: WorkerQaLint): WorkerChangeValidation {
   return {
     status: "failed",
     reasons: [`qa lint found 1 QA finding(s) requiring repair (gate exit ${qaLint.exitCode ?? "unknown"})`],
-    target: { unit: "melee/mn/mncount.c", symbol: "mnCount_803EE888", before: 80, after: 99.999999, improved: true, exact: true },
+    target: { unit: "colosseum/mn/mncount.c", symbol: "mnCount_803EE888", before: 80, after: 99.999999, improved: true, exact: true },
     qaLint,
   };
 }
@@ -84,7 +84,7 @@ function passedValidation(qaLint: WorkerQaLint | null): WorkerChangeValidation {
   return {
     status: "passed",
     reasons: [],
-    target: { unit: "melee/mn/mncount.c", symbol: "mnCount_803EE888", before: 80, after: 99.999999, improved: true, exact: true },
+    target: { unit: "colosseum/mn/mncount.c", symbol: "mnCount_803EE888", before: 80, after: 99.999999, improved: true, exact: true },
     qaLint,
   };
 }
@@ -233,6 +233,23 @@ describe("workerToolArtifactSourceRoots", () => {
     );
   });
 
+  test("filters worker-local tools to flags supported by configure.py", () => {
+    expect(
+      configureCommandWithWorkerToolPaths(
+        "python3 configure.py",
+        {
+          binutils: "build/binutils",
+          compilers: "build/compilers",
+          dtk: "build/tools/dtk",
+          objdiff: "build/tools/objdiff-cli",
+          sjiswrap: "build/tools/sjiswrap.exe",
+          wrapper: "build/tools/wibo",
+        },
+        { supportedFlags: new Set(["--compilers", "--dtk", "--objdiff", "--wrapper"]) },
+      ),
+    ).toBe("python3 configure.py --wrapper 'build/tools/wibo' --compilers 'build/compilers' --dtk 'build/tools/dtk' --objdiff 'build/tools/objdiff-cli'");
+  });
+
   test("does not override explicit configure.py tool paths", () => {
     expect(
       configureCommandWithWorkerToolPaths("python3 configure.py --require-protos --compilers /shared/compilers", {
@@ -324,7 +341,7 @@ describe("workerAttemptRepairReasons", () => {
     const validation = rejectedValidation(violationsQaLint());
     const reasons = workerAttemptRepairReasons({ writeSetDiffChanged: true, runnerValidation: validation });
     expect(reasons).toContain(
-      'qa_lint_finding: error packed_string_blob at src/melee/mn/mncount.c:782 — hand-packed string blob [standard: global_standard:literals-and-data-ownership] excerpt: static char lbl_803EE888[0x18] = "a\\0b";',
+      'qa_lint_finding: error packed_string_blob at src/colosseum/mn/mncount.c:782 — hand-packed string blob [standard: global_standard:literals-and-data-ownership] excerpt: static char lbl_803EE888[0x18] = "a\\0b";',
     );
     expect(reasons[reasons.length - 1]).toBe(QA_LINT_REPAIR_INSTRUCTION);
     // The runner-validation summary reason also rides along (status is failed).
@@ -335,7 +352,7 @@ describe("workerAttemptRepairReasons", () => {
     const validation = rejectedValidation(warningsQaLint());
     const reasons = workerAttemptRepairReasons({ writeSetDiffChanged: true, runnerValidation: validation });
     expect(reasons).toContain(
-      'qa_lint_finding: warning packed_string_blob at src/melee/mn/mncount.c:782 — hand-packed string blob [standard: global_standard:literals-and-data-ownership] excerpt: static char lbl_803EE888[0x18] = "a\\0b";',
+      'qa_lint_finding: warning packed_string_blob at src/colosseum/mn/mncount.c:782 — hand-packed string blob [standard: global_standard:literals-and-data-ownership] excerpt: static char lbl_803EE888[0x18] = "a\\0b";',
     );
     expect(reasons[reasons.length - 1]).toBe(QA_LINT_REPAIR_INSTRUCTION);
   });

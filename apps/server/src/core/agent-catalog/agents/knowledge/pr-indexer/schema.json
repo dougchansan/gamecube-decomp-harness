@@ -1,5 +1,5 @@
 {
-  "schema_version": "melee_pr_postmortem_v1",
+  "schema_version": "colosseum_pr_postmortem_v1",
   "object_id": "pr-NNNN",
   "pr": {
     "number": 0,
@@ -42,7 +42,7 @@
     "accepted_candidate_records": [],
     "source_update_candidates": [
       {
-        "target_source_id": "decomp_standards | path_facts | ssbm_data_sheet | other",
+        "target_source_id": "decomp_standards | path_facts | code_graph | other",
         "update_kind": "global_standard | path_fact | source_update",
         "title": "",
         "text": "",

@@ -115,7 +115,7 @@ decompilation decisions.
 ## Core Concepts
 
 - [Session operating flow](01-session-operating-flow.md) covers the target
-  first-read flow for a full Melee project session, from baseline sync through
+  first-read flow for a full Colosseum project session, from baseline sync through
   epoch workers, PR review, and next-session intake.
 - [Core principles](05-core-principles.md) covers the Sudoku metaphor,
   run-boundary rule, metric choice, and former-skill mapping.
@@ -135,7 +135,7 @@ decompilation decisions.
 - [Worker lifecycle](40-worker-lifecycle.md) covers target packets, research,
   capabilities, validation, and stall behavior.
 - [Worker capabilities](45-worker-capabilities.md) covers the worker tactic
-  table, evidence emitted, guardrails, and `melee-assist` absorption map.
+  table, evidence emitted, guardrails, and `colosseum-assist` absorption map.
 - [Knowledge model](50-knowledge-model.md) covers references, workflows, tools,
   decomp resources, and past PR evidence.
 - [Score integration and PR handoff](60-score-and-pr-handoff.md) covers the

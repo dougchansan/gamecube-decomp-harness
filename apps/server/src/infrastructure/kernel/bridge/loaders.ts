@@ -7,8 +7,8 @@ import {
   type LoaderResolveContext,
 } from "@agent-kernel/kernel/context/loaders";
 
-export const MELEE_SESSION_CONTEXT_LOADER_KIND = "melee-session-context";
-export const MELEE_INLINE_CONTEXT_LOADER_KINDS = [
+export const COLOSSEUM_SESSION_CONTEXT_LOADER_KIND = "colosseum-session-context";
+export const COLOSSEUM_INLINE_CONTEXT_LOADER_KINDS = [
   "worker-packet",
   "knowledge-graph-file-card",
   "integration-conflict-item",
@@ -25,23 +25,23 @@ export const MELEE_INLINE_CONTEXT_LOADER_KINDS = [
   "qa-repair-queue-summary",
 ] as const;
 
-export interface MeleeSessionContextLoaderDeclaration {
-  kind: typeof MELEE_SESSION_CONTEXT_LOADER_KIND;
+export interface ColosseumSessionContextLoaderDeclaration {
+  kind: typeof COLOSSEUM_SESSION_CONTEXT_LOADER_KIND;
   label?: string;
   [key: string]: unknown;
 }
 
-export type MeleeInlineContextLoaderKind = (typeof MELEE_INLINE_CONTEXT_LOADER_KINDS)[number];
+export type ColosseumInlineContextLoaderKind = (typeof COLOSSEUM_INLINE_CONTEXT_LOADER_KINDS)[number];
 
-export interface MeleeInlineContextLoaderDeclaration {
-  kind: MeleeInlineContextLoaderKind;
+export interface ColosseumInlineContextLoaderDeclaration {
+  kind: ColosseumInlineContextLoaderKind;
   ref?: string;
   label?: string;
   content?: string;
   [key: string]: unknown;
 }
 
-export interface CreateMeleeLoaderCatalogOptions extends CreateDefaultCatalogOptions {
+export interface CreateColosseumLoaderCatalogOptions extends CreateDefaultCatalogOptions {
   includeSessionContextLoader?: boolean;
   includeInlineContextLoaders?: boolean;
 }
@@ -58,9 +58,9 @@ function renderSessionContext(ctx: LoaderResolveContext): string {
   );
 }
 
-export function createMeleeSessionContextLoader(): Loader<MeleeSessionContextLoaderDeclaration> {
+export function createColosseumSessionContextLoader(): Loader<ColosseumSessionContextLoaderDeclaration> {
   return {
-    kind: MELEE_SESSION_CONTEXT_LOADER_KIND,
+    kind: COLOSSEUM_SESSION_CONTEXT_LOADER_KIND,
     async resolve(_decl, ctx) {
       const content = renderSessionContext(ctx);
       return {
@@ -73,9 +73,9 @@ export function createMeleeSessionContextLoader(): Loader<MeleeSessionContextLoa
   };
 }
 
-export function createMeleeInlineContextLoader(
-  kind: MeleeInlineContextLoaderKind,
-): Loader<MeleeInlineContextLoaderDeclaration> {
+export function createColosseumInlineContextLoader(
+  kind: ColosseumInlineContextLoaderKind,
+): Loader<ColosseumInlineContextLoaderDeclaration> {
   return {
     kind,
     async resolve(decl) {
@@ -90,22 +90,22 @@ export function createMeleeInlineContextLoader(
   };
 }
 
-export function registerMeleeLoaders(catalog: LoaderCatalog): LoaderCatalog {
-  if (!catalog.has(MELEE_SESSION_CONTEXT_LOADER_KIND)) {
-    catalog.register(createMeleeSessionContextLoader());
+export function registerColosseumLoaders(catalog: LoaderCatalog): LoaderCatalog {
+  if (!catalog.has(COLOSSEUM_SESSION_CONTEXT_LOADER_KIND)) {
+    catalog.register(createColosseumSessionContextLoader());
   }
-  for (const kind of MELEE_INLINE_CONTEXT_LOADER_KINDS) {
-    if (!catalog.has(kind)) catalog.register(createMeleeInlineContextLoader(kind));
+  for (const kind of COLOSSEUM_INLINE_CONTEXT_LOADER_KINDS) {
+    if (!catalog.has(kind)) catalog.register(createColosseumInlineContextLoader(kind));
   }
   return catalog;
 }
 
-export function createMeleeLoaderCatalog(
-  options: CreateMeleeLoaderCatalogOptions = {},
+export function createColosseumLoaderCatalog(
+  options: CreateColosseumLoaderCatalogOptions = {},
 ): LoaderCatalog {
   const catalog = createDefaultCatalog(options);
   if ((options.includeSessionContextLoader ?? true) || (options.includeInlineContextLoaders ?? true)) {
-    registerMeleeLoaders(catalog);
+    registerColosseumLoaders(catalog);
   }
   return catalog;
 }

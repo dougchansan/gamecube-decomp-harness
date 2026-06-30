@@ -13,7 +13,6 @@ projects/*/knowledge/sources/past_prs/data/current/
 projects/*/knowledge/sources/past_prs/data/prs/runs/
 projects/*/knowledge/sources/tool_outputs/indexes/tool_findings.jsonl
 projects/*/knowledge/sources/external_mirrors/indexes/external_file_mentions.jsonl
-projects/*/knowledge/sources/ssbm_data_sheet/indexes/cells.jsonl
 
 # Project knowledge: keep portable corpora metadata/postmortems tracked, ignore
 # bulk raw corpora, generated indexes, local graph DBs, and runner caches.
@@ -35,10 +34,6 @@ projects/*/knowledge/sources/**/indexes/*.json
 projects/*/knowledge/sources/**/indexes/*.jsonl
 projects/*/knowledge/sources/**/indexes/*.sqlite*
 projects/*/knowledge/sources/code_context/external_mirrors/indexes/external_file_mentions.jsonl
-projects/*/knowledge/sources/code_context/ssbm_data_sheet/indexes/cells.jsonl
-projects/*/knowledge/sources/code_context/ssbm_data_sheet/indexes/codebase_facts.jsonl
-projects/*/knowledge/sources/code_context/ssbm_data_sheet/indexes/codebase_facts.meta.json
-projects/*/knowledge/sources/code_context/ssbm_data_sheet/data/generated/
 projects/*/knowledge/tools/**/cache/**
 !projects/*/knowledge/tools/**/cache/
 !projects/*/knowledge/tools/**/cache/.gitignore
@@ -48,7 +43,7 @@ projects/*/knowledge/tools/**/indexes/*.jsonl
 projects/*/knowledge/tools/**/indexes/*.sqlite*
 
 # Vendored debug toolchains (zig etc.) — hundreds of MB, fetched on demand.
-apps/server/resources/tools/_impl/melee/mwcc_debug/tools/
+toolpacks/gamecube-decomp/_impl/gamecube/mwcc_debug/tools/
 
 projects/*/knowledge/tools/research/opseq/indexes/function_shapes.jsonl
 projects/*/knowledge/tools/research/ghidra/indexes/symbol_lookup.jsonl
@@ -96,5 +91,5 @@ projects/*/local.project.json
 !testdata/smoke_repo/
 !testdata/smoke_repo/objdiff.json
 !testdata/smoke_repo/build/
-!testdata/smoke_repo/build/GALE01/
-!testdata/smoke_repo/build/GALE01/report.json
+!testdata/smoke_repo/build/GC6E01/
+!testdata/smoke_repo/build/GC6E01/report.json

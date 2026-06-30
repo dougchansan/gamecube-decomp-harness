@@ -1,7 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { createMeleeKernelSpawnContext } from "@server/infrastructure/kernel/bridge/spawn-context";
-import { runMeleeKernelPiAgent as runPiAgent, type MeleeKernelPiRunOptions } from "@server/infrastructure/agent-runtime/kernel-pi-runner";
+import { createColosseumKernelSpawnContext } from "@server/infrastructure/kernel/bridge/spawn-context";
+import { runColosseumKernelPiAgent as runPiAgent, type ColosseumKernelPiRunOptions } from "@server/infrastructure/agent-runtime/kernel-pi-runner";
 import {
   prSplitterPrompt,
   validatePrSplitterPlan,
@@ -17,12 +17,12 @@ import type { PiRunResult } from "@server/core/shared/types";
 import { booleanArg, numberArg, projectMetadata, stringArg, type GlobalArgs } from "@server/core/project-registry/runtime-options.js";
 
 type ChangeSource = "branch" | "worktree";
-type GroupMode = "melee-subsystem" | "top-dir";
+type GroupMode = "colosseum-subsystem" | "top-dir";
 type IndependenceKind = "independent" | "shared-prep" | "stacked" | "needs-merge";
 type PrLane = "match" | "local";
 type PrSplitPlanningStrategy = "deterministic" | "agent";
 
-export type PrSplitterAgentRunner = (options: MeleeKernelPiRunOptions) => Promise<PiRunResult>;
+export type PrSplitterAgentRunner = (options: ColosseumKernelPiRunOptions) => Promise<PiRunResult>;
 
 export interface PrLaneSets {
   matchPaths: string[];
@@ -214,10 +214,10 @@ function isBuildOrGeneratedPath(path: string): boolean {
   );
 }
 
-function isScopedToMeleeSubsystem(path: string, sliceId: string): boolean {
+function isScopedToColosseumSubsystem(path: string, sliceId: string): boolean {
   const parts = normalizePath(path).split("/").filter(Boolean);
-  const meleeIndex = parts.indexOf("melee");
-  return meleeIndex >= 0 && sanitizeId(parts[meleeIndex + 1] ?? "") === sliceId;
+  const colosseumIndex = parts.indexOf("colosseum");
+  return colosseumIndex >= 0 && sanitizeId(parts[colosseumIndex + 1] ?? "") === sliceId;
 }
 
 function isReviewableSourceLikePath(path: string): boolean {
@@ -237,14 +237,14 @@ function groupForPath(path: string, groupMode: GroupMode): Omit<ChangeGroup, "fi
     };
   }
 
-  const meleeIndex = parts.indexOf("melee");
-  if (meleeIndex >= 0 && parts[meleeIndex + 1]) {
-    const subsystem = parts[meleeIndex + 1];
+  const colosseumIndex = parts.indexOf("colosseum");
+  if (colosseumIndex >= 0 && parts[colosseumIndex + 1]) {
+    const subsystem = parts[colosseumIndex + 1];
     const id = sanitizeId(subsystem);
     return {
       id,
       displayName: displayNameFor(id),
-      scope: `melee/${subsystem}`,
+      scope: `colosseum/${subsystem}`,
       category: "subsystem",
     };
   }
@@ -402,7 +402,7 @@ function isolationCommandsForSlice(
   options: Pick<BuildPlanOptions, "baseRef" | "headRef" | "repoRoot" | "sliceCheckCommand">,
 ): string[] {
   const pathspecs = slice.pathspecs.map(shellQuote).join(" ");
-  const tempPrefix = `melee-pr-${sanitizeId(slice.id) || "slice"}-XXXXXX`;
+  const tempPrefix = `colosseum-pr-${sanitizeId(slice.id) || "slice"}-XXXXXX`;
   return [
     `SLICE_DIR="$(mktemp -d "\${TMPDIR:-/tmp}/${tempPrefix}")"`,
     `git worktree add --detach "$SLICE_DIR" ${shellQuote(options.baseRef)}`,
@@ -428,8 +428,8 @@ function classifyIndependence(group: ChangeGroup, files: PrChangedFile[], maxFil
     group.category === "subsystem" ? sanitizeId(group.scope.split("/").filter(Boolean)[1] ?? "") || group.id : group.id;
   const allScopedSourceLike =
     group.category === "subsystem" &&
-    files.every((file) => isScopedToMeleeSubsystem(file.path, subsystemId) && isReviewableSourceLikePath(file.path));
-  const hasCrossCuttingHeader = files.some((file) => extensionForPath(file.path) === "h" && !isScopedToMeleeSubsystem(file.path, subsystemId));
+    files.every((file) => isScopedToColosseumSubsystem(file.path, subsystemId) && isReviewableSourceLikePath(file.path));
+  const hasCrossCuttingHeader = files.some((file) => extensionForPath(file.path) === "h" && !isScopedToColosseumSubsystem(file.path, subsystemId));
 
   if (files.length > maxFilesPerPr) {
     reasons.push(`slice has ${files.length} files, above --max-files-per-pr=${maxFilesPerPr}`);
@@ -442,17 +442,17 @@ function classifyIndependence(group: ChangeGroup, files: PrChangedFile[], maxFil
   }
 
   if (group.category === "shared") {
-    reasons.push("changes are outside a Melee subsystem directory");
+    reasons.push("changes are outside a Colosseum subsystem directory");
     return { kind: "shared-prep", verified: false, confidence: "low", reasons, requiredChecks, possibleDependencies: [] };
   }
 
   if (group.category === "support") {
-    reasons.push("support-library changes may affect multiple Melee subsystem slices");
+    reasons.push("support-library changes may affect multiple Colosseum subsystem slices");
     return { kind: "shared-prep", verified: false, confidence: "low", reasons, requiredChecks, possibleDependencies: [] };
   }
 
   if (hasCrossCuttingHeader) {
-    reasons.push("contains headers or declarations outside this slice's Melee subsystem");
+    reasons.push("contains headers or declarations outside this slice's Colosseum subsystem");
     return { kind: "stacked", verified: false, confidence: "low", reasons, requiredChecks, possibleDependencies: [] };
   }
 
@@ -478,7 +478,7 @@ function lanePathMatcher(paths: string[]): (changedPath: string) => boolean {
     const path = normalizePath(changedPath);
     if (candidates.has(path)) return true;
     // Checkpoint source paths and git paths can differ by a repo-root prefix
-    // (e.g. "melee/mn/mnnamenew.c" vs "src/melee/mn/mnnamenew.c").
+    // (e.g. "colosseum/mn/mnnamenew.c" vs "src/colosseum/mn/mnnamenew.c").
     for (const candidate of candidates) {
       if (path.endsWith(`/${candidate}`) || candidate.endsWith(`/${path}`)) return true;
     }
@@ -697,7 +697,7 @@ function splitterContextFromPlan(plan: PrSplitPlan): Record<string, unknown> {
     for (const file of slice.files) seedSliceByFile.set(normalizePath(file.path), slice.id);
   }
   return {
-    schema_version: "melee_pr_splitter_context_v1",
+    schema_version: "colosseum_pr_splitter_context_v1",
     plan_inputs: {
       repo_root: plan.repoRoot,
       base_ref: plan.baseRef,
@@ -946,7 +946,7 @@ async function applyPrSplitterStrategy(params: {
         stateDir: params.globals.stateDir,
         project: projectMetadata(params.globals),
       },
-      kernelContext: createMeleeKernelSpawnContext({
+      kernelContext: createColosseumKernelSpawnContext({
         kind: "pr-split",
         projectId: params.globals.project?.projectId ?? params.globals.projectId,
         sessionId: runId || "pr-split",
@@ -1207,9 +1207,9 @@ export async function prSplitPlan(globals: GlobalArgs, args: Map<string, string 
   if (!Number.isInteger(minFilesPerPr) || minFilesPerPr < 1 || minFilesPerPr > maxFilesPerPr) {
     throw new Error("--min-files-per-pr must be a positive integer no larger than --max-files-per-pr");
   }
-  const groupMode = stringArg(args, "--group-mode", globals.project?.pr.groupMode ?? "melee-subsystem");
-  if (groupMode !== "melee-subsystem" && groupMode !== "top-dir") {
-    throw new Error("--group-mode must be melee-subsystem or top-dir");
+  const groupMode = stringArg(args, "--group-mode", globals.project?.pr.groupMode ?? "colosseum-subsystem");
+  if (groupMode !== "colosseum-subsystem" && groupMode !== "top-dir") {
+    throw new Error("--group-mode must be colosseum-subsystem or top-dir");
   }
   const planningStrategy = stringArg(args, "--strategy", globals.project?.pr.splitStrategy ?? "deterministic");
   if (planningStrategy !== "deterministic" && planningStrategy !== "agent") {
@@ -1217,7 +1217,7 @@ export async function prSplitPlan(globals: GlobalArgs, args: Map<string, string 
   }
 
   const branchPrefix = stringArg(args, "--branch-prefix", globals.project?.pr.branchPrefix ?? "pr-split");
-  const titlePrefix = stringArg(args, "--title-prefix", globals.project?.pr.titlePrefix ?? "Melee decomp");
+  const titlePrefix = stringArg(args, "--title-prefix", globals.project?.pr.titlePrefix ?? "Colosseum decomp");
   const sliceCheckCommand = stringArg(args, "--slice-check-command", "python3 configure.py --require-protos --wrapper build/tools/wibo && ninja changes_all");
   const includeBranchDiff = !booleanArg(args, "--worktree-only");
   const includeWorktree = !booleanArg(args, "--committed-only");

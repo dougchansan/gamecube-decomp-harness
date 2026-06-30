@@ -5,9 +5,9 @@ import {
 } from "@agent-kernel/db";
 
 import {
-  createMeleeKernelBridgeConfig,
-  type CreateMeleeKernelBridgeConfigInput,
-  type MeleeKernelBridgeConfig,
+  createColosseumKernelBridgeConfig,
+  type CreateColosseumKernelBridgeConfigInput,
+  type ColosseumKernelBridgeConfig,
 } from "./config.js";
 
 export type KernelRegistrationUpsertPort = (
@@ -15,8 +15,8 @@ export type KernelRegistrationUpsertPort = (
   data: NewKernelRegistration,
 ) => Promise<KernelRegistration>;
 
-export function buildMeleeKernelRegistration(
-  config: MeleeKernelBridgeConfig = createMeleeKernelBridgeConfig(),
+export function buildColosseumKernelRegistration(
+  config: ColosseumKernelBridgeConfig = createColosseumKernelBridgeConfig(),
 ): NewKernelRegistration {
   return {
     kernelId: config.kernelId,
@@ -31,17 +31,17 @@ export function buildMeleeKernelRegistration(
   };
 }
 
-export interface UpsertMeleeKernelRegistrationOptions {
+export interface UpsertColosseumKernelRegistrationOptions {
   db: unknown;
-  config?: CreateMeleeKernelBridgeConfigInput | MeleeKernelBridgeConfig;
+  config?: CreateColosseumKernelBridgeConfigInput | ColosseumKernelBridgeConfig;
   upsert?: KernelRegistrationUpsertPort;
 }
 
-export async function upsertMeleeKernelRegistration({
+export async function upsertColosseumKernelRegistration({
   db,
   config,
   upsert = defaultUpsertKernelRegistration,
-}: UpsertMeleeKernelRegistrationOptions): Promise<KernelRegistration> {
-  const resolvedConfig = createMeleeKernelBridgeConfig(config);
-  return upsert(db, buildMeleeKernelRegistration(resolvedConfig));
+}: UpsertColosseumKernelRegistrationOptions): Promise<KernelRegistration> {
+  const resolvedConfig = createColosseumKernelBridgeConfig(config);
+  return upsert(db, buildColosseumKernelRegistration(resolvedConfig));
 }

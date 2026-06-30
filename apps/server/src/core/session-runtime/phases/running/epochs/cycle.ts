@@ -29,6 +29,7 @@ export interface EpochCycleOptions {
   regressionRequeueLimit?: number;
   /** Added to repair-target priority so repairs outrank every board candidate. */
   repairPriorityBase?: number;
+  changesTarget?: string;
   reportRelPath?: string;
   reportChangesRelPath?: string;
   baselineRelPath?: string;
@@ -372,9 +373,9 @@ export async function runEpochCycle(store: StateStore, runId: string, repoRoot: 
 async function runEpochCycleInner(store: StateStore, runId: string, repoRoot: string, stateDir: string, options: EpochCycleOptions): Promise<EpochCycleResult> {
   const startedAt = Date.now();
   const label = options.label ?? null;
-  const reportRelPath = options.reportRelPath ?? "build/GALE01/report.json";
-  const reportChangesRelPath = options.reportChangesRelPath ?? "build/GALE01/report_changes.json";
-  const baselineRelPath = options.baselineRelPath ?? "build/GALE01/baseline.json";
+  const reportRelPath = options.reportRelPath ?? "build/GC6E01/report.json";
+  const reportChangesRelPath = options.reportChangesRelPath ?? "build/GC6E01/report_changes.json";
+  const baselineRelPath = options.baselineRelPath ?? "build/GC6E01/baseline.json";
   const integrationDrain = await processWorkerOutputIntegrationQueue({
     dryRun: false,
     limit: 64,
@@ -414,7 +415,13 @@ async function runEpochCycleInner(store: StateStore, runId: string, repoRoot: st
   await runConfigure(options.worktreeDir, configureCommand);
 
   const worktreeBaselinePath = resolve(options.worktreeDir, baselineRelPath);
-  const buildResult = await forceReportRun(options.worktreeDir, { resetBaseline: !existsSync(worktreeBaselinePath) });
+  const buildResult = await forceReportRun(options.worktreeDir, {
+    baselinePath: baselineRelPath,
+    changesTarget: options.changesTarget,
+    reportChangesPath: reportChangesRelPath,
+    reportPath: reportRelPath,
+    resetBaseline: !existsSync(worktreeBaselinePath),
+  });
 
   const worktreeReportPath = resolve(options.worktreeDir, reportRelPath);
   const worktreeChangesPath = resolve(options.worktreeDir, reportChangesRelPath);
@@ -551,11 +558,11 @@ async function runEpochCycleInner(store: StateStore, runId: string, repoRoot: st
       artifactType: "trusted_report",
       artifactKey: "current",
       sourcePath: resolve(artifactDir, "report_changes.json"),
-      sourceLabel: "build/GALE01/report_changes.json",
+      sourceLabel: "build/GC6E01/report_changes.json",
       payload: trustedReportFromRegressionReport(
         regressionReport,
         resolve(artifactDir, "report_changes.json"),
-        "build/GALE01/report_changes.json",
+        "build/GC6E01/report_changes.json",
         savePoint.createdAt,
         0,
       ) as unknown as Record<string, unknown>,

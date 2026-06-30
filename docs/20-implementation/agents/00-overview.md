@@ -98,7 +98,7 @@ module to that bundle, and the catalog converts those inputs into a kernel
 `AgentContextResolver` alongside the `ParsedAgent` system prompt.
 
 Live DB-backed spawns pass the resolver through the server kernel bridge into
-`createSpawnAgent`. The kernel resolves `melee-session-context` plus the
+`createSpawnAgent`. The kernel resolves `colosseum-session-context` plus the
 role-specific inline inputs, emits context lifecycle events, injects the
 assembled context as an `agent-context` custom message, and runs a short first
 turn prompt that points at the injected context. The rendered context packet is
@@ -119,7 +119,7 @@ model-reviewed postmortems enter the orchestrator through the internal
 `kg-pr-indexer-agent` server job in `apps/server/src/core/knowledge/jobs/kg.ts`.
 
 `kg-pr-indexer-agent` builds the same `prIndexerPrompt` used by the catalog,
-passes role `pr-indexer` to `runMeleeKernelPiAgent()`, forces the kernel spawn
+passes role `pr-indexer` to `runColosseumKernelPiAgent()`, forces the kernel spawn
 path for non-dry runs, attaches a `postmortem` spawn context, records the
 resulting Pi session in harness state, and writes raw model output back to the
 Python worker. The Python launcher forwards orchestrator state/run/project and
@@ -134,7 +134,7 @@ defines the pre-PR worker-output integration conflict agent. Its stable runtime
 id is `integration-resolver`. The prompt receives one integration conflict queue
 item plus a queue summary: failed `git apply` evidence, worker checkpoint ids,
 explicit write sets, conflict paths, validation evidence, and conflict-group
-metadata. It returns `melee_integration_resolver_result_v1` with worker-output
+metadata. It returns `colosseum_integration_resolver_result_v1` with worker-output
 dispositions, path-level conflict resolutions, edits, validation rows, remaining
 conflicts, carry-forward notes, and risks.
 
@@ -149,7 +149,7 @@ validation; clean worker checkpoint applies do not need this agent.
 feedback fixer. Its stable runtime id is `pr-fixer`. The fixer receives
 maintainer comments, review-thread findings, PR reviewer findings, diff
 context, and validation evidence for one PR branch. It returns
-`melee_pr_fixer_result_v1`: focused edits, validation rows, comment/finding
+`colosseum_pr_fixer_result_v1`: focused edits, validation rows, comment/finding
 dispositions, remaining items, manual-review notes, and risks. The runner owns
 remote PR state, including posting comments or marking threads resolved.
 
@@ -157,7 +157,7 @@ remote PR state, including posting comments or marking threads resolved.
 QA repair queue surface.
 Its stable runtime id remains `qa-repair` for compatibility with the existing
 candidate-file repair lane. The fixer receives one repair item, fixes only the
-listed deterministic findings, and returns the `melee_qa_repair_result_v1`
+listed deterministic findings, and returns the `colosseum_qa_repair_result_v1`
 JSON contract. The runner owns final status: agent output must parse against
 the schema, then the server job reruns the QA scanner before a file can become
 `clean_same_match` or `clean_lower_score`.

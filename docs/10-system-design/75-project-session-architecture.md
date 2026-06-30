@@ -171,7 +171,7 @@ stops can be `finish_epoch` or `hard_stop`. A hard stop or error can be forced
 into PR, but PR always starts at `final_build`. QA and later PR subphases are
 guarded until the final build is recorded complete.
 
-`process_state_json` stores enough `melee-live` identity to reconnect a
+`process_state_json` stores enough `pkmn-colosseum-live` identity to reconnect a
 detached process after the UI/server restarts: process name, project id,
 session uuid, status, pid/process group, process file path, command, repo root,
 state dir, graph DB path, and timestamps. `kernel_trace_json` stores the

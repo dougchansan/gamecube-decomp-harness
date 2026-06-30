@@ -311,7 +311,7 @@ function addFunctionHintLesson(
 }
 
 function currentFunctionIndex(repoRoot: string): Map<string, CurrentFunction> {
-  const reportPath = resolve(repoRoot, "build/GALE01/report.json");
+  const reportPath = resolve(repoRoot, "build/GC6E01/report.json");
   const objdiffPath = resolve(repoRoot, "objdiff.json");
   if (!existsSync(reportPath) || !existsSync(objdiffPath)) return new Map();
   const sourceByUnit = objdiffSourceMap(readJson(objdiffPath));

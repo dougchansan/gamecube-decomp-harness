@@ -108,9 +108,9 @@ export async function savePoint(globals: GlobalArgs, args: Map<string, string | 
 
     const artifactDir = resolve(globals.stateDir, "save_points", artifactTimestamp());
     await mkdir(artifactDir, { recursive: true });
-    const reportSource = resolve(globals.repoRoot, "build/GALE01/report.json");
-    const baselineSource = resolve(globals.repoRoot, "build/GALE01/baseline.json");
-    const reportChangesSource = resolve(globals.repoRoot, "build/GALE01/report_changes.json");
+    const reportSource = resolve(globals.repoRoot, "build/GC6E01/report.json");
+    const baselineSource = resolve(globals.repoRoot, "build/GC6E01/baseline.json");
+    const reportChangesSource = resolve(globals.repoRoot, "build/GC6E01/report_changes.json");
     let reportPath: string | null = null;
     let reportChangesPath: string | null = null;
     let measuresSource: string | null = null;
@@ -207,7 +207,7 @@ export async function savePoint(globals: GlobalArgs, args: Map<string, string | 
       });
     }
     if (reportChangesPath) {
-      const trustedReport = await loadTrustedReportFile(reportChangesPath, "build/GALE01/report_changes.json", 0);
+      const trustedReport = await loadTrustedReportFile(reportChangesPath, "build/GC6E01/report_changes.json", 0);
       if (trustedReport.status === "ready") {
         recordDashboardArtifact(store, {
           runId: record.runId,
@@ -215,7 +215,7 @@ export async function savePoint(globals: GlobalArgs, args: Map<string, string | 
           artifactType: "trusted_report",
           artifactKey: "current",
           sourcePath: reportChangesPath,
-          sourceLabel: "build/GALE01/report_changes.json",
+          sourceLabel: "build/GC6E01/report_changes.json",
           payload: trustedReport as unknown as Record<string, unknown>,
           createdAt: trustedReport.generatedAt ?? record.createdAt,
         });

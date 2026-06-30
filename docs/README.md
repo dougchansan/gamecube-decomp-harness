@@ -6,7 +6,7 @@ concepts: [docs, navigation, package-local, foundation, system-design, implement
 # D-Comp Orchestrator Docs
 
 These docs describe `decomp-orchestrator/` only. They are intentionally
-package-local docs, not the top-level Melee repository documentation.
+package-local docs, not the top-level Colosseum repository documentation.
 
 The visual design artifact is preserved at [design.html](design.html). The
 markdown docs are the living, navigable version of that design, organized with

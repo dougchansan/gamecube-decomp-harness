@@ -6,9 +6,9 @@ durable agent control plane: many Pi worker agents can research, edit, validate,
 and report in parallel while sharing one run board, one knowledge graph, and one
 set of project-specific safety rails.
 
-The current tracked project is Melee, but the harness is organized around
+The fork default project is Pokemon Colosseum. The harness is organized around
 `projects/<id>/project.json` descriptors so the same machinery can be pointed at
-other GameCube decompilation workspaces.
+project-specific GameCube decompilation workspaces.
 
 ![GameCube Decomp Harness dashboard](docs/assets/dashboard-screenshot.png)
 
@@ -41,10 +41,21 @@ bun run smoke
 `bun run smoke` uses dry-run agents and fixture data, so it does not require a
 live provider or edit a real decompilation checkout.
 
+This branch expects the Agent Kernel workspace at
+`/Users/douglaswhittingham/Codecaine/agent-kernel`, with its `prompt-kit`
+submodule initialized and dependencies installed:
+
+```sh
+git clone https://github.com/Codecaine-AI/agent-kernel.git ../Codecaine/agent-kernel
+git -C ../Codecaine/agent-kernel checkout fa2ebf7418a48c6bb85fafe237d28887507d8230
+git -C ../Codecaine/agent-kernel submodule update --init --recursive packages/prompt-kit
+bun install --cwd ../Codecaine/agent-kernel --linker hoisted
+```
+
 Inspect the server job surface:
 
 ```sh
-bun run server:job -- --project melee status
+bun run server:job -- --project pkmn-colosseum status
 ```
 
 Launch the dashboard when you want the browser control surface:
@@ -57,10 +68,11 @@ The dashboard serves at `http://localhost:8787` by default.
 
 ## Live Project Setup
 
-The tracked Melee descriptor defaults to `projects/melee/checkout/`. For local
-work, either place a `doldecomp/melee` checkout there or create ignored
-`projects/melee/local.project.json` with machine-specific paths for the repo,
-state directory, graph database, env file, and process defaults.
+The tracked Pokemon Colosseum descriptor defaults to
+`projects/pkmn-colosseum/checkout/`. For local work, either place a checkout
+there or create ignored `projects/pkmn-colosseum/local.project.json` with
+machine-specific paths for the repo, state directory, graph database, env file,
+and process defaults.
 
 Live agent sessions need:
 
@@ -70,7 +82,7 @@ Live agent sessions need:
 - Pi provider/auth configuration for the selected provider, model, and thinking
   level.
 - Project-local secrets in ignored env files such as
-  `projects/melee/local.env`.
+  `projects/pkmn-colosseum/local.env`.
 
 Keep literal API keys and generated session state out of tracked files.
 
@@ -79,7 +91,7 @@ Keep literal API keys and generated session state out of tracked files.
 Initialize a run:
 
 ```sh
-bun run server:job -- --project melee init-run \
+bun run server:job -- --project pkmn-colosseum init-run \
   --desired-workers 16 \
   --goal-kind matched_code_percent \
   --goal-value 72
@@ -88,7 +100,7 @@ bun run server:job -- --project melee init-run \
 Run the supervised worker loop:
 
 ```sh
-bun run server:job -- --project melee --agent-timeout-seconds 14400 babysit \
+bun run server:job -- --project pkmn-colosseum --agent-timeout-seconds 14400 babysit \
   --max-workers 16 \
   --idle-sleep-ms 5000 \
   --worker-thinking-level low
@@ -97,7 +109,7 @@ bun run server:job -- --project melee --agent-timeout-seconds 14400 babysit \
 Before review or handoff, run the regression gate:
 
 ```sh
-bun run server:job -- --project melee regression-check
+bun run server:job -- --project pkmn-colosseum regression-check
 ```
 
 For high-throughput runs, tune worker count, queue size, candidate windows, graph

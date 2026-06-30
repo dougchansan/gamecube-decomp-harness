@@ -13,6 +13,7 @@ export interface CliResult {
 export interface ManagedProcessProject {
   graphDbPath?: string;
   id?: string;
+  processName?: string;
   projectId?: string;
   repoRoot?: string;
   stateDir?: string;
@@ -258,7 +259,8 @@ export class ManagedProcessController {
       const savedProject = asObject(record.project);
       const savedProjectId = stringValue(record.projectId, stringValue(savedProject.id, stringValue(savedProject.projectId)));
       const projectId = stringValue(project.projectId, stringValue(project.id));
-      return !projectId || savedProjectId === projectId || stringValue(record.name) === "melee-live";
+      const projectProcessName = stringValue(project.processName);
+      return !projectId || savedProjectId === projectId || Boolean(projectProcessName && stringValue(record.name) === projectProcessName);
     });
     const managedRunning = this.managed?.state === "running" || this.managed?.state === "stopping" || this.managed?.state === "draining";
     const savedPid = intValue(activeSaved?.pid, 0, 0);

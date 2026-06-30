@@ -14,7 +14,7 @@ function validReview(): Record<string, unknown> {
     slice_verdict: "reject",
     findings: [
       {
-        file: "src/melee/gm/gm_1832.c",
+        file: "src/colosseum/gm/gm_1832.c",
         line: 1919,
         standard_id: "global_standard:literals-and-data-ownership",
         verdict: "reject",
@@ -22,7 +22,7 @@ function validReview(): Record<string, unknown> {
         suggested_fix: "Remove the extern and define the constant in binary order; accept the lower match.",
       },
       {
-        file: "src/melee/gm/gm_1832.c",
+        file: "src/colosseum/gm/gm_1832.c",
         line: null,
         standard_id: null,
         verdict: "warn",
@@ -62,7 +62,7 @@ describe("validatePreshipReview", () => {
   });
 
   test("rejects a wrong schema_version", () => {
-    const { review, errors } = validatePreshipReview({ ...validReview(), schema_version: "melee_pr_postmortem_v1" });
+    const { review, errors } = validatePreshipReview({ ...validReview(), schema_version: "colosseum_pr_postmortem_v1" });
     expect(review).toBeNull();
     expect(errors.join(" ")).toContain("schema_version");
   });
@@ -141,10 +141,10 @@ describe("prPreshipReviewPrompt", () => {
       },
     });
     const injectedContext = bundle.kernelContext?.renderedContext ?? "";
-    expect(bundle.systemPrompt).not.toContain("melee_pr_preship_review_v1");
+    expect(bundle.systemPrompt).not.toContain("colosseum_pr_preship_review_v1");
     expect(bundle.systemPrompt).toContain("find every reason the maintainer");
     expect(bundle.userPrompt).not.toContain("+extern const f32 lbl_804DA60C;");
-    expect(injectedContext).toContain("melee_pr_preship_review_v1");
+    expect(injectedContext).toContain("colosseum_pr_preship_review_v1");
     expect(injectedContext).toContain("slice `gm`");
     expect(injectedContext).toContain("+extern const f32 lbl_804DA60C;");
     expect(injectedContext).toContain("extern_literal_anchor");

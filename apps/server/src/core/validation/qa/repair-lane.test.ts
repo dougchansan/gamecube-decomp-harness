@@ -12,7 +12,7 @@ function finding(overrides: Partial<QaScanFinding> = {}): QaScanFinding {
   return {
     rule_id: "m2c_residue_names",
     severity: "error",
-    file: "src/melee/gr/grsmoke.c",
+    file: "src/colosseum/gr/grsmoke.c",
     line: 24,
     excerpt: "s32 temp_r30 = var_r4;",
     message: "Generated m2c local name remains in source.",
@@ -42,7 +42,7 @@ function scanResult(findings: QaScanFinding[]): QaScanResult {
     tool: "review_lint",
     operation: "review_lint:scan_diff",
     status: errors > 0 ? "failed" : warnings > 0 ? "warned" : "passed",
-    repo: "/tmp/melee",
+    repo: "/tmp/colosseum",
     base: "origin/master",
     findings,
     counts: { errors, warnings },
@@ -57,14 +57,14 @@ describe("buildQaRepairQueue", () => {
       repoRoot: "/repo",
       baseRef: "origin/master",
       scanResult: payload,
-      candidateFiles: ["src/melee/gr/grsmoke.c"],
+      candidateFiles: ["src/colosseum/gr/grsmoke.c"],
       createdAt: "2026-06-13T00:00:00.000Z",
       dryRun: true,
     });
 
     expect(queue.items).toHaveLength(1);
     const item = queue.items[0] as QaRepairQueueItem;
-    expect(item.source_path).toBe("src/melee/gr/grsmoke.c");
+    expect(item.source_path).toBe("src/colosseum/gr/grsmoke.c");
     expect(item.status).toBe("queued");
     const errorRules = new Set(item.findings.map((entry) => entry.rule_id));
     for (const rule of [
@@ -86,8 +86,8 @@ describe("buildQaRepairQueue", () => {
     const queue = buildQaRepairQueue({
       runId: "test-run",
       repoRoot: "/repo",
-      scanResult: scanResult([finding(), finding({ file: "src/melee/gm/gm_1832.c", rule_id: "new_data_anchor" })]),
-      candidateFiles: ["src/melee/gr/grsmoke.c"],
+      scanResult: scanResult([finding(), finding({ file: "src/colosseum/gm/gm_1832.c", rule_id: "new_data_anchor" })]),
+      candidateFiles: ["src/colosseum/gr/grsmoke.c"],
       createdAt: "2026-06-13T00:00:00.000Z",
     });
 
@@ -101,7 +101,7 @@ describe("buildQaRepairQueue", () => {
       runId: "test-run",
       repoRoot: "/repo",
       scanResult: scanResult([finding({ severity: "warning", rule_id: "type_erasing_cast", excerpt: "(u8*) data", message: "Added type-erasing cast." })]),
-      candidateFiles: ["src/melee/gr/grsmoke.c"],
+      candidateFiles: ["src/colosseum/gr/grsmoke.c"],
       repairWarnings: true,
       createdAt: "2026-06-13T00:00:00.000Z",
     });
@@ -121,7 +121,7 @@ describe("validateQaRepairOutcome", () => {
       runId: "test-run",
       repoRoot: "/repo",
       scanResult: scanResult([finding()]),
-      candidateFiles: ["src/melee/gr/grsmoke.c"],
+      candidateFiles: ["src/colosseum/gr/grsmoke.c"],
       createdAt: "2026-06-13T00:00:00.000Z",
     });
     const result = validateQaRepairOutcome({
@@ -145,7 +145,7 @@ describe("validateQaRepairOutcome", () => {
         items: [
           {
             id: "checkpoint-item",
-            sourcePath: "src/melee/gr/grsmoke.c",
+            sourcePath: "src/colosseum/gr/grsmoke.c",
             disposition: "pr_candidate",
             exactMatch: true,
             symbol: "grSmoke",
@@ -168,8 +168,8 @@ describe("validateQaRepairOutcome", () => {
 	    const shipStatus = qaRepairShipStatus(nextQueue);
 	    expect(shipStatus.status).toBe("qa_repair_blocked");
 	    expect(shipStatus.shippedFiles).toEqual([]);
-    expect(shipStatus.cleanLowerScoreFiles).toEqual(["src/melee/gr/grsmoke.c"]);
-    expect(shipStatus.droppedFiles["src/melee/gr/grsmoke.c"]?.[0]).toContain("lowered match score");
+    expect(shipStatus.cleanLowerScoreFiles).toEqual(["src/colosseum/gr/grsmoke.c"]);
+    expect(shipStatus.droppedFiles["src/colosseum/gr/grsmoke.c"]?.[0]).toContain("lowered match score");
   });
 
   test("failed score validation prevents a clean post-scan from passing", () => {
@@ -177,7 +177,7 @@ describe("validateQaRepairOutcome", () => {
       runId: "test-run",
       repoRoot: "/repo",
       scanResult: scanResult([finding()]),
-      candidateFiles: ["src/melee/gr/grsmoke.c"],
+      candidateFiles: ["src/colosseum/gr/grsmoke.c"],
       createdAt: "2026-06-13T00:00:00.000Z",
     });
     const result = validateQaRepairOutcome({
@@ -197,7 +197,7 @@ describe("validateQaRepairOutcome", () => {
       runId: "test-run",
       repoRoot: "/repo",
       scanResult: scanResult([finding()]),
-      candidateFiles: ["src/melee/gr/grsmoke.c"],
+      candidateFiles: ["src/colosseum/gr/grsmoke.c"],
       createdAt: "2026-06-13T00:00:00.000Z",
     });
     const result = validateQaRepairOutcome({
@@ -216,7 +216,7 @@ describe("validateQaRepairOutcome", () => {
       runId: "test-run",
       repoRoot: "/repo",
       scanResult: scanResult([finding({ severity: "warning", rule_id: "m2c_goto_label", excerpt: "goto done;", message: "Added goto." })]),
-      candidateFiles: ["src/melee/gr/grsmoke.c"],
+      candidateFiles: ["src/colosseum/gr/grsmoke.c"],
       repairWarnings: true,
       createdAt: "2026-06-13T00:00:00.000Z",
     });

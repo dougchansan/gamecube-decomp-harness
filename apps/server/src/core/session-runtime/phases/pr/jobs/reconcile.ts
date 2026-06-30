@@ -1,8 +1,8 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { createMeleeKernelSpawnContext } from "@server/infrastructure/kernel/bridge/spawn-context";
-import { runMeleeKernelPiAgent as runPiAgent } from "@server/infrastructure/agent-runtime/kernel-pi-runner";
+import { createColosseumKernelSpawnContext } from "@server/infrastructure/kernel/bridge/spawn-context";
+import { runColosseumKernelPiAgent as runPiAgent } from "@server/infrastructure/agent-runtime/kernel-pi-runner";
 import { reconcilePrompt, type ReconcileMode } from "@server/core/agent-catalog/agents/pr/reconcile";
 import { artifactTimestamp, parseJsonObject } from "@server/infrastructure/agent-runtime/runtime";
 import { addPiSession } from "@server/core/session-runtime/run-state";
@@ -133,7 +133,7 @@ export async function reconcile(globals: GlobalArgs, args: Map<string, string | 
       stateDir: globals.stateDir,
       project: globals.project,
     },
-    kernelContext: createMeleeKernelSpawnContext({
+    kernelContext: createColosseumKernelSpawnContext({
       kind: "reconcile",
       projectId: globals.project?.projectId ?? globals.projectId,
       sessionId: context.run_id ? String(context.run_id) : `reconcile-${mode}`,

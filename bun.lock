@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "melee-decomp-orchestrator",
+      "name": "colosseum-decomp-orchestrator",
       "dependencies": {
         "@earendil-works/pi-coding-agent": "latest",
         "react": "^19.2.7",

@@ -98,11 +98,17 @@ function scoreFromRow(row: Record<string, unknown>): number {
   return numberValue(row.match_percent, numberValue(row.fuzzy_match_percent, NaN));
 }
 
-function objectTargetFromSourcePath(sourcePath: string): string | null {
+export function objectBuildDirFromReportPath(reportPath: string | undefined): string {
+  if (!reportPath) return "build/GC6E01";
+  const buildDir = dirname(reportPath);
+  return buildDir && buildDir !== "." ? buildDir : "build/GC6E01";
+}
+
+function objectTargetFromSourcePath(sourcePath: string, objectBuildDir = "build/GC6E01"): string | null {
   if (!sourcePath) return null;
   const withoutExtension = sourcePath.replace(/\.[^./\\]+$/, "");
   if (withoutExtension === sourcePath) return null;
-  return `build/GALE01/${withoutExtension}.o`;
+  return `${objectBuildDir}/${withoutExtension}.o`;
 }
 
 function scoredSideRows(side: unknown): ObjdiffSideRows {
@@ -349,6 +355,7 @@ export async function captureWorkerChangeBaseline(params: {
   outputDir: string;
   target: Record<string, unknown>;
   dryRun?: boolean;
+  objectBuildDir?: string;
   /** Additional repo-relative paths to snapshot for the L1 QA lint diff. */
   extraPaths?: string[];
 }): Promise<WorkerChangeBaseline> {
@@ -356,7 +363,7 @@ export async function captureWorkerChangeBaseline(params: {
   const unit = stringValue(params.target.unit);
   const symbol = stringValue(params.target.symbol);
   const sourcePath = stringValue(params.target.source_path);
-  const objectTarget = objectTargetFromSourcePath(sourcePath);
+  const objectTarget = objectTargetFromSourcePath(sourcePath, params.objectBuildDir);
   const reasons: string[] = [];
 
   if (params.dryRun) {
@@ -561,7 +568,7 @@ export function compareWorkerUnitSnapshots(params: {
 
 /**
  * Rewrite a `git diff --no-index <preCopy> <current>` header so scan_diff.py
- * sees the repo-relative path (`a/src/melee/... b/src/melee/...`) instead of
+ * sees the repo-relative path (`a/src/colosseum/... b/src/colosseum/...`) instead of
  * the absolute snapshot/worktree paths. Returns "" when the diff has no hunks
  * (identical or binary files).
  */

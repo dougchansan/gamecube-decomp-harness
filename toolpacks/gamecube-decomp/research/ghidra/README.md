@@ -6,7 +6,7 @@ headless import/analyze evidence.
 Current state: live runner v1.
 `python3 toolpacks/gamecube-decomp/research/ghidra/runners/run_headless_probe.py --repo-root <repo_root>`
 resolves the Homebrew Ghidra/OpenJDK install, runs `analyzeHeadless` against
-`build/GALE01/main.elf`, and writes:
+`build/GC6E01/main.elf`, and writes:
 
 - `cache/runner_status.json`
 - `cache/ghidra_headless_probe.log`

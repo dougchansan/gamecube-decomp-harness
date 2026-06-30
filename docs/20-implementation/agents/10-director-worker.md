@@ -49,7 +49,7 @@ The integration resolver runs after worker completion and before PR mode. It
 receives an explicit integration conflict queue item, not a PR review item. The
 item contains failed apply evidence, selected worker checkpoint metadata, patch
 paths, conflict paths, and write sets. The agent resolves only that conflict
-group, returns `melee_integration_resolver_result_v1`, and records how each
+group, returns `colosseum_integration_resolver_result_v1`, and records how each
 worker output was applied, partially applied, dropped, or superseded.
 
 ```text

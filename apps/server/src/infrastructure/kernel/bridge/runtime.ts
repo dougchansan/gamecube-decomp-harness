@@ -20,40 +20,40 @@ import type { TraceEvent } from "@agent-kernel/protocol";
 import { and, desc, eq, isNull, like, or, sql } from "drizzle-orm";
 
 import {
-  createMeleeKernelBridgeConfig,
-  type CreateMeleeKernelBridgeConfigInput,
-  type MeleeKernelBridgeConfig,
+  createColosseumKernelBridgeConfig,
+  type CreateColosseumKernelBridgeConfigInput,
+  type ColosseumKernelBridgeConfig,
 } from "./config.js";
 import {
   ensureKernelObservabilitySchema,
   DEFAULT_AGENT_KERNEL_DATABASE_URL,
-  meleeKernelDatabaseUrlFromEnv,
-  meleeKernelRuntimeRequiredFromEnv,
-  openMeleeKernelDatabase,
-  type MeleeKernelDatabaseHandle,
-  type OpenMeleeKernelDatabaseOptions,
+  colosseumKernelDatabaseUrlFromEnv,
+  colosseumKernelRuntimeRequiredFromEnv,
+  openColosseumKernelDatabase,
+  type ColosseumKernelDatabaseHandle,
+  type OpenColosseumKernelDatabaseOptions,
 } from "./database.js";
-import type { MeleeKernelSpawnContext } from "./kernel.js";
+import type { ColosseumKernelSpawnContext } from "./kernel.js";
 import {
   createDbKernelTraceRowsReader,
-  createMeleeKernelTraceReadService,
+  createColosseumKernelTraceReadService,
   type KernelTraceRowsLister,
   type KernelTraceRowsReader,
   type KernelTraceIdentityResolver,
 } from "./read-api.js";
 import {
-  upsertMeleeKernelRegistration,
+  upsertColosseumKernelRegistration,
   type KernelRegistrationUpsertPort,
 } from "./registration.js";
 import {
-  createMeleeTraceTailer,
-  type CreateMeleeTraceTailerOptions,
-  type MeleeTraceTailer,
-  type MeleeTraceTailerStatus,
+  createColosseumTraceTailer,
+  type CreateColosseumTraceTailerOptions,
+  type ColosseumTraceTailer,
+  type ColosseumTraceTailerStatus,
 } from "./tailer.js";
 import {
-  createMeleeTraceWriter,
-  type MeleeTraceWriter,
+  createColosseumTraceWriter,
+  type ColosseumTraceWriter,
 } from "./trace-writer.js";
 
 export type ContainerUpsertPort = (
@@ -76,25 +76,25 @@ export type AgentRunUpsertPort = (
   data: NewAgentRun,
 ) => Promise<AgentRun | NewAgentRun>;
 
-export interface MeleeKernelRuntime {
-  config: MeleeKernelBridgeConfig;
+export interface ColosseumKernelRuntime {
+  config: ColosseumKernelBridgeConfig;
   databaseUrl: string | null;
   db: unknown;
   registration: KernelRegistration | null;
   readApi: ReturnType<typeof createKernelTraceReadApi>;
   readRows: KernelTraceRowsReader;
-  traceWriter: MeleeTraceWriter;
-  upsertSpawnContainers: (context: MeleeKernelSpawnContext) => Promise<void>;
+  traceWriter: ColosseumTraceWriter;
+  upsertSpawnContainers: (context: ColosseumKernelSpawnContext) => Promise<void>;
   startTraceTailer: () => Promise<void>;
   flushTraceTailer: () => Promise<void>;
   stopTraceTailer: () => Promise<void>;
-  traceTailerStatus: () => MeleeTraceTailerStatus | null;
+  traceTailerStatus: () => ColosseumTraceTailerStatus | null;
   close: () => Promise<void>;
 }
 
-export interface CreateMeleeKernelRuntimeOptions {
-  config?: CreateMeleeKernelBridgeConfigInput | MeleeKernelBridgeConfig;
-  database?: OpenMeleeKernelDatabaseOptions;
+export interface CreateColosseumKernelRuntimeOptions {
+  config?: CreateColosseumKernelBridgeConfigInput | ColosseumKernelBridgeConfig;
+  database?: OpenColosseumKernelDatabaseOptions;
   db?: unknown;
   closeDatabase?: () => Promise<void>;
   ensureSchema?: boolean;
@@ -106,7 +106,7 @@ export interface CreateMeleeKernelRuntimeOptions {
   upsertPiAgentSession?: PiAgentSessionUpsertPort;
   upsertAgentRun?: AgentRunUpsertPort;
   tailer?: Omit<
-    CreateMeleeTraceTailerOptions,
+    CreateColosseumTraceTailerOptions,
     "db" | "config" | "insertTraceEvents" | "upsertPiAgentSession" | "upsertAgentRun"
   > | false;
   readRows?: KernelTraceRowsReader;
@@ -114,9 +114,9 @@ export interface CreateMeleeKernelRuntimeOptions {
   resolveIdentity?: KernelTraceIdentityResolver;
 }
 
-export interface GetDefaultMeleeKernelRuntimeOptions
-  extends Omit<CreateMeleeKernelRuntimeOptions, "database"> {
-  database?: OpenMeleeKernelDatabaseOptions & {
+export interface GetDefaultColosseumKernelRuntimeOptions
+  extends Omit<CreateColosseumKernelRuntimeOptions, "database"> {
+  database?: OpenColosseumKernelDatabaseOptions & {
     env?: Record<string, string | undefined>;
   };
 }
@@ -132,12 +132,12 @@ function dedupeContainers(containers: NewContainer[]): NewContainer[] {
   return [...byId.values()];
 }
 
-export async function upsertMeleeSpawnContextContainers({
+export async function upsertColosseumSpawnContextContainers({
   context,
   db,
   upsert = defaultUpsertContainer,
 }: {
-  context: MeleeKernelSpawnContext;
+  context: ColosseumKernelSpawnContext;
   db: unknown;
   upsert?: ContainerUpsertPort;
 }): Promise<void> {
@@ -167,7 +167,7 @@ export async function upsertMeleeSpawnContextContainers({
   }
 }
 
-export async function resolveMeleeKernelTraceIdentity(
+export async function resolveColosseumKernelTraceIdentity(
   db: unknown,
   id: string,
 ): Promise<KernelTraceReadIdentity> {
@@ -213,9 +213,9 @@ export async function resolveMeleeKernelTraceIdentity(
   };
 }
 
-export function createDbMeleeKernelTraceRowsLister(
+export function createDbColosseumKernelTraceRowsLister(
   db: unknown,
-  _config: MeleeKernelBridgeConfig,
+  _config: ColosseumKernelBridgeConfig,
 ): KernelTraceRowsLister {
   return async (query) => {
     const limit = Math.min(Math.max(query.limit ?? 100, 1), 500);
@@ -225,7 +225,7 @@ export function createDbMeleeKernelTraceRowsLister(
       .where(
         and(
           isNull(schema.containers.parentContainerId),
-          like(schema.containers.id, "melee:%:session"),
+          like(schema.containers.id, "colosseum:%:session"),
           sql`${schema.containers.metadata}->>'projectId' IS NOT NULL`,
         ),
       )
@@ -252,17 +252,17 @@ export function createDbMeleeKernelTraceRowsLister(
   };
 }
 
-export async function createMeleeKernelRuntime(
-  options: CreateMeleeKernelRuntimeOptions = {},
-): Promise<MeleeKernelRuntime> {
-  const config = createMeleeKernelBridgeConfig(options.config);
-  const handle: MeleeKernelDatabaseHandle = options.db
+export async function createColosseumKernelRuntime(
+  options: CreateColosseumKernelRuntimeOptions = {},
+): Promise<ColosseumKernelRuntime> {
+  const config = createColosseumKernelBridgeConfig(options.config);
+  const handle: ColosseumKernelDatabaseHandle = options.db
     ? {
         db: options.db,
         databaseUrl: options.database?.databaseUrl ?? null,
         close: options.closeDatabase ?? (async () => {}),
       }
-    : await openMeleeKernelDatabase(options.database);
+    : await openColosseumKernelDatabase(options.database);
   const db = handle.db;
 
   if (options.ensureSchema !== false) {
@@ -272,20 +272,20 @@ export async function createMeleeKernelRuntime(
   const registration =
     options.register === false
       ? null
-      : await upsertMeleeKernelRegistration({
+      : await upsertColosseumKernelRegistration({
           db,
           config,
           upsert: options.upsertRegistration,
         });
   const insertTraceEvents = options.insertTraceEvents ?? defaultInsertTraceEventsBatch;
-  const traceWriter = createMeleeTraceWriter({
+  const traceWriter = createColosseumTraceWriter({
     insertBatch: (events) => insertTraceEvents(db, events),
   });
   const readRows = options.readRows ?? createDbKernelTraceRowsReader({ db });
-  const listRows = options.listRows ?? createDbMeleeKernelTraceRowsLister(db, config);
+  const listRows = options.listRows ?? createDbColosseumKernelTraceRowsLister(db, config);
   const resolveIdentity =
-    options.resolveIdentity ?? ((id) => resolveMeleeKernelTraceIdentity(db, id));
-  const readService = createMeleeKernelTraceReadService({
+    options.resolveIdentity ?? ((id) => resolveColosseumKernelTraceIdentity(db, id));
+  const readService = createColosseumKernelTraceReadService({
     readRows,
     listRows,
     resolveIdentity,
@@ -294,13 +294,13 @@ export async function createMeleeKernelRuntime(
   const upsertContainer = options.upsertContainer ?? defaultUpsertContainer;
   const upsertPiAgentSession = options.upsertPiAgentSession ?? defaultUpsertPiAgentSession;
   const upsertAgentRun = options.upsertAgentRun ?? defaultUpsertAgentRun;
-  let traceTailer: MeleeTraceTailer | null = null;
+  let traceTailer: ColosseumTraceTailer | null = null;
   let traceTailerStartPromise: Promise<void> | null = null;
 
-  const getTraceTailer = (): MeleeTraceTailer | null => {
+  const getTraceTailer = (): ColosseumTraceTailer | null => {
     if (options.tailer === false) return null;
     if (!traceTailer) {
-      traceTailer = createMeleeTraceTailer({
+      traceTailer = createColosseumTraceTailer({
         db,
         config,
         insertTraceEvents,
@@ -321,7 +321,7 @@ export async function createMeleeKernelRuntime(
     readRows,
     traceWriter,
     upsertSpawnContainers: (context) =>
-      upsertMeleeSpawnContextContainers({ context, db, upsert: upsertContainer }),
+      upsertColosseumSpawnContextContainers({ context, db, upsert: upsertContainer }),
     startTraceTailer: async () => {
       const tailer = getTraceTailer();
       if (!tailer) return;
@@ -347,21 +347,21 @@ export async function createMeleeKernelRuntime(
   };
 }
 
-let defaultRuntimePromise: Promise<MeleeKernelRuntime | null> | null = null;
+let defaultRuntimePromise: Promise<ColosseumKernelRuntime | null> | null = null;
 let defaultRuntimeWarningShown = false;
 
-export async function getDefaultMeleeKernelRuntime(
-  options: GetDefaultMeleeKernelRuntimeOptions = {},
-): Promise<MeleeKernelRuntime | null> {
-  if (options.db) return createMeleeKernelRuntime(options);
+export async function getDefaultColosseumKernelRuntime(
+  options: GetDefaultColosseumKernelRuntimeOptions = {},
+): Promise<ColosseumKernelRuntime | null> {
+  if (options.db) return createColosseumKernelRuntime(options);
 
   const env = options.database?.env ?? process.env;
   const databaseUrl =
-    options.database?.databaseUrl ?? meleeKernelDatabaseUrlFromEnv(env) ?? DEFAULT_AGENT_KERNEL_DATABASE_URL;
+    options.database?.databaseUrl ?? colosseumKernelDatabaseUrlFromEnv(env) ?? DEFAULT_AGENT_KERNEL_DATABASE_URL;
   if (!databaseUrl) return null;
 
   if (!defaultRuntimePromise) {
-    defaultRuntimePromise = createMeleeKernelRuntime({
+    defaultRuntimePromise = createColosseumKernelRuntime({
       ...options,
       database: {
         ...options.database,
@@ -369,7 +369,7 @@ export async function getDefaultMeleeKernelRuntime(
       },
     }).catch((error) => {
       defaultRuntimePromise = null;
-      if (meleeKernelRuntimeRequiredFromEnv(env)) throw error;
+      if (colosseumKernelRuntimeRequiredFromEnv(env)) throw error;
       if (!defaultRuntimeWarningShown) {
         defaultRuntimeWarningShown = true;
         console.warn(
@@ -383,12 +383,12 @@ export async function getDefaultMeleeKernelRuntime(
   return defaultRuntimePromise;
 }
 
-export function resetDefaultMeleeKernelRuntimeForTests(): void {
+export function resetDefaultColosseumKernelRuntimeForTests(): void {
   defaultRuntimePromise = null;
   defaultRuntimeWarningShown = false;
 }
 
-export async function closeDefaultMeleeKernelRuntime(): Promise<void> {
+export async function closeDefaultColosseumKernelRuntime(): Promise<void> {
   const runtimePromise = defaultRuntimePromise;
   defaultRuntimePromise = null;
   defaultRuntimeWarningShown = false;

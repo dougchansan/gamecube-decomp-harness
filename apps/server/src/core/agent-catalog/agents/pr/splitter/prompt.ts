@@ -16,7 +16,7 @@ import {
 } from "./context.js";
 export { type PrSplitterPromptOptions } from "./context.js";
 
-export const PR_SPLITTER_SCHEMA_VERSION = "melee_pr_splitter_plan_v1";
+export const PR_SPLITTER_SCHEMA_VERSION = "colosseum_pr_splitter_plan_v1";
 
 export type PrSplitterLane = "match" | "local" | null;
 export type PrSplitterIndependenceKind = "independent" | "shared-prep" | "stacked" | "needs-merge";
@@ -49,12 +49,12 @@ function agentFilePath(): string {
 }
 
 export const prompt = definePrompt({
-  id: "melee.pr-splitter.system",
-  title: "Melee PR Splitter System Prompt",
+  id: "colosseum.pr-splitter.system",
+  title: "Colosseum PR Splitter System Prompt",
   archetype: "workflow",
   nodes: [
     section("goal", [
-      "You are the PR splitter agent for the Melee decomp orchestrator.",
+      "You are the PR splitter agent for the Colosseum decomp orchestrator.",
       "Turn deterministic handoff evidence into a reviewer-friendly PR series. Decide slice grouping, order, titles, descriptions, dependencies, and review focus.",
     ]),
     section("context_contract", [

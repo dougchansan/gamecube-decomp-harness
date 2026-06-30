@@ -38,7 +38,7 @@ def test_address_from_name_value():
 
 def _externs(text: str):
     hunk = {
-        "file": "src/melee/gm/x.c",
+        "file": "src/colosseum/gm/x.c",
         "added": [(i + 1, line) for i, line in enumerate(text.splitlines())],
         "removed": [],
     }
@@ -87,7 +87,7 @@ def test_function_extern_visibility_warns_on_function_prototype():
 
 def _blob_findings(text: str):
     hunk = {
-        "file": "src/melee/mn/x.c",
+        "file": "src/colosseum/mn/x.c",
         "added": [(i + 1, line) for i, line in enumerate(text.splitlines())],
         "removed": [],
     }
@@ -142,7 +142,7 @@ def test_packed_blob_negatives():
 # ---------------------------------------------------------------------------
 
 
-def _assert_findings(text: str, path: str = "src/melee/gr/x.c"):
+def _assert_findings(text: str, path: str = "src/colosseum/gr/x.c"):
     hunk = {
         "file": path,
         "added": [(i + 1, line) for i, line in enumerate(text.splitlines())],
@@ -192,7 +192,7 @@ def test_unrolled_assert_ignores_strings():
 
 def _hardened_hunk(text: str, removed: list[str] | None = None):
     return {
-        "file": "src/melee/gr/x.c",
+        "file": "src/colosseum/gr/x.c",
         "added": [(i + 1, line) for i, line in enumerate(text.splitlines())],
         "removed": removed or [],
     }
@@ -323,7 +323,7 @@ def test_volatile_local_tactic_warns_on_indented_local_decl():
 
 def test_string_literal_to_symbol_pairing():
     hunk = {
-        "file": "src/melee/gr/grkongo.c",
+        "file": "src/colosseum/gr/grkongo.c",
         "added": [(662, '        __assert(grKg_803E1858, 1719, grKg_803E1A00);')],
         "removed": ['        __assert(grKg_803E1858, 1719, "gp->u.taru.keep");'],
     }
@@ -334,7 +334,7 @@ def test_string_literal_to_symbol_pairing():
 
 def test_string_literal_to_symbol_offset_expression():
     hunk = {
-        "file": "src/melee/ty/tydisplay.c",
+        "file": "src/colosseum/ty/tydisplay.c",
         "added": [(1401, "        OSReport(strbase + 0xC8);")],
         "removed": ['        OSReport("*** BG data aren\'t being loaded!\\n");'],
     }
@@ -344,7 +344,7 @@ def test_string_literal_to_symbol_offset_expression():
 
 def test_string_literal_to_symbol_requires_string_in_removed():
     hunk = {
-        "file": "src/melee/gm/gm_1832.c",
+        "file": "src/colosseum/gm/gm_1832.c",
         "added": [(10, "    foo(lbl_804DA60C);")],
         "removed": ["    foo(other_value);"],
     }
@@ -353,7 +353,7 @@ def test_string_literal_to_symbol_requires_string_in_removed():
 
 def test_numeric_literal_to_symbol_pairing():
     hunk = {
-        "file": "src/melee/gr/grbigblue.c",
+        "file": "src/colosseum/gr/grbigblue.c",
         "added": [
             (1410, "        f32 inv = grBb_804DB2F0 / Ground_801C0498();"),
             (2111, "    best_above = grBb_804DB310;"),
@@ -375,7 +375,7 @@ def test_numeric_literal_to_symbol_pairing():
 
 def test_numeric_literal_to_symbol_requires_numeric_in_removed():
     hunk = {
-        "file": "src/melee/gr/grbigblue.c",
+        "file": "src/colosseum/gr/grbigblue.c",
         "added": [(10, "    foo(grBb_804DB2F0);")],
         "removed": ["    foo(existing_symbol);"],
     }
@@ -384,7 +384,7 @@ def test_numeric_literal_to_symbol_requires_numeric_in_removed():
 
 def test_copied_jobj_inline_flags_local_header_body_copy():
     hunk = {
-        "file": "src/melee/gr/grvenom.c",
+        "file": "src/colosseum/gr/grvenom.c",
         "added": [
             (71, '/* literal */ SDATA char grVe_804D47C0[] = "jobj.h";'),
             (74, "static inline void grVenom_JObjSetScaleX(HSD_JObj* jobj, f32 x)"),
@@ -403,7 +403,7 @@ def test_copied_jobj_inline_flags_local_header_body_copy():
 
 def test_copied_jobj_inline_allows_wrappers_that_call_hsd_helpers():
     hunk = {
-        "file": "src/melee/it/items/itcoin.c",
+        "file": "src/colosseum/it/items/itcoin.c",
         "added": [
             (10, "static inline void itCoin_ResetRotation(Item_GObj* gobj)"),
             (11, "{"),
@@ -418,7 +418,7 @@ def test_copied_jobj_inline_allows_wrappers_that_call_hsd_helpers():
 
 def test_stage_ground_var_owner_flags_borrowed_stage_arm():
     hunk = {
-        "file": "src/melee/gr/grbigblue.c",
+        "file": "src/colosseum/gr/grbigblue.c",
         "added": [(1763, "            gp->gv.arwing.xC8 = 0;")],
         "removed": [],
     }
@@ -429,7 +429,7 @@ def test_stage_ground_var_owner_flags_borrowed_stage_arm():
 
 def test_stage_ground_var_owner_flags_other_stage_families_too():
     hunk = {
-        "file": "src/melee/gr/grvenom.c",
+        "file": "src/colosseum/gr/grvenom.c",
         "added": [(1685, "                        sub->gv.arwing.xE0 = sp94;")],
         "removed": [],
     }
@@ -440,7 +440,7 @@ def test_stage_ground_var_owner_flags_other_stage_families_too():
 
 def test_stage_ground_var_owner_allows_stage_family_members():
     hunk = {
-        "file": "src/melee/gr/grbigblue.c",
+        "file": "src/colosseum/gr/grbigblue.c",
         "added": [(1763, "            gp->gv.bigblue.platform.xC8_timer = 0;")],
         "removed": [],
     }
@@ -449,7 +449,7 @@ def test_stage_ground_var_owner_allows_stage_family_members():
 
 def test_stage_ground_var_owner_allows_corneria_arwing_owner():
     hunk = {
-        "file": "src/melee/gr/grcorneria.c",
+        "file": "src/colosseum/gr/grcorneria.c",
         "added": [(636, "    gp->gv.arwing.xC8 = slot;")],
         "removed": [],
     }
@@ -530,9 +530,9 @@ def test_shingles_cli(tmp_path: Path):
 def test_load_banned_pattern_rules_env_override(tmp_path: Path, monkeypatch):
     record = {
         "id": "no-osreport-offset",
-        "source_pr": "doldecomp/melee#2658",
-        "comment_url": "https://github.com/doldecomp/melee/pull/2658#discussion_r1",
-        "file": "src/melee/ty/tydisplay.c",
+        "source_pr": "dougchansan/pkmn-colosseum#2658",
+        "comment_url": "https://github.com/dougchansan/pkmn-colosseum/pull/2658#discussion_r1",
+        "file": "src/colosseum/ty/tydisplay.c",
         "excerpt": "OSReport(strbase + 0xC8);",
         "standard_id": "global_standard:no-string-literal-symbol-regression",
         "detector": {"type": "regex", "pattern": r"OSReport\(\w+ \+ 0x[0-9A-Fa-f]+\)"},
@@ -549,7 +549,7 @@ def test_load_banned_pattern_rules_env_override(tmp_path: Path, monkeypatch):
     assert rules[0]["severity"] == "error"
     assert "discussion_r1" in rules[0]["message"]
     hunk = {
-        "file": "src/melee/ty/tydisplay.c",
+        "file": "src/colosseum/ty/tydisplay.c",
         "added": [(5, "    OSReport(strbase + 0xC8);")],
         "removed": [],
     }

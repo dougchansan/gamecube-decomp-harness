@@ -7,7 +7,7 @@
   "runner_status": "on_demand",
   "status_message": "Tool-local implementation: APIs invoke toolpacks/gamecube-decomp/_impl/gamecube/tools/infer_struct.py.",
   "limitations": [
-    "Requires generated assembly under build/GALE01/asm.",
+    "Requires generated assembly under build/GC6E01/asm.",
     "Field names are placeholders; inferred offsets and access sizes need source/header confirmation.",
     "Pointer-register selection is caller-provided and should come from objdiff, local asm, or register-flow evidence."
   ],

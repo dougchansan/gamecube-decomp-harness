@@ -5,14 +5,19 @@ import { withRankFeatureProvider } from "./graph/rank.js";
 
 export interface LoadKnowledgeBoardSnapshotOptions {
   graphDbPath?: string;
+  objdiffPath?: string;
+  projectId?: string;
+  reportPath?: string;
 }
 
 export function loadKnowledgeBoardSnapshot(repoRoot: string, limit: number, options: LoadKnowledgeBoardSnapshotOptions = {}): BoardSnapshot {
   const graphDbPath = options.graphDbPath ?? resourceGraphDbPath();
   return withRankFeatureProvider(graphDbPath, (rankFeatureProvider) =>
     loadBoardSnapshot(repoRoot, limit, {
-      codeGraphFunctionsIndexPath: codeGraphFunctionsIndexPath(),
+      codeGraphFunctionsIndexPath: codeGraphFunctionsIndexPath(options.projectId),
+      objdiffPath: options.objdiffPath,
       rankFeatureProvider,
+      reportPath: options.reportPath,
     }),
   );
 }

@@ -10,7 +10,7 @@ import {
 
 export type TraceEventBatchInsertPort = (events: TraceEvent[]) => Promise<number>;
 
-export interface CreateMeleeTraceWriterOptions {
+export interface CreateColosseumTraceWriterOptions {
   insertBatch: TraceEventBatchInsertPort;
   userId?: string;
   now?: () => string;
@@ -30,13 +30,13 @@ export interface AppTraceEventInput {
   userId?: string;
 }
 
-export class MeleeTraceWriter {
+export class ColosseumTraceWriter {
   private readonly insertBatch: TraceEventBatchInsertPort;
   private readonly userId: string;
   private readonly now: () => string;
   private readonly createId: () => string;
 
-  constructor(options: CreateMeleeTraceWriterOptions) {
+  constructor(options: CreateColosseumTraceWriterOptions) {
     this.insertBatch = options.insertBatch;
     this.userId = options.userId ?? SYSTEM_USER_ID;
     this.now = options.now ?? (() => new Date().toISOString());
@@ -72,8 +72,8 @@ export class MeleeTraceWriter {
   }
 }
 
-export function createMeleeTraceWriter(
-  options: CreateMeleeTraceWriterOptions,
-): MeleeTraceWriter {
-  return new MeleeTraceWriter(options);
+export function createColosseumTraceWriter(
+  options: CreateColosseumTraceWriterOptions,
+): ColosseumTraceWriter {
+  return new ColosseumTraceWriter(options);
 }

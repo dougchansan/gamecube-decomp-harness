@@ -544,7 +544,7 @@ def collect_findings(
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--repo", required=True, help="Melee repo root.")
+    parser.add_argument("--repo", required=True, help="Colosseum repo root.")
     parser.add_argument(
         "--base",
         default=None,

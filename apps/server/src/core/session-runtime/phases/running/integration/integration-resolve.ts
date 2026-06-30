@@ -1,8 +1,8 @@
 import { existsSync, readFileSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { createMeleeKernelSpawnContext } from "@server/infrastructure/kernel/bridge/spawn-context";
-import { runMeleeKernelPiAgent as runPiAgent } from "@server/infrastructure/agent-runtime/kernel-pi-runner";
+import { createColosseumKernelSpawnContext } from "@server/infrastructure/kernel/bridge/spawn-context";
+import { runColosseumKernelPiAgent as runPiAgent } from "@server/infrastructure/agent-runtime/kernel-pi-runner";
 import {
   integrationResolverPrompt,
   validateIntegrationResolverAgentResult,
@@ -134,7 +134,7 @@ export async function integrationResolve(globals: GlobalArgs, args: Map<string, 
       stateDir: globals.stateDir,
       project: globals.project,
     },
-    kernelContext: createMeleeKernelSpawnContext({
+    kernelContext: createColosseumKernelSpawnContext({
       kind: "worker-integration",
       projectId: globals.project?.projectId ?? globals.projectId,
       sessionId: runId || `integration-${itemId}`,

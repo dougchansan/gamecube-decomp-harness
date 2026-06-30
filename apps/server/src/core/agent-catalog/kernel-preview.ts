@@ -12,7 +12,7 @@ import {
 } from "@server/core/agent-catalog";
 import {
   KERNEL_AGENT_IDS,
-  meleeKernelAgent,
+  colosseumKernelAgent,
   toKernelAgentViewerDefinition,
   type KernelAgentId,
   type KernelAgentViewerDefinition,
@@ -54,9 +54,9 @@ function samplePrompt(agentId: KernelAgentId, paths: KernelAgentCatalogContext):
       return workerPrompt({
         packet: {
           target: {
-            unit: "GALE01:kernel-viewer",
+            unit: "GC6E01:kernel-viewer",
             symbol: "ftDemo_KernelViewerSample",
-            source_path: "src/melee/ft/chara/ftDemo.c",
+            source_path: "src/colosseum/ft/chara/ftDemo.c",
           },
           baseline: {
             fuzzy_match_percent: 91.25,
@@ -65,16 +65,20 @@ function samplePrompt(agentId: KernelAgentId, paths: KernelAgentCatalogContext):
             graph_db: paths.graphDbPath,
             status: "ready",
             file_card: {
-              source_path: "src/melee/ft/chara/ftDemo.c",
+              source_path: "src/colosseum/ft/chara/ftDemo.c",
+              editability: {
+                mode: "editable",
+                reason: "Kernel viewer sample has one unmatched Colosseum function.",
+              },
               functions: [
                 {
                   symbol: "ftDemo_KernelViewerSample",
-                  unit: "GALE01:kernel-viewer",
+                  unit: "GC6E01:kernel-viewer",
                   fuzzy: 91.25,
                 },
                 {
                   symbol: "ftDemo_KernelViewerSolvedNeighbor",
-                  unit: "GALE01:kernel-viewer",
+                  unit: "GC6E01:kernel-viewer",
                   fuzzy: 100,
                   status: "matched",
                 },
@@ -93,7 +97,7 @@ function samplePrompt(agentId: KernelAgentId, paths: KernelAgentCatalogContext):
                 {
                   id: "kernel-viewer:ft-demo-sibling-style",
                   title: "Solved sibling action code",
-                  directory: "src/melee/ft/chara",
+                  directory: "src/colosseum/ft/chara",
                   strength: "sample",
                   summary: "Nearby matched character code is the first reference set before deeper mismatch probes.",
                   evidence_refs: ["kernel-viewer:sample"],
@@ -113,24 +117,24 @@ function samplePrompt(agentId: KernelAgentId, paths: KernelAgentCatalogContext):
         integrationItem: {
           schema_version: "integration_conflict_item_v1",
           id: "kernel-viewer-integration-conflict",
-          conflict_group_id: "src-melee-ft-demo",
+          conflict_group_id: "src-colosseum-ft-demo",
           run_id: "kernel-viewer-run",
           epoch_id: "kernel-viewer-epoch",
           failed_apply: {
             command: "git apply --check worker.patch",
-            stderr: "patch failed: src/melee/ft/chara/ftDemo.c:24",
+            stderr: "patch failed: src/colosseum/ft/chara/ftDemo.c:24",
           },
           worker_outputs: [
             {
               worker_state_id: "kernel-viewer-worker-state",
               checkpoint_id: "kernel-viewer-checkpoint",
-              target: "GALE01:ftDemo::ftDemo_KernelViewerSample",
-              source_paths: ["src/melee/ft/chara/ftDemo.c"],
+              target: "GC6E01:ftDemo::ftDemo_KernelViewerSample",
+              source_paths: ["src/colosseum/ft/chara/ftDemo.c"],
               validation: { exact: true, hard_gates_passed: true },
             },
           ],
-          conflict_paths: ["src/melee/ft/chara/ftDemo.c"],
-          explicit_write_set: ["src/melee/ft/chara/ftDemo.c"],
+          conflict_paths: ["src/colosseum/ft/chara/ftDemo.c"],
+          explicit_write_set: ["src/colosseum/ft/chara/ftDemo.c"],
         },
         queueSummary: { queued_items: 1, conflict_groups: 1 },
         repoRoot: paths.repoRoot,
@@ -143,9 +147,9 @@ function samplePrompt(agentId: KernelAgentId, paths: KernelAgentCatalogContext):
           schema_version: "pr_context_v1",
           object_id: "kernel-viewer-pr",
           pr: { number: 0, title: "Kernel viewer sample PR" },
-          changed_files: [{ path: "src/melee/ft/chara/ftDemo.c" }],
+          changed_files: [{ path: "src/colosseum/ft/chara/ftDemo.c" }],
           human_text_excerpt: "Match a focused ftDemo target while preserving local style.",
-          diff_excerpt: "diff --git a/src/melee/ft/chara/ftDemo.c b/src/melee/ft/chara/ftDemo.c",
+          diff_excerpt: "diff --git a/src/colosseum/ft/chara/ftDemo.c b/src/colosseum/ft/chara/ftDemo.c",
         },
         repoRoot: paths.repoRoot,
         stateDir: paths.stateDir,
@@ -154,7 +158,7 @@ function samplePrompt(agentId: KernelAgentId, paths: KernelAgentCatalogContext):
     case "pr-reviewer":
       return prPreshipReviewPrompt({
         sliceId: "kernel-viewer-slice",
-        sliceDiff: "diff --git a/src/melee/ft/chara/ftDemo.c b/src/melee/ft/chara/ftDemo.c\n+int ftDemo_KernelViewerSample(void) { return 1; }\n",
+        sliceDiff: "diff --git a/src/colosseum/ft/chara/ftDemo.c b/src/colosseum/ft/chara/ftDemo.c\n+int ftDemo_KernelViewerSample(void) { return 1; }\n",
         lintFindings: { findings: [] },
         exhibits: [],
       });
@@ -169,7 +173,7 @@ function samplePrompt(agentId: KernelAgentId, paths: KernelAgentCatalogContext):
           comments: [
             {
               id: "kernel-viewer-review-comment",
-              file: "src/melee/ft/chara/ftDemo.c",
+              file: "src/colosseum/ft/chara/ftDemo.c",
               line: 12,
               body: "Please restore the project assert helper here instead of open-coding this.",
               standard_id: "global_standard:canonical-asserts",
@@ -179,13 +183,13 @@ function samplePrompt(agentId: KernelAgentId, paths: KernelAgentCatalogContext):
           findings: [
             {
               source: "pr-reviewer",
-              file: "src/melee/ft/chara/ftDemo.c",
+              file: "src/colosseum/ft/chara/ftDemo.c",
               line: 12,
               verdict: "reject",
               suggested_fix: "Use the canonical assert macro from nearby code.",
             },
           ],
-          diff_excerpt: "diff --git a/src/melee/ft/chara/ftDemo.c b/src/melee/ft/chara/ftDemo.c",
+          diff_excerpt: "diff --git a/src/colosseum/ft/chara/ftDemo.c b/src/colosseum/ft/chara/ftDemo.c",
         },
         repoRoot: paths.repoRoot,
         stateDir: paths.stateDir,
@@ -194,8 +198,8 @@ function samplePrompt(agentId: KernelAgentId, paths: KernelAgentCatalogContext):
     case "pr-splitter":
       return prSplitterPrompt({
         splitContext: {
-          changed_files: ["src/melee/ft/chara/ftDemo.c"],
-          lanes: { match: ["src/melee/ft/chara/ftDemo.c"] },
+          changed_files: ["src/colosseum/ft/chara/ftDemo.c"],
+          lanes: { match: ["src/colosseum/ft/chara/ftDemo.c"] },
           max_files_per_pr: 3,
         },
         repoRoot: paths.repoRoot,
@@ -233,7 +237,7 @@ function samplePrompt(agentId: KernelAgentId, paths: KernelAgentCatalogContext):
       return qaRepairPrompt({
         item: {
           id: "kernel-viewer-qa-repair",
-          source_path: "src/melee/ft/chara/ftDemo.c",
+          source_path: "src/colosseum/ft/chara/ftDemo.c",
           lane: "match",
           repair_warnings: false,
           findings: [
@@ -259,7 +263,7 @@ export function loadKernelAgentsPayload(paths: KernelAgentCatalogContext): Kerne
   const generatedAt = new Date().toISOString();
   const warnings: string[] = [];
   const agents = KERNEL_AGENT_IDS.map((agentId) => {
-    const entry = meleeKernelAgent(agentId);
+    const entry = colosseumKernelAgent(agentId);
     try {
       return toKernelAgentViewerDefinition(entry, samplePrompt(agentId, paths), {
         generatedAt,

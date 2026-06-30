@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Rank high-ROI doldecomp/melee decomp targets from an objdiff report."""
+"""Rank high-ROI dougchansan/pkmn-colosseum decomp targets from an objdiff report."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any
 
 
-DEFAULT_REPORT = Path("build/GALE01/report.json")
+DEFAULT_REPORT = Path("build/GC6E01/report.json")
 
 
 def as_float(value: Any, default: float = 0.0) -> float:

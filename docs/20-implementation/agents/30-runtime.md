@@ -21,7 +21,7 @@ common mechanics.
 | `apps/server/src/infrastructure/agent-runtime/runtime/index.ts` | Re-exports runtime helpers. |
 | `apps/server/src/infrastructure/agent-runtime/kernel-pi-runner.ts` | Converts catalog prompt bundles into kernel spawn inputs and chooses dry-run/direct or DB-backed kernel spawn behavior. |
 | `apps/server/src/infrastructure/kernel/bridge/spawn-agent.ts` | Bridges converted agents, context resolvers, tools, session binding, prompt artifacts, and trace writers into `createSpawnAgent`. |
-| `apps/server/src/infrastructure/kernel/bridge/loaders.ts` | Registers Melee session and inline context loaders for kernel context resolution. |
+| `apps/server/src/infrastructure/kernel/bridge/loaders.ts` | Registers Colosseum session and inline context loaders for kernel context resolution. |
 
 ## Behavior
 

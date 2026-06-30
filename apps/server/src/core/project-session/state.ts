@@ -132,7 +132,7 @@ export function normalizeProcessState(value: unknown, projectId: string, session
   const status = ["idle", "running", "draining", "stopping", "exited", "unknown"].includes(String(raw.status)) ? String(raw.status) : "unknown";
   return {
     ...raw,
-    process_name: typeof raw.process_name === "string" && raw.process_name ? raw.process_name : "melee-live",
+    process_name: typeof raw.process_name === "string" && raw.process_name ? raw.process_name : `${projectId}-live`,
     project_id: typeof raw.project_id === "string" && raw.project_id ? raw.project_id : projectId,
     session_uuid: typeof raw.session_uuid === "string" && raw.session_uuid ? raw.session_uuid : sessionUuid,
     status: status as ProjectSessionProcessState["status"],

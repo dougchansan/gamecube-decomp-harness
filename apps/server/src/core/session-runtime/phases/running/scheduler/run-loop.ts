@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { loadKnowledgeBoardSnapshot, packageRoot, resourceGraphDbPath } from "@server/core/knowledge";
 import {
@@ -25,8 +25,8 @@ import {
 } from "@server/core/session-runtime/run-state";
 import { withBusyRetry } from "@server/core/orchestrator-state";
 import { runEpochCycle, type EpochCycleResult } from "@server/core/session-runtime/phases/running/epochs";
-import { createMeleeKernelSpawnContext } from "@server/infrastructure/kernel/bridge/spawn-context";
-import { runMeleeKernelPiAgent as runPiAgent } from "@server/infrastructure/agent-runtime/kernel-pi-runner";
+import { createColosseumKernelSpawnContext } from "@server/infrastructure/kernel/bridge/spawn-context";
+import { runColosseumKernelPiAgent as runPiAgent } from "@server/infrastructure/agent-runtime/kernel-pi-runner";
 import { booleanArg, numberArg, stringArg, type GlobalArgs } from "@server/core/project-registry/runtime-options.js";
 import { assertSchedulableRun } from "@server/core/session-runtime/phases/running/jobs/shared.js";
 import {
@@ -147,7 +147,7 @@ async function probeProvider(globals: GlobalArgs, outputDir: string, runId: stri
       timeoutMs: 120_000,
       sessionDir: outputDir,
       toolProfile: { replace: [] },
-      kernelContext: createMeleeKernelSpawnContext({
+      kernelContext: createColosseumKernelSpawnContext({
         kind: "run",
         projectId: globals.project?.projectId ?? globals.projectId,
         sessionId: runId,
@@ -383,16 +383,34 @@ function shellQuote(value: string): string {
   return `'${value.replace(/'/g, `'\\''`)}'`;
 }
 
+function configurePySupportedFlags(repoRoot: string): Set<string> | null {
+  try {
+    const text = readFileSync(resolve(repoRoot, "configure.py"), "utf8");
+    const flags = new Set([...text.matchAll(/["'](--[A-Za-z0-9][A-Za-z0-9-]*)["']/g)].map((match) => match[1]));
+    return flags.size > 0 ? flags : null;
+  } catch {
+    return null;
+  }
+}
+
+function configureSupports(flags: Set<string> | null, flag: string): boolean {
+  return flags == null || flags.has(flag);
+}
+
 function defaultConfigureCommand(globals: Pick<GlobalArgs, "repoRoot" | "stateDir">): string {
+  const supportedFlags = configurePySupportedFlags(globals.repoRoot);
+  const requireProtos = configureSupports(supportedFlags, "--require-protos") ? " --require-protos" : "";
+  const baseCommand = `python3 configure.py${requireProtos}`;
+  if (!configureSupports(supportedFlags, "--wrapper")) return baseCommand;
   const localWibo = resolve(globals.repoRoot, "build", "tools", "wibo");
   if ((process.platform === "darwin" || process.platform === "linux") && existsSync(localWibo)) {
-    return "python3 configure.py --require-protos --wrapper build/tools/wibo";
+    return `${baseCommand} --wrapper build/tools/wibo`;
   }
   const wibo = resolve(globals.stateDir, "tools", "wibo");
   if ((process.platform === "darwin" || process.platform === "linux") && existsSync(wibo)) {
-    return `python3 configure.py --require-protos --wrapper ${shellQuote(wibo)}`;
+    return `${baseCommand} --wrapper ${shellQuote(wibo)}`;
   }
-  return "python3 configure.py --require-protos";
+  return baseCommand;
 }
 
 function workerProcessEnv(globals: Pick<GlobalArgs, "stateDir">): Record<string, string | undefined> {
@@ -642,6 +660,7 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
                 console.error(`[run-loop] epoch ${epochOrdinal}: ${trigger}; snapshotting and rebuilding report`);
                 const result = await runEpochCycle(store, runId, globals.repoRoot, globals.stateDir, {
                   baseRef: globals.project?.baseRef,
+                  changesTarget: globals.project?.validation.qaTarget,
                   configureCommand: epochConfigureCommand,
                   label: `epoch-${epochOrdinal}`,
                   linkPaths: epochLinkPaths,
@@ -840,6 +859,9 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
                   recordSchedulerEpochFastRefresh(store, epoch.id);
                   const board = loadKnowledgeBoardSnapshot(globals.repoRoot, schedulerEpochConfig.candidateWindow, {
                     graphDbPath,
+                    objdiffPath: globals.project?.validation.objdiffPath,
+                    projectId: globals.project?.projectId ?? globals.projectId,
+                    reportPath: globals.project?.validation.reportPath,
                   });
                   priorityRefreshes = refreshEpochTargetPriorities(store, {
                     epochId: epoch.id,

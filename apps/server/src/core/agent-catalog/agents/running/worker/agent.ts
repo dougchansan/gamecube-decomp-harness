@@ -6,16 +6,11 @@ import { tools } from "./tools.js";
 
 export const agent = defineAgent({
   name: "worker",
-  description: "Execute one claimed Melee decomp target while the runner owns checkpoints and lifecycle state.",
+  description: "Execute one claimed Colosseum decomp target while the runner owns checkpoints and lifecycle state.",
   model: "codex-lb/gpt-5.5",
   coreTools: [
       "code_graph_file_card",
       "code_graph_search",
-      "past_prs_search",
-      "discord_knowledge_search",
-      "ssbm_data_sheet_lookup_address",
-      "external_mirrors_search",
-      "external_symbol_lookup",
       "path_facts_resolve",
       "ghidra_lookup",
       "opseq_similar_functions",

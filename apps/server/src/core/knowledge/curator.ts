@@ -402,8 +402,8 @@ function targetSourceForText(value: string): string | null {
   if (/\b(path fact|path-scoped|scoped known win|directory fact|scope_globs|subsystem hint)\b/i.test(text)) {
     return "path_facts";
   }
-  if (/\b0x[0-9a-f]{6,8}\b/i.test(value) || /\b(offset|address|data sheet|action state|hitbox|hurtbox|id list)\b/i.test(text)) {
-    return "ssbm_data_sheet";
+  if (/\b0x[0-9a-f]{6,8}\b/i.test(value) || /\b(offset|address|data sheet|id list)\b/i.test(text)) {
+    return "code_graph";
   }
   return null;
 }
@@ -417,7 +417,7 @@ function sourceUpdateKind(targetSourceId: string): string {
 function sourceUpdateReason(targetSourceId: string): string {
   if (targetSourceId === "decomp_standards") return "Evidence proposes a broad decomp/review standard; standards source owner should review before changing global injected rules.";
   if (targetSourceId === "path_facts") return "Evidence proposes a scoped known win for a directory or path; path facts source owner should validate scope, stale checks, and provenance before applying.";
-  if (targetSourceId === "ssbm_data_sheet") return "Evidence references address, offset, ID, or data-sheet-like terms; source owner should review before mutating CSV data.";
+  if (targetSourceId === "code_graph") return "Evidence references addresses, offsets, IDs, or code-graph-like terms; source owner should review before changing generated graph data.";
   return "Evidence references source-like terms; source owner should review before mutating registered source data.";
 }
 
