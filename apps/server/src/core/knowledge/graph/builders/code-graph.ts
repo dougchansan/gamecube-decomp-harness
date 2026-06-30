@@ -1,5 +1,5 @@
-import { existsSync } from "node:fs";
-import { resolve } from "node:path";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
 import { sourceRoot } from "../../paths.js";
 import type { GraphEdge, GraphEntity, GraphFact, GraphRecords, SearchChunk } from "../types.js";
 import { arrayValue, filesFingerprint, numberValue, objectValue, readJson, readJsonl, shortHash, stableJson, stringValue } from "../util.js";
@@ -145,6 +145,8 @@ export function buildCodeGraphRecords(repoRoot: string): GraphRecords {
     });
   }
 
+  writeCodeGraphIndexes(files);
+
   return {
     sourceVersion: {
       id: sourceVersionId,
@@ -157,6 +159,45 @@ export function buildCodeGraphRecords(repoRoot: string): GraphRecords {
     edges,
     chunks,
   };
+}
+
+function writeCodeGraphIndexes(files: Map<string, FileRecord>): void {
+  const fileRows = [...files.values()]
+    .sort((left, right) => left.sourcePath.localeCompare(right.sourcePath))
+    .map((file) => {
+      const unmatched = file.functions.filter((fn) => fn.fuzzy < 100);
+      const matched = file.functions.filter((fn) => fn.fuzzy >= 100);
+      return {
+        source_path: file.sourcePath,
+        units: [...file.units].sort(),
+        function_count: file.functions.length,
+        unmatched_function_count: unmatched.length,
+        matched_function_count: matched.length,
+      };
+    });
+  const functionRows = [...files.values()]
+    .flatMap((file) => file.functions)
+    .sort(
+      (left, right) =>
+        left.sourcePath.localeCompare(right.sourcePath) || left.unit.localeCompare(right.unit) || left.symbol.localeCompare(right.symbol),
+    )
+    .map((fn) => ({
+      unit: fn.unit,
+      source_path: fn.sourcePath,
+      sourcePath: fn.sourcePath,
+      symbol: fn.symbol,
+      size: fn.size,
+      fuzzy: fn.fuzzy,
+      address: fn.address,
+    }));
+  writeJsonl(resolve(sourceRoot("code_graph"), "indexes/files.jsonl"), fileRows);
+  writeJsonl(resolve(sourceRoot("code_graph"), "indexes/functions.jsonl"), functionRows);
+}
+
+function writeJsonl(path: string, rows: Array<Record<string, unknown>>): void {
+  mkdirSync(dirname(path), { recursive: true });
+  const body = rows.map((row) => JSON.stringify(row)).join("\n");
+  writeFileSync(path, body ? `${body}\n` : "", "utf8");
 }
 
 function buildCodeGraphRecordsFromIndexes(reportPath: string, objdiffPath: string): GraphRecords {
