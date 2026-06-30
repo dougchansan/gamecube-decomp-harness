@@ -207,9 +207,11 @@ async function runConfigure(worktreeDir: string, command: string): Promise<void>
   }
 }
 
-async function seedEpochWibo(worktreeDir: string, stateDir: string): Promise<boolean> {
+async function seedEpochWibo(worktreeDir: string, stateDir: string, repoRoot: string): Promise<boolean> {
   if (process.platform !== "darwin" && process.platform !== "linux") return false;
-  const source = resolve(stateDir, "tools", "wibo");
+  const stateSource = resolve(stateDir, "tools", "wibo");
+  const repoSource = resolve(repoRoot, "build", "tools", "wibo");
+  const source = existsSync(stateSource) ? stateSource : repoSource;
   if (!existsSync(source)) return false;
   const destination = resolve(worktreeDir, "build", "tools", "wibo");
   await mkdir(dirname(destination), { recursive: true });
@@ -408,7 +410,7 @@ async function runEpochCycleInner(store: StateStore, runId: string, repoRoot: st
     commitSha: snapshot.commitSha,
     linkPaths: options.linkPaths ?? ["orig"],
   });
-  const hasLocalWibo = await seedEpochWibo(options.worktreeDir, stateDir);
+  const hasLocalWibo = await seedEpochWibo(options.worktreeDir, stateDir, repoRoot);
   const configureCommand = hasLocalWibo
     ? configureCommandWithLocalWrapper(options.configureCommand ?? "python3 configure.py --require-protos", "build/tools/wibo")
     : (options.configureCommand ?? "python3 configure.py --require-protos");

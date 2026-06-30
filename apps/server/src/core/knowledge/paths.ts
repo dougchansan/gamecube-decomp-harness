@@ -126,6 +126,10 @@ export function knowledgeCuratorEnrichmentPath(): string {
   return resolve(resourceGraphEnrichmentsRoot(), "knowledge_curator_updates.jsonl");
 }
 
+export function legacyColosseumKgEnrichmentPath(): string {
+  return resolve(resourceGraphEnrichmentsRoot(), "legacy_colosseum_kg.jsonl");
+}
+
 export function resourceGraphDbPath(): string {
   return resolve(packageRoot(), "projects/pkmn-colosseum/graph/graph.sqlite");
 }

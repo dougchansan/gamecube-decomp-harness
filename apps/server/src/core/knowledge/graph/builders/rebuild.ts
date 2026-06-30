@@ -2,6 +2,7 @@ import { buildAgentSharedStateGraphRecords } from "./agent-shared-state.js";
 import { buildCodeGraphRecords } from "./code-graph.js";
 import { insertGraphRecords, openKnowledgeGraph, resetKnowledgeGraph, upsertSourceDescriptor, upsertToolDescriptor, graphStats } from "../db.js";
 import { buildKnowledgeCuratorGraphRecords } from "./knowledge-curator.js";
+import { buildLegacyColosseumKgGraphRecords } from "./legacy-colosseum-kg.js";
 import { buildMismatchPatternGraphRecords } from "./mismatch-patterns.js";
 import { buildPastPrsGraphRecords } from "./past-prs.js";
 import {
@@ -17,6 +18,7 @@ export interface RebuildKnowledgeGraphOptions {
   sources?: string[];
   agentStateEnrichmentPath?: string;
   knowledgeCuratorEnrichmentPath?: string;
+  legacyColosseumKgEnrichmentPath?: string;
 }
 
 export function rebuildKnowledgeGraph(options: RebuildKnowledgeGraphOptions): Record<string, unknown> {
@@ -71,6 +73,15 @@ export function rebuildKnowledgeGraph(options: RebuildKnowledgeGraphOptions): Re
         skippedSources.push("curator_enrichment");
       }
     }
+    if (selected.has("legacy_colosseum_kg")) {
+      const records = buildLegacyColosseumKgGraphRecords(options.repoRoot, options.legacyColosseumKgEnrichmentPath);
+      if (records) {
+        insertGraphRecords(store, records);
+        indexedSources.push("legacy_colosseum_kg");
+      } else {
+        skippedSources.push("legacy_colosseum_kg");
+      }
+    }
     if (selected.has("mismatch_patterns")) {
       const records = buildMismatchPatternGraphRecords(options.repoRoot, {
         agentStateEnrichmentPath: options.agentStateEnrichmentPath,
@@ -104,6 +115,7 @@ export function defaultGraphSources(): string[] {
     "path_facts",
     "agent_shared_state",
     "curator_enrichment",
+    "legacy_colosseum_kg",
     "mismatch_patterns",
   ];
 }

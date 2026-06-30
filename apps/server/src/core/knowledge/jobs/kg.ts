@@ -9,6 +9,7 @@ import { parseJsonObject } from "@server/infrastructure/agent-runtime/runtime";
 import {
   agentSharedStateEnrichmentPath,
   knowledgeCuratorEnrichmentPath,
+  legacyColosseumKgEnrichmentPath,
   packageRoot,
   resourceGraphDbPath,
   sourceDataRoot,
@@ -35,6 +36,7 @@ import {
   sourceUpdateProposalRecords,
   type CuratedKnowledgeRecord,
 } from "@server/core/knowledge";
+import { importLegacyColosseumKg } from "@server/core/knowledge/graph/builders/legacy-colosseum-kg.js";
 import { rankFeatureForSourcePath } from "@server/core/knowledge/graph/rank";
 import { shortHash, stringValue, truncate } from "@server/core/knowledge/graph/util";
 import { resolveRegisteredTool, type ToolRuntimeContext } from "@server/core/tools/resolver";
@@ -178,6 +180,7 @@ export async function kgRebuildGraph(globals: GlobalArgs, args: Map<string, stri
     sources,
     agentStateEnrichmentPath: enrichmentPath,
     knowledgeCuratorEnrichmentPath: curatorPath,
+    legacyColosseumKgEnrichmentPath: stringArg(args, "--legacy-colosseum-kg-enrichment", legacyColosseumKgEnrichmentPath()),
   });
   console.log(JSON.stringify(payload, null, 2));
 }
@@ -186,6 +189,14 @@ export async function kgImportAgentState(args: Map<string, string | true>): Prom
   const inputPath = stringArg(args, "--input", "agent_state-shared.db");
   const outputPath = stringArg(args, "--output", agentSharedStateEnrichmentPath());
   const payload = importAgentSharedStateLessons({ inputPath, outputPath });
+  console.log(JSON.stringify(payload, null, 2));
+}
+
+export async function kgImportLegacyColosseumKg(globals: GlobalArgs, args: Map<string, string | true>): Promise<void> {
+  const inputPath = stringArg(args, "--input", resolve(globals.repoRoot, "tools/decomp_work/kg/kg.db"));
+  const outputPath = stringArg(args, "--output", legacyColosseumKgEnrichmentPath());
+  const leverDocPath = stringArg(args, "--lever-doc", resolve(globals.repoRoot, "docs/CRACK_LEVERS.md"));
+  const payload = importLegacyColosseumKg({ inputPath, outputPath, leverDocPath });
   console.log(JSON.stringify(payload, null, 2));
 }
 
@@ -232,6 +243,7 @@ export async function runKnowledgeMaintenance(globals: GlobalArgs, args: Map<str
         sources: sourceListArg(args),
         agentStateEnrichmentPath: stringArg(args, "--agent-state-enrichment", agentSharedStateEnrichmentPath()),
         knowledgeCuratorEnrichmentPath: stringArg(args, "--knowledge-curator-enrichment", knowledgeCuratorEnrichmentPath()),
+        legacyColosseumKgEnrichmentPath: stringArg(args, "--legacy-colosseum-kg-enrichment", legacyColosseumKgEnrichmentPath()),
       });
   return {
     generated_at: new Date().toISOString(),
@@ -546,6 +558,7 @@ async function ensureGraphReady(globals: GlobalArgs, args: Map<string, string | 
   const shouldRebuild = booleanArg(args, "--rebuild") || !graphDbExists(dbPath);
   const enrichmentPath = stringArg(args, "--agent-state-enrichment", agentSharedStateEnrichmentPath());
   const curatorPath = stringArg(args, "--knowledge-curator-enrichment", knowledgeCuratorEnrichmentPath());
+  const legacyPath = stringArg(args, "--legacy-colosseum-kg-enrichment", legacyColosseumKgEnrichmentPath());
   if (shouldRebuild) {
     rebuildKnowledgeGraph({
       repoRoot: knowledgeRepoRoot(globals),
@@ -553,6 +566,7 @@ async function ensureGraphReady(globals: GlobalArgs, args: Map<string, string | 
       sources: defaultGraphSources(),
       agentStateEnrichmentPath: enrichmentPath,
       knowledgeCuratorEnrichmentPath: curatorPath,
+      legacyColosseumKgEnrichmentPath: legacyPath,
     });
   }
   return dbPath;

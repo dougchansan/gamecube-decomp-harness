@@ -15,6 +15,7 @@ import {
   kgCurate,
   kgFileCard,
   kgImportAgentState,
+  kgImportLegacyColosseumKg,
   kgKnowledgeIntakeAgent,
   kgMaintain,
   kgPrIndexerAgent,
@@ -67,6 +68,7 @@ export async function main(argv = process.argv.slice(2)): Promise<void> {
     else if (command === "kg-sources") await kgSources();
     else if (command === "kg-status") await kgStatus(globals, args);
     else if (command === "kg-import-agent-state") await kgImportAgentState(args);
+    else if (command === "kg-import-legacy-colosseum-kg") await kgImportLegacyColosseumKg(globals, args);
     else if (command === "kg-curate") await kgCurate(globals, args);
     else if (command === "kg-maintain") await kgMaintain(globals, args);
     else if (command === "kg-pr-indexer-agent") await kgPrIndexerAgent(globals, args);

@@ -37,6 +37,12 @@
       "section": "code_context",
       "path": "code_context/code_graph",
       "access_modes": ["file_card", "rank_features", "editability", "graph_search"]
+    },
+    {
+      "id": "legacy_colosseum_kg",
+      "section": "code_context",
+      "path": "code_context/legacy_colosseum_kg",
+      "access_modes": ["graph_search", "source_search", "symbol_lookup", "topic_lookup", "file_edges", "rank_features"]
     }
   ]
 }

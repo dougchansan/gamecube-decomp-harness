@@ -3,6 +3,7 @@ export {
   codeGraphFunctionsIndexPath,
   defaultToolpackId,
   knowledgeCuratorEnrichmentPath,
+  legacyColosseumKgEnrichmentPath,
   knowledgeSourceRegistryPath,
   knowledgeSourcesRoot,
   knowledgeToolRegistryPath,

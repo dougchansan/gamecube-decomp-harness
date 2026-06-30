@@ -24,6 +24,7 @@
     "kg:sources": "bun run server:job -- kg-sources",
     "kg:status": "bun run server:job -- kg-status",
     "kg:import-agent-state": "bun run server:job -- kg-import-agent-state",
+    "kg:import-legacy-colosseum-kg": "bun run server:job -- kg-import-legacy-colosseum-kg",
     "kg:curate": "bun run server:job -- kg-curate",
     "kg:maintain": "bun run server:job -- kg-maintain",
     "kg:rebuild": "bun run server:job -- kg-rebuild-graph",
