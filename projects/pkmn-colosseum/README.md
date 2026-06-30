@@ -24,15 +24,16 @@ model list catches up.
 Local setup:
 
 ```sh
-mkdir -p projects/pkmn-colosseum/.pi-agent
+mkdir -p ~/.pi/agent
 cp projects/pkmn-colosseum/pi-agent.models.example.json \
-  projects/pkmn-colosseum/.pi-agent/models.json
-printf '%s\n' 'PI_CODING_AGENT_DIR=./.pi-agent' > projects/pkmn-colosseum/local.env
+  ~/.pi/agent/models.json
 ```
 
-Then set `ZAI_API_KEY` in the ignored local environment or replace the
-`apiKey` value in the ignored `.pi-agent/models.json` with a command-backed
-secret lookup.
+Then set `ZAI_API_KEY` in your shell or replace the `apiKey` value in
+`~/.pi/agent/models.json` with a command-backed secret lookup. Do not set
+`PI_CODING_AGENT_DIR` for this project unless you also copy the normal
+`openai-codex` auth into that directory; otherwise Codex OAuth will disappear
+from this project's workers.
 
 Run a GLM lane:
 

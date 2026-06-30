@@ -91,6 +91,25 @@ function normalizeSourcePath(path: string): string {
   return path.replace(/\\/g, "/").replace(/^\.\/+/, "");
 }
 
+function buildableSourcePaths(repoRoot: string, reportRelPath: string): Set<string> {
+  const buildDir = dirname(reportRelPath).replace(/\\/g, "/");
+  const ninjaPath = resolve(repoRoot, "build.ninja");
+  const paths = new Set<string>();
+  if (!existsSync(ninjaPath) || !buildDir || buildDir === ".") return paths;
+
+  const targetPattern = new RegExp(`^build\\s+${escapeRegExp(buildDir)}/(src/.+?)\\.o:`);
+  for (const line of readFileSync(ninjaPath, "utf8").split(/\r?\n/)) {
+    const match = targetPattern.exec(line);
+    if (!match) continue;
+    paths.add(`${match[1]}.c`);
+  }
+  return paths;
+}
+
+function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 function excludedSources(options: LoadBoardSnapshotOptions): Set<string> {
   return new Set((options.excludeSourcePaths ?? []).map(normalizeSourcePath).filter(Boolean));
 }
@@ -104,9 +123,11 @@ function sourceConversionCandidate(params: {
   entry: FunctionSourceMapEntry;
   report: ReportFunctionInfo | undefined;
   sourceClass: SourceProgressClass;
+  buildableSources: Set<string>;
 }): TargetCandidate | null {
   if (params.sourceClass === "REAL_C") return null;
   if (!params.entry.sourcePath.endsWith(".c")) return null;
+  if (!params.buildableSources.has(normalizeSourcePath(params.entry.sourcePath))) return null;
   const unit = params.report?.unitName ?? "";
   if (!unit) return null;
   const size = params.report?.size || params.entry.size;
@@ -148,6 +169,7 @@ export function loadBoardSnapshot(repoRoot: string, limit: number, options: Load
   const sourceByUnit = objdiffSourceMap(objdiff);
   const functionSourceMap = loadFunctionSourceMap(repoRoot);
   const sourceClasses = classifySourceFunctions(repoRoot, functionSourceMap);
+  const buildableSources = buildableSourcePaths(repoRoot, reportRelPath);
   const reportFunctions = new Map<string, ReportFunctionInfo>();
   const candidateKeys = new Set<string>();
   const excluded = excludedSources(options);
@@ -184,7 +206,7 @@ export function loadBoardSnapshot(repoRoot: string, limit: number, options: Load
   for (const [symbol, sourceClass] of sourceClasses) {
     const entry = functionSourceMap.get(symbol);
     if (!entry) continue;
-    const candidate = sourceConversionCandidate({ entry, report: reportFunctions.get(symbol), sourceClass });
+    const candidate = sourceConversionCandidate({ entry, report: reportFunctions.get(symbol), sourceClass, buildableSources });
     if (!candidate) continue;
     const key = candidateKey(candidate.unit, candidate.symbol);
     if (candidateKeys.has(key)) continue;

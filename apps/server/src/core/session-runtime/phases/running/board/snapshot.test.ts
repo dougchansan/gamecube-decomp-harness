@@ -64,6 +64,7 @@ describe("loadBoardSnapshot", () => {
               { name: "fn_80001000", size: 64, fuzzy_match_percent: 100 },
               { name: "fn_80002000", size: 32, fuzzy_match_percent: 100 },
               { name: "fn_80003000", size: 48, fuzzy_match_percent: 100 },
+              { name: "fn_80004000", size: 24, fuzzy_match_percent: 100 },
             ],
           },
         ],
@@ -73,8 +74,10 @@ describe("loadBoardSnapshot", () => {
         fn_80001000: { src: "src/game/foo.c", status: "KNOWN", size: "0x40", addr: "0x80001000" },
         fn_80002000: { src: "src/game/foo.c", status: "KNOWN", size: "0x20", addr: "0x80002000" },
         fn_80003000: { src: "src/game/foo.c", status: "KNOWN", size: "0x30", addr: "0x80003000" },
+        fn_80004000: { src: "src/game/bar.c", status: "KNOWN", size: "0x18", addr: "0x80004000" },
       });
       mkdirSync(resolve(root, "src/game"), { recursive: true });
+      writeFileSync(resolve(root, "build.ninja"), "build build/GC6E01/src/game/foo.o: mwcc_sjis src/game/foo.c\n");
       writeFileSync(
         resolve(root, "src/game/foo.c"),
         [
@@ -90,6 +93,7 @@ describe("loadBoardSnapshot", () => {
           "",
         ].join("\n"),
       );
+      writeFileSync(resolve(root, "src/game/bar.c"), "asm void fn_80004000(void) {\n#include \"fn_80004000.inc\"\n}\n");
 
       const snapshot = loadBoardSnapshot(root, 10);
       expect(snapshot.candidates.map((candidate) => candidate.symbol).sort()).toEqual(["fn_80001000", "fn_80002000"]);
