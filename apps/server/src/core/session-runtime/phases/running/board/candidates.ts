@@ -4,6 +4,7 @@ import { asArray, asObject, numberValue, stringValue, type JsonObject } from "./
 const CLOSENESS_SCORE_CAP = 30;
 
 export function closenessPriority(size: number, fuzzy: number): number {
+  if (fuzzy <= 0) return Math.max(0, size);
   const gap = Math.max(0.001, 100 - fuzzy);
   const completeness = Math.max(0, Math.min(1, fuzzy / 100));
   const nearExactBoost = fuzzy >= 99 ? 8 : fuzzy >= 98 ? 4 : fuzzy >= 95 ? 2 : 1;

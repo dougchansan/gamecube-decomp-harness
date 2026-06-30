@@ -379,6 +379,15 @@ function schedulerTickArgs(
   ]);
 }
 
+function sourceListArg(args: Map<string, string | true>, name: string): string[] {
+  const raw = args.get(name);
+  if (typeof raw !== "string") return [];
+  return raw
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
 function shellQuote(value: string): string {
   return `'${value.replace(/'/g, `'\\''`)}'`;
 }
@@ -858,6 +867,7 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
                 if (epoch) {
                   recordSchedulerEpochFastRefresh(store, epoch.id);
                   const board = loadKnowledgeBoardSnapshot(globals.repoRoot, schedulerEpochConfig.candidateWindow, {
+                    excludeSourcePaths: sourceListArg(args, "--exclude-sources"),
                     graphDbPath,
                     objdiffPath: globals.project?.validation.objdiffPath,
                     projectId: globals.project?.projectId ?? globals.projectId,

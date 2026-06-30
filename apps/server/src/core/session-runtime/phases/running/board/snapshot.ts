@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { basename, dirname, isAbsolute, resolve } from "node:path";
 import type { BoardMeasures, BoardRankBreakdown, BoardSnapshot, TargetCandidate } from "@server/core/shared/types/index.js";
+import { classifySourceFunctions, loadFunctionSourceMap, type FunctionSourceMapEntry, type SourceProgressClass } from "../source-progress.js";
 import { candidateFromReportFunction, closenessPriority, closenessScore, objdiffSourceMap } from "./candidates.js";
 import { asArray, asObject, numberValue, stringValue, type JsonObject } from "./json.js";
 
@@ -16,6 +17,7 @@ function readJson(path: string): JsonObject {
 
 export interface LoadBoardSnapshotOptions {
   codeGraphFunctionsIndexPath?: string;
+  excludeSourcePaths?: string[];
   objdiffPath?: string;
   rankFeatureProvider?: BoardRankFeatureProvider;
   reportPath?: string;
@@ -65,6 +67,65 @@ function sessionBaselineRepoRoot(repoRoot: string): string | null {
   return resolve(dirname(sessionsRoot), "upstream-current");
 }
 
+interface ReportFunctionInfo {
+  unitName: string;
+  sourcePath: string;
+  symbol: string;
+  size: number;
+  fuzzy: number;
+}
+
+function candidateKey(unit: string, symbol: string): string {
+  return `${unit}:${symbol}`;
+}
+
+function mappedSourcePath(symbol: string, fallback: string, sourceMap: Map<string, FunctionSourceMapEntry>): string {
+  return fallback || sourceMap.get(symbol)?.sourcePath || "";
+}
+
+function sourceConversionFuzzy(_klass: SourceProgressClass): number {
+  return 0;
+}
+
+function normalizeSourcePath(path: string): string {
+  return path.replace(/\\/g, "/").replace(/^\.\/+/, "");
+}
+
+function excludedSources(options: LoadBoardSnapshotOptions): Set<string> {
+  return new Set((options.excludeSourcePaths ?? []).map(normalizeSourcePath).filter(Boolean));
+}
+
+function filterExcludedCandidates(candidates: TargetCandidate[], excluded: Set<string>): TargetCandidate[] {
+  if (excluded.size === 0) return candidates;
+  return candidates.filter((candidate) => !excluded.has(normalizeSourcePath(candidate.sourcePath)));
+}
+
+function sourceConversionCandidate(params: {
+  entry: FunctionSourceMapEntry;
+  report: ReportFunctionInfo | undefined;
+  sourceClass: SourceProgressClass;
+}): TargetCandidate | null {
+  if (params.sourceClass === "REAL_C") return null;
+  if (!params.entry.sourcePath.endsWith(".c")) return null;
+  const unit = params.report?.unitName ?? "";
+  if (!unit) return null;
+  const size = params.report?.size || params.entry.size;
+  if (size <= 0) return null;
+  const fuzzy = sourceConversionFuzzy(params.sourceClass);
+  const reportedFuzzy = params.report ? `${params.report.fuzzy.toFixed(5)}%` : "unavailable";
+  return {
+    unit,
+    sourcePath: params.entry.sourcePath,
+    symbol: params.entry.symbol,
+    size,
+    fuzzy,
+    priority: closenessPriority(size, fuzzy),
+    reason:
+      `source-conversion candidate: active ${params.sourceClass} in ${params.entry.sourcePath}; ` +
+      `func_tu_map status ${params.entry.status}; objdiff reports ${reportedFuzzy}, so this needs honest C conversion rather than score-only progress`,
+  };
+}
+
 export function loadBoardSnapshot(repoRoot: string, limit: number, options: LoadBoardSnapshotOptions = {}): BoardSnapshot {
   const reportRelPath = options.reportPath ?? "build/GC6E01/report.json";
   const objdiffRelPath = options.objdiffPath ?? "objdiff.json";
@@ -85,6 +146,11 @@ export function loadBoardSnapshot(repoRoot: string, limit: number, options: Load
   const report = readJson(reportPath);
   const objdiff = readJson(objdiffPath);
   const sourceByUnit = objdiffSourceMap(objdiff);
+  const functionSourceMap = loadFunctionSourceMap(repoRoot);
+  const sourceClasses = classifySourceFunctions(repoRoot, functionSourceMap);
+  const reportFunctions = new Map<string, ReportFunctionInfo>();
+  const candidateKeys = new Set<string>();
+  const excluded = excludedSources(options);
   const candidates: TargetCandidate[] = [];
 
   for (const unitValue of asArray(report.units)) {
@@ -97,25 +163,45 @@ export function loadBoardSnapshot(repoRoot: string, limit: number, options: Load
       const fn = asObject(fnValue);
       const fnMetadata = asObject(fn.metadata);
       const symbol = stringValue(fn.name);
-      const sourcePath = stringValue(fnMetadata.source_path, unitSourcePath);
+      const sourcePath = mappedSourcePath(symbol, stringValue(fnMetadata.source_path, unitSourcePath), functionSourceMap);
+      const size = numberValue(fn.size);
+      const fuzzy = numberValue(fn.fuzzy_match_percent, 100);
+      if (symbol) {
+        reportFunctions.set(symbol, { unitName, sourcePath, symbol, size, fuzzy });
+      }
       const candidate = candidateFromReportFunction({
         unitName,
         sourcePath,
         fn,
       });
-      if (candidate) candidates.push(candidate);
+      if (candidate) {
+        candidates.push(candidate);
+        candidateKeys.add(candidateKey(candidate.unit, candidate.symbol));
+      }
     }
   }
 
-  rankBoardCandidates(candidates, options.rankFeatureProvider);
-  candidates.sort((left, right) => right.priority - left.priority);
+  for (const [symbol, sourceClass] of sourceClasses) {
+    const entry = functionSourceMap.get(symbol);
+    if (!entry) continue;
+    const candidate = sourceConversionCandidate({ entry, report: reportFunctions.get(symbol), sourceClass });
+    if (!candidate) continue;
+    const key = candidateKey(candidate.unit, candidate.symbol);
+    if (candidateKeys.has(key)) continue;
+    candidates.push(candidate);
+    candidateKeys.add(key);
+  }
+
+  const filteredCandidates = filterExcludedCandidates(candidates, excluded);
+  rankBoardCandidates(filteredCandidates, options.rankFeatureProvider);
+  filteredCandidates.sort((left, right) => right.priority - left.priority);
   const measures = asObject(report.measures) as BoardMeasures;
   return {
     generatedAt: new Date().toISOString(),
     reportPath,
     objdiffPath,
     measures,
-    candidates: candidates.slice(0, limit),
+    candidates: filteredCandidates.slice(0, limit),
   };
 }
 
@@ -136,6 +222,7 @@ function loadBoardSnapshotFromCodeGraphIndex(
   }
 
   const rows = readJsonl(functionsIndex);
+  const excluded = excludedSources(options);
   const candidates: TargetCandidate[] = [];
   let totalFunctions = 0;
   let matchedFunctions = 0;
@@ -148,7 +235,7 @@ function loadBoardSnapshotFromCodeGraphIndex(
     const symbol = stringValue(row.symbol);
     const size = numberValue(row.size);
     const fuzzy = numberValue(row.fuzzy, numberValue(row.fuzzy_match_percent, 100));
-    if (!unit || !sourcePath || !symbol || size <= 0) continue;
+    if (!unit || !sourcePath || !symbol || size <= 0 || excluded.has(normalizeSourcePath(sourcePath))) continue;
     totalFunctions += 1;
     totalBytes += size;
     if (fuzzy >= 100) {

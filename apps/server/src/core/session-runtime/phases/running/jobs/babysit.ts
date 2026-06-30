@@ -87,6 +87,7 @@ const SYSTEM_ARG_ALLOWLIST = new Set([
   "--exit-on-worker-error",
   "--epoch-size",
   "--epoch-worktree",
+  "--exclude-sources",
   "--fast-kg-maintenance-interval-ms",
   "--fast-kg-maintenance-report-count",
   "--full-kg-maintenance-mode",

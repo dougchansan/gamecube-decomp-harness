@@ -26,6 +26,11 @@ export interface WorkerRunnerValidation {
     improved: boolean;
     exact: boolean;
   };
+  sourceProgress?: {
+    before: string | null;
+    after: string | null;
+    converted: boolean;
+  };
   regressions?: Array<{
     kind: "unit" | "function" | "section";
     unit: string;

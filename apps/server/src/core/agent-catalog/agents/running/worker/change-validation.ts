@@ -4,6 +4,7 @@ import { basename, dirname, isAbsolute, resolve } from "node:path";
 import { runQaScanDiff, type QaScanFinding, type QaScanInvocation, type RunQaScanDiffOptions } from "@server/core/validation/qa";
 import { runCommand, type CommandResult } from "@server/infrastructure/shell";
 import { packageRoot } from "@server/core/knowledge";
+import { classifyFunctionInFile, type SourceProgressClass } from "@server/core/session-runtime/phases/running/source-progress.js";
 import type { WorkerRunnerValidation } from "./runner-validation.js";
 
 const SCORE_EPSILON = 0.000001;
@@ -50,6 +51,8 @@ export interface WorkerChangeBaseline {
   sourceSnapshotDir?: string;
   /** Repo-relative paths that were actually copied into sourceSnapshotDir. */
   sourceSnapshotPaths?: string[];
+  /** Active source-body class for the target function before the worker edit. */
+  sourceProgressClass?: SourceProgressClass | null;
 }
 
 /** Injectable scan_diff runner so tests (and callers) can fake the QA scanner. */
@@ -382,13 +385,14 @@ export async function captureWorkerChangeBaseline(params: {
   });
   const sourceSnapshotDir = sourceSnapshot.dir;
   const sourceSnapshotPaths = sourceSnapshot.copied;
+  const sourceProgressClass = sourcePath ? classifyFunctionInFile(resolve(sourceSnapshotDir, sourcePath), symbol) : null;
 
   if (!unit) reasons.push("target unit is missing");
   if (!symbol) reasons.push("target symbol is missing");
   if (!sourcePath) reasons.push("target source_path is missing");
   if (!objectTarget) reasons.push("could not derive object target from target source_path");
   if (reasons.length > 0 || !objectTarget) {
-    return { status: "snapshot_unavailable", reasons, snapshot: null, objectTarget, sourceSnapshotDir, sourceSnapshotPaths };
+    return { status: "snapshot_unavailable", reasons, snapshot: null, objectTarget, sourceSnapshotDir, sourceSnapshotPaths, sourceProgressClass };
   }
 
   const objectBuild = await runValidationCommand(
@@ -406,6 +410,7 @@ export async function captureWorkerChangeBaseline(params: {
       objectBuild,
       sourceSnapshotDir,
       sourceSnapshotPaths,
+      sourceProgressClass,
     };
   }
 
@@ -427,6 +432,7 @@ export async function captureWorkerChangeBaseline(params: {
       unitDiff,
       sourceSnapshotDir,
       sourceSnapshotPaths,
+      sourceProgressClass,
     };
   }
 
@@ -448,6 +454,7 @@ export async function captureWorkerChangeBaseline(params: {
       unitDiff,
       sourceSnapshotDir,
       sourceSnapshotPaths,
+      sourceProgressClass,
     };
   }
 
@@ -464,6 +471,7 @@ export async function captureWorkerChangeBaseline(params: {
     unitDiff,
     sourceSnapshotDir,
     sourceSnapshotPaths,
+    sourceProgressClass,
   };
 }
 
@@ -501,6 +509,10 @@ export function compareWorkerUnitSnapshots(params: {
   before: WorkerUnitScoreSnapshot;
   after: WorkerUnitScoreSnapshot;
   claimedExact: boolean;
+  sourceProgress?: {
+    before: SourceProgressClass | null;
+    after: SourceProgressClass | null;
+  };
   summaryPath?: string;
   reportPath?: string;
   baselinePath?: string;
@@ -514,11 +526,16 @@ export function compareWorkerUnitSnapshots(params: {
   const targetImproved = targetHasScores && afterTarget > beforeTarget + SCORE_EPSILON;
   const targetReachedExact = targetHasScores && beforeTarget < EXACT_SCORE && afterTarget >= EXACT_SCORE;
   const targetRegressed = targetHasScores && afterTarget + SCORE_EPSILON < beforeTarget;
+  const sourceConverted =
+    (params.sourceProgress?.before === "ASM" || params.sourceProgress?.before === "STUB") &&
+    params.sourceProgress?.after === "REAL_C" &&
+    targetHasScores &&
+    afterTarget + SCORE_EPSILON >= beforeTarget;
   // The runner owns the durable outcome: a measured official improvement is
   // accepted progress even when the model over-claimed exact. The over-claim
   // is surfaced in reasons and target.exact stays truthful, so the recorded
   // result downgrades to "improved" instead of discarding real score movement.
-  const targetAccepted = targetImproved || targetReachedExact;
+  const targetAccepted = targetImproved || targetReachedExact || sourceConverted;
 
   compareRows({ kind: "unit", unit: params.before.unit, beforeRows: params.before.metrics, afterRows: params.after.metrics, regressions, improvements, reasons });
   compareRows({ kind: "function", unit: params.before.unit, beforeRows: params.before.functions, afterRows: params.after.functions, regressions, improvements, reasons });
@@ -545,6 +562,10 @@ export function compareWorkerUnitSnapshots(params: {
     reasons.push(
       `target ${params.before.symbol} improved from ${beforeTarget} to ${afterTarget} but did not reach exact as claimed; runner records improved progress`,
     );
+  } else if (sourceConverted) {
+    reasons.push(
+      `target ${params.before.symbol} converted active source from ${params.sourceProgress?.before} to REAL_C without official score regression`,
+    );
   }
 
   return {
@@ -558,6 +579,13 @@ export function compareWorkerUnitSnapshots(params: {
       improved: Boolean(targetImproved),
       exact: Boolean(targetHasScores && afterTarget >= EXACT_SCORE),
     },
+    sourceProgress: params.sourceProgress
+      ? {
+          before: params.sourceProgress.before,
+          after: params.sourceProgress.after,
+          converted: Boolean(sourceConverted),
+        }
+      : undefined,
     regressions,
     improvements,
     summaryPath: params.summaryPath,
@@ -834,10 +862,15 @@ async function validateWorkerScoreChange(
 
   const snapshotPath = resolve(params.outputDir, `attempt-${params.attemptIndex}.unit_snapshot.json`);
   await writeFile(snapshotPath, JSON.stringify(after, null, 2));
+  const afterSourceProgressClass = classifyFunctionInFile(resolve(params.repoRoot, sourcePath), symbol);
   const validation = compareWorkerUnitSnapshots({
     before: params.baseline.snapshot,
     after,
     claimedExact: params.claimedExact,
+    sourceProgress: {
+      before: params.baseline.sourceProgressClass ?? null,
+      after: afterSourceProgressClass,
+    },
     summaryPath,
     reportPath: snapshotPath,
     baselinePath: params.baseline.snapshotPath,

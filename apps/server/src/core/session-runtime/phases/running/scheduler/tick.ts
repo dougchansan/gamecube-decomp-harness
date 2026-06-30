@@ -73,6 +73,15 @@ function positiveIntArg(args: Map<string, string | true>, name: string, fallback
   return Math.max(1, nonNegativeInt(numberArg(args, name, fallback)));
 }
 
+function sourceListArg(args: Map<string, string | true>, name: string): string[] {
+  const raw = args.get(name);
+  if (typeof raw !== "string") return [];
+  return raw
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
 function rawEpochSize(globals: GlobalArgs, args: Map<string, string | true>, admissionTargetSize: number): string | number {
   const explicit = args.get("--epoch-size");
   if (typeof explicit === "string") return explicit;
@@ -118,6 +127,7 @@ function historicalTargetKeyCount(store: StateStore, runId: string): number {
 
 export function ensureSchedulerEpochFromBoard(params: {
   config: SchedulerEpochConfig;
+  excludeSourcePaths?: string[];
   globals: GlobalArgs;
   graphDbPath: string;
   runId: string;
@@ -135,6 +145,7 @@ export function ensureSchedulerEpochFromBoard(params: {
     const admissionCandidateWindow =
       params.config.size.mode === "full" ? candidateWindow : candidateWindow + historicalTargetKeyCount(params.store, params.runId);
     const board = loadKnowledgeBoardSnapshot(params.globals.repoRoot, admissionCandidateWindow, {
+      excludeSourcePaths: params.excludeSourcePaths,
       graphDbPath: params.graphDbPath,
       objdiffPath: params.globals.project?.validation.objdiffPath,
       projectId: params.globals.project?.projectId ?? params.globals.projectId,
@@ -156,6 +167,7 @@ export function ensureSchedulerEpochFromBoard(params: {
   }
 
   const refreshBoard = loadKnowledgeBoardSnapshot(params.globals.repoRoot, candidateWindow, {
+    excludeSourcePaths: params.excludeSourcePaths,
     graphDbPath: params.graphDbPath,
     objdiffPath: params.globals.project?.validation.objdiffPath,
     projectId: params.globals.project?.projectId ?? params.globals.projectId,
@@ -196,9 +208,11 @@ export async function runSchedulerTick(globals: GlobalArgs, args: Map<string, st
       nonNegativeInt(numberArg(args, "--candidate-window", globals.project?.dashboard.candidateWindow ?? Math.max(candidateLimit, admissionTargetSize * 8))),
     );
     const graphDbPath = stringArg(args, "--graph-db", globals.graphDbPath ?? resourceGraphDbPath());
+    const excludeSourcePaths = sourceListArg(args, "--exclude-sources");
     let epochResult: SchedulerEpochEnsureResult | null = null;
     epochResult = ensureSchedulerEpochFromBoard({
       config: schedulerEpochConfigFromArgs(globals, args, { admissionTargetSize, candidateWindow: requestedCandidateWindow }),
+      excludeSourcePaths,
       globals,
       graphDbPath,
       runId,

@@ -7,6 +7,7 @@ import type { QaScanFinding, QaScanInvocation, QaScanResult, RunQaScanDiffOption
 import {
   applyQaLintToValidation,
   captureWorkerChangeBaseline,
+  compareWorkerUnitSnapshots,
   objectBuildDirFromReportPath,
   QA_LINT_REPAIR_INSTRUCTION,
   qaLintFromInvocation,
@@ -278,6 +279,38 @@ describe("captureWorkerChangeBaseline source snapshot", () => {
     // No build system in the temp repo, so the objdiff baseline itself fails —
     // the source snapshot must survive that.
     expect(baseline.snapshot).toBeNull();
+  });
+});
+
+describe("compareWorkerUnitSnapshots source progress", () => {
+  test("accepts an exact-preserving ASM to REAL_C conversion", () => {
+    const before = {
+      schemaVersion: 1 as const,
+      capturedAt: "2026-06-30T00:00:00.000Z",
+      unit: "main/auto_01_800055E0_text",
+      symbol: "fn_80001000",
+      sourcePath: "src/game/foo.c",
+      objectTarget: "build/GC6E01/src/game/foo.o",
+      metrics: [{ name: "matched_code_percent", score: 100, size: 64 }],
+      functions: [{ name: "fn_80001000", score: 100, size: 64 }],
+      sections: [],
+      targetScore: 100,
+    };
+    const after = {
+      ...before,
+      capturedAt: "2026-06-30T00:01:00.000Z",
+    };
+
+    const validation = compareWorkerUnitSnapshots({
+      before,
+      after,
+      claimedExact: true,
+      sourceProgress: { before: "ASM", after: "REAL_C" },
+    });
+
+    expect(validation.status).toBe("passed");
+    expect(validation.sourceProgress).toEqual({ before: "ASM", after: "REAL_C", converted: true });
+    expect(validation.reasons.some((reason) => reason.includes("converted active source"))).toBe(true);
   });
 });
 

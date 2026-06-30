@@ -5,6 +5,15 @@ import { createRun, openState } from "@server/core/session-runtime/run-state";
 import { recordDashboardArtifact } from "@server/core/orchestrator-state";
 import { numberArg, projectMetadata, stringArg, type GlobalArgs } from "@server/core/project-registry/runtime-options.js";
 
+function sourceListArg(args: Map<string, string | true>, name: string): string[] {
+  const raw = args.get(name);
+  if (typeof raw !== "string") return [];
+  return raw
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
 export async function initRun(globals: GlobalArgs, args: Map<string, string | true>): Promise<void> {
   const store = openState(globals.stateDir);
   try {
@@ -21,6 +30,7 @@ export async function initRun(globals: GlobalArgs, args: Map<string, string | tr
       numberArg(args, "--candidate-window", globals.project?.dashboard.candidateWindow ?? candidateLimit * 8),
     );
     const snapshot = loadKnowledgeBoardSnapshot(globals.repoRoot, candidateWindow, {
+      excludeSourcePaths: sourceListArg(args, "--exclude-sources"),
       graphDbPath,
       objdiffPath: globals.project?.validation.objdiffPath,
       projectId: globals.project?.projectId ?? globals.projectId,

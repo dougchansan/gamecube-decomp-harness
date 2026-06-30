@@ -4,6 +4,7 @@ import { codeGraphFunctionsIndexPath, resourceGraphDbPath } from "./paths.js";
 import { withRankFeatureProvider } from "./graph/rank.js";
 
 export interface LoadKnowledgeBoardSnapshotOptions {
+  excludeSourcePaths?: string[];
   graphDbPath?: string;
   objdiffPath?: string;
   projectId?: string;
@@ -15,6 +16,7 @@ export function loadKnowledgeBoardSnapshot(repoRoot: string, limit: number, opti
   return withRankFeatureProvider(graphDbPath, (rankFeatureProvider) =>
     loadBoardSnapshot(repoRoot, limit, {
       codeGraphFunctionsIndexPath: codeGraphFunctionsIndexPath(options.projectId),
+      excludeSourcePaths: options.excludeSourcePaths,
       objdiffPath: options.objdiffPath,
       rankFeatureProvider,
       reportPath: options.reportPath,
