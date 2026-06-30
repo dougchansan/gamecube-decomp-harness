@@ -33,13 +33,17 @@ CLAUDE_START_MINUTE="${CLAUDE_START_MINUTE:-00}"
 mkdir -p "$LOGDIR"
 cd "$ROOT"
 
+ts() {
+  date '+%Y-%m-%dT%H:%M:%S%z'
+}
+
 run_json() {
   local name="$1"
   shift
-  echo "[$(date -Is)] $*" | tee -a "$LOGDIR/overnight.log"
+  echo "[$(ts)] $*" | tee -a "$LOGDIR/overnight.log"
   "$@" >"$LOGDIR/$name.json" 2>"$LOGDIR/$name.err" || {
     local rc=$?
-    echo "[$(date -Is)] $name failed rc=$rc; stderr tail:" | tee -a "$LOGDIR/overnight.log"
+    echo "[$(ts)] $name failed rc=$rc; stderr tail:" | tee -a "$LOGDIR/overnight.log"
     tail -80 "$LOGDIR/$name.err" | tee -a "$LOGDIR/overnight.log"
     return "$rc"
   }
@@ -149,7 +153,7 @@ start_lane() {
   else
     tmux new-window -t "$SESSION" -n "$window" "bash -lc $(printf '%q' "$cmd 2>&1 | tee -a '$log'")"
   fi
-  echo "[$(date -Is)] started $name lane: $provider/$model workers=$workers log=$log" | tee -a "$LOGDIR/overnight.log"
+  echo "[$(ts)] started $name lane: $provider/$model workers=$workers log=$log" | tee -a "$LOGDIR/overnight.log"
 }
 
 claude_auth_ready() {
@@ -182,14 +186,14 @@ PY
 claude_scheduler() {
   local wait_seconds
   wait_seconds="$(seconds_until_claude_window)"
-  echo "[$(date -Is)] Claude scheduler waiting ${wait_seconds}s for ${CLAUDE_START_HOUR}:${CLAUDE_START_MINUTE}" | tee -a "$LOGDIR/overnight.log"
+  echo "[$(ts)] Claude scheduler waiting ${wait_seconds}s for ${CLAUDE_START_HOUR}:${CLAUDE_START_MINUTE}" | tee -a "$LOGDIR/overnight.log"
   sleep "$wait_seconds"
   while true; do
     if claude_auth_ready; then
-      start_lane "claude" "$CLAUDE_PROVIDER" "$CLAUDE_MODEL" low 2
+      start_lane "claude" "$CLAUDE_PROVIDER" "$CLAUDE_MODEL" low 8
       return 0
     fi
-    echo "[$(date -Is)] Claude auth not ready; retrying in 300s" | tee -a "$LOGDIR/overnight.log"
+    echo "[$(ts)] Claude auth not ready; retrying in 300s" | tee -a "$LOGDIR/overnight.log"
     sleep 300
   done
 }
@@ -218,7 +222,7 @@ recover_previous_run
 init_fresh_run
 ensure_tmux_session
 start_lane "codex" "$CODEX_PROVIDER" "$CODEX_MODEL" high 2
-start_lane "glm52" "$GLM_PROVIDER" "$GLM_MODEL" low 2
-start_lane "deepseek" "$DEEPSEEK_PROVIDER" "$DEEPSEEK_MODEL" low 2
+start_lane "glm52" "$GLM_PROVIDER" "$GLM_MODEL" low 4
+start_lane "deepseek" "$DEEPSEEK_PROVIDER" "$DEEPSEEK_MODEL" low 6
 claude_scheduler &
 monitor_loop
