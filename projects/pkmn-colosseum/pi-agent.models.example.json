@@ -1,0 +1,36 @@
+{
+  "providers": {
+    "zai": {
+      "name": "Z.ai GLM Coding Plan",
+      "apiKey": "$ZAI_API_KEY",
+      "models": [
+        {
+          "id": "glm-5.2",
+          "name": "GLM-5.2",
+          "api": "openai-completions",
+          "baseUrl": "https://api.z.ai/api/coding/paas/v4",
+          "reasoning": true,
+          "thinkingLevelMap": {
+            "xhigh": "max"
+          },
+          "input": [
+            "text"
+          ],
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 1048576,
+          "maxTokens": 131072,
+          "compat": {
+            "supportsDeveloperRole": false,
+            "thinkingFormat": "zai",
+            "zaiToolStream": true
+          }
+        }
+      ]
+    }
+  }
+}
