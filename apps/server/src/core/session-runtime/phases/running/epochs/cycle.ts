@@ -23,6 +23,8 @@ export interface EpochCycleOptions {
   label?: string | null;
   /** Untracked build inputs symlinked from the live repo into the worktree (e.g. orig assets). */
   linkPaths?: string[];
+  /** Extra live-checkout paths that must never be staged by epoch snapshots. */
+  extraExcludePaths?: string[];
   projectId?: string | null;
   /** Above this many regressed report rows the cycle pauses instead of admitting repairs. */
   regressionPauseThreshold?: number;
@@ -392,7 +394,7 @@ async function runEpochCycleInner(store: StateStore, runId: string, repoRoot: st
       `epoch checkpoint blocked by ${blockingIntegrations} unresolved worker output integration item(s): ${JSON.stringify(integrationDrain.queueSummary)}`,
     );
   }
-  const lockedPaths = [...activeLockedSourcePaths(store)].sort();
+  const lockedPaths = [...new Set([...activeLockedSourcePaths(store), ...(options.extraExcludePaths ?? [])])].sort();
   const stateDirRelative = options.stateDirRelative !== undefined ? options.stateDirRelative : stateDirRelativeToRepo(repoRoot, stateDir);
 
   const snapshot = await commitEpochSnapshot({

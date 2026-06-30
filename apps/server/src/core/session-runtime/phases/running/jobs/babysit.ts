@@ -79,6 +79,7 @@ const SYSTEM_ARG_ALLOWLIST = new Set([
   "--candidate-window",
   "--curator-agent-record-limit",
   "--epoch-configure-command",
+  "--epoch-exclude-paths",
   "--epoch-link-paths",
   "--epoch-ready-queue-size",
   "--epoch-regression-pause-threshold",

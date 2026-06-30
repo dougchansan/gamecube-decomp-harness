@@ -591,11 +591,12 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
     const workerThinkingLevel = stringArg(args, "--worker-thinking-level", globals.thinkingLevel);
     const workerConfigureCommand = stringArg(args, "--worker-configure-command", defaultConfigureCommand(globals));
     const maintenanceIntervalMs = knowledgeMaintenanceIntervalMs(globals, args);
-    const epochCycleEnabled = true;
+    const epochCycleEnabled = !booleanArg(args, "--no-epoch-cycle");
     const schedulerEpochConfig = schedulerEpochConfigFromArgs(globals, args, { admissionTargetSize, candidateWindow });
     const workerPoolTargetSize = schedulerEpochConfig.workerPoolSize;
     const epochWorktreeDir = stringArg(args, "--epoch-worktree", resolve(globals.stateDir, "epoch_worktree"));
     const epochConfigureCommand = stringArg(args, "--epoch-configure-command", defaultConfigureCommand(globals));
+    const epochExcludePaths = sourceListArg(args, "--epoch-exclude-paths");
     const epochLinkPaths = stringArg(args, "--epoch-link-paths", "orig")
       .split(",")
       .map((path) => path.trim())
@@ -671,6 +672,7 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
                   baseRef: globals.project?.baseRef,
                   changesTarget: globals.project?.validation.qaTarget,
                   configureCommand: epochConfigureCommand,
+                  extraExcludePaths: epochExcludePaths,
                   label: `epoch-${epochOrdinal}`,
                   linkPaths: epochLinkPaths,
                   projectId: globals.project?.projectId ?? globals.projectId ?? null,
