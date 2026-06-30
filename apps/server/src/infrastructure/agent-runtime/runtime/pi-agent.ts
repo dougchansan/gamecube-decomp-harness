@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { spawn } from "node:child_process";
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -38,6 +39,7 @@ export const DEFAULT_PI_PROVIDER = "codex-lb";
 export const DEFAULT_PI_MODEL = "gpt-5.5";
 export const DEFAULT_PI_THINKING_LEVEL = "medium";
 export const DEFAULT_PI_SESSION_DIR_NAME = ".pi-sessions";
+export const CLAUDE_CODE_PROVIDER = "claude-code";
 
 function packageRoot(): string {
   return fileURLToPath(new URL("../../../../../..", import.meta.url));
@@ -69,6 +71,10 @@ function piConfig(options: PiRunOptions): { provider: string; model: string; thi
     model: options.model ?? DEFAULT_PI_MODEL,
     thinkingLevel: normalizeThinkingLevel(options.thinkingLevel ?? DEFAULT_PI_THINKING_LEVEL),
   };
+}
+
+export function isClaudeCodeProvider(provider: string | undefined): boolean {
+  return (provider ?? "").trim().toLowerCase() === CLAUDE_CODE_PROVIDER;
 }
 
 function dryRunTranscript(
@@ -189,8 +195,262 @@ async function withTimeout<T>(promise: Promise<T>, timeoutMs: number | undefined
   }
 }
 
+function claudeCodeModel(model: string | undefined): string {
+  const normalized = (model ?? "").trim();
+  if (!normalized) return "sonnet";
+  if (/^claude-(?:3|4|opus|sonnet|haiku)/.test(normalized)) return normalized;
+  if (/sonnet/i.test(normalized)) return "sonnet";
+  if (/opus/i.test(normalized)) return "opus";
+  if (/haiku/i.test(normalized)) return "haiku";
+  return normalized;
+}
+
+function claudeCodeCompatibilityPrompt(systemPrompt: string): string {
+  return [
+    systemPrompt,
+    "",
+    "<claude_code_runtime_compatibility>",
+    "This session is running under Claude Code CLI rather than the Pi custom-tool SDK.",
+    "If the prompt names Pi custom tools such as checkdiff_run, direct_compile_tu, or knowledge graph tools, treat them as reference capabilities and use local Bash commands, canonical tool paths, and repository scripts instead.",
+    "Do not report missing Pi custom tools as a blocker when equivalent local validation can be run.",
+    "</claude_code_runtime_compatibility>",
+  ].join("\n");
+}
+
+function claudeCodeToolArgs(options: PiRunOptions): string[] {
+  const args: string[] = [];
+  if (options.toolProfile?.replace && options.toolProfile.replace.length === 0) {
+    args.push("--tools", "");
+  }
+  if (options.excludeBuiltinTools?.some((tool) => tool.toLowerCase() === "write")) {
+    args.push("--disallowedTools", "Write");
+  }
+  return args;
+}
+
+function claudeCodeCommandArgs(options: PiRunOptions, paths: { systemPromptPath: string; sessionId: string }): string[] {
+  const config = piConfig(options);
+  const args = [
+    "--print",
+    "--model",
+    claudeCodeModel(config.model),
+    "--effort",
+    config.thinkingLevel,
+    "--output-format",
+    "json",
+    "--input-format",
+    "text",
+    "--system-prompt-file",
+    paths.systemPromptPath,
+    "--session-id",
+    paths.sessionId,
+    "--name",
+    `${options.role}-${paths.sessionId.slice(0, 8)}`,
+  ];
+  if (!(options.toolProfile?.replace && options.toolProfile.replace.length === 0)) {
+    args.push("--dangerously-skip-permissions");
+  }
+  args.push(...claudeCodeToolArgs(options));
+  return args;
+}
+
+function claudeCodeFailureText(params: {
+  stdout: string;
+  stderr: string;
+  exitCode: number | null;
+  signal: NodeJS.Signals | null;
+}): string {
+  const parts = [
+    `[Claude Code session failed]`,
+    `exit_code: ${params.exitCode ?? "(none)"}`,
+    `signal: ${params.signal ?? "(none)"}`,
+  ];
+  if (params.stderr.trim()) parts.push("", "=== STDERR ===", params.stderr.trimEnd());
+  if (params.stdout.trim()) parts.push("", "=== STDOUT ===", params.stdout.trimEnd());
+  return `${parts.join("\n")}\n`;
+}
+
+async function spawnClaudeCode(
+  options: PiRunOptions,
+  args: string[],
+): Promise<{ stdout: string; stderr: string; exitCode: number | null; signal: NodeJS.Signals | null }> {
+  return new Promise((resolve, reject) => {
+    const controller = new AbortController();
+    let timedOut = false;
+    const timeout = options.timeoutMs && options.timeoutMs > 0
+      ? setTimeout(() => {
+          timedOut = true;
+          controller.abort();
+        }, options.timeoutMs)
+      : undefined;
+    const child = spawn("claude", args, {
+      cwd: options.cwd,
+      env: { ...process.env, ...(options.env ?? {}) },
+      stdio: ["pipe", "pipe", "pipe"],
+      signal: controller.signal,
+    });
+    let stdout = "";
+    let stderr = "";
+    child.stdout.setEncoding("utf8");
+    child.stderr.setEncoding("utf8");
+    child.stdout.on("data", (chunk) => {
+      stdout += chunk;
+    });
+    child.stderr.on("data", (chunk) => {
+      stderr += chunk;
+    });
+    child.on("error", (error) => {
+      if (timeout) clearTimeout(timeout);
+      if (timedOut) {
+        reject(new Error(`${options.role} Claude Code session timed out after ${Math.round((options.timeoutMs ?? 0) / 1000)}s`));
+      } else {
+        reject(error);
+      }
+    });
+    child.on("close", (exitCode, signal) => {
+      if (timeout) clearTimeout(timeout);
+      resolve({ stdout, stderr, exitCode, signal });
+    });
+    child.stdin.end(options.prompt.userPrompt);
+  });
+}
+
+function parseClaudeCodeJson(stdout: string): Record<string, any> | null {
+  const trimmed = stdout.trim();
+  if (!trimmed) return null;
+  try {
+    return JSON.parse(trimmed) as Record<string, any>;
+  } catch {
+    const lastLine = trimmed.split("\n").reverse().find((line) => line.trim().startsWith("{"));
+    if (!lastLine) return null;
+    try {
+      return JSON.parse(lastLine) as Record<string, any>;
+    } catch {
+      return null;
+    }
+  }
+}
+
+async function runClaudeCodeAgent(options: PiRunOptions): Promise<PiRunResult> {
+  const sessionId = randomUUID();
+  const sessionDir = options.sessionDir ?? defaultPiSessionDir(options.role);
+  const outputPath = resolve(options.outputDir, `${options.role}_${sessionId}.txt`);
+  const systemPromptPath = resolve(options.outputDir, `${options.role}_${sessionId}.system.md`);
+  const userPromptPath = resolve(options.outputDir, `${options.role}_${sessionId}.user.md`);
+  const sessionFile = resolve(sessionDir, `${sessionId}.claude-code.json`);
+  await mkdir(sessionDir, { recursive: true });
+  await writeOutput(systemPromptPath, claudeCodeCompatibilityPrompt(options.prompt.systemPrompt));
+  await writeOutput(userPromptPath, options.prompt.userPrompt);
+
+  if (options.dryRun) {
+    const rawText = [
+      `[dry-run ${options.role} Claude Code agent]`,
+      `cwd: ${options.cwd}`,
+      `provider: ${CLAUDE_CODE_PROVIDER}`,
+      `model: ${claudeCodeModel(options.model)}`,
+      `thinking: ${normalizeThinkingLevel(options.thinkingLevel ?? DEFAULT_PI_THINKING_LEVEL)}`,
+      `session_dir: ${sessionDir}`,
+      `system_prompt_artifact: ${systemPromptPath}`,
+      `user_prompt_artifact: ${userPromptPath}`,
+      "",
+      "=== SYSTEM PROMPT ===",
+      claudeCodeCompatibilityPrompt(options.prompt.systemPrompt),
+      "",
+      "=== INITIAL USER PROMPT ===",
+      options.prompt.userPrompt,
+    ].join("\n");
+    await writeOutput(outputPath, rawText);
+    return {
+      sessionId,
+      sessionFile,
+      sessionDir,
+      outputPath,
+      systemPromptPath,
+      userPromptPath,
+      rawText,
+      dryRun: true,
+    };
+  }
+
+  const args = claudeCodeCommandArgs(options, { systemPromptPath, sessionId });
+  try {
+    const result = await spawnClaudeCode(options, args);
+    const parsed = parseClaudeCodeJson(result.stdout);
+    await writeOutput(sessionFile, `${JSON.stringify({
+      provider: CLAUDE_CODE_PROVIDER,
+      model: claudeCodeModel(options.model),
+      role: options.role,
+      cwd: options.cwd,
+      command: ["claude", ...args],
+      exitCode: result.exitCode,
+      signal: result.signal,
+      stderr: result.stderr,
+      result: parsed,
+    }, null, 2)}\n`);
+    if (result.exitCode !== 0 || result.signal) {
+      const failureText = claudeCodeFailureText(result);
+      await writeOutput(outputPath, failureText);
+      return {
+        sessionId,
+        sessionFile,
+        sessionDir,
+        outputPath,
+        systemPromptPath,
+        userPromptPath,
+        rawText: failureText,
+        dryRun: false,
+        failed: true,
+        error: result.signal ? `Claude Code exited on signal ${result.signal}` : `Claude Code exited with code ${result.exitCode}`,
+      };
+    }
+    const outputText = typeof parsed?.result === "string" ? parsed.result : result.stdout;
+    await writeOutput(outputPath, outputText);
+    const providerError =
+      parsed?.is_error === true
+        ? String(parsed?.result ?? parsed?.api_error_status ?? "Claude Code returned an error")
+        : undefined;
+    return {
+      sessionId: typeof parsed?.session_id === "string" ? parsed.session_id : sessionId,
+      sessionFile,
+      sessionDir,
+      outputPath,
+      systemPromptPath,
+      userPromptPath,
+      rawText: outputText,
+      dryRun: false,
+      providerError,
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    const failureText = `[Claude Code session failed]\n${message}\n`;
+    await writeOutput(outputPath, failureText);
+    await writeOutput(sessionFile, `${JSON.stringify({
+      provider: CLAUDE_CODE_PROVIDER,
+      model: claudeCodeModel(options.model),
+      role: options.role,
+      cwd: options.cwd,
+      error: message,
+    }, null, 2)}\n`);
+    return {
+      sessionId,
+      sessionFile,
+      sessionDir,
+      outputPath,
+      systemPromptPath,
+      userPromptPath,
+      rawText: failureText,
+      dryRun: false,
+      failed: true,
+      error: message,
+    };
+  }
+}
+
 export async function runPiAgent(options: PiRunOptions): Promise<PiRunResult> {
   loadLocalEnv();
+  if (isClaudeCodeProvider(options.provider)) {
+    return runClaudeCodeAgent(options);
+  }
   const sessionId = randomUUID();
   const outputPath = resolve(options.outputDir, `${options.role}_${sessionId}.txt`);
   const systemPromptPath = resolve(options.outputDir, `${options.role}_${sessionId}.system.md`);

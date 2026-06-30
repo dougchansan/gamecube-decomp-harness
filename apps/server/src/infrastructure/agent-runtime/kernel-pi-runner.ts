@@ -27,7 +27,7 @@ import {
   type ColosseumKernelRuntime,
 } from "@server/infrastructure/kernel/bridge/runtime";
 import type { ColosseumTraceWriter } from "@server/infrastructure/kernel/bridge/trace-writer";
-import { runPiAgent } from "./runtime/pi-agent.js";
+import { isClaudeCodeProvider, runPiAgent } from "./runtime/pi-agent.js";
 
 export const COLOSSEUM_AGENT_SPAWN_STARTED_EVENT = "colosseum:agent_spawn_started";
 export const COLOSSEUM_AGENT_SPAWN_COMPLETED_EVENT = "colosseum:agent_spawn_completed";
@@ -313,14 +313,16 @@ export function createColosseumKernelPiAgentRunner(
       runtime?.config?.markerConfig ??
       createColosseumKernelBridgeConfig({ workingDir: piOptions.cwd }).markerConfig;
     const strategy = kernelSpawnStrategy ?? spawnStrategyFromEnv();
+    const useDirectAgentRunner = isClaudeCodeProvider(piOptions.provider);
     const useKernelCreateSpawnAgent =
-      strategy === "kernel" ||
-      (strategy === "auto" && Boolean(runtime?.db && context.appSessionId && !piOptions.dryRun));
+      !useDirectAgentRunner &&
+      (strategy === "kernel" ||
+        (strategy === "auto" && Boolean(runtime?.db && context.appSessionId && !piOptions.dryRun)));
 
     if (strategy === "kernel" && piOptions.dryRun) {
       throw new Error("Kernel createSpawnAgent strategy does not support Pi dryRun");
     }
-    if (!piOptions.dryRun && !useKernelCreateSpawnAgent) {
+    if (!piOptions.dryRun && !useKernelCreateSpawnAgent && !useDirectAgentRunner) {
       const reason = !runtime?.db
         ? "initialized kernel runtime DB"
         : !context.appSessionId

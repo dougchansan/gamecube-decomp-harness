@@ -44,6 +44,7 @@ import {
   openState,
   recordWorkerCheckpoint,
   setClaimWorktreePath,
+  targetClaimFilterFromArgs,
   workerCheckpointsForWorkerState,
   type StateStore,
   type WorkerCheckpointRecord,
@@ -1268,6 +1269,21 @@ function clampSummary(text: string, maxChars = 400): string {
   return trimmed.length <= maxChars ? trimmed : `${trimmed.slice(0, maxChars)}…`;
 }
 
+function providerWorkerPromptGuidance(provider: string): string {
+  const normalized = provider.trim().toLowerCase();
+  if (normalized !== "zai" && !normalized.includes("glm")) return "";
+  return [
+    "<provider_guidance provider=\"glm\">",
+    "This lane is optimized for small, gate-clean decompilation wins.",
+    "Prefer one narrow source hypothesis and one retained edit over broad exploration.",
+    "Do not change compile flags, pragmas, file-wide declarations, or shared headers unless the target packet already asks for that exact repair.",
+    "Avoid type-erasing casts, asm wrappers, inline assembly, and score-only tricks that trigger same-unit regression or QA repair.",
+    "Use cheap local checks first: direct_compile_tu, checkdiff_run/checkdiff_summary, and review_lint_scan where available.",
+    "If the target does not become exact or clearly gate-clean after a few concrete attempts, return compact JSON with negative evidence instead of continuing to churn.",
+    "</provider_guidance>",
+  ].join("\n");
+}
+
 export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, string | true>): Promise<WorkerCycleResult> {
   const store = openState(globals.stateDir);
   try {
@@ -1283,9 +1299,10 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
     const postReturnCheckCommand = stringArg(args, "--post-return-check-command", "");
     const workerConfigureCommand = stringArg(args, "--worker-configure-command", "python3 configure.py --require-protos");
     const graphDbPath = stringArg(args, "--graph-db", globals.graphDbPath ?? resourceGraphDbPath());
+    const targetFilter = targetClaimFilterFromArgs(args);
     const schedulerEpoch = activeSchedulerEpoch(store, runId);
     if (!schedulerEpoch) throw new Error(`No active epoch with admitted targets for session ${runId}`);
-    const claimed = claimNextEpochTarget({ store, sessionId: runId, workerId, baseRev, ttlSeconds });
+    const claimed = claimNextEpochTarget({ store, sessionId: runId, workerId, baseRev, ttlSeconds, targetFilter });
     if (!claimed) throw new Error(`No admitted epoch targets available for session ${runId}`);
     const outputDir = resolve(globals.stateDir, "runs", runId, "worker_state", claimed.workerStateId);
     store.db.query("UPDATE worker_state SET artifact_dir = ? WHERE id = ?").run(outputDir, claimed.workerStateId);
@@ -1376,17 +1393,21 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
       });
       let result: PiRunResult;
       try {
+        const basePrompt = workerPrompt({
+          packet: attemptPacket,
+          repoRoot: workerRepoRoot,
+          stateDir: globals.stateDir,
+          project,
+          initialBoardPath,
+          workerLogDir: outputDir,
+        });
+        const providerGuidance = providerWorkerPromptGuidance(globals.provider);
         result = await runPiAgent({
           role: "worker",
           cwd: workerRepoRoot,
-          prompt: workerPrompt({
-            packet: attemptPacket,
-            repoRoot: workerRepoRoot,
-            stateDir: globals.stateDir,
-            project,
-            initialBoardPath,
-            workerLogDir: outputDir,
-          }),
+          prompt: providerGuidance
+            ? { ...basePrompt, systemPrompt: `${basePrompt.systemPrompt}\n\n${providerGuidance}` }
+            : basePrompt,
           outputDir,
           dryRun: globals.dryRunAgents,
           provider: globals.provider,

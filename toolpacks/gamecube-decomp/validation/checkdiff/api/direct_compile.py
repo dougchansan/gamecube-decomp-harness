@@ -14,15 +14,27 @@ sys.path.append(str(Path(__file__).resolve().parents[3] / "_shared"))
 from toolpack_runtime import captured_stdio, import_tool_module, print_json, resolve_repo_root
 
 
+def normalize_unit(unit: str | None) -> str | None:
+    if not unit:
+        return None
+    normalized = unit.strip().replace("\\", "/")
+    normalized = normalized.removeprefix("./")
+    normalized = normalized.removeprefix("build/GC6E01/src/")
+    normalized = normalized.removeprefix("src/")
+    normalized = normalized.removeprefix("main/")
+    return normalized.removesuffix(".c")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", help="Target project checkout root.")
-    group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("--function", help="Function symbol whose owning translation unit should compile.")
-    group.add_argument("--unit", help="Unit path without src/ prefix or .c suffix, for example colosseum/it/items/itkinoko.")
+    parser.add_argument("--function", help="Function symbol whose owning translation unit should compile.")
+    parser.add_argument("--unit", help="Unit path without src/ prefix or .c suffix, for example colosseum/it/items/itkinoko.")
     parser.add_argument("--keep-object", action="store_true", help="Keep the temporary object alive after the API exits.")
     parser.add_argument("--json", action="store_true", help="Emit JSON output.")
     args = parser.parse_args()
+    if not args.function and not args.unit:
+        parser.error("one of --function or --unit is required")
 
     repo_root = resolve_repo_root(args.repo_root)
     payload: dict[str, Any] = {
@@ -34,7 +46,7 @@ def main() -> None:
     }
     try:
         ninja_compile = import_tool_module("ninja_compile", repo_root)
-        unit = args.unit or ninja_compile.find_unit_for_function(args.function)
+        unit = normalize_unit(args.unit) or ninja_compile.find_unit_for_function(args.function)
         if not unit:
             payload.update({"status": "function_not_found", "message": "Function was not found in build/GC6E01/report.json."})
             print_json(payload)

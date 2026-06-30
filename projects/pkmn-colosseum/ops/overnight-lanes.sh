@@ -7,12 +7,13 @@ SESSION="${TMUX_SESSION:-gamecube-harness}"
 STAMP="$(date +%Y%m%d-%H%M%S)"
 LOGDIR="${LOGDIR:-$ROOT/projects/$PROJECT/state/overnight/$STAMP}"
 
-DESIRED_WORKERS="${DESIRED_WORKERS:-8}"
+DESIRED_WORKERS="${DESIRED_WORKERS:-6}"
 CANDIDATE_LIMIT="${CANDIDATE_LIMIT:-64}"
 QUEUE_TARGET_SIZE="${QUEUE_TARGET_SIZE:-64}"
 CANDIDATE_WINDOW="${CANDIDATE_WINDOW:-512}"
 EPOCH_READY_QUEUE_SIZE="${EPOCH_READY_QUEUE_SIZE:-64}"
 AGENT_TIMEOUT_SECONDS="${AGENT_TIMEOUT_SECONDS:-14400}"
+TTL_SECONDS="${TTL_SECONDS:-7200}"
 IDLE_SLEEP_MS="${IDLE_SLEEP_MS:-5000}"
 RESTART_DELAY_MS="${RESTART_DELAY_MS:-30000}"
 
@@ -21,12 +22,26 @@ EPOCH_EXCLUDE_PATHS="${EPOCH_EXCLUDE_PATHS:-src/game/gs_task.c,tools/decomp_work
 
 CODEX_PROVIDER="${CODEX_PROVIDER:-openai-codex}"
 CODEX_MODEL="${CODEX_MODEL:-gpt-5.5}"
+CODEX_WORKER_CAP="${CODEX_WORKER_CAP:-2}"
+CODEX_TARGET_MIN_SIZE="${CODEX_TARGET_MIN_SIZE:-221}"
 GLM_PROVIDER="${GLM_PROVIDER:-zai}"
 GLM_MODEL="${GLM_MODEL:-glm-5.2}"
-DEEPSEEK_PROVIDER="${DEEPSEEK_PROVIDER:-deepseek}"
-DEEPSEEK_MODEL="${DEEPSEEK_MODEL:-deepseek-v4-flash}"
-CLAUDE_PROVIDER="${CLAUDE_PROVIDER:-anthropic}"
-CLAUDE_MODEL="${CLAUDE_MODEL:-claude-sonnet-4-20250514}"
+GLM_WORKER_CAP="${GLM_WORKER_CAP:-4}"
+GLM_TARGET_MAX_SIZE="${GLM_TARGET_MAX_SIZE:-80}"
+GLM_TARGET_MIN_FUZZY="${GLM_TARGET_MIN_FUZZY:-45}"
+ENABLE_DEEPSEEK="${ENABLE_DEEPSEEK:-0}"
+DEEPSEEK_PROVIDER="${DEEPSEEK_PROVIDER:-deepseek-ollama-cloud}"
+DEEPSEEK_MODEL="${DEEPSEEK_MODEL:-deepseek-v3.1:671b-cloud}"
+DEEPSEEK_WORKER_CAP="${DEEPSEEK_WORKER_CAP:-8}"
+DEEPSEEK_TARGET_MAX_SIZE="${DEEPSEEK_TARGET_MAX_SIZE:-80}"
+DEEPSEEK_TARGET_MIN_FUZZY="${DEEPSEEK_TARGET_MIN_FUZZY:-45}"
+CLAUDE_PROVIDER="${CLAUDE_PROVIDER:-claude-code}"
+CLAUDE_MODEL="${CLAUDE_MODEL:-sonnet}"
+SONNET_WORKER_CAP="${SONNET_WORKER_CAP:-6}"
+SONNET_TARGET_MIN_SIZE="${SONNET_TARGET_MIN_SIZE:-81}"
+SONNET_TARGET_MAX_SIZE="${SONNET_TARGET_MAX_SIZE:-220}"
+SONNET_TARGET_MIN_FUZZY="${SONNET_TARGET_MIN_FUZZY:-45}"
+CLAUDE_START_DELAY_SECONDS="${CLAUDE_START_DELAY_SECONDS:-0}"
 CLAUDE_START_HOUR="${CLAUDE_START_HOUR:-02}"
 CLAUDE_START_MINUTE="${CLAUDE_START_MINUTE:-00}"
 
@@ -109,25 +124,31 @@ lane_command() {
   local model="$2"
   local thinking="$3"
   local workers="$4"
-  cat <<EOF
-cd "$ROOT" && exec bun run server:job -- --project "$PROJECT" \
-  --provider "$provider" --model "$model" --thinking-level "$thinking" \
-  --agent-timeout-seconds "$AGENT_TIMEOUT_SECONDS" \
-  babysit --run-id "$RUN_ID" \
-  --max-workers "$workers" \
-  --idle-sleep-ms "$IDLE_SLEEP_MS" \
-  --worker-thinking-level "$thinking" \
-  --candidate-limit "$CANDIDATE_LIMIT" \
-  --queue-target-size "$QUEUE_TARGET_SIZE" \
-  --candidate-window "$CANDIDATE_WINDOW" \
-  --epoch-ready-queue-size "$EPOCH_READY_QUEUE_SIZE" \
-  --exclude-sources "$EXCLUDE_SOURCES" \
-  --epoch-exclude-paths "$EPOCH_EXCLUDE_PATHS" \
-  --force-recover-claims \
-  --max-restarts 999 \
-  --restart-delay-ms "$RESTART_DELAY_MS" \
-  --restart-on-clean-exit
-EOF
+  shift 4
+  local command=(
+    bun run server:job -- --project "$PROJECT"
+    --provider "$provider" --model "$model" --thinking-level "$thinking"
+    --agent-timeout-seconds "$AGENT_TIMEOUT_SECONDS"
+    babysit --run-id "$RUN_ID"
+    --max-workers "$workers"
+    --idle-sleep-ms "$IDLE_SLEEP_MS"
+    --worker-thinking-level "$thinking"
+    --candidate-limit "$CANDIDATE_LIMIT"
+    --queue-target-size "$QUEUE_TARGET_SIZE"
+    --candidate-window "$CANDIDATE_WINDOW"
+    --epoch-ready-queue-size "$EPOCH_READY_QUEUE_SIZE"
+    --ttl-seconds "$TTL_SECONDS"
+    --exclude-sources "$EXCLUDE_SOURCES"
+    --epoch-exclude-paths "$EPOCH_EXCLUDE_PATHS"
+    --force-recover-claims
+    --max-restarts 999
+    --restart-delay-ms "$RESTART_DELAY_MS"
+    --restart-on-clean-exit
+    "$@"
+  )
+  printf 'cd %q && exec' "$ROOT"
+  printf ' %q' "${command[@]}"
+  printf '\n'
 }
 
 ensure_tmux_session() {
@@ -136,16 +157,27 @@ ensure_tmux_session() {
   fi
 }
 
+kill_legacy_lane_windows() {
+  local window
+  for window in colosseum-codex colosseum-glm52 colosseum-glm52-4 colosseum-claude colosseum-deepseek colosseum-deepseek-v4 colosseum-deepseek-cloud colosseum-deepseek-cloud-tiny; do
+    if tmux list-windows -t "$SESSION" -F '#W' 2>/dev/null | grep -qx "$window"; then
+      tmux kill-window -t "$SESSION:$window"
+      echo "[$(ts)] stopped legacy lane window $window" | tee -a "$LOGDIR/overnight.log"
+    fi
+  done
+}
+
 start_lane() {
   local name="$1"
   local provider="$2"
   local model="$3"
   local thinking="$4"
   local workers="$5"
+  shift 5
   local window="colosseum-$name"
   local log="$LOGDIR/$name.log"
   local cmd
-  cmd="$(lane_command "$provider" "$model" "$thinking" "$workers")"
+  cmd="$(lane_command "$provider" "$model" "$thinking" "$workers" "$@")"
   if tmux list-windows -t "$SESSION" -F '#W' 2>/dev/null | grep -qx "$window"; then
     tmux send-keys -t "$SESSION:$window" C-c
     sleep 1
@@ -153,10 +185,15 @@ start_lane() {
   else
     tmux new-window -t "$SESSION" -n "$window" "bash -lc $(printf '%q' "$cmd 2>&1 | tee -a '$log'")"
   fi
-  echo "[$(ts)] started $name lane: $provider/$model workers=$workers log=$log" | tee -a "$LOGDIR/overnight.log"
+  echo "[$(ts)] started $name lane: $provider/$model cap=$workers filters=$* log=$log" | tee -a "$LOGDIR/overnight.log"
 }
 
 claude_auth_ready() {
+  if [[ "$CLAUDE_PROVIDER" == "claude-code" ]]; then
+    command -v claude >/dev/null 2>&1 || return 1
+    claude auth status 2>/dev/null | python3 -c 'import json,sys; data=json.load(sys.stdin); raise SystemExit(0 if data.get("loggedIn") else 1)'
+    return $?
+  fi
   [[ -n "${ANTHROPIC_API_KEY:-}" ]] && return 0
   python3 - <<'PY'
 import json
@@ -185,15 +222,25 @@ PY
 
 claude_scheduler() {
   local wait_seconds
-  wait_seconds="$(seconds_until_claude_window)"
-  echo "[$(ts)] Claude scheduler waiting ${wait_seconds}s for ${CLAUDE_START_HOUR}:${CLAUDE_START_MINUTE}" | tee -a "$LOGDIR/overnight.log"
-  sleep "$wait_seconds"
+  wait_seconds="$CLAUDE_START_DELAY_SECONDS"
+  if [[ "$wait_seconds" == "auto" ]]; then
+    wait_seconds="$(seconds_until_claude_window)"
+    echo "[$(ts)] Sonnet scheduler waiting ${wait_seconds}s for ${CLAUDE_START_HOUR}:${CLAUDE_START_MINUTE}" | tee -a "$LOGDIR/overnight.log"
+  else
+    echo "[$(ts)] Sonnet scheduler start delay ${wait_seconds}s" | tee -a "$LOGDIR/overnight.log"
+  fi
+  if [[ "$wait_seconds" != "0" ]]; then
+    sleep "$wait_seconds"
+  fi
   while true; do
     if claude_auth_ready; then
-      start_lane "claude" "$CLAUDE_PROVIDER" "$CLAUDE_MODEL" low 8
+      start_lane "sonnet-simple" "$CLAUDE_PROVIDER" "$CLAUDE_MODEL" low "$SONNET_WORKER_CAP" \
+        --target-min-size "$SONNET_TARGET_MIN_SIZE" \
+        --target-max-size "$SONNET_TARGET_MAX_SIZE" \
+        --target-min-fuzzy "$SONNET_TARGET_MIN_FUZZY"
       return 0
     fi
-    echo "[$(ts)] Claude auth not ready; retrying in 300s" | tee -a "$LOGDIR/overnight.log"
+    echo "[$(ts)] Sonnet auth not ready; retrying in 300s" | tee -a "$LOGDIR/overnight.log"
     sleep 300
   done
 }
@@ -221,8 +268,18 @@ PY
 recover_previous_run
 init_fresh_run
 ensure_tmux_session
-start_lane "codex" "$CODEX_PROVIDER" "$CODEX_MODEL" high 2
-start_lane "glm52" "$GLM_PROVIDER" "$GLM_MODEL" low 4
-start_lane "deepseek" "$DEEPSEEK_PROVIDER" "$DEEPSEEK_MODEL" low 6
+kill_legacy_lane_windows
+start_lane "codex-hard" "$CODEX_PROVIDER" "$CODEX_MODEL" high "$CODEX_WORKER_CAP" \
+  --target-min-size "$CODEX_TARGET_MIN_SIZE"
+start_lane "glm52-tiny" "$GLM_PROVIDER" "$GLM_MODEL" low "$GLM_WORKER_CAP" \
+  --target-max-size "$GLM_TARGET_MAX_SIZE" \
+  --target-min-fuzzy "$GLM_TARGET_MIN_FUZZY"
+if [[ "$ENABLE_DEEPSEEK" == "1" ]]; then
+  start_lane "deepseek-cloud-tiny" "$DEEPSEEK_PROVIDER" "$DEEPSEEK_MODEL" low "$DEEPSEEK_WORKER_CAP" \
+    --target-max-size "$DEEPSEEK_TARGET_MAX_SIZE" \
+    --target-min-fuzzy "$DEEPSEEK_TARGET_MIN_FUZZY"
+else
+  echo "[$(ts)] DeepSeek lane disabled (ENABLE_DEEPSEEK=$ENABLE_DEEPSEEK)" | tee -a "$LOGDIR/overnight.log"
+fi
 claude_scheduler &
 monitor_loop

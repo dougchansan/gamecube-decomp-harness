@@ -1,5 +1,6 @@
 import { withBusyRetry, type StateStore } from "@server/core/orchestrator-state";
 import { activeWorkerCount } from "./worker-state.js";
+import { targetClaimFilterSql, type TargetClaimFilter } from "./target-filter.js";
 
 function scalar(store: StateStore, sql: string, runId: string): number {
   const row = withBusyRetry(() => store.db.query(sql).get(runId) as Record<string, unknown>);
@@ -21,19 +22,25 @@ export function admittedTargetCount(store: StateStore, runId: string): number {
   );
 }
 
-export function schedulableTargetCount(store: StateStore, runId: string): number {
-  return scalar(
-    store,
-    `
+export function schedulableTargetCount(store: StateStore, runId: string, filter?: TargetClaimFilter): number {
+  const filterSql = targetClaimFilterSql(filter);
+  const row = withBusyRetry(
+    () =>
+      store.db
+        .query(
+          `
       SELECT COUNT(*) AS count
       FROM epoch_targets
       JOIN epochs ON epochs.id = epoch_targets.epoch_id
       WHERE epoch_targets.session_id = ?
         AND epochs.status = 'active'
         AND epoch_targets.status = 'admitted'
+        ${filterSql.sql}
     `,
-    runId,
+        )
+        .get(runId, ...filterSql.params) as Record<string, unknown>,
   );
+  return Number(row.count ?? 0);
 }
 
 export function blockedAdmittedTargetCount(store: StateStore, runId: string): number {

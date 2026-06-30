@@ -62,6 +62,12 @@ export {
   unhandledEventCount,
   unhandledPoolEventCount,
 } from "./target-pressure.js";
+export {
+  targetClaimFilterCommandArgs,
+  targetClaimFilterFromArgs,
+  targetClaimFilterSql,
+  type TargetClaimFilter,
+} from "./target-filter.js";
 export { createRun, getLatestRun, getRun, setRunDesiredWorkers, updateRunStatus } from "./runs.js";
 export { statusSnapshot } from "./status.js";
 export { activeLockedSourcePaths, admitPriorityTargets } from "./targets.js";

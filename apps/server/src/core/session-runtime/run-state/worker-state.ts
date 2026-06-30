@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { immediateTransaction, now, withBusyRetry, writeSetHash, type StateStore } from "@server/core/orchestrator-state";
+import { targetClaimFilterSql, type TargetClaimFilter } from "./target-filter.js";
 
 export const DEFAULT_WORKER_TTL_SECONDS = 50 * 60;
 
@@ -223,8 +224,10 @@ export function claimNextEpochTarget(params: {
   baseRev?: string;
   ttlSeconds?: number;
   artifactDir?: string | null;
+  targetFilter?: TargetClaimFilter;
 }): ClaimedTarget | null {
   return immediateTransaction(params.store.db, () => {
+    const filterSql = targetClaimFilterSql(params.targetFilter);
     const target = params.store.db
       .query(
         `
@@ -244,6 +247,7 @@ export function claimNextEpochTarget(params: {
           WHERE epoch_targets.session_id = ?
             AND epochs.status = 'active'
             AND epoch_targets.status = 'admitted'
+            ${filterSql.sql}
             AND NOT EXISTS (
               SELECT 1
               FROM target_claims
@@ -254,7 +258,7 @@ export function claimNextEpochTarget(params: {
           LIMIT 1
         `,
       )
-      .get(params.sessionId) as Record<string, unknown> | undefined;
+      .get(params.sessionId, ...filterSql.params) as Record<string, unknown> | undefined;
     if (!target) return null;
 
     const sourcePath = String(target.source_path ?? "").trim();

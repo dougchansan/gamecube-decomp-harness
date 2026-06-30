@@ -19,9 +19,12 @@ import {
   refreshEpochTargetAvailability,
   schedulerEpochProgress,
   schedulableTargetCount,
+  targetClaimFilterCommandArgs,
+  targetClaimFilterFromArgs,
   unhandledEventCount,
   type EpochProgressSummary,
   type StateStore,
+  type TargetClaimFilter,
 } from "@server/core/session-runtime/run-state";
 import { withBusyRetry } from "@server/core/orchestrator-state";
 import { runEpochCycle, type EpochCycleResult } from "@server/core/session-runtime/phases/running/epochs";
@@ -213,6 +216,7 @@ function targetPressureSnapshotForRunLoop(params: {
   runningWorkerIds: Set<string>;
   runId: string;
   store: StateStore;
+  targetFilter?: TargetClaimFilter;
 }): TargetPressureSnapshot {
   const activeWorkers = activeWorkerCount(params.store, params.runId);
   const activeLocalWorkers = activeLocalWorkerCount(params.store, params.runId, params.runningWorkerIds);
@@ -232,7 +236,7 @@ function targetPressureSnapshotForRunLoop(params: {
     maxWorkers: params.maxWorkers,
     openSlots,
     runningWorkers: params.runningWorkers.size,
-    schedulableTargets: schedulableTargetCount(params.store, params.runId),
+    schedulableTargets: schedulableTargetCount(params.store, params.runId, params.targetFilter),
   };
 }
 
@@ -442,6 +446,7 @@ function workerCommand(
     postReturnCheckCommand: string;
     workerConfigureCommand: string;
     graphDbPath: string;
+    targetFilter?: TargetClaimFilter;
   },
 ): string[] {
   const bin = resolve(orchestratorRoot(), "apps/server/src/job-runner.ts");
@@ -475,6 +480,7 @@ function workerCommand(
   );
   if (params.postReturnCheckCommand) command.push("--post-return-check-command", params.postReturnCheckCommand);
   if (params.workerConfigureCommand) command.push("--worker-configure-command", params.workerConfigureCommand);
+  command.push(...targetClaimFilterCommandArgs(params.targetFilter));
   command.push("--graph-db", params.graphDbPath);
   return command;
 }
@@ -490,6 +496,7 @@ async function runWorkerProcess(
     postReturnCheckCommand: string;
     workerConfigureCommand: string;
     graphDbPath: string;
+    targetFilter?: TargetClaimFilter;
   },
   procRegistry?: Set<{ kill: (signal?: number) => void; exited: Promise<number> }>,
 ): Promise<WorkerCycleResult> {
@@ -590,6 +597,7 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
     const exitOnWorkerError = booleanArg(args, "--exit-on-worker-error");
     const workerThinkingLevel = stringArg(args, "--worker-thinking-level", globals.thinkingLevel);
     const workerConfigureCommand = stringArg(args, "--worker-configure-command", defaultConfigureCommand(globals));
+    const targetFilter = targetClaimFilterFromArgs(args);
     const maintenanceIntervalMs = knowledgeMaintenanceIntervalMs(globals, args);
     const epochCycleEnabled = !booleanArg(args, "--no-epoch-cycle");
     const schedulerEpochConfig = schedulerEpochConfigFromArgs(globals, args, { admissionTargetSize, candidateWindow });
@@ -654,6 +662,7 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
         runningWorkerIds,
         runId,
         store,
+        targetFilter,
       });
       const nowMs = Date.now();
       const launchEpochCycle = (trigger: string, schedulerEpochId?: string): void => {
@@ -997,7 +1006,7 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
 
       const activeWorkers = activeWorkerCount(store, runId);
       const activeLocalWorkers = activeLocalWorkerCount(store, runId, runningWorkerIds);
-      const schedulableTargets = schedulableTargetCount(store, runId);
+      const schedulableTargets = schedulableTargetCount(store, runId, targetFilter);
       const openSlots = workerOpenSlots({
         maxWorkers,
         activeWorkers,
@@ -1023,6 +1032,7 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
             postReturnCheckCommand,
             workerConfigureCommand,
             graphDbPath,
+            targetFilter,
           },
           runningWorkerProcs,
         )
@@ -1192,7 +1202,7 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
         activeWorkers: activeWorkerCount(store, runId),
         admittedTargets: admittedTargetCount(store, runId),
         blockedAdmittedTargets: blockedAdmittedTargetCount(store, runId),
-        schedulableTargets: schedulableTargetCount(store, runId),
+        schedulableTargets: schedulableTargetCount(store, runId, targetFilter),
         unhandledEvents: unhandledEventCount(store, runId),
       },
     };
