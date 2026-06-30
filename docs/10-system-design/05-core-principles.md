@@ -64,8 +64,8 @@ move down a layer:
 | Former surface | New role inside orchestrator |
 | --- | --- |
 | `decomp-find` | Board scan, candidate-prior features, linked-blocker awareness, and progress metrics. |
-| `melee-decomp` | Worker system prompt and co-located context for one file or symbol: gather evidence, edit source, verify, and stop before guessing. |
-| `melee-decomp-sweep` | Last-resort experimental tooling for bounded source-shape experiments, kept out of default prompt context. |
+| `colosseum-decomp` | Worker system prompt and co-located context for one file or symbol: gather evidence, edit source, verify, and stop before guessing. |
+| `colosseum-decomp-sweep` | Last-resort experimental tooling for bounded source-shape experiments, kept out of default prompt context. |
 | Run scheduler | Deterministic Sudoku player: admit and route targets from the whole board, explicit epoch policy, claims, cooldowns, and every durable fact. |
 
 ## Runtime Principle

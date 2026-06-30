@@ -8,7 +8,7 @@ server unless the user specifically asks you to start one.
 
 ## UI Process Name
 
-The dashboard-managed Melee process name is `melee-live`. Keep that project
+The dashboard-managed Colosseum process name is `pkmn-colosseum-live`. Keep that project
 process name stable instead of adding UI controls that let it drift. The UI
 server may die while the detached process continues running, so a constant name
 keeps the saved process file, status view, drain/stop controls, and kill command

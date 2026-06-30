@@ -24,8 +24,8 @@ function deps(
   return {
     baseRefForProject: () => "origin/master",
     json: (data: unknown, init?: ResponseInit) => Response.json(data, init),
-    projectIdForProject: () => "melee",
-    requestPaths: () => ({ project: { projectId: "melee", baseRef: "origin/master" }, stateDir }),
+    projectIdForProject: () => "colosseum",
+    requestPaths: () => ({ project: { projectId: "colosseum", baseRef: "origin/master" }, stateDir }),
     ...overrides,
   };
 }
@@ -45,33 +45,33 @@ async function routeJson(
 describe("project session API routes", () => {
   test("creates and projects canonical session state", async () => {
     const stateDir = tempStateDir();
-    const empty = await routeJson(stateDir, "/api/project-session?projectId=melee");
+    const empty = await routeJson(stateDir, "/api/project-session?projectId=colosseum");
     expect(empty.response.status).toBe(200);
     expect(empty.data.projectSession).toBeNull();
 
-    const created = await routeJson(stateDir, "/api/project-session/new?projectId=melee", { method: "POST" });
+    const created = await routeJson(stateDir, "/api/project-session/new?projectId=colosseum", { method: "POST" });
     const projectSession = created.data.projectSession as Record<string, unknown>;
     expect(created.response.status).toBe(200);
     expect(projectSession.phase).toBe("preparing");
     expect(projectSession.activeSubphase).toBe("config");
 
-    const prepared = await routeJson(stateDir, "/api/project-session/preparing/complete?projectId=melee", {
+    const prepared = await routeJson(stateDir, "/api/project-session/preparing/complete?projectId=colosseum", {
       method: "POST",
       body: JSON.stringify({ activeRunId: "run-1" }),
     });
     expect((prepared.data.projectSession as Record<string, unknown>).activeRunId).toBe("run-1");
     expect(((prepared.data.projectSession as Record<string, unknown>).gates as Record<string, unknown>).can_start_workers).toBe(true);
 
-    const running = await routeJson(stateDir, "/api/project-session/start-running?projectId=melee", { method: "POST" });
+    const running = await routeJson(stateDir, "/api/project-session/start-running?projectId=colosseum", { method: "POST" });
     expect((running.data.projectSession as Record<string, unknown>).phase).toBe("running");
   });
 
   test("accepts bare UUID sessionId selectors from dashboard actions", async () => {
     const stateDir = tempStateDir();
-    const created = await routeJson(stateDir, "/api/project-session/new?projectId=melee", { method: "POST" });
+    const created = await routeJson(stateDir, "/api/project-session/new?projectId=colosseum", { method: "POST" });
     const sessionUuid = String((created.data.projectSession as Record<string, unknown>).sessionUuid);
 
-    const prepared = await routeJson(stateDir, "/api/project-session/preparing/complete?projectId=melee", {
+    const prepared = await routeJson(stateDir, "/api/project-session/preparing/complete?projectId=colosseum", {
       method: "POST",
       body: JSON.stringify({ sessionId: sessionUuid, activeRunId: "run-from-session-id" }),
     });
@@ -88,7 +88,7 @@ describe("project session API routes", () => {
 
     const created = await routeJson(
       stateDir,
-      "/api/project-session/new?projectId=melee",
+      "/api/project-session/new?projectId=colosseum",
       { method: "POST" },
       {
         submitSessionStartedTrace: (_paths, session) => calls.push(session),
@@ -99,7 +99,7 @@ describe("project session API routes", () => {
     expect(calls).toHaveLength(1);
     expect(calls[0]).toMatchObject({
       baseRef: "origin/master",
-      projectId: "melee",
+      projectId: "colosseum",
       sessionUuid: projectSession.sessionUuid,
     });
   });
@@ -113,7 +113,7 @@ describe("project session API routes", () => {
 
     const created = await routeJson(
       stateDir,
-      "/api/project-session/new?projectId=melee",
+      "/api/project-session/new?projectId=colosseum",
       { method: "POST" },
       overrides,
     );
@@ -121,7 +121,7 @@ describe("project session API routes", () => {
 
     const duplicate = await routeJson(
       stateDir,
-      "/api/project-session/new?projectId=melee",
+      "/api/project-session/new?projectId=colosseum",
       { method: "POST" },
       overrides,
     );

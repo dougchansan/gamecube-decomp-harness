@@ -23,8 +23,8 @@ def main() -> None:
             tool="item_state_table",
             scripts=("gen_item_state_table.py",),
             repo_root=repo_root,
-            required_paths=("config/GALE01/splits.txt", "build/GALE01/asm", "src"),
-            optional_paths=("build/GALE01/report.json",),
+            required_paths=("config/GC6E01/splits.txt", "build/GC6E01/asm", "src"),
+            optional_paths=("build/GC6E01/report.json",),
             message="ItemStateTable preview is ready when splits, asm, and source files are present.",
         )
     )

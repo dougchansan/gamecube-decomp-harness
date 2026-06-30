@@ -52,7 +52,7 @@ export async function recordReportRunDashboardArtifacts(
     artifactType: "report_run",
     artifactKey: reportRunKey,
     sourcePath: input.result.reportPath,
-    sourceLabel: "build/GALE01/report.json",
+    sourceLabel: "build/GC6E01/report.json",
     payload: {
       baselinePath: input.result.baselinePath,
       reportChangesPath: input.result.reportChangesPath,
@@ -73,7 +73,7 @@ export async function recordReportRunDashboardArtifacts(
       artifactType: "board_snapshot",
       artifactKey: boardKey,
       sourcePath: input.result.reportPath,
-      sourceLabel: "build/GALE01/report.json",
+      sourceLabel: "build/GC6E01/report.json",
       payload: {
         generatedAt: input.result.timestamps.report ?? null,
         measures,
@@ -86,7 +86,7 @@ export async function recordReportRunDashboardArtifacts(
   }
 
   if (input.result.timestamps.reportChanges) {
-    const source = input.reportChangesSource ?? "build/GALE01/report_changes.json";
+    const source = input.reportChangesSource ?? "build/GC6E01/report_changes.json";
     const trustedReport = await loadTrustedReportFile(input.result.reportChangesPath, source, 0);
     if (trustedReport.status === "ready") {
       recordDashboardArtifact(store, {

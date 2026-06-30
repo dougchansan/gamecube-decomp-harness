@@ -11,14 +11,14 @@ function sampleContext() {
   return {
     pr: {
       number: 2704,
-      branch: "ford/melee-demo-pr",
+      branch: "ford/colosseum-demo-pr",
       title: "Match ftDemo sample",
     },
     comments: [
       {
         id: "review-comment-1",
-        url: "https://github.com/doldecomp/melee/pull/2704#discussion_r1",
-        file: "src/melee/ft/chara/ftDemo.c",
+        url: "https://github.com/dougchansan/pkmn-colosseum/pull/2704#discussion_r1",
+        file: "src/colosseum/ft/chara/ftDemo.c",
         line: 24,
         body: "Please restore the project assert helper here instead of open-coding this.",
         standard_id: "global_standard:canonical-asserts",
@@ -28,13 +28,13 @@ function sampleContext() {
     findings: [
       {
         source: "pr-reviewer",
-        file: "src/melee/ft/chara/ftDemo.c",
+        file: "src/colosseum/ft/chara/ftDemo.c",
         line: 24,
         verdict: "reject",
         suggested_fix: "Use the canonical assert macro from nearby code.",
       },
     ],
-    diff_excerpt: "diff --git a/src/melee/ft/chara/ftDemo.c b/src/melee/ft/chara/ftDemo.c",
+    diff_excerpt: "diff --git a/src/colosseum/ft/chara/ftDemo.c b/src/colosseum/ft/chara/ftDemo.c",
   };
 }
 
@@ -42,7 +42,7 @@ describe("validatePrFixerAgentResult", () => {
   test("accepts a valid pr-fixer result", () => {
     const validated = validatePrFixerAgentResult({
       schema_version: PR_FIXER_SCHEMA_VERSION,
-      pr: { number: 2704, branch: "ford/melee-demo-pr", title: "Match ftDemo sample" },
+      pr: { number: 2704, branch: "ford/colosseum-demo-pr", title: "Match ftDemo sample" },
       outcome: "fixed",
       summary: "Restored the assert helper requested in review.",
       edits: ["Replaced the open-coded assert with HSD_ASSERT."],
@@ -50,7 +50,7 @@ describe("validatePrFixerAgentResult", () => {
       comment_dispositions: [
         {
           comment_id: "review-comment-1",
-          file: "src/melee/ft/chara/ftDemo.c",
+          file: "src/colosseum/ft/chara/ftDemo.c",
           line: 24,
           disposition: "fixed_source",
           evidence: "The line now uses the project assert helper.",
@@ -97,7 +97,7 @@ describe("prFixerPrompt", () => {
     expect(promptOnly).toContain("Resolve maintainer PR comments");
     expect(promptOnly).not.toContain("review-comment-1");
     expect(injectedContext).toContain("review-comment-1");
-    expect(injectedContext).toContain("src/melee/ft/chara/ftDemo.c");
+    expect(injectedContext).toContain("src/colosseum/ft/chara/ftDemo.c");
     expect(injectedContext).toContain("<available_tools>");
     expect(injectedContext).toContain("<standard_examples");
     expect(injectedContext).toContain(PR_FIXER_SCHEMA_VERSION);

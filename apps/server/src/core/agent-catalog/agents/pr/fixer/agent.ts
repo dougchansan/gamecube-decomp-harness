@@ -11,7 +11,6 @@ export const agent = defineAgent({
   coreTools: [
       "code_graph_file_card",
       "code_graph_search",
-      "past_prs_search",
       "path_facts_resolve",
       "mismatch_db_search",
       "checkdiff_run",

@@ -219,8 +219,8 @@ plan. `pr-split-plan` owns deterministic evidence collection: it inspects the
 branch/worktree against the selected base ref, applies checkpoint lanes and
 ship-filter verdicts, keeps every changed file assigned exactly once, and emits
 suggested slice branches, titles, pathspecs, and patch commands. The default
-strategy groups by Melee subsystem directories such as `melee/it`, `melee/gm`,
-and `melee/cm`; shared or support directories become separate slices so
+strategy groups by Colosseum subsystem directories such as `colosseum/it`, `colosseum/gm`,
+and `colosseum/cm`; shared or support directories become separate slices so
 cross-cutting changes can be reviewed or stacked intentionally.
 
 When a project or command selects the agent strategy, the PR splitter agent
@@ -295,8 +295,8 @@ which stage is running, its detail, and where a failure happened:
                                 PRs); skipped when nothing new landed
 4. rebuild production baseline  detached worktree at the base SHA runs
                                 configure + `ninja baseline` (cached per SHA
-                                under /tmp/melee-baseline-<sha>, shared with
-                                the melee-pr-workflow skill); baseline.json
+                                under /tmp/colosseum-baseline-<sha>, shared with
+                                the colosseum-pr-workflow skill); baseline.json
                                 is copied into the checkout. This is the
                                 "upstream as merged, without local work"
                                 reference everything is compared against.

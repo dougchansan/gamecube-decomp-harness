@@ -15,7 +15,7 @@
   "commands": {
     "status": "python3 toolpacks/gamecube-decomp/source_editing/review_lint/api/status.py --json",
     "scan": "python3 toolpacks/gamecube-decomp/source_editing/review_lint/api/scan.py --file <path> --json",
-    "scan_diff": "python3 toolpacks/gamecube-decomp/source_editing/review_lint/api/scan_diff.py --repo <melee-root> --base origin/master --gate --json"
+    "scan_diff": "python3 toolpacks/gamecube-decomp/source_editing/review_lint/api/scan_diff.py --repo <colosseum-root> --base origin/master --gate --json"
   },
   "capabilities": [
     "review_lint",

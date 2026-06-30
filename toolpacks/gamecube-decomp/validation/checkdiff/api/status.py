@@ -24,9 +24,9 @@ def main() -> None:
         scripts=("checkdiff.py", "ninja_compile.py", "fix_includes.py", "objdiff_path.py"),
         repo_root=repo_root,
         required_paths=(
-            "build/GALE01/report.json",
+            "build/GC6E01/report.json",
             "build.ninja",
-            "build/GALE01/obj",
+            "build/GC6E01/obj",
             "build/tools/objdiff-cli",
             "build/tools/sjiswrap.exe",
             "build/tools/dtk",

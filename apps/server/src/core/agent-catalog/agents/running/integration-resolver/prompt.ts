@@ -15,7 +15,7 @@ import {
 } from "./context.js";
 export { type IntegrationResolverPromptOptions } from "./context.js";
 
-export const INTEGRATION_RESOLVER_SCHEMA_VERSION = "melee_integration_resolver_result_v1";
+export const INTEGRATION_RESOLVER_SCHEMA_VERSION = "colosseum_integration_resolver_result_v1";
 
 export type IntegrationResolverOutcome = "resolved" | "needs_rework" | "blocked" | "rejected";
 export type IntegrationWorkerOutputDisposition = "applied" | "partially_applied" | "dropped" | "superseded";
@@ -61,8 +61,8 @@ function agentFilePath(): string {
 }
 
 export const prompt = definePrompt({
-  id: "melee.integration-resolver.system",
-  title: "Melee Integration Resolver System Prompt",
+  id: "colosseum.integration-resolver.system",
+  title: "Colosseum Integration Resolver System Prompt",
   archetype: "workflow",
   nodes: [
     section("goal", [

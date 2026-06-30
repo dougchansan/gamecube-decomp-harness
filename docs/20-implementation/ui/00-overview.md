@@ -177,7 +177,7 @@ The dashboard server exposes kernel runtime status at
 `/kernel/...`. It uses `ORCH_AGENT_KERNEL_DATABASE_URL` or
 `AGENT_KERNEL_DATABASE_URL` when configured, otherwise the local default
 Postgres kernel database on `127.0.0.1:55432`; `ORCH_AGENT_KERNEL_DISABLED=1`
-opts out. Startup upserts the Melee kernel registration and starts the Melee
+opts out. Startup upserts the Colosseum kernel registration and starts the Colosseum
 trace tailer against `.pi-sessions` only from the real server lifecycle.
 Imported fetch-handler validation can still probe routes without starting file
 watchers. Status responses include the DB source, redacted URL, and tailer
@@ -273,7 +273,7 @@ server derives `--max-workers`, `--queue-target-size`, `--queue-low-watermark`,
 `--candidate-limit`, `--candidate-window`, `--epoch-size`,
 `--epoch-ready-queue-size`, fast refresh cadence, and boundary maintenance mode
 from form state and project defaults. The managed process name remains the
-project process name, which is `melee-live` for the Melee dashboard run.
+project process name, which is `pkmn-colosseum-live` for the Colosseum dashboard run.
 
 | Preset | Workers | Default epoch | Worker slots |
 | --- | ---: | ---: | ---: |

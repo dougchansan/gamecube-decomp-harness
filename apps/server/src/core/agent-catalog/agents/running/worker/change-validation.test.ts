@@ -7,6 +7,7 @@ import type { QaScanFinding, QaScanInvocation, QaScanResult, RunQaScanDiffOption
 import {
   applyQaLintToValidation,
   captureWorkerChangeBaseline,
+  objectBuildDirFromReportPath,
   QA_LINT_REPAIR_INSTRUCTION,
   qaLintFromInvocation,
   qaLintRepairReasons,
@@ -21,7 +22,7 @@ function finding(overrides: Partial<QaScanFinding> = {}): QaScanFinding {
   return {
     rule_id: "extern_literal_anchor",
     severity: "error",
-    file: "src/melee/ft/ftcoll.c",
+    file: "src/colosseum/ft/ftcoll.c",
     line: 42,
     excerpt: "extern const f32 lbl_804DA60C;",
     message: "extern-for-literal anchor referencing TU-owned data",
@@ -35,7 +36,7 @@ function scanResult(findings: QaScanFinding[], status: QaScanResult["status"]): 
     tool: "review_lint",
     operation: "review_lint:scan_diff",
     status,
-    repo: "/tmp/melee",
+    repo: "/tmp/colosseum",
     base: null,
     findings,
     counts: {
@@ -61,38 +62,38 @@ function passedValidation(): WorkerRunnerValidation {
   return {
     status: "passed",
     reasons: [],
-    target: { unit: "melee/ft/ftcoll.c", symbol: "ftCo_800C8E5C", before: 62.5, after: 99.999999, improved: true, exact: true },
+    target: { unit: "colosseum/ft/ftcoll.c", symbol: "ftCo_800C8E5C", before: 62.5, after: 99.999999, improved: true, exact: true },
     regressions: [],
-    improvements: [{ kind: "function", unit: "melee/ft/ftcoll.c", item: "ftCo_800C8E5C", before: 62.5, after: 99.999999 }],
+    improvements: [{ kind: "function", unit: "colosseum/ft/ftcoll.c", item: "ftCo_800C8E5C", before: 62.5, after: 99.999999 }],
   };
 }
 
 describe("rewriteNoIndexDiffPaths", () => {
   test("rewrites absolute --no-index headers to repo-relative a/ b/ paths", () => {
     const diff = [
-      "diff --git a/Users/x/state/pre_worker_source/src/melee/ft/ftcoll.c b/Users/x/repo/src/melee/ft/ftcoll.c",
+      "diff --git a/Users/x/state/pre_worker_source/src/colosseum/ft/ftcoll.c b/Users/x/repo/src/colosseum/ft/ftcoll.c",
       "index 1111111..2222222 100644",
-      "--- a/Users/x/state/pre_worker_source/src/melee/ft/ftcoll.c",
-      "+++ b/Users/x/repo/src/melee/ft/ftcoll.c",
+      "--- a/Users/x/state/pre_worker_source/src/colosseum/ft/ftcoll.c",
+      "+++ b/Users/x/repo/src/colosseum/ft/ftcoll.c",
       "@@ -1,2 +1,3 @@",
       " int a;",
       "+extern const f32 lbl_804DA60C;",
       " int b;",
       "",
     ].join("\n");
-    const rewritten = rewriteNoIndexDiffPaths(diff, "src/melee/ft/ftcoll.c");
+    const rewritten = rewriteNoIndexDiffPaths(diff, "src/colosseum/ft/ftcoll.c");
     const lines = rewritten.split("\n");
-    expect(lines[0]).toBe("diff --git a/src/melee/ft/ftcoll.c b/src/melee/ft/ftcoll.c");
-    expect(lines[1]).toBe("--- a/src/melee/ft/ftcoll.c");
-    expect(lines[2]).toBe("+++ b/src/melee/ft/ftcoll.c");
+    expect(lines[0]).toBe("diff --git a/src/colosseum/ft/ftcoll.c b/src/colosseum/ft/ftcoll.c");
+    expect(lines[1]).toBe("--- a/src/colosseum/ft/ftcoll.c");
+    expect(lines[2]).toBe("+++ b/src/colosseum/ft/ftcoll.c");
     expect(lines[3]).toBe("@@ -1,2 +1,3 @@");
     expect(rewritten).toContain("+extern const f32 lbl_804DA60C;");
     expect(rewritten).not.toContain("Users/x");
   });
 
   test("returns empty string when the diff has no hunks (identical or binary)", () => {
-    expect(rewriteNoIndexDiffPaths("", "src/melee/ft/ftcoll.c")).toBe("");
-    expect(rewriteNoIndexDiffPaths("Binary files a/x and b/x differ\n", "src/melee/ft/ftcoll.c")).toBe("");
+    expect(rewriteNoIndexDiffPaths("", "src/colosseum/ft/ftcoll.c")).toBe("");
+    expect(rewriteNoIndexDiffPaths("Binary files a/x and b/x differ\n", "src/colosseum/ft/ftcoll.c")).toBe("");
   });
 });
 
@@ -191,17 +192,17 @@ describe("qaLintRepairReasons", () => {
     const qaLint = qaLintFromInvocation(
       invocation({
         exitCode: 1,
-        result: scanResult([finding(), finding({ rule_id: "unrolled_assert", file: "src/melee/gr/ground.c", line: 99, message: "open-coded assert", standard_id: "global_standard:assert-report-macros", excerpt: "__assert(...)" })], "failed"),
+        result: scanResult([finding(), finding({ rule_id: "unrolled_assert", file: "src/colosseum/gr/ground.c", line: 99, message: "open-coded assert", standard_id: "global_standard:assert-report-macros", excerpt: "__assert(...)" })], "failed"),
       }),
       "/tmp/scan.patch",
     );
     const reasons = qaLintRepairReasons(qaLint);
     expect(reasons).toHaveLength(3);
     expect(reasons[0]).toBe(
-      "qa_lint_finding: error extern_literal_anchor at src/melee/ft/ftcoll.c:42 — extern-for-literal anchor referencing TU-owned data [standard: global_standard:literals-and-data-ownership] excerpt: extern const f32 lbl_804DA60C;",
+      "qa_lint_finding: error extern_literal_anchor at src/colosseum/ft/ftcoll.c:42 — extern-for-literal anchor referencing TU-owned data [standard: global_standard:literals-and-data-ownership] excerpt: extern const f32 lbl_804DA60C;",
     );
     expect(reasons[1]).toBe(
-      "qa_lint_finding: error unrolled_assert at src/melee/gr/ground.c:99 — open-coded assert [standard: global_standard:assert-report-macros] excerpt: __assert(...)",
+      "qa_lint_finding: error unrolled_assert at src/colosseum/gr/ground.c:99 — open-coded assert [standard: global_standard:assert-report-macros] excerpt: __assert(...)",
     );
     expect(reasons[2]).toBe(QA_LINT_REPAIR_INSTRUCTION);
     expect(QA_LINT_REPAIR_INSTRUCTION).toBe(
@@ -215,7 +216,7 @@ describe("qaLintRepairReasons", () => {
     const reasons = qaLintRepairReasons(qaLint);
     expect(reasons).toHaveLength(2);
     expect(reasons[0]).toBe(
-      "qa_lint_finding: warning type_erasing_cast at src/melee/ft/ftcoll.c:42 — Added type-erasing cast. [standard: global_standard:literals-and-data-ownership] excerpt: (u8*) obj",
+      "qa_lint_finding: warning type_erasing_cast at src/colosseum/ft/ftcoll.c:42 — Added type-erasing cast. [standard: global_standard:literals-and-data-ownership] excerpt: (u8*) obj",
     );
     expect(reasons[1]).toBe(QA_LINT_REPAIR_INSTRUCTION);
   });
@@ -237,26 +238,43 @@ describe("qaLintRepairReasons", () => {
 });
 
 describe("captureWorkerChangeBaseline source snapshot", () => {
-  test("copies the target source file and extraPaths into pre_worker_source", async () => {
-    const root = await mkdtemp(join(tmpdir(), "qa-l1-baseline-"));
+  test("derives object targets from the configured build/report directory", async () => {
+    const root = await mkdtemp(join(tmpdir(), "qa-l1-build-dir-"));
     const repoRoot = join(root, "repo");
     const outputDir = join(root, "validation");
-    await mkdir(join(repoRoot, "src/melee/ft"), { recursive: true });
-    await mkdir(join(repoRoot, "src/melee/gr"), { recursive: true });
-    await writeFile(join(repoRoot, "src/melee/ft/ftcoll.c"), "int a;\n");
-    await writeFile(join(repoRoot, "src/melee/gr/ground.c"), "int b;\n");
+    await mkdir(repoRoot, { recursive: true });
 
     const baseline = await captureWorkerChangeBaseline({
       repoRoot,
       outputDir,
-      target: { unit: "melee/ft/ftcoll.c", symbol: "ftCo_800C8E5C", source_path: "src/melee/ft/ftcoll.c" },
-      extraPaths: ["src/melee/gr/ground.c", "src/missing.c", "../escape.c"],
+      target: { unit: "main/auto_01_800055E0_text", symbol: "fn_80006630", source_path: "src/game/gs_task.c" },
+      dryRun: true,
+      objectBuildDir: objectBuildDirFromReportPath("build/GC6E01/report.json"),
+    });
+
+    expect(baseline.objectTarget).toBe("build/GC6E01/src/game/gs_task.o");
+  });
+
+  test("copies the target source file and extraPaths into pre_worker_source", async () => {
+    const root = await mkdtemp(join(tmpdir(), "qa-l1-baseline-"));
+    const repoRoot = join(root, "repo");
+    const outputDir = join(root, "validation");
+    await mkdir(join(repoRoot, "src/colosseum/ft"), { recursive: true });
+    await mkdir(join(repoRoot, "src/colosseum/gr"), { recursive: true });
+    await writeFile(join(repoRoot, "src/colosseum/ft/ftcoll.c"), "int a;\n");
+    await writeFile(join(repoRoot, "src/colosseum/gr/ground.c"), "int b;\n");
+
+    const baseline = await captureWorkerChangeBaseline({
+      repoRoot,
+      outputDir,
+      target: { unit: "colosseum/ft/ftcoll.c", symbol: "ftCo_800C8E5C", source_path: "src/colosseum/ft/ftcoll.c" },
+      extraPaths: ["src/colosseum/gr/ground.c", "src/missing.c", "../escape.c"],
     });
 
     expect(baseline.sourceSnapshotDir).toBe(resolve(outputDir, "pre_worker_source"));
-    expect(baseline.sourceSnapshotPaths?.sort()).toEqual(["src/melee/ft/ftcoll.c", "src/melee/gr/ground.c"]);
-    expect(await readFile(resolve(outputDir, "pre_worker_source/src/melee/ft/ftcoll.c"), "utf8")).toBe("int a;\n");
-    expect(await readFile(resolve(outputDir, "pre_worker_source/src/melee/gr/ground.c"), "utf8")).toBe("int b;\n");
+    expect(baseline.sourceSnapshotPaths?.sort()).toEqual(["src/colosseum/ft/ftcoll.c", "src/colosseum/gr/ground.c"]);
+    expect(await readFile(resolve(outputDir, "pre_worker_source/src/colosseum/ft/ftcoll.c"), "utf8")).toBe("int a;\n");
+    expect(await readFile(resolve(outputDir, "pre_worker_source/src/colosseum/gr/ground.c"), "utf8")).toBe("int b;\n");
     // No build system in the temp repo, so the objdiff baseline itself fails —
     // the source snapshot must survive that.
     expect(baseline.snapshot).toBeNull();
@@ -273,17 +291,17 @@ describe("validateWorkerChange QA lint integration", () => {
     const repoRoot = join(root, "repo");
     const outputDir = join(root, "validation");
     const sourceSnapshotDir = join(outputDir, "pre_worker_source");
-    await mkdir(join(repoRoot, "src/melee/ft"), { recursive: true });
-    await mkdir(join(sourceSnapshotDir, "src/melee/ft"), { recursive: true });
-    await writeFile(join(sourceSnapshotDir, "src/melee/ft/ftcoll.c"), "int a;\nint b;\n");
-    await writeFile(join(repoRoot, "src/melee/ft/ftcoll.c"), "int a;\nextern const f32 lbl_804DA60C;\nint b;\n");
+    await mkdir(join(repoRoot, "src/colosseum/ft"), { recursive: true });
+    await mkdir(join(sourceSnapshotDir, "src/colosseum/ft"), { recursive: true });
+    await writeFile(join(sourceSnapshotDir, "src/colosseum/ft/ftcoll.c"), "int a;\nint b;\n");
+    await writeFile(join(repoRoot, "src/colosseum/ft/ftcoll.c"), "int a;\nextern const f32 lbl_804DA60C;\nint b;\n");
     const baseline: WorkerChangeBaseline = {
       status: "snapshot_unavailable",
       reasons: ["pre-worker unit diff exited 1"],
       snapshot: null,
-      objectTarget: "build/GALE01/src/melee/ft/ftcoll.o",
+      objectTarget: "build/GC6E01/src/colosseum/ft/ftcoll.o",
       sourceSnapshotDir,
-      sourceSnapshotPaths: ["src/melee/ft/ftcoll.c"],
+      sourceSnapshotPaths: ["src/colosseum/ft/ftcoll.c"],
     };
     return { repoRoot, outputDir, baseline };
   }
@@ -301,7 +319,7 @@ describe("validateWorkerChange QA lint integration", () => {
       outputDir,
       attemptIndex: 0,
       baseline,
-      target: { unit: "melee/ft/ftcoll.c", symbol: "ftCo_800C8E5C", source_path: "src/melee/ft/ftcoll.c" },
+      target: { unit: "colosseum/ft/ftcoll.c", symbol: "ftCo_800C8E5C", source_path: "src/colosseum/ft/ftcoll.c" },
       dryRun: false,
       shouldRun: true,
       claimedExact: false,
@@ -321,9 +339,9 @@ describe("validateWorkerChange QA lint integration", () => {
     expect(validation.qaLint?.scanPath).toBe(scanPath);
 
     const patch = await readFile(scanPath, "utf8");
-    expect(patch).toContain("diff --git a/src/melee/ft/ftcoll.c b/src/melee/ft/ftcoll.c");
-    expect(patch).toContain("--- a/src/melee/ft/ftcoll.c");
-    expect(patch).toContain("+++ b/src/melee/ft/ftcoll.c");
+    expect(patch).toContain("diff --git a/src/colosseum/ft/ftcoll.c b/src/colosseum/ft/ftcoll.c");
+    expect(patch).toContain("--- a/src/colosseum/ft/ftcoll.c");
+    expect(patch).toContain("+++ b/src/colosseum/ft/ftcoll.c");
     expect(patch).toContain("+extern const f32 lbl_804DA60C;");
     expect(patch).not.toContain(repoRoot);
 
@@ -333,14 +351,14 @@ describe("validateWorkerChange QA lint integration", () => {
 
   test("an unchanged source file skips the scanner and reports clean", async () => {
     const { repoRoot, outputDir, baseline } = await setupAttempt();
-    await writeFile(join(repoRoot, "src/melee/ft/ftcoll.c"), "int a;\nint b;\n");
+    await writeFile(join(repoRoot, "src/colosseum/ft/ftcoll.c"), "int a;\nint b;\n");
     let calls = 0;
     const validation = await validateWorkerChange({
       repoRoot,
       outputDir,
       attemptIndex: 0,
       baseline,
-      target: { unit: "melee/ft/ftcoll.c", symbol: "ftCo_800C8E5C", source_path: "src/melee/ft/ftcoll.c" },
+      target: { unit: "colosseum/ft/ftcoll.c", symbol: "ftCo_800C8E5C", source_path: "src/colosseum/ft/ftcoll.c" },
       dryRun: false,
       shouldRun: true,
       claimedExact: false,
@@ -362,7 +380,7 @@ describe("validateWorkerChange QA lint integration", () => {
       outputDir,
       attemptIndex: 1,
       baseline,
-      target: { unit: "melee/ft/ftcoll.c", symbol: "ftCo_800C8E5C", source_path: "src/melee/ft/ftcoll.c" },
+      target: { unit: "colosseum/ft/ftcoll.c", symbol: "ftCo_800C8E5C", source_path: "src/colosseum/ft/ftcoll.c" },
       dryRun: false,
       shouldRun: true,
       claimedExact: false,
@@ -381,7 +399,7 @@ describe("validateWorkerChange QA lint integration", () => {
       calls += 1;
       return invocation();
     };
-    const target = { unit: "melee/ft/ftcoll.c", symbol: "ftCo_800C8E5C", source_path: "src/melee/ft/ftcoll.c" };
+    const target = { unit: "colosseum/ft/ftcoll.c", symbol: "ftCo_800C8E5C", source_path: "src/colosseum/ft/ftcoll.c" };
     const dryRun = await validateWorkerChange({
       repoRoot,
       outputDir,

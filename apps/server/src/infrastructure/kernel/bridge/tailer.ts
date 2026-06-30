@@ -24,12 +24,12 @@ import {
 } from "@agent-kernel/tailer";
 
 import {
-  createMeleeKernelBridgeConfig,
-  type CreateMeleeKernelBridgeConfigInput,
-  type MeleeKernelBridgeConfig,
+  createColosseumKernelBridgeConfig,
+  type CreateColosseumKernelBridgeConfigInput,
+  type ColosseumKernelBridgeConfig,
 } from "./config.js";
 
-export interface CreateMeleeTailerConfigOptions
+export interface CreateColosseumTailerConfigOptions
   extends Partial<Omit<TailerConfigInput, "watchDir" | "snapshotPath">> {
   watchDir?: string;
   snapshotPath?: string;
@@ -50,17 +50,17 @@ export type TailerAgentRunUpsertPort = (
   data: NewAgentRun,
 ) => Promise<AgentRun | NewAgentRun>;
 
-export interface CreateMeleeTraceTailerOptions {
+export interface CreateColosseumTraceTailerOptions {
   db: unknown;
-  config?: CreateMeleeKernelBridgeConfigInput | MeleeKernelBridgeConfig;
-  tailer?: CreateMeleeTailerConfigOptions;
+  config?: CreateColosseumKernelBridgeConfigInput | ColosseumKernelBridgeConfig;
+  tailer?: CreateColosseumTailerConfigOptions;
   insertTraceEvents?: TailerTraceEventsInsertPort;
   upsertPiAgentSession?: TailerPiAgentSessionUpsertPort;
   upsertAgentRun?: TailerAgentRunUpsertPort;
   sleep?: (ms: number) => Promise<void>;
 }
 
-export interface MeleeTraceTailerStatus {
+export interface ColosseumTraceTailerStatus {
   started: boolean;
   watchDir: string;
   snapshotPath: string;
@@ -100,19 +100,19 @@ interface TailerFileState {
   kernelManagedRun?: boolean;
 }
 
-const MELEE_AGENT_RUN_NAMESPACE = "56de4ed7-1d44-47ff-8f3b-c5e1b9071f25";
+const COLOSSEUM_AGENT_RUN_NAMESPACE = "56de4ed7-1d44-47ff-8f3b-c5e1b9071f25";
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function resolveBridgeConfig(
-  config?: CreateMeleeKernelBridgeConfigInput | MeleeKernelBridgeConfig,
-): MeleeKernelBridgeConfig {
-  return createMeleeKernelBridgeConfig(config);
+  config?: CreateColosseumKernelBridgeConfigInput | ColosseumKernelBridgeConfig,
+): ColosseumKernelBridgeConfig {
+  return createColosseumKernelBridgeConfig(config);
 }
 
-export function createMeleeTailerConfig(
-  config?: CreateMeleeKernelBridgeConfigInput | MeleeKernelBridgeConfig,
-  overrides: CreateMeleeTailerConfigOptions = {},
+export function createColosseumTailerConfig(
+  config?: CreateColosseumKernelBridgeConfigInput | ColosseumKernelBridgeConfig,
+  overrides: CreateColosseumTailerConfigOptions = {},
 ): Readonly<TailerConfig> {
   const resolved = resolveBridgeConfig(config);
   return createTailerConfig({
@@ -122,8 +122,8 @@ export function createMeleeTailerConfig(
   });
 }
 
-export function createMeleeEventMapperOptions(
-  config?: CreateMeleeKernelBridgeConfigInput | MeleeKernelBridgeConfig,
+export function createColosseumEventMapperOptions(
+  config?: CreateColosseumKernelBridgeConfigInput | ColosseumKernelBridgeConfig,
 ): EventMapperOptions {
   const resolved = resolveBridgeConfig(config);
   return {
@@ -138,10 +138,10 @@ export function createMeleeEventMapperOptions(
   };
 }
 
-export function createMeleeEventMapper(
-  config?: CreateMeleeKernelBridgeConfigInput | MeleeKernelBridgeConfig,
+export function createColosseumEventMapper(
+  config?: CreateColosseumKernelBridgeConfigInput | ColosseumKernelBridgeConfig,
 ): EventMapper {
-  return new EventMapper(createMeleeEventMapperOptions(config));
+  return new EventMapper(createColosseumEventMapperOptions(config));
 }
 
 function stableUuid(namespace: string, name: string): string {
@@ -214,14 +214,14 @@ function agentRunIdFor(state: TailerFileState): string {
   return (
     uuidString(state.agentRunId) ??
     stableUuid(
-      MELEE_AGENT_RUN_NAMESPACE,
+      COLOSSEUM_AGENT_RUN_NAMESPACE,
       `pi-session:${state.piSessionUuid ?? "unknown"}\nrun:${state.runNumber ?? 1}`,
     )
   );
 }
 
-export class MeleeTraceTailer {
-  readonly config: MeleeKernelBridgeConfig;
+export class ColosseumTraceTailer {
+  readonly config: ColosseumKernelBridgeConfig;
   readonly tailerConfig: TailerConfig;
 
   private readonly db: unknown;
@@ -238,10 +238,10 @@ export class MeleeTraceTailer {
   private mappedEventCount = 0;
   private insertedEventCount = 0;
 
-  constructor(options: CreateMeleeTraceTailerOptions) {
+  constructor(options: CreateColosseumTraceTailerOptions) {
     this.db = options.db;
     this.config = resolveBridgeConfig(options.config);
-    this.tailerConfig = createMeleeTailerConfig(this.config, options.tailer);
+    this.tailerConfig = createColosseumTailerConfig(this.config, options.tailer);
     this.insertTraceEvents = options.insertTraceEvents ?? defaultInsertTraceEventsBatch;
     this.upsertPiAgentSession = options.upsertPiAgentSession ?? defaultUpsertPiAgentSession;
     this.upsertAgentRun = options.upsertAgentRun ?? defaultUpsertAgentRun;
@@ -313,7 +313,7 @@ export class MeleeTraceTailer {
     }
   }
 
-  status(): MeleeTraceTailerStatus {
+  status(): ColosseumTraceTailerStatus {
     return {
       started: this.started,
       watchDir: this.tailerConfig.watchDir,
@@ -332,7 +332,7 @@ export class MeleeTraceTailer {
   private mapperFor(filePath: string): EventMapper {
     let mapper = this.mappers.get(filePath);
     if (!mapper) {
-      mapper = createMeleeEventMapper(this.config);
+      mapper = createColosseumEventMapper(this.config);
       this.mappers.set(filePath, mapper);
     }
     return mapper;
@@ -486,8 +486,8 @@ export class MeleeTraceTailer {
   }
 }
 
-export function createMeleeTraceTailer(
-  options: CreateMeleeTraceTailerOptions,
-): MeleeTraceTailer {
-  return new MeleeTraceTailer(options);
+export function createColosseumTraceTailer(
+  options: CreateColosseumTraceTailerOptions,
+): ColosseumTraceTailer {
+  return new ColosseumTraceTailer(options);
 }

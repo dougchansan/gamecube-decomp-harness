@@ -66,7 +66,7 @@ function sessionBaselineRepoRoot(repoRoot: string): string | null {
 }
 
 export function loadBoardSnapshot(repoRoot: string, limit: number, options: LoadBoardSnapshotOptions = {}): BoardSnapshot {
-  const reportRelPath = options.reportPath ?? "build/GALE01/report.json";
+  const reportRelPath = options.reportPath ?? "build/GC6E01/report.json";
   const objdiffRelPath = options.objdiffPath ?? "objdiff.json";
   let reportPath = resolveRepoPath(repoRoot, reportRelPath);
   let objdiffPath = resolveRepoPath(repoRoot, objdiffRelPath);
@@ -92,12 +92,16 @@ export function loadBoardSnapshot(repoRoot: string, limit: number, options: Load
     const unitName = stringValue(unit.name);
     if (!unitName) continue;
     const metadata = asObject(unit.metadata);
-    const sourcePath = stringValue(metadata.source_path, sourceByUnit.get(unitName) ?? "");
+    const unitSourcePath = stringValue(metadata.source_path, sourceByUnit.get(unitName) ?? "");
     for (const fnValue of asArray(unit.functions)) {
+      const fn = asObject(fnValue);
+      const fnMetadata = asObject(fn.metadata);
+      const symbol = stringValue(fn.name);
+      const sourcePath = stringValue(fnMetadata.source_path, unitSourcePath);
       const candidate = candidateFromReportFunction({
         unitName,
         sourcePath,
-        fn: asObject(fnValue),
+        fn,
       });
       if (candidate) candidates.push(candidate);
     }

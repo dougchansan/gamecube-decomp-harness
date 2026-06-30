@@ -34,7 +34,6 @@
     "globalSources": [
       "decomp_standards",
       "powerpc_docs",
-      "external_mirrors",
       "path_facts"
     ],
     "projectSources": [

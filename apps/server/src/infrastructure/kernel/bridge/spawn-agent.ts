@@ -21,19 +21,19 @@ import type { PiRunResult } from "@server/core/shared/types";
 import type { PiRunOptions } from "@server/infrastructure/agent-runtime/runtime";
 import { applyProcessEnvPatch } from "@server/infrastructure/agent-runtime/runtime/process-env";
 
-import type { MeleeKernelBridgeConfig } from "./config.js";
+import type { ColosseumKernelBridgeConfig } from "./config.js";
 import type {
-  MeleeKernelSpawnAdapter,
-  MeleeKernelSpawnContext,
-  MeleeKernelSpawnOptions,
+  ColosseumKernelSpawnAdapter,
+  ColosseumKernelSpawnContext,
+  ColosseumKernelSpawnOptions,
 } from "./kernel.js";
-import { createMeleeLoaderCatalog } from "./loaders.js";
+import { createColosseumLoaderCatalog } from "./loaders.js";
 
-export type BuildMeleeKernelToolFactories = (
+export type BuildColosseumKernelToolFactories = (
   piOptions: PiRunOptions,
 ) => ReturnType<CreateSpawnAgentAdapters["buildToolFactories"]>;
 
-export const MELEE_KERNEL_MANAGED_RUN_MARKER_FIELD = "kernelManagedRun";
+export const COLOSSEUM_KERNEL_MANAGED_RUN_MARKER_FIELD = "kernelManagedRun";
 
 export type KernelSpawnAgentFactoryPort = (
   adapters: CreateSpawnAgentAdapters,
@@ -43,21 +43,21 @@ export type KernelTraceWriterSinkLike = {
   submit?: (event: TraceEvent) => unknown;
 };
 
-export interface MeleeCreateSpawnAgentRuntime {
+export interface ColosseumCreateSpawnAgentRuntime {
   db: unknown;
-  config: Pick<MeleeKernelBridgeConfig, "markerConfig" | "piSessionsDir">;
+  config: Pick<ColosseumKernelBridgeConfig, "markerConfig" | "piSessionsDir">;
   traceWriter?: KernelTraceWriterSinkLike;
 }
 
-export interface CreateMeleeKernelSpawnAgentOptions {
+export interface CreateColosseumKernelSpawnAgentOptions {
   piOptions: PiRunOptions;
   parsedAgent: ParsedAgent;
   contextResolver?: AgentContextResolver | null;
-  runtime: MeleeCreateSpawnAgentRuntime;
+  runtime: ColosseumCreateSpawnAgentRuntime;
   createSpawnAgent?: KernelSpawnAgentFactoryPort;
   createSpawnContext?: (params: CreateSpawnContextParams) => SpawnContext;
   loadAgentResolver?: (name: string) => Promise<AgentContextResolver | null>;
-  buildToolFactories?: BuildMeleeKernelToolFactories;
+  buildToolFactories?: BuildColosseumKernelToolFactories;
   buildPrivateRegisterFactory?: CreateSpawnAgentAdapters["buildPrivateRegisterFactory"];
   logger?: CreateSpawnAgentAdapters["logger"];
 }
@@ -83,17 +83,17 @@ function defaultPiAgentDir(env: NodeJS.ProcessEnv = process.env): string {
 
 function modelOverride(
   piOptions: PiRunOptions,
-  spawnOptions?: MeleeKernelSpawnOptions,
+  spawnOptions?: ColosseumKernelSpawnOptions,
 ): string | undefined {
   if (spawnOptions?.model) return spawnOptions.model;
   if (piOptions.provider && piOptions.model) return `${piOptions.provider}/${piOptions.model}`;
   return piOptions.model;
 }
 
-export function parsedAgentForMeleeKernelSpawn(
+export function parsedAgentForColosseumKernelSpawn(
   parsedAgent: ParsedAgent,
   piOptions: PiRunOptions,
-  spawnOptions?: MeleeKernelSpawnOptions,
+  spawnOptions?: ColosseumKernelSpawnOptions,
 ): ParsedAgent {
   const sourceEditingRoles = new Set(["worker", "integration-resolver", "pr-fixer", "qa-repair", "reconcile"]);
   const sourceEditingCoreTools = sourceEditingRoles.has(piOptions.role)
@@ -158,7 +158,7 @@ function resultPaths(piOptions: PiRunOptions, sessionId: string): Pick<
 }
 
 function sessionDirFor(
-  runtime: MeleeCreateSpawnAgentRuntime,
+  runtime: ColosseumCreateSpawnAgentRuntime,
   appSessionId: string,
   piOptions: PiRunOptions,
 ): string {
@@ -204,10 +204,10 @@ function buildKernelSpawnOptions({
   runtime,
   spawnOptions,
 }: {
-  context: MeleeKernelSpawnContext;
+  context: ColosseumKernelSpawnContext;
   piOptions: PiRunOptions;
-  runtime: MeleeCreateSpawnAgentRuntime;
-  spawnOptions?: MeleeKernelSpawnOptions;
+  runtime: ColosseumCreateSpawnAgentRuntime;
+  spawnOptions?: ColosseumKernelSpawnOptions;
 }): KernelSpawnOptions {
   const appSessionId = context.appSessionId;
   if (!appSessionId) {
@@ -244,7 +244,7 @@ function buildKernelSpawnOptions({
 }
 
 function createAppSessionBinding(
-  runtime: MeleeCreateSpawnAgentRuntime,
+  runtime: ColosseumCreateSpawnAgentRuntime,
   piOptions: PiRunOptions,
 ): CreateSpawnAgentAdapters["createAppSessionBinding"] {
   return (opts) => {
@@ -262,15 +262,15 @@ function createAppSessionBinding(
         displayLabel: opts.displayLabel ?? piOptions.role,
         workingDir: opts.workingDir ?? piOptions.cwd,
         outputDir: piOptions.outputDir,
-        [MELEE_KERNEL_MANAGED_RUN_MARKER_FIELD]: true,
+        [COLOSSEUM_KERNEL_MANAGED_RUN_MARKER_FIELD]: true,
       },
     };
   };
 }
 
-export function createMeleeKernelSpawnAgent(
-  options: CreateMeleeKernelSpawnAgentOptions,
-): MeleeKernelSpawnAdapter<PiRunResult> {
+export function createColosseumKernelSpawnAgent(
+  options: CreateColosseumKernelSpawnAgentOptions,
+): ColosseumKernelSpawnAdapter<PiRunResult> {
   const createSpawnAgent = options.createSpawnAgent ?? defaultCreateSpawnAgent;
   const createSpawnContext = options.createSpawnContext ?? defaultCreateSpawnContext;
 
@@ -280,20 +280,20 @@ export function createMeleeKernelSpawnAgent(
     context,
     spawnOptions,
   ): Promise<PiRunResult> {
-    const spawnContext: MeleeKernelSpawnContext = context ?? {
+    const spawnContext: ColosseumKernelSpawnContext = context ?? {
       workingDir: options.piOptions.cwd,
       phase: options.piOptions.role,
     };
     if (name !== options.piOptions.role) {
       throw new Error(
-        `Melee kernel spawn mismatch: expected ${options.piOptions.role}, got ${name}`,
+        `Colosseum kernel spawn mismatch: expected ${options.piOptions.role}, got ${name}`,
       );
     }
     if (options.piOptions.dryRun) {
       throw new Error("Kernel createSpawnAgent strategy does not support Pi dryRun");
     }
 
-    const parsedAgent = parsedAgentForMeleeKernelSpawn(
+    const parsedAgent = parsedAgentForColosseumKernelSpawn(
       options.parsedAgent,
       options.piOptions,
       spawnOptions,
@@ -301,7 +301,7 @@ export function createMeleeKernelSpawnAgent(
     const adapters: CreateSpawnAgentAdapters = {
       loadAgent(agentName) {
         if (agentName !== name) {
-          throw new Error(`No Melee parsed agent loaded for "${agentName}"`);
+          throw new Error(`No Colosseum parsed agent loaded for "${agentName}"`);
         }
         return parsedAgent;
       },
@@ -311,7 +311,7 @@ export function createMeleeKernelSpawnAgent(
       buildPrivateRegisterFactory:
         options.buildPrivateRegisterFactory ?? (async () => null),
       buildToolFactories: () => options.buildToolFactories?.(options.piOptions) ?? [],
-      createContextCatalog: () => createMeleeLoaderCatalog(),
+      createContextCatalog: () => createColosseumLoaderCatalog(),
       createSpawnContext,
       getDb: () => options.runtime.db,
       createAppSessionBinding: createAppSessionBinding(options.runtime, options.piOptions),

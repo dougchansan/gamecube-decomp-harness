@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Dump the mwcc_debug compiler's IR/backend listing for one function.
 
-Resolves the function's TU (via build/GALE01/report.json, like checkdiff.py),
+Resolves the function's TU (via build/GC6E01/report.json, like checkdiff.py),
 compiles that TU with the instrumented MWCC from a unique temporary working
 directory, then truncates that run's pcdump.txt to just the requested
 function's section so the output concerns only that function.
@@ -27,11 +27,11 @@ from pathlib import Path
 from typing import Optional
 
 # Project checkout root: explicit override, then Claude Code's project dir,
-# then assume this script lives at <melee>/tools/.
+# then assume this script lives at <colosseum>/tools/.
 from project_root import resolve_root
 
 ROOT = resolve_root()
-REPORT_PATH = ROOT / "build/GALE01/report.json"
+REPORT_PATH = ROOT / "build/GC6E01/report.json"
 
 
 def find_unit_for_function(func_name: str) -> Optional[str]:
@@ -57,7 +57,7 @@ def find_build_block(src: str) -> tuple[str, str]:
     text = (ROOT / "build.ninja").read_text()
     # Unfold ninja line continuations.
     text = text.replace("$\n", " ")
-    obj = f"build/GALE01/{src[:-2]}.o"
+    obj = f"build/GC6E01/{src[:-2]}.o"
     blocks = re.split(r"^build ", text, flags=re.M)
     for b in blocks:
         if b.startswith(f"{obj}:") or b.startswith(f"{obj} :"):
@@ -1094,11 +1094,11 @@ def wibo_path() -> Path:
       2. $ORCH_PROJECT_STATE_DIR/tools/wibo  orchestrator-managed install
       3. <tool impl>/bin/wibo                optional tool-local install
       4. <tool impl>/wibo/build/release/wibo raw cmake output
-      5. <melee>/build/tools/wibo            project tool artifact
+      5. <colosseum>/build/tools/wibo            project tool artifact
       6. wibo on PATH                        last-resort fallback
 
     If no runner exists, returning the project path keeps the eventual compiler
-    error pointed at the missing prerequisite expected by the Melee checkout.
+    error pointed at the missing prerequisite expected by the Colosseum checkout.
     """
     override = os.environ.get("MWCC_WIBO")
     if override:

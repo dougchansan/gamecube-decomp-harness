@@ -2,9 +2,9 @@ import { createHash } from "node:crypto";
 
 import type { NewContainer } from "@agent-kernel/db";
 
-const MELEE_APP_SESSION_NAMESPACE = "0dbd5814-75c3-4dc8-9b3b-0f6277cc2b08";
+const COLOSSEUM_APP_SESSION_NAMESPACE = "0dbd5814-75c3-4dc8-9b3b-0f6277cc2b08";
 
-export type MeleeContainerKind =
+export type ColosseumContainerKind =
   | "session"
   | "prepare"
   | "sync-intake"
@@ -28,43 +28,43 @@ export type MeleeContainerKind =
   | "pr-repair"
   | "pr-publication";
 
-export interface MeleeProjectSessionRef {
+export interface ColosseumProjectSessionRef {
   projectId: string;
   sessionId: string;
 }
 
-export interface MeleeRunRef extends MeleeProjectSessionRef {
+export interface ColosseumRunRef extends ColosseumProjectSessionRef {
   runId: string;
 }
 
-export interface MeleeEpochRef extends MeleeRunRef {
+export interface ColosseumEpochRef extends ColosseumRunRef {
   epochId: string | number;
 }
 
-export interface MeleeClaimRef extends MeleeEpochRef {
+export interface ColosseumClaimRef extends ColosseumEpochRef {
   claimId: string;
   targetId?: string;
 }
 
-export interface MeleePrRef extends MeleeProjectSessionRef {
+export interface ColosseumPrRef extends ColosseumProjectSessionRef {
   prId?: string;
 }
 
-export interface MeleeIntakePrRef extends MeleeProjectSessionRef {
+export interface ColosseumIntakePrRef extends ColosseumProjectSessionRef {
   prId: string | number;
 }
 
-export interface MeleeReviewRef extends MeleePrRef {
+export interface ColosseumReviewRef extends ColosseumPrRef {
   reviewId: string;
 }
 
-export interface MeleeRepairRef extends MeleePrRef {
+export interface ColosseumRepairRef extends ColosseumPrRef {
   repairId: string;
 }
 
-export interface MeleeContainerDescriptor {
+export interface ColosseumContainerDescriptor {
   id: string;
-  kind: MeleeContainerKind;
+  kind: ColosseumContainerKind;
   appSessionId: string;
   parentContainerId: string | null;
   label: string;
@@ -72,9 +72,9 @@ export interface MeleeContainerDescriptor {
   metadata: Record<string, unknown>;
 }
 
-export interface BuildMeleeContainerInput {
-  kind: MeleeContainerKind;
-  ref: MeleeProjectSessionRef;
+export interface BuildColosseumContainerInput {
+  kind: ColosseumContainerKind;
+  ref: ColosseumProjectSessionRef;
   parentContainerId?: string | null;
   label?: string;
   phase?: string;
@@ -107,108 +107,108 @@ function cleanSegment(value: string | number | undefined): string {
   return `${normalized || "id"}-${digest}`;
 }
 
-export function meleeAppSessionId(ref: MeleeProjectSessionRef): string {
+export function colosseumAppSessionId(ref: ColosseumProjectSessionRef): string {
   return stableUuid(
-    MELEE_APP_SESSION_NAMESPACE,
+    COLOSSEUM_APP_SESSION_NAMESPACE,
     `project:${ref.projectId}\nsession:${ref.sessionId}`,
   );
 }
 
-export function meleeRootContainerId(ref: MeleeProjectSessionRef): string {
-  return `melee:${meleeAppSessionId(ref)}:session`;
+export function colosseumRootContainerId(ref: ColosseumProjectSessionRef): string {
+  return `colosseum:${colosseumAppSessionId(ref)}:session`;
 }
 
-export function meleePrepareContainerId(ref: MeleeProjectSessionRef): string {
-  return `${meleeRootContainerId(ref)}:prepare`;
+export function colosseumPrepareContainerId(ref: ColosseumProjectSessionRef): string {
+  return `${colosseumRootContainerId(ref)}:prepare`;
 }
 
-export function meleeSyncIntakeContainerId(ref: MeleeProjectSessionRef): string {
-  return `${meleePrepareContainerId(ref)}:sync-intake`;
+export function colosseumSyncIntakeContainerId(ref: ColosseumProjectSessionRef): string {
+  return `${colosseumPrepareContainerId(ref)}:sync-intake`;
 }
 
-export function meleeIntakeContainerId(ref: MeleeProjectSessionRef): string {
-  return `${meleePrepareContainerId(ref)}:intake`;
+export function colosseumIntakeContainerId(ref: ColosseumProjectSessionRef): string {
+  return `${colosseumPrepareContainerId(ref)}:intake`;
 }
 
-export function meleeIntakeItemContainerId(ref: MeleeIntakePrRef): string {
-  return `${meleeIntakeContainerId(ref)}:pr:${cleanSegment(ref.prId)}`;
+export function colosseumIntakeItemContainerId(ref: ColosseumIntakePrRef): string {
+  return `${colosseumIntakeContainerId(ref)}:pr:${cleanSegment(ref.prId)}`;
 }
 
-export function meleeIntakePostmortemContainerId(ref: MeleeIntakePrRef): string {
-  return `${meleeIntakeItemContainerId(ref)}:postmortem`;
+export function colosseumIntakePostmortemContainerId(ref: ColosseumIntakePrRef): string {
+  return `${colosseumIntakeItemContainerId(ref)}:postmortem`;
 }
 
-export function meleeIntakeKnowledgeContainerId(ref: MeleeIntakePrRef): string {
-  return `${meleeIntakeItemContainerId(ref)}:knowledge-intake`;
+export function colosseumIntakeKnowledgeContainerId(ref: ColosseumIntakePrRef): string {
+  return `${colosseumIntakeItemContainerId(ref)}:knowledge-intake`;
 }
 
-export function meleePrIndexContainerId(ref: MeleeProjectSessionRef): string {
-  return `${meleePrepareContainerId(ref)}:pr-index`;
+export function colosseumPrIndexContainerId(ref: ColosseumProjectSessionRef): string {
+  return `${colosseumPrepareContainerId(ref)}:pr-index`;
 }
 
-export function meleeKnowledgeRefreshContainerId(ref: MeleeProjectSessionRef): string {
-  return `${meleePrepareContainerId(ref)}:knowledge-refresh`;
+export function colosseumKnowledgeRefreshContainerId(ref: ColosseumProjectSessionRef): string {
+  return `${colosseumPrepareContainerId(ref)}:knowledge-refresh`;
 }
 
-export function meleeBaselineContainerId(ref: MeleeProjectSessionRef): string {
-  return `${meleePrepareContainerId(ref)}:baseline`;
+export function colosseumBaselineContainerId(ref: ColosseumProjectSessionRef): string {
+  return `${colosseumPrepareContainerId(ref)}:baseline`;
 }
 
-export function meleeRunContainerId(ref: MeleeRunRef): string {
-  return `${meleeRootContainerId(ref)}:run:${cleanSegment(ref.runId)}`;
+export function colosseumRunContainerId(ref: ColosseumRunRef): string {
+  return `${colosseumRootContainerId(ref)}:run:${cleanSegment(ref.runId)}`;
 }
 
-export function meleeEpochContainerId(ref: MeleeEpochRef): string {
-  return `${meleeRunContainerId(ref)}:epoch:${cleanSegment(ref.epochId)}`;
+export function colosseumEpochContainerId(ref: ColosseumEpochRef): string {
+  return `${colosseumRunContainerId(ref)}:epoch:${cleanSegment(ref.epochId)}`;
 }
 
-export function meleeWorkerContainerId(ref: MeleeClaimRef): string {
-  return `${meleeEpochContainerId(ref)}:worker:${cleanSegment(ref.claimId)}`;
+export function colosseumWorkerContainerId(ref: ColosseumClaimRef): string {
+  return `${colosseumEpochContainerId(ref)}:worker:${cleanSegment(ref.claimId)}`;
 }
 
-export function meleeWorkerIntegrationContainerId(ref: MeleeClaimRef): string {
-  return `${meleeEpochContainerId(ref)}:integration:${cleanSegment(ref.claimId)}`;
+export function colosseumWorkerIntegrationContainerId(ref: ColosseumClaimRef): string {
+  return `${colosseumEpochContainerId(ref)}:integration:${cleanSegment(ref.claimId)}`;
 }
 
-export function meleePostmortemContainerId(ref: MeleeClaimRef): string {
-  return `${meleeEpochContainerId(ref)}:postmortem:${cleanSegment(ref.claimId)}`;
+export function colosseumPostmortemContainerId(ref: ColosseumClaimRef): string {
+  return `${colosseumEpochContainerId(ref)}:postmortem:${cleanSegment(ref.claimId)}`;
 }
 
-export function meleePrContainerId(ref: MeleePrRef): string {
-  return `${meleeRootContainerId(ref)}:pr:${cleanSegment(ref.prId ?? "session")}`;
+export function colosseumPrContainerId(ref: ColosseumPrRef): string {
+  return `${colosseumRootContainerId(ref)}:pr:${cleanSegment(ref.prId ?? "session")}`;
 }
 
-export function meleePrHandoffContainerId(ref: MeleePrRef): string {
-  return `${meleePrContainerId(ref)}:handoff`;
+export function colosseumPrHandoffContainerId(ref: ColosseumPrRef): string {
+  return `${colosseumPrContainerId(ref)}:handoff`;
 }
 
-export function meleePrQaContainerId(ref: MeleePrRef): string {
-  return `${meleePrContainerId(ref)}:qa`;
+export function colosseumPrQaContainerId(ref: ColosseumPrRef): string {
+  return `${colosseumPrContainerId(ref)}:qa`;
 }
 
-export function meleePrSplitContainerId(ref: MeleePrRef): string {
-  return `${meleePrContainerId(ref)}:split`;
+export function colosseumPrSplitContainerId(ref: ColosseumPrRef): string {
+  return `${colosseumPrContainerId(ref)}:split`;
 }
 
-export function meleePrReviewContainerId(ref: MeleeReviewRef): string {
-  return `${meleePrContainerId(ref)}:review:${cleanSegment(ref.reviewId)}`;
+export function colosseumPrReviewContainerId(ref: ColosseumReviewRef): string {
+  return `${colosseumPrContainerId(ref)}:review:${cleanSegment(ref.reviewId)}`;
 }
 
-export function meleePrRepairContainerId(ref: MeleeRepairRef): string {
-  return `${meleePrContainerId(ref)}:repair:${cleanSegment(ref.repairId)}`;
+export function colosseumPrRepairContainerId(ref: ColosseumRepairRef): string {
+  return `${colosseumPrContainerId(ref)}:repair:${cleanSegment(ref.repairId)}`;
 }
 
-export function meleePrPublicationContainerId(ref: MeleePrRef): string {
-  return `${meleePrContainerId(ref)}:publication`;
+export function colosseumPrPublicationContainerId(ref: ColosseumPrRef): string {
+  return `${colosseumPrContainerId(ref)}:publication`;
 }
 
-export function describeMeleeContainer(
-  kind: MeleeContainerKind,
-  ref: MeleeProjectSessionRef,
+export function describeColosseumContainer(
+  kind: ColosseumContainerKind,
+  ref: ColosseumProjectSessionRef,
   metadata: Record<string, unknown> = {},
-): MeleeContainerDescriptor {
-  const appSessionId = meleeAppSessionId(ref);
-  const rootId = meleeRootContainerId(ref);
+): ColosseumContainerDescriptor {
+  const appSessionId = colosseumAppSessionId(ref);
+  const rootId = colosseumRootContainerId(ref);
 
   switch (kind) {
     case "session":
@@ -223,7 +223,7 @@ export function describeMeleeContainer(
       };
     case "prepare":
       return {
-        id: meleePrepareContainerId(ref),
+        id: colosseumPrepareContainerId(ref),
         kind,
         appSessionId,
         parentContainerId: rootId,
@@ -233,20 +233,20 @@ export function describeMeleeContainer(
       };
     case "sync-intake":
       return {
-        id: meleeSyncIntakeContainerId(ref),
+        id: colosseumSyncIntakeContainerId(ref),
         kind,
         appSessionId,
-        parentContainerId: meleePrepareContainerId(ref),
+        parentContainerId: colosseumPrepareContainerId(ref),
         label: "Sync Intake",
         phase: "setup",
         metadata: { projectId: ref.projectId, sessionId: ref.sessionId, ...metadata },
       };
     case "intake":
       return {
-        id: meleeIntakeContainerId(ref),
+        id: colosseumIntakeContainerId(ref),
         kind,
         appSessionId,
-        parentContainerId: meleePrepareContainerId(ref),
+        parentContainerId: colosseumPrepareContainerId(ref),
         label: "Intake",
         phase: "intake",
         metadata: { projectId: ref.projectId, sessionId: ref.sessionId, ...metadata },
@@ -255,10 +255,10 @@ export function describeMeleeContainer(
       const prId = typeof metadata.prId === "string" && metadata.prId ? metadata.prId : "item";
       const intakeRef = { ...ref, prId };
       return {
-        id: meleeIntakeItemContainerId(intakeRef),
+        id: colosseumIntakeItemContainerId(intakeRef),
         kind,
         appSessionId,
-        parentContainerId: meleeIntakeContainerId(ref),
+        parentContainerId: colosseumIntakeContainerId(ref),
         label: prId.startsWith("#") ? `${prId} intake` : `PR #${prId} intake`,
         phase: "intake-item",
         metadata: { projectId: ref.projectId, sessionId: ref.sessionId, prId, ...metadata },
@@ -268,10 +268,10 @@ export function describeMeleeContainer(
       const prId = typeof metadata.prId === "string" && metadata.prId ? metadata.prId : "item";
       const intakeRef = { ...ref, prId };
       return {
-        id: meleeIntakePostmortemContainerId(intakeRef),
+        id: colosseumIntakePostmortemContainerId(intakeRef),
         kind,
         appSessionId,
-        parentContainerId: meleeIntakeItemContainerId(intakeRef),
+        parentContainerId: colosseumIntakeItemContainerId(intakeRef),
         label: prId.startsWith("#") ? `${prId} postmortem` : `PR #${prId} postmortem`,
         phase: "postmortem",
         metadata: { projectId: ref.projectId, sessionId: ref.sessionId, prId, ...metadata },
@@ -281,10 +281,10 @@ export function describeMeleeContainer(
       const prId = typeof metadata.prId === "string" && metadata.prId ? metadata.prId : "item";
       const intakeRef = { ...ref, prId };
       return {
-        id: meleeIntakeKnowledgeContainerId(intakeRef),
+        id: colosseumIntakeKnowledgeContainerId(intakeRef),
         kind,
         appSessionId,
-        parentContainerId: meleeIntakeItemContainerId(intakeRef),
+        parentContainerId: colosseumIntakeItemContainerId(intakeRef),
         label: prId.startsWith("#") ? `${prId} knowledge intake` : `PR #${prId} knowledge intake`,
         phase: "knowledge-intake",
         metadata: { projectId: ref.projectId, sessionId: ref.sessionId, prId, ...metadata },
@@ -292,30 +292,30 @@ export function describeMeleeContainer(
     }
     case "pr-index":
       return {
-        id: meleePrIndexContainerId(ref),
+        id: colosseumPrIndexContainerId(ref),
         kind,
         appSessionId,
-        parentContainerId: meleePrepareContainerId(ref),
+        parentContainerId: colosseumPrepareContainerId(ref),
         label: "PR index",
         phase: "pr-index",
         metadata: { projectId: ref.projectId, sessionId: ref.sessionId, ...metadata },
       };
     case "knowledge-refresh":
       return {
-        id: meleeKnowledgeRefreshContainerId(ref),
+        id: colosseumKnowledgeRefreshContainerId(ref),
         kind,
         appSessionId,
-        parentContainerId: meleePrepareContainerId(ref),
+        parentContainerId: colosseumPrepareContainerId(ref),
         label: "Knowledge refresh",
         phase: "knowledge-refresh",
         metadata: { projectId: ref.projectId, sessionId: ref.sessionId, ...metadata },
       };
     case "baseline":
       return {
-        id: meleeBaselineContainerId(ref),
+        id: colosseumBaselineContainerId(ref),
         kind,
         appSessionId,
-        parentContainerId: meleePrepareContainerId(ref),
+        parentContainerId: colosseumPrepareContainerId(ref),
         label: "Baseline and rebuild",
         phase: "baseline",
         metadata: { projectId: ref.projectId, sessionId: ref.sessionId, ...metadata },
@@ -324,7 +324,7 @@ export function describeMeleeContainer(
       const prId = typeof metadata.prId === "string" && metadata.prId ? metadata.prId : "session";
       const prRef = { ...ref, prId };
       return {
-        id: meleePrContainerId(prRef),
+        id: colosseumPrContainerId(prRef),
         kind,
         appSessionId,
         parentContainerId: rootId,
@@ -337,10 +337,10 @@ export function describeMeleeContainer(
       const prId = typeof metadata.prId === "string" && metadata.prId ? metadata.prId : "session";
       const prRef = { ...ref, prId };
       return {
-        id: meleePrPublicationContainerId(prRef),
+        id: colosseumPrPublicationContainerId(prRef),
         kind,
         appSessionId,
-        parentContainerId: meleePrContainerId(prRef),
+        parentContainerId: colosseumPrContainerId(prRef),
         label: "PR publication",
         phase: "publication",
         metadata: { projectId: ref.projectId, sessionId: ref.sessionId, prId, ...metadata },
@@ -359,8 +359,8 @@ export function describeMeleeContainer(
   }
 }
 
-export function buildMeleeContainer(input: BuildMeleeContainerInput): NewContainer {
-  const descriptor = describeMeleeContainer(input.kind, input.ref, input.metadata);
+export function buildColosseumContainer(input: BuildColosseumContainerInput): NewContainer {
+  const descriptor = describeColosseumContainer(input.kind, input.ref, input.metadata);
   return {
     id: descriptor.id,
     parentContainerId: input.parentContainerId ?? descriptor.parentContainerId,

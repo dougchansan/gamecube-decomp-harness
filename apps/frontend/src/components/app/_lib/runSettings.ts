@@ -107,7 +107,7 @@ const defaultForm: FormState = {
   repoRoot: "",
   stateDir: "",
   graphDbPath: "",
-  processName: "melee-live",
+  processName: "pkmn-colosseum-live",
   ...schedulingForWorkers(16),
   idleSleepMs: 5000,
   goalValue: 100,

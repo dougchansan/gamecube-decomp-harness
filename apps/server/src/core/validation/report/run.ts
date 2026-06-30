@@ -202,7 +202,7 @@ async function ensureConfigured(repoRoot: string, steps: ReportRunStep[]): Promi
 }
 
 export async function forceReportRun(repoRoot: string, options: ReportRunOptions = {}): Promise<ReportRunResult> {
-  const reportRelPath = options.reportPath ?? "build/GALE01/report.json";
+  const reportRelPath = options.reportPath ?? "build/GC6E01/report.json";
   const reportPath = resolveRepoPath(repoRoot, reportRelPath);
   const buildDir = dirname(reportPath);
   const baselinePath = options.baselinePath ? resolveRepoPath(repoRoot, options.baselinePath) : resolve(buildDir, "baseline.json");

@@ -12,7 +12,7 @@ export const agentRegistry = {
     id: "worker",
     role: "worker",
     toolProfile: "worker",
-    purpose: "Execute one claimed Melee decomp target while the runner owns checkpoints and lifecycle state.",
+    purpose: "Execute one claimed Colosseum decomp target while the runner owns checkpoints and lifecycle state.",
   },
   "integration-resolver": integrationResolverAgent,
   "pr-indexer": prIndexerAgent,

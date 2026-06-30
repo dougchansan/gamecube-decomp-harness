@@ -120,5 +120,5 @@ export async function loadTrustedReportFile(path: string, source: string, maxRow
 }
 
 export async function loadTrustedReport(repoRoot: string, maxRows = 100): Promise<TrustedReport> {
-  return loadTrustedReportFile(resolve(repoRoot, "build/GALE01/report_changes.json"), "build/GALE01/report_changes.json", maxRows);
+  return loadTrustedReportFile(resolve(repoRoot, "build/GC6E01/report_changes.json"), "build/GC6E01/report_changes.json", maxRows);
 }

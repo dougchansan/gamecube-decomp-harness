@@ -30,7 +30,7 @@ or `scripts/render-pi-agent-tool-report.py`.
    ```bash
    python3 - <<'PY'
    import sqlite3
-   db = sqlite3.connect("projects/melee/state/orchestrator.sqlite")
+   db = sqlite3.connect("projects/pkmn-colosseum/state/orchestrator.sqlite")
    rows = db.execute("""
      SELECT run_id, COUNT(*) AS sessions, MIN(created_at), MAX(created_at)
      FROM pi_sessions
@@ -108,7 +108,7 @@ or `scripts/render-pi-agent-tool-report.py`.
 - When the user asks for branch-delta or "big sweep" formatting, use
   `reports/pi-agent-tool-analysis-2026-06-16.html` as the current rich-layout
   reference and include branch-delta data only when
-  `projects/melee/checkout/build/GALE01/report_changes_production.json` is
+  `projects/pkmn-colosseum/checkout/build/GC6E01/report_changes_production.json` is
   present and relevant.
 - After any tool surface change, update renderer tier lists before rerendering:
   `PRIMARY_SURFACE_TOOLS`, `INJECTED_CONTEXT_TOOLS`, `AUTO_CLOSE_TOOLS`,

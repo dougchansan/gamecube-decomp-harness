@@ -84,10 +84,19 @@ function setupGitRepo(): string {
   return repo;
 }
 
-function writePatch(repo: string, outputPath: string, nextSource: string): void {
-  writeFileSync(join(repo, "src/a.c"), nextSource);
-  writeFileSync(outputPath, git(repo, ["diff", "--", "src/a.c"]));
-  git(repo, ["checkout", "--", "src/a.c"]);
+function writePatch(_repo: string, outputPath: string, nextSource: string): void {
+  writeFileSync(
+    outputPath,
+    [
+      "diff --git a/src/a.c b/src/a.c",
+      "--- a/src/a.c",
+      "+++ b/src/a.c",
+      "@@ -1 +1 @@",
+      "-int value = 0;",
+      `+${nextSource.trimEnd()}`,
+      "",
+    ].join("\n"),
+  );
 }
 
 function count(store: StateStore, sql: string, ...params: Array<string | number | null>): number {

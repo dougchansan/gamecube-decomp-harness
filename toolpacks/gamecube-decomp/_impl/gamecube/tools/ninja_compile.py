@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Compile a single melee translation unit using the exact MWCC command that
+Compile a single colosseum translation unit using the exact MWCC command that
 `build.ninja` would, without going through Ninja itself.
 
 Extracted from checkdiff.py so the permuter (permute.py) and checkdiff.py
@@ -36,11 +36,11 @@ from pathlib import Path
 from typing import Iterator, List, Optional, Tuple
 
 # Project checkout root: explicit override, then Claude Code's project dir,
-# then assume this script lives at <melee>/tools/.
+# then assume this script lives at <colosseum>/tools/.
 from project_root import resolve_root
 
 ROOT = resolve_root()
-REPORT_PATH = ROOT / "build/GALE01/report.json"
+REPORT_PATH = ROOT / "build/GC6E01/report.json"
 SRC_ROOT = ROOT / "src"
 
 MWCC_RULES = {"mwcc", "mwcc_sjis", "mwcc_extab", "mwcc_sjis_extab"}
@@ -64,7 +64,7 @@ class CompiledObject:
 
 
 def find_unit_for_function(func_name: str) -> Optional[str]:
-    """Return the unit path (e.g. 'melee/it/itdrop') containing func_name."""
+    """Return the unit path (e.g. 'colosseum/it/itdrop') containing func_name."""
     with REPORT_PATH.open("r") as f:
         for unit in json.load(f).get("units", []):
             for function in unit.get("functions", []):
@@ -75,7 +75,7 @@ def find_unit_for_function(func_name: str) -> Optional[str]:
 
 def find_build_block(obj_path: str) -> BuildBlock:
     """Parse build.ninja for the MWCC build edge that produces obj_path."""
-    target = f"build/GALE01/src/{obj_path}.o"
+    target = f"build/GC6E01/src/{obj_path}.o"
     text = (ROOT / "build.ninja").read_text()
     # Unfold ninja line continuations so cflags can be read as one value.
     text = text.replace("$\n", " ")

@@ -5,9 +5,9 @@ concepts: [foundation, intent, boundaries, orchestration, decompilation]
 
 # Foundation: D-Comp Orchestrator
 
-D-Comp Orchestrator coordinates Melee decompilation work across a durable board
+D-Comp Orchestrator coordinates Colosseum decompilation work across a durable board
 of targets, facts, leases, and agent reports. It is not a replacement for the
-Melee toolchain. It is the runtime that decides which bounded unit of work is
+Colosseum toolchain. It is the runtime that decides which bounded unit of work is
 worth attempting next, records what happened, and keeps useful evidence moving
 through the run.
 

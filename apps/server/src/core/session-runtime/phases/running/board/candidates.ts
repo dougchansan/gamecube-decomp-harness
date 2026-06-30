@@ -35,16 +35,17 @@ export function objdiffSourceMap(objdiff: JsonObject): Map<string, string> {
 }
 
 export function candidateFromReportFunction(params: {
+  defaultFuzzy?: number;
   unitName: string;
   sourcePath: string;
   fn: JsonObject;
 }): TargetCandidate | null {
-  const fuzzy = numberValue(params.fn.fuzzy_match_percent, 100);
+  const fuzzy = numberValue(params.fn.fuzzy_match_percent, params.defaultFuzzy ?? 100);
   if (fuzzy >= 100) return null;
   const size = numberValue(params.fn.size);
   const symbol = stringValue(params.fn.name);
-  if (!symbol || size <= 0) return null;
-  const priority = closenessPriority(size, fuzzy);
+  if (!params.sourcePath || !symbol || size <= 0) return null;
+  const priority = fuzzy > 0 ? closenessPriority(size, fuzzy) : size;
   return {
     unit: params.unitName,
     sourcePath: params.sourcePath,
@@ -52,8 +53,9 @@ export function candidateFromReportFunction(params: {
     size,
     fuzzy,
     priority,
-    reason: `matched-code finish candidate: ${size} bytes at ${fuzzy.toFixed(5)}% fuzzy, ${Math.max(0, 100 - fuzzy).toFixed(
-      5,
-    )}% gap to exact`,
+    reason:
+      fuzzy > 0
+        ? `matched-code finish candidate: ${size} bytes at ${fuzzy.toFixed(5)}% fuzzy, ${Math.max(0, 100 - fuzzy).toFixed(5)}% gap to exact`
+        : `unscored function candidate: ${size} bytes with source mapping from project function map`,
   };
 }

@@ -143,7 +143,7 @@ function sourcePathFromUnit(name: string): string {
 // sees. Run the exact same container locally so a slice fails here, before it
 // is pushed, instead of failing on the PR. The image is amd64-only, so the
 // platform is pinned (Docker on Apple Silicon runs it under Rosetta).
-const CHECK_ISSUES_IMAGE = "ghcr.io/doldecomp/melee/check-issues:latest";
+const CHECK_ISSUES_IMAGE = "ghcr.io/dougchansan/pkmn-colosseum/check-issues:latest";
 let dockerAvailable: boolean | null = null;
 
 export function createPrWorktreeService<Context extends PrWorktreeProjectContext>(deps: PrWorktreeServiceDeps<Context>) {
@@ -166,8 +166,8 @@ export function createPrWorktreeService<Context extends PrWorktreeProjectContext
     const { repoRoot } = paths;
     const baseRef = paths.project?.baseRef ?? "origin/master";
     const baseSha = (await runGit(repoRoot, ["rev-parse", "--verify", baseRef], { failureHint: `Unable to resolve ${baseRef}` })).stdout.trim();
-    const worktreeDir = resolve(tmpdir(), `melee-baseline-${baseSha}`);
-    const worktreeBaseline = resolve(worktreeDir, "build/GALE01/baseline.json");
+    const worktreeDir = resolve(tmpdir(), `colosseum-baseline-${baseSha}`);
+    const worktreeBaseline = resolve(worktreeDir, "build/GC6E01/baseline.json");
     const cached = existsSync(worktreeBaseline);
     await submitWorkflowEvent?.(paths, {
       kind: "baseline",
@@ -205,7 +205,7 @@ export function createPrWorktreeService<Context extends PrWorktreeProjectContext
     } else {
       appendLog("ui", `baseline reused from cache for ${baseSha.slice(0, 10)}`);
     }
-    const baselinePath = resolve(repoRoot, "build/GALE01/baseline.json");
+    const baselinePath = resolve(repoRoot, "build/GC6E01/baseline.json");
     mkdirSync(dirname(baselinePath), { recursive: true });
     copyFileSync(worktreeBaseline, baselinePath);
     appendLog("ui", `production baseline installed at ${baselinePath}`);
@@ -228,7 +228,7 @@ export function createPrWorktreeService<Context extends PrWorktreeProjectContext
     const baseSha = (await runGit(paths.repoRoot, ["rev-parse", "--verify", baseRef], { failureHint: `Unable to resolve ${baseRef}` })).stdout.trim();
     const status = readJsonObject(resolve(paths.stateDir, "pr_handoff", "baseline_status.json"));
     const worktreeDir = stringValue(status.worktreeDir);
-    const baselinePath = worktreeDir ? resolve(worktreeDir, "build/GALE01/baseline.json") : "";
+    const baselinePath = worktreeDir ? resolve(worktreeDir, "build/GC6E01/baseline.json") : "";
     if (stringValue(status.baseSha) === baseSha && worktreeDir && existsSync(baselinePath)) return status;
 
     const reason =
@@ -282,7 +282,7 @@ export function createPrWorktreeService<Context extends PrWorktreeProjectContext
         if (apply.exitCode !== 0) throw new Error(`Ship-set patch did not apply cleanly (${apply.exitCode}): ${outputTail(apply.stderr, 2000)}`);
         const build = await runCli(["ninja", "changes_all"], worktreeDir);
         if (build.exitCode !== 0) throw new Error(`Ship-set build failed (${build.exitCode}): ${outputTail(build.stderr || build.stdout, 4000)}`);
-        report = await readRegressionReport(resolve(worktreeDir, "build/GALE01/report_changes.json"), "ship set", 0);
+        report = await readRegressionReport(resolve(worktreeDir, "build/GC6E01/report_changes.json"), "ship set", 0);
         // Upstream CI parity: the patched tree must also pass the Issues lint.
         issues = await checkCodeIssues(worktreeDir);
         if (issues.status === "unavailable") appendLog("ui", `ship-set round ${round}: code-issues check skipped — ${outputTail(issues.output, 300)}`);
@@ -399,7 +399,7 @@ export function createPrWorktreeService<Context extends PrWorktreeProjectContext
       if (apply.exitCode !== 0) throw new Error(`Slice patch did not apply (${apply.exitCode}): ${outputTail(apply.stderr, 1500)}`);
       const build = await runCli(["ninja", "changes_all"], params.baselineWorktree);
       if (build.exitCode !== 0) throw new Error(`Slice build failed (${build.exitCode}): ${outputTail(build.stderr || build.stdout, 3000)}`);
-      report = await readRegressionReport(resolve(params.baselineWorktree, "build/GALE01/report_changes.json"), "slice isolation", 0);
+      report = await readRegressionReport(resolve(params.baselineWorktree, "build/GC6E01/report_changes.json"), "slice isolation", 0);
       if (report.regressions.length === 0 && report.brokenMatches.length === 0 && report.fuzzyRegressions.length === 0) {
         issues = await checkCodeIssues(params.baselineWorktree);
       } else {
@@ -571,7 +571,7 @@ export function createPrWorktreeService<Context extends PrWorktreeProjectContext
 
   async function publishPatchToFork(params: { baseSha: string; branch: string; files: string[]; patchPath: string; repoRoot: string; title: string }): Promise<void> {
     const includeArgs = params.files.map((file) => `--include=${file}`);
-    const worktreeDir = resolve(tmpdir(), `melee-pr-${params.branch.replace(/[^A-Za-z0-9_.-]+/g, "-")}`);
+    const worktreeDir = resolve(tmpdir(), `colosseum-pr-${params.branch.replace(/[^A-Za-z0-9_.-]+/g, "-")}`);
     if (existsSync(worktreeDir)) await runCli(["git", "worktree", "remove", "--force", worktreeDir], params.repoRoot);
     const add = await runCli(["git", "worktree", "add", "-B", params.branch, worktreeDir, params.baseSha], params.repoRoot);
     if (add.exitCode !== 0) throw new Error(`git worktree add failed (${add.exitCode}): ${outputTail(add.stderr, 1500)}`);

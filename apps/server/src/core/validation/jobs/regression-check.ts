@@ -48,10 +48,10 @@ export async function regressionCheck(globals: GlobalArgs, args: Map<string, str
     throw new Error("--target must be one Ninja target name, for example changes_all");
   }
   const runId = stringArg(args, "--run-id", "manual");
-  const reportRelPath = globals.project?.validation.reportPath ?? "build/GALE01/report.json";
-  const reportChangesRelPath = globals.project?.validation.reportChangesPath ?? "build/GALE01/report_changes.json";
+  const reportRelPath = globals.project?.validation.reportPath ?? "build/GC6E01/report.json";
+  const reportChangesRelPath = globals.project?.validation.reportChangesPath ?? "build/GC6E01/report_changes.json";
   const baselineRelPath = join(dirname(reportRelPath), "baseline.json");
-  const reportTitle = stringArg(args, "--report-title", `Expected local report for ${globals.project?.displayName ?? "GALE01"}`);
+  const reportTitle = stringArg(args, "--report-title", `Expected local report for ${globals.project?.displayName ?? "GC6E01"}`);
   const reportMaxRows = numberArg(args, "--report-max-rows", 30);
   if (!Number.isInteger(reportMaxRows) || reportMaxRows < 0) {
     throw new Error("--report-max-rows must be a non-negative integer");

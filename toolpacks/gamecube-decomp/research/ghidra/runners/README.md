@@ -7,7 +7,7 @@ python3 toolpacks/gamecube-decomp/research/ghidra/runners/run_headless_probe.py 
 ```
 
 The runner resolves Homebrew Ghidra/OpenJDK when present, runs
-`analyzeHeadless` against `build/GALE01/main.elf`, and records bounded smoke
+`analyzeHeadless` against `build/GC6E01/main.elf`, and records bounded smoke
 evidence in `cache/runner_status.json`, `cache/ghidra_headless_probe.log`, and
 `indexes/ghidra_headless_probe.jsonl`.
 

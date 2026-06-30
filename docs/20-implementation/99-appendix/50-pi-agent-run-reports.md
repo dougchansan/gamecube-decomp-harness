@@ -19,7 +19,7 @@ lease):
 
 | Source | Provides |
 | --- | --- |
-| `projects/melee/state/orchestrator.sqlite` → `events` | Canonical outcome per lease: latest terminal `worker_*`, `needs_fact`, or `score_candidate` event, with `runner_validation` (the canonical gate) and `qaLint` payloads |
+| `projects/pkmn-colosseum/state/orchestrator.sqlite` → `events` | Canonical outcome per lease: latest terminal `worker_*`, `needs_fact`, or `score_candidate` event, with `runner_validation` (the canonical gate) and `qaLint` payloads |
 | `orchestrator.sqlite` → `pi_sessions` | Session → lease mapping, transcript file path, thinking level |
 | `.pi-sessions/worker/*.jsonl` | Wall-clock duration (first→last timestamp), per-tool call counts (assistant `toolCall` blocks), advertised tool set (parsed from the `<available_tools>` block in the initial user prompt) |
 

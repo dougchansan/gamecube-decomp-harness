@@ -1,6 +1,6 @@
 import { basename, dirname } from "node:path";
 
-import { closeDefaultMeleeKernelRuntime, resetDefaultMeleeKernelRuntimeForTests } from "@server/infrastructure/kernel/bridge/runtime";
+import { closeDefaultColosseumKernelRuntime, resetDefaultColosseumKernelRuntimeForTests } from "@server/infrastructure/kernel/bridge/runtime";
 import { loadLocalEnv } from "@server/infrastructure/env";
 import { parse } from "@server/core/project-registry/runtime-options.js";
 import { babysit } from "@server/core/session-runtime/phases/running/jobs/babysit.js";
@@ -79,8 +79,8 @@ export async function main(argv = process.argv.slice(2)): Promise<void> {
     else if (command === "status") await status(globals);
     else throw new Error(`Unknown server job: ${command}`);
   } finally {
-    await closeDefaultMeleeKernelRuntime();
-    resetDefaultMeleeKernelRuntimeForTests();
+    await closeDefaultColosseumKernelRuntime();
+    resetDefaultColosseumKernelRuntimeForTests();
   }
 }
 

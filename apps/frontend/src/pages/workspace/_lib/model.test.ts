@@ -6,8 +6,8 @@ import { activeSessionFocus } from "@/pages/workspace/sessions/_lib/sessionRoute
 import { deriveSessionView } from "./model";
 
 const form = {
-  projectId: "melee",
-  processName: "melee-live",
+  projectId: "pkmn-colosseum",
+  processName: "pkmn-colosseum-live",
   usePathOverrides: false,
 } as unknown as FormState;
 
@@ -70,8 +70,8 @@ describe("workspace session view", () => {
               beforeRef: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
               afterRef: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
               mergedPrs: [2731, "2732"],
-              mainWorktreePath: "/repo/projects/melee/worktrees/upstream-current",
-              sessionWorktreePath: "/repo/projects/melee/worktrees/sessions/c850/current",
+              mainWorktreePath: "/repo/projects/pkmn-colosseum/worktrees/upstream-current",
+              sessionWorktreePath: "/repo/projects/pkmn-colosseum/worktrees/sessions/c850/current",
             },
           },
           running: {},
@@ -93,8 +93,8 @@ describe("workspace session view", () => {
     expect(view.prepareState.upstreamChanged).toBe(true);
     expect(view.prepareState.mergedPrs).toEqual([2731, 2732]);
     expect(view.prepareState.pendingIntakePrCount).toBe(2);
-    expect(view.prepareState.upstreamWorktreePath).toBe("/repo/projects/melee/worktrees/upstream-current");
-    expect(view.prepareState.sessionCurrentWorktreePath).toBe("/repo/projects/melee/worktrees/sessions/c850/current");
+    expect(view.prepareState.upstreamWorktreePath).toBe("/repo/projects/pkmn-colosseum/worktrees/upstream-current");
+    expect(view.prepareState.sessionCurrentWorktreePath).toBe("/repo/projects/pkmn-colosseum/worktrees/sessions/c850/current");
   });
 
   test("keeps PR index debt separate from git movement after resync", () => {

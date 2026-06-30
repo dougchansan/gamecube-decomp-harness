@@ -37,7 +37,7 @@ function globals(repoRoot: string, stateDir: string): GlobalArgs {
 function prViewJson(): string {
   return JSON.stringify({
     number: 2704,
-    url: "https://github.com/doldecomp/melee/pull/2704",
+    url: "https://github.com/dougchansan/pkmn-colosseum/pull/2704",
     title: "1/14 gm work in progress",
     state: "OPEN",
     isDraft: true,
@@ -80,7 +80,7 @@ function qaFinding(overrides: Partial<QaScanFinding> = {}): QaScanFinding {
   return {
     rule_id: "type_erasing_cast",
     severity: "warning",
-    file: "src/melee/gm/gmresult.c",
+    file: "src/colosseum/gm/gmresult.c",
     line: 12,
     excerpt: "(u8*) data",
     message: "Added type-erasing cast.",
@@ -128,7 +128,7 @@ function baseDeps(repoRoot: string): DraftPrQaDeps & { commands: string[][] } {
     commandRunner: async (_cwd, command) => {
       commands.push(command);
       if (command.join(" ") === "git remote get-url origin") {
-        return { exitCode: 0, stdout: "https://github.com/doldecomp/melee.git\n", stderr: "" };
+        return { exitCode: 0, stdout: "https://github.com/dougchansan/pkmn-colosseum.git\n", stderr: "" };
       }
       if (command[0] === "gh" && command[1] === "pr" && command[2] === "view") {
         return { exitCode: 0, stdout: prViewJson(), stderr: "" };
@@ -137,11 +137,11 @@ function baseDeps(repoRoot: string): DraftPrQaDeps & { commands: string[][] } {
         return { exitCode: 0, stdout: "", stderr: "" };
       }
       if (command[0] === "git" && command[1] === "diff" && command[2] === "--name-only") {
-        return { exitCode: 0, stdout: "src/melee/gm/gmresult.c\n", stderr: "" };
+        return { exitCode: 0, stdout: "src/colosseum/gm/gmresult.c\n", stderr: "" };
       }
       if (command[0] === "git" && command[1] === "diff" && command.some((part) => part.startsWith("--output="))) {
         const output = command.find((part) => part.startsWith("--output="))?.slice("--output=".length);
-        if (output) await writeFile(output, "diff --git a/src/melee/gm/gmresult.c b/src/melee/gm/gmresult.c\n");
+        if (output) await writeFile(output, "diff --git a/src/colosseum/gm/gmresult.c b/src/colosseum/gm/gmresult.c\n");
         return { exitCode: 0, stdout: "", stderr: "" };
       }
       if (command[0] === "gh" && command[1] === "api" && command[2] === "--paginate") {
@@ -177,12 +177,12 @@ async function rejectPreshipDeps(repoRoot: string, reviewPath: string): Promise<
     `${JSON.stringify(
       {
         review: {
-          schema_version: "melee_pr_preship_review_v1",
+          schema_version: "colosseum_pr_preship_review_v1",
           slice_id: "pr-2704",
           slice_verdict: "reject",
           findings: [
             {
-              file: "src/melee/gm/gmresult.c",
+              file: "src/colosseum/gm/gmresult.c",
               line: 12,
               standard_id: "global_standard:literals-and-data-ownership",
               verdict: "reject",
@@ -221,7 +221,7 @@ function markerForPreshipReject(): string {
   const material = [
     "preship",
     "reject",
-    "src/melee/gm/gmresult.c",
+    "src/colosseum/gm/gmresult.c",
     "12",
     "",
     "global_standard:literals-and-data-ownership",
@@ -260,7 +260,7 @@ describe("pr-draft-qa lifecycle", () => {
     deps.commandRunner = async (_cwd, command) => {
       deps.commands.push(command);
       if (command[0] === "gh" && command[1] === "api" && String(command[2]).includes("/pulls/2704/comments") && command.includes("-f")) {
-        return { exitCode: 0, stdout: JSON.stringify({ html_url: "https://github.com/doldecomp/melee/pull/2704#discussion_r1" }), stderr: "" };
+        return { exitCode: 0, stdout: JSON.stringify({ html_url: "https://github.com/dougchansan/pkmn-colosseum/pull/2704#discussion_r1" }), stderr: "" };
       }
       return baseDeps(repoRoot).commandRunner!(_cwd, command);
     };
@@ -321,7 +321,7 @@ describe("pr-draft-qa lifecycle", () => {
         ...emptyQueue(String(repairArgs.get("--run-id")), repairGlobals.repoRoot),
         candidate_files: [
           {
-            sourcePath: "src/melee/gm/gmresult.c",
+            sourcePath: "src/colosseum/gm/gmresult.c",
             lane: "match",
             proofs: [],
             errorCount: 1,
@@ -333,9 +333,9 @@ describe("pr-draft-qa lifecycle", () => {
         items: [
           {
             schema_version: "qa_repair_queue_item_v1",
-            id: "src-melee-gm-gmresult",
+            id: "src-colosseum-gm-gmresult",
             status: "clean_lower_score",
-            source_path: "src/melee/gm/gmresult.c",
+            source_path: "src/colosseum/gm/gmresult.c",
             lane: "match",
             base_ref: "base-sha",
             head_sha: "head-sha",
@@ -346,7 +346,7 @@ describe("pr-draft-qa lifecycle", () => {
             rule_counts: { self_tu_extern: 1 },
             created_at: "2026-06-15T00:00:00.000Z",
             validation: {
-              qa_scan: "review_lint scan_diff --gate for src/melee/gm/gmresult.c",
+              qa_scan: "review_lint scan_diff --gate for src/colosseum/gm/gmresult.c",
               target_check: "score",
               ship_set_check: "ship",
             },

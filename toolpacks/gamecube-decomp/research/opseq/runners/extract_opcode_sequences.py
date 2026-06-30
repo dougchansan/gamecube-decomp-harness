@@ -18,11 +18,11 @@ from search_index import package_root_for_tool, tool_storage_root  # type: ignor
 
 PACKAGE_ROOT = package_root_for_tool(TOOL_ROOT)
 TOOL_STORAGE_ROOT = tool_storage_root(TOOL_ROOT)
-DEFAULT_REPO_ROOT = PACKAGE_ROOT.parent / "melee"
+DEFAULT_REPO_ROOT = PACKAGE_ROOT.parent / "pkmn-colosseum"
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Generate opcode-sequence fingerprints from build/GALE01/asm.")
+    parser = argparse.ArgumentParser(description="Generate opcode-sequence fingerprints from build/GC6E01/asm.")
     parser.add_argument("--repo-root", type=Path, default=DEFAULT_REPO_ROOT)
     parser.add_argument("--limit", type=int, default=0, help="Maximum functions to index; 0 means all.")
     parser.add_argument("--query", default="", help="Optional symbol/opcode query to include in the smoke summary.")
@@ -37,7 +37,7 @@ def read_json(path: Path, default: Any) -> Any:
 
 
 def report_metadata(repo_root: Path) -> dict[str, dict[str, Any]]:
-    report = read_json(repo_root / "build" / "GALE01" / "report.json", {})
+    report = read_json(repo_root / "build" / "GC6E01" / "report.json", {})
     by_symbol: dict[str, dict[str, Any]] = {}
     for unit in report.get("units") or []:
         if not isinstance(unit, dict):
@@ -79,7 +79,7 @@ def safe_float(value: Any) -> float:
 
 
 def iter_asm_functions(repo_root: Path, metadata: dict[str, dict[str, Any]]) -> Iterable[dict[str, Any]]:
-    asm_root = repo_root / "build" / "GALE01" / "asm"
+    asm_root = repo_root / "build" / "GC6E01" / "asm"
     for asm_path in sorted(asm_root.rglob("*.s")):
         lines = asm_path.read_text(encoding="utf-8", errors="replace").splitlines()
         symbol = ""
@@ -139,7 +139,7 @@ def make_row(
     for opcode in opcodes:
         opcode_histogram[opcode] = opcode_histogram.get(opcode, 0) + 1
     rel_asm = asm_path.relative_to(repo_root)
-    unit = str(meta.get("unit") or rel_asm.with_suffix("")).replace("build/GALE01/asm/", "")
+    unit = str(meta.get("unit") or rel_asm.with_suffix("")).replace("build/GC6E01/asm/", "")
     source_path = str(meta.get("source_path") or "")
     text = " ".join(
         part
@@ -197,7 +197,7 @@ def write_manifest(args: argparse.Namespace, rows: list[dict[str, Any]], generat
         "generated_artifacts": [str(path) for path in generated if path.name != "opcode_sequences.jsonl"],
         "generated_indexes": [str(path) for path in generated if path.name == "opcode_sequences.jsonl"],
         "smoke_results": smoke_results,
-        "dependencies": ["build/GALE01/asm", "build/GALE01/report.json"],
+        "dependencies": ["build/GC6E01/asm", "build/GC6E01/report.json"],
     }
     status_path = TOOL_STORAGE_ROOT / "cache" / "runner_status.json"
     status_path.parent.mkdir(parents=True, exist_ok=True)

@@ -120,7 +120,7 @@ capability, and calls it when it needs evidence.
 
 ## Maintenance Commands
 
-- `bun run kg:maintain -- --project melee` runs the server-backed maintenance
+- `bun run kg:maintain -- --project pkmn-colosseum` runs the server-backed maintenance
   pipeline: PR postmortems, tool runners, tool indexes, data-sheet facts,
   curator enrichment, and graph rebuild.
 - `python3 toolpacks/gamecube-decomp/build_tool_indexes.py --repo-root <repo_root>`

@@ -5,12 +5,9 @@ import { buildKnowledgeCuratorGraphRecords } from "./knowledge-curator.js";
 import { buildMismatchPatternGraphRecords } from "./mismatch-patterns.js";
 import { buildPastPrsGraphRecords } from "./past-prs.js";
 import {
-  buildDiscordKnowledgeGraphRecords,
   buildDecompStandardsGraphRecords,
-  buildExternalMirrorsGraphRecords,
   buildPathFactsGraphRecords,
   buildPowerpcDocsGraphRecords,
-  buildSsbmDataSheetGraphRecords,
 } from "./source-slices.js";
 import { readSourceRegistry, readToolRegistry } from "../registry/sources.js";
 
@@ -42,10 +39,7 @@ export function rebuildKnowledgeGraph(options: RebuildKnowledgeGraphOptions): Re
       indexedSources.push("past_prs");
     }
     const optionalSources = [
-      ["discord_knowledge", buildDiscordKnowledgeGraphRecords],
-      ["ssbm_data_sheet", buildSsbmDataSheetGraphRecords],
       ["powerpc_docs", buildPowerpcDocsGraphRecords],
-      ["external_mirrors", buildExternalMirrorsGraphRecords],
       ["decomp_standards", buildDecompStandardsGraphRecords],
       ["path_facts", buildPathFactsGraphRecords],
     ] as const;
@@ -102,16 +96,10 @@ export function rebuildKnowledgeGraph(options: RebuildKnowledgeGraphOptions): Re
 }
 
 export function defaultGraphSources(): string[] {
-  // ssbm_data_sheet and powerpc_docs are intentionally absent: their worker
-  // tools read the python source APIs directly (never the graph), their chunks
-  // attach only to their own entity types (never file cards or rank signals),
-  // and no agent profile exposes generic graph search. Re-include via
-  // --sources if a graph consumer appears.
   return [
     "code_graph",
     "past_prs",
-    "discord_knowledge",
-    "external_mirrors",
+    "powerpc_docs",
     "decomp_standards",
     "path_facts",
     "agent_shared_state",

@@ -5,7 +5,7 @@ functions by instruction patterns.
 
 Current state: live runner v1.
 `python3 toolpacks/gamecube-decomp/research/opseq/runners/extract_opcode_sequences.py --repo-root <repo_root>`
-parses `build/GALE01/asm/**/*.s`, extracts one opcode fingerprint per function,
+parses `build/GC6E01/asm/**/*.s`, extracts one opcode fingerprint per function,
 and writes:
 
 - `cache/runner_status.json`

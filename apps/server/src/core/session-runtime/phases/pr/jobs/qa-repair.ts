@@ -2,8 +2,8 @@ import { existsSync, readFileSync } from "node:fs";
 import { spawn } from "node:child_process";
 import { mkdir, writeFile } from "node:fs/promises";
 import { isAbsolute, resolve } from "node:path";
-import { createMeleeKernelSpawnContext } from "@server/infrastructure/kernel/bridge/spawn-context";
-import { runMeleeKernelPiAgent as runPiAgent, type MeleeKernelPiRunOptions } from "@server/infrastructure/agent-runtime/kernel-pi-runner";
+import { createColosseumKernelSpawnContext } from "@server/infrastructure/kernel/bridge/spawn-context";
+import { runColosseumKernelPiAgent as runPiAgent, type ColosseumKernelPiRunOptions } from "@server/infrastructure/agent-runtime/kernel-pi-runner";
 import { qaRepairPrompt, validateQaRepairAgentResult } from "@server/core/agent-catalog/agents/pr/qa-repair";
 import { artifactTimestamp, parseJsonObject } from "@server/infrastructure/agent-runtime/runtime";
 import {
@@ -27,7 +27,7 @@ import { latestCheckpointSummary } from "@server/core/session-runtime/phases/pr/
 import { packageRoot } from "@server/core/knowledge";
 import { booleanArg, numberArg, projectMetadata, stringArg, type GlobalArgs } from "@server/core/project-registry/runtime-options.js";
 
-export type QaRepairAgentRunner = (options: MeleeKernelPiRunOptions) => Promise<PiRunResult>;
+export type QaRepairAgentRunner = (options: ColosseumKernelPiRunOptions) => Promise<PiRunResult>;
 type QaRepairValidationKind = "score" | "build" | "regression";
 type QaRepairValidationCommands = Partial<Record<QaRepairValidationKind, string>>;
 
@@ -351,7 +351,7 @@ async function processQueueItem(params: {
       stateDir: params.globals.stateDir,
       project: params.globals.project,
     },
-    kernelContext: createMeleeKernelSpawnContext({
+    kernelContext: createColosseumKernelSpawnContext({
       kind: "pr-repair",
       projectId: params.globals.project?.projectId ?? params.globals.projectId,
       sessionId: params.runId || "qa-repair",

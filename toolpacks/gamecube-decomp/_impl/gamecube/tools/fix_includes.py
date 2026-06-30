@@ -29,7 +29,7 @@ from typing import Dict, List, Optional, Set, Tuple
 
 
 # Project checkout root: explicit override, then Claude Code's project dir,
-# then assume this script lives at <melee>/tools/.
+# then assume this script lives at <colosseum>/tools/.
 from project_root import resolve_root
 
 ROOT = resolve_root()
@@ -151,9 +151,9 @@ def parse_existing_includes(src_text: str) -> Tuple[List[str], Set[str], Set[str
         if m:
             includes.append(line)
             path = m.group(2)
-            # Normalize to prefer 'it/...' over 'melee/it/...'
-            if path.startswith('melee/'):
-                path = path[len('melee/') :]
+            # Normalize to prefer 'it/...' over 'colosseum/it/...'
+            if path.startswith('colosseum/'):
+                path = path[len('colosseum/') :]
             included_paths.add(path)
             included_basenames.add(Path(path).name)
     return includes, included_paths, included_basenames
@@ -223,9 +223,9 @@ def main() -> int:
             rel = header.relative_to(ROOT / "src")
         except ValueError:
             rel = header
-        # Map 'melee/it/...' to 'it/...'
+        # Map 'colosseum/it/...' to 'it/...'
         rel_parts = rel.as_posix().split('/')
-        if rel_parts and rel_parts[0] == 'melee':
+        if rel_parts and rel_parts[0] == 'colosseum':
             rel_parts = rel_parts[1:]
         inc_path = '/'.join(rel_parts)
         proposals[inc_path] = header

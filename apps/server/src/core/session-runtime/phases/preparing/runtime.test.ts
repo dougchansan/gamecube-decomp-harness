@@ -34,7 +34,7 @@ describe("preparing runtime baseline", () => {
     try {
       const created = createNewProjectSession(store.db, {
         id: "project-session:session-uuid",
-        projectId: "melee",
+        projectId: "colosseum",
         sessionUuid: "session-uuid",
       });
       updatePreparingSubphase(store.db, { id: created.record.id }, "baseline", {
@@ -88,11 +88,11 @@ describe("preparing runtime baseline", () => {
       submitWorkflowEvent: async () => null,
     } as PreparingRuntimeDeps);
 
-    await expect(runtime.calculateBaselineForPrepare({ projectId: "melee", sessionUuid: "session-uuid" })).rejects.toThrow("missing build.ninja");
+    await expect(runtime.calculateBaselineForPrepare({ projectId: "colosseum", sessionUuid: "session-uuid" })).rejects.toThrow("missing build.ninja");
 
     const nextStore = openState(stateDir);
     try {
-      const record = getActiveProjectSession(nextStore.db, "melee");
+      const record = getActiveProjectSession(nextStore.db, "colosseum");
       expect(record?.preparing_state_json.subphase).toBe("baseline");
       expect(record?.preparing_state_json.baseline?.status).toBe("failed");
       expect(record?.preparing_state_json.baseline?.error).toContain("missing build.ninja");

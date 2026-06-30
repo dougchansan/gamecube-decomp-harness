@@ -1,9 +1,9 @@
 {
   "units": [
     {
-      "name": "src/melee/ft/chara/ftDemo.c",
+      "name": "src/colosseum/ft/chara/ftDemo.c",
       "metadata": {
-        "source_path": "src/melee/ft/chara/ftDemo.c"
+        "source_path": "src/colosseum/ft/chara/ftDemo.c"
       }
     }
   ]

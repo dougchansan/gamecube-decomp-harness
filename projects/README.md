@@ -34,5 +34,5 @@ enrichment inputs. The active graph database lives under
 and server APIs live under `apps/server/src`.
 
 PR defaults live under the descriptor's `pr` key. `splitStrategy` can be
-`deterministic` or `agent`; the tracked Melee descriptor uses `agent` so
+`deterministic` or `agent`; the tracked Colosseum descriptor uses `agent` so
 handoff planning asks the PR splitter to reshape the deterministic seed plan.

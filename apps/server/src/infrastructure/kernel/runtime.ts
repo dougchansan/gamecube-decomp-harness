@@ -1,15 +1,15 @@
 import { resolve } from "node:path";
 import {
   DEFAULT_AGENT_KERNEL_DATABASE_URL,
-  meleeKernelDatabaseUrlFromEnv,
-  meleeKernelRuntimeRequiredFromEnv,
+  colosseumKernelDatabaseUrlFromEnv,
+  colosseumKernelRuntimeRequiredFromEnv,
 } from "@server/infrastructure/kernel/bridge/database";
-import { createMeleeKernelRuntime, type MeleeKernelRuntime } from "@server/infrastructure/kernel/bridge/runtime";
-import { meleeRootContainerId } from "@server/infrastructure/kernel/bridge/session-mapping";
+import { createColosseumKernelRuntime, type ColosseumKernelRuntime } from "@server/infrastructure/kernel/bridge/runtime";
+import { colosseumRootContainerId } from "@server/infrastructure/kernel/bridge/session-mapping";
 import {
-  submitMeleeWorkflowTraceEvent,
-  type MeleeWorkflowTraceStatus,
-  type SubmitMeleeWorkflowTraceEventInput,
+  submitColosseumWorkflowTraceEvent,
+  type ColosseumWorkflowTraceStatus,
+  type SubmitColosseumWorkflowTraceEventInput,
 } from "@server/infrastructure/kernel/bridge/workflow-trace";
 import type { ProjectRuntimeContext } from "@server/core/project-registry";
 
@@ -17,9 +17,9 @@ type JsonObject = Record<string, unknown>;
 type JsonResponder = (data: unknown, init?: ResponseInit) => Response;
 
 export interface DashboardKernelWorkflowEventInput {
-  kind: SubmitMeleeWorkflowTraceEventInput["kind"];
+  kind: SubmitColosseumWorkflowTraceEventInput["kind"];
   operation: string;
-  status?: MeleeWorkflowTraceStatus;
+  status?: ColosseumWorkflowTraceStatus;
   sessionId?: string | null;
   runId?: string | null;
   prId?: string | null;
@@ -34,7 +34,7 @@ export interface DashboardKernelRuntimeService {
   kernelRuntimeRequired: boolean;
   projectId: (paths: ProjectRuntimeContext) => string;
   readApiResponse: (req: Request) => Promise<Response>;
-  runtime: () => Promise<MeleeKernelRuntime | null>;
+  runtime: () => Promise<ColosseumKernelRuntime | null>;
   sessionId: (paths: ProjectRuntimeContext, input: Pick<DashboardKernelWorkflowEventInput, "sessionId" | "runId">) => string;
   startTraceTailer: () => Promise<void>;
   status: () => Promise<JsonObject>;
@@ -80,19 +80,19 @@ function redactedUrl(value: string | null): string | null {
 }
 
 export function createDashboardKernelRuntimeService(deps: DashboardKernelRuntimeServiceDeps): DashboardKernelRuntimeService {
-  const explicitKernelDatabaseUrl = meleeKernelDatabaseUrlFromEnv(deps.env);
+  const explicitKernelDatabaseUrl = colosseumKernelDatabaseUrlFromEnv(deps.env);
   const kernelRuntimeDisabled = /^(1|true|yes)$/i.test(deps.env.ORCH_AGENT_KERNEL_DISABLED ?? deps.env.ORCH_AGENT_KERNEL_DISABLE ?? "");
   const kernelDatabaseUrl = kernelRuntimeDisabled ? null : (explicitKernelDatabaseUrl || DEFAULT_AGENT_KERNEL_DATABASE_URL);
   const kernelDatabaseSource = kernelRuntimeDisabled ? "disabled" : (explicitKernelDatabaseUrl ? "env" : "default-local");
-  const kernelRuntimeRequired = meleeKernelRuntimeRequiredFromEnv(deps.env);
+  const kernelRuntimeRequired = colosseumKernelRuntimeRequiredFromEnv(deps.env);
   const kernelAppBaseUrl = deps.env.ORCH_AGENT_KERNEL_APP_BASE_URL ?? `http://localhost:${deps.port}`;
   const kernelObserverUrl = deps.env.AGENT_KERNEL_OBSERVER_URL ?? null;
-  let kernelRuntimePromise: Promise<MeleeKernelRuntime | null> | null = null;
+  let kernelRuntimePromise: Promise<ColosseumKernelRuntime | null> | null = null;
 
-  function runtime(): Promise<MeleeKernelRuntime | null> {
+  function runtime(): Promise<ColosseumKernelRuntime | null> {
     if (!kernelDatabaseUrl) return Promise.resolve(null);
     if (!kernelRuntimePromise) {
-      kernelRuntimePromise = createMeleeKernelRuntime({
+      kernelRuntimePromise = createColosseumKernelRuntime({
         config: {
           workingDir: deps.packageRoot,
           piSessionsDir: resolve(deps.packageRoot, ".pi-sessions"),
@@ -101,7 +101,7 @@ export function createDashboardKernelRuntimeService(deps: DashboardKernelRuntime
           appTraceUrlTemplate: `${kernelAppBaseUrl}/trace?containerId={containerId}`,
           genericTraceUrlTemplate: kernelObserverUrl ? `${kernelObserverUrl}/containers/{containerId}` : null,
           metadata: {
-            processName: "melee-live",
+            processName: "pkmn-colosseum-live",
             server: "server",
           },
         },
@@ -191,7 +191,7 @@ export function createDashboardKernelRuntimeService(deps: DashboardKernelRuntime
   }
 
   function projectId(paths: ProjectRuntimeContext): string {
-    return paths.project?.projectId ?? "melee";
+    return paths.project?.projectId ?? "pkmn-colosseum";
   }
 
   function sessionId(
@@ -232,7 +232,7 @@ export function createDashboardKernelRuntimeService(deps: DashboardKernelRuntime
       }
       const resolvedProjectId = projectId(paths);
       const resolvedSessionId = sessionId(paths, input);
-      const result = await submitMeleeWorkflowTraceEvent({
+      const result = await submitColosseumWorkflowTraceEvent({
         runtime: current,
         kind: input.kind,
         projectId: resolvedProjectId,
@@ -249,7 +249,7 @@ export function createDashboardKernelRuntimeService(deps: DashboardKernelRuntime
           ...(input.metadata ?? {}),
         },
       });
-      const rootContainerId = meleeRootContainerId({
+      const rootContainerId = colosseumRootContainerId({
         projectId: resolvedProjectId,
         sessionId: resolvedSessionId,
       });

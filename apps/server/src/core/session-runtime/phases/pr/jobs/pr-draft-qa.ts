@@ -267,7 +267,7 @@ async function defaultRepoSlug(globals: GlobalArgs, deps: DraftPrQaDeps): Promis
     const slug = repoSlugFromRemoteUrl(remote.stdout);
     if (slug) return slug;
   }
-  if (globals.project?.kind === "doldecomp-melee" || globals.projectId === "melee") return "doldecomp/melee";
+  if (globals.project?.kind === "dtk-pokemon-colosseum" || globals.projectId === "pkmn-colosseum") return "dougchansan/pkmn-colosseum";
   throw new Error("Could not infer GitHub repo; pass --repo owner/name.");
 }
 

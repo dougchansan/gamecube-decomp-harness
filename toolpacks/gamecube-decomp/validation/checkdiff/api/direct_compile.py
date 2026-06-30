@@ -19,7 +19,7 @@ def main() -> None:
     parser.add_argument("--repo-root", help="Target project checkout root.")
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--function", help="Function symbol whose owning translation unit should compile.")
-    group.add_argument("--unit", help="Unit path without src/ prefix or .c suffix, for example melee/it/items/itkinoko.")
+    group.add_argument("--unit", help="Unit path without src/ prefix or .c suffix, for example colosseum/it/items/itkinoko.")
     parser.add_argument("--keep-object", action="store_true", help="Keep the temporary object alive after the API exits.")
     parser.add_argument("--json", action="store_true", help="Emit JSON output.")
     args = parser.parse_args()
@@ -36,7 +36,7 @@ def main() -> None:
         ninja_compile = import_tool_module("ninja_compile", repo_root)
         unit = args.unit or ninja_compile.find_unit_for_function(args.function)
         if not unit:
-            payload.update({"status": "function_not_found", "message": "Function was not found in build/GALE01/report.json."})
+            payload.update({"status": "function_not_found", "message": "Function was not found in build/GC6E01/report.json."})
             print_json(payload)
             return
         with captured_stdio() as (stdout, stderr):

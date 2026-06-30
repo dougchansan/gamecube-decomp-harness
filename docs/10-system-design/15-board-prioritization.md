@@ -17,10 +17,10 @@ available.
 
 ## Snapshot And Admission Semantics
 
-`loadBoardSnapshot` reads the current `build/GALE01/report.json` and
+`loadBoardSnapshot` reads the current `build/GC6E01/report.json` and
 `objdiff.json`, builds imperfect-function candidates, scores them with the
 helper prior, and returns the highest-ranked candidate window. The snapshot is a
-fresh read of the available board artifacts. The trigger does not run the Melee
+fresh read of the available board artifacts. The trigger does not run the Colosseum
 build or objdiff pipeline itself; when those artifacts are regenerated, the next
 snapshot observes the updated scores.
 

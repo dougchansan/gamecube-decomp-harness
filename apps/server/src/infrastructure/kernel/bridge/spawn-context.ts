@@ -1,26 +1,26 @@
 import type { NewContainer } from "@agent-kernel/db";
 
-import type { MeleeKernelSpawnContext } from "./kernel.js";
+import type { ColosseumKernelSpawnContext } from "./kernel.js";
 import {
-  meleeAppSessionId,
-  meleeEpochContainerId,
-  meleeIntakeContainerId,
-  meleeIntakeItemContainerId,
-  meleeIntakeKnowledgeContainerId,
-  meleeIntakePostmortemContainerId,
-  meleePrepareContainerId,
-  meleePrContainerId,
-  meleePrRepairContainerId,
-  meleePrReviewContainerId,
-  meleePrSplitContainerId,
-  meleePostmortemContainerId,
-  meleeRunContainerId,
-  meleeWorkerIntegrationContainerId,
-  meleeWorkerContainerId,
-  type MeleeProjectSessionRef,
+  colosseumAppSessionId,
+  colosseumEpochContainerId,
+  colosseumIntakeContainerId,
+  colosseumIntakeItemContainerId,
+  colosseumIntakeKnowledgeContainerId,
+  colosseumIntakePostmortemContainerId,
+  colosseumPrepareContainerId,
+  colosseumPrContainerId,
+  colosseumPrRepairContainerId,
+  colosseumPrReviewContainerId,
+  colosseumPrSplitContainerId,
+  colosseumPostmortemContainerId,
+  colosseumRunContainerId,
+  colosseumWorkerIntegrationContainerId,
+  colosseumWorkerContainerId,
+  type ColosseumProjectSessionRef,
 } from "./session-mapping.js";
 
-export type MeleeKernelSpawnContainerKind =
+export type ColosseumKernelSpawnContainerKind =
   | "run"
   | "worker"
   | "worker-integration"
@@ -34,8 +34,8 @@ export type MeleeKernelSpawnContainerKind =
   | "pr-repair"
   | "reconcile";
 
-export interface MeleeKernelSpawnContextInput {
-  kind: MeleeKernelSpawnContainerKind;
+export interface ColosseumKernelSpawnContextInput {
+  kind: ColosseumKernelSpawnContainerKind;
   projectId?: string | null;
   sessionId?: string | null;
   runId?: string | null;
@@ -51,9 +51,9 @@ export interface MeleeKernelSpawnContextInput {
   metadata?: Record<string, unknown>;
 }
 
-const DEFAULT_PROJECT_ID = "melee";
+const DEFAULT_PROJECT_ID = "colosseum";
 const MANUAL_SESSION_ID = "manual";
-const MELEE_PHASE_VOCABULARY = [
+const COLOSSEUM_PHASE_VOCABULARY = [
   "setup",
   "prepare",
   "intake",
@@ -79,7 +79,7 @@ function nonEmpty(value: string | number | null | undefined): string | undefined
   return text ? text : undefined;
 }
 
-function baseRef(input: MeleeKernelSpawnContextInput): MeleeProjectSessionRef {
+function baseRef(input: ColosseumKernelSpawnContextInput): ColosseumProjectSessionRef {
   const projectId = nonEmpty(input.projectId) ?? DEFAULT_PROJECT_ID;
   const sessionId =
     nonEmpty(input.sessionId) ??
@@ -89,11 +89,11 @@ function baseRef(input: MeleeKernelSpawnContextInput): MeleeProjectSessionRef {
   return { projectId, sessionId };
 }
 
-function containerId(input: MeleeKernelSpawnContextInput, ref: MeleeProjectSessionRef): string {
+function containerId(input: ColosseumKernelSpawnContextInput, ref: ColosseumProjectSessionRef): string {
   const runId = nonEmpty(input.runId) ?? ref.sessionId;
   switch (input.kind) {
     case "worker":
-      return meleeWorkerContainerId({
+      return colosseumWorkerContainerId({
         ...ref,
         runId,
         epochId: nonEmpty(input.epochId) ?? "active",
@@ -101,7 +101,7 @@ function containerId(input: MeleeKernelSpawnContextInput, ref: MeleeProjectSessi
         targetId: nonEmpty(input.targetId),
       });
     case "worker-integration":
-      return meleeWorkerIntegrationContainerId({
+      return colosseumWorkerIntegrationContainerId({
         ...ref,
         runId,
         epochId: nonEmpty(input.epochId) ?? "active",
@@ -109,7 +109,7 @@ function containerId(input: MeleeKernelSpawnContextInput, ref: MeleeProjectSessi
         targetId: nonEmpty(input.targetId),
       });
     case "postmortem":
-      return meleePostmortemContainerId({
+      return colosseumPostmortemContainerId({
         ...ref,
         runId,
         epochId: nonEmpty(input.epochId) ?? "active",
@@ -117,44 +117,44 @@ function containerId(input: MeleeKernelSpawnContextInput, ref: MeleeProjectSessi
         targetId: nonEmpty(input.targetId),
       });
     case "intake-postmortem":
-      return meleeIntakePostmortemContainerId({
+      return colosseumIntakePostmortemContainerId({
         ...ref,
         prId: nonEmpty(input.prId) ?? nonEmpty(input.targetId) ?? nonEmpty(input.itemId) ?? runId,
       });
     case "intake-knowledge":
-      return meleeIntakeKnowledgeContainerId({
+      return colosseumIntakeKnowledgeContainerId({
         ...ref,
         prId: nonEmpty(input.prId) ?? nonEmpty(input.targetId) ?? nonEmpty(input.itemId) ?? runId,
       });
     case "knowledge-curation":
     case "run":
-      return meleeRunContainerId({ ...ref, runId });
+      return colosseumRunContainerId({ ...ref, runId });
     case "pr-split":
-      return meleePrSplitContainerId({ ...ref, prId: nonEmpty(input.prId) ?? runId });
+      return colosseumPrSplitContainerId({ ...ref, prId: nonEmpty(input.prId) ?? runId });
     case "pr-review":
-      return meleePrReviewContainerId({
+      return colosseumPrReviewContainerId({
         ...ref,
         prId: nonEmpty(input.prId) ?? runId,
         reviewId: nonEmpty(input.reviewId) ?? "review",
       });
     case "pr-repair":
-      return meleePrRepairContainerId({
+      return colosseumPrRepairContainerId({
         ...ref,
         prId: nonEmpty(input.prId) ?? runId,
         repairId: nonEmpty(input.repairId) ?? "repair",
       });
     case "reconcile":
-      return meleePrRepairContainerId({
+      return colosseumPrRepairContainerId({
         ...ref,
         prId: nonEmpty(input.prId) ?? runId,
         repairId: nonEmpty(input.repairId) ?? "reconcile",
       });
     case "pr":
-      return meleePrContainerId({ ...ref, prId: nonEmpty(input.prId) ?? runId });
+      return colosseumPrContainerId({ ...ref, prId: nonEmpty(input.prId) ?? runId });
   }
 }
 
-function defaultPhase(kind: MeleeKernelSpawnContainerKind): string {
+function defaultPhase(kind: ColosseumKernelSpawnContainerKind): string {
   switch (kind) {
     case "intake-postmortem":
       return "postmortem";
@@ -178,7 +178,7 @@ function containerRecord(input: {
   parentContainerId: string | null;
   label: string;
   phase: string;
-  ref: MeleeProjectSessionRef;
+  ref: ColosseumProjectSessionRef;
   appSessionId: string;
   kind: string;
   workingDir?: string;
@@ -192,27 +192,27 @@ function containerRecord(input: {
     workingDir: input.workingDir ?? null,
     worktreePath: null,
     phase: input.phase,
-    phaseVocabulary: MELEE_PHASE_VOCABULARY,
+    phaseVocabulary: COLOSSEUM_PHASE_VOCABULARY,
     metadata: {
       appSessionId: input.appSessionId,
       appSessionSlug: input.ref.sessionId,
-      appSessionType: "melee-project-session",
+      appSessionType: "colosseum-project-session",
       containerKind: input.kind,
       projectId: input.ref.projectId,
       sessionId: input.ref.sessionId,
-      topic: `Melee ${input.ref.projectId} session ${input.ref.sessionId}`,
+      topic: `Colosseum ${input.ref.projectId} session ${input.ref.sessionId}`,
       ...(input.metadata ?? {}),
     },
   };
 }
 
 function rootContainer(
-  ref: MeleeProjectSessionRef,
+  ref: ColosseumProjectSessionRef,
   appSessionId: string,
   workingDir?: string,
 ): NewContainer {
   return containerRecord({
-    id: `melee:${appSessionId}:session`,
+    id: `colosseum:${appSessionId}:session`,
     parentContainerId: null,
     label: `Project session ${ref.sessionId}`,
     phase: "session",
@@ -224,8 +224,8 @@ function rootContainer(
 }
 
 function containerLineage(
-  input: MeleeKernelSpawnContextInput,
-  ref: MeleeProjectSessionRef,
+  input: ColosseumKernelSpawnContextInput,
+  ref: ColosseumProjectSessionRef,
   appSessionId: string,
 ): NewContainer[] {
   const workingDir = nonEmpty(input.workingDir);
@@ -237,7 +237,7 @@ function containerLineage(
   const claimSegment = claimId ?? nonEmpty(input.itemId) ?? "none";
   const root = rootContainer(ref, appSessionId, workingDir);
   const run = containerRecord({
-    id: meleeRunContainerId({ ...ref, runId }),
+    id: colosseumRunContainerId({ ...ref, runId }),
     parentContainerId: root.id,
     label: `Run ${runId}`,
     phase: "run",
@@ -248,7 +248,7 @@ function containerLineage(
     metadata: { runId },
   });
   const pr = containerRecord({
-    id: meleePrContainerId({ ...ref, prId }),
+    id: colosseumPrContainerId({ ...ref, prId }),
     parentContainerId: root.id,
     label: `PR ${prId}`,
     phase: "pr",
@@ -259,7 +259,7 @@ function containerLineage(
     metadata: { runId, prId },
   });
   const prepare = containerRecord({
-    id: meleePrepareContainerId(ref),
+    id: colosseumPrepareContainerId(ref),
     parentContainerId: root.id,
     label: "Prepare",
     phase: "prepare",
@@ -269,7 +269,7 @@ function containerLineage(
     workingDir,
   });
   const intake = containerRecord({
-    id: meleeIntakeContainerId(ref),
+    id: colosseumIntakeContainerId(ref),
     parentContainerId: prepare.id,
     label: "Intake",
     phase: "intake",
@@ -280,7 +280,7 @@ function containerLineage(
   });
   const intakeItemPrId = nonEmpty(input.prId) ?? nonEmpty(input.targetId) ?? itemId;
   const intakeItem = containerRecord({
-    id: meleeIntakeItemContainerId({ ...ref, prId: intakeItemPrId }),
+    id: colosseumIntakeItemContainerId({ ...ref, prId: intakeItemPrId }),
     parentContainerId: intake.id,
     label: intakeItemPrId.startsWith("#") ? `${intakeItemPrId} intake` : `PR #${intakeItemPrId} intake`,
     phase: "intake-item",
@@ -314,7 +314,7 @@ function containerLineage(
       ];
     case "worker": {
       const epoch = containerRecord({
-        id: meleeEpochContainerId({ ...ref, runId, epochId }),
+        id: colosseumEpochContainerId({ ...ref, runId, epochId }),
         parentContainerId: run.id,
         label: `Epoch ${epochId}`,
         phase: "epoch",
@@ -325,7 +325,7 @@ function containerLineage(
         metadata: { runId, epochId },
       });
       const worker = containerRecord({
-        id: meleeWorkerContainerId({ ...ref, runId, epochId, claimId: claimSegment }),
+        id: colosseumWorkerContainerId({ ...ref, runId, epochId, claimId: claimSegment }),
         parentContainerId: epoch.id,
         label: `Worker claim ${claimSegment}`,
         phase: "worker",
@@ -344,7 +344,7 @@ function containerLineage(
     }
     case "worker-integration": {
       const epoch = containerRecord({
-        id: meleeEpochContainerId({ ...ref, runId, epochId }),
+        id: colosseumEpochContainerId({ ...ref, runId, epochId }),
         parentContainerId: run.id,
         label: `Epoch ${epochId}`,
         phase: "epoch",
@@ -355,7 +355,7 @@ function containerLineage(
         metadata: { runId, epochId },
       });
       const integration = containerRecord({
-        id: meleeWorkerIntegrationContainerId({ ...ref, runId, epochId, claimId: claimSegment }),
+        id: colosseumWorkerIntegrationContainerId({ ...ref, runId, epochId, claimId: claimSegment }),
         parentContainerId: epoch.id,
         label: `Worker integration ${claimSegment}`,
         phase: "integration",
@@ -375,7 +375,7 @@ function containerLineage(
     }
     case "postmortem": {
       const epoch = containerRecord({
-        id: meleeEpochContainerId({ ...ref, runId, epochId }),
+        id: colosseumEpochContainerId({ ...ref, runId, epochId }),
         parentContainerId: run.id,
         label: `Epoch ${epochId}`,
         phase: "epoch",
@@ -386,7 +386,7 @@ function containerLineage(
         metadata: { runId, epochId },
       });
       const postmortem = containerRecord({
-        id: meleePostmortemContainerId({ ...ref, runId, epochId, claimId: claimSegment }),
+        id: colosseumPostmortemContainerId({ ...ref, runId, epochId, claimId: claimSegment }),
         parentContainerId: epoch.id,
         label: claimId ? `Postmortem claim ${claimSegment}` : `Postmortem ${claimSegment}`,
         phase: "postmortem",
@@ -411,7 +411,7 @@ function containerLineage(
         intake,
         intakeItem,
         containerRecord({
-          id: meleeIntakePostmortemContainerId({ ...ref, prId: intakeItemPrId }),
+          id: colosseumIntakePostmortemContainerId({ ...ref, prId: intakeItemPrId }),
           parentContainerId: intakeItem.id,
           label: intakeItemPrId.startsWith("#") ? `${intakeItemPrId} postmortem` : `PR #${intakeItemPrId} postmortem`,
           phase: "postmortem",
@@ -434,7 +434,7 @@ function containerLineage(
         intake,
         intakeItem,
         containerRecord({
-          id: meleeIntakeKnowledgeContainerId({ ...ref, prId: intakeItemPrId }),
+          id: colosseumIntakeKnowledgeContainerId({ ...ref, prId: intakeItemPrId }),
           parentContainerId: intakeItem.id,
           label: intakeItemPrId.startsWith("#") ? `${intakeItemPrId} knowledge intake` : `PR #${intakeItemPrId} knowledge intake`,
           phase: "knowledge-intake",
@@ -457,7 +457,7 @@ function containerLineage(
         root,
         pr,
         containerRecord({
-          id: meleePrSplitContainerId({ ...ref, prId }),
+          id: colosseumPrSplitContainerId({ ...ref, prId }),
           parentContainerId: pr.id,
           label: `PR split ${prId}`,
           phase: "pr-split",
@@ -474,7 +474,7 @@ function containerLineage(
         root,
         pr,
         containerRecord({
-          id: meleePrReviewContainerId({ ...ref, prId, reviewId }),
+          id: colosseumPrReviewContainerId({ ...ref, prId, reviewId }),
           parentContainerId: pr.id,
           label: `PR review ${reviewId}`,
           phase: "pr-review",
@@ -493,7 +493,7 @@ function containerLineage(
         root,
         pr,
         containerRecord({
-          id: meleePrRepairContainerId({ ...ref, prId, repairId }),
+          id: colosseumPrRepairContainerId({ ...ref, prId, repairId }),
           parentContainerId: pr.id,
           label: input.kind === "reconcile" ? `Reconcile ${repairId}` : `PR repair ${repairId}`,
           phase: input.kind === "reconcile" ? "reconcile" : "repair",
@@ -508,11 +508,11 @@ function containerLineage(
   }
 }
 
-export function createMeleeKernelSpawnContext(
-  input: MeleeKernelSpawnContextInput,
-): MeleeKernelSpawnContext {
+export function createColosseumKernelSpawnContext(
+  input: ColosseumKernelSpawnContextInput,
+): ColosseumKernelSpawnContext {
   const ref = baseRef(input);
-  const appSessionId = meleeAppSessionId(ref);
+  const appSessionId = colosseumAppSessionId(ref);
   const runId = nonEmpty(input.runId);
   const prId = nonEmpty(input.prId);
   const epochId = nonEmpty(input.epochId);

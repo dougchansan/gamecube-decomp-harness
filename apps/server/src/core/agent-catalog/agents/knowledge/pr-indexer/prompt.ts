@@ -25,8 +25,8 @@ function promptFilePath(): string {
 }
 
 export const prompt = definePrompt({
-  id: "melee.pr-indexer.system",
-  title: "Melee PR Indexer System Prompt",
+  id: "colosseum.pr-indexer.system",
+  title: "Colosseum PR Indexer System Prompt",
   archetype: "workflow",
   nodes: [
     section("goal", [

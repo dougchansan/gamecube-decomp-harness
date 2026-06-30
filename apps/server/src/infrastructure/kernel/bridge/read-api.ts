@@ -42,7 +42,7 @@ export interface CreateDbKernelTraceRowsReaderOptions {
   readRows?: typeof getKernelTraceReadRows;
 }
 
-export interface CreateMeleeKernelTraceReadServiceOptions {
+export interface CreateColosseumKernelTraceReadServiceOptions {
   readRows: KernelTraceRowsReader;
   listRows?: KernelTraceRowsLister;
   resolveIdentity?: KernelTraceIdentityResolver;
@@ -173,7 +173,7 @@ export function toTraceSessionMeta(rows: KernelTraceReadRows): TraceSessionMeta 
       root.id,
     topic: stringMeta(metadata, "topic") ?? root.label,
     status: root.status,
-    appSessionType: stringMeta(metadata, "appSessionType") ?? "melee-project-session",
+    appSessionType: stringMeta(metadata, "appSessionType") ?? "colosseum-project-session",
     createdAt: root.createdAt,
     updatedAt: root.updatedAt,
   };
@@ -215,11 +215,11 @@ export function toKernelTraceSessionSummary(
   };
 }
 
-export function createMeleeKernelTraceReadService({
+export function createColosseumKernelTraceReadService({
   readRows,
   listRows,
   resolveIdentity = defaultKernelTraceIdentityResolver,
-}: CreateMeleeKernelTraceReadServiceOptions): KernelTraceReadService {
+}: CreateColosseumKernelTraceReadServiceOptions): KernelTraceReadService {
   return {
     ...(listRows
       ? {

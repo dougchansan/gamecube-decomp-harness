@@ -25,8 +25,8 @@ function promptFilePath(): string {
 }
 
 export const prompt = definePrompt({
-  id: "melee.worker.system",
-  title: "Melee Worker System Prompt",
+  id: "colosseum.worker.system",
+  title: "Colosseum Worker System Prompt",
   archetype: "workflow",
   nodes: [
     section("goal", [
@@ -163,11 +163,9 @@ export const prompt = definePrompt({
               "Code graph facts",
               "Path facts",
               "Decomp standards",
-              "Indexed past PRs",
               "Curated worker lessons",
-              "Resource docs and data sheets",
+              "Project resource docs",
               "PowerPC notes",
-              "External hints",
               "Discord/reference knowledge",
               "Tool-local cache/API evidence",
             ]),

@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "description": "Runtime agent context for D-Comp Orchestrator agents. Paths are relative to the decomp-orchestrator repo root. Melee knowledge source definitions, APIs, data, indexes, and graph resources live under projects/melee/knowledge; reusable GameCube tool definitions live under toolpacks/gamecube-decomp; project tool bindings/data live under projects/melee; role behavior lives beside the server agents package.",
+  "description": "Runtime agent context for D-Comp Orchestrator agents. Paths are relative to the decomp-orchestrator repo root. Colosseum knowledge source definitions, APIs, data, indexes, and graph resources live under projects/pkmn-colosseum/knowledge; reusable GameCube tool definitions live under toolpacks/gamecube-decomp; project tool bindings/data live under projects/pkmn-colosseum; role behavior lives beside the server agents package.",
   "role_defaults": {
     "worker": []
   },
@@ -9,11 +9,11 @@
   "scripts": {
     "rank_decomp_candidates": {
       "path": "toolpacks/gamecube-decomp/operations/rank_decomp_candidates.py",
-      "purpose": "Rank fuzzy functions and linked blocker units from build/GALE01/report.json."
+      "purpose": "Rank fuzzy functions and linked blocker units from build/GC6E01/report.json."
     },
     "decomp_context_lookup": {
       "path": "toolpacks/gamecube-decomp/operations/decomp_context_lookup.py",
-      "purpose": "Search local code, report metadata, PR history, and resource CSVs for one target."
+      "purpose": "Search local code, report metadata, and active project resources for one target."
     },
     "scaffold_decomp_run": {
       "path": "toolpacks/gamecube-decomp/operations/sweeps/scaffold_decomp_run.py",
@@ -30,18 +30,6 @@
     "render_progress_charts": {
       "path": "toolpacks/gamecube-decomp/operations/sweeps/render_progress_charts.py",
       "purpose": "Render experimental search progress, Pareto, and mismatch SVG charts."
-    },
-    "fetch_recent_pr_dump": {
-      "path": "projects/melee/knowledge/sources/code_context/past_prs/commands/fetch_recent_pr_dump.py",
-      "purpose": "Fetch missing GitHub PR metadata, comments, reviews, and diffs into the orchestrator-owned past-PR dump."
-    },
-    "build_pr_postmortems": {
-      "path": "projects/melee/knowledge/sources/code_context/past_prs/commands/build_pr_postmortems.py",
-      "purpose": "Build searchable per-PR JSON knowledge records and shared Pi-agent prompt standards."
-    },
-    "sync_repo_and_pr_library": {
-      "path": "projects/melee/knowledge/sources/code_context/past_prs/commands/sync_repo_and_pr_library.py",
-      "purpose": "Fetch/rebase the local repo and sync missing orchestrator-owned PR knowledge entries."
     }
   }
 }

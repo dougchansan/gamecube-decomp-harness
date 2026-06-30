@@ -6,7 +6,7 @@ function finding(overrides: Partial<QaScanFinding> = {}): QaScanFinding {
   return {
     rule_id: "extern_literal_anchor",
     severity: "error",
-    file: "src/melee/ft/ftcoll.c",
+    file: "src/colosseum/ft/ftcoll.c",
     line: 42,
     excerpt: "extern const f32 lbl_804DA60C;",
     message: "extern-for-literal anchor referencing TU-owned data",
@@ -20,7 +20,7 @@ function scanResult(findings: QaScanFinding[], status: QaScanResult["status"]): 
     tool: "review_lint",
     operation: "review_lint:scan_diff",
     status,
-    repo: "/tmp/melee",
+    repo: "/tmp/colosseum",
     base: "origin/master",
     findings,
     counts: {
@@ -61,13 +61,13 @@ describe("evaluateQaGate", () => {
     expect(gate.qaCounts).toEqual({ errors: 0, warnings: 1 });
     expect(gate.qaFindings).toHaveLength(1);
     expect(gate.hint).toContain("0 error, 1 warning");
-    expect(gate.hint).toContain("packed_string_blob at src/melee/ft/ftcoll.c:7");
+    expect(gate.hint).toContain("packed_string_blob at src/colosseum/ft/ftcoll.c:7");
   });
 
   test("hard fail (exit 1) fails with rule ids and locations in the hint", () => {
     const findings = [
       finding(),
-      finding({ rule_id: "unrolled_assert", file: "src/melee/gr/ground.c", line: 99 }),
+      finding({ rule_id: "unrolled_assert", file: "src/colosseum/gr/ground.c", line: 99 }),
     ];
     const gate = evaluateQaGate(invocation({ exitCode: 1, result: scanResult(findings, "failed") }), false);
     expect(gate.qaGatePassed).toBe(false);
@@ -75,8 +75,8 @@ describe("evaluateQaGate", () => {
     expect(gate.qaCounts).toEqual({ errors: 2, warnings: 0 });
     expect(gate.hint).toContain("QA gate failed: 2 QA finding(s)");
     expect(gate.hint).toContain("2 error, 0 warning");
-    expect(gate.hint).toContain("extern_literal_anchor at src/melee/ft/ftcoll.c:42");
-    expect(gate.hint).toContain("unrolled_assert at src/melee/gr/ground.c:99");
+    expect(gate.hint).toContain("extern_literal_anchor at src/colosseum/ft/ftcoll.c:42");
+    expect(gate.hint).toContain("unrolled_assert at src/colosseum/gr/ground.c:99");
     expect(gate.hint).toContain("lower match % without it is the correct outcome");
     expect(gate.hint).toContain("qa_scan.json");
   });

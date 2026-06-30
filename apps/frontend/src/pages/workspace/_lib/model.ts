@@ -11,8 +11,8 @@ export function isDraftBatchCandidate(record: PrFlowRecord): boolean {
 }
 
 export function processName(value: unknown): string {
-  const raw = text(value, "melee-live").trim() || "melee-live";
-  return raw.replace(/[^A-Za-z0-9_.-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80) || "melee-live";
+  const raw = text(value, "pkmn-colosseum-live").trim() || "pkmn-colosseum-live";
+  return raw.replace(/[^A-Za-z0-9_.-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80) || "pkmn-colosseum-live";
 }
 
 export function schedulingForWorkers(
@@ -64,7 +64,7 @@ export function prettyStatus(value: unknown, fallback = "-"): string {
 }
 
 export function compactFilePath(path: string): string {
-  return path.replace(/^src\/melee\//, "").replace(/^src\//, "");
+  return path.replace(/^src\/colosseum\//, "").replace(/^src\//, "");
 }
 
 export function fileCountLabel(count: number): string {
@@ -108,7 +108,7 @@ function prRecordMatchesSession(record: JsonObject, runId: string, activeBranche
   return !Number.isFinite(numberValue(record.prNumber, NaN)) && ["planned", "planned_mock", "blocked"].includes(status);
 }
 
-function derivedPrRecords(dashboard: Dashboard | null, hasMeleePrFixture: boolean): PrFlowRecord[] {
+function derivedPrRecords(dashboard: Dashboard | null, hasColosseumPrFixture: boolean): PrFlowRecord[] {
   const prs = asObject(dashboard?.prs);
   const records = asArray(prs.records).map(asObject);
   const runId = text(asObject(asObject(dashboard?.status).run).id);
@@ -166,10 +166,10 @@ function derivedPrRecords(dashboard: Dashboard | null, hasMeleePrFixture: boolea
     }));
   }
 
-  if (!hasMeleePrFixture) return [];
+  if (!hasColosseumPrFixture) return [];
   return [
     {
-      branch: "planned/mock/melee-match-slice-a",
+      branch: "planned/mock/colosseum-match-slice-a",
       ci: "",
       comments: 0,
       displayName: "Planned match slice A",
@@ -189,7 +189,7 @@ function derivedPrRecords(dashboard: Dashboard | null, hasMeleePrFixture: boolea
       validationStatus: "not_run",
     },
     {
-      branch: "planned/mock/melee-match-slice-b",
+      branch: "planned/mock/colosseum-match-slice-b",
       ci: "",
       comments: 0,
       displayName: "Planned match slice B",
@@ -304,7 +304,7 @@ export function deriveSessionView(dashboard: Dashboard | null, config: UiConfig 
       artifactStatus(ship, ["status", "patchPath"]) ||
       rawPrRecords.length > 0 ||
       operationLooksPrMode(operationName));
-  const hasMeleePrFixture = project?.id === "melee" && !process.running && runStatus !== "active" && !completedLegacyRun && rawPrRecords.length === 0;
+  const hasColosseumPrFixture = project?.id === "pkmn-colosseum" && !process.running && runStatus !== "active" && !completedLegacyRun && rawPrRecords.length === 0;
   const modeEvidence: string[] = [];
   if (hasCanonicalSession) modeEvidence.push(`canonical phase ${prettyStatus(canonicalPhase)}${canonicalSubphase ? ` / ${prettyStatus(canonicalSubphase)}` : ""}`);
   if (canonicalBlockers.length > 0) modeEvidence.push(`${canonicalBlockers.length.toLocaleString()} canonical blocker(s)`);
@@ -312,18 +312,18 @@ export function deriveSessionView(dashboard: Dashboard | null, config: UiConfig 
   if (activeClaims > 0) modeEvidence.push(`${activeClaims.toLocaleString()} active claim(s)`);
   if (runStatus === "active") modeEvidence.push("run status active");
   if (hasHandoffEvidence) modeEvidence.push("handoff, QA, split, ship, or PR evidence exists");
-  if (hasMeleePrFixture && !hasHandoffEvidence) modeEvidence.push("current Melee PR-flow planned/mock fixture");
+  if (hasColosseumPrFixture && !hasHandoffEvidence) modeEvidence.push("current Colosseum PR-flow planned/mock fixture");
 
   let mode: SessionView["mode"] = "none";
   if (canonicalPhase === "running") mode = "run";
   else if (canonicalPhase === "pr") mode = "pr";
   else if (canonicalPhase === "preparing" || canonicalPhase === "complete") mode = "none";
   else if (process.running || activeClaims > 0) mode = "run";
-  else if (hasHandoffEvidence || hasMeleePrFixture) mode = "pr";
+  else if (hasHandoffEvidence || hasColosseumPrFixture) mode = "pr";
   else if (runStatus === "active" || (runId && !completedLegacyRun)) mode = "run";
 
-  const hasActivePrSession = !completedLegacyRun && (canonicalPhase === "pr" || mode === "pr" || hasHandoffEvidence || hasMeleePrFixture);
-  const prRecords = hasActivePrSession ? derivedPrRecords(dashboard, hasMeleePrFixture) : [];
+  const hasActivePrSession = !completedLegacyRun && (canonicalPhase === "pr" || mode === "pr" || hasHandoffEvidence || hasColosseumPrFixture);
+  const prRecords = hasActivePrSession ? derivedPrRecords(dashboard, hasColosseumPrFixture) : [];
   const prBlockedReasons: string[] = [];
   const shipStatus = text(ship.status);
   const qaStatus = text(asObject(qa.prPromotion).status, text(qa.status));
@@ -333,7 +333,7 @@ export function deriveSessionView(dashboard: Dashboard | null, config: UiConfig 
     if (qaStatus === "blocked" || qaStatus === "failed") prBlockedReasons.push(`QA ${prettyStatus(qaStatus)}`);
     if (qaRepairStatus && !["passed", "clean", "pr_ready"].includes(qaRepairStatus)) prBlockedReasons.push(`QA repair ${prettyStatus(qaRepairStatus)}`);
     if (canonicalPhase === "pr") prBlockedReasons.push(...canonicalBlockers);
-    if (hasMeleePrFixture) prBlockedReasons.push("current PR repair campaign is routed-blocked; isolate ship set before draft opening");
+    if (hasColosseumPrFixture) prBlockedReasons.push("current PR repair campaign is routed-blocked; isolate ship set before draft opening");
   }
 
   const activePrStatuses = new Set(["planned", "planned_mock", "branch_pushed", "draft", "open", "changes_requested", "blocked"]);
@@ -423,7 +423,7 @@ export function deriveSessionView(dashboard: Dashboard | null, config: UiConfig 
     canonicalSubphase,
     handoffIdle,
     handoffReason,
-    hasMeleePrFixture,
+    hasColosseumPrFixture,
     mode,
     modeEvidence,
     modeLabel,

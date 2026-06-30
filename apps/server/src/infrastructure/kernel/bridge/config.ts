@@ -2,11 +2,11 @@ import { resolve } from "node:path";
 
 import type { NewKernelRegistration } from "@agent-kernel/db";
 
-export const MELEE_KERNEL_ID = "melee-decomp-orchestrator";
-export const MELEE_KERNEL_DISPLAY_NAME = "Melee Decomp Orchestrator";
-export const MELEE_DASHBOARD_PROCESS_NAME = "melee-live";
+export const COLOSSEUM_KERNEL_ID = "pkmn-colosseum-decomp-orchestrator";
+export const COLOSSEUM_KERNEL_DISPLAY_NAME = "Pokemon Colosseum Decomp Orchestrator";
+export const COLOSSEUM_DASHBOARD_PROCESS_NAME = "pkmn-colosseum-live";
 
-export const MELEE_KERNEL_MARKER_CONFIG = Object.freeze({
+export const COLOSSEUM_KERNEL_MARKER_CONFIG = Object.freeze({
   sessionBinding: "agent-kernel:session-binding",
   lifecycle: "agent-kernel:pi-lifecycle",
   subagentLink: "agent-kernel:subagent-link",
@@ -15,7 +15,7 @@ export const MELEE_KERNEL_MARKER_CONFIG = Object.freeze({
 export const DEFAULT_PI_SESSIONS_DIR_NAME = ".pi-sessions";
 export const DEFAULT_TAILER_CURSOR_PATH = ".decomp-orchestrator-state/agent-kernel-tailer-cursors.json";
 
-export interface MeleeKernelBridgeConfig {
+export interface ColosseumKernelBridgeConfig {
   kernelId: string;
   displayName: string;
   processName: string;
@@ -29,7 +29,7 @@ export interface MeleeKernelBridgeConfig {
   metadata: Record<string, unknown>;
 }
 
-export interface CreateMeleeKernelBridgeConfigInput {
+export interface CreateColosseumKernelBridgeConfigInput {
   kernelId?: string;
   displayName?: string;
   processName?: string;
@@ -43,30 +43,30 @@ export interface CreateMeleeKernelBridgeConfigInput {
   metadata?: Record<string, unknown>;
 }
 
-export function createMeleeKernelBridgeConfig(
-  input: CreateMeleeKernelBridgeConfigInput = {},
-): MeleeKernelBridgeConfig {
+export function createColosseumKernelBridgeConfig(
+  input: CreateColosseumKernelBridgeConfigInput = {},
+): ColosseumKernelBridgeConfig {
   const workingDir = input.workingDir ?? process.cwd();
   const piSessionsDir = input.piSessionsDir ?? resolve(workingDir, DEFAULT_PI_SESSIONS_DIR_NAME);
   const cursorSnapshotPath =
     input.cursorSnapshotPath ?? resolve(workingDir, DEFAULT_TAILER_CURSOR_PATH);
 
   return {
-    kernelId: input.kernelId ?? MELEE_KERNEL_ID,
-    displayName: input.displayName ?? MELEE_KERNEL_DISPLAY_NAME,
-    processName: input.processName ?? MELEE_DASHBOARD_PROCESS_NAME,
+    kernelId: input.kernelId ?? COLOSSEUM_KERNEL_ID,
+    displayName: input.displayName ?? COLOSSEUM_KERNEL_DISPLAY_NAME,
+    processName: input.processName ?? COLOSSEUM_DASHBOARD_PROCESS_NAME,
     workingDir,
     piSessionsDir,
     cursorSnapshotPath,
     markerConfig: {
-      ...MELEE_KERNEL_MARKER_CONFIG,
+      ...COLOSSEUM_KERNEL_MARKER_CONFIG,
       ...input.markerConfig,
     },
     appBaseUrl: input.appBaseUrl ?? null,
     appTraceUrlTemplate: input.appTraceUrlTemplate ?? null,
     genericTraceUrlTemplate: input.genericTraceUrlTemplate ?? null,
     metadata: {
-      processName: input.processName ?? MELEE_DASHBOARD_PROCESS_NAME,
+      processName: input.processName ?? COLOSSEUM_DASHBOARD_PROCESS_NAME,
       ...input.metadata,
     },
   };

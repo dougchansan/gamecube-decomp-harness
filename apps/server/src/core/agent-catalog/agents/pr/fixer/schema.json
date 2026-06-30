@@ -1,5 +1,5 @@
 {
-  "schema_version": "melee_pr_fixer_result_v1",
+  "schema_version": "colosseum_pr_fixer_result_v1",
   "pr": {
     "number": 0,
     "branch": "user/pr-branch",
@@ -12,7 +12,7 @@
   ],
   "validation": [
     {
-      "command": "review_lint scan_diff --path src/melee/example.c",
+      "command": "review_lint scan_diff --path src/colosseum/example.c",
       "status": "passed",
       "artifact_path": "state/pr_fixers/pr-0/post_scan.json",
       "notes": "No maintainer-rejected source patterns remain in the edited file."
@@ -21,7 +21,7 @@
   "comment_dispositions": [
     {
       "comment_id": "review-comment-1",
-      "file": "src/melee/example.c",
+      "file": "src/colosseum/example.c",
       "line": 24,
       "disposition": "fixed_source",
       "evidence": "Replaced the rejected source shape with the nearby project helper."

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Create a decomp-runs/<slug>/ bundle for data-driven Melee decomp sweeps."""
+"""Create a decomp-runs/<slug>/ bundle for data-driven Colosseum decomp sweeps."""
 
 from __future__ import annotations
 
@@ -163,7 +163,7 @@ def find_objdiff_unit(root: Path, source_path: str | None) -> dict[str, Any]:
 
 
 def report_function_info(root: Path, unit_name: str, symbol: str) -> dict[str, Any]:
-    data = load_json(root / "build" / "GALE01" / "report.json")
+    data = load_json(root / "build" / "GC6E01" / "report.json")
     if not data:
         return {}
     for unit in data.get("units", []):
@@ -206,7 +206,7 @@ def write_csv(path: Path, header: list[str], rows: list[dict[str, Any]], force: 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--name", help="Readable run name or slug")
-    parser.add_argument("--source", help="Target source file, e.g. src/melee/it/items/itlinkbomb.c")
+    parser.add_argument("--source", help="Target source file, e.g. src/colosseum/it/items/itlinkbomb.c")
     parser.add_argument("--symbol", action="append", default=[], help="Target symbol; repeat for multiple symbols")
     parser.add_argument("--root", type=Path, default=Path("."), help="Repo root (default: current directory)")
     parser.add_argument("--runs-dir", default="decomp-runs", help="Run root relative to repo (default: decomp-runs)")
@@ -312,7 +312,7 @@ def main() -> int:
     write_text(
         run_dir / "goal.md",
         f"""<goal>
-- Continue the Melee decomp sweep in `decomp-runs/{run_slug}` for source `{source_rel or '<source-path>'}`, unit `{unit_name or '<unit>'}`, symbols {symbols_text}.
+- Continue the Colosseum decomp sweep in `decomp-runs/{run_slug}` for source `{source_rel or '<source-path>'}`, unit `{unit_name or '<unit>'}`, symbols {symbols_text}.
 - Drive the run from baseline reproduction through candidate-matrix sweeps, Pareto selection, post-sweep worked/failed analysis, next-sweep planning, permuter handoff when justified, cleanup, and validation.
 </goal>
 

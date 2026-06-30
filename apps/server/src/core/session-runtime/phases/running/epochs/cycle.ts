@@ -373,9 +373,9 @@ export async function runEpochCycle(store: StateStore, runId: string, repoRoot: 
 async function runEpochCycleInner(store: StateStore, runId: string, repoRoot: string, stateDir: string, options: EpochCycleOptions): Promise<EpochCycleResult> {
   const startedAt = Date.now();
   const label = options.label ?? null;
-  const reportRelPath = options.reportRelPath ?? "build/GALE01/report.json";
-  const reportChangesRelPath = options.reportChangesRelPath ?? "build/GALE01/report_changes.json";
-  const baselineRelPath = options.baselineRelPath ?? "build/GALE01/baseline.json";
+  const reportRelPath = options.reportRelPath ?? "build/GC6E01/report.json";
+  const reportChangesRelPath = options.reportChangesRelPath ?? "build/GC6E01/report_changes.json";
+  const baselineRelPath = options.baselineRelPath ?? "build/GC6E01/baseline.json";
   const integrationDrain = await processWorkerOutputIntegrationQueue({
     dryRun: false,
     limit: 64,
@@ -558,11 +558,11 @@ async function runEpochCycleInner(store: StateStore, runId: string, repoRoot: st
       artifactType: "trusted_report",
       artifactKey: "current",
       sourcePath: resolve(artifactDir, "report_changes.json"),
-      sourceLabel: "build/GALE01/report_changes.json",
+      sourceLabel: "build/GC6E01/report_changes.json",
       payload: trustedReportFromRegressionReport(
         regressionReport,
         resolve(artifactDir, "report_changes.json"),
-        "build/GALE01/report_changes.json",
+        "build/GC6E01/report_changes.json",
         savePoint.createdAt,
         0,
       ) as unknown as Record<string, unknown>,

@@ -1,7 +1,7 @@
-diff --git a/src/melee/ty/tydisplay.c b/src/melee/ty/tydisplay.c
+diff --git a/src/colosseum/ty/tydisplay.c b/src/colosseum/ty/tydisplay.c
 index 5d71101..8ad9ad1 100644
---- a/src/melee/ty/tydisplay.c
-+++ b/src/melee/ty/tydisplay.c
+--- a/src/colosseum/ty/tydisplay.c
++++ b/src/colosseum/ty/tydisplay.c
 @@ -137,6 +137,11 @@ typedef struct TyDspConfig {
      /* 0x7C */ s32 x7C;
  } TyDspConfig;

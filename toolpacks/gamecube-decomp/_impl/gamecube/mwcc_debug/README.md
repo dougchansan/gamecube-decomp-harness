@@ -2,7 +2,7 @@
 
 > **Tool note:** this code is vendored under `toolpacks/gamecube-decomp/_impl/gamecube/mwcc_debug`.
 > For live dump/diagnose APIs, build the DLL here and patch/copy the selected
-> Melee checkout's `mwcceppc.exe` into `mwcceppc_debug.exe`. The notes below
+> Colosseum checkout's `mwcceppc.exe` into `mwcceppc_debug.exe`. The notes below
 > are the original standalone description.
 
 This project generates `lmgr326b.dll`, a drop-in replacement .dll for the Metrowerks CodeWarrior v1.2.5n PPC compiler that enables diagnostic logging of its IR optimizer and PPC code generator. 
@@ -11,7 +11,7 @@ This project generates `lmgr326b.dll`, a drop-in replacement .dll for the Metrow
 
 While using ghidra/gdb to try and understand the compiler's decision making process, I found what looked to be dormant debugging code surrounding its IR optimizer and PPC code generator and tried to find information on it. While looking at a significantly newer version (7.0) of MWCC's decompiled [source code](https://git.wuffs.org/MWCC/) targeting `MSL_MacOS`, maintained by Ninji (shoutouts to furries), I saw that there was debugging functionality behind a compiler option `debug_listing` and debugging guards (`CW_ENABLE_IRO_DEBUG`, `CW_ENABLE_PCODE_DEBUG`) surrounding the code that it enabled.
 
-I wanted to know if similar functionality existed in the compiler used for the Super Smash Brothers Melee decomp project. Amazingly, it did seemingly exist when looking for data related to it in the binary, however when trying `#pragma debuglisting on` it didn't have any meaninful output. Ghidra and gdb to the rescue.
+I wanted to know if similar functionality existed in the compiler used for the Pokemon Colosseum decomp project. Amazingly, it did seemingly exist when looking for data related to it in the binary, however when trying `#pragma debuglisting on` it didn't have any meaninful output. Ghidra and gdb to the rescue.
 
 The IR optimizer logging functionality was still available, just gated behind a flag that gets forced to `0` during init. I checked the PPC backend listing functions as well (`pclistblocks` et al), but these were compiled as empty stubs. This meant `CW_ENABLE_PCODE_DEBUG` ifdefed the actual code responsible for the PPC backend unlike the IR optimizer, but it turns out the operand formatting function `formatoperands` @ 0x4C4BF0 was still fully intact. It handles every PPC opcode with symbol names, register classes, alias annotations, etc. We just needed to call it.
 
@@ -50,7 +50,7 @@ python3 patch_mwcceppc_for_wibo.py \
 Then run wibo with `mwcceppc_wibo_debug.exe`; `MWDBG326.dll` is copied next to it
 by the patch script.
 
-The compiler writes `pcdump.txt` to its working directory, and in the case of melee it's going to be the repo root when building via ninja. It overwrites whatever the previous `pcdump.txt` file was, so its debug information contents will be related to whatever the last compiled TU was.
+The compiler writes `pcdump.txt` to its working directory, and in the case of colosseum it's going to be the repo root when building via ninja. It overwrites whatever the previous `pcdump.txt` file was, so its debug information contents will be related to whatever the last compiled TU was.
 
 ## What it does
 

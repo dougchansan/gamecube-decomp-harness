@@ -7,9 +7,9 @@ import {
 } from "@agent-kernel/kernel";
 import type { NewContainer } from "@agent-kernel/db";
 
-import { MELEE_KERNEL_ID } from "./config.js";
+import { COLOSSEUM_KERNEL_ID } from "./config.js";
 
-export interface MeleeKernelSpawnContext {
+export interface ColosseumKernelSpawnContext {
   appSessionId?: string;
   containerId?: string;
   containerLineage?: NewContainer[];
@@ -18,26 +18,26 @@ export interface MeleeKernelSpawnContext {
   metadata?: Record<string, unknown>;
 }
 
-export interface MeleeKernelSpawnOptions {
+export interface ColosseumKernelSpawnOptions {
   model?: string;
   timeoutMs?: number;
   abortSignal?: AbortSignal;
   metadata?: Record<string, unknown>;
 }
 
-export type MeleeKernelSpawnAdapter<TResult = unknown> = KernelSpawnAdapter<
-  MeleeKernelSpawnContext,
-  MeleeKernelSpawnOptions,
+export type ColosseumKernelSpawnAdapter<TResult = unknown> = KernelSpawnAdapter<
+  ColosseumKernelSpawnContext,
+  ColosseumKernelSpawnOptions,
   TResult
 >;
 
-export type CreateMeleeKernelOptions<
+export type CreateColosseumKernelOptions<
   TResult = unknown,
   TAgentManager extends KernelAgentManagerLike | undefined = undefined,
 > = Omit<
   KernelConfig<
-    MeleeKernelSpawnContext,
-    MeleeKernelSpawnOptions,
+    ColosseumKernelSpawnContext,
+    ColosseumKernelSpawnOptions,
     TResult,
     TAgentManager
   >,
@@ -46,24 +46,24 @@ export type CreateMeleeKernelOptions<
   id?: string;
 };
 
-export type MeleeKernelInstance<
+export type ColosseumKernelInstance<
   TResult = unknown,
   TAgentManager extends KernelAgentManagerLike | undefined = undefined,
 > = KernelInstance<
-  MeleeKernelSpawnContext,
-  MeleeKernelSpawnOptions,
+  ColosseumKernelSpawnContext,
+  ColosseumKernelSpawnOptions,
   TResult,
   TAgentManager
 >;
 
-export function createMeleeKernel<
+export function createColosseumKernel<
   TResult = unknown,
   TAgentManager extends KernelAgentManagerLike | undefined = undefined,
 >(
-  options: CreateMeleeKernelOptions<TResult, TAgentManager>,
-): MeleeKernelInstance<TResult, TAgentManager> {
+  options: CreateColosseumKernelOptions<TResult, TAgentManager>,
+): ColosseumKernelInstance<TResult, TAgentManager> {
   return createKernel({
     ...options,
-    id: options.id ?? MELEE_KERNEL_ID,
+    id: options.id ?? COLOSSEUM_KERNEL_ID,
   });
 }

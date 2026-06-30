@@ -1,4 +1,0 @@
-interface:
-  display_name: "Melee PR Workflow"
-  short_description: "Shape reviewer-friendly Melee PRs and run handoff checks."
-  default_prompt: "Use $melee-pr-workflow to shape the current Melee changes into reviewer-friendly PRs, refresh PR knowledge, sync with origin/master, and prepare the PR body and handoff checks."

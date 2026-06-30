@@ -30,7 +30,7 @@ function writeRawSlice(dataRoot: string, number: number, state = "MERGED"): void
 
 function writePostmortem(dataRoot: string, number: number, agentStatus = "agent_completed"): void {
   writeJson(resolve(dataRoot, "prs", `pr-${number}`, "postmortem", "postmortem.json"), {
-    schema_version: "melee_pr_postmortem_v1",
+    schema_version: "colosseum_pr_postmortem_v1",
     agent_status: agentStatus,
   });
 }
@@ -55,7 +55,7 @@ describe("prepare PR index debt scan", () => {
       sourceRoot: () => sourceRoot,
     } as unknown as PreparingRuntimeDeps;
     const paths = {
-      project: { id: "melee" },
+      project: { id: "colosseum" },
     } as unknown as PreparingRuntimeProjectContext;
 
     const debt = scanPrIndexDebtForPrepare(deps, paths, [104]);

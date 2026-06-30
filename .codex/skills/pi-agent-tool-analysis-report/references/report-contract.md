@@ -14,14 +14,14 @@ Read this before changing the analyzer, renderer, or HTML format for
 
 ## Inputs
 
-- `projects/melee/state/orchestrator.sqlite`, table `events`: terminal worker
+- `projects/pkmn-colosseum/state/orchestrator.sqlite`, table `events`: terminal worker
   events and `runner_validation`. This is the canonical outcome source.
-- `projects/melee/state/orchestrator.sqlite`, table `pi_sessions`: worker
+- `projects/pkmn-colosseum/state/orchestrator.sqlite`, table `pi_sessions`: worker
   session to lease mapping, transcript paths, thinking level, status, and times.
 - `.pi-sessions/worker/*.jsonl`: duration, tool calls, advertised tools parsed
   from the initial prompt's `<available_tools>` block.
 - Optional branch-delta input:
-  `projects/melee/checkout/build/GALE01/report_changes_production.json`.
+  `projects/pkmn-colosseum/checkout/build/GC6E01/report_changes_production.json`.
 
 The analyzer groups by lease. Repair sessions are summed into the owning lease.
 

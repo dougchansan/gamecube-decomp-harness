@@ -20,14 +20,14 @@ from search_index import package_root_for_tool, tool_storage_root  # type: ignor
 
 PACKAGE_ROOT = package_root_for_tool(TOOL_ROOT)
 TOOL_STORAGE_ROOT = tool_storage_root(TOOL_ROOT)
-DEFAULT_REPO_ROOT = PACKAGE_ROOT.parent / "melee"
+DEFAULT_REPO_ROOT = PACKAGE_ROOT.parent / "pkmn-colosseum"
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run analyzeHeadless against build/GALE01/main.elf and cache Ghidra output.")
+    parser = argparse.ArgumentParser(description="Run analyzeHeadless against build/GC6E01/main.elf and cache Ghidra output.")
     parser.add_argument("--repo-root", type=Path, default=DEFAULT_REPO_ROOT)
     parser.add_argument("--analyze-headless", default=os.environ.get("GHIDRA_ANALYZE_HEADLESS", ""))
-    parser.add_argument("--project-name", default="melee-ghidra-smoke")
+    parser.add_argument("--project-name", default="colosseum-ghidra-smoke")
     return parser.parse_args()
 
 
@@ -71,7 +71,7 @@ def main() -> int:
     repo_root = args.repo_root.resolve()
     analyze = find_analyze_headless(args.analyze_headless)
     java = java_home()
-    input_elf = repo_root / "build" / "GALE01" / "main.elf"
+    input_elf = repo_root / "build" / "GC6E01" / "main.elf"
     project_dir = TOOL_STORAGE_ROOT / "cache" / "ghidra_project"
     log_path = TOOL_STORAGE_ROOT / "cache" / "ghidra_headless_probe.log"
     index_path = TOOL_STORAGE_ROOT / "indexes" / "ghidra_headless_probe.jsonl"
@@ -105,7 +105,7 @@ def main() -> int:
                     "id": "ghidra_headless_probe:main.elf",
                     "kind": "ghidra_headless_probe_live",
                     "title": "Ghidra headless import smoke: main.elf",
-                    "summary": "analyzeHeadless imported build/GALE01/main.elf successfully for a bounded local smoke.",
+                    "summary": "analyzeHeadless imported build/GC6E01/main.elf successfully for a bounded local smoke.",
                     "text": f"ghidra analyzeHeadless main.elf {input_elf} {args.project_name}",
                     "evidence_ref": str(log_path),
                     "payload": {
@@ -150,7 +150,7 @@ def main() -> int:
         "record_count": len(rows),
         "generated_artifacts": [str(log_path)] if log_path.exists() else [],
         "generated_indexes": [str(index_path)] if index_path.exists() else [],
-        "dependencies": [analyze or "analyzeHeadless", java or "openjdk@21", "build/GALE01/main.elf"],
+        "dependencies": [analyze or "analyzeHeadless", java or "openjdk@21", "build/GC6E01/main.elf"],
         "analyze_headless": analyze,
         "java_home": java,
         "stderr_excerpt": (proc.stderr if proc else "")[-2000:] if proc else "",

@@ -1,24 +1,24 @@
 ---
-covers: Current Melee repo mechanics that the orchestrator indexes or wraps
+covers: Current Colosseum repo mechanics that the orchestrator indexes or wraps
 concepts: [repo-mechanics, report-json, objdiff, configure, progress-terms, commands, wibo]
 code-ref: decomp-orchestrator/tools, decomp-orchestrator/apps/server/src/core/session-runtime/phases/running/board, decomp-orchestrator/apps/server/src/infrastructure/shell
 ---
 
 # Current Repo Mechanics
 
-The orchestrator should index and drive the existing Melee progress pipeline. It
+The orchestrator should index and drive the existing Colosseum progress pipeline. It
 should not fork the compiler, report, objdiff, or progress machinery.
 
 ## Artifacts And Commands
 
 | Artifact Or Command | Current Role | Orchestrator Use |
 | --- | --- | --- |
-| `config/GALE01/config.yml` | Input to DTK's DOL split; points at the original DOL, symbols, and splits. | Read-only provenance for object/unit boundaries and target addresses. |
+| `config/GC6E01/config.yml` | Input to DTK's DOL split; points at the original DOL, symbols, and splits. | Read-only provenance for object/unit boundaries and target addresses. |
 | `python configure.py` | Generates `build.ninja`, `objdiff.json`, and compile commands. | Run during workspace/bootstrap and after source/config changes that require regeneration. |
 | `python3 configure.py --require-protos --wrapper <state>/tools/wibo` | Generates the same build graph with MWCC invocations routed through wibo. | Preferred orchestrator configure command when project-state wibo is installed. |
 | `configure.py` object flags | `Object(Matching, ...)` means linked from rebuilt source; `NonMatching` means diffable but not linked. | Distinguish exact code progress from linked progress. |
 | `objdiff.json` | Maps units to original objects, rebuilt objects, source paths, scratch context, and completion metadata. | Primary source for unit metadata, source paths, compiler flags, and write-set derivation. |
-| `build/GALE01/report.json` | Generated report with unit/function match metrics. | Main index input for target discovery, progress targets, score deltas, and regression checks. |
+| `build/GC6E01/report.json` | Generated report with unit/function match metrics. | Main index input for target discovery, progress targets, score deltas, and regression checks. |
 | `decomp-find` | Candidate ranking helper built from `report.json`. | Internal board-scan signal, not the top-level workflow. |
 | `tools/table-typer dups` | Finds normalized assembly duplicate groups with matched refs and unmatched candidates. | High-confidence graph edges and duplicate-adaptation worker evidence. |
 | `decomp-runs/` | Existing experiment-bundle convention. | Per-target or per-capability artifact ledger; the orchestrator DB can point into these bundles. |
@@ -36,9 +36,9 @@ should not fork the compiler, report, objdiff, or progress machinery.
 
 ```sh
 python3 configure.py --require-protos --wrapper projects/<id>/state/tools/wibo
-ninja build/GALE01/report.json
+ninja build/GC6E01/report.json
 ninja progress
-bun run server:job -- --project melee kg-rank-features --limit 200
+bun run server:job -- --project pkmn-colosseum kg-rank-features --limit 200
 build/tools/objdiff-cli diff -p . -u <unit> <symbol>
 (cd tools/table-typer && go run . dups)
 ```

@@ -35,12 +35,12 @@ from ninja_compile import (
 )
 
 # Project checkout root: explicit override, then Claude Code's project dir,
-# then assume this script lives at <melee>/tools/.
+# then assume this script lives at <colosseum>/tools/.
 from project_root import resolve_root
 
 ROOT = resolve_root()
 SRC_ROOT = ROOT / "src"
-# Sibling implementation scripts live next to this one, not in the melee tree.
+# Sibling implementation scripts live next to this one, not in the colosseum tree.
 TOOLS = Path(__file__).resolve().parent
 
 
@@ -78,7 +78,7 @@ def run_diff(
     verdicts must come from the strict score, otherwise a function can read
     "100%" here while the official score is still below exact.
     """
-    ref_obj = f"./build/GALE01/obj/{obj_path}.o"
+    ref_obj = f"./build/GC6E01/obj/{obj_path}.o"
     command = [
         objdiff_cli(), "diff",
         "--format", "json",

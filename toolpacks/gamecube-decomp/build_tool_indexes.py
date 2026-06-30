@@ -32,7 +32,7 @@ def parse_args() -> argparse.Namespace:
     """Parse CLI options for regenerating lightweight suite indexes."""
 
     parser = argparse.ArgumentParser(description="Generate local JSONL indexes for registered tool APIs.")
-    parser.add_argument("--repo-root", type=Path, default=PACKAGE_ROOT.parent / "melee")
+    parser.add_argument("--repo-root", type=Path, default=PACKAGE_ROOT.parent / "pkmn-colosseum")
     return parser.parse_args()
 
 
@@ -61,7 +61,7 @@ def write_jsonl(path: Path, rows: Iterable[dict[str, Any]]) -> int:
 def report_functions(repo_root: Path) -> list[dict[str, Any]]:
     """Load function rows from the target checkout report or local fallback."""
 
-    report_path = repo_root / "build" / "GALE01" / "report.json"
+    report_path = repo_root / "build" / "GC6E01" / "report.json"
     report = read_json(report_path, {})
     functions: list[dict[str, Any]] = []
     for unit in report.get("units") or []:
@@ -154,7 +154,7 @@ def build_ghidra_index(repo_root: Path) -> int:
                 "source_path": fn["source_path"],
                 "unit": fn["unit"],
                 "text": text,
-                "evidence_ref": str(fn.get("evidence_ref") or repo_root / "build" / "GALE01" / "report.json"),
+                "evidence_ref": str(fn.get("evidence_ref") or repo_root / "build" / "GC6E01" / "report.json"),
                 "payload": fn,
             }
         )
@@ -182,7 +182,7 @@ def build_opseq_index(repo_root: Path) -> int:
                 "unit": fn["unit"],
                 "address": fn["address"],
                 "text": f"{fn['symbol']} {fn['source_path']} {fn['unit']} size {size} bucket {size_bucket} {status}",
-                "evidence_ref": str(fn.get("evidence_ref") or repo_root / "build" / "GALE01" / "report.json"),
+                "evidence_ref": str(fn.get("evidence_ref") or repo_root / "build" / "GC6E01" / "report.json"),
                 "payload": {**fn, "size_bucket": size_bucket, "status": status},
             }
         )

@@ -20,7 +20,7 @@ This audit tracks where each design idea lives in the markdown docs.
 | Board Prioritization | [Board prioritization](../../10-system-design/15-board-prioritization.md) | Preserves candidate-prior formula and scheduling signals. |
 | Worker Lifecycle | [Worker lifecycle](../../10-system-design/40-worker-lifecycle.md), [Worker capabilities](../../10-system-design/45-worker-capabilities.md) | Covers target packet, research, attempt loop, runner validation, checkpointing, and lifecycle close. |
 | Write Safety | [Write safety](../../10-system-design/35-write-safety.md), [State implementation](../state/00-overview.md) | Covers explicit write sets, worker worktrees, active claims, stale base checks, and artifact race rules. |
-| Worker Capabilities | [Worker capabilities](../../10-system-design/45-worker-capabilities.md), [Knowledge model](../../10-system-design/50-knowledge-model.md) | Covers capability table, guardrails, evidence, and `melee-assist` absorption map. |
+| Worker Capabilities | [Worker capabilities](../../10-system-design/45-worker-capabilities.md), [Knowledge model](../../10-system-design/50-knowledge-model.md) | Covers capability table, guardrails, evidence, and `colosseum-assist` absorption map. |
 | Score Integration Gate | [Score integration and PR handoff](../../10-system-design/60-score-and-pr-handoff.md), [UI implementation](../ui/00-overview.md) | Covers serial integration, validation, baseline update, dashboard handoff controls, and PR handoff boundary. |
 | Current Repo Mechanics | [Current repo mechanics](20-current-repo-mechanics.md) | Covers report/objdiff/configure/table-typer artifacts, progress terms, and first commands to wrap. |
 | Unified Skill Model | [Core principles](../../10-system-design/05-core-principles.md), [Knowledge model](../../10-system-design/50-knowledge-model.md) | Covers how former skill surfaces become internal capabilities and references. |
@@ -35,7 +35,7 @@ This audit tracks where each design idea lives in the markdown docs.
 | Resting run loop | [Run scheduler loop](../../10-system-design/10-run-director-loop.md), [Process guardians](../../10-system-design/25-process-guardians.md), [Server jobs overview](../server-jobs/00-overview.md) |
 | Former skill mapping | [Core principles](../../10-system-design/05-core-principles.md) |
 | Candidate-prior formula | [Board prioritization](../../10-system-design/15-board-prioritization.md) |
-| `melee-assist` absorption | [Worker capabilities](../../10-system-design/45-worker-capabilities.md) |
+| `colosseum-assist` absorption | [Worker capabilities](../../10-system-design/45-worker-capabilities.md) |
 | Progress terms | [Current repo mechanics](20-current-repo-mechanics.md) |
 | Human dashboard | [UI implementation](../ui/00-overview.md) |
 | V1 defaults | [Implementation roadmap](30-implementation-roadmap.md) |

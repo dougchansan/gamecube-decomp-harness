@@ -68,7 +68,7 @@ additionally needs the run paused, Sync is locked while a run is active.
    `pr_split_plan.md` and ship the **match slices only** — they are the PRs.
    Local-only slices stay on the branch until they become matches. Branch
    creation, pushing, and PR bodies are manual, guided by the
-   melee-pr-workflow skill.
+   colosseum-pr-workflow skill.
 7. After upstream merges your PRs: **Sync Merged PRs** to intake them, then
    **New Session** for the next campaign loop against the fresh baseline.
 

@@ -345,7 +345,6 @@ function compactTargetGraphFileCard(packet: Record<string, unknown>, project?: R
   const followUpQueries = [
     compactObject({ tool: "code_graph_file_card", source_path: sourcePath }),
     compactObject({ tool: "code_graph_search", query: [sourcePath, targetSymbol].filter(Boolean).join(" ") }),
-    compactObject({ tool: "past_prs_search", query: [sourcePath, targetSymbol].filter(Boolean).join(" ") }),
     ...(mismatchQueries.length ? [compactObject({ tool: "mismatch_db_search", query: mismatchQueries.join(" OR ") })] : []),
     compactObject({ tool: "path_facts_resolve", source_path: sourcePath }),
   ];
@@ -370,7 +369,7 @@ function compactTargetGraphFileCard(packet: Record<string, unknown>, project?: R
       target_function: targetFunction,
       same_file_functions: sameFileFunctions,
       mismatch_patterns: mismatchPatterns,
-      past_prs: {
+      review_history: {
         touching_prs: touchingPrs,
         search_terms: [targetSymbol, sourcePath, ...mismatchQueries].filter(Boolean).slice(0, 8),
       },

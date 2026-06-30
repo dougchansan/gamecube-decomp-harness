@@ -1,5 +1,5 @@
 {
-  "schema_version": "melee_integration_resolver_result_v1",
+  "schema_version": "colosseum_integration_resolver_result_v1",
   "queue_item_id": "integration-item-id",
   "conflict_group_id": "conflict-group-id",
   "outcome": "resolved",
@@ -8,15 +8,15 @@
     {
       "worker_state_id": "worker-state-id",
       "checkpoint_id": "worker-checkpoint-id",
-      "target": "GALE01:example::Example_Target",
-      "source_paths": ["src/melee/example.c"],
+      "target": "GC6E01:example::Example_Target",
+      "source_paths": ["src/colosseum/example.c"],
       "disposition": "applied",
       "evidence": "Retained the exact-match hunk after reconciling nearby session-current edits."
     }
   ],
   "conflict_resolutions": [
     {
-      "path": "src/melee/example.c",
+      "path": "src/colosseum/example.c",
       "symbols": ["Example_Target"],
       "resolution": "manual_merge",
       "evidence": "Removed conflict markers, kept session-current scaffolding, and reapplied the validated worker expression."

@@ -21,40 +21,40 @@ import type {
 import { EventType, TraceLevel, TraceSource } from "@agent-kernel/protocol";
 import type { PiEvent } from "@agent-kernel/tailer";
 
-import { createMeleeKernelBridgeConfig, MELEE_KERNEL_ID } from "./config.js";
-import { createMeleeKernel } from "./kernel.js";
-import { createMeleeLoaderCatalog, MELEE_SESSION_CONTEXT_LOADER_KIND } from "./loaders.js";
-import { createMeleeKernelTraceReadService } from "./read-api.js";
-import { upsertMeleeKernelRegistration } from "./registration.js";
-import { createMeleeKernelRuntime } from "./runtime.js";
+import { createColosseumKernelBridgeConfig, COLOSSEUM_KERNEL_ID } from "./config.js";
+import { createColosseumKernel } from "./kernel.js";
+import { createColosseumLoaderCatalog, COLOSSEUM_SESSION_CONTEXT_LOADER_KIND } from "./loaders.js";
+import { createColosseumKernelTraceReadService } from "./read-api.js";
+import { upsertColosseumKernelRegistration } from "./registration.js";
+import { createColosseumKernelRuntime } from "./runtime.js";
 import {
-  buildMeleeContainer,
-  meleeAppSessionId,
-  meleeBaselineContainerId,
-  meleeIntakeContainerId,
-  meleeIntakeItemContainerId,
-  meleeIntakeKnowledgeContainerId,
-  meleeIntakePostmortemContainerId,
-  meleePrepareContainerId,
-  meleePrContainerId,
-  meleePrPublicationContainerId,
-  meleePostmortemContainerId,
-  meleeRootContainerId,
-  meleeSyncIntakeContainerId,
-  meleeWorkerContainerId,
+  buildColosseumContainer,
+  colosseumAppSessionId,
+  colosseumBaselineContainerId,
+  colosseumIntakeContainerId,
+  colosseumIntakeItemContainerId,
+  colosseumIntakeKnowledgeContainerId,
+  colosseumIntakePostmortemContainerId,
+  colosseumPrepareContainerId,
+  colosseumPrContainerId,
+  colosseumPrPublicationContainerId,
+  colosseumPostmortemContainerId,
+  colosseumRootContainerId,
+  colosseumSyncIntakeContainerId,
+  colosseumWorkerContainerId,
 } from "./session-mapping.js";
-import { createMeleeKernelSpawnContext } from "./spawn-context.js";
+import { createColosseumKernelSpawnContext } from "./spawn-context.js";
 import {
-  createMeleeKernelPiAgentRunner,
-  MELEE_AGENT_SPAWN_COMPLETED_EVENT,
-  MELEE_AGENT_SPAWN_STARTED_EVENT,
-  type MeleeKernelPiRunOptions,
+  createColosseumKernelPiAgentRunner,
+  COLOSSEUM_AGENT_SPAWN_COMPLETED_EVENT,
+  COLOSSEUM_AGENT_SPAWN_STARTED_EVENT,
+  type ColosseumKernelPiRunOptions,
 } from "@server/infrastructure/agent-runtime/kernel-pi-runner";
 import type { PiRunOptions } from "@server/infrastructure/agent-runtime/runtime";
-import { createMeleeEventMapperOptions, createMeleeTailerConfig, createMeleeTraceTailer } from "./tailer.js";
-import { createMeleeTraceWriter } from "./trace-writer.js";
-import { MELEE_KERNEL_MANAGED_RUN_MARKER_FIELD } from "./spawn-agent.js";
-import { submitMeleeWorkflowTraceEvent } from "./workflow-trace.js";
+import { createColosseumEventMapperOptions, createColosseumTailerConfig, createColosseumTraceTailer } from "./tailer.js";
+import { createColosseumTraceWriter } from "./trace-writer.js";
+import { COLOSSEUM_KERNEL_MANAGED_RUN_MARKER_FIELD } from "./spawn-agent.js";
+import { submitColosseumWorkflowTraceEvent } from "./workflow-trace.js";
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -76,7 +76,7 @@ function registrationRow(data: NewKernelRegistration): KernelRegistration {
 function fixtureRows(): KernelTraceReadRows {
   const appSessionId = "11111111-1111-5111-8111-111111111111";
   const rootContainer: Container = {
-    id: "melee:root",
+    id: "colosseum:root",
     parentContainerId: null,
     label: "Project session live",
     status: "running",
@@ -87,8 +87,8 @@ function fixtureRows(): KernelTraceReadRows {
     metadata: {
       appSessionId,
       appSessionSlug: "live",
-      topic: "Melee session",
-      appSessionType: "melee-project-session",
+      topic: "Colosseum session",
+      appSessionType: "colosseum-project-session",
     },
     startedAt: "2026-06-24T18:00:00.000Z",
     completedAt: null,
@@ -97,7 +97,7 @@ function fixtureRows(): KernelTraceReadRows {
   };
   const childContainer: Container = {
     ...rootContainer,
-    id: "melee:root:worker",
+    id: "colosseum:root:worker",
     parentContainerId: rootContainer.id,
     label: "Worker claim A",
     phase: "worker",
@@ -161,18 +161,18 @@ function fixtureRows(): KernelTraceReadRows {
 }
 
 describe("kernel registration", () => {
-  test("builds and upserts the Melee kernel registration payload", async () => {
+  test("builds and upserts the Colosseum kernel registration payload", async () => {
     const payloads: NewKernelRegistration[] = [];
-    const config = createMeleeKernelBridgeConfig({
+    const config = createColosseumKernelBridgeConfig({
       workingDir: "/repo",
       appBaseUrl: "http://127.0.0.1:5174",
       markerConfig: {
-        sessionBinding: "melee:session-binding",
+        sessionBinding: "colosseum:session-binding",
       },
       metadata: { environment: "test" },
     });
 
-    const row = await upsertMeleeKernelRegistration({
+    const row = await upsertColosseumKernelRegistration({
       db: {},
       config,
       upsert: async (_db: unknown, data: NewKernelRegistration) => {
@@ -182,14 +182,14 @@ describe("kernel registration", () => {
     });
     const captured = payloads[0];
 
-    expect(row.kernelId).toBe(MELEE_KERNEL_ID);
-    expect(captured?.displayName).toBe("Melee Decomp Orchestrator");
+    expect(row.kernelId).toBe(COLOSSEUM_KERNEL_ID);
+    expect(captured?.displayName).toBe("Pokemon Colosseum Decomp Orchestrator");
     expect(captured?.workingDir).toBe("/repo");
     expect(captured?.piSessionsDir).toBe("/repo/.pi-sessions");
-    expect(captured?.markerConfig.sessionBinding).toBe("melee:session-binding");
+    expect(captured?.markerConfig.sessionBinding).toBe("colosseum:session-binding");
     expect(captured?.markerConfig.lifecycle).toBe("agent-kernel:pi-lifecycle");
     expect(captured?.metadata).toMatchObject({
-      processName: "melee-live",
+      processName: "pkmn-colosseum-live",
       environment: "test",
     });
   });
@@ -197,17 +197,17 @@ describe("kernel registration", () => {
 
 describe("session and container mapping", () => {
   test("derives stable UUID app sessions and deterministic container ids", () => {
-    const ref = { projectId: "melee", sessionId: "session 2026/06/24" };
-    const appSessionId = meleeAppSessionId(ref);
-    const repeat = meleeAppSessionId({ ...ref });
-    const other = meleeAppSessionId({ projectId: "melee", sessionId: "next" });
+    const ref = { projectId: "colosseum", sessionId: "session 2026/06/24" };
+    const appSessionId = colosseumAppSessionId(ref);
+    const repeat = colosseumAppSessionId({ ...ref });
+    const other = colosseumAppSessionId({ projectId: "colosseum", sessionId: "next" });
 
     expect(appSessionId).toMatch(UUID_RE);
     expect(repeat).toBe(appSessionId);
     expect(other).not.toBe(appSessionId);
-    expect(meleeRootContainerId(ref)).toBe(`melee:${appSessionId}:session`);
+    expect(colosseumRootContainerId(ref)).toBe(`colosseum:${appSessionId}:session`);
     expect(
-      meleeWorkerContainerId({
+      colosseumWorkerContainerId({
         ...ref,
         runId: "run/live",
         epochId: 3,
@@ -215,7 +215,7 @@ describe("session and container mapping", () => {
         targetId: "ftMain",
       }),
     ).toBe(
-      meleeWorkerContainerId({
+      colosseumWorkerContainerId({
         ...ref,
         runId: "run/live",
         epochId: 3,
@@ -223,30 +223,30 @@ describe("session and container mapping", () => {
       }),
     );
 
-    const container = buildMeleeContainer({ kind: "session", ref, workingDir: "/repo" });
-    expect(container.id).toBe(meleeRootContainerId(ref));
+    const container = buildColosseumContainer({ kind: "session", ref, workingDir: "/repo" });
+    expect(container.id).toBe(colosseumRootContainerId(ref));
     expect(container.parentContainerId).toBeNull();
     expect(container.metadata).toMatchObject({
       appSessionId,
       containerKind: "session",
-      projectId: "melee",
+      projectId: "colosseum",
     });
   });
 
   test("maps PR publication containers under the PR tree with publication phase", () => {
-    const ref = { projectId: "melee", sessionId: "run-1" };
-    const container = buildMeleeContainer({
+    const ref = { projectId: "colosseum", sessionId: "run-1" };
+    const container = buildColosseumContainer({
       kind: "pr-publication",
       ref,
       metadata: { prId: "draft-1", branch: "pr/demo" },
       workingDir: "/repo",
     });
 
-    expect(container.id).toBe(meleePrPublicationContainerId({ ...ref, prId: "draft-1" }));
-    expect(container.parentContainerId).toBe(meleePrContainerId({ ...ref, prId: "draft-1" }));
+    expect(container.id).toBe(colosseumPrPublicationContainerId({ ...ref, prId: "draft-1" }));
+    expect(container.parentContainerId).toBe(colosseumPrContainerId({ ...ref, prId: "draft-1" }));
     expect(container.phase).toBe("publication");
     expect(container.metadata).toMatchObject({
-      appSessionId: meleeAppSessionId(ref),
+      appSessionId: colosseumAppSessionId(ref),
       containerKind: "pr-publication",
       prId: "draft-1",
       branch: "pr/demo",
@@ -254,31 +254,31 @@ describe("session and container mapping", () => {
   });
 
   test("maps prepare intake containers under the Prepare tree", () => {
-    const ref = { projectId: "melee", sessionId: "session-1" };
-    const item = buildMeleeContainer({
+    const ref = { projectId: "colosseum", sessionId: "session-1" };
+    const item = buildColosseumContainer({
       kind: "intake-item",
       ref,
       metadata: { prId: "2764" },
       workingDir: "/repo",
     });
-    const postmortem = buildMeleeContainer({
+    const postmortem = buildColosseumContainer({
       kind: "intake-postmortem",
       ref,
       metadata: { prId: "2764" },
       workingDir: "/repo",
     });
-    const knowledge = buildMeleeContainer({
+    const knowledge = buildColosseumContainer({
       kind: "intake-knowledge",
       ref,
       metadata: { prId: "2764" },
       workingDir: "/repo",
     });
 
-    expect(item.id).toBe(meleeIntakeItemContainerId({ ...ref, prId: "2764" }));
-    expect(item.parentContainerId).toBe(meleeIntakeContainerId(ref));
-    expect(postmortem.id).toBe(meleeIntakePostmortemContainerId({ ...ref, prId: "2764" }));
+    expect(item.id).toBe(colosseumIntakeItemContainerId({ ...ref, prId: "2764" }));
+    expect(item.parentContainerId).toBe(colosseumIntakeContainerId(ref));
+    expect(postmortem.id).toBe(colosseumIntakePostmortemContainerId({ ...ref, prId: "2764" }));
     expect(postmortem.parentContainerId).toBe(item.id);
-    expect(knowledge.id).toBe(meleeIntakeKnowledgeContainerId({ ...ref, prId: "2764" }));
+    expect(knowledge.id).toBe(colosseumIntakeKnowledgeContainerId({ ...ref, prId: "2764" }));
     expect(knowledge.parentContainerId).toBe(item.id);
     expect(knowledge.phase).toBe("knowledge-intake");
   });
@@ -286,9 +286,9 @@ describe("session and container mapping", () => {
 
 describe("spawn context mapping", () => {
   test("builds worker spawn context with app session and claim container identity", () => {
-    const context = createMeleeKernelSpawnContext({
+    const context = createColosseumKernelSpawnContext({
       kind: "worker",
-      projectId: "melee",
+      projectId: "colosseum",
       sessionId: "run-1",
       runId: "run-1",
       epochId: 2,
@@ -299,11 +299,11 @@ describe("spawn context mapping", () => {
     });
 
     expect(context.appSessionId).toBe(
-      meleeAppSessionId({ projectId: "melee", sessionId: "run-1" }),
+      colosseumAppSessionId({ projectId: "colosseum", sessionId: "run-1" }),
     );
     expect(context.containerId).toBe(
-      meleeWorkerContainerId({
-        projectId: "melee",
+      colosseumWorkerContainerId({
+        projectId: "colosseum",
         sessionId: "run-1",
         runId: "run-1",
         epochId: 2,
@@ -315,7 +315,7 @@ describe("spawn context mapping", () => {
     expect(context.workingDir).toBe("/repo");
     expect(context.metadata).toMatchObject({
       containerKind: "worker",
-      projectId: "melee",
+      projectId: "colosseum",
       sessionId: "run-1",
       runId: "run-1",
       epochId: "2",
@@ -341,9 +341,9 @@ describe("spawn context mapping", () => {
   });
 
   test("builds postmortem spawn context under the epoch container tree", () => {
-    const context = createMeleeKernelSpawnContext({
+    const context = createColosseumKernelSpawnContext({
       kind: "postmortem",
-      projectId: "melee",
+      projectId: "colosseum",
       sessionId: "run-1",
       runId: "run-1",
       epochId: 2,
@@ -353,8 +353,8 @@ describe("spawn context mapping", () => {
     });
 
     expect(context.containerId).toBe(
-      meleePostmortemContainerId({
-        projectId: "melee",
+      colosseumPostmortemContainerId({
+        projectId: "colosseum",
         sessionId: "run-1",
         runId: "run-1",
         epochId: 2,
@@ -365,7 +365,7 @@ describe("spawn context mapping", () => {
     expect(context.phase).toBe("postmortem");
     expect(context.metadata).toMatchObject({
       containerKind: "postmortem",
-      projectId: "melee",
+      projectId: "colosseum",
       sessionId: "run-1",
       runId: "run-1",
       epochId: "2",
@@ -386,9 +386,9 @@ describe("spawn context mapping", () => {
   });
 
   test("builds prepare intake agent spawn contexts under the PR intake item", () => {
-    const context = createMeleeKernelSpawnContext({
+    const context = createColosseumKernelSpawnContext({
       kind: "intake-postmortem",
-      projectId: "melee",
+      projectId: "colosseum",
       sessionId: "session-1",
       runId: "session-1",
       itemId: "pr-2764",
@@ -398,11 +398,11 @@ describe("spawn context mapping", () => {
     });
 
     expect(context.appSessionId).toBe(
-      meleeAppSessionId({ projectId: "melee", sessionId: "session-1" }),
+      colosseumAppSessionId({ projectId: "colosseum", sessionId: "session-1" }),
     );
     expect(context.containerId).toBe(
-      meleeIntakePostmortemContainerId({
-        projectId: "melee",
+      colosseumIntakePostmortemContainerId({
+        projectId: "colosseum",
         sessionId: "session-1",
         prId: "2764",
       }),
@@ -410,7 +410,7 @@ describe("spawn context mapping", () => {
     expect(context.phase).toBe("postmortem");
     expect(context.metadata).toMatchObject({
       containerKind: "intake-postmortem",
-      projectId: "melee",
+      projectId: "colosseum",
       sessionId: "session-1",
       runId: "session-1",
       itemId: "pr-2764",
@@ -418,32 +418,32 @@ describe("spawn context mapping", () => {
       targetId: "pr-2764",
     });
     expect(context.containerLineage?.map((container) => container.id)).toEqual([
-      meleeRootContainerId({ projectId: "melee", sessionId: "session-1" }),
-      meleePrepareContainerId({ projectId: "melee", sessionId: "session-1" }),
-      meleeIntakeContainerId({ projectId: "melee", sessionId: "session-1" }),
-      meleeIntakeItemContainerId({ projectId: "melee", sessionId: "session-1", prId: "2764" }),
-      meleeIntakePostmortemContainerId({ projectId: "melee", sessionId: "session-1", prId: "2764" }),
+      colosseumRootContainerId({ projectId: "colosseum", sessionId: "session-1" }),
+      colosseumPrepareContainerId({ projectId: "colosseum", sessionId: "session-1" }),
+      colosseumIntakeContainerId({ projectId: "colosseum", sessionId: "session-1" }),
+      colosseumIntakeItemContainerId({ projectId: "colosseum", sessionId: "session-1", prId: "2764" }),
+      colosseumIntakePostmortemContainerId({ projectId: "colosseum", sessionId: "session-1", prId: "2764" }),
     ]);
   });
 
   test("builds PR review context under the PR container tree", () => {
-    const context = createMeleeKernelSpawnContext({
+    const context = createColosseumKernelSpawnContext({
       kind: "pr-review",
-      projectId: "melee",
+      projectId: "colosseum",
       runId: "run-1",
       prId: "run-1",
       reviewId: "slice-001",
     });
 
     expect(context.appSessionId).toBe(
-      meleeAppSessionId({ projectId: "melee", sessionId: "run-1" }),
+      colosseumAppSessionId({ projectId: "colosseum", sessionId: "run-1" }),
     );
     expect(context.containerId).toContain(":pr:");
     expect(context.containerId).toContain(":review:");
     expect(context.phase).toBe("pr-review");
     expect(context.metadata).toMatchObject({
       containerKind: "pr-review",
-      projectId: "melee",
+      projectId: "colosseum",
       sessionId: "run-1",
       runId: "run-1",
       prId: "run-1",
@@ -465,7 +465,7 @@ describe("spawn context mapping", () => {
 describe("trace writer", () => {
   test("submits app-owned workflow events with app source and kernel identity", async () => {
     const submitted: unknown[] = [];
-    const writer = createMeleeTraceWriter({
+    const writer = createColosseumTraceWriter({
       insertBatch: async (events) => {
         submitted.push(...events);
         return events.length;
@@ -476,8 +476,8 @@ describe("trace writer", () => {
 
     const event = await writer.submitAppEvent({
       appSessionId: "11111111-1111-5111-8111-111111111111",
-      containerId: "melee:root:run",
-      type: "melee:scheduler_decision",
+      containerId: "colosseum:root:run",
+      type: "colosseum:scheduler_decision",
       eventData: { admittedTargets: 256 },
       traceLevel: TraceLevel.DEBUG,
     });
@@ -486,9 +486,9 @@ describe("trace writer", () => {
     expect(event).toMatchObject({
       eventId: "55555555-5555-5555-8555-555555555555",
       appSessionId: "11111111-1111-5111-8111-111111111111",
-      containerId: "melee:root:run",
+      containerId: "colosseum:root:run",
       source: TraceSource.APP,
-      type: "melee:scheduler_decision",
+      type: "colosseum:scheduler_decision",
       traceLevel: TraceLevel.DEBUG,
       eventData: { admittedTargets: 256 },
     });
@@ -497,7 +497,7 @@ describe("trace writer", () => {
 
 describe("workflow trace helper", () => {
   test("upserts non-agent workflow phase containers and emits app events", async () => {
-    const ref = { projectId: "melee", sessionId: "run-1" };
+    const ref = { projectId: "colosseum", sessionId: "run-1" };
     const upsertedContexts: unknown[] = [];
     const traceInputs: unknown[] = [];
     const runtime = {
@@ -522,7 +522,7 @@ describe("workflow trace helper", () => {
       },
     };
 
-    const prepare = await submitMeleeWorkflowTraceEvent({
+    const prepare = await submitColosseumWorkflowTraceEvent({
       runtime,
       kind: "prepare",
       projectId: ref.projectId,
@@ -531,7 +531,7 @@ describe("workflow trace helper", () => {
       status: "started",
       workingDir: "/repo",
     });
-    const setup = await submitMeleeWorkflowTraceEvent({
+    const setup = await submitColosseumWorkflowTraceEvent({
       runtime,
       kind: "sync-intake",
       projectId: ref.projectId,
@@ -541,7 +541,7 @@ describe("workflow trace helper", () => {
       workingDir: "/repo",
       metadata: { mergedPrs: [123] },
     });
-    const baseline = await submitMeleeWorkflowTraceEvent({
+    const baseline = await submitColosseumWorkflowTraceEvent({
       runtime,
       kind: "baseline",
       projectId: ref.projectId,
@@ -550,7 +550,7 @@ describe("workflow trace helper", () => {
       status: "completed",
       metadata: { baseSha: "abc123" },
     });
-    const intakeKnowledge = await submitMeleeWorkflowTraceEvent({
+    const intakeKnowledge = await submitColosseumWorkflowTraceEvent({
       runtime,
       kind: "intake-knowledge",
       projectId: ref.projectId,
@@ -560,7 +560,7 @@ describe("workflow trace helper", () => {
       status: "completed",
       metadata: { outputPath: "/state/knowledge-intake/pr-2764.json" },
     });
-    const publication = await submitMeleeWorkflowTraceEvent({
+    const publication = await submitColosseumWorkflowTraceEvent({
       runtime,
       kind: "pr-publication",
       projectId: ref.projectId,
@@ -571,24 +571,24 @@ describe("workflow trace helper", () => {
       metadata: { branch: "pr/demo" },
     });
 
-    expect(prepare.containerId).toBe(meleePrepareContainerId(ref));
-    expect(setup.containerId).toBe(meleeSyncIntakeContainerId(ref));
-    expect(baseline.containerId).toBe(meleeBaselineContainerId(ref));
+    expect(prepare.containerId).toBe(colosseumPrepareContainerId(ref));
+    expect(setup.containerId).toBe(colosseumSyncIntakeContainerId(ref));
+    expect(baseline.containerId).toBe(colosseumBaselineContainerId(ref));
     expect(intakeKnowledge.containerId).toBe(
-      meleeIntakeKnowledgeContainerId({ ...ref, prId: "2764" }),
+      colosseumIntakeKnowledgeContainerId({ ...ref, prId: "2764" }),
     );
     expect(publication.containerId).toBe(
-      meleePrPublicationContainerId({ ...ref, prId: "draft-1" }),
+      colosseumPrPublicationContainerId({ ...ref, prId: "draft-1" }),
     );
     expect(upsertedContexts).toHaveLength(5);
     expect((upsertedContexts[0] as any).containerLineage.map((container: NewContainer) => container.id)).toEqual([
-      meleeRootContainerId(ref),
-      meleePrepareContainerId(ref),
+      colosseumRootContainerId(ref),
+      colosseumPrepareContainerId(ref),
     ]);
     expect((upsertedContexts[1] as any).containerLineage.map((container: NewContainer) => container.id)).toEqual([
-      meleeRootContainerId(ref),
-      meleePrepareContainerId(ref),
-      meleeSyncIntakeContainerId(ref),
+      colosseumRootContainerId(ref),
+      colosseumPrepareContainerId(ref),
+      colosseumSyncIntakeContainerId(ref),
     ]);
     expect((upsertedContexts[1] as any).containerLineage.map((container: NewContainer) => container.label)).toEqual([
       "Project session run-1",
@@ -606,21 +606,21 @@ describe("workflow trace helper", () => {
       baseSha: "abc123",
     });
     expect((upsertedContexts[3] as any).containerLineage.map((container: NewContainer) => container.id)).toEqual([
-      meleeRootContainerId(ref),
-      meleePrepareContainerId(ref),
-      meleeIntakeContainerId(ref),
-      meleeIntakeItemContainerId({ ...ref, prId: "2764" }),
-      meleeIntakeKnowledgeContainerId({ ...ref, prId: "2764" }),
+      colosseumRootContainerId(ref),
+      colosseumPrepareContainerId(ref),
+      colosseumIntakeContainerId(ref),
+      colosseumIntakeItemContainerId({ ...ref, prId: "2764" }),
+      colosseumIntakeKnowledgeContainerId({ ...ref, prId: "2764" }),
     ]);
     expect((upsertedContexts[4] as any).containerLineage.map((container: NewContainer) => container.id)).toEqual([
-      meleeRootContainerId(ref),
-      meleePrContainerId({ ...ref, prId: "draft-1" }),
-      meleePrPublicationContainerId({ ...ref, prId: "draft-1" }),
+      colosseumRootContainerId(ref),
+      colosseumPrContainerId({ ...ref, prId: "draft-1" }),
+      colosseumPrPublicationContainerId({ ...ref, prId: "draft-1" }),
     ]);
     expect(traceInputs).toMatchObject([
       {
-        type: "melee:prepare_started",
-        containerId: meleePrepareContainerId(ref),
+        type: "colosseum:prepare_started",
+        containerId: colosseumPrepareContainerId(ref),
         eventData: {
           phase: "prepare",
           operation: "prepareSession",
@@ -628,8 +628,8 @@ describe("workflow trace helper", () => {
         },
       },
       {
-        type: "melee:setup_completed",
-        containerId: meleeSyncIntakeContainerId(ref),
+        type: "colosseum:setup_completed",
+        containerId: colosseumSyncIntakeContainerId(ref),
         eventData: {
           phase: "setup",
           operation: "syncProjectIntake",
@@ -638,8 +638,8 @@ describe("workflow trace helper", () => {
         },
       },
       {
-        type: "melee:baseline_completed",
-        containerId: meleeBaselineContainerId(ref),
+        type: "colosseum:baseline_completed",
+        containerId: colosseumBaselineContainerId(ref),
         eventData: {
           phase: "baseline",
           operation: "rebuildProductionBaseline",
@@ -648,8 +648,8 @@ describe("workflow trace helper", () => {
         },
       },
       {
-        type: "melee:knowledge_intake_completed",
-        containerId: meleeIntakeKnowledgeContainerId({ ...ref, prId: "2764" }),
+        type: "colosseum:knowledge_intake_completed",
+        containerId: colosseumIntakeKnowledgeContainerId({ ...ref, prId: "2764" }),
         eventData: {
           phase: "knowledge-intake",
           operation: "prepare.intake.knowledge",
@@ -659,8 +659,8 @@ describe("workflow trace helper", () => {
         },
       },
       {
-        type: "melee:publication_started",
-        containerId: meleePrPublicationContainerId({ ...ref, prId: "draft-1" }),
+        type: "colosseum:publication_started",
+        containerId: colosseumPrPublicationContainerId({ ...ref, prId: "draft-1" }),
         eventData: {
           phase: "publication",
           operation: "openPrForSlice",
@@ -678,7 +678,7 @@ describe("kernel runtime composition", () => {
     const registrations: NewKernelRegistration[] = [];
     const containers: NewContainer[] = [];
     const traceEvents: unknown[] = [];
-    const runtime = await createMeleeKernelRuntime({
+    const runtime = await createColosseumKernelRuntime({
       db: {},
       config: {
         workingDir: "/repo",
@@ -699,9 +699,9 @@ describe("kernel runtime composition", () => {
       },
       listRows: async () => [],
     });
-    const context = createMeleeKernelSpawnContext({
+    const context = createColosseumKernelSpawnContext({
       kind: "worker",
-      projectId: "melee",
+      projectId: "colosseum",
       sessionId: "run-1",
       runId: "run-1",
       epochId: 2,
@@ -714,13 +714,13 @@ describe("kernel runtime composition", () => {
     await runtime.traceWriter.submitAppEvent({
       appSessionId: context.appSessionId ?? "",
       containerId: context.containerId,
-      type: "melee:runtime_smoke",
+      type: "colosseum:runtime_smoke",
       eventData: { ok: true },
     });
     await runtime.close();
 
     expect(registrations[0]).toMatchObject({
-      kernelId: MELEE_KERNEL_ID,
+      kernelId: COLOSSEUM_KERNEL_ID,
       appBaseUrl: "http://localhost:8787",
     });
     expect(containers.map((container) => container.id)).toEqual(
@@ -737,37 +737,37 @@ describe("kernel runtime composition", () => {
 
 describe("tailer wrapper", () => {
   test("uses registration marker names for mapper options and config paths", () => {
-    const config = createMeleeKernelBridgeConfig({
+    const config = createColosseumKernelBridgeConfig({
       workingDir: "/repo",
       markerConfig: {
-        sessionBinding: "melee:bind",
-        lifecycle: "melee:lifecycle",
-        subagentLink: "melee:subagent-link",
+        sessionBinding: "colosseum:bind",
+        lifecycle: "colosseum:lifecycle",
+        subagentLink: "colosseum:subagent-link",
       },
     });
 
-    const tailerConfig = createMeleeTailerConfig(config, { batchSize: 32 });
-    const mapperOptions = createMeleeEventMapperOptions(config);
+    const tailerConfig = createColosseumTailerConfig(config, { batchSize: 32 });
+    const mapperOptions = createColosseumEventMapperOptions(config);
 
     expect(tailerConfig.watchDir).toBe("/repo/.pi-sessions");
     expect(tailerConfig.snapshotPath).toBe(
       "/repo/.decomp-orchestrator-state/agent-kernel-tailer-cursors.json",
     );
     expect(tailerConfig.batchSize).toBe(32);
-    expect(mapperOptions.sessionBinding?.customType).toBe("melee:bind");
-    expect(mapperOptions.lifecycleCustomType).toBe("melee:lifecycle");
-    expect(mapperOptions.subagentLinkCustomType).toBe("melee:subagent-link");
+    expect(mapperOptions.sessionBinding?.customType).toBe("colosseum:bind");
+    expect(mapperOptions.lifecycleCustomType).toBe("colosseum:lifecycle");
+    expect(mapperOptions.subagentLinkCustomType).toBe("colosseum:subagent-link");
   });
 
   test("buffers Pi JSONL events until binding, then upserts session and run before trace insert", async () => {
-    const tempDir = await mkdtemp(join(tmpdir(), "melee-kernel-tailer-"));
+    const tempDir = await mkdtemp(join(tmpdir(), "colosseum-kernel-tailer-"));
     const appSessionId = "11111111-1111-5111-8111-111111111111";
     const piSessionId = "22222222-2222-5222-8222-222222222222";
     const operations: string[] = [];
     const piSessions: NewPiAgentSession[] = [];
     const agentRuns: NewAgentRun[] = [];
     const traceEvents: unknown[] = [];
-    const tailer = createMeleeTraceTailer({
+    const tailer = createColosseumTraceTailer({
       db: {},
       config: {
         workingDir: tempDir,
@@ -844,7 +844,7 @@ describe("tailer wrapper", () => {
           appSessionId,
           appSessionSlug: "run-1",
           appSessionDir: "/state/runs/run-1",
-          containerId: "melee:worker",
+          containerId: "colosseum:worker",
           phase: "worker",
           agentName: "worker",
           displayLabel: "Worker claim A",
@@ -859,7 +859,7 @@ describe("tailer wrapper", () => {
       id: piSessionId,
       appSessionId,
       agentName: "worker",
-      containerId: "melee:worker",
+      containerId: "colosseum:worker",
       phase: "worker",
       displayLabel: "Worker claim A",
       model: "gpt-5.5",
@@ -868,7 +868,7 @@ describe("tailer wrapper", () => {
     expect(agentRuns[0]).toMatchObject({
       piSessionId,
       agentName: "worker",
-      containerId: "melee:worker",
+      containerId: "colosseum:worker",
       phase: "worker",
       displayLabel: "Worker claim A",
       runNumber: 2,
@@ -881,7 +881,7 @@ describe("tailer wrapper", () => {
         expect.objectContaining({
           appSessionId,
           piSessionUuid: piSessionId,
-          containerId: "melee:worker",
+          containerId: "colosseum:worker",
         }),
       ]),
     );
@@ -894,14 +894,14 @@ describe("tailer wrapper", () => {
   });
 
   test("does not synthesize an agent run for kernel-managed session bindings", async () => {
-    const tempDir = await mkdtemp(join(tmpdir(), "melee-kernel-tailer-managed-"));
+    const tempDir = await mkdtemp(join(tmpdir(), "colosseum-kernel-tailer-managed-"));
     const appSessionId = "11111111-1111-5111-8111-111111111111";
     const piSessionId = "22222222-2222-5222-8222-222222222222";
     const operations: string[] = [];
     const piSessions: NewPiAgentSession[] = [];
     const agentRuns: NewAgentRun[] = [];
     const traceEvents: unknown[] = [];
-    const tailer = createMeleeTraceTailer({
+    const tailer = createColosseumTraceTailer({
       db: {},
       config: {
         workingDir: tempDir,
@@ -956,11 +956,11 @@ describe("tailer wrapper", () => {
         timestamp: "2026-06-24T18:00:02.000Z",
         data: {
           appSessionId,
-          containerId: "melee:worker",
+          containerId: "colosseum:worker",
           phase: "worker",
           agentName: "worker",
           displayLabel: "Worker claim A",
-          [MELEE_KERNEL_MANAGED_RUN_MARKER_FIELD]: true,
+          [COLOSSEUM_KERNEL_MANAGED_RUN_MARKER_FIELD]: true,
         },
       },
       {
@@ -982,7 +982,7 @@ describe("tailer wrapper", () => {
       id: piSessionId,
       appSessionId,
       agentName: "worker",
-      containerId: "melee:worker",
+      containerId: "colosseum:worker",
       phase: "worker",
     });
     expect(agentRuns).toHaveLength(0);
@@ -992,7 +992,7 @@ describe("tailer wrapper", () => {
         expect.objectContaining({
           appSessionId,
           piSessionUuid: piSessionId,
-          containerId: "melee:worker",
+          containerId: "colosseum:worker",
         }),
       ]),
     );
@@ -1004,7 +1004,7 @@ describe("read API service", () => {
     const rows = fixtureRows();
     const identities: KernelTraceReadIdentity[] = [];
     const options: KernelTraceReadOptions[] = [];
-    const service = createMeleeKernelTraceReadService({
+    const service = createColosseumKernelTraceReadService({
       resolveIdentity: (id) => ({ containerId: `container-for-${id}`, legacySessionId: id }),
       readRows: async (identity, opts) => {
         identities.push(identity);
@@ -1030,9 +1030,9 @@ describe("read API service", () => {
     });
     expect(detail?.session).toMatchObject({
       id: "11111111-1111-5111-8111-111111111111",
-      containerId: "melee:root",
+      containerId: "colosseum:root",
       appSessionSlug: "live",
-      topic: "Melee session",
+      topic: "Colosseum session",
     });
     expect(detail?.containers).toHaveLength(2);
     expect(detail?.pi_sessions[0]).toMatchObject({
@@ -1050,7 +1050,7 @@ describe("read API service", () => {
     });
     expect(list?.trace_sessions[0]).toMatchObject({
       id: "11111111-1111-5111-8111-111111111111",
-      containerId: "melee:root",
+      containerId: "colosseum:root",
       piSessionCount: 1,
       eventCount: 1,
       latestEventAt: "2026-06-24T18:02:00.000Z",
@@ -1061,7 +1061,7 @@ describe("read API service", () => {
 describe("kernel wrapper", () => {
   test("delegates spawn calls to the provided adapter", async () => {
     const calls: unknown[] = [];
-    const kernel = createMeleeKernel({
+    const kernel = createColosseumKernel({
       spawnAgent: async (name, prompt, ctx, opts) => {
         calls.push({ name, prompt, ctx, opts });
         return { ok: true, name };
@@ -1075,7 +1075,7 @@ describe("kernel wrapper", () => {
       { model: "gpt-5" },
     );
 
-    expect(kernel.id).toBe(MELEE_KERNEL_ID);
+    expect(kernel.id).toBe(COLOSSEUM_KERNEL_ID);
     expect(result).toEqual({ ok: true, name: "worker" });
     expect(calls).toEqual([
       {
@@ -1089,11 +1089,11 @@ describe("kernel wrapper", () => {
 });
 
 describe("kernel Pi runtime bridge", () => {
-  test("routes dry-run PiRunOptions through the Melee kernel boundary and app trace events", async () => {
+  test("routes dry-run PiRunOptions through the Colosseum kernel boundary and app trace events", async () => {
     const calls: unknown[] = [];
     const traceInputs: unknown[] = [];
     const upsertedContexts: unknown[] = [];
-    const runner = createMeleeKernelPiAgentRunner({
+    const runner = createColosseumKernelPiAgentRunner({
       runPiAgent: async (options) => {
         calls.push(options);
         return {
@@ -1107,7 +1107,7 @@ describe("kernel Pi runtime bridge", () => {
         };
       },
     });
-    const options: MeleeKernelPiRunOptions = {
+    const options: ColosseumKernelPiRunOptions = {
       role: "worker",
       cwd: "/repo",
       outputDir: "/out",
@@ -1120,7 +1120,7 @@ describe("kernel Pi runtime bridge", () => {
       },
       kernelContext: {
         appSessionId: "11111111-1111-5111-8111-111111111111",
-        containerId: "melee:worker",
+        containerId: "colosseum:worker",
         phase: "worker",
         workingDir: "/repo",
       },
@@ -1163,7 +1163,7 @@ describe("kernel Pi runtime bridge", () => {
           customType: "agent-kernel:session-binding",
           data: {
             appSessionId: "11111111-1111-5111-8111-111111111111",
-            containerId: "melee:worker",
+            containerId: "colosseum:worker",
             phase: "worker",
             agentName: "worker",
             role: "worker",
@@ -1175,19 +1175,19 @@ describe("kernel Pi runtime bridge", () => {
     expect(upsertedContexts).toHaveLength(1);
     expect(upsertedContexts[0]).toMatchObject({
       appSessionId: "11111111-1111-5111-8111-111111111111",
-      containerId: "melee:worker",
+      containerId: "colosseum:worker",
     });
     expect(traceInputs).toHaveLength(2);
     expect(traceInputs[0]).toMatchObject({
       appSessionId: "11111111-1111-5111-8111-111111111111",
-      containerId: "melee:worker",
-      type: MELEE_AGENT_SPAWN_STARTED_EVENT,
+      containerId: "colosseum:worker",
+      type: COLOSSEUM_AGENT_SPAWN_STARTED_EVENT,
       agentId: "worker",
     });
     expect(traceInputs[1]).toMatchObject({
       appSessionId: "11111111-1111-5111-8111-111111111111",
-      containerId: "melee:worker",
-      type: MELEE_AGENT_SPAWN_COMPLETED_EVENT,
+      containerId: "colosseum:worker",
+      type: COLOSSEUM_AGENT_SPAWN_COMPLETED_EVENT,
       agentId: "worker",
       eventData: {
         sessionId: "pi-session-1",
@@ -1209,7 +1209,7 @@ describe("kernel Pi runtime bridge", () => {
       assemble: (loaded: ReadonlyArray<{ content: string }>) =>
         loaded.map((input) => input.content).join("\n"),
     };
-    const runner = createMeleeKernelPiAgentRunner({
+    const runner = createColosseumKernelPiAgentRunner({
       toKernelParsedAgentFromBundle: (entry, bundle) => ({
         parsed: {
           frontmatter: {
@@ -1263,7 +1263,7 @@ describe("kernel Pi runtime bridge", () => {
       },
       kernelContext: {
         appSessionId: "11111111-1111-5111-8111-111111111111",
-        containerId: "melee:worker",
+        containerId: "colosseum:worker",
         phase: "worker",
         workingDir: "/repo",
       },
@@ -1289,7 +1289,7 @@ describe("kernel Pi runtime bridge", () => {
 
   test("rejects non-dry spawns when the kernel createSpawnAgent path is unavailable", async () => {
     const calls: unknown[] = [];
-    const runner = createMeleeKernelPiAgentRunner({
+    const runner = createColosseumKernelPiAgentRunner({
       runPiAgent: async (options) => {
         calls.push(options);
         return {
@@ -1318,7 +1318,7 @@ describe("kernel Pi runtime bridge", () => {
         },
         kernelContext: {
           appSessionId: "11111111-1111-5111-8111-111111111111",
-          containerId: "melee:worker",
+          containerId: "colosseum:worker",
           phase: "worker",
           workingDir: "/repo",
         },
@@ -1337,18 +1337,18 @@ describe("kernel Pi runtime bridge", () => {
           },
         },
       }),
-    ).rejects.toThrow("Non-dry Melee agent spawns must use kernel createSpawnAgent");
+    ).rejects.toThrow("Non-dry Colosseum agent spawns must use kernel createSpawnAgent");
     expect(calls).toHaveLength(0);
   });
 
   test("can route a DB-backed non-dry spawn through kernel createSpawnAgent", async () => {
-    const tempDir = await mkdtemp(join(tmpdir(), "melee-kernel-spawn-"));
+    const tempDir = await mkdtemp(join(tmpdir(), "colosseum-kernel-spawn-"));
     const outputDir = join(tempDir, "out");
     const traceInputs: unknown[] = [];
     const submittedTraceEvents: unknown[] = [];
     const kernelCalls: unknown[] = [];
     const bindings: unknown[] = [];
-    const runner = createMeleeKernelPiAgentRunner({
+    const runner = createColosseumKernelPiAgentRunner({
       runPiAgent: async () => {
         throw new Error("direct Pi runner should not be called for kernel strategy");
       },
@@ -1390,7 +1390,7 @@ describe("kernel Pi runtime bridge", () => {
       kernelSpawnStrategy: "kernel",
       kernelContext: {
         appSessionId: "11111111-1111-5111-8111-111111111111",
-        containerId: "melee:worker",
+        containerId: "colosseum:worker",
         phase: "worker",
         workingDir: tempDir,
         metadata: {
@@ -1402,7 +1402,7 @@ describe("kernel Pi runtime bridge", () => {
       kernelRuntime: {
         db: {},
         config: {
-          markerConfig: createMeleeKernelBridgeConfig({ workingDir: tempDir }).markerConfig,
+          markerConfig: createColosseumKernelBridgeConfig({ workingDir: tempDir }).markerConfig,
           piSessionsDir: join(tempDir, ".pi-sessions"),
         },
         upsertSpawnContainers: async () => {},
@@ -1444,7 +1444,7 @@ describe("kernel Pi runtime bridge", () => {
       opts: {
         appSessionId: "11111111-1111-5111-8111-111111111111",
         appSessionSlug: "run-1",
-        containerId: "melee:worker",
+        containerId: "colosseum:worker",
         phase: "worker",
         workingDir: tempDir,
         piSessionsDir: join(tempDir, ".pi-sessions"),
@@ -1458,9 +1458,9 @@ describe("kernel Pi runtime bridge", () => {
       customType: "agent-kernel:session-binding",
       data: {
         appSessionId: "11111111-1111-5111-8111-111111111111",
-        containerId: "melee:worker",
+        containerId: "colosseum:worker",
         agentName: "worker",
-        [MELEE_KERNEL_MANAGED_RUN_MARKER_FIELD]: true,
+        [COLOSSEUM_KERNEL_MANAGED_RUN_MARKER_FIELD]: true,
       },
     });
     expect(traceInputs).toHaveLength(2);
@@ -1468,7 +1468,7 @@ describe("kernel Pi runtime bridge", () => {
   });
 
   test("passes converted prompt-bundle context resolver into kernel createSpawnAgent", async () => {
-    const tempDir = await mkdtemp(join(tmpdir(), "melee-kernel-context-"));
+    const tempDir = await mkdtemp(join(tmpdir(), "colosseum-kernel-context-"));
     const outputDir = join(tempDir, "out");
     const loadedResolvers: unknown[] = [];
     const kernelPrompts: string[] = [];
@@ -1483,7 +1483,7 @@ describe("kernel Pi runtime bridge", () => {
       assemble: (loaded: ReadonlyArray<{ content: string }>) =>
         loaded.map((input) => input.content).join("\n"),
     };
-    const runner = createMeleeKernelPiAgentRunner({
+    const runner = createColosseumKernelPiAgentRunner({
       runPiAgent: async () => {
         throw new Error("direct Pi runner should not be called for kernel strategy");
       },
@@ -1533,14 +1533,14 @@ describe("kernel Pi runtime bridge", () => {
       kernelSpawnStrategy: "kernel",
       kernelContext: {
         appSessionId: "11111111-1111-5111-8111-111111111111",
-        containerId: "melee:worker",
+        containerId: "colosseum:worker",
         phase: "worker",
         workingDir: tempDir,
       },
       kernelRuntime: {
         db: {},
         config: {
-          markerConfig: createMeleeKernelBridgeConfig({ workingDir: tempDir }).markerConfig,
+          markerConfig: createColosseumKernelBridgeConfig({ workingDir: tempDir }).markerConfig,
           piSessionsDir: join(tempDir, ".pi-sessions"),
         },
       },
@@ -1550,19 +1550,19 @@ describe("kernel Pi runtime bridge", () => {
     expect(loadedResolvers).toHaveLength(1);
     expect(loadedResolvers[0]).toBe(contextResolver);
     expect(await Bun.file(result.systemPromptPath).text()).toBe("worker system prompt");
-    expect(await Bun.file(result.userPromptPath).text()).toBe("full original worker user prompt");
+    expect(await Bun.file(result.userPromptPath).text()).toBe("Use the injected worker context.");
   });
 });
 
 describe("loader catalog", () => {
-  test("registers the Melee session context loader with kernel default loaders", async () => {
-    const catalog = createMeleeLoaderCatalog();
+  test("registers the Colosseum session context loader with kernel default loaders", async () => {
+    const catalog = createColosseumLoaderCatalog();
     expect(catalog.has("text")).toBeTrue();
-    expect(catalog.has(MELEE_SESSION_CONTEXT_LOADER_KIND)).toBeTrue();
+    expect(catalog.has(COLOSSEUM_SESSION_CONTEXT_LOADER_KIND)).toBeTrue();
 
-    const loader = catalog.get(MELEE_SESSION_CONTEXT_LOADER_KIND);
+    const loader = catalog.get(COLOSSEUM_SESSION_CONTEXT_LOADER_KIND);
     const result = await loader.resolve(
-      { kind: MELEE_SESSION_CONTEXT_LOADER_KIND },
+      { kind: COLOSSEUM_SESSION_CONTEXT_LOADER_KIND },
       {
         cwd: "/repo",
         appSessionId: "11111111-1111-5111-8111-111111111111",

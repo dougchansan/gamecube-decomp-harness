@@ -144,7 +144,7 @@ function updateFreshProjectSessionSubphase(
 function assertPrepareActionAllowed(deps: PreparingRuntimeDeps, paths: PreparingRuntimeProjectContext): void {
   const active = deps.hasActiveProcess(paths.stateDir);
   if (active.active) {
-    const activeName = stringValue(active.name, paths.project?.processName ?? "melee-live");
+    const activeName = stringValue(active.name, paths.project?.processName ?? "colosseum-live");
     throw new Error(`Stop the active process (${activeName}) before changing session preparation.`);
   }
   const runId = latestRunId(paths.stateDir);
@@ -902,7 +902,7 @@ export function createPreparingRuntime(deps: PreparingRuntimeDeps): {
 
       const active = deps.hasActiveProcess(stateDir);
       if (active.active) {
-        const activeName = stringValue(active.name, paths.project?.processName ?? "melee-live");
+        const activeName = stringValue(active.name, paths.project?.processName ?? "colosseum-live");
         throw new Error(`Stop the active process (${activeName}) before closing this run.`);
       }
 
@@ -1058,7 +1058,7 @@ export function createPreparingRuntime(deps: PreparingRuntimeDeps): {
       const paths = deps.resolveDashboardProject(body, { useDefaultProject: true });
       const { repoRoot, stateDir } = paths;
       try {
-        const name = canonicalProcessName(paths.project?.processName ?? stringValue(body.processName, "melee-live"));
+        const name = canonicalProcessName(paths.project?.processName ?? stringValue(body.processName, "colosseum-live"));
         const active = deps.hasActiveProcess(stateDir);
         if (active.active) {
           const activeName = stringValue(active.name, name);
@@ -1541,7 +1541,7 @@ export function createPreparingRuntime(deps: PreparingRuntimeDeps): {
       try {
         const active = deps.hasActiveProcess(stateDir);
         if (active.active) {
-          const activeName = stringValue(active.name, paths.project?.processName ?? "melee-live");
+          const activeName = stringValue(active.name, paths.project?.processName ?? "colosseum-live");
           throw new Error(`Stop the active process (${activeName}) before fetching and re-syncing.`);
         }
         const runId = latestRunId(stateDir);

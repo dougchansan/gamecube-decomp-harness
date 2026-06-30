@@ -100,10 +100,10 @@ function workerUnitSnapshot(params: {
   return {
     schemaVersion: 1,
     capturedAt: new Date().toISOString(),
-    unit: "main/melee/ft/chara/ftCommon/ftCo_Bury",
+    unit: "main/colosseum/ft/chara/ftCommon/ftCo_Bury",
     symbol: "ftCo_800C0D0C",
-    sourcePath: "src/melee/ft/chara/ftCommon/ftCo_Bury.c",
-    objectTarget: "build/GALE01/src/melee/ft/chara/ftCommon/ftCo_Bury.o",
+    sourcePath: "src/colosseum/ft/chara/ftCommon/ftCo_Bury.c",
+    objectTarget: "build/GC6E01/src/colosseum/ft/chara/ftCommon/ftCo_Bury.o",
     metrics: [
       { name: "fuzzy_match_percent", score: params.unitFuzzy ?? params.targetScore },
       { name: "matched_code_percent", score: params.targetScore >= 99.99999 ? 100 : 90 },
@@ -161,7 +161,7 @@ function createLegacyAgentStateDb(path: string): void {
       "feature",
       "checkdiff",
       "fixture stack frame mismatch lesson",
-      "Fixture body says src/melee/ft/chara/ftDemo.c has a stack frame mismatch and register allocation mismatch that should be searched through graph mismatch patterns.",
+      "Fixture body says src/colosseum/ft/chara/ftDemo.c has a stack frame mismatch and register allocation mismatch that should be searched through graph mismatch patterns.",
       JSON.stringify(["ftDemo_Unmatched"]),
       1760000000,
       1760000100,
@@ -193,9 +193,9 @@ async function main(): Promise<void> {
   const parsedDefaultState = parse(["--repo-root", fixtureRoot, "status"]);
   assertSmoke("server job default state dir follows command cwd", parsedDefaultState.globals.stateDir === resolve(process.cwd(), ".decomp-orchestrator-state"));
   assertSmoke("server job default state dir does not follow repo root", parsedDefaultState.globals.stateDir !== resolve(fixtureRoot, ".decomp-orchestrator-state"));
-  const parsedProject = parse(["--project", "melee", "status"]);
-  assertSmoke("server job project flag resolves project identity", parsedProject.globals.project?.projectId === "melee");
-  assertSmoke("server job project flag resolves project state dir", parsedProject.globals.stateDir.endsWith("projects/melee/state"));
+  const parsedProject = parse(["--project", "pkmn-colosseum", "status"]);
+  assertSmoke("server job project flag resolves project identity", parsedProject.globals.project?.projectId === "pkmn-colosseum");
+  assertSmoke("server job project flag resolves project state dir", parsedProject.globals.stateDir.endsWith("projects/pkmn-colosseum/state"));
 
   const projectWorkspace = await mkdtemp(join(tmpdir(), "decomp-orchestrator-projects-"));
   const projectDir = resolve(projectWorkspace, "projects/fixture");
@@ -261,7 +261,7 @@ async function main(): Promise<void> {
   assertSmoke("ui worker score formatter does not percent-format large mismatch counts", scoreOrPercent(894, scorePairLooksPercent(900, 894, 6)) === "894.000");
   assertSmoke("ui worker score formatter rejects lower-is-better local counts", scoreOrPercent(31, scorePairLooksPercent(34, 31, 3)) === "31.000");
 
-  const regressionReport = await readRegressionReport(resolve(fixtureRoot, "build/GALE01/report_changes.json"), "Fixture local report", 30);
+  const regressionReport = await readRegressionReport(resolve(fixtureRoot, "build/GC6E01/report_changes.json"), "Fixture local report", 30);
   assertSmoke("regression report promotes exact matched progress", regressionReport.promotion.status === "pr_ready");
   assertSmoke("regression report explains exact match promotion evidence", regressionReport.promotion.reasons.some((reason) => reason.includes("new exact match")));
   const partialOnlyInput = {
@@ -293,10 +293,10 @@ async function main(): Promise<void> {
 
   const prSplitPlan = buildPrSplitPlanFromChanges(
     [
-      { path: "src/melee/it/items/itfoo.c", status: "M", source: "branch" },
-      { path: "include/melee/it/itfoo.h", status: "M", source: "branch" },
-      { path: "src/melee/gm/gm_demo.c", status: "M", source: "branch" },
-      { path: "src/melee/cm/camera.c", status: "M", source: "branch" },
+      { path: "src/colosseum/it/items/itfoo.c", status: "M", source: "branch" },
+      { path: "include/colosseum/it/itfoo.h", status: "M", source: "branch" },
+      { path: "src/colosseum/gm/gm_demo.c", status: "M", source: "branch" },
+      { path: "src/colosseum/cm/camera.c", status: "M", source: "branch" },
       { path: "src/sysdolphin/baselib/cobj.c", status: "M", source: "branch" },
       { path: "configure.py", status: "M", source: "worktree" },
     ],
@@ -305,20 +305,20 @@ async function main(): Promise<void> {
       baseRef: "origin/master",
       headRef: "fixture-head",
       currentBranch: "fixture-branch",
-      groupMode: "melee-subsystem",
+      groupMode: "colosseum-subsystem",
       maxFilesPerPr: 30,
       branchPrefix: "review",
-      titlePrefix: "Melee decomp",
+      titlePrefix: "Colosseum decomp",
       sliceCheckCommand: "ninja changes_all",
     },
   );
   const prSplitIds = prSplitPlan.slices.map((slice) => slice.id);
   const itemSlice = prSplitPlan.slices.find((slice) => slice.id === "it");
   const configureSlice = prSplitPlan.slices.find((slice) => slice.id === "configure.py");
-  assertSmoke("pr-split-plan groups Melee source and headers by subsystem", itemSlice?.pathspecs.length === 2);
+  assertSmoke("pr-split-plan groups Colosseum source and headers by subsystem", itemSlice?.pathspecs.length === 2);
   assertSmoke("pr-split-plan marks subsystem slices as unverified independent candidates", itemSlice?.independence.kind === "independent" && itemSlice.independence.verified === false);
   assertSmoke("pr-split-plan creates subsystem slices", ["cm", "gm", "it"].every((id) => prSplitIds.includes(id)));
-  assertSmoke("pr-split-plan keeps support code separate from Melee subsystems", prSplitIds.includes("sysdolphin"));
+  assertSmoke("pr-split-plan keeps support code separate from Colosseum subsystems", prSplitIds.includes("sysdolphin"));
   assertSmoke("pr-split-plan marks root build/config changes as shared prep", configureSlice?.independence.kind === "shared-prep");
   assertSmoke("pr-split-plan emits slice isolation commands", itemSlice?.isolationCommands.some((command) => command.includes("git worktree add")) === true);
   assertSmoke("pr-split-plan records worktree warnings", prSplitPlan.warnings.some((warning) => warning.includes("Worktree changes")));
@@ -326,23 +326,23 @@ async function main(): Promise<void> {
 
   const lanePlan = buildPrSplitPlanFromChanges(
     [
-      { path: "src/melee/it/items/itfoo.c", status: "M", source: "branch" },
-      { path: "include/melee/it/itfoo.h", status: "M", source: "branch" },
-      { path: "src/melee/it/items/itbar.c", status: "M", source: "branch" },
+      { path: "src/colosseum/it/items/itfoo.c", status: "M", source: "branch" },
+      { path: "include/colosseum/it/itfoo.h", status: "M", source: "branch" },
+      { path: "src/colosseum/it/items/itbar.c", status: "M", source: "branch" },
     ],
     {
       repoRoot: fixtureRoot,
       baseRef: "origin/master",
       headRef: "fixture-head",
       currentBranch: "fixture-branch",
-      groupMode: "melee-subsystem",
+      groupMode: "colosseum-subsystem",
       maxFilesPerPr: 30,
       branchPrefix: "review",
-      titlePrefix: "Melee decomp",
+      titlePrefix: "Colosseum decomp",
       sliceCheckCommand: "ninja changes_all",
       lanes: {
-        matchPaths: ["src/melee/it/items/itfoo.c"],
-        improvementPaths: ["src/melee/it/items/itbar.c"],
+        matchPaths: ["src/colosseum/it/items/itfoo.c"],
+        improvementPaths: ["src/colosseum/it/items/itbar.c"],
       },
     },
   );
@@ -351,7 +351,7 @@ async function main(): Promise<void> {
   assertSmoke("pr-split-plan applies lanes from checkpoint candidates", lanePlan.lanesApplied === true && lanePlan.slices.length === 2);
   assertSmoke(
     "pr-split-plan match lane carries match and supporting files",
-    laneMatchSlice?.lane === "match" && laneMatchSlice.fileCount === 2 && laneMatchSlice.files.some((file) => file.path === "include/melee/it/itfoo.h"),
+    laneMatchSlice?.lane === "match" && laneMatchSlice.fileCount === 2 && laneMatchSlice.files.some((file) => file.path === "include/colosseum/it/itfoo.h"),
   );
   assertSmoke(
     "pr-split-plan keeps non-match work in a local-only slice that does not ship",
@@ -455,32 +455,32 @@ async function main(): Promise<void> {
       runnerValidation: { ...noOfficialMovementValidation, qaLint: null },
     }).some((reason) => reason.includes("runner validation")),
   );
-  const defineAliasLint = lintWorkerReviewDiff(`diff --git a/src/melee/if/textlib.c b/src/melee/if/textlib.c
+  const defineAliasLint = lintWorkerReviewDiff(`diff --git a/src/colosseum/if/textlib.c b/src/colosseum/if/textlib.c
 @@ -1,2 +1,3 @@
 +#define devtext_drawlist un_804D6E18
 `);
   assertSmoke("worker review lint rejects variable #define aliases", defineAliasLint.status === "failed");
   assertSmoke("worker review lint names define alias rule", defineAliasLint.findings.some((finding) => finding.ruleId === "no-define-alias-global-renames"));
-  const duplicateExternLint = lintWorkerReviewDiff(`diff --git a/src/melee/if/textlib.c b/src/melee/if/textlib.c
+  const duplicateExternLint = lintWorkerReviewDiff(`diff --git a/src/colosseum/if/textlib.c b/src/colosseum/if/textlib.c
 @@ -1,3 +1,4 @@
  /* 4D6E18 */ extern DevText* devtext_drawlist;
 +/* 4D6E18 */ extern DevText* un_804D6E18;
 `);
   assertSmoke("worker review lint rejects duplicate address extern aliases", duplicateExternLint.status === "failed");
   assertSmoke("worker review lint names duplicate extern rule", duplicateExternLint.findings.some((finding) => finding.ruleId === "duplicate-address-extern-alias"));
-  const cleanDefineLint = lintWorkerReviewDiff(`diff --git a/src/melee/if/textlib.c b/src/melee/if/textlib.c
+  const cleanDefineLint = lintWorkerReviewDiff(`diff --git a/src/colosseum/if/textlib.c b/src/colosseum/if/textlib.c
 @@ -1,2 +1,3 @@
 +#define TEXTLIB_POOL_SIZE 32
 `);
   assertSmoke("worker review lint allows uppercase numeric constants", cleanDefineLint.status === "passed");
-  const stringSymbolLint = lintWorkerReviewDiff(`diff --git a/src/melee/mn/mnnamenew.c b/src/melee/mn/mnnamenew.c
+  const stringSymbolLint = lintWorkerReviewDiff(`diff --git a/src/colosseum/mn/mnnamenew.c b/src/colosseum/mn/mnnamenew.c
 @@ -1,3 +1,3 @@
 -        (void**) &MenMainBack_Top.joint, "MenMainBack_Top_joint",
 +        (void**) &MenMainBack_Top.joint, mnNameNew_803EE38C,
 `);
   assertSmoke("worker review lint rejects string literal symbol regressions", stringSymbolLint.status === "failed");
   assertSmoke("worker review lint names string literal symbol rule", stringSymbolLint.findings.some((finding) => finding.ruleId === "no-string-literal-symbol-regression"));
-  const cleanStringEditLint = lintWorkerReviewDiff(`diff --git a/src/melee/mn/mnnamenew.c b/src/melee/mn/mnnamenew.c
+  const cleanStringEditLint = lintWorkerReviewDiff(`diff --git a/src/colosseum/mn/mnnamenew.c b/src/colosseum/mn/mnnamenew.c
 @@ -1,3 +1,3 @@
 -        (void**) &MenMainBack_Top.joint, "MenMainBack_Top_joint",
 +        (void**) &MenMainBack_Top.joint, "MenMainBack_Top_model",
@@ -516,11 +516,11 @@ async function main(): Promise<void> {
     toPercent,
     bytesDelta: Math.round((128 * (toPercent - fromPercent)) / 100),
   });
-  const repairSources = new Map([["GALE01:ft/ft_a", "src/melee/ft/ft_a.c"]]);
+  const repairSources = new Map([["GC6E01:ft/ft_a", "src/colosseum/ft/ft_a.c"]]);
   const repairPlan = planRegressionRepair(
     {
-      brokenMatches: [repairEntry("GALE01:ft/ft_a", "ftA_Broken", 100, 94)],
-      fuzzyRegressions: [repairEntry("GALE01:ft/ft_a", ".data", 90, 88), repairEntry("GALE01:ft/ft_b", "ftB_NoSource", 97, 95)],
+      brokenMatches: [repairEntry("GC6E01:ft/ft_a", "ftA_Broken", 100, 94)],
+      fuzzyRegressions: [repairEntry("GC6E01:ft/ft_a", ".data", 90, 88), repairEntry("GC6E01:ft/ft_b", "ftB_NoSource", 97, 95)],
       regressions: [],
     },
     { pauseThreshold: 12, repairPriorityBase: 400, requeueLimit: 32, sourcePaths: repairSources },
@@ -535,7 +535,7 @@ async function main(): Promise<void> {
   assertSmoke("epoch repair plan does not pause under the threshold", repairPlan.paused === false);
   const pausedPlan = planRegressionRepair(
     {
-      brokenMatches: Array.from({ length: 13 }, (_, index) => repairEntry("GALE01:ft/ft_a", `ftA_Regressed_${index}`, 100, 90)),
+      brokenMatches: Array.from({ length: 13 }, (_, index) => repairEntry("GC6E01:ft/ft_a", `ftA_Regressed_${index}`, 100, 90)),
       fuzzyRegressions: [],
       regressions: [],
     },
@@ -590,7 +590,7 @@ async function main(): Promise<void> {
       workerId: "worker-state-smoke-2",
       baseRev: "smoke-base",
     });
-    assertSmoke("same-source epoch target can claim concurrently", Boolean(secondClaim) && firstClaim?.writeSet[0] === secondClaim?.writeSet[0]);
+    assertSmoke("scheduler prefers an alternate source when one source already has an active claim", Boolean(secondClaim) && firstClaim?.writeSet[0] !== secondClaim?.writeSet[0]);
     assertSmoke("worker-state smoke tracks active claims", activeClaimsForSession(workerStateStore, run.id).length === 2);
     const selected = recordWorkerCheckpoint(workerStateStore, {
       workerStateId: firstClaim?.workerStateId ?? "",
@@ -633,9 +633,9 @@ async function main(): Promise<void> {
   }
 
   const rankingRepo = await mkdtemp(join(tmpdir(), "decomp-orchestrator-rank-"));
-  await mkdir(join(rankingRepo, "build/GALE01"), { recursive: true });
+  await mkdir(join(rankingRepo, "build/GC6E01"), { recursive: true });
   await writeFile(
-    join(rankingRepo, "build/GALE01/report.json"),
+    join(rankingRepo, "build/GC6E01/report.json"),
     JSON.stringify({
       measures: { matched_code_percent: 60, matched_functions_percent: 50 },
       units: [
@@ -730,10 +730,10 @@ async function main(): Promise<void> {
   assertSmoke("board rank spreads no-information closeness fallback", Number(closeHighRank?.closeness_fallback_score ?? 0) > 0);
 
   stateDir = await mkdtemp(join(tmpdir(), "decomp-orchestrator-smoke-"));
-  const commonFlags = ["--repo-root", fixtureRoot, "--state-dir", stateDir, "--dry-run-agents"];
-  const smokeGraphSources = "code_graph,past_prs,agent_shared_state,mismatch_patterns";
-  const smokeCuratedGraphSources = `${smokeGraphSources},curator_enrichment`;
   const graphDb = join(stateDir, "knowledge-graph.sqlite");
+  const commonFlags = ["--repo-root", fixtureRoot, "--state-dir", stateDir, "--graph-db", graphDb, "--dry-run-agents"];
+  const smokeGraphSources = "code_graph,agent_shared_state,mismatch_patterns";
+  const smokeCuratedGraphSources = `${smokeGraphSources},curator_enrichment`;
   const legacyAgentStateDb = join(stateDir, "legacy-agent-state.sqlite");
   const legacyAgentStateEnrichment = join(stateDir, "agent-shared-state-lessons.jsonl");
   const emptyCuratorEnrichment = join(stateDir, "empty-knowledge-curator-updates.jsonl");
@@ -759,9 +759,8 @@ async function main(): Promise<void> {
     ]),
   );
   assertSmoke(
-    "kg-rebuild-graph indexes code graph, past PRs, agent state, and mismatch patterns",
+    "kg-rebuild-graph indexes code graph, agent state, and mismatch patterns",
     kgRebuild.indexed_sources.includes("code_graph") &&
-      kgRebuild.indexed_sources.includes("past_prs") &&
       kgRebuild.indexed_sources.includes("agent_shared_state") &&
       kgRebuild.indexed_sources.includes("mismatch_patterns"),
   );
@@ -774,16 +773,16 @@ async function main(): Promise<void> {
     mismatch_patterns: unknown[];
     scheduling_signals: { priority_bonus: number };
   }>(
-    await runCli([...commonFlags, "kg-file-card", "--graph-db", graphDb, "--source", "src/melee/ft/chara/ftDemo.c"]),
+    await runCli([...commonFlags, "kg-file-card", "--graph-db", graphDb, "--source", "src/colosseum/ft/chara/ftDemo.c"]),
   );
   assertSmoke("kg-file-card reports fixture file editable", kgFileCard.editability.mode === "editable");
   assertSmoke("kg-file-card includes fixture functions", kgFileCard.functions.length === 2);
   assertSmoke("kg-file-card includes linked mismatch patterns", kgFileCard.mismatch_patterns.length > 0);
   assertSmoke("kg-file-card includes graph scheduling signals", Number.isFinite(kgFileCard.scheduling_signals.priority_bonus));
   const kgSearch = parseJson<{ results: unknown[] }>(
-    await runCli([...commonFlags, "kg-search", "--graph-db", graphDb, "--source", "past_prs", "--query", "ftDemo", "--limit", "3"]),
+    await runCli([...commonFlags, "kg-search", "--graph-db", graphDb, "--source", "code_graph", "--query", "ftDemo", "--limit", "3"]),
   );
-  assertSmoke("kg-search can query past PR source", kgSearch.results.length > 0);
+  assertSmoke("kg-search can query code graph source", kgSearch.results.length > 0);
   const kgAgentStateSearch = parseJson<{ results: unknown[] }>(
     await runCli([...commonFlags, "kg-search", "--graph-db", graphDb, "--source", "agent_shared_state", "--query", "fixture stack", "--limit", "3"]),
   );
@@ -822,7 +821,7 @@ async function main(): Promise<void> {
   );
   assertSmoke("kg-curate writes curator enrichment records", kgCurate.records_written > 0);
   assertSmoke("kg-curate extracts worker lessons", kgCurate.worker_lessons === 1);
-  assertSmoke("kg-curate extracts PR lessons", kgCurate.pr_lessons > 0);
+  assertSmoke("kg-curate does not require PR lessons without a Colosseum PR corpus", kgCurate.pr_lessons === 0);
   const kgCuratedRebuild = parseJson<{ indexed_sources: string[] }>(
     await runCli([
       ...commonFlags,
@@ -870,17 +869,17 @@ async function main(): Promise<void> {
   const tinyImproveValidationPath = join(checkpointFixtureDir, "tiny_improve.validation.json");
   const tinyImprovePatchPath = join(checkpointFixtureDir, "patch_tiny_improve.diff");
   const tinyImproveBaselinePath = join(checkpointFixtureDir, "baseline_tiny_improve.json");
-  await writeFile(exactPatchPath, "diff --git a/src/melee/ft/chara/ftDemo.c b/src/melee/ft/chara/ftDemo.c\n");
-  await writeFile(skippedExactPatchPath, "diff --git a/src/melee/ft/chara/ftDemo2.c b/src/melee/ft/chara/ftDemo2.c\n");
-  await writeFile(improvePatchPath, "diff --git a/src/melee/ft/chara/ftDemo4.c b/src/melee/ft/chara/ftDemo4.c\n");
-  await writeFile(tinyImprovePatchPath, "diff --git a/src/melee/ft/chara/ftDemo5.c b/src/melee/ft/chara/ftDemo5.c\n");
+  await writeFile(exactPatchPath, "diff --git a/src/colosseum/ft/chara/ftDemo.c b/src/colosseum/ft/chara/ftDemo.c\n");
+  await writeFile(skippedExactPatchPath, "diff --git a/src/colosseum/ft/chara/ftDemo2.c b/src/colosseum/ft/chara/ftDemo2.c\n");
+  await writeFile(improvePatchPath, "diff --git a/src/colosseum/ft/chara/ftDemo4.c b/src/colosseum/ft/chara/ftDemo4.c\n");
+  await writeFile(tinyImprovePatchPath, "diff --git a/src/colosseum/ft/chara/ftDemo5.c b/src/colosseum/ft/chara/ftDemo5.c\n");
   await writeFile(
     improveBaselinePath,
-    JSON.stringify({ unit: "main/melee/ft/chara/ftDemo4", symbol: "ftDemo_Improve", functions: [{ name: "ftDemo_Improve", score: 60, size: 512 }], sections: [] }, null, 2),
+    JSON.stringify({ unit: "main/colosseum/ft/chara/ftDemo4", symbol: "ftDemo_Improve", functions: [{ name: "ftDemo_Improve", score: 60, size: 512 }], sections: [] }, null, 2),
   );
   await writeFile(
     tinyImproveBaselinePath,
-    JSON.stringify({ unit: "main/melee/ft/chara/ftDemo5", symbol: "ftDemo_TinyImprove", functions: [{ name: "ftDemo_TinyImprove", score: 99, size: 512 }], sections: [] }, null, 2),
+    JSON.stringify({ unit: "main/colosseum/ft/chara/ftDemo5", symbol: "ftDemo_TinyImprove", functions: [{ name: "ftDemo_TinyImprove", score: 99, size: 512 }], sections: [] }, null, 2),
   );
   const checkpointSeedStore = openState(stateDir);
   try {
@@ -1006,9 +1005,9 @@ async function main(): Promise<void> {
     };
     await seedWorkerCheckpoint({
       key: "checkpoint-exact",
-      unit: "main/melee/ft/chara/ftDemo",
+      unit: "main/colosseum/ft/chara/ftDemo",
       symbol: "ftDemo_Exact",
-      sourcePath: "src/melee/ft/chara/ftDemo.c",
+      sourcePath: "src/colosseum/ft/chara/ftDemo.c",
       size: 32,
       before: 99.5,
       after: 100,
@@ -1022,9 +1021,9 @@ async function main(): Promise<void> {
     });
     await seedWorkerCheckpoint({
       key: "checkpoint-skipped-exact",
-      unit: "main/melee/ft/chara/ftDemo2",
+      unit: "main/colosseum/ft/chara/ftDemo2",
       symbol: "ftDemo_SkippedExact",
-      sourcePath: "src/melee/ft/chara/ftDemo2.c",
+      sourcePath: "src/colosseum/ft/chara/ftDemo2.c",
       size: 32,
       before: 99.5,
       after: 100,
@@ -1039,9 +1038,9 @@ async function main(): Promise<void> {
     });
     await seedWorkerCheckpoint({
       key: "checkpoint-tool-error",
-      unit: "main/melee/ft/chara/ftDemo3",
+      unit: "main/colosseum/ft/chara/ftDemo3",
       symbol: "ftDemo_ToolError",
-      sourcePath: "src/melee/ft/chara/ftDemo3.c",
+      sourcePath: "src/colosseum/ft/chara/ftDemo3.c",
       size: 32,
       before: null,
       after: null,
@@ -1055,9 +1054,9 @@ async function main(): Promise<void> {
     });
     await seedWorkerCheckpoint({
       key: "checkpoint-improve",
-      unit: "main/melee/ft/chara/ftDemo4",
+      unit: "main/colosseum/ft/chara/ftDemo4",
       symbol: "ftDemo_Improve",
-      sourcePath: "src/melee/ft/chara/ftDemo4.c",
+      sourcePath: "src/colosseum/ft/chara/ftDemo4.c",
       size: 512,
       before: 60,
       after: 75,
@@ -1072,9 +1071,9 @@ async function main(): Promise<void> {
     });
     await seedWorkerCheckpoint({
       key: "checkpoint-tiny-improve",
-      unit: "main/melee/ft/chara/ftDemo5",
+      unit: "main/colosseum/ft/chara/ftDemo5",
       symbol: "ftDemo_TinyImprove",
-      sourcePath: "src/melee/ft/chara/ftDemo5.c",
+      sourcePath: "src/colosseum/ft/chara/ftDemo5.c",
       size: 512,
       before: 99,
       after: 99.4,
@@ -1413,7 +1412,7 @@ async function main(): Promise<void> {
     workerUserPrompt.includes("<target>") &&
       workerUserPrompt.includes("<baseline") &&
       workerUserPrompt.includes("<details_json>") &&
-      workerUserPrompt.includes('"source_path": "src/melee/ft/chara/ftDemo.c"') &&
+      workerUserPrompt.includes('"source_path": "src/colosseum/ft/chara/ftDemo.c"') &&
       workerUserPrompt.includes('"current_scores"') &&
       workerUserPrompt.includes('"fuzzy_match_percent"') &&
       !workerUserPrompt.includes("<current_state_json>") &&
@@ -1431,7 +1430,7 @@ async function main(): Promise<void> {
     "worker user prompt includes compact target file XML",
     workerUserPrompt.includes("<target>") &&
       workerUserPrompt.includes("<target_file") &&
-      workerUserPrompt.includes('path="src/melee/ft/chara/ftDemo.c"') &&
+      workerUserPrompt.includes('path="src/colosseum/ft/chara/ftDemo.c"') &&
       workerUserPrompt.includes("baseline_match_percent") &&
       workerUserPrompt.includes("<![CDATA["),
   );
@@ -1450,7 +1449,7 @@ async function main(): Promise<void> {
       workerUserPrompt.includes('"search_leads"') &&
       workerUserPrompt.includes('"symbols"') &&
       workerUserPrompt.includes('"target_symbol"') &&
-      workerUserPrompt.includes('"past_prs"') &&
+      workerUserPrompt.includes('"review_history"') &&
       workerUserPrompt.includes('"path_facts"') &&
       workerUserPrompt.includes('"follow_up_queries"') &&
       workerUserPrompt.includes('"path_facts_resolve"') &&
@@ -1496,7 +1495,7 @@ async function main(): Promise<void> {
     "dashboard kernel integration resolver catalog has conflict queue context",
     kernelIntegrationResolverContext.includes("<integration_conflict_item>") &&
       kernelIntegrationResolverContext.includes("kernel-viewer-integration-conflict") &&
-      kernelIntegrationResolverContext.includes("src/melee/ft/chara/ftDemo.c") &&
+      kernelIntegrationResolverContext.includes("src/colosseum/ft/chara/ftDemo.c") &&
       kernelIntegrationResolverPrompt.includes("worker-output integration conflict") &&
       !`${kernelIntegrationResolverPrompt}\n${kernelIntegrationResolverContext}`.includes("{{"),
   );
@@ -1514,8 +1513,8 @@ async function main(): Promise<void> {
   );
   assertSmoke(
     "dashboard kernel worker catalog renders sample target file context",
-    kernelWorkerContext.includes('<target_file path="src/melee/ft/chara/ftDemo.c"') &&
-      kernelWorkerContext.includes('"source_path": "src/melee/ft/chara/ftDemo.c"') &&
+    kernelWorkerContext.includes('<target_file path="src/colosseum/ft/chara/ftDemo.c"') &&
+      kernelWorkerContext.includes('"source_path": "src/colosseum/ft/chara/ftDemo.c"') &&
       kernelWorkerContext.includes("ftDemo_KernelViewerSample"),
   );
   assertSmoke(
@@ -1527,12 +1526,12 @@ async function main(): Promise<void> {
       kernelWorkerContext.includes("<target_graph_file_card") &&
       kernelWorkerContext.includes("<details_json>") &&
       kernelWorkerContext.includes('"source": "code_graph_file_card"') &&
-      kernelWorkerContext.includes('"source_path": "src/melee/ft/chara/ftDemo.c"') &&
+      kernelWorkerContext.includes('"source_path": "src/colosseum/ft/chara/ftDemo.c"') &&
       kernelWorkerContext.includes('"editability"') &&
       kernelWorkerContext.includes('"search_leads"') &&
       kernelWorkerContext.includes('"symbols"') &&
       kernelWorkerContext.includes('"target_symbol"') &&
-      kernelWorkerContext.includes('"past_prs"') &&
+      kernelWorkerContext.includes('"review_history"') &&
       kernelWorkerContext.includes('"path_facts"') &&
       kernelWorkerContext.includes('"follow_up_queries"') &&
       !kernelWorkerContext.includes('"scheduling_signals"') &&
@@ -1557,8 +1556,8 @@ async function main(): Promise<void> {
   assertSmoke("worker user prompt does not list lookup commands", !workerUserPrompt.includes('"lookup_commands"'));
   assertSmoke("rendered prompts do not reference design doc", !renderedPrompts.includes("decomp-orchestrator-design.html"));
   assertSmoke("rendered prompts do not reference Codex skill paths", !renderedPrompts.includes(".codex/skills"));
-  assertSmoke("worker prompt includes structured past PR resources", workerUserPrompt.includes("past_prs"));
-  assertSmoke("worker prompt includes data sheet resources", workerUserPrompt.includes("ssbm_data_sheet"));
+  assertSmoke("worker prompt omits unavailable past PR resources", !workerUserPrompt.includes("past_prs"));
+  assertSmoke("worker prompt omits unavailable legacy data sheet resources", !workerUserPrompt.includes("data_sheet"));
   assertSmoke("rendered prompts do not include director scheduling context", !renderedPrompts.includes("legacy/director/context/scheduling.md"));
   assertSmoke("rendered prompts do not include worker context guide paths", !renderedPrompts.includes("legacy/worker/context/"));
   assertSmoke("worker user prompt does not duplicate Pi tool affordances", !workerUserPrompt.includes("<available_pi_tools_json>"));
@@ -1566,7 +1565,7 @@ async function main(): Promise<void> {
   assertSmoke("rendered prompts do not reference old knowledge references", !renderedPrompts.includes("knowledge/references"));
   assertSmoke("rendered prompts do not reference old knowledge workflows", !renderedPrompts.includes("knowledge/workflows"));
   assertSmoke("rendered prompts do not reference targeted iteration workflow file", !renderedPrompts.includes("workflows/targeted-iteration.md"));
-  assertSmoke("rendered prompts omit legacy sweep workflow", !renderedPrompts.includes("melee-decomp-sweep"));
+  assertSmoke("rendered prompts omit legacy sweep workflow", !renderedPrompts.includes("colosseum-decomp-sweep"));
   assertSmoke("worker prompt omits helper command paths", !workerUserPrompt.includes("decomp_context_lookup.py"));
 
   const summary = {

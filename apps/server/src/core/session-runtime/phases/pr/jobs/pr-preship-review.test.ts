@@ -6,7 +6,7 @@ import { existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import type { MeleeKernelPiRunOptions } from "@server/infrastructure/agent-runtime/kernel-pi-runner";
+import type { ColosseumKernelPiRunOptions } from "@server/infrastructure/agent-runtime/kernel-pi-runner";
 import type { PiRunResult } from "@server/core/shared/types";
 import {
   aggregatePreshipOutcomes,
@@ -50,13 +50,13 @@ async function syntheticRepo(): Promise<{ repoRoot: string; baseSha: string; hea
   await git(repoRoot, ["init", "-q", "-b", "main"]);
   await git(repoRoot, ["config", "user.email", "test@example.com"]);
   await git(repoRoot, ["config", "user.name", "Preship Test"]);
-  await mkdir(resolve(repoRoot, "src/melee/gm"), { recursive: true });
-  await writeFile(resolve(repoRoot, "src/melee/gm/gm_1832.c"), "int gm_existing(void) { return 0; }\n");
+  await mkdir(resolve(repoRoot, "src/colosseum/gm"), { recursive: true });
+  await writeFile(resolve(repoRoot, "src/colosseum/gm/gm_1832.c"), "int gm_existing(void) { return 0; }\n");
   await git(repoRoot, ["add", "."]);
   await git(repoRoot, ["commit", "-q", "-m", "base"]);
   const baseSha = await currentHead(repoRoot);
   await writeFile(
-    resolve(repoRoot, "src/melee/gm/gm_1832.c"),
+    resolve(repoRoot, "src/colosseum/gm/gm_1832.c"),
     ["extern const f32 lbl_804DA60C;", "", "int gm_existing(void) { return 0; }", "float gm_new(void) { return lbl_804DA60C; }", ""].join("\n"),
   );
   await git(repoRoot, ["add", "."]);
@@ -67,12 +67,12 @@ async function syntheticRepo(): Promise<{ repoRoot: string; baseSha: string; hea
 
 function rejectReviewJson(sliceId: string): string {
   return JSON.stringify({
-    schema_version: "melee_pr_preship_review_v1",
+    schema_version: "colosseum_pr_preship_review_v1",
     slice_id: sliceId,
     slice_verdict: "reject",
     findings: [
       {
-        file: "src/melee/gm/gm_1832.c",
+        file: "src/colosseum/gm/gm_1832.c",
         line: 1,
         standard_id: "global_standard:literals-and-data-ownership",
         verdict: "reject",
@@ -149,10 +149,10 @@ describe("parsePreshipPlan", () => {
 
   test("falls back to file paths when pathspecs are absent", () => {
     const plan = parsePreshipPlan(
-      { repoRoot: "/r", baseRef: "a", headRef: "b", slices: [{ id: "gm", lane: "match", files: [{ path: "src/melee/gm/gm_1832.c" }] }] },
+      { repoRoot: "/r", baseRef: "a", headRef: "b", slices: [{ id: "gm", lane: "match", files: [{ path: "src/colosseum/gm/gm_1832.c" }] }] },
       "plan.json",
     );
-    expect(plan.slices[0]?.pathspecs).toEqual(["src/melee/gm/gm_1832.c"]);
+    expect(plan.slices[0]?.pathspecs).toEqual(["src/colosseum/gm/gm_1832.c"]);
   });
 });
 
@@ -161,13 +161,13 @@ describe("runPreshipReview (canned diff, mocked agent)", () => {
     const { repoRoot, baseSha, headSha } = await syntheticRepo();
     const stateDir = tempDir("preship-state-");
     const seenPrompts: string[] = [];
-    const runner = async (options: MeleeKernelPiRunOptions): Promise<PiRunResult> => {
+    const runner = async (options: ColosseumKernelPiRunOptions): Promise<PiRunResult> => {
       seenPrompts.push(options.prompt.userPrompt);
       return mockRunnerResult(rejectReviewJson("gm"), options.outputDir);
     };
     const { aggregate, exitCode } = await runPreshipReview(
       {
-        plan: { repoRoot, baseRef: baseSha, headRef: headSha, slices: [{ id: "gm", lane: "match", pathspecs: ["src/melee/gm/gm_1832.c"] }] },
+        plan: { repoRoot, baseRef: baseSha, headRef: headSha, slices: [{ id: "gm", lane: "match", pathspecs: ["src/colosseum/gm/gm_1832.c"] }] },
         selection: { kind: "all" },
         baseRef: baseSha,
         headRef: headSha,
@@ -206,11 +206,11 @@ describe("runPreshipReview (canned diff, mocked agent)", () => {
   test("invalid agent output fails closed as an error outcome", async () => {
     const { repoRoot, baseSha, headSha } = await syntheticRepo();
     const stateDir = tempDir("preship-state-");
-    const runner = async (options: MeleeKernelPiRunOptions): Promise<PiRunResult> =>
-      mockRunnerResult('{"schema_version":"melee_pr_preship_review_v1","slice_verdict":"maybe"}', options.outputDir);
+    const runner = async (options: ColosseumKernelPiRunOptions): Promise<PiRunResult> =>
+      mockRunnerResult('{"schema_version":"colosseum_pr_preship_review_v1","slice_verdict":"maybe"}', options.outputDir);
     const { aggregate, exitCode } = await runPreshipReview(
       {
-        plan: { repoRoot, baseRef: baseSha, headRef: headSha, slices: [{ id: "gm", lane: "match", pathspecs: ["src/melee/gm/gm_1832.c"] }] },
+        plan: { repoRoot, baseRef: baseSha, headRef: headSha, slices: [{ id: "gm", lane: "match", pathspecs: ["src/colosseum/gm/gm_1832.c"] }] },
         selection: { kind: "all" },
         baseRef: baseSha,
         headRef: headSha,
@@ -233,7 +233,7 @@ describe("runPreshipReview (canned diff, mocked agent)", () => {
     const { repoRoot, baseSha, headSha } = await syntheticRepo();
     const stateDir = tempDir("preship-state-");
     let agentCalls = 0;
-    const runner = async (options: MeleeKernelPiRunOptions): Promise<PiRunResult> => {
+    const runner = async (options: ColosseumKernelPiRunOptions): Promise<PiRunResult> => {
       agentCalls += 1;
       return mockRunnerResult(rejectReviewJson("gm"), options.outputDir);
     };
@@ -242,7 +242,7 @@ describe("runPreshipReview (canned diff, mocked agent)", () => {
         repoRoot,
         baseRef: baseSha,
         headRef: headSha,
-        slices: [{ id: "local-gm", lane: "local", pathspecs: ["src/melee/gm/gm_1832.c"] }],
+        slices: [{ id: "local-gm", lane: "local", pathspecs: ["src/colosseum/gm/gm_1832.c"] }],
       },
       baseRef: baseSha,
       headRef: headSha,
@@ -273,7 +273,7 @@ describe("pr-preship-review server job --dry-run integration", () => {
         repoRoot,
         baseRef: baseSha,
         headRef: headSha,
-        slices: [{ id: "gm", lane: "match", pathspecs: ["src/melee/gm/gm_1832.c"] }],
+        slices: [{ id: "gm", lane: "match", pathspecs: ["src/colosseum/gm/gm_1832.c"] }],
       }),
     );
 

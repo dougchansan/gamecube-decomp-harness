@@ -18,7 +18,7 @@ from search_index import package_root_for_tool, tool_storage_root  # type: ignor
 
 PACKAGE_ROOT = package_root_for_tool(TOOL_ROOT)
 TOOL_STORAGE_ROOT = tool_storage_root(TOOL_ROOT)
-DEFAULT_REPO_ROOT = PACKAGE_ROOT.parent / "melee"
+DEFAULT_REPO_ROOT = PACKAGE_ROOT.parent / "pkmn-colosseum"
 
 
 def parse_args() -> argparse.Namespace:
@@ -39,7 +39,7 @@ def read_json(path: Path, default: Any) -> Any:
 def choose_target(repo_root: Path, unit: str, symbol: str) -> dict[str, Any]:
     if unit and symbol:
         return {"unit": unit, "symbol": symbol, "source_path": "", "fuzzy_match_percent": None}
-    report = read_json(repo_root / "build" / "GALE01" / "report.json", {})
+    report = read_json(repo_root / "build" / "GC6E01" / "report.json", {})
     for unit_row in report.get("units") or []:
         if not isinstance(unit_row, dict):
             continue
@@ -59,7 +59,7 @@ def choose_target(repo_root: Path, unit: str, symbol: str) -> dict[str, Any]:
                     "source_path": str(unit_meta.get("source_path") or ""),
                     "fuzzy_match_percent": fuzzy,
                 }
-    raise RuntimeError("No imperfect function found in build/GALE01/report.json; pass --unit and --symbol explicitly.")
+    raise RuntimeError("No imperfect function found in build/GC6E01/report.json; pass --unit and --symbol explicitly.")
 
 
 def run_objdiff(repo_root: Path, target: dict[str, Any], output_path: Path) -> subprocess.CompletedProcess[str]:
@@ -195,7 +195,7 @@ def main() -> int:
         "record_count": len(rows),
         "generated_artifacts": [str(diff_path)] if diff_path.exists() else [],
         "generated_indexes": [str(index_path)] if index_path.exists() else [],
-        "dependencies": ["build/tools/objdiff-cli", "objdiff.json", "build/GALE01/report.json"],
+        "dependencies": ["build/tools/objdiff-cli", "objdiff.json", "build/GC6E01/report.json"],
     }
     status_path = TOOL_STORAGE_ROOT / "cache" / "runner_status.json"
     status_path.parent.mkdir(parents=True, exist_ok=True)

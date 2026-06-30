@@ -7,7 +7,7 @@
   "runner_status": "on_demand",
   "status_message": "Tool-local implementation: APIs use toolpacks/gamecube-decomp/_impl/gamecube/tools/objdiff_path.py, ninja_compile.py, and objdiff-cli JSON diff.",
   "limitations": [
-    "Requires a candidate object built from the current source and target objects under build/GALE01/obj.",
+    "Requires a candidate object built from the current source and target objects under build/GC6E01/obj.",
     "Score is derived from objdiff-cli JSON match_percent; detailed score-server mismatch breakdown is unavailable with stock objdiff-cli 3.6.x.",
     "A good score is evidence for one object/function only and must be interpreted with source diff and neighbor regression checks."
   ],

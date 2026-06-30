@@ -33,12 +33,6 @@
       "access_modes": ["source_search", "instruction_lookup", "graph_search"]
     },
     {
-      "id": "external_mirrors",
-      "section": "code_context",
-      "path": "code_context/external_mirrors",
-      "access_modes": ["source_search", "symbol_lookup", "graph_search"]
-    },
-    {
       "id": "code_graph",
       "section": "code_context",
       "path": "code_context/code_graph",

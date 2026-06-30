@@ -9,14 +9,14 @@ import {
 } from "./resolver.js";
 
 describe("toolpack runtime resolver", () => {
-  test("resolves Melee project bindings into shared data and worktree cache roots", () => {
+  test("resolves Colosseum project bindings into shared data and worktree cache roots", () => {
     const root = packageRoot();
     const context = {
       project: {
-        projectId: "melee",
-        repoRoot: resolve(root, "projects/melee/checkout"),
-        stateDir: resolve(root, "projects/melee/state"),
-        descriptorPath: resolve(root, "projects/melee/project.json"),
+        projectId: "pkmn-colosseum",
+        repoRoot: resolve(root, "projects/pkmn-colosseum/checkout"),
+        stateDir: resolve(root, "projects/pkmn-colosseum/state"),
+        descriptorPath: resolve(root, "projects/pkmn-colosseum/project.json"),
       },
       worktreeId: "lease-a",
     };
@@ -26,9 +26,9 @@ describe("toolpack runtime resolver", () => {
     expect(tool.toolpackId).toBe("gamecube-decomp");
     expect(tool.toolRoot).toBe(resolve(root, "toolpacks/gamecube-decomp/research/ghidra"));
     expect(tool.apiRoot).toBe(resolve(root, "toolpacks/gamecube-decomp/research/ghidra/api"));
-    expect(tool.bindingPath).toBe(resolve(root, "projects/melee/tool-bindings/ghidra.json"));
-    expect(tool.sharedDataRoot).toBe(resolve(root, "projects/melee/shared/tool-data/ghidra"));
-    expect(tool.worktreeCacheRoot).toBe(resolve(root, "projects/melee/worktrees/lease-a/tool-cache/ghidra"));
+    expect(tool.bindingPath).toBe(resolve(root, "projects/pkmn-colosseum/tool-bindings/ghidra.json"));
+    expect(tool.sharedDataRoot).toBe(resolve(root, "projects/pkmn-colosseum/shared/tool-data/ghidra"));
+    expect(tool.worktreeCacheRoot).toBe(resolve(root, "projects/pkmn-colosseum/worktrees/lease-a/tool-cache/ghidra"));
     expect(tool.env.ORCH_TOOL_SHARED_DATA_ROOT).toBe(tool.sharedDataRoot);
     expect(tool.env.ORCH_TOOL_WORKTREE_CACHE_ROOT).toBe(tool.worktreeCacheRoot);
     expect(tool.env.ORCH_TOOL_IMPL_ROOT).toBe(resolve(root, "toolpacks/gamecube-decomp/_impl/gamecube"));
@@ -37,8 +37,8 @@ describe("toolpack runtime resolver", () => {
   test("reads registered ids from the project-enabled toolpack", () => {
     const ids = registeredToolIdsForContext({
       project: {
-        projectId: "melee",
-        descriptorPath: resolve(packageRoot(), "projects/melee/project.json"),
+        projectId: "pkmn-colosseum",
+        descriptorPath: resolve(packageRoot(), "projects/pkmn-colosseum/project.json"),
       },
     });
 
@@ -47,7 +47,7 @@ describe("toolpack runtime resolver", () => {
     expect(ids.has("not_a_tool")).toBe(false);
   });
 
-  test("resolves a non-Melee fixture without reading Melee bindings or data", () => {
+  test("resolves a non-Colosseum fixture without reading Colosseum bindings or data", () => {
     const projectDir = mkdtempSync(join(tmpdir(), "gamecube-tool-fixture-"));
     mkdirSync(join(projectDir, "tool-bindings"), { recursive: true });
     writeFileSync(

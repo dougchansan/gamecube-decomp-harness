@@ -42,13 +42,13 @@ touch build.ninja
       resolve(binDir, "ninja"),
       `#!/bin/sh
 echo "ninja $*" >> "$REPORT_RUN_TEST_LOG"
-mkdir -p build/GALE01
-if [ "$1" = "build/GALE01/report.json" ]; then
-  printf '%s\\n' '{"measures":{"fuzzy_match_percent":98.5,"matched_code_percent":76.25,"matched_data_percent":81.5,"matched_functions_percent":95,"total_functions":200,"matched_functions":190,"total_units":20,"complete_units":17,"total_code":"1000","matched_code":"762","total_data":"400","matched_data":"326"}}' > build/GALE01/report.json
+mkdir -p build/GC6E01
+if [ "$1" = "build/GC6E01/report.json" ]; then
+  printf '%s\\n' '{"measures":{"fuzzy_match_percent":98.5,"matched_code_percent":76.25,"matched_data_percent":81.5,"matched_functions_percent":95,"total_functions":200,"matched_functions":190,"total_units":20,"complete_units":17,"total_code":"1000","matched_code":"762","total_data":"400","matched_data":"326"}}' > build/GC6E01/report.json
   exit 0
 fi
 if [ "$1" = "changes_all" ]; then
-  printf '{"ok":true}\\n' > build/GALE01/report_changes.json
+  printf '{"ok":true}\\n' > build/GC6E01/report_changes.json
   exit 0
 fi
 exit 1
@@ -75,7 +75,7 @@ exit 1
       });
       expect(readFileSync(logPath, "utf8").trim().split("\n")).toEqual([
         "python3 configure.py --require-protos",
-        "ninja build/GALE01/report.json",
+        "ninja build/GC6E01/report.json",
         "ninja changes_all",
       ]);
     } finally {
@@ -109,9 +109,9 @@ touch build.ninja
       resolve(binDir, "ninja"),
       `#!/bin/sh
 echo "ninja $*" >> "$REPORT_RUN_TEST_LOG"
-mkdir -p build/GALE01
-printf '%s\\n' '{"measures":{}}' > build/GALE01/report.json
-printf '{"ok":true}\\n' > build/GALE01/report_changes.json
+mkdir -p build/GC6E01
+printf '%s\\n' '{"measures":{}}' > build/GC6E01/report.json
+printf '{"ok":true}\\n' > build/GC6E01/report_changes.json
 `,
     );
 

@@ -1,7 +1,7 @@
 ---
 covers: Reusable GameCube decomp toolpack, project tool bindings, agent tool wrappers, validation tools, and scoped tool data
 concepts: [tools, toolpacks, project-bindings, worker-tools, pi-extensions, validation, research, worktree-cache, wibo, tool-slots]
-code-ref: toolpacks/gamecube-decomp, projects/melee/project.json, projects/melee/tool-bindings, apps/server/src/core/tools/resolver.ts, apps/server/src/core/tools
+code-ref: toolpacks/gamecube-decomp, projects/pkmn-colosseum/project.json, projects/pkmn-colosseum/tool-bindings, apps/server/src/core/tools/resolver.ts, apps/server/src/core/tools
 ---
 
 # Worker Tool Suites
@@ -129,7 +129,7 @@ enabled toolpack into specific affordances such as `ghidra_lookup`,
 ## Maintenance
 
 `bun run kg:sources` lists active knowledge sources and registered tools.
-`bun run kg:smoke -- --project melee --strict` checks graph source readiness and
+`bun run kg:smoke -- --project pkmn-colosseum --strict` checks graph source readiness and
 tool readiness. The strict smoke also requires local indexed source data and
 live runner artifacts, so a resolver-valid setup can still fail strict smoke
 when generated project data is stale or absent.

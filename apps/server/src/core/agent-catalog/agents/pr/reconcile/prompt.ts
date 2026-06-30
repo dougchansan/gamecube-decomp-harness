@@ -21,8 +21,8 @@ function agentFilePath(): string {
 }
 
 export const prompt = definePrompt({
-  id: "melee.reconcile.system",
-  title: "Melee Reconcile System Prompt",
+  id: "colosseum.reconcile.system",
+  title: "Colosseum Reconcile System Prompt",
   archetype: "workflow",
   nodes: [
     section("goal", [

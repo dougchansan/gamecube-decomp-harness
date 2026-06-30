@@ -1,5 +1,5 @@
 {
-  "name": "melee-decomp-orchestrator",
+  "name": "colosseum-decomp-orchestrator",
   "private": true,
   "workspaces": [
     "apps/*",

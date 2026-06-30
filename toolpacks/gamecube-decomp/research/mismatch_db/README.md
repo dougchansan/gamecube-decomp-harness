@@ -5,7 +5,7 @@ last-mile matching tactics.
 
 Current state: live runner v1.
 `python3 toolpacks/gamecube-decomp/research/mismatch_db/runners/analyze_objdiff_mismatches.py --repo-root <repo_root>`
-chooses an imperfect function from `build/GALE01/report.json`, runs
+chooses an imperfect function from `build/GC6E01/report.json`, runs
 `objdiff-cli diff`, and writes:
 
 - `cache/runner_status.json`

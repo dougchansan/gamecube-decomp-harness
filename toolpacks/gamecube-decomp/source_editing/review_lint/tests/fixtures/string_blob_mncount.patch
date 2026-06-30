@@ -1,7 +1,7 @@
-diff --git a/src/melee/mn/mncount.c b/src/melee/mn/mncount.c
+diff --git a/src/colosseum/mn/mncount.c b/src/colosseum/mn/mncount.c
 index eb5c211..2b6d2eb 100644
---- a/src/melee/mn/mncount.c
-+++ b/src/melee/mn/mncount.c
+--- a/src/colosseum/mn/mncount.c
++++ b/src/colosseum/mn/mncount.c
 @@ -31,6 +31,10 @@
  #define NUM_CHARACTERS 25
  #define MAX_SCROLL 20

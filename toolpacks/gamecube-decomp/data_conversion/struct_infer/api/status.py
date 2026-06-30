@@ -23,8 +23,8 @@ def main() -> None:
             tool="struct_infer",
             scripts=("infer_struct.py",),
             repo_root=repo_root,
-            required_paths=("build/GALE01/asm",),
-            optional_paths=("build/GALE01/report.json",),
+            required_paths=("build/GC6E01/asm",),
+            optional_paths=("build/GC6E01/report.json",),
             message="Struct inference is ready when generated assembly is present.",
         )
     )

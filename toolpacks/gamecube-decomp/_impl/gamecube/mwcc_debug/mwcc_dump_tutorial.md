@@ -12,10 +12,10 @@ compiler temporaries, instruction scheduling, or helper-call setup.
 
 ## Running it
 
-From the Melee checkout:
+From the Colosseum checkout:
 
 ```sh
-ORCH_PROJECT_REPO_ROOT=/Users/luke/melee \
+ORCH_PROJECT_REPO_ROOT=/Users/luke/colosseum \
   python /path/to/decomp-orchestrator/toolpacks/gamecube-decomp/_impl/gamecube/tools/mwcc_dump.py it_8026CD50
 ```
 
@@ -23,19 +23,19 @@ Or invoke the worker-facing API from the orchestrator checkout:
 
 ```sh
 python3 toolpacks/gamecube-decomp/compiler/mwcc_debug/api/dump_function.py \
-  --repo-root /Users/luke/melee \
+  --repo-root /Users/luke/colosseum \
   --function it_8026CD50 \
   --json
 ```
 
 The tool resolves the function's translation unit, compiles it with
 `mwcc_debug`, and prints the unique dump path, usually under
-`/Users/luke/melee/build/mwcc-dump/<function>-*/pcdump.txt`.
+`/Users/luke/colosseum/build/mwcc-dump/<function>-*/pcdump.txt`.
 
 The terminal summary looks like:
 
 ```text
-[mwcc_dump] it_8026CD50: 2566 lines; full function dump available at: /Users/luke/melee/build/mwcc-dump/it_8026CD50-abcd1234/pcdump.txt
+[mwcc_dump] it_8026CD50: 2566 lines; full function dump available at: /Users/luke/colosseum/build/mwcc-dump/it_8026CD50-abcd1234/pcdump.txt
 [mwcc_dump] passes: BEFORE GLOBAL OPTIMIZATION=1, ...
 [mwcc_dump] shape analysis from: FINAL CODE AFTER INSTRUCTION SCHEDULING
 ```
@@ -249,7 +249,7 @@ When `checkdiff.py` shows frame or stack mismatches, grep the dump for stack
 slot names and nearby source-like locals:
 
 ```sh
-DUMP=/Users/luke/melee/build/mwcc-dump/it_8026CD50-abcd1234/pcdump.txt
+DUMP=/Users/luke/colosseum/build/mwcc-dump/it_8026CD50-abcd1234/pcdump.txt
 rg -n "@337|@338|@339|sp10|sp1C|sp28" "$DUMP"
 ```
 

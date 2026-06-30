@@ -1,7 +1,7 @@
 ---
 covers: PR indexer, PR splitter, and PR reviewer agent slices
 concepts: [pr-indexer, pr-splitter, pr-reviewer, pr-knowledge, pr-planning, preship-review, draft-pr-qa, qa-ship-gate, pr-fixer]
-code-ref: decomp-orchestrator/apps/server/src/core/agent-catalog/agents/knowledge/pr-indexer, decomp-orchestrator/apps/server/src/core/agent-catalog/agents/pr/splitter, decomp-orchestrator/apps/server/src/core/agent-catalog/agents/pr/reviewer, decomp-orchestrator/apps/server/src/core/agent-catalog/agents/pr/fixer, decomp-orchestrator/projects/melee/knowledge/sources/code_context/past_prs
+code-ref: decomp-orchestrator/apps/server/src/core/agent-catalog/agents/knowledge/pr-indexer, decomp-orchestrator/apps/server/src/core/agent-catalog/agents/pr/splitter, decomp-orchestrator/apps/server/src/core/agent-catalog/agents/pr/reviewer, decomp-orchestrator/apps/server/src/core/agent-catalog/agents/pr/fixer, decomp-orchestrator/projects/pkmn-colosseum/knowledge/sources/code_context/past_prs
 ---
 
 # PR Indexer, Splitter, Reviewer, And Fixer Agents
@@ -31,11 +31,11 @@ gives each role its own runtime identity:
 | `apps/server/src/core/agent-catalog/agents/knowledge/pr-indexer/schema.json` | Defines the PR indexing structured output contract. |
 | `apps/server/src/core/agent-catalog/agents/pr/splitter/index.ts` | Exposes the PR splitter agent definition. |
 | `apps/server/src/core/agent-catalog/agents/pr/splitter/agent.ts` | Kernel metadata plus planner role wiring for prompt, context, and tools. |
-| `apps/server/src/core/agent-catalog/agents/pr/splitter/prompt.ts` | Defines the stable splitter system prompt and validates `melee_pr_splitter_plan_v1` output. |
+| `apps/server/src/core/agent-catalog/agents/pr/splitter/prompt.ts` | Defines the stable splitter system prompt and validates `colosseum_pr_splitter_plan_v1` output. |
 | `apps/server/src/core/agent-catalog/agents/pr/splitter/context.ts` | Builds the injected split-planning evidence packet, standards, tools, and schema. |
 | `apps/server/src/core/agent-catalog/agents/pr/splitter/schema.json` | Defines the splitter structured output contract. |
 | `apps/server/src/core/agent-catalog/agents/pr/fixer/agent.ts` | Kernel metadata plus PR feedback fixer role wiring for prompt, context, and tools. |
-| `apps/server/src/core/agent-catalog/agents/pr/fixer/prompt.ts` | Defines the stable PR feedback fixer system prompt and validates `melee_pr_fixer_result_v1` output. |
+| `apps/server/src/core/agent-catalog/agents/pr/fixer/prompt.ts` | Defines the stable PR feedback fixer system prompt and validates `colosseum_pr_fixer_result_v1` output. |
 | `apps/server/src/core/agent-catalog/agents/pr/fixer/context.ts` | Builds the injected PR feedback packet, standards, targeted examples, tools, and schema. |
 | `apps/server/src/core/agent-catalog/agents/pr/fixer/schema.json` | Defines the PR fixer structured output contract. |
 | `apps/server/src/core/agent-catalog/agents/pr/qa-repair/agent.ts` | Kernel metadata plus deterministic QA repair queue role wiring for prompt, context, and tools. |
@@ -44,8 +44,8 @@ gives each role its own runtime identity:
 | `apps/server/src/core/agent-catalog/agents/pr/reviewer/context.ts` | Builds the injected slice diff, lint findings, standards, exhibits, examples, and schema. |
 | `apps/server/src/core/agent-catalog/agents/pr/reviewer/preship.ts` | Loads/render exhibits and validates the preship output contract. |
 | `apps/server/src/core/agent-catalog/agents/pr/reviewer/agent.ts` | Kernel metadata plus adversarial pre-ship reviewer role wiring for prompt, context, and tools. |
-| `apps/server/src/core/agent-catalog/agents/pr/reviewer/schema.json` | Pre-ship structured output contract (`melee_pr_preship_review_v1`). |
-| `apps/server/src/core/agent-catalog/agents/pr/reviewer/exhibits/preship_exhibits.json` | Curated maintainer-rejection exhibits from doldecomp/melee PRs #2655-#2659. |
+| `apps/server/src/core/agent-catalog/agents/pr/reviewer/schema.json` | Pre-ship structured output contract (`colosseum_pr_preship_review_v1`). |
+| `apps/server/src/core/agent-catalog/agents/pr/reviewer/exhibits/preship_exhibits.json` | Curated maintainer-rejection exhibits from dougchansan/pkmn-colosseum PRs #2655-#2659. |
 
 ## PR Splitter Mode
 
@@ -56,7 +56,7 @@ seed slices, and validation commands. With `--strategy agent` or project
 `pr.splitStrategy: "agent"`, that deterministic plan becomes the splitter
 context.
 
-The splitter returns `melee_pr_splitter_plan_v1`: ordered slices with
+The splitter returns `colosseum_pr_splitter_plan_v1`: ordered slices with
 sanitized ids, display names, titles, lanes, scopes, exact file lists,
 dependencies, independence hypotheses, review focus, PR-body summaries, risks,
 validation notes, warnings, rationale, and confidence. The server job validates the
@@ -81,7 +81,7 @@ the slice, targeted examples, the output schema, and curated maintainer-rejectio
 exhibits. An unavailable scanner becomes a context note that increases
 suspicion; it is not approval.
 
-Output follows `melee_pr_preship_review_v1`: per-finding `{file, line,
+Output follows `colosseum_pr_preship_review_v1`: per-finding `{file, line,
 standard_id, verdict: "reject"|"warn", rationale, suggested_fix}` plus a
 top-level `slice_verdict: "approve"|"reject"`, `summary`, and `confidence`.
 Invalid or unparseable output is an infrastructure error, not approval.
@@ -107,7 +107,7 @@ completed worker checkpoint conflict queue items before any PR slice exists.
 ## Knowledge Relationship
 
 The PR indexer is the knowledge-facing PR agent. Historical PR data lives under
-`projects/melee/knowledge/sources/code_context/past_prs/data/`; the indexer
+`projects/pkmn-colosseum/knowledge/sources/code_context/past_prs/data/`; the indexer
 turns raw slices from that corpus into postmortem records that the knowledge
 curator can reduce into graph-safe lessons and proposal-only source updates.
 

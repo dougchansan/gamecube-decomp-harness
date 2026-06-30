@@ -4,7 +4,7 @@
  * The runtime agent id is "pr-reviewer"; this mode uses the kernel-native
  * prompt.ts system and per-slice context rendering.
  * This module owns the mode's static
- * exhibits (curated past maintainer rejections from doldecomp/melee
+ * exhibits (curated past maintainer rejections from dougchansan/pkmn-colosseum
  * PRs #2655-#2659), their prompt XML rendering, and the structural validator
  * for the agent's output contract (schema.json).
  *
@@ -14,7 +14,7 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-export const PRESHIP_REVIEW_SCHEMA_VERSION = "melee_pr_preship_review_v1";
+export const PRESHIP_REVIEW_SCHEMA_VERSION = "colosseum_pr_preship_review_v1";
 
 export type PreshipExhibitKind = "rejection" | "counter_exhibit";
 

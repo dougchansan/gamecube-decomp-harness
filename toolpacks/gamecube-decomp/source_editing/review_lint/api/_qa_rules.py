@@ -32,7 +32,7 @@ gate flow (docs/10-system-design/60-score-and-pr-handoff.md):
 - ``define_alias`` / ``type_erasing_cast``: define aliases over names/expressions
   and raw type-erasing casts that need review.
 - data-driven banned-pattern rules loaded from
-  ``projects/melee/knowledge/sources/injectable/banned_patterns/data/banned.jsonl``.
+  ``projects/pkmn-colosseum/knowledge/sources/injectable/banned_patterns/data/banned.jsonl``.
 - resubmission tombstones (fuzzy token-shingle hashes of previously rejected
   hunks) loaded from ``.../banned_patterns/data/tombstones.jsonl``.
 
@@ -1346,7 +1346,7 @@ RULES: list[dict[str, Any]] = [
         "standard_id": "global_standard:header-inlines",
         "check": check_copied_jobj_inline,
         "message": "Local copy of a jobj.h inline helper body.",
-        "applies_to": ["src/melee/**/*.c"],
+        "applies_to": ["src/colosseum/**/*.c"],
     },
     {
         "rule_id": "stage_ground_var_owner",
@@ -1354,7 +1354,7 @@ RULES: list[dict[str, Any]] = [
         "standard_id": "global_standard:typed-fields-over-pointer-math",
         "check": check_stage_ground_var_owner,
         "message": "Stage TU borrows another stage's GroundVars arm.",
-        "applies_to": ["src/melee/gr/gr*.c"],
+        "applies_to": ["src/colosseum/gr/gr*.c"],
     },
     {
         "rule_id": "unrolled_assert",
@@ -1362,7 +1362,7 @@ RULES: list[dict[str, Any]] = [
         "standard_id": "global_standard:assert-report-macros",
         "check": check_unrolled_assert,
         "message": "Open-coded __assert call.",
-        "applies_to": ["src/melee/**/*.c", "src/sysdolphin/**/*.c"],
+        "applies_to": ["src/colosseum/**/*.c", "src/sysdolphin/**/*.c"],
     },
     {
         "rule_id": "fake_assert_macro",

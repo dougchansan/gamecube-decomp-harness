@@ -1,25 +1,25 @@
 ---
-covers: Project-owned Melee knowledge sources, server runtime knowledge code, toolpack boundaries, agent context routing, resource graph, and past PR library
+covers: Project-owned Colosseum knowledge sources, server runtime knowledge code, toolpack boundaries, agent context routing, resource graph, and past PR library
 concepts: [knowledge, agent-context, sources, tools, resource-graph, past-prs]
-code-ref: projects/melee/knowledge, toolpacks/gamecube-decomp, projects/melee/tool-bindings, apps/server/src/core/knowledge, apps/server/src/core/tools/resolver.ts, apps/server/src/core/agent-catalog/context.ts
+code-ref: projects/pkmn-colosseum/knowledge, toolpacks/gamecube-decomp, projects/pkmn-colosseum/tool-bindings, apps/server/src/core/knowledge, apps/server/src/core/tools/resolver.ts, apps/server/src/core/agent-catalog/context.ts
 ---
 
 # Knowledge: Overview
 
-Melee knowledge is project-owned. `projects/melee/knowledge` owns source
+Colosseum knowledge is project-owned. `projects/pkmn-colosseum/knowledge` owns source
 descriptors, source API code, registry metadata, graph schemas, graph commands,
 accumulated corpora, generated indexes, source-local data, and graph-owned
 enrichment files. The server owns runtime code under
 `apps/server/src/core/knowledge`; it resolves and executes project knowledge but
 does not own the knowledge tree. The active graph database lives at
-`projects/melee/graph/graph.sqlite`.
+`projects/pkmn-colosseum/graph/graph.sqlite`.
 
 Tools are callable operations, not knowledge sources. Reusable GameCube decomp
-tool definitions live in `toolpacks/gamecube-decomp`; Melee selects that pack
-from `projects/melee/project.json`, configures it in
-`projects/melee/tool-bindings`, stores stable tool data in
-`projects/melee/shared/tool-data`, and scopes mutable tool output under
-`projects/melee/worktrees/<worktree_id>/tool-cache`.
+tool definitions live in `toolpacks/gamecube-decomp`; Colosseum selects that pack
+from `projects/pkmn-colosseum/project.json`, configures it in
+`projects/pkmn-colosseum/tool-bindings`, stores stable tool data in
+`projects/pkmn-colosseum/shared/tool-data`, and scopes mutable tool output under
+`projects/pkmn-colosseum/worktrees/<worktree_id>/tool-cache`.
 
 The selected project supplies the checkout root and graph database path used for
 project-derived graph data such as `code_graph`, rank features, file cards, and
@@ -36,7 +36,7 @@ code-connected evidence.
 ## File Tree
 
 ```text
-projects/melee/knowledge/
+projects/pkmn-colosseum/knowledge/
 +-- README.md
 +-- sources/
 |   +-- README.md
@@ -61,7 +61,7 @@ projects/melee/knowledge/
 ```
 
 ```text
-projects/melee/graph/
+projects/pkmn-colosseum/graph/
 +-- graph.sqlite
 +-- graph.sqlite-shm
 +-- graph.sqlite-wal
@@ -83,7 +83,7 @@ toolpacks/gamecube-decomp/
 ```
 
 ```text
-projects/melee/
+projects/pkmn-colosseum/
 +-- tool-bindings/
 |   +-- <tool_id>.json
 +-- shared/tool-data/
@@ -157,7 +157,7 @@ includes the agent context summary but does not own prompt-context selection.
 indexes the selected project's current code graph, the global past-PR corpus,
 registered global sources, and graph-owned enrichments into SQLite. In project
 mode, commands default to the selected project's `graphDbPath`, which is
-`projects/melee/graph/graph.sqlite` for the tracked Melee project. The graph
+`projects/pkmn-colosseum/graph/graph.sqlite` for the tracked Colosseum project. The graph
 API exposes file cards, graph search, source/tool registries, graph-derived rank
 features, and internal graph enrichments. External sources and tools are
 registered as optional slices until their usage justifies deeper indexing.
@@ -187,40 +187,35 @@ does not model directly: connection pragmas, bootstrap DDL, and the
 falls back to LIKE scanning over `search_chunks` when FTS is unavailable.
 
 The resource map rendered into worker and boundary-agent prompts carries the
-runtime boundaries: source definitions/data under `projects/melee/knowledge`,
+runtime boundaries: source definitions/data under `projects/pkmn-colosseum/knowledge`,
 tool definitions under the enabled toolpack, project tool bindings/data under
-`projects/melee`, and project fields such as `project_id`, `project_kind`,
+`projects/pkmn-colosseum`, and project fields such as `project_id`, `project_kind`,
 `board_repo_root`, `state_dir`, and `graph_db`. This prevents prompts and
 knowledge commands from guessing a parent checkout when a project has already
 been resolved.
 
 The source slices are shallow on purpose. Actual corpora live under each slice's
 project-owned `data/` folder, while
-`projects/melee/knowledge/sources/registry.json` declares active section
+`projects/pkmn-colosseum/knowledge/sources/registry.json` declares active section
 and access-mode metadata:
 
 | Section | Active sources | Access model |
 | --- | --- | --- |
-| `injectable` | `decomp_standards`, `path_facts`, `banned_patterns` | Worker bootstrap/context selection; source APIs exist for focused lookup and proposals. |
-| `rag_search` | `discord_knowledge`, `powerpc_docs` | Independently searchable knowledge bases. |
-| `code_context` | `code_graph`, `past_prs`, `ssbm_data_sheet`, `external_mirrors` | Evidence that links to files, symbols, PRs, data rows, mirrors, or graph cards. |
+| `injectable` | `decomp_standards`, `path_facts` | Worker bootstrap/context selection; source APIs exist for focused lookup and proposals. |
+| `rag_search` | `powerpc_docs` | Independently searchable knowledge bases. |
+| `code_context` | `code_graph` | Evidence that links to files, symbols, graph cards, and editability records. |
 
 Actual corpus paths:
 
 | Source | Actual corpus path |
 | --- | --- |
-| `decomp_standards` | `projects/melee/knowledge/sources/injectable/decomp_standards/data` |
-| `path_facts` | `projects/melee/knowledge/sources/injectable/path_facts/data` |
-| `banned_patterns` | `projects/melee/knowledge/sources/injectable/banned_patterns/data` |
-| `past_prs` | `projects/melee/knowledge/sources/code_context/past_prs/data` |
-| `discord_knowledge` | `projects/melee/knowledge/sources/rag_search/discord_knowledge/data/docs` |
-| `ssbm_data_sheet` | `projects/melee/knowledge/sources/code_context/ssbm_data_sheet/data` |
-| `powerpc_docs` | `projects/melee/knowledge/sources/rag_search/powerpc_docs/data` |
-| `external_mirrors` | `projects/melee/knowledge/sources/code_context/external_mirrors/data` |
+| `decomp_standards` | `projects/pkmn-colosseum/knowledge/sources/injectable/decomp_standards/data` |
+| `path_facts` | `projects/pkmn-colosseum/knowledge/sources/injectable/path_facts/data` |
+| `powerpc_docs` | `projects/pkmn-colosseum/knowledge/sources/rag_search/powerpc_docs/data` |
 
 Every active registered source also has a source-local script API under its
 registry path, such as
-`projects/melee/knowledge/sources/code_context/past_prs/api/`:
+`projects/pkmn-colosseum/knowledge/sources/code_context/past_prs/api/`:
 
 - `status.py --json` reports index readiness, generated index files, record
   counts, and declared data paths.
@@ -230,17 +225,14 @@ registry path, such as
   into `indexes/vector.sqlite`, plus `api/semantic_search.py --query <question>
   --json` for hybrid semantic lookup over normalized vectors.
 - Source-specific aliases are thin query wrappers, such as
-  `ssbm_data_sheet/api/lookup_address.py`,
-  `powerpc_docs/api/lookup_instruction.py`,
-  `external_mirrors/api/lookup_external_symbol.py`, and
-  `discord_knowledge/api/topics_for_terms.py`.
+  `powerpc_docs/api/lookup_instruction.py`.
 
 `banned_patterns` is the QA ship gate's executable record of maintainer
 rejections:
-`projects/melee/knowledge/sources/injectable/banned_patterns/data/banned.jsonl`
+`projects/pkmn-colosseum/knowledge/sources/injectable/banned_patterns/data/banned.jsonl`
 (one record per rejection; `agent_exhibit` detectors feed the pre-ship review
 prompt, human-approved `regex` detectors become extra `review_lint` rules) and
-`projects/melee/knowledge/sources/injectable/banned_patterns/data/tombstones.jsonl`
+`projects/pkmn-colosseum/knowledge/sources/injectable/banned_patterns/data/tombstones.jsonl`
 (fuzzy token-shingle fingerprints that block resubmission of rejected hunks).
 Loader contracts and field shapes live in the source's `data/schema.md`;
 candidate records arrive via `build_pr_postmortems.py --extract-banned-patterns`
@@ -260,13 +252,13 @@ SQLite, and keep the provider/model/dimensions/source fingerprint in a manifest
 so stale or mixed embeddings are visible in `status.py --json`.
 
 Internal graph enrichments are graph-owned artifacts rather than source slices.
-`projects/melee/knowledge/resource_graph/enrichments/agent_shared_state_lessons.jsonl` is
+`projects/pkmn-colosseum/knowledge/resource_graph/enrichments/agent_shared_state_lessons.jsonl` is
 generated from a legacy `agent_state-shared.db` by
 `bun run kg:import-agent-state -- --input agent_state-shared.db`. The importer
 keeps historical tool issues and nontrivial function hints, skips stale legacy
 operational tables, and lets the raw DB be removed after import.
 
-`projects/melee/knowledge/resource_graph/enrichments/knowledge_curator_updates.jsonl` is an
+`projects/pkmn-colosseum/knowledge/resource_graph/enrichments/knowledge_curator_updates.jsonl` is an
 internal ingestion artifact generated by `bun run kg:curate`. It is not a
 source slice and is not worker-facing search material. It reduces persisted
 worker states, selected checkpoints, and past-PR postmortems into accepted or
@@ -286,11 +278,11 @@ resource graph only after it appears in accepted or imported lessons.
 Package scripts expose the script-backed graph surface:
 
 - `bun run kg:sources`
-- `bun run kg:status -- --project melee`
+- `bun run kg:status -- --project pkmn-colosseum`
 - `bun run kg:import-agent-state`
 - `bun run kg:curate`
 - `bun run kg:maintain`
-- `bun run kg:rebuild -- --project melee`
+- `bun run kg:rebuild -- --project pkmn-colosseum`
 - `bun run kg:search`
 - `bun run kg:file-card`
 - `bun run kg:rank-features`
@@ -307,8 +299,8 @@ The current live runner paths are:
 
 | Tool | Runner evidence |
 | --- | --- |
-| `ghidra` | Homebrew Ghidra/OpenJDK `analyzeHeadless` imports `build/GALE01/main.elf` and writes `ghidra_headless_probe.jsonl`. |
-| `opseq` | Generated assembly under `build/GALE01/asm` is parsed into opcode fingerprints. |
+| `ghidra` | Homebrew Ghidra/OpenJDK `analyzeHeadless` imports `build/GC6E01/main.elf` and writes `ghidra_headless_probe.jsonl`. |
+| `opseq` | Generated assembly under `build/GC6E01/asm` is parsed into opcode fingerprints. |
 | `mismatch_db` | `build/tools/objdiff-cli diff` runs against an imperfect function and writes tool-local objdiff mismatch summaries. Generalized pattern knowledge is surfaced through graph `mismatch_patterns`. |
 | `mwcc_debug` | The MWCC runner smoke records `GC/1.2.5n/mwcceppc.exe -version` output and build-rule snippets. Runtime dump/diagnose calls prefer wibo when provisioned, with Wine as fallback. |
 
@@ -339,9 +331,9 @@ available through `--knowledge-maintenance-interval-ms`.
 
 ## Past PR Library
 
-`projects/melee/knowledge/sources/code_context/past_prs/data/` contains the
+`projects/pkmn-colosseum/knowledge/sources/code_context/past_prs/data/` contains the
 stable PR dump and searchable per-PR postmortem records.
-`projects/melee/knowledge/sources/code_context/past_prs/commands/`
+`projects/pkmn-colosseum/knowledge/sources/code_context/past_prs/commands/`
 contains the missing-only fetch, postmortem, and sync commands so this evidence library
 travels with the orchestrator package while its accumulated data stays with the
 project.
@@ -369,14 +361,13 @@ Current validation status, 2026-06-26:
 - Representative resolver-backed status calls pass for `ghidra`, `checkdiff`,
   `mwcc_debug`, and `review_lint`.
 - `bun run kg:smoke -- --strict` requires project context; without
-  `--project melee`, tool status checks use the package root as the effective
+  `--project pkmn-colosseum`, tool status checks use the package root as the effective
   repo root and fail project checkout prerequisites or stale-runner root
   checks.
-- `bun run kg:smoke -- --project melee --strict` resolves tools through the
-  toolpack/project binding runtime, but strict readiness still fails for
-  unindexed sources (`banned_patterns`, `powerpc_docs`, `ssbm_data_sheet`) and
-  live-runner smoke proofs for `ghidra`, `opseq`, `mismatch_db`, and
-  `mwcc_debug`.
+- `bun run kg:smoke -- --project pkmn-colosseum --strict` resolves tools through the
+  toolpack/project binding runtime; strict readiness then depends on the current
+  `powerpc_docs` index plus live-runner smoke proofs for `ghidra`, `opseq`,
+  `mismatch_db`, and `mwcc_debug`.
 
 ## Archive Boundary
 
@@ -389,9 +380,9 @@ agent context, a source slice, a tool, or graph-owned enrichment.
 
 - [Worker tooling gap report](10-worker-tooling-doc-gap-report.md): audit trail
   for the worker-facing tool guidance promoted into active context.
-- [Melee PR review QA standards](20-melee-pr-review-qa-standards.md): review
+- [Colosseum PR review QA standards](20-colosseum-pr-review-qa-standards.md): review
   checklist distilled from the past-PR corpus.
-- [Melee PR review QA coverage audit](21-melee-pr-review-qa-coverage-audit.md):
+- [Colosseum PR review QA coverage audit](21-colosseum-pr-review-qa-coverage-audit.md):
   corpus coverage and evidence counts for the QA standards.
 
 ## Related

@@ -24,7 +24,7 @@ def main() -> None:
         tool="m2c_decomp",
         scripts=("decomp.py",),
         repo_root=repo_root,
-        required_paths=("build/GALE01/obj", "build/GALE01/asm", "tools/m2ctx/m2ctx.py"),
+        required_paths=("build/GC6E01/obj", "build/GC6E01/asm", "tools/m2ctx/m2ctx.py"),
         optional_paths=("build/ctx.c",),
         message="m2c is ready when tool-local m2c files, generated objects/asm, and m2ctx.py are present.",
     )

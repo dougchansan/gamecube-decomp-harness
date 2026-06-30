@@ -79,8 +79,8 @@ function boolValue(value: unknown): boolean {
 }
 
 function processName(value: unknown): string {
-  const raw = text(value, "melee-live").trim() || "melee-live";
-  return raw.replace(/[^A-Za-z0-9_.-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80) || "melee-live";
+  const raw = text(value, "pkmn-colosseum-live").trim() || "pkmn-colosseum-live";
+  return raw.replace(/[^A-Za-z0-9_.-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80) || "pkmn-colosseum-live";
 }
 
 export function runningScheduling(maxWorkersValue: unknown): {

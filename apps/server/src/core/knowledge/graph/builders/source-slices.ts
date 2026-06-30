@@ -29,76 +29,7 @@ interface SourceBuildOptions {
 }
 
 const DOCUMENT_EXTENSIONS = new Set([".md", ".txt", ".text"]);
-const SEARCHABLE_TEXT_EXTENSIONS = new Set([".md", ".txt", ".text", ".c", ".h", ".py", ".yml", ".yaml", ".ini"]);
 const FILE_MENTION_RE = /(?:^|[\s`"'(])((?:src|include|asm|config)\/[A-Za-z0-9_./+@-]+)\b/g;
-const ADDRESS_RE = /\b0x[0-9A-Fa-f]{6,8}\b/;
-
-export function buildDiscordKnowledgeGraphRecords(): GraphRecords | null {
-  return buildDocumentSource({
-    sourceId: "discord_knowledge",
-    trustTier: "historical",
-    dataRoot: sourceDataRoot("discord_knowledge"),
-    indexFileName: "chunks.jsonl",
-    defaultEntityType: "discord_knowledge_chunk",
-  });
-}
-
-export function buildSsbmDataSheetGraphRecords(): GraphRecords | null {
-  const sourceId = "ssbm_data_sheet";
-  const dataRoot = sourceDataRoot(sourceId);
-  const csvRoot = resolve(dataRoot, "csv");
-  const generatedRoot = resolve(dataRoot, "generated");
-  const csvFiles = [...new Set([...recursiveFiles(csvRoot), ...recursiveFiles(generatedRoot)])].filter((path) => extname(path).toLowerCase() === ".csv");
-  const sourceFiles = recursiveFiles(resolve(dataRoot, "source"));
-  const inputPaths = [...csvFiles, ...sourceFiles];
-  const records: IndexedSliceRecord[] = [];
-
-  for (const file of csvFiles) {
-    const relPath = relative(dataRoot, file);
-    const rows = readCsvObjects(file);
-    rows.forEach((row, index) => {
-      const sheet = stringField(row, "sheet_name") || basename(file, ".csv");
-      const cell = stringField(row, "cell");
-      const address = firstAddress(rowText(row));
-      const rowTitle = [sheet, cell, address].filter(Boolean).join(" ");
-      records.push({
-        id: `${relPath}:row:${index + 1}`,
-        title: `SSBM data sheet: ${rowTitle || `${relPath} row ${index + 1}`}`,
-        text: compactText([relPath, sheet, cell, stringField(row, "value"), stringField(row, "row_label"), stringField(row, "nearest_above"), stringField(row, "row_text"), rowText(row)]),
-        evidenceRef: `${file}#row=${index + 1}`,
-        payload: {
-          source_id: sourceId,
-          source_csv: relPath,
-          row_number: index + 1,
-          row,
-          address,
-        },
-        linkedFilePaths: extractLinkedFilePaths(rowText(row)),
-        entityType: address ? "address_reference" : "data_sheet_row",
-        entityKey: address || `${relPath}:${index + 1}`,
-        trustTier: ssbmDataSheetRowTrustTier(relPath, row),
-      });
-    });
-  }
-
-  return buildIndexBackedGraphRecords({
-    sourceId,
-    trustTier: "external_hint",
-    indexFileName: "cells.jsonl",
-    inputPaths,
-    records,
-    defaultEntityType: "data_sheet_row",
-    factType: "data_sheet_reference",
-    edgeType: "HAS_DATA_SHEET_REFERENCE",
-  });
-}
-
-function ssbmDataSheetRowTrustTier(relPath: string, row: Record<string, string>): TrustTier {
-  if (!relPath.startsWith("generated/")) return "external_hint";
-  const sourceType = stringField(row, "source_type");
-  if (sourceType === "codebase_function" || sourceType === "data_symbol") return "canonical";
-  return "local";
-}
 
 export function buildPowerpcDocsGraphRecords(): GraphRecords | null {
   const sourceId = "powerpc_docs";
@@ -144,107 +75,6 @@ export function buildPowerpcDocsGraphRecords(): GraphRecords | null {
     defaultEntityType: "powerpc_doc_page",
     factType: "powerpc_reference",
     edgeType: "HAS_POWERPC_REFERENCE",
-  });
-}
-
-export function buildExternalMirrorsGraphRecords(): GraphRecords | null {
-  const sourceId = "external_mirrors";
-  const dataRoot = sourceDataRoot(sourceId);
-  const inputPaths: string[] = [];
-  const records: IndexedSliceRecord[] = [];
-
-  addCsvIndexRecords({
-    sourceId,
-    dataRoot,
-    inputPaths,
-    records,
-    path: resolve(dataRoot, "m_ex/indexes/header_symbols.csv"),
-    titlePrefix: "m-ex header symbol",
-    idPrefix: "m_ex_header_symbol",
-    entityType: "external_header_symbol",
-    textFields: ["header_path", "kind", "name", "context"],
-    keyFields: ["name", "header_path", "line"],
-  });
-  addCsvIndexRecords({
-    sourceId,
-    dataRoot,
-    inputPaths,
-    records,
-    path: resolve(dataRoot, "training_mode/indexes/gtme01_map_symbols.csv"),
-    titlePrefix: "Training Mode map symbol",
-    idPrefix: "training_mode_map_symbol",
-    entityType: "external_map_symbol",
-    textFields: ["source_file", "section", "address", "virtual_address", "size", "name", "is_placeholder"],
-    keyFields: ["name", "virtual_address", "line"],
-  });
-  addCsvIndexRecords({
-    sourceId,
-    dataRoot,
-    inputPaths,
-    records,
-    path: resolve(dataRoot, "ppc2cpp/indexes/source_files.csv"),
-    titlePrefix: "ppc2cpp source file",
-    idPrefix: "ppc2cpp_source_file",
-    entityType: "external_source_file",
-    textFields: ["path", "extension", "size_bytes", "line_count"],
-    keyFields: ["path"],
-  });
-
-  const compilerIndex = resolve(dataRoot, "tockdom/indexes/compiler_page.csv");
-  if (existsSync(compilerIndex)) {
-    inputPaths.push(compilerIndex);
-    for (const row of readCsvObjects(compilerIndex)) {
-      splitLongText(stringField(row, "text"), 3200).forEach((chunk, index) => {
-        records.push({
-          id: `tockdom_compiler:chunk:${index + 1}`,
-          title: `Tockdom compiler page${index ? ` chunk ${index + 1}` : ""}`,
-          text: compactText([stringField(row, "title"), stringField(row, "url"), chunk]),
-          evidenceRef: stringField(row, "url") || compilerIndex,
-          payload: {
-            source_id: sourceId,
-            source_file: stringField(row, "source_file"),
-            text_file: stringField(row, "text_file"),
-            title: stringField(row, "title"),
-            url: stringField(row, "url"),
-            chunk: index + 1,
-          },
-          linkedFilePaths: extractLinkedFilePaths(chunk),
-          entityType: "external_document_chunk",
-          entityKey: `tockdom_compiler:${index + 1}`,
-        });
-      });
-    }
-  }
-
-  const selectedPpc2cppFiles = recursiveFiles(resolve(dataRoot, "ppc2cpp/mips_to_c_ppc2cpp_branch"))
-    .filter((path) => SEARCHABLE_TEXT_EXTENSIONS.has(extname(path).toLowerCase()))
-    .filter((path) => !path.includes("/tests/") && !path.includes("/.git/"));
-  inputPaths.push(...selectedPpc2cppFiles);
-  for (const file of selectedPpc2cppFiles) {
-    const relPath = relative(dataRoot, file);
-    splitLongText(readFileSync(file, "utf8"), 3200).forEach((chunk, index) => {
-      records.push({
-        id: `${relPath}:chunk:${index + 1}`,
-        title: `External mirror: ${relPath}${index ? ` chunk ${index + 1}` : ""}`,
-        text: compactText([relPath, chunk]),
-        evidenceRef: `${file}#chunk=${index + 1}`,
-        payload: { source_id: sourceId, path: relPath, chunk: index + 1 },
-        linkedFilePaths: extractLinkedFilePaths(chunk),
-        entityType: "external_document_chunk",
-        entityKey: `${relPath}:${index + 1}`,
-      });
-    });
-  }
-
-  return buildIndexBackedGraphRecords({
-    sourceId,
-    trustTier: "external_hint",
-    indexFileName: "external_file_mentions.jsonl",
-    inputPaths,
-    records,
-    defaultEntityType: "external_mirror_record",
-    factType: "external_mirror_reference",
-    edgeType: "HAS_EXTERNAL_MIRROR_REFERENCE",
   });
 }
 
@@ -480,37 +310,6 @@ function buildIndexBackedGraphRecords(options: SourceBuildOptions): GraphRecords
   };
 }
 
-function addCsvIndexRecords(options: {
-  sourceId: string;
-  dataRoot: string;
-  inputPaths: string[];
-  records: IndexedSliceRecord[];
-  path: string;
-  titlePrefix: string;
-  idPrefix: string;
-  entityType: string;
-  textFields: string[];
-  keyFields: string[];
-}): void {
-  if (!existsSync(options.path)) return;
-  options.inputPaths.push(options.path);
-  const relPath = relative(options.dataRoot, options.path);
-  readCsvObjects(options.path).forEach((row, index) => {
-    const key = options.keyFields.map((field) => stringField(row, field)).filter(Boolean).join(":") || `${index + 1}`;
-    const text = compactText([relPath, ...options.textFields.map((field) => stringField(row, field)), rowText(row)]);
-    options.records.push({
-      id: `${options.idPrefix}:${key}:${index + 1}`,
-      title: `${options.titlePrefix}: ${key}`,
-      text,
-      evidenceRef: `${options.path}#row=${index + 1}`,
-      payload: { source_id: options.sourceId, source_csv: relPath, row_number: index + 1, row },
-      linkedFilePaths: extractLinkedFilePaths(text),
-      entityType: options.entityType,
-      entityKey: key,
-    });
-  });
-}
-
 function writeSourceIndex(sourceId: string, fileName: string, rows: Array<Record<string, unknown>>): void {
   const path = resolve(sourceStorageRoot(sourceId), "indexes", fileName);
   mkdirSync(dirname(path), { recursive: true });
@@ -643,13 +442,6 @@ function compactText(values: unknown[]): string {
     .trim();
 }
 
-function rowText(row: Record<string, unknown>): string {
-  return Object.values(row)
-    .map((value) => String(value ?? ""))
-    .filter(Boolean)
-    .join(" | ");
-}
-
 function stringField(row: Record<string, unknown>, field: string): string {
   const value = row[field];
   return typeof value === "string" ? value : "";
@@ -667,10 +459,6 @@ function representativePathFactPaths(row: Record<string, unknown>): string[] {
     .filter((value) => !value.includes("*"))
     .filter((value) => value.startsWith("src/") || value.startsWith("include/"))
     .slice(0, 12);
-}
-
-function firstAddress(text: string): string {
-  return ADDRESS_RE.exec(text)?.[0] ?? "";
 }
 
 function extractLinkedFilePaths(text: string): string[] {

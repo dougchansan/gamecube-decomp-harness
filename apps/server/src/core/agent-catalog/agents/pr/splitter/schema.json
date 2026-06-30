@@ -6,7 +6,7 @@
   "required": ["schema_version", "slices", "warnings", "rationale", "confidence"],
   "properties": {
     "schema_version": {
-      "const": "melee_pr_splitter_plan_v1"
+      "const": "colosseum_pr_splitter_plan_v1"
     },
     "slices": {
       "type": "array",

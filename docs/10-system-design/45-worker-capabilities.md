@@ -1,6 +1,6 @@
 ---
-covers: Worker capability model, evidence emitted by each capability, guardrails, and melee-assist absorption map
-concepts: [worker-capabilities, evidence, guardrails, melee-assist, context-packaging]
+covers: Worker capability model, evidence emitted by each capability, guardrails, and colosseum-assist absorption map
+concepts: [worker-capabilities, evidence, guardrails, colosseum-assist, context-packaging]
 ---
 
 # Worker Capabilities
@@ -24,7 +24,7 @@ budgets; the worker controls the local tactic mix inside its write set.
 | Permuter handoff | A finalist is close, reviewable, and mechanically narrow. | Permuter artifacts, candidate patch, provenance notes. | Do not substitute permuter output for understandable source. |
 | Review and cleanup | A byte improvement needs quality/type/regression review before integration. | Debt report, safer rewrite, validation transcript, or rejection. | Prevent fake matches from entering the baseline. |
 
-## `melee-assist` Absorption Map
+## `colosseum-assist` Absorption Map
 
 | Reference | Capability To Absorb | Why It Matters |
 | --- | --- | --- |

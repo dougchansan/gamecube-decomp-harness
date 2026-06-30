@@ -1,8 +1,8 @@
 import { existsSync, readFileSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
-import { createMeleeKernelSpawnContext } from "@server/infrastructure/kernel/bridge/spawn-context";
-import { runMeleeKernelPiAgent as runPiAgent } from "@server/infrastructure/agent-runtime/kernel-pi-runner";
+import { createColosseumKernelSpawnContext } from "@server/infrastructure/kernel/bridge/spawn-context";
+import { runColosseumKernelPiAgent as runPiAgent } from "@server/infrastructure/agent-runtime/kernel-pi-runner";
 import { knowledgeCuratorPrompt } from "@server/core/agent-catalog/agents/knowledge/curator";
 import { prIndexerPrompt } from "@server/core/agent-catalog/agents/knowledge/pr-indexer";
 import { parseJsonObject } from "@server/infrastructure/agent-runtime/runtime";
@@ -220,9 +220,10 @@ export async function runKnowledgeMaintenance(globals: GlobalArgs, args: Map<str
     includeStalled: !booleanArg(args, "--progress-only"),
   });
   const agentReview = await maybeRunCuratorAgent(globals, args, curator.output_path);
-  const dataSheetFacts = booleanArg(args, "--no-data-sheet-facts")
-    ? skipSummary("data_sheet_facts", "--no-data-sheet-facts")
-    : await runDataSheetFacts(repoRoot);
+  const dataSheetFacts = skipSummary(
+    "data_sheet_facts",
+    booleanArg(args, "--no-data-sheet-facts") ? "--no-data-sheet-facts" : "no Colosseum data-sheet source configured",
+  );
   const rebuild = booleanArg(args, "--no-rebuild")
     ? { skipped: true, reason: "--no-rebuild" }
     : rebuildKnowledgeGraph({
@@ -242,20 +243,6 @@ export async function runKnowledgeMaintenance(globals: GlobalArgs, args: Map<str
     agent_review: agentReview,
     rebuild,
   };
-}
-
-async function runDataSheetFacts(repoRoot: string): Promise<SpawnSummary> {
-  const script = resolve(sourceRoot("ssbm_data_sheet"), "commands/build_codebase_facts.py");
-  const command = ["python3", script, "--repo-root", repoRoot, "--json"];
-  const proc = Bun.spawn(command, {
-    cwd: packageRoot(),
-    env: Bun.env,
-    stdout: "pipe",
-    stderr: "pipe",
-  });
-  const [stdout, stderr, exitCode] = await Promise.all([new Response(proc.stdout).text(), new Response(proc.stderr).text(), proc.exited]);
-  if (exitCode !== 0) throw new Error(`Data-sheet fact build failed (${exitCode}): ${command.join(" ")}\n${stderr || stdout}`);
-  return { command, exit_code: exitCode, stdout, stderr };
 }
 
 async function runToolRunners(context: ToolRuntimeContext): Promise<SpawnSummary[]> {
@@ -353,7 +340,7 @@ export async function kgPrIndexerAgent(globals: GlobalArgs, args: Map<string, st
       project: globals.project,
     },
     kernelSpawnStrategy: globals.dryRunAgents ? "auto" : "kernel",
-    kernelContext: createMeleeKernelSpawnContext({
+    kernelContext: createColosseumKernelSpawnContext({
       kind: prepareIntake ? "intake-postmortem" : "postmortem",
       projectId: kernelProjectId || undefined,
       sessionId: runId,
@@ -444,7 +431,7 @@ export async function kgKnowledgeIntakeAgent(globals: GlobalArgs, args: Map<stri
       project: globals.project,
     },
     kernelSpawnStrategy: globals.dryRunAgents ? "auto" : "kernel",
-    kernelContext: createMeleeKernelSpawnContext({
+    kernelContext: createColosseumKernelSpawnContext({
       kind: "intake-knowledge",
       projectId: kernelProjectId || undefined,
       sessionId: runId,
@@ -684,7 +671,7 @@ async function maybeRunCuratorAgent(globals: GlobalArgs, args: Map<string, strin
         stateDir: globals.stateDir,
         project: globals.project,
       },
-      kernelContext: createMeleeKernelSpawnContext({
+      kernelContext: createColosseumKernelSpawnContext({
         kind: "knowledge-curation",
         projectId: globals.project?.projectId ?? globals.projectId,
         sessionId: runId || "knowledge-curation",

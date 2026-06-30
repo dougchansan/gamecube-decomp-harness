@@ -23,7 +23,7 @@ def main() -> None:
             tool="objdiff_score",
             scripts=("objdiff_path.py", "ninja_compile.py"),
             repo_root=repo_root,
-            required_paths=("build/GALE01/report.json", "build/GALE01/obj", "build/tools/objdiff-cli"),
+            required_paths=("build/GC6E01/report.json", "build/GC6E01/obj", "build/tools/objdiff-cli"),
             optional_paths=("objdiff.json",),
             message="objdiff scoring is ready when target objects and objdiff-cli are available.",
         )

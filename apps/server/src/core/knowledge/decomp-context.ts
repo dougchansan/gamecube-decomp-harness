@@ -153,7 +153,7 @@ export function globalStandardsPromptXml(): string {
 }
 
 export function resolvePathFactsContext(sourcePath: string, limit = 5): PathFactResolution {
-  const normalizedPath = normalizeMeleePath(sourcePath);
+  const normalizedPath = normalizeColosseumPath(sourcePath);
   const scored: Array<{ score: number; fact: JsonRecord }> = [];
   for (const fact of loadPathFacts()) {
     if (fact.status !== "accepted") continue;
@@ -185,7 +185,7 @@ function loadPathFacts(): JsonRecord[] {
   return readdirSync(root)
     .filter((file) => file.endsWith(".jsonl"))
     .sort()
-    .flatMap((file) => readJsonl(resolve(root, file)).map((row) => ({ ...row, source_file: `projects/melee/knowledge/sources/injectable/path_facts/data/path_facts/${file}` })));
+    .flatMap((file) => readJsonl(resolve(root, file)).map((row) => ({ ...row, source_file: `projects/pkmn-colosseum/knowledge/sources/injectable/path_facts/data/path_facts/${file}` })));
 }
 
 function formatPathFact(fact: JsonRecord, score: number): JsonRecord {
@@ -208,7 +208,7 @@ function formatPathFact(fact: JsonRecord, score: number): JsonRecord {
 function matchScore(path: string, fact: JsonRecord): number {
   let best = 0;
   for (const rawGlob of stringArray(fact.scope_globs)) {
-    const glob = normalizeMeleePath(rawGlob);
+    const glob = normalizeColosseumPath(rawGlob);
     if (!globMatches(glob, path)) continue;
     const components = glob.split("/").filter((part) => part && part !== "**" && !part.includes("*"));
     let score = 100 + components.length * 5;
@@ -235,11 +235,11 @@ function globMatches(glob: string, path: string): boolean {
   return new RegExp(`^${pattern}$`).test(path);
 }
 
-function normalizeMeleePath(path: string): string {
+function normalizeColosseumPath(path: string): string {
   let value = path.trim().replace(/\\/g, "/");
-  const sourceMarker = "/src/melee/";
+  const sourceMarker = "/src/colosseum/";
   const includeMarker = "/include/";
-  if (value.includes(sourceMarker)) value = `src/melee/${value.split(sourceMarker, 2)[1]}`;
+  if (value.includes(sourceMarker)) value = `src/colosseum/${value.split(sourceMarker, 2)[1]}`;
   if (value.includes(includeMarker)) value = `include/${value.split(includeMarker, 2)[1]}`;
   value = value.replace(/^\.\//, "").replace(/^\.\.\//, "");
   if (value.startsWith(`${basename(packageRoot())}/`)) value = value.slice(basename(packageRoot()).length + 1);

@@ -57,7 +57,7 @@ export interface QaScanInvocation {
 }
 
 export interface RunQaScanDiffOptions {
-  /** Melee (target project) repo root the diff lives in. */
+  /** Colosseum (target project) repo root the diff lives in. */
   repoRoot: string;
   /** Orchestrator root. Kept for compatibility with older callers. */
   orchestratorRoot: string;

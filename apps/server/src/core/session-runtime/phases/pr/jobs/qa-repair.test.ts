@@ -4,7 +4,7 @@ import { existsSync, mkdtempSync, rmSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
-import type { MeleeKernelPiRunOptions } from "@server/infrastructure/agent-runtime/kernel-pi-runner";
+import type { ColosseumKernelPiRunOptions } from "@server/infrastructure/agent-runtime/kernel-pi-runner";
 import type { QaScanFinding, QaScanResult } from "@server/core/validation/qa";
 import type { PiRunResult } from "@server/core/shared/types";
 import type { GlobalArgs } from "@server/core/project-registry/runtime-options.js";
@@ -42,8 +42,8 @@ async function cleanRepo(): Promise<{ repoRoot: string; baseSha: string }> {
   await git(repoRoot, ["init", "-q", "-b", "main"]);
   await git(repoRoot, ["config", "user.email", "test@example.com"]);
   await git(repoRoot, ["config", "user.name", "QA Repair Test"]);
-  await mkdir(resolve(repoRoot, "src/melee/gr"), { recursive: true });
-  await writeFile(resolve(repoRoot, "src/melee/gr/grsmoke.c"), "int grSmoke(void) { return 0; }\n");
+  await mkdir(resolve(repoRoot, "src/colosseum/gr"), { recursive: true });
+  await writeFile(resolve(repoRoot, "src/colosseum/gr/grsmoke.c"), "int grSmoke(void) { return 0; }\n");
   await git(repoRoot, ["add", "."]);
   await git(repoRoot, ["commit", "-q", "-m", "base"]);
   return { repoRoot, baseSha: await currentHead(repoRoot) };
@@ -51,7 +51,7 @@ async function cleanRepo(): Promise<{ repoRoot: string; baseSha: string }> {
 
 async function repoWithCommittedQaViolation(): Promise<{ repoRoot: string; baseSha: string }> {
   const { repoRoot, baseSha } = await cleanRepo();
-  await writeFile(resolve(repoRoot, "src/melee/gr/grsmoke.c"), "int grSmoke(void) { register int bad = 1; return bad; }\n");
+  await writeFile(resolve(repoRoot, "src/colosseum/gr/grsmoke.c"), "int grSmoke(void) { register int bad = 1; return bad; }\n");
   await git(repoRoot, ["add", "."]);
   await git(repoRoot, ["commit", "-q", "-m", "introduce qa violation"]);
   return { repoRoot, baseSha };
@@ -72,7 +72,7 @@ function finding(overrides: Partial<QaScanFinding> = {}): QaScanFinding {
   return {
     rule_id: "m2c_residue_names",
     severity: "error",
-    file: "src/melee/gr/grsmoke.c",
+    file: "src/colosseum/gr/grsmoke.c",
     line: 23,
     excerpt: "s32 temp_r30 = var_r4 + phi_f1;",
     message: "Generated m2c local name remains in source.",
@@ -103,13 +103,13 @@ async function writeScanJson(dir: string, findings: QaScanFinding[]): Promise<st
 
 function fixedRepairJson(scoreImpact: "same_match" | "lower_score" = "same_match"): string {
   return JSON.stringify({
-    schema_version: "melee_qa_repair_result_v1",
-    item_id: "src-melee-gr-grsmoke",
-    source_path: "src/melee/gr/grsmoke.c",
+    schema_version: "colosseum_qa_repair_result_v1",
+    item_id: "src-colosseum-gr-grsmoke",
+    source_path: "src/colosseum/gr/grsmoke.c",
     outcome: "fixed",
     score_impact: scoreImpact,
     summary: "Removed the QA violation with a minimal source edit.",
-    edits: ["src/melee/gr/grsmoke.c"],
+    edits: ["src/colosseum/gr/grsmoke.c"],
 	    validation: [
 	      {
 	        command: "review_lint scan_diff --gate",
@@ -155,8 +155,8 @@ describe("qa-repair server job", () => {
     const outputDir = tempDir("qa-repair-output-");
     const scanPath = await writeScanJson(root, [
       finding(),
-      finding({ file: "src/melee/gm/gm_1832.c", rule_id: "new_data_anchor", line: 99 }),
-      finding({ file: "src/melee/gm/gm_1832.c", rule_id: "novel_pragma", severity: "warning", line: 100 }),
+      finding({ file: "src/colosseum/gm/gm_1832.c", rule_id: "new_data_anchor", line: 99 }),
+      finding({ file: "src/colosseum/gm/gm_1832.c", rule_id: "novel_pragma", severity: "warning", line: 100 }),
     ]);
 
     const result = await runQaRepair(
@@ -178,8 +178,8 @@ describe("qa-repair server job", () => {
     expect(summary.counts.files_with_errors).toBe(2);
     expect(summary.counts.by_rule.m2c_residue_names).toBe(1);
     const report = await readFile(result.artifacts.reportPath, "utf8");
-    expect(report).toContain("src/melee/gr/grsmoke.c");
-    expect(report).toContain("src/melee/gm/gm_1832.c");
+    expect(report).toContain("src/colosseum/gr/grsmoke.c");
+    expect(report).toContain("src/colosseum/gm/gm_1832.c");
   });
 
   test("dry-run agents write prompt artifacts without marking the item clean", async () => {
@@ -215,10 +215,10 @@ describe("qa-repair server job", () => {
     const outputDir = tempDir("qa-repair-output-");
     const scanPath = await writeScanJson(root, [
       finding(),
-      finding({ file: "src/melee/gm/gm_1832.c", rule_id: "new_data_anchor", line: 99 }),
+      finding({ file: "src/colosseum/gm/gm_1832.c", rule_id: "new_data_anchor", line: 99 }),
     ]);
     const resolvedItems: string[] = [];
-    const runner = async (options: MeleeKernelPiRunOptions): Promise<PiRunResult> => {
+    const runner = async (options: ColosseumKernelPiRunOptions): Promise<PiRunResult> => {
       resolvedItems.push(String(options.kernelContext?.metadata?.itemId ?? ""));
       return mockRunnerResult(fixedRepairJson(), options.outputDir);
     };
@@ -230,30 +230,30 @@ describe("qa-repair server job", () => {
         ["--scan-json", scanPath],
         ["--all-scan-files", true],
         ["--run-agents", true],
-        ["--item-id", "src-melee-gr-grsmoke"],
+        ["--item-id", "src-colosseum-gr-grsmoke"],
         ["--output-dir", outputDir],
       ]),
       runner,
     );
 
-    expect(resolvedItems).toEqual(["src-melee-gr-grsmoke"]);
+    expect(resolvedItems).toEqual(["src-colosseum-gr-grsmoke"]);
     const byId = new Map(result.queue.items.map((item) => [item.id, item]));
-    expect(byId.get("src-melee-gr-grsmoke")?.attempts).toHaveLength(1);
-    expect(byId.get("src-melee-gm-gm-1832")?.attempts).toHaveLength(0);
+    expect(byId.get("src-colosseum-gr-grsmoke")?.attempts).toHaveLength(1);
+    expect(byId.get("src-colosseum-gm-gm-1832")?.attempts).toHaveLength(0);
   });
 
   test("queue scan requests uncommitted worktree collection", async () => {
     const { repoRoot, baseSha } = await cleanRepo();
     const stateDir = tempDir("qa-repair-state-");
     const outputDir = tempDir("qa-repair-output-");
-    await writeFile(resolve(repoRoot, "src/melee/gr/grsmoke.c"), "int grSmoke(void) { register int bad = 1; return bad; }\n");
+    await writeFile(resolve(repoRoot, "src/colosseum/gr/grsmoke.c"), "int grSmoke(void) { register int bad = 1; return bad; }\n");
 
     await runQaRepair(
       globals(repoRoot, stateDir),
       new Map<string, string | true>([
         ["--run-id", "test-run"],
         ["--base-ref", baseSha],
-        ["--candidate-files", "src/melee/gr/grsmoke.c"],
+        ["--candidate-files", "src/colosseum/gr/grsmoke.c"],
         ["--output-dir", outputDir],
       ]),
     );
@@ -268,7 +268,7 @@ describe("qa-repair server job", () => {
     const stateDir = tempDir("qa-repair-state-");
     const outputDir = tempDir("qa-repair-output-");
     const scanPath = await writeScanJson(repoRoot, [finding()]);
-    const runner = async (options: MeleeKernelPiRunOptions): Promise<PiRunResult> => mockRunnerResult(fixedRepairJson("lower_score"), options.outputDir);
+    const runner = async (options: ColosseumKernelPiRunOptions): Promise<PiRunResult> => mockRunnerResult(fixedRepairJson("lower_score"), options.outputDir);
 
     const result = await runQaRepair(
       globals(repoRoot, stateDir),
@@ -298,8 +298,8 @@ describe("qa-repair server job", () => {
     expect(validation.status).toBe("clean_lower_score");
     expect(validation.validationArtifacts.score_check).toBe(attempt?.scoreCheckPath);
     const shipStatus = JSON.parse(await readFile(result.artifacts.shipStatusPath, "utf8")) as Record<string, any>;
-    expect(shipStatus.cleanLowerScoreFiles).toEqual(["src/melee/gr/grsmoke.c"]);
-    expect(shipStatus.droppedFiles["src/melee/gr/grsmoke.c"][0]).toContain("lowered match score");
+    expect(shipStatus.cleanLowerScoreFiles).toEqual(["src/colosseum/gr/grsmoke.c"]);
+    expect(shipStatus.droppedFiles["src/colosseum/gr/grsmoke.c"][0]).toContain("lowered match score");
   });
 
   test("post-repair validation scans uncommitted live agent edits", async () => {
@@ -307,8 +307,8 @@ describe("qa-repair server job", () => {
     const stateDir = tempDir("qa-repair-state-");
     const outputDir = tempDir("qa-repair-output-");
     const scanPath = await writeScanJson(repoRoot, [finding({ rule_id: "register_keyword", excerpt: "register int bad = 1;" })]);
-    const runner = async (options: MeleeKernelPiRunOptions): Promise<PiRunResult> => {
-      await writeFile(resolve(repoRoot, "src/melee/gr/grsmoke.c"), "int grSmoke(void) { int value = 1; return value; }\n");
+    const runner = async (options: ColosseumKernelPiRunOptions): Promise<PiRunResult> => {
+      await writeFile(resolve(repoRoot, "src/colosseum/gr/grsmoke.c"), "int grSmoke(void) { int value = 1; return value; }\n");
       return mockRunnerResult(fixedRepairJson(), options.outputDir);
     };
 

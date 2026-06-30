@@ -6,10 +6,9 @@ durable agent control plane: many Pi worker agents can research, edit, validate,
 and report in parallel while sharing one run board, one knowledge graph, and one
 set of project-specific safety rails.
 
-The fork default project is Pokemon Colosseum, and Melee remains available as a
-tracked descriptor. The harness is organized around
+The fork default project is Pokemon Colosseum. The harness is organized around
 `projects/<id>/project.json` descriptors so the same machinery can be pointed at
-multiple GameCube decompilation workspaces.
+project-specific GameCube decompilation workspaces.
 
 ![GameCube Decomp Harness dashboard](docs/assets/dashboard-screenshot.png)
 
@@ -41,6 +40,17 @@ bun run smoke
 
 `bun run smoke` uses dry-run agents and fixture data, so it does not require a
 live provider or edit a real decompilation checkout.
+
+This branch expects the Agent Kernel workspace at
+`/Users/douglaswhittingham/Codecaine/agent-kernel`, with its `prompt-kit`
+submodule initialized and dependencies installed:
+
+```sh
+git clone https://github.com/Codecaine-AI/agent-kernel.git ../Codecaine/agent-kernel
+git -C ../Codecaine/agent-kernel checkout fa2ebf7418a48c6bb85fafe237d28887507d8230
+git -C ../Codecaine/agent-kernel submodule update --init --recursive packages/prompt-kit
+bun install --cwd ../Codecaine/agent-kernel --linker hoisted
+```
 
 Inspect the server job surface:
 

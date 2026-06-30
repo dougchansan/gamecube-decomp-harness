@@ -15,8 +15,8 @@
  */
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { createMeleeKernelSpawnContext } from "@server/infrastructure/kernel/bridge/spawn-context";
-import { runMeleeKernelPiAgent as runPiAgent, type MeleeKernelPiRunOptions } from "@server/infrastructure/agent-runtime/kernel-pi-runner";
+import { createColosseumKernelSpawnContext } from "@server/infrastructure/kernel/bridge/spawn-context";
+import { runColosseumKernelPiAgent as runPiAgent, type ColosseumKernelPiRunOptions } from "@server/infrastructure/agent-runtime/kernel-pi-runner";
 import {
   prPreshipReviewPrompt,
   validatePreshipReview,
@@ -30,7 +30,7 @@ import { packageRoot } from "@server/core/knowledge";
 import { booleanArg, stringArg, type GlobalArgs } from "@server/core/project-registry/runtime-options.js";
 
 /** Injectable agent runner; the default is the in-process Pi runtime the other server agent jobs use. */
-export type PreshipAgentRunner = (options: MeleeKernelPiRunOptions) => Promise<PiRunResult>;
+export type PreshipAgentRunner = (options: ColosseumKernelPiRunOptions) => Promise<PiRunResult>;
 
 export type PreshipSliceVerdictKind = "approve" | "reject" | "error" | "dry_run" | "skipped_local";
 
@@ -198,7 +198,7 @@ async function reviewOneSlice(slice: PreshipPlanSlice, options: PreshipReviewRun
 
   if (!diff.trim()) {
     const review: PreshipReview = {
-      schema_version: "melee_pr_preship_review_v1",
+      schema_version: "colosseum_pr_preship_review_v1",
       slice_id: slice.id,
       slice_verdict: "approve",
       findings: [],
@@ -252,7 +252,7 @@ async function reviewOneSlice(slice: PreshipPlanSlice, options: PreshipReviewRun
     // Diff-only review: the reviewer judges the diff and loaded evidence, no tools.
     toolProfile: { replace: [] },
     toolContext: { stateDir: options.stateDir, project: options.project },
-    kernelContext: createMeleeKernelSpawnContext({
+    kernelContext: createColosseumKernelSpawnContext({
       kind: "pr-review",
       projectId: options.project?.projectId ?? options.projectId,
       sessionId: options.runId,

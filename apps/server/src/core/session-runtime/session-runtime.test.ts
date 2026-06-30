@@ -35,7 +35,7 @@ describe("project session runtime", () => {
   test("supports preparing -> running -> pr -> complete with phase completed_at markers", () => {
     const { db } = openTestDb();
     const created = createNewProjectSession(db, {
-      projectId: "melee",
+      projectId: "colosseum",
       sessionUuid: "session-uuid",
       id: "project-session:session-uuid",
       now: "2026-06-25T12:00:00.000Z",
@@ -75,7 +75,7 @@ describe("project session runtime", () => {
 
   test("rejects PR QA before final_build completes", () => {
     const { db } = openTestDb();
-    const created = createNewProjectSession(db, { projectId: "melee", sessionUuid: "session-uuid", id: "project-session:session-uuid" });
+    const created = createNewProjectSession(db, { projectId: "colosseum", sessionUuid: "session-uuid", id: "project-session:session-uuid" });
     markPreparingComplete(db, { id: created.record.id });
     startRunning(db, { id: created.record.id });
     stopProjectSessionRun(db, { id: created.record.id }, "manual_stop", { manualStopMode: "finish_epoch" });
@@ -87,7 +87,7 @@ describe("project session runtime", () => {
 
   test("supports hard-stop force-to-PR through final_build", () => {
     const { db } = openTestDb();
-    const created = createNewProjectSession(db, { projectId: "melee", sessionUuid: "session-uuid", id: "project-session:session-uuid" });
+    const created = createNewProjectSession(db, { projectId: "colosseum", sessionUuid: "session-uuid", id: "project-session:session-uuid" });
     markPreparingComplete(db, { id: created.record.id });
     startRunning(db, { id: created.record.id });
     const stopped = stopProjectSessionRun(db, { id: created.record.id }, "manual_stop", { manualStopMode: "hard_stop" });
@@ -102,7 +102,7 @@ describe("project session runtime", () => {
 
   test("represents error stop reason and force-to-PR escape hatch", () => {
     const { db } = openTestDb();
-    const created = createNewProjectSession(db, { projectId: "melee", sessionUuid: "session-uuid", id: "project-session:session-uuid" });
+    const created = createNewProjectSession(db, { projectId: "colosseum", sessionUuid: "session-uuid", id: "project-session:session-uuid" });
     markPreparingComplete(db, { id: created.record.id });
     startRunning(db, { id: created.record.id });
     const stopped = stopProjectSessionRun(db, { id: created.record.id }, "error", {

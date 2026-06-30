@@ -68,7 +68,7 @@ export interface SessionView {
   canonicalSubphase: string;
   handoffIdle: boolean;
   handoffReason: string;
-  hasMeleePrFixture: boolean;
+  hasColosseumPrFixture: boolean;
   mode: "none" | "pr" | "run";
   modeEvidence: string[];
   modeLabel: string;

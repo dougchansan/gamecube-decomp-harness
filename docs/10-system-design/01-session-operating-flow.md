@@ -1,5 +1,5 @@
 ---
-covers: Target high-level Melee decomp harness flow from project session startup through autonomous epochs, PR preparation, review, kernel-backed tracing, and next-session sync/intake
+covers: Target high-level Colosseum decomp harness flow from project session startup through autonomous epochs, PR preparation, review, kernel-backed tracing, and next-session sync/intake
 concepts: [project-session, full-flow, agent-kernel, kernel-containers, trace-events, run-mode, epoch-flow, worker-worktrees, pr-mode, adversarial-review, smart-prs]
 status: target-flow
 depends-on: [docs/10-system-design/10-run-director-loop.md, docs/10-system-design/40-worker-lifecycle.md, docs/10-system-design/50-knowledge-model.md, docs/10-system-design/60-score-and-pr-handoff.md, docs/10-system-design/65-operator-flow-and-pr-tracking.md, docs/10-system-design/75-project-session-architecture.md]
@@ -7,7 +7,7 @@ depends-on: [docs/10-system-design/10-run-director-loop.md, docs/10-system-desig
 
 # Session Operating Flow
 
-This is the first-read flow for the Melee decomp harness. It describes the
+This is the first-read flow for the Colosseum decomp harness. It describes the
 system the harness should become, not the exact current implementation.
 
 Everything centers on a project session. A session captures one upstream
@@ -18,7 +18,7 @@ work has been resolved and the next session boundary has synchronized the
 merged upstream work into local state and knowledge.
 
 The target runtime uses `agent-kernel` as the agent execution and
-observability substrate. The harness still owns Melee-specific workflow
+observability substrate. The harness still owns Colosseum-specific workflow
 semantics: scheduling, target claims, scoring, validation, PR lanes, standards, and
 knowledge. The kernel owns reusable agent runtime concerns: cataloged agent
 definitions, context assembly, Pi session lifecycle, subagent lineage, trace
@@ -213,7 +213,7 @@ means, or which PR slice is safe to publish.
 
 ### Prompt And Context Contract
 
-The Melee server bridge's kernel boundary is the rendered prompt bundle plus explicit
+The Colosseum server bridge's kernel boundary is the rendered prompt bundle plus explicit
 kernel context metadata. Existing prompt builders assemble the role-specific
 context that the scheduler, PR gates, QA repair lane, and knowledge pipeline
 depend on, then expose that context as named loader inputs on the same bundle.
@@ -236,10 +236,10 @@ injection, lifecycle events, trace rows, and viewer summaries.
 
 The project session maps to the kernel `appSessionId` and a root session
 container. Containers are the portable grouping primitive the kernel viewer can
-navigate without understanding Melee-specific state.
+navigate without understanding Colosseum-specific state.
 
 The durable `session_uuid` in `project_sessions` is the trace root identity.
-The Melee kernel bridge derives a stable kernel app session id and root
+The Colosseum kernel bridge derives a stable kernel app session id and root
 container from `(project_id, session_uuid)`, and the dashboard stores the
 returned trace pointers in `kernel_trace_json`. This keeps trace lineage stable
 across display-name, branch, dashboard, or process restarts.
@@ -321,7 +321,7 @@ accepted so far?" and becomes the branch point for epochs, workers, and PR
 handoff.
 
 ```text
-projects/melee/
+projects/pkmn-colosseum/
   checkout/
     -> control clone and object database
     -> fetches origin
@@ -615,7 +615,7 @@ anchored by a session list that defaults to the active session UUID and
 phase/subphase, with app-specific panels for targets, claims, score movement,
 PR slices,
 validation artifacts, and knowledge facts. The reusable viewer should render
-the generic tree/detail span model; the harness should provide the Melee-aware
+the generic tree/detail span model; the harness should provide the Colosseum-aware
 metadata around it.
 
 ## Epoch Boundary Routing

@@ -1,7 +1,7 @@
-diff --git a/src/melee/gm/gm_1832.c b/src/melee/gm/gm_1832.c
+diff --git a/src/colosseum/gm/gm_1832.c b/src/colosseum/gm/gm_1832.c
 index 1111111..2222222 100644
---- a/src/melee/gm/gm_1832.c
-+++ b/src/melee/gm/gm_1832.c
+--- a/src/colosseum/gm/gm_1832.c
++++ b/src/colosseum/gm/gm_1832.c
 @@ -190,6 +190,8 @@ extern ClassicStageEntry lbl_803D9910[65];
 
  static TrainingModeState lbl_80473700;
