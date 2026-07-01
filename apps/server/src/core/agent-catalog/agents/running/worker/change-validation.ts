@@ -637,7 +637,7 @@ export function qaLintFromInvocation(invocation: QaScanInvocation, scanPath: str
 }
 
 export const QA_LINT_REPAIR_INSTRUCTION =
-  "Remove every QA lint finding; a lower match % without it is the correct outcome. Do not re-add maintainer-rejected patterns.";
+  "Remove every QA lint finding WHILE preserving the exact byte match; if a finding cannot be removed without losing the exact match, prove it is a false positive instead of regressing the match. Do not re-add maintainer-rejected patterns.";
 
 function qaLintRequiresRepair(qaLint: WorkerQaLint | null | undefined): qaLint is WorkerQaLint {
   return qaLint?.status === "violations" || qaLint?.status === "warnings";

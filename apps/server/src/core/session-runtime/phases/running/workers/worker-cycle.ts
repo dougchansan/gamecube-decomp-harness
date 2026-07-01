@@ -280,7 +280,13 @@ export const WORKER_ATTEMPT_TAIL_POLICY = {
   mode: "bounded_attempt_tail_v1",
   maxColdAttempts: 3,
   followUpAttemptsAfterBest: 2,
-  followUpAttemptsAfterGateFailedExact: 1,
+  // A4: give a byte-exact-but-gate-failed checkpoint a second follow-up to recover the exact
+  // (remove the lint finding while keeping the match) before giving up. This budget is
+  // consumed ONLY on the gate-failed-exact path (workerContinuationDecision: gated by
+  // failedGateExactAttemptIndex = a prior checkpoint with exactMatch && !hardGatesPassed);
+  // generic partials use followUpAttemptsAfterBest. The claim TTL / claimDeadlineMs guard
+  // still bounds it, so a target cannot monopolize a claim.
+  followUpAttemptsAfterGateFailedExact: 2,
 } as const;
 
 export interface WorkerContinuationDecision {

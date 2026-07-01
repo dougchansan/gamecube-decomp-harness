@@ -520,13 +520,47 @@ describe("workerContinuationDecision", () => {
     expect(decision.continueReason).toBe("gate_failed_exact_repair");
   });
 
-  test("failed-gate exact repair stops after the configured follow-up budget", () => {
+  test("A4: grants a second follow-up to recover a gate-failed exact before giving up", () => {
+    // Budget raised 1 -> 2: after the exact-but-gate-failed checkpoint at attempt 4, a
+    // follow-up at attempt 5 (followUps == 1 < 2) is still granted to recover the exact.
     const checkpoints = [
       continuationCheckpoint(4, { exactMatch: true, hardGatesPassed: false, selectable: false, newScore: 100 }),
       continuationCheckpoint(5, { exactMatch: true, hardGatesPassed: false, selectable: false, newScore: 100 }),
     ];
     const decision = workerContinuationDecision({
       attemptIndex: 5,
+      checkpoints,
+      repairReasons: ["runner validation: qa lint failed"],
+      dryRun: false,
+      claimDeadlineMs: futureDeadline,
+    });
+
+    expect(decision.shouldContinue).toBe(true);
+    expect(decision.continueReason).toBe("gate_failed_exact_repair");
+  });
+
+  test("A4: the extra gate-failed-exact follow-up is still bounded by the claim TTL", () => {
+    const checkpoints = [continuationCheckpoint(4, { exactMatch: true, hardGatesPassed: false, selectable: false, newScore: 100 })];
+    const decision = workerContinuationDecision({
+      attemptIndex: 5,
+      checkpoints,
+      repairReasons: ["runner validation: qa lint failed"],
+      dryRun: false,
+      claimDeadlineMs: Date.now() - 1, // claim deadline already passed
+    });
+
+    expect(decision.shouldContinue).toBe(false);
+    expect(decision.stopReason).toBe("claim_deadline");
+  });
+
+  test("failed-gate exact repair stops after the configured follow-up budget", () => {
+    const checkpoints = [
+      continuationCheckpoint(4, { exactMatch: true, hardGatesPassed: false, selectable: false, newScore: 100 }),
+      continuationCheckpoint(5, { exactMatch: true, hardGatesPassed: false, selectable: false, newScore: 100 }),
+      continuationCheckpoint(6, { exactMatch: true, hardGatesPassed: false, selectable: false, newScore: 100 }),
+    ];
+    const decision = workerContinuationDecision({
+      attemptIndex: 6,
       checkpoints,
       repairReasons: ["runner validation: qa lint failed"],
       dryRun: false,
