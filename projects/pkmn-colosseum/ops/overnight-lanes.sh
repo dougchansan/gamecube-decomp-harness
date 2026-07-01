@@ -37,6 +37,7 @@ DEEPSEEK_TARGET_MAX_SIZE="${DEEPSEEK_TARGET_MAX_SIZE:-80}"
 DEEPSEEK_TARGET_MIN_FUZZY="${DEEPSEEK_TARGET_MIN_FUZZY:-45}"
 CLAUDE_PROVIDER="${CLAUDE_PROVIDER:-claude-code}"
 CLAUDE_MODEL="${CLAUDE_MODEL:-sonnet}"
+ENABLE_CLAUDE="${ENABLE_CLAUDE:-0}"
 SONNET_WORKER_CAP="${SONNET_WORKER_CAP:-6}"
 SONNET_TARGET_MIN_SIZE="${SONNET_TARGET_MIN_SIZE:-81}"
 SONNET_TARGET_MAX_SIZE="${SONNET_TARGET_MAX_SIZE:-220}"
@@ -281,5 +282,9 @@ if [[ "$ENABLE_DEEPSEEK" == "1" ]]; then
 else
   echo "[$(ts)] DeepSeek lane disabled (ENABLE_DEEPSEEK=$ENABLE_DEEPSEEK)" | tee -a "$LOGDIR/overnight.log"
 fi
-claude_scheduler &
+if [[ "$ENABLE_CLAUDE" == "1" ]]; then
+  claude_scheduler &
+else
+  echo "[$(ts)] Claude lane disabled (ENABLE_CLAUDE=$ENABLE_CLAUDE)" | tee -a "$LOGDIR/overnight.log"
+fi
 monitor_loop
