@@ -2,27 +2,42 @@ import { immediateTransaction, now, type StateStore } from "@server/core/orchest
 import type { LadderConfig, LadderRung } from "./ladder.js";
 
 /**
- * Track A — rung selection (A1). Pure functions plus the two DB reads/writes the
- * escalation hooks need. `failedAttempts` = count of prior non-exact worker_state
- * rows for this target in this run (see countNonExactWorkerStates).
+ * Track A — rung selection (A1). Pure functions plus the DB reads/writes the escalation
+ * hooks need. The escalation level (rung index) is the monotonic
+ * epoch_targets.model_ladder_level (see currentLadderLevel); pickRung maps it to a rung.
  */
 
-export function pickRung(ladder: LadderConfig, failedAttempts: number): { index: number; rung: LadderRung } {
+export function pickRung(ladder: LadderConfig, escalationLevel: number): { index: number; rung: LadderRung } {
   const lastIndex = Math.max(0, ladder.rungs.length - 1);
-  const index = Math.min(Math.max(failedAttempts, 0), lastIndex);
+  const index = Math.min(Math.max(escalationLevel, 0), lastIndex);
   const rung = ladder.rungs[index];
   if (!rung) throw new Error(`Ladder ${ladder.id} has no rung at index ${index}`);
   return { index, rung };
 }
 
 /** At/over the last rung -> stop escalating after this run. */
-export function ladderExhausted(ladder: LadderConfig, failedAttempts: number): boolean {
-  return failedAttempts >= ladder.rungs.length - 1;
+export function ladderExhausted(ladder: LadderConfig, escalationLevel: number): boolean {
+  return escalationLevel >= ladder.rungs.length - 1;
 }
 
 /**
- * A1 counter: number of non-exact worker_state rows recorded for this target in
- * this run. Drives the rung index in A2.
+ * A2 source of truth (rung-counter fix): the target's current ladder level, read from
+ * the monotonic epoch_targets.model_ladder_level column. A fresh target has NULL -> 0
+ * (rung 0). A3 increments it by exactly one on each escalation re-admit, so the level
+ * survives claimNextEpochTarget's worker_state row-reuse and climbs deterministically.
+ */
+export function currentLadderLevel(store: StateStore, epochTargetId: string): number {
+  const row = store.db
+    .query("SELECT model_ladder_level AS level FROM epoch_targets WHERE id = ?")
+    .get(epochTargetId) as { level?: number | null } | undefined;
+  const level = row?.level;
+  return typeof level === "number" && Number.isFinite(level) ? level : 0;
+}
+
+/**
+ * A1 primitive (retained; no longer the escalation counter — see currentLadderLevel):
+ * number of non-exact worker_state rows recorded for a target in a run. Kept for
+ * telemetry/diagnostics.
  */
 export function countNonExactWorkerStates(store: StateStore, runId: string, targetKey: string): number {
   const row = store.db

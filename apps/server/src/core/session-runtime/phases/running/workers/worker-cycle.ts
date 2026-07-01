@@ -56,7 +56,7 @@ import {
 import type { PiRunResult } from "@server/core/shared/types";
 import { numberArg, projectMetadata, stringArg, type GlobalArgs } from "@server/core/project-registry/runtime-options.js";
 import { assertSchedulableRun } from "@server/core/session-runtime/phases/running/jobs/shared.js";
-import { countNonExactWorkerStates, ladderExhausted, pickRung, recordCrackTelemetry } from "@server/core/session-runtime/escalation/select-rung.js";
+import { currentLadderLevel, ladderExhausted, pickRung, recordCrackTelemetry } from "@server/core/session-runtime/escalation/select-rung.js";
 import type { LadderRung } from "@server/core/session-runtime/escalation/ladder.js";
 
 export interface WorkerCycleResult {
@@ -1360,17 +1360,18 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
     const targetSymbol = String(target.symbol ?? "");
     const targetKey = `${targetUnit}::${targetSymbol}`;
 
-    // A2 — iterative model-escalation. Compute the rung once per worker cycle from the
-    // number of prior non-exact attempts on this target. Everything is gated behind
-    // globals.escalationEnabled: when OFF the fixed-model lane behaves exactly as before.
+    // A2 — iterative model-escalation. The rung is the target's monotonic ladder level
+    // (epoch_targets.model_ladder_level), which A3 increments by one per re-admit and which
+    // survives claimNextEpochTarget's worker_state row-reuse. Fresh target -> level 0 (rung 0).
+    // Everything is gated behind globals.escalationEnabled: when OFF the fixed-model lane
+    // behaves exactly as before.
     const escalationEnabled = globals.escalationEnabled === true && globals.ladder != null;
     const ladder = globals.ladder;
     let escalationLevel = 0;
-    let failedAttempts = 0;
     let rung: LadderRung | undefined;
     if (escalationEnabled && ladder) {
-      failedAttempts = countNonExactWorkerStates(store, runId, targetKey);
-      const picked = pickRung(ladder, failedAttempts);
+      const level = currentLadderLevel(store, claimed.epochTargetId);
+      const picked = pickRung(ladder, level);
       escalationLevel = picked.index;
       rung = picked.rung;
     }
@@ -1828,7 +1829,9 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
     // A3 — the one control-flow change. On a non-exact "timeout" (the agent ran but did not
     // crack the target), return the target to the claimable pool so the next generic worker
     // re-attacks it one rung up. Infra "error" does NOT escalate — existing recovery re-runs
-    // the SAME rung. Gated on escalationEnabled; hard-capped at rungs.length to prevent loops.
+    // the SAME rung. Gated on escalationEnabled. The climb stops once escalationLevel reaches
+    // the top rung (ladderExhausted), which is also the hard cap against re-admit loops: the
+    // level is monotonic (A3 bumps it by exactly one, closeWorkerState writes it atomically).
     // TODO(A6): mode "full-matrix"/"hybrid" reuse this re-admit machinery with a different stop
     // condition (re-admit until every rung has an attempt, even on exact); not yet implemented.
     const escalationReAdmit =
@@ -1836,8 +1839,7 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
       ladder != null &&
       ladder.mode === "escalation" &&
       lifecycleStatus === "timeout" &&
-      !ladderExhausted(ladder, failedAttempts) &&
-      failedAttempts < ladder.rungs.length;
+      !ladderExhausted(ladder, escalationLevel);
 
     closeWorkerState(store, {
       workerStateId: claimed.workerStateId,
@@ -1846,6 +1848,9 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
       errorSummary: lifecycleStatus === "error" ? summaryText : null,
       summary: workerStateSummary,
       epochTargetStatus: escalationReAdmit ? "admitted" : "finished",
+      // Bump the monotonic rung counter (and drop this attempt's selectable checkpoints) so
+      // the next claim runs one rung higher and does not trip the recycle guard.
+      nextModelLadderLevel: escalationReAdmit ? escalationLevel + 1 : undefined,
     });
     const wakeEvent = addEvent(store, runId, lifecycleStatus === "error" ? "worker_error" : "worker_finished", "worker", {
       worker_state_id: claimed.workerStateId,

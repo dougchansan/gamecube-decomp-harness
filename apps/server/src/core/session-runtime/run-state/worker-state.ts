@@ -66,6 +66,14 @@ export interface WorkerStateCloseInput {
   summary?: Record<string, unknown>;
   timeoutSummary?: string | null;
   errorSummary?: string | null;
+  // Track A escalation re-admit (worker-cycle A3 only): when set together with
+  // epochTargetStatus:"admitted", also (1) write epoch_targets.model_ladder_level =
+  // nextModelLadderLevel (the monotonic rung counter) and (2) clear this worker_state's
+  // selectable non-exact checkpoints so the next rung's worker can re-claim the target
+  // without claimNextEpochTarget's recycle guard throwing "has selectable execution
+  // evidence". Omitted by every non-escalation caller (recover-claims etc.), so their
+  // behavior is byte-for-byte unchanged.
+  nextModelLadderLevel?: number;
 }
 
 function parseStringArray(value: unknown): string[] {
@@ -589,7 +597,16 @@ export function closeWorkerState(store: StateStore, input: WorkerStateCloseInput
       .query("UPDATE target_claims SET status = 'closed', closed_at = ?, close_reason = ? WHERE id = ?")
       .run(endedAt, input.lifecycleStatus, String(row.target_claim_id));
     if (epochTargetStatus === "admitted") {
-      store.db.query("UPDATE epoch_targets SET status = 'admitted', claimed_at = NULL, finished_at = NULL WHERE id = ?").run(String(row.epoch_target_id));
+      if (typeof input.nextModelLadderLevel === "number") {
+        // Track A escalation re-admit: bump the monotonic rung counter and drop the
+        // prior attempt's selectable non-exact checkpoints (atomic with the re-admit).
+        store.db
+          .query("UPDATE epoch_targets SET status = 'admitted', claimed_at = NULL, finished_at = NULL, model_ladder_level = ? WHERE id = ?")
+          .run(input.nextModelLadderLevel, String(row.epoch_target_id));
+        store.db.query("UPDATE worker_checkpoints SET selectable = 0 WHERE worker_state_id = ? AND exact_match = 0").run(input.workerStateId);
+      } else {
+        store.db.query("UPDATE epoch_targets SET status = 'admitted', claimed_at = NULL, finished_at = NULL WHERE id = ?").run(String(row.epoch_target_id));
+      }
     } else {
       store.db.query("UPDATE epoch_targets SET status = 'finished', finished_at = ? WHERE id = ?").run(endedAt, String(row.epoch_target_id));
     }
