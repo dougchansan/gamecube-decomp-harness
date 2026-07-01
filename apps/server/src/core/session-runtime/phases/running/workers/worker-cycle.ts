@@ -1292,6 +1292,19 @@ function providerWorkerPromptGuidance(provider: string): string {
   ].join("\n");
 }
 
+/** Universal decomp-style rule (applies to every worker/provider): maintainable
+ *  struct-access C, never obfuscated byte-matches. */
+function decompStyleRule(): string {
+  return [
+    "<decomp_style_rule>",
+    "Write maintainable C, not obfuscated byte-matches. Replace raw pointer arithmetic (e.g. *(T*)((u8*)p + 0xNN)) with named struct types, field access (p->field), and meaningful local variable names.",
+    "When matching requires struct layout, define or extend a named struct with descriptive field names (pad unknown regions explicitly) and reference fields by name instead of casting-and-offsetting.",
+    "This must PRESERVE OR IMPROVE the objdiff match: never regress the score to gain readability. If a cleaner form would lower the match, keep the match and leave a concise TODO comment describing the intended structure.",
+    "Never use type-erasing casts, asm wrappers, inline assembly, or score-only tricks (they fail the QA gate). Preserve fn_XXXXXXXX address traceability in comments until a semantic name is well proven.",
+    "</decomp_style_rule>",
+  ].join("\n");
+}
+
 export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, string | true>): Promise<WorkerCycleResult> {
   const store = openState(globals.stateDir);
   try {
@@ -1438,11 +1451,12 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
           workerLogDir: outputDir,
         });
         const providerGuidance = providerWorkerPromptGuidance(runProvider);
+        const extraGuidance = [decompStyleRule(), providerGuidance].filter(Boolean).join("\n\n");
         result = await runPiAgent({
           role: "worker",
           cwd: workerRepoRoot,
-          prompt: providerGuidance
-            ? { ...basePrompt, systemPrompt: `${basePrompt.systemPrompt}\n\n${providerGuidance}` }
+          prompt: extraGuidance
+            ? { ...basePrompt, systemPrompt: `${basePrompt.systemPrompt}\n\n${extraGuidance}` }
             : basePrompt,
           outputDir,
           dryRun: globals.dryRunAgents,

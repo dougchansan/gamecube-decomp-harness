@@ -14,6 +14,7 @@
 export const defaultWorkerToolProfile = [
   "code_graph_file_card",
   "code_graph_search",
+  "legacy_lever_search",
   "path_facts_resolve",
   "ghidra_lookup",
   "opseq_similar_functions",
@@ -32,7 +33,6 @@ export const defaultWorkerToolProfile = [
   "source_mutation_preview",
   "type_oracle_lookup",
   "m2c_decompile",
-  "seedcoder_v3_propose",
   "review_lint_scan",
 ] as const;
 
@@ -115,6 +115,7 @@ export const defaultQaRepairToolProfile = [
 /** Default knowledge-curator tools attached to curator launches. */
 export const defaultKnowledgeCuratorToolProfile = [
   "code_graph_search",
+  "legacy_lever_search",
   "decomp_standards_context",
   "decomp_standards_proposals",
   "path_facts_resolve",
