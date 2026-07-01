@@ -5,7 +5,7 @@ import { closenessScore } from "../board/candidates.js";
 import { readRegressionReport, type RegressionReport, type ReportEntry } from "@server/core/validation/objdiff/report.js";
 import { runQaScanDiff, type QaScanFinding } from "@server/core/validation/qa/scan-diff.js";
 import { forceReportRun, trustedReportFromRegressionReport, type ReportRunResult } from "@server/core/validation/report";
-import { addSavePoint, ensureCampaign, type SavePointRecord } from "@server/core/session-runtime/phases/pr/state";
+import { addReportSnapshot, addSavePoint, ensureCampaign, type SavePointRecord } from "@server/core/session-runtime/phases/pr/state";
 import { recordDashboardArtifact, type StateStore } from "@server/core/orchestrator-state";
 import { blockingWorkerOutputIntegrationCount } from "@server/core/session-runtime/run-state";
 import { addEvent } from "@server/core/session-runtime/run-state/events.js";
@@ -431,8 +431,17 @@ async function runEpochCycleInner(store: StateStore, runId: string, repoRoot: st
   const worktreeChangesPath = resolve(options.worktreeDir, reportChangesRelPath);
   const regressionReport = await readRegressionReport(worktreeChangesPath, `Epoch checkpoint for run ${runId}`, 50);
   const measures = reportMeasures(worktreeReportPath);
-  const matchedCodeValue = Number(measures.matched_code_percent);
-  const matchedCodePercent = Number.isFinite(matchedCodeValue) ? matchedCodeValue : null;
+  const measureNumber = (key: string): number | null => {
+    const value = Number(measures[key]);
+    return Number.isFinite(value) ? value : null;
+  };
+  const matchedCodePercent = measureNumber("matched_code_percent");
+  const matchedDataPercent = measureNumber("matched_data_percent");
+  const matchedFunctionsPercent = measureNumber("matched_functions_percent");
+  const fuzzyMatchPercent = measureNumber("fuzzy_match_percent");
+  const completeCodePercent = measureNumber("complete_code_percent");
+  const completeUnits = measureNumber("complete_units");
+  const totalUnits = measureNumber("total_units");
 
   const artifactDir = resolve(stateDir, "epochs", artifactTimestamp());
   await mkdir(artifactDir, { recursive: true });
@@ -525,6 +534,8 @@ async function runEpochCycleInner(store: StateStore, runId: string, repoRoot: st
       committed: snapshot.committed,
       worktreeDirty: lockedPaths.length > 0,
       matchedCodePercent,
+      matchedDataPercent,
+      matchedFunctionsPercent,
       reportPath: resolve(artifactDir, "report.json"),
       reportChangesPath: resolve(artifactDir, "report_changes.json"),
       artifactDir,
@@ -537,6 +548,20 @@ async function runEpochCycleInner(store: StateStore, runId: string, repoRoot: st
         locked_paths_excluded: lockedPaths,
         summary_delta: regressionReport.summary,
       },
+    });
+    // Telemetry (Track B): dense match-over-time row from the same measures block.
+    addReportSnapshot(store, {
+      runId,
+      source: "epoch",
+      fuzzyMatchPercent,
+      matchedCodePercent,
+      completeCodePercent,
+      matchedDataPercent,
+      matchedFunctionsPercent,
+      completeUnits,
+      totalUnits,
+      reportPath: resolve(artifactDir, "report.json"),
+      at: savePoint.createdAt,
     });
     recordDashboardArtifact(store, {
       runId,

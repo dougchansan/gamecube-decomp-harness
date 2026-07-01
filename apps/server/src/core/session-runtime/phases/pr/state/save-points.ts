@@ -4,6 +4,7 @@ import {
   campaigns,
   immediateTransaction,
   now,
+  reportSnapshots,
   savePoints,
   type CampaignRow,
   type SavePointRow,
@@ -33,6 +34,8 @@ export interface SavePointRecord {
   worktreeDirty: boolean;
   committed: boolean;
   matchedCodePercent: number | null;
+  matchedDataPercent: number | null;
+  matchedFunctionsPercent: number | null;
   reportPath: string | null;
   reportChangesPath: string | null;
   boardSnapshotPath: string | null;
@@ -53,6 +56,8 @@ export interface SavePointInput {
   worktreeDirty?: boolean;
   committed?: boolean;
   matchedCodePercent?: number | null;
+  matchedDataPercent?: number | null;
+  matchedFunctionsPercent?: number | null;
   reportPath?: string | null;
   reportChangesPath?: string | null;
   boardSnapshotPath?: string | null;
@@ -84,6 +89,8 @@ function savePointFromRow(row: SavePointRow): SavePointRecord {
     worktreeDirty: row.worktreeDirty,
     committed: row.committed,
     matchedCodePercent: row.matchedCodePercent,
+    matchedDataPercent: row.matchedDataPercent,
+    matchedFunctionsPercent: row.matchedFunctionsPercent,
     reportPath: row.reportPath ? String(row.reportPath) : null,
     reportChangesPath: row.reportChangesPath ? String(row.reportChangesPath) : null,
     boardSnapshotPath: row.boardSnapshotPath ? String(row.boardSnapshotPath) : null,
@@ -143,6 +150,8 @@ export function addSavePoint(store: StateStore, input: SavePointInput): SavePoin
     worktreeDirty: input.worktreeDirty ?? false,
     committed: input.committed ?? false,
     matchedCodePercent: input.matchedCodePercent ?? null,
+    matchedDataPercent: input.matchedDataPercent ?? null,
+    matchedFunctionsPercent: input.matchedFunctionsPercent ?? null,
     reportPath: input.reportPath ?? null,
     reportChangesPath: input.reportChangesPath ?? null,
     boardSnapshotPath: input.boardSnapshotPath ?? null,
@@ -166,6 +175,8 @@ export function addSavePoint(store: StateStore, input: SavePointInput): SavePoin
         worktreeDirty: record.worktreeDirty,
         committed: record.committed,
         matchedCodePercent: record.matchedCodePercent,
+        matchedDataPercent: record.matchedDataPercent,
+        matchedFunctionsPercent: record.matchedFunctionsPercent,
         reportPath: record.reportPath,
         reportChangesPath: record.reportChangesPath,
         boardSnapshotPath: record.boardSnapshotPath,
@@ -176,6 +187,52 @@ export function addSavePoint(store: StateStore, input: SavePointInput): SavePoin
       .run();
   });
   return record;
+}
+
+export type ReportSnapshotSource = "epoch" | "save_point" | "periodic";
+
+export interface ReportSnapshotInput {
+  runId: string;
+  source: ReportSnapshotSource;
+  fuzzyMatchPercent?: number | null;
+  matchedCodePercent?: number | null;
+  completeCodePercent?: number | null;
+  matchedDataPercent?: number | null;
+  matchedFunctionsPercent?: number | null;
+  completeUnits?: number | null;
+  totalUnits?: number | null;
+  reportPath?: string | null;
+  at?: string;
+}
+
+/**
+ * Telemetry (Track B): append-only dense match-over-time row. Written alongside
+ * each epoch save point from the same report `measures` block so the dashboard
+ * can plot code/data/function progress between the sparse epoch checkpoints.
+ */
+export function addReportSnapshot(store: StateStore, input: ReportSnapshotInput): string {
+  const id = randomUUID();
+  const at = input.at ?? now();
+  immediateTransaction(store.db, () => {
+    store.orm
+      .insert(reportSnapshots)
+      .values({
+        id,
+        runId: input.runId,
+        at,
+        source: input.source,
+        fuzzyMatchPercent: input.fuzzyMatchPercent ?? null,
+        matchedCodePercent: input.matchedCodePercent ?? null,
+        completeCodePercent: input.completeCodePercent ?? null,
+        matchedDataPercent: input.matchedDataPercent ?? null,
+        matchedFunctionsPercent: input.matchedFunctionsPercent ?? null,
+        completeUnits: input.completeUnits ?? null,
+        totalUnits: input.totalUnits ?? null,
+        reportPath: input.reportPath ?? null,
+      })
+      .run();
+  });
+  return id;
 }
 
 export function latestSavePoint(store: StateStore): SavePointRecord | null {
