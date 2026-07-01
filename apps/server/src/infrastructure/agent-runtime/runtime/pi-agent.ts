@@ -131,6 +131,40 @@ function finiteNumber(value: unknown): number | undefined {
   return typeof value === "number" && Number.isFinite(value) ? value : undefined;
 }
 
+/**
+ * Telemetry (Track B): sum per-turn token usage across every VALID assistant message of a
+ * Pi SDK `agent_end` event (usage.input/output/cacheRead/cacheWrite). The final message in
+ * the array is usually a tool result or an errored/aborted turn (whose usage is zeroed by
+ * the SDK's createFailureMessage), so reading only messages.at(-1) captured 0 for the SDK
+ * providers (zai/glm-5.2, deepseek-ollama-cloud, openai-codex). Skipping error/aborted turns
+ * mirrors the SDK's own getAssistantUsage rule; summing makes the total cumulative across
+ * turns, comparable to claude-code's cumulative CLI usage. Returns undefined when no
+ * assistant message carries usage (identical to the previous no-op for empty usage).
+ */
+export function sumAssistantUsage(messages: unknown): PiRunResult["usage"] | undefined {
+  const list = Array.isArray(messages) ? (messages as Array<Record<string, unknown>>) : [];
+  let input = 0;
+  let output = 0;
+  let cacheRead = 0;
+  let cacheWrite = 0;
+  let sawUsage = false;
+  for (const message of list) {
+    if (message?.role !== "assistant") continue;
+    if (message.stopReason === "aborted" || message.stopReason === "error") continue;
+    const usage = message.usage as { input?: unknown; output?: unknown; cacheRead?: unknown; cacheWrite?: unknown } | undefined;
+    if (!usage) continue;
+    const i = finiteNumber(usage.input);
+    const o = finiteNumber(usage.output);
+    const cr = finiteNumber(usage.cacheRead);
+    const cw = finiteNumber(usage.cacheWrite);
+    if (i !== undefined) { input += i; sawUsage = true; }
+    if (o !== undefined) { output += o; sawUsage = true; }
+    if (cr !== undefined) { cacheRead += cr; sawUsage = true; }
+    if (cw !== undefined) { cacheWrite += cw; sawUsage = true; }
+  }
+  return sawUsage ? { inputTokens: input, outputTokens: output, cacheReadTokens: cacheRead, cacheWriteTokens: cacheWrite } : undefined;
+}
+
 type SessionManagerWithCustomEntries = {
   appendCustomEntry?: (customType: string, data?: unknown) => string;
 };
@@ -558,16 +592,11 @@ export async function runPiAgent(options: PiRunOptions): Promise<PiRunResult> {
         rawText += event.assistantMessageEvent.delta;
       }
       if (event?.type === "agent_end") {
-        // Telemetry (Track B): hoist the final-turn token usage. Shape is the Pi
-        // SDK's `usage.input`/`usage.output`; guard so a missing field is undefined.
-        const messages = Array.isArray(event.messages) ? event.messages : [];
-        const last = messages.at(-1) as { usage?: { input?: number; output?: number } } | undefined;
-        if (last?.usage) {
-          lastUsage = {
-            inputTokens: typeof last.usage.input === "number" ? last.usage.input : undefined,
-            outputTokens: typeof last.usage.output === "number" ? last.usage.output : undefined,
-          };
-        }
+        // Telemetry (Track B): sum token usage across all valid assistant messages (see
+        // sumAssistantUsage) instead of reading only the final message, which for the SDK
+        // providers is typically a tool result / errored turn with zeroed usage.
+        const summed = sumAssistantUsage(event.messages);
+        if (summed) lastUsage = summed;
       }
       if (event?.type === "message_end" || event?.type === "turn_end") {
         const text = textFromMessage(event.message);
