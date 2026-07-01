@@ -1,0 +1,42 @@
+{
+  "id": "colosseum-weak-to-strong",
+  "mode": "escalation",
+  "rungs": [
+    {
+      "provider": "deepseek-ollama-cloud",
+      "model": "deepseek-v3.1:671b-cloud",
+      "thinking": "low",
+      "budget": { "agentTimeoutSeconds": 14400, "ttlSeconds": 7200, "maxAttempts": 2 }
+    },
+    {
+      "provider": "zai",
+      "model": "glm-5.2",
+      "thinking": "low",
+      "budget": { "agentTimeoutSeconds": 14400, "ttlSeconds": 7200, "maxAttempts": 2 }
+    },
+    {
+      "provider": "claude-code",
+      "model": "claude-sonnet-5",
+      "thinking": "medium",
+      "budget": { "agentTimeoutSeconds": 14400, "ttlSeconds": 7200, "maxAttempts": 2 }
+    },
+    {
+      "provider": "openai-codex",
+      "model": "gpt-5.5",
+      "thinking": "medium",
+      "budget": { "agentTimeoutSeconds": 14400, "ttlSeconds": 7200, "maxAttempts": 2 }
+    },
+    {
+      "provider": "claude-code",
+      "model": "claude-opus-4-8",
+      "thinking": "high",
+      "budget": { "agentTimeoutSeconds": 14400, "ttlSeconds": 7200, "maxAttempts": 2 }
+    },
+    {
+      "provider": "claude-code",
+      "model": "claude-fable-5",
+      "thinking": "high",
+      "budget": { "agentTimeoutSeconds": 14400, "ttlSeconds": 7200, "maxAttempts": 2 }
+    }
+  ]
+}
