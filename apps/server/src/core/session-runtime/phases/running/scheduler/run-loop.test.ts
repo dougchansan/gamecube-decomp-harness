@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { evaluateFastKnowledgeMaintenanceDecision, PENDING_CLAIM_TIMEOUT_MS, reapStuckPendingWorkers, shouldRefreshSchedulerBoard, workerOpenSlots } from "./run-loop.js";
+import { evaluateFastKnowledgeMaintenanceDecision, integrationResolveCommand, PENDING_CLAIM_TIMEOUT_MS, reapStuckPendingWorkers, shouldRefreshSchedulerBoard, workerOpenSlots } from "./run-loop.js";
+import type { GlobalArgs } from "@server/core/project-registry/runtime-options.js";
 
 type WorkerProcRegistry = Map<string, { proc: { kill: (signal?: number) => void; exited: Promise<number> }; spawnedAtMs: number }>;
 
@@ -128,6 +129,47 @@ describe("workerOpenSlots retains pending workers in the cap (no over-spawn)", (
   test("pending (spawned-but-unclaimed) workers still reduce open slots", () => {
     // 4 max, 1 active claim, 3 spawned promises => 2 pending => 4 - 1 - 2 = 1 open slot.
     expect(workerOpenSlots({ maxWorkers: 4, activeWorkers: 1, runningWorkers: 3, activeLocalWorkers: 1 })).toBe(1);
+  });
+});
+
+describe("integrationResolveCommand (auto conflict-resolver child)", () => {
+  const globals: GlobalArgs = {
+    repoRoot: "/repo",
+    stateDir: "/state",
+    projectId: "pkmn-colosseum",
+    dryRunAgents: false,
+    provider: "openai-codex",
+    model: "gpt-5.5",
+    thinkingLevel: "medium",
+  };
+
+  test("forwards the resolver model + item/queue/run flags to integration-resolve", () => {
+    const cmd = integrationResolveCommand(globals, {
+      runId: "run-1",
+      itemPath: "/state/i/item.json",
+      queueSummaryPath: "/state/i/queue.json",
+      resolverProvider: "zai",
+      resolverModel: "glm-5.2",
+      resolverThinkingLevel: "low",
+    });
+    const joined = cmd.join(" ");
+    expect(cmd).toContain("integration-resolve");
+    expect(joined).toContain("--run-id run-1");
+    expect(joined).toContain("--item-file /state/i/item.json");
+    expect(joined).toContain("--queue-summary-file /state/i/queue.json");
+    expect(joined).toContain("--resolver-provider zai");
+    expect(joined).toContain("--resolver-model glm-5.2");
+    expect(joined).toContain("--resolver-thinking-level low");
+    expect(joined).toContain("--project pkmn-colosseum");
+    expect(joined).not.toContain("--dry-run-agents");
+  });
+
+  test("respects dryRunAgents by forwarding --dry-run-agents", () => {
+    const cmd = integrationResolveCommand(
+      { ...globals, dryRunAgents: true },
+      { runId: "r", itemPath: "a.json", queueSummaryPath: "b.json", resolverProvider: "zai", resolverModel: "glm-5.2", resolverThinkingLevel: "low" },
+    );
+    expect(cmd).toContain("--dry-run-agents");
   });
 });
 

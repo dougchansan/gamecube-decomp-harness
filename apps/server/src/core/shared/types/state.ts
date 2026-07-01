@@ -23,4 +23,5 @@ export type EventType =
   | "epoch_started"
   | "epoch_finished"
   | "pool_stopping"
-  | "pending_worker_reaped";
+  | "pending_worker_reaped"
+  | "worker_integration_resolver_launched";

@@ -33,7 +33,27 @@ function itemString(item: unknown, ...keys: string[]): string {
   return "";
 }
 
-function recordIntegrationResolverSession(globals: GlobalArgs, runId: string, result: Awaited<ReturnType<typeof runPiAgent>>): void {
+export interface ResolverModel {
+  provider: string;
+  model: string;
+  thinkingLevel: string;
+}
+
+/**
+ * The model the integration resolver runs on. --resolver-provider/--resolver-model/
+ * --resolver-thinking-level override the base globals so conflicts can be resolved on a cheap
+ * model (e.g. glm) instead of burning the campaign worker's model; each falls back to the
+ * corresponding globals.* when unset.
+ */
+export function resolveResolverModel(args: Map<string, string | true>, globals: GlobalArgs): ResolverModel {
+  return {
+    provider: stringArg(args, "--resolver-provider", globals.provider),
+    model: stringArg(args, "--resolver-model", globals.model),
+    thinkingLevel: stringArg(args, "--resolver-thinking-level", globals.thinkingLevel),
+  };
+}
+
+function recordIntegrationResolverSession(globals: GlobalArgs, runId: string, resolver: ResolverModel, result: Awaited<ReturnType<typeof runPiAgent>>): void {
   if (!runId) return;
   const store = openState(globals.stateDir);
   try {
@@ -43,9 +63,9 @@ function recordIntegrationResolverSession(globals: GlobalArgs, runId: string, re
       role: "integration-resolver",
       sessionId: result.sessionId,
       sessionFile: result.sessionFile,
-      provider: globals.provider,
-      model: globals.model,
-      thinkingLevel: globals.thinkingLevel,
+      provider: resolver.provider,
+      model: resolver.model,
+      thinkingLevel: resolver.thinkingLevel,
       status: result.failed || result.providerError ? "failed" : result.dryRun ? "dry_run" : "succeeded",
       outputPath: result.outputPath,
     });
@@ -112,6 +132,7 @@ export async function integrationResolve(globals: GlobalArgs, args: Map<string, 
   const targetId = itemString(item, "epoch_target_id", "epochTargetId", "target_id", "targetId");
   const outputDir = resolve(stringArg(args, "--output-dir", "") || resolve(globals.stateDir, "integration_resolver", artifactTimestamp()));
   await mkdir(outputDir, { recursive: true });
+  const resolver = resolveResolverModel(args, globals);
 
   const result = await runPiAgent({
     role: "integration-resolver",
@@ -125,9 +146,9 @@ export async function integrationResolve(globals: GlobalArgs, args: Map<string, 
     }),
     outputDir,
     dryRun: globals.dryRunAgents,
-    provider: globals.provider,
-    model: globals.model,
-    thinkingLevel: globals.thinkingLevel,
+    provider: resolver.provider,
+    model: resolver.model,
+    thinkingLevel: resolver.thinkingLevel,
     timeoutMs: globals.agentTimeoutSeconds ? globals.agentTimeoutSeconds * 1000 : undefined,
     toolContext: {
       repoRoot: globals.repoRoot,
@@ -153,7 +174,7 @@ export async function integrationResolve(globals: GlobalArgs, args: Map<string, 
       },
     }),
   });
-  recordIntegrationResolverSession(globals, runId, result);
+  recordIntegrationResolverSession(globals, runId, resolver, result);
 
   const parsed = result.dryRun || result.failed || result.providerError
     ? { object: null, error: result.error ?? result.providerError ?? (result.dryRun ? "dry-run" : "agent failed") }

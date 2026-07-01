@@ -28,6 +28,8 @@ import {
 } from "@server/core/session-runtime/run-state";
 import { withBusyRetry } from "@server/core/orchestrator-state";
 import { runEpochCycle, type EpochCycleResult } from "@server/core/session-runtime/phases/running/epochs";
+import { conflictItemArtifactPaths, pendingConflictIntegrationIds, selectConflictItemsToLaunch } from "@server/core/session-runtime/phases/running/integration/conflict-resolver.js";
+import { resolveResolverModel } from "@server/core/session-runtime/phases/running/integration/integration-resolve.js";
 import { createColosseumKernelSpawnContext } from "@server/infrastructure/kernel/bridge/spawn-context";
 import { runColosseumKernelPiAgent as runPiAgent } from "@server/infrastructure/agent-runtime/kernel-pi-runner";
 import { booleanArg, numberArg, stringArg, type GlobalArgs } from "@server/core/project-registry/runtime-options.js";
@@ -554,6 +556,56 @@ function workerCommand(
   return command;
 }
 
+type ConflictResolverRegistry = Map<string, { proc: WorkerProcHandle }>;
+
+// Build the `integration-resolve` child command for one queued conflict, running the resolver
+// on the (cheap) --resolver-* model so the campaign worker's model is not spent on merges.
+export function integrationResolveCommand(
+  globals: GlobalArgs,
+  params: { runId: string; itemPath: string; queueSummaryPath: string; resolverProvider: string; resolverModel: string; resolverThinkingLevel: string },
+): string[] {
+  const bin = resolve(orchestratorRoot(), "apps/server/src/job-runner.ts");
+  const command = ["bun", bin, "--repo-root", globals.repoRoot, "--state-dir", globals.stateDir, "--provider", globals.provider, "--model", globals.model, "--thinking-level", globals.thinkingLevel];
+  if (globals.projectId) command.splice(2, 0, "--project", globals.projectId);
+  if (globals.dryRunAgents) command.push("--dry-run-agents");
+  if (globals.agentTimeoutSeconds != null) command.push("--agent-timeout-seconds", String(globals.agentTimeoutSeconds));
+  command.push(
+    "integration-resolve",
+    "--run-id",
+    params.runId,
+    "--item-file",
+    params.itemPath,
+    "--queue-summary-file",
+    params.queueSummaryPath,
+    "--resolver-provider",
+    params.resolverProvider,
+    "--resolver-model",
+    params.resolverModel,
+    "--resolver-thinking-level",
+    params.resolverThinkingLevel,
+  );
+  return command;
+}
+
+// Spawn one resolver subprocess for a conflict item, keyed by item id so the gate never
+// double-launches it; the proc.exited.finally frees the slot. Output is discarded (the resolver
+// persists its own summary + status) so it can never corrupt the run-loop's JSON stdout.
+function spawnConflictResolver(
+  globals: GlobalArgs,
+  params: { itemId: string; runId: string; itemPath: string; queueSummaryPath: string; resolverProvider: string; resolverModel: string; resolverThinkingLevel: string },
+  registry: ConflictResolverRegistry,
+): void {
+  const command = integrationResolveCommand(globals, params);
+  const proc = Bun.spawn(command, {
+    cwd: orchestratorRoot(),
+    env: workerProcessEnv(globals),
+    stdout: "ignore",
+    stderr: "ignore",
+  });
+  registry.set(params.itemId, { proc });
+  void proc.exited.finally(() => registry.delete(params.itemId));
+}
+
 async function runWorkerProcess(
   globals: GlobalArgs,
   params: {
@@ -606,6 +658,15 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
   const runningWorkers = new Set<Promise<void>>();
   const runningWorkerIds = new Set<string>();
   const runningWorkerProcs: WorkerProcRegistry = new Map();
+  // Auto integration-conflict resolution (opt-in). Bounds: one resolver per item, capped
+  // concurrency, in-lifetime retry cap so a repeatedly-crashing resolver can't loop forever.
+  const autoResolveConflicts = booleanArg(args, "--auto-resolve-conflicts");
+  const resolverModelConfig = resolveResolverModel(args, globals);
+  const resolverMaxConcurrency = Math.max(1, Math.trunc(numberArg(args, "--resolver-max-concurrency", 1)));
+  const resolverMaxAttempts = Math.max(1, Math.trunc(numberArg(args, "--resolver-max-attempts", 2)));
+  const runningConflictResolvers: ConflictResolverRegistry = new Map();
+  const conflictResolverAttempts = new Map<string, number>();
+  const conflictResolverExhausted = new Set<string>();
   let runningScheduler: Promise<void> | null = null;
   let runningKnowledgeMaintenance: Promise<void> | null = null;
   let stoppedReason = "running";
@@ -1189,6 +1250,50 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
         runningWorkerIds.add(workerId);
       }
 
+      // Auto integration-conflict resolver gate (opt-in via --auto-resolve-conflicts). Launch
+      // one resolver subprocess per queued conflict on the --resolver-* model (e.g. glm) so the
+      // campaign worker's model is not burned on merges. Not gated on providerPaused: the
+      // resolver runs a different provider than the (possibly-paused) worker provider.
+      if (autoResolveConflicts && !drainRequested) {
+        const runningItemIds = new Set(runningConflictResolvers.keys());
+        const pendingItemIds = pendingConflictIntegrationIds(store, runId);
+        const toLaunch = selectConflictItemsToLaunch({
+          pendingItemIds,
+          runningItemIds,
+          cap: resolverMaxConcurrency,
+          exhaustedItemIds: conflictResolverExhausted,
+        });
+        for (const itemId of toLaunch) {
+          const paths = conflictItemArtifactPaths(globals.stateDir, runId, itemId);
+          if (!existsSync(paths.itemPath)) continue; // conflict item file not written yet; retry next tick
+          const attempts = (conflictResolverAttempts.get(itemId) ?? 0) + 1;
+          conflictResolverAttempts.set(itemId, attempts);
+          if (attempts >= resolverMaxAttempts) conflictResolverExhausted.add(itemId);
+          didWork = true;
+          spawnConflictResolver(
+            globals,
+            {
+              itemId,
+              runId,
+              itemPath: paths.itemPath,
+              queueSummaryPath: paths.queueSummaryPath,
+              resolverProvider: resolverModelConfig.provider,
+              resolverModel: resolverModelConfig.model,
+              resolverThinkingLevel: resolverModelConfig.thinkingLevel,
+            },
+            runningConflictResolvers,
+          );
+          console.error(`[run-loop] auto-resolving integration conflict ${itemId} on ${resolverModelConfig.provider}/${resolverModelConfig.model} (attempt ${attempts})`);
+          addEvent(store, runId, "worker_integration_resolver_launched", "run-loop", {
+            id: itemId,
+            resolver_provider: resolverModelConfig.provider,
+            resolver_model: resolverModelConfig.model,
+            attempt: attempts,
+            created_by: "run-loop",
+          });
+        }
+      }
+
       if (!drainRequested && !runningScheduler && nextUnhandledEvent(store, runId)) {
         const tickArgs = schedulerTickArgs(args, { admissionTargetSize: workerPoolTargetSize, candidateLimit, candidateWindow, runId });
         let task: Promise<void>;
@@ -1261,6 +1366,9 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
       for (const { proc } of runningWorkerProcs.values()) proc.kill(9);
       await Promise.allSettled([...runningWorkers]);
     }
+    // Kill any in-flight conflict resolvers on shutdown; their items stay 'conflict' and are
+    // re-launched on the next run (bounded by the retry cap).
+    for (const { proc } of runningConflictResolvers.values()) proc.kill(9);
     if (runningEpoch) await runningEpoch;
     if (runningScheduler) await runningScheduler;
     if (runningFastKnowledgeMaintenance) await runningFastKnowledgeMaintenance;
