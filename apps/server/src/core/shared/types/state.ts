@@ -22,4 +22,5 @@ export type EventType =
   | "epoch_full_refresh_finished"
   | "epoch_started"
   | "epoch_finished"
-  | "pool_stopping";
+  | "pool_stopping"
+  | "pending_worker_reaped";

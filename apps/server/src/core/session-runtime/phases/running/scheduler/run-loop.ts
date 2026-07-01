@@ -197,9 +197,67 @@ function activeLocalWorkerCount(store: StateStore, runId: string, workerIds: Set
   return Number(row.count ?? 0);
 }
 
+// Watchdog helper: the worker_ids (among `workerIds`) that currently hold an active claim.
+// Mirrors activeLocalWorkerCount but returns the id set. Because a worker claims its target
+// BEFORE building its worktree (worker-cycle: claim precedes build), a running worker NOT in
+// this set is stuck in the pre-claim path and is a reap candidate.
+export function activeClaimedWorkerIds(store: StateStore, runId: string, workerIds: Set<string>): Set<string> {
+  if (workerIds.size === 0) return new Set();
+  const ids = [...workerIds];
+  const placeholders = ids.map(() => "?").join(", ");
+  const rows = withBusyRetry(
+    () =>
+      store.db
+        .query(
+          `
+            SELECT worker_id
+            FROM target_claims
+            WHERE session_id = ?
+              AND status = 'active'
+              AND worker_id IN (${placeholders})
+          `,
+        )
+        .all(runId, ...ids) as Array<Record<string, unknown>>,
+  );
+  return new Set(rows.map((row) => String(row.worker_id)));
+}
+
+// A spawned worker that never registers an active target_claim is stuck in the pre-claim path
+// (openState / getRun / git rev-parse on the shared repo). Uncounted and unreaped it pins a
+// slot forever, driving openSlots toward 0 and blocking all replacement spawns. Reap such a
+// worker past this age. 75s sits above p99 pre-claim latency (<10s) and below the ~3min build
+// (which only starts AFTER the claim), so a genuinely working worker is never eligible.
+export const PENDING_CLAIM_TIMEOUT_MS = 75_000;
+
+type WorkerProcHandle = { kill: (signal?: number) => void; exited: Promise<number> };
+type WorkerProcRegistry = Map<string, { proc: WorkerProcHandle; spawnedAtMs: number }>;
+
 export function workerOpenSlots(params: { maxWorkers: number; activeWorkers: number; runningWorkers: number; activeLocalWorkers: number }): number {
   const pendingLocalWorkers = Math.max(0, params.runningWorkers - params.activeLocalWorkers);
   return Math.max(0, params.maxWorkers - params.activeWorkers - pendingLocalWorkers);
+}
+
+// Kill any spawned worker that is still pending a claim (NOT in claimedWorkerIds) past
+// timeoutMs. Classify by claim, never by age alone — a worker WITH an active claim is
+// building/working and must never be reaped. kill(9) settles proc.exited so the existing
+// .finally() frees the slot next tick; recover-claims returns any half-claimed target.
+export function reapStuckPendingWorkers(params: {
+  workerProcs: WorkerProcRegistry;
+  claimedWorkerIds: Set<string>;
+  nowMs: number;
+  timeoutMs: number;
+  onReap?: (workerId: string, ageMs: number) => void;
+}): string[] {
+  const reaped: string[] = [];
+  for (const [workerId, rec] of params.workerProcs) {
+    if (params.claimedWorkerIds.has(workerId)) continue;
+    const ageMs = params.nowMs - rec.spawnedAtMs;
+    if (ageMs < params.timeoutMs) continue;
+    rec.proc.kill(9);
+    params.onReap?.(workerId, ageMs);
+    reaped.push(workerId);
+  }
+  return reaped;
 }
 
 function nonNegativeInt(value: number): number {
@@ -500,7 +558,7 @@ async function runWorkerProcess(
     graphDbPath: string;
     targetFilter?: TargetClaimFilter;
   },
-  procRegistry?: Set<{ kill: (signal?: number) => void; exited: Promise<number> }>,
+  procRegistry?: WorkerProcRegistry,
 ): Promise<WorkerCycleResult> {
   const command = workerCommand(globals, params);
   const proc = Bun.spawn(command, {
@@ -509,8 +567,10 @@ async function runWorkerProcess(
     stdout: "pipe",
     stderr: "pipe",
   });
-  procRegistry?.add(proc);
-  void proc.exited.finally(() => procRegistry?.delete(proc));
+  // Keyed by workerId so the pending-claim watchdog can kill a specific stuck worker;
+  // spawnedAtMs anchors its pre-claim age.
+  procRegistry?.set(params.workerId, { proc, spawnedAtMs: Date.now() });
+  void proc.exited.finally(() => procRegistry?.delete(params.workerId));
   const stdoutPromise = new Response(proc.stdout).text();
   const stderrPromise = new Response(proc.stderr).text();
   const [stdout, stderr, exitCode] = await Promise.all([stdoutPromise, stderrPromise, proc.exited]);
@@ -536,7 +596,7 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
   const fastKnowledgeMaintenanceErrors: KnowledgeMaintenanceError[] = [];
   const runningWorkers = new Set<Promise<void>>();
   const runningWorkerIds = new Set<string>();
-  const runningWorkerProcs = new Set<{ kill: (signal?: number) => void; exited: Promise<number> }>();
+  const runningWorkerProcs: WorkerProcRegistry = new Map();
   let runningScheduler: Promise<void> | null = null;
   let runningKnowledgeMaintenance: Promise<void> | null = null;
   let stoppedReason = "running";
@@ -1006,6 +1066,20 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
         runningProviderProbe = probeTask;
       }
 
+      // Rank 1 — pending-claim watchdog. Reap workers stuck in the pre-claim path (spawned,
+      // in runningWorkerIds, but holding no active claim) so they stop pinning openSlots to 0
+      // and blocking replacement spawns. Runs once per iteration, before the spawn gate.
+      reapStuckPendingWorkers({
+        workerProcs: runningWorkerProcs,
+        claimedWorkerIds: activeClaimedWorkerIds(store, runId, runningWorkerIds),
+        nowMs: Date.now(),
+        timeoutMs: PENDING_CLAIM_TIMEOUT_MS,
+        onReap: (workerId, ageMs) => {
+          console.error(`[run-loop] reaping stuck pre-claim worker ${workerId} after ${ageMs}ms without an active claim`);
+          addEvent(store, runId, "pending_worker_reaped", "run-loop", { worker_id: workerId, age_ms: ageMs, created_by: "run-loop" });
+        },
+      });
+
       const activeWorkers = activeWorkerCount(store, runId);
       const activeLocalWorkers = activeLocalWorkerCount(store, runId, runningWorkerIds);
       const schedulableTargets = schedulableTargetCount(store, runId, targetFilter);
@@ -1017,6 +1091,13 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
       });
       const iterationBudgetExhausted = maxIterations > 0 && iterations >= maxIterations;
       const workersToStart = drainRequested || providerPausedSinceMs != null || iterationBudgetExhausted ? 0 : Math.min(openSlots, schedulableTargets);
+      // Rank 0 — instrumentation: the spawn gate is starving despite open demand (should be
+      // rare once the watchdog reaps pins; a persistent hit means a slot is stuck pre-claim).
+      if (workersToStart === 0 && !drainRequested && providerPausedSinceMs == null && !iterationBudgetExhausted && schedulableTargets > 0 && activeWorkers < maxWorkers) {
+        console.error(
+          `[run-loop] spawn-starved: openSlots=${openSlots} activeWorkers=${activeWorkers} activeLocalWorkers=${activeLocalWorkers} runningWorkers=${runningWorkers.size} pendingLocalWorkers=${Math.max(0, runningWorkers.size - activeLocalWorkers)} schedulableTargets=${schedulableTargets}`,
+        );
+      }
       for (let index = 0; index < workersToStart; index += 1) {
         workerOrdinal += 1;
         workersStarted += 1;
@@ -1157,7 +1238,7 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
       });
       const grace = new Promise<void>((resolveGrace) => setTimeout(resolveGrace, 30_000));
       await Promise.race([Promise.allSettled([...runningWorkers]).then(() => undefined), grace]);
-      for (const proc of runningWorkerProcs) proc.kill(9);
+      for (const { proc } of runningWorkerProcs.values()) proc.kill(9);
       await Promise.allSettled([...runningWorkers]);
     }
     if (runningEpoch) await runningEpoch;
