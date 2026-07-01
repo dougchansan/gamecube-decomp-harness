@@ -19,6 +19,7 @@ import {
 import type { TraceEvent } from "@agent-kernel/protocol";
 import type { PiRunResult } from "@server/core/shared/types";
 import type { PiRunOptions } from "@server/infrastructure/agent-runtime/runtime";
+import { sumAssistantUsage } from "@server/infrastructure/agent-runtime/runtime/pi-agent.js";
 import { applyProcessEnvPatch } from "@server/infrastructure/agent-runtime/runtime/process-env";
 
 import type { ColosseumKernelBridgeConfig } from "./config.js";
@@ -340,6 +341,11 @@ export function createColosseumKernelSpawnAgent(
       await writeOutput(paths.systemPromptPath, parsedAgent.body);
       await writeOutput(paths.userPromptPath, userPrompt);
       await writeOutput(paths.outputPath, result.responseText);
+      // Telemetry (Track B / token capture): the SDK-worker path holds per-message usage on
+      // result.session.messages. Read it BEFORE dispose() releases the session — this is the
+      // ordering correctness constraint. sumAssistantUsage is null-guarded (returns undefined
+      // on shape drift), so this can never throw.
+      const usage = sumAssistantUsage((result.session as { messages?: unknown }).messages);
       result.session.dispose?.();
 
       return {
@@ -354,6 +360,8 @@ export function createColosseumKernelSpawnAgent(
         ...paths,
         rawText: result.responseText,
         dryRun: false,
+        usage,
+        endedAt: new Date().toISOString(),
         failed: result.aborted ? true : undefined,
         error: result.aborted
           ? timeoutSignal.timedOut()

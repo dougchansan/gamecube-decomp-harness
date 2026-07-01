@@ -160,6 +160,55 @@ function fixtureRows(): KernelTraceReadRows {
   };
 }
 
+// Minimal kernel-spawn run options for the SDK-worker (createSpawnAgent) path.
+function usageSpawnRunOptions(tempDir: string, outputDir: string): ColosseumKernelPiRunOptions {
+  return {
+    role: "worker",
+    cwd: tempDir,
+    outputDir,
+    dryRun: false,
+    prompt: {
+      systemPrompt: "worker system prompt",
+      userPrompt: "worker user prompt",
+      systemTemplatePath: "apps/server/src/core/agent-catalog/agents/running/worker/agent.ts",
+      userTemplatePath: "apps/server/src/core/agent-catalog/agents/running/worker/prompt.ts",
+    },
+    kernelSpawnStrategy: "kernel",
+    kernelContext: {
+      appSessionId: "11111111-1111-5111-8111-111111111111",
+      containerId: "colosseum:worker",
+      phase: "worker",
+      workingDir: tempDir,
+      metadata: {
+        sessionId: "run-1",
+        stateDir: join(tempDir, "state"),
+        piAgentDir: join(tempDir, ".pi-agent"),
+      },
+    },
+    kernelRuntime: {
+      db: {},
+      config: {
+        markerConfig: createColosseumKernelBridgeConfig({ workingDir: tempDir }).markerConfig,
+        piSessionsDir: join(tempDir, ".pi-sessions"),
+      },
+      upsertSpawnContainers: async () => {},
+      traceWriter: {
+        submit: async () => 1,
+        submitAppEvent: async (input) => ({
+          eventId: "event-1",
+          appSessionId: input.appSessionId,
+          userId: "00000000-0000-0000-0000-000000000001",
+          type: input.type as any,
+          source: TraceSource.APP,
+          traceLevel: input.traceLevel ?? TraceLevel.PROCESSING,
+          eventData: input.eventData,
+          timestamp: "2026-06-24T18:00:00.000Z",
+        }),
+      },
+    },
+  };
+}
+
 describe("kernel registration", () => {
   test("builds and upserts the Colosseum kernel registration payload", async () => {
     const payloads: NewKernelRegistration[] = [];
@@ -1465,6 +1514,56 @@ describe("kernel Pi runtime bridge", () => {
     });
     expect(traceInputs).toHaveLength(2);
     expect(submittedTraceEvents).toHaveLength(0);
+  });
+
+  test("captures summed per-message token usage and cost from the kernel spawn session", async () => {
+    const tempDir = await mkdtemp(join(tmpdir(), "colosseum-kernel-usage-"));
+    const runner = createColosseumKernelPiAgentRunner({
+      runPiAgent: async () => {
+        throw new Error("direct Pi runner should not be called for kernel strategy");
+      },
+      createKernelSpawnAgent: () => async () => ({
+        responseText: "{\"checkpoint_note\":\"progress\"}",
+        aborted: false,
+        session: {
+          sessionId: "22222222-2222-5222-8222-222222222222",
+          messages: [
+            { role: "user", content: [] },
+            { role: "assistant", stopReason: "toolUse", usage: { input: 100, output: 20, cacheRead: 5, cacheWrite: 1, cost: { total: 0.5 } } },
+            { role: "toolResult" },
+            { role: "assistant", stopReason: "stop", usage: { input: 200, output: 30, cost: { total: 1.25 } } },
+            { role: "toolResult" }, // final message carries no usage — the old messages.at(-1) read returned 0
+          ],
+        } as any,
+      }),
+    });
+
+    const result = await runner(usageSpawnRunOptions(tempDir, join(tempDir, "out")));
+
+    expect(result.usage).toMatchObject({ inputTokens: 300, outputTokens: 50, cacheReadTokens: 5, cacheWriteTokens: 1, costUsd: 1.75 });
+    expect(typeof result.endedAt).toBe("string");
+  });
+
+  test("omits costUsd when no message carries a cost (flat-rate / local providers)", async () => {
+    const tempDir = await mkdtemp(join(tmpdir(), "colosseum-kernel-usage-nocost-"));
+    const runner = createColosseumKernelPiAgentRunner({
+      runPiAgent: async () => {
+        throw new Error("direct Pi runner should not be called for kernel strategy");
+      },
+      createKernelSpawnAgent: () => async () => ({
+        responseText: "{}",
+        aborted: false,
+        session: {
+          sessionId: "22222222-2222-5222-8222-222222222222",
+          messages: [{ role: "assistant", stopReason: "stop", usage: { input: 42, output: 7 } }],
+        } as any,
+      }),
+    });
+
+    const result = await runner(usageSpawnRunOptions(tempDir, join(tempDir, "out")));
+
+    expect(result.usage).toMatchObject({ inputTokens: 42, outputTokens: 7 });
+    expect(result.usage?.costUsd).toBeUndefined();
   });
 
   test("passes converted prompt-bundle context resolver into kernel createSpawnAgent", async () => {

@@ -147,22 +147,33 @@ export function sumAssistantUsage(messages: unknown): PiRunResult["usage"] | und
   let output = 0;
   let cacheRead = 0;
   let cacheWrite = 0;
+  let cost = 0;
   let sawUsage = false;
+  let sawCost = false;
   for (const message of list) {
     if (message?.role !== "assistant") continue;
     if (message.stopReason === "aborted" || message.stopReason === "error") continue;
-    const usage = message.usage as { input?: unknown; output?: unknown; cacheRead?: unknown; cacheWrite?: unknown } | undefined;
+    const usage = message.usage as
+      | { input?: unknown; output?: unknown; cacheRead?: unknown; cacheWrite?: unknown; cost?: { total?: unknown } }
+      | undefined;
     if (!usage) continue;
     const i = finiteNumber(usage.input);
     const o = finiteNumber(usage.output);
     const cr = finiteNumber(usage.cacheRead);
     const cw = finiteNumber(usage.cacheWrite);
+    // Providers that report a per-message dollar cost (e.g. codex) carry it at usage.cost.total.
+    const c = finiteNumber(usage.cost?.total);
     if (i !== undefined) { input += i; sawUsage = true; }
     if (o !== undefined) { output += o; sawUsage = true; }
     if (cr !== undefined) { cacheRead += cr; sawUsage = true; }
     if (cw !== undefined) { cacheWrite += cw; sawUsage = true; }
+    if (c !== undefined) { cost += c; sawCost = true; }
   }
-  return sawUsage ? { inputTokens: input, outputTokens: output, cacheReadTokens: cacheRead, cacheWriteTokens: cacheWrite } : undefined;
+  // Include costUsd ONLY when a cost field was seen (mirrors the sawUsage guard), so paths
+  // that carry no cost leave costUsd undefined exactly as before (claude-code is unaffected).
+  return sawUsage
+    ? { inputTokens: input, outputTokens: output, cacheReadTokens: cacheRead, cacheWriteTokens: cacheWrite, ...(sawCost ? { costUsd: cost } : {}) }
+    : undefined;
 }
 
 type SessionManagerWithCustomEntries = {
