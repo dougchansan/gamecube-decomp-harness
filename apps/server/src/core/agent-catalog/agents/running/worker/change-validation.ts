@@ -535,7 +535,12 @@ export function compareWorkerUnitSnapshots(params: {
   // accepted progress even when the model over-claimed exact. The over-claim
   // is surfaced in reasons and target.exact stays truthful, so the recorded
   // result downgrades to "improved" instead of discarding real score movement.
-  const targetAccepted = targetImproved || targetReachedExact || sourceConverted;
+  // C1: an ABSOLUTE byte-exact target (afterTarget >= EXACT_SCORE) is accepted
+  // regardless of delta — a zero-delta byte-exact (e.g. already exact in the
+  // same-unit snapshot) must not be discarded as "no_official_score_change".
+  // The same-unit REGRESSION guards above (targetRegressed / regressions) still
+  // run first, so a byte-exact that regresses a neighbor continues to fail.
+  const targetAccepted = targetImproved || targetReachedExact || sourceConverted || (targetHasScores && afterTarget >= EXACT_SCORE);
 
   compareRows({ kind: "unit", unit: params.before.unit, beforeRows: params.before.metrics, afterRows: params.after.metrics, regressions, improvements, reasons });
   compareRows({ kind: "function", unit: params.before.unit, beforeRows: params.before.functions, afterRows: params.after.functions, regressions, improvements, reasons });

@@ -495,7 +495,11 @@ export function recordWorkerCheckpoint(store: StateStore, input: WorkerCheckpoin
   const improvedOverStoredBaseline = baseline !== null && newScore !== null && newScore > baseline;
   const improvedOverValidationBaseline = delta === null ? improvedOverStoredBaseline : delta > 0;
   const improvedOverBaseline = improvedOverStoredBaseline && improvedOverValidationBaseline;
-  const selectable = input.hardGatesPassed && improvedOverBaseline;
+  // C2: a byte-exact target is a win even with zero same-unit delta, so accept it
+  // regardless of improvedOverBaseline. input.exactMatch is only ever true for a genuine
+  // runner-measured byte-exact (afterTarget >= EXACT_SCORE; change-validation.ts:580), so
+  // this cannot promote a partial. hardGatesPassed is still required.
+  const selectable = input.hardGatesPassed && (improvedOverBaseline || input.exactMatch);
 
   immediateTransaction(store.db, () => {
     store.db

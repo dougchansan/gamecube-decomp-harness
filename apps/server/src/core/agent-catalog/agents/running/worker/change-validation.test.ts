@@ -181,6 +181,17 @@ describe("applyQaLintToValidation", () => {
     expect(validation.qaLint?.toolError).toBe("python3 crashed");
   });
 
+  test("byte-exact validation with qa warnings still downgrades to failed (Option B NOT applied)", () => {
+    // passedValidation() is byte-exact (target.exact === true). Warnings must still fail the
+    // gate — loosening this so a byte-exact ships past QA warnings is Option B, which is out
+    // of scope. exactness stays truthful; only the verdict fails.
+    const warn = finding({ severity: "warning" });
+    const qaLint = qaLintFromInvocation(invocation({ exitCode: 2, result: scanResult([warn], "warned") }), "/tmp/scan.patch");
+    const validation = applyQaLintToValidation(passedValidation(), qaLint);
+    expect(validation.target?.exact).toBe(true);
+    expect(validation.status).toBe("failed");
+  });
+
   test("null qaLint attaches null and changes nothing", () => {
     const validation = applyQaLintToValidation(passedValidation(), null);
     expect(validation.status).toBe("passed");
@@ -311,6 +322,64 @@ describe("compareWorkerUnitSnapshots source progress", () => {
     expect(validation.status).toBe("passed");
     expect(validation.sourceProgress).toEqual({ before: "ASM", after: "REAL_C", converted: true });
     expect(validation.reasons.some((reason) => reason.includes("converted active source"))).toBe(true);
+  });
+});
+
+describe("compareWorkerUnitSnapshots byte-exact acceptance (C1)", () => {
+  test("accepts an absolute byte-exact target even with zero same-unit delta", () => {
+    // A byte-exact target (targetScore >= EXACT_SCORE) with no positive delta previously
+    // fell through to status "no_official_score_change" and was discarded. C1 accepts it.
+    const before = {
+      schemaVersion: 1 as const,
+      capturedAt: "2026-06-30T00:00:00.000Z",
+      unit: "main/auto_01_800055E0_text",
+      symbol: "fn_801DB088",
+      sourcePath: "src/game/foo.c",
+      objectTarget: "build/GC6E01/src/game/foo.o",
+      metrics: [{ name: "matched_code_percent", score: 100, size: 64 }],
+      functions: [{ name: "fn_801DB088", score: 100, size: 64 }],
+      sections: [],
+      targetScore: 100,
+    };
+    const after = { ...before, capturedAt: "2026-06-30T00:01:00.000Z" };
+
+    const validation = compareWorkerUnitSnapshots({ before, after, claimedExact: true });
+
+    expect(validation.status).toBe("passed");
+    expect(validation.target?.exact).toBe(true);
+  });
+
+  test("a byte-exact target that regresses a neighbor still fails (regression guard preserved)", () => {
+    // C1 must not paper over a same-unit regression: the target is byte-exact but a sibling
+    // function regressed, so the runner still rejects it.
+    const before = {
+      schemaVersion: 1 as const,
+      capturedAt: "2026-06-30T00:00:00.000Z",
+      unit: "main/auto_01_800055E0_text",
+      symbol: "fn_801DB088",
+      sourcePath: "src/game/foo.c",
+      objectTarget: "build/GC6E01/src/game/foo.o",
+      metrics: [{ name: "matched_code_percent", score: 100, size: 128 }],
+      functions: [
+        { name: "fn_801DB088", score: 90, size: 64 },
+        { name: "fn_neighbor", score: 100, size: 64 },
+      ],
+      sections: [],
+      targetScore: 90,
+    };
+    const after = {
+      ...before,
+      capturedAt: "2026-06-30T00:01:00.000Z",
+      functions: [
+        { name: "fn_801DB088", score: 100, size: 64 }, // target reaches exact
+        { name: "fn_neighbor", score: 80, size: 64 }, // ...but a neighbor regressed
+      ],
+      targetScore: 100,
+    };
+
+    const validation = compareWorkerUnitSnapshots({ before, after, claimedExact: true });
+
+    expect(validation.status).toBe("same_unit_regression");
   });
 });
 

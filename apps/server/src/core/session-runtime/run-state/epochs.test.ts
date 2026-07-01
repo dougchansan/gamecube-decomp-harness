@@ -460,6 +460,70 @@ describe("scheduler epoch and worker state lifecycle", () => {
     }
   });
 
+  test("byte-exact checkpoint with qa clean is selectable even with zero same-unit delta (C2)", () => {
+    const { store } = tempState();
+    try {
+      const { run } = setupEpoch(store, [candidate(1, "src/a.c")]);
+      const claim = claimNextEpochTarget({ store, sessionId: run.id, workerId: "worker-1", baseRev: "base" });
+      expect(claim).not.toBeNull();
+      // Byte-exact (exactMatch), qa clean (hardGatesPassed) and ZERO same-unit delta
+      // (old === new). Pre-fix `selectable = hardGatesPassed && improvedOverBaseline` returned
+      // false because delta === 0. C2 accepts it via exactMatch.
+      const exactCleanNoDelta = recordWorkerCheckpoint(store, {
+        workerStateId: claim?.workerStateId ?? "",
+        sessionId: run.id,
+        epochId: claim?.epochId ?? "",
+        epochTargetId: claim?.epochTargetId ?? "",
+        targetClaimId: claim?.claimId ?? "",
+        attemptIndex: 0,
+        oldScore: 100,
+        newScore: 100,
+        exactMatch: true,
+        hardGatesPassed: true,
+        buildStatus: "compiled",
+        qaStatus: "clean",
+        objdiffStatus: "available",
+        validationStatus: "passed",
+      });
+      expect(exactCleanNoDelta.selectable).toBe(true);
+      expect(bestCheckpointForWorkerState(store, claim?.workerStateId ?? "")?.id).toBe(exactCleanNoDelta.id);
+    } finally {
+      store.db.close();
+    }
+  });
+
+  test("byte-exact checkpoint whose qa gate failed (warnings) stays NON-selectable (Option B not applied)", () => {
+    const { store } = tempState();
+    try {
+      const { run } = setupEpoch(store, [candidate(1, "src/a.c")]);
+      const claim = claimNextEpochTarget({ store, sessionId: run.id, workerId: "worker-1", baseRev: "base" });
+      expect(claim).not.toBeNull();
+      // qa='warnings' downgrades the runner status passed->failed (applyQaLintToValidation), so
+      // hardGatesPassed is false. C2 must NOT rescue a byte-exact that failed the QA gate;
+      // loosening that gate is Option B and is out of scope.
+      const exactGateFailed = recordWorkerCheckpoint(store, {
+        workerStateId: claim?.workerStateId ?? "",
+        sessionId: run.id,
+        epochId: claim?.epochId ?? "",
+        epochTargetId: claim?.epochTargetId ?? "",
+        targetClaimId: claim?.claimId ?? "",
+        attemptIndex: 0,
+        oldScore: 100,
+        newScore: 100,
+        exactMatch: true,
+        hardGatesPassed: false,
+        buildStatus: "compiled",
+        qaStatus: "warnings",
+        objdiffStatus: "available",
+        validationStatus: "failed",
+      });
+      expect(exactGateFailed.selectable).toBe(false);
+      expect(bestCheckpointForWorkerState(store, claim?.workerStateId ?? "")).toBeNull();
+    } finally {
+      store.db.close();
+    }
+  });
+
   test("timeout keeps baseline when no checkpoint improves over baseline", () => {
     const { store } = tempState();
     try {
