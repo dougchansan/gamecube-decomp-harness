@@ -511,11 +511,24 @@ function workerStatesForRun(stateDir: string, runId: string, limit = 100): JsonO
             latest.artifact_path AS latest_artifact_path,
             latest.patch_path AS latest_patch_path,
             latest.failure_reasons_json AS latest_failure_reasons_json,
-            latest.metadata_json AS latest_metadata_json
+            latest.metadata_json AS latest_metadata_json,
+            integration.id AS integration_id,
+            integration.status AS integration_status,
+            integration.disposition AS integration_disposition,
+            integration.failure_reasons_json AS integration_failure_reasons_json
           FROM worker_state
           LEFT JOIN epochs ON epochs.id = worker_state.epoch_id
           LEFT JOIN epoch_targets ON epoch_targets.id = worker_state.epoch_target_id
           LEFT JOIN worker_checkpoints AS best ON best.id = worker_state.best_checkpoint_id
+          LEFT JOIN worker_output_integrations AS integration ON integration.id = (
+            SELECT id
+            FROM worker_output_integrations
+            WHERE worker_output_integrations.worker_state_id = worker_state.id
+            ORDER BY
+              CASE status WHEN 'applied' THEN 0 WHEN 'applying' THEN 1 WHEN 'pending' THEN 2 ELSE 3 END,
+              created_at DESC
+            LIMIT 1
+          )
           LEFT JOIN worker_checkpoints AS latest ON latest.id = (
             SELECT id
             FROM worker_checkpoints
@@ -601,6 +614,12 @@ function workerStatesForRun(stateDir: string, runId: string, limit = 100): JsonO
         epochTargetStatus: row.epoch_target_status,
         selectedCheckpoint: bestCheckpoint,
         latestCheckpoint,
+        integration: {
+          id: stringValue(row.integration_id),
+          status: stringValue(row.integration_status),
+          disposition: stringValue(row.integration_disposition),
+          failureReasons: stringArrayValue(row.integration_failure_reasons_json),
+        },
         summaryPath: workerStateSummaryPath(row, summary),
       };
     });
@@ -908,12 +927,17 @@ function workerStateOutcomeCounts(workerStates: JsonObject[]): JsonObject {
 function improvementRowsFromWorkerStates(workerStates: JsonObject[]): JsonObject[] {
   const rows: JsonObject[] = [];
   for (const workerState of workerStates) {
+    const integration = asObject(workerState.integration);
+    const integrationStatus = stringValue(integration.status);
+    if (integrationStatus && integrationStatus !== "applied" && integrationStatus !== "pending" && integrationStatus !== "applying") continue;
     const target = asObject(workerState.target);
     const base = {
       workerStateId: workerState.id,
       workerCheckpointId: workerState.workerCheckpointId,
       lifecycleStatus: workerState.lifecycleStatus,
       validationStatus: workerState.validationStatus,
+      integrationStatus,
+      integrationDisposition: stringValue(integration.disposition),
       createdAt: workerState.createdAt,
       workerId: workerState.workerId,
       symbol: stringValue(target.symbol),

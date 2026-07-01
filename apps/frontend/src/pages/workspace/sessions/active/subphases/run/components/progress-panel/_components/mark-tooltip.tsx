@@ -1,4 +1,4 @@
-import { delta, pct, whole } from "@/lib/format";
+import { pct, whole } from "@/lib/format";
 import { strictNumber, tapeClass } from "../_lib/numbers";
 import type { ChartMark } from "../_lib/types";
 
@@ -26,11 +26,17 @@ export function MarkTooltip({ mark }: { mark: ChartMark }) {
         <span className="text-[10px] text-dim">{mark.when}</span>
       </div>
       <div className="mt-0.5 text-sm">
-        <strong className="text-fg">{pct(mark.matched)}</strong>
-        {Number.isFinite(mark.diff) ? <span className={`ml-1.5 text-xs ${tapeClass(mark.diff, 0.00001)}`}>{delta(mark.diff)}</span> : null}
-        <span className="ml-1.5 text-[10px] text-dim">matched code</span>
+        <strong className="text-fg">{mark.valueLabel}</strong>
+        {Number.isFinite(mark.diff) ? <span className={`ml-1.5 text-xs ${tapeClass(mark.diff, 0.00001)}`}>{mark.diffLabel}</span> : null}
+        <span className="ml-1.5 text-[10px] text-dim">{mark.metricLabel}</span>
       </div>
       <div className="mt-1.5 grid gap-0.5 border-t border-line pt-1.5 text-[11px]">
+        {mark.detailRows.map((row) => (
+          <div className="flex items-baseline justify-between gap-2" key={`${row.label}-${row.value}`}>
+            <span className="text-dim">{row.label}</span>
+            <span className={row.tone === "up" ? "text-up" : row.tone === "down" ? "text-down" : "text-soft"}>{row.value}</span>
+          </div>
+        ))}
         {measureRowSpecs.map((spec) => {
           const value = strictNumber(mark.measures[spec.key]);
           if (!Number.isFinite(value)) return null;

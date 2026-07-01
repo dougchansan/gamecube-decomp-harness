@@ -1,8 +1,8 @@
 import { Fragment, useState } from "react";
-import { pct, type Dashboard } from "@/lib/format";
+import type { Dashboard } from "@/lib/format";
 import { MarkTooltip } from "./mark-tooltip";
 import { chartModel } from "../_lib/chart-model";
-import type { ChartMark } from "../_lib/types";
+import type { ChartMark, ChartMode, ChartRange } from "../_lib/types";
 
 function markLabelTransform(mark: ChartMark): string {
   if (mark.x < 8) return "translateX(0)";
@@ -10,8 +10,8 @@ function markLabelTransform(mark: ChartMark): string {
   return "translateX(-50%)";
 }
 
-export function TimelineChart({ dashboard }: { dashboard: Dashboard | null }) {
-  const model = chartModel(dashboard);
+export function TimelineChart({ dashboard, mode, range }: { dashboard: Dashboard | null; mode: ChartMode; range: ChartRange }) {
+  const model = chartModel(dashboard, { mode, range });
   const [hovered, setHovered] = useState<number | null>(null);
   return (
     <div className="px-2.5 py-2.5">
@@ -21,8 +21,12 @@ export function TimelineChart({ dashboard }: { dashboard: Dashboard | null }) {
         ))}
         {model.hasLine ? (
           <svg className="absolute inset-0 h-full w-full" preserveAspectRatio="none" viewBox="0 0 100 100">
-            <polygon fill="var(--color-up)" fillOpacity="0.08" points={model.areaPoints} />
-            <polyline fill="none" points={model.linePoints} stroke="var(--color-up)" strokeOpacity="0.9" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
+            {model.areaSegments.map((points, index) => (
+              <polygon fill="var(--color-up)" fillOpacity="0.08" key={`area-${index}`} points={points} />
+            ))}
+            {model.lineSegments.map((points, index) => (
+              <polyline fill="none" key={`line-${index}`} points={points} stroke="var(--color-up)" strokeOpacity="0.9" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
+            ))}
           </svg>
         ) : null}
         {model.marks.map((mark, index) => (
@@ -46,7 +50,7 @@ export function TimelineChart({ dashboard }: { dashboard: Dashboard | null }) {
               className={`pointer-events-none absolute whitespace-nowrap text-[10px] ${hovered === index ? "text-fg" : "text-soft"}`}
               style={{ left: `${mark.x}%`, top: `calc(${mark.y}% - 22px)`, transform: markLabelTransform(mark) }}
             >
-              {pct(mark.matched)}
+              {mark.valueLabel}
             </span>
           </Fragment>
         ))}
