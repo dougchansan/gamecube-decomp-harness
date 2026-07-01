@@ -260,6 +260,15 @@ export function reapStuckPendingWorkers(params: {
   return reaped;
 }
 
+// Rank 2 — board-throttle gate. ensureSchedulerEpochFromBoard runs loadKnowledgeBoardSnapshot
+// x2 + a full-window priority refresh, which at ~5s/tick stalls the single JS thread and
+// starves spawn/reap. Throttle it to at most once per nextRefreshMs — BUT always run on the
+// first iteration (iterationsCompleted === 0) so the first epoch admits promptly and the pool
+// starts.
+export function shouldRefreshSchedulerBoard(params: { iterationsCompleted: number; nowMs: number; nextRefreshMs: number }): boolean {
+  return params.iterationsCompleted === 0 || params.nowMs >= params.nextRefreshMs;
+}
+
 function nonNegativeInt(value: number): number {
   if (!Number.isFinite(value)) return 0;
   return Math.max(0, Math.floor(value));
@@ -674,9 +683,14 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
     const epochPauseThreshold = nonNegativeInt(numberArg(args, "--epoch-regression-pause-threshold", 12));
     const epochRequeueLimit = nonNegativeInt(numberArg(args, "--epoch-regression-requeue-limit", 32));
     const epochRetryMs = nonNegativeInt(numberArg(args, "--epoch-retry-ms", 10 * 60_000));
+    // Rank 2: minimum spacing between the expensive per-iteration board refresh (see
+    // shouldRefreshSchedulerBoard). Default 15s (vs the ~5s tick) throttles the event-loop
+    // stall while keeping admission/priority fresh; the first iteration always runs.
+    const boardRefreshMs = nonNegativeInt(numberArg(args, "--board-refresh-ms", 15_000));
     const fullKgMaintenanceMode = stringArg(args, "--full-kg-maintenance-mode", globals.project?.dashboard.fullKgMaintenanceMode ?? "full").trim().toLowerCase();
     let runningEpoch: Promise<void> | null = null;
     let nextEpochAllowedMs = 0;
+    let nextPriorityRefreshMs = 0;
     let epochCycles = 0;
     let epochPaused = false;
     let lastEpoch: EpochCycleResult | undefined;
@@ -989,7 +1003,13 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
       }
 
       if (!drainRequested && epochCycleEnabled) {
-        if (!runningEpoch && nowMs >= nextEpochAllowedMs && !epochPaused) {
+        if (
+          !runningEpoch &&
+          nowMs >= nextEpochAllowedMs &&
+          !epochPaused &&
+          shouldRefreshSchedulerBoard({ iterationsCompleted: iterations, nowMs, nextRefreshMs: nextPriorityRefreshMs })
+        ) {
+          nextPriorityRefreshMs = Date.now() + boardRefreshMs;
           const epochResult = ensureSchedulerEpochFromBoard({
             config: schedulerEpochConfig,
             globals,

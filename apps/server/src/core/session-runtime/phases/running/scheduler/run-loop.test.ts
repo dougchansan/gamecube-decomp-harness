@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { evaluateFastKnowledgeMaintenanceDecision, PENDING_CLAIM_TIMEOUT_MS, reapStuckPendingWorkers, workerOpenSlots } from "./run-loop.js";
+import { evaluateFastKnowledgeMaintenanceDecision, PENDING_CLAIM_TIMEOUT_MS, reapStuckPendingWorkers, shouldRefreshSchedulerBoard, workerOpenSlots } from "./run-loop.js";
 
 type WorkerProcRegistry = Map<string, { proc: { kill: (signal?: number) => void; exited: Promise<number> }; spawnedAtMs: number }>;
 
@@ -128,5 +128,19 @@ describe("workerOpenSlots retains pending workers in the cap (no over-spawn)", (
   test("pending (spawned-but-unclaimed) workers still reduce open slots", () => {
     // 4 max, 1 active claim, 3 spawned promises => 2 pending => 4 - 1 - 2 = 1 open slot.
     expect(workerOpenSlots({ maxWorkers: 4, activeWorkers: 1, runningWorkers: 3, activeLocalWorkers: 1 })).toBe(1);
+  });
+});
+
+describe("shouldRefreshSchedulerBoard (board-throttle)", () => {
+  test("always runs on the first iteration so the first epoch admits (even if the timer is in the future)", () => {
+    expect(shouldRefreshSchedulerBoard({ iterationsCompleted: 0, nowMs: 1_000, nextRefreshMs: 999_999 })).toBe(true);
+  });
+
+  test("after the first iteration, is throttled until the refresh interval elapses", () => {
+    expect(shouldRefreshSchedulerBoard({ iterationsCompleted: 5, nowMs: 1_000, nextRefreshMs: 16_000 })).toBe(false);
+  });
+
+  test("after the first iteration, runs once the refresh interval has elapsed", () => {
+    expect(shouldRefreshSchedulerBoard({ iterationsCompleted: 5, nowMs: 16_000, nextRefreshMs: 16_000 })).toBe(true);
   });
 });
