@@ -85,6 +85,12 @@ export interface Dashboard {
   /** Closed worker states since the last epoch checkpoint vs the checkpoint interval. */
   checkpointProgress?: JsonObject | null;
   prs?: JsonObject | null;
+  /** Telemetry (Track B): per-model leaderboard rollup. */
+  modelBenchmark?: JsonObject | null;
+  /** Telemetry (Track B): per-agent-invocation token/cost sessions. */
+  piSessions?: JsonObject[];
+  /** Telemetry (Track B): dense match-over-time snapshots. */
+  reportSnapshots?: JsonObject[];
 }
 
 export interface RunDetails {
@@ -97,6 +103,10 @@ export interface RunDetails {
   workerStates?: JsonObject[];
   events?: JsonObject[];
   sessions?: JsonObject[];
+  /** Telemetry (Track B): per-model leaderboard rollup. */
+  modelBenchmark?: JsonObject | null;
+  /** Telemetry (Track B): dense match-over-time snapshots. */
+  reportSnapshots?: JsonObject[];
   directorCycles?: JsonObject[];
   targetClaims?: JsonObject[];
   epochTargets?: JsonObject[];

@@ -71,6 +71,14 @@ function numberValue(value: unknown, fallback = 0): number {
   return fallback;
 }
 
+// Preserves SQL NULL as JS null (rather than coercing to 0) so telemetry
+// columns that were never populated render as "n/a" instead of a fake zero.
+function numberOrNull(value: unknown): number | null {
+  if (value === null || value === undefined) return null;
+  const parsed = numberValue(value, NaN);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
 function percentLike(value: unknown): boolean {
   const parsed = numberValue(value, NaN);
   return Number.isFinite(parsed) && parsed >= 0 && parsed <= 100;
@@ -482,6 +490,11 @@ function workerStatesForRun(stateDir: string, runId: string, limit = 100): JsonO
             epoch_targets.size,
             epoch_targets.baseline_score AS fuzzy,
             epoch_targets.status AS epoch_target_status,
+            epoch_targets.cracked_by_provider AS cracked_by_provider,
+            epoch_targets.cracked_by_model AS cracked_by_model,
+            epoch_targets.cracked_at_escalation AS cracked_at_escalation,
+            epoch_targets.tokens_to_crack AS tokens_to_crack,
+            epoch_targets.time_to_crack_ms AS time_to_crack_ms,
             best.id AS best_checkpoint_id,
             best.attempt_index AS best_attempt_index,
             best.validation_time AS best_validation_time,
@@ -591,6 +604,12 @@ function workerStatesForRun(stateDir: string, runId: string, limit = 100): JsonO
           sourcePath: stringValue(target.source_path),
           size: numberValue(target.size),
           fuzzy: numberValue(target.fuzzy, numberValue(target.fuzzy_match_percent)),
+          // Telemetry (Track B): "who cracked it" benchmark keys (populated by Track A).
+          crackedByProvider: stringValue(row.cracked_by_provider) || null,
+          crackedByModel: stringValue(row.cracked_by_model) || null,
+          crackedAtEscalation: numberOrNull(row.cracked_at_escalation),
+          tokensToCrack: numberOrNull(row.tokens_to_crack),
+          timeToCrackMs: numberOrNull(row.time_to_crack_ms),
         },
         writeSet: [...new Set(writeSet)],
         attempts: attempts.map((attempt) => ({
@@ -1124,7 +1143,8 @@ function piSessionsForRun(stateDir: string, runId: string): JsonObject[] {
       store.db
         .query(
           `
-            SELECT id, target_claim_id, role, session_id, session_file, provider, model, thinking_level, status, output_path, created_at
+            SELECT id, target_claim_id, role, session_id, session_file, provider, model, thinking_level, status, output_path, created_at,
+                   input_tokens, output_tokens, cache_read_tokens, cache_write_tokens, cost_usd, attempt_index, escalation_level, ended_at
             FROM pi_sessions
             WHERE run_id = ?
             ORDER BY created_at DESC
@@ -1143,6 +1163,130 @@ function piSessionsForRun(stateDir: string, runId: string): JsonObject[] {
       status: row.status,
       outputPath: row.output_path,
       createdAt: row.created_at,
+      // Telemetry (Track B): per-invocation token/cost + rung bookkeeping.
+      inputTokens: numberOrNull(row.input_tokens),
+      outputTokens: numberOrNull(row.output_tokens),
+      cacheReadTokens: numberOrNull(row.cache_read_tokens),
+      cacheWriteTokens: numberOrNull(row.cache_write_tokens),
+      costUsd: numberOrNull(row.cost_usd),
+      attemptIndex: numberOrNull(row.attempt_index),
+      escalationLevel: numberOrNull(row.escalation_level),
+      endedAt: row.ended_at,
+    }));
+  } finally {
+    store.db.close();
+  }
+}
+
+function median(values: number[]): number | null {
+  const sorted = values.filter((value) => Number.isFinite(value)).sort((left, right) => left - right);
+  if (sorted.length === 0) return null;
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
+}
+
+// Telemetry (Track B): per-model leaderboard. Attempts/exacts are de-duplicated
+// by target_claim_id so a target with multiple pi_sessions on one claim is not
+// double-counted (mirrors the fan-out guard on the worker-state view); token/cost
+// totals sum over every session. Medians of tokens-to-crack / time-to-crack are
+// computed in JS from epoch_targets (SQLite has no MEDIAN); they populate once
+// Track A writes the cracked-by denormalization.
+function modelBenchmark(stateDir: string, runId: string): JsonObject {
+  const store = openState(stateDir);
+  try {
+    const leaderboardRows = store.db
+      .query(
+        `
+          SELECT
+            ps.provider AS provider,
+            ps.model AS model,
+            ps.thinking_level AS thinking_level,
+            COUNT(DISTINCT ps.target_claim_id) AS attempts,
+            COUNT(DISTINCT CASE WHEN ws.exact = 1 THEN ps.target_claim_id END) AS exacts,
+            SUM(COALESCE(ps.input_tokens, 0) + COALESCE(ps.output_tokens, 0)) AS total_tokens,
+            SUM(ps.cost_usd) AS total_cost_usd
+          FROM pi_sessions ps
+          JOIN worker_state ws ON ws.target_claim_id = ps.target_claim_id
+          WHERE ps.run_id = ?
+          GROUP BY ps.provider, ps.model, ps.thinking_level
+          ORDER BY exacts DESC, attempts DESC
+        `,
+      )
+      .all(runId) as JsonObject[];
+
+    const crackRows = store.db
+      .query(
+        `
+          SELECT cracked_by_provider AS provider, cracked_by_model AS model,
+                 tokens_to_crack AS tokens_to_crack, time_to_crack_ms AS time_to_crack_ms
+          FROM epoch_targets
+          WHERE session_id = ? AND cracked_by_model IS NOT NULL
+        `,
+      )
+      .all(runId) as JsonObject[];
+
+    const tokensByModel = new Map<string, number[]>();
+    const timeByModel = new Map<string, number[]>();
+    for (const row of crackRows) {
+      const key = `${stringValue(row.provider)}|${stringValue(row.model)}`;
+      const tokens = numberOrNull(row.tokens_to_crack);
+      const time = numberOrNull(row.time_to_crack_ms);
+      if (tokens !== null) (tokensByModel.get(key) ?? tokensByModel.set(key, []).get(key)!).push(tokens);
+      if (time !== null) (timeByModel.get(key) ?? timeByModel.set(key, []).get(key)!).push(time);
+    }
+
+    const leaderboard = leaderboardRows.map((row) => {
+      const attempts = numberValue(row.attempts);
+      const exacts = numberValue(row.exacts);
+      const key = `${stringValue(row.provider)}|${stringValue(row.model)}`;
+      return {
+        provider: stringValue(row.provider) || null,
+        model: stringValue(row.model) || null,
+        thinkingLevel: stringValue(row.thinking_level) || null,
+        attempts,
+        exacts,
+        successRate: attempts > 0 ? exacts / attempts : 0,
+        totalTokens: numberOrNull(row.total_tokens),
+        totalCostUsd: numberOrNull(row.total_cost_usd),
+        medianTokensToCrack: median(tokensByModel.get(key) ?? []),
+        medianTimeToCrackMs: median(timeByModel.get(key) ?? []),
+      };
+    });
+
+    return { leaderboard };
+  } finally {
+    store.db.close();
+  }
+}
+
+// Telemetry (Track B): dense match-over-time series for the progress panel.
+function reportSnapshotsForRun(stateDir: string, runId: string): JsonObject[] {
+  const store = openState(stateDir);
+  try {
+    return (
+      store.db
+        .query(
+          `
+            SELECT id, at, source, fuzzy_match_percent, matched_code_percent, complete_code_percent,
+                   matched_data_percent, matched_functions_percent, complete_units, total_units, report_path
+            FROM report_snapshots
+            WHERE run_id = ?
+            ORDER BY at ASC
+          `,
+        )
+        .all(runId) as JsonObject[]
+    ).map((row) => ({
+      id: row.id,
+      at: row.at,
+      source: row.source,
+      fuzzyMatchPercent: numberOrNull(row.fuzzy_match_percent),
+      matchedCodePercent: numberOrNull(row.matched_code_percent),
+      completeCodePercent: numberOrNull(row.complete_code_percent),
+      matchedDataPercent: numberOrNull(row.matched_data_percent),
+      matchedFunctionsPercent: numberOrNull(row.matched_functions_percent),
+      completeUnits: numberOrNull(row.complete_units),
+      totalUnits: numberOrNull(row.total_units),
+      reportPath: row.report_path,
     }));
   } finally {
     store.db.close();
@@ -1367,12 +1511,18 @@ function runTimeline(params: {
     });
   }
   for (const session of params.sessions) {
+    const inputTokens = numberOrNull(session.inputTokens);
+    const outputTokens = numberOrNull(session.outputTokens);
+    const tokens = inputTokens === null && outputTokens === null ? null : (inputTokens ?? 0) + (outputTokens ?? 0);
     pushTimeline(timeline, {
       kind: "pi_session",
       at: session.createdAt,
       title: `${stringValue(session.role)} session`,
       detail: `${stringValue(session.status)} / ${stringValue(session.model)}`,
       id: session.id,
+      // Telemetry (Track B): per-session token + rung badge for the timeline.
+      tokens,
+      escalationLevel: numberOrNull(session.escalationLevel),
     });
   }
   for (const cycle of params.directorCycles) {
@@ -1514,6 +1664,8 @@ function runDetails(stateDir: string, explicitRunId = "", project: ResolvedProje
   const workerStates = workerStatesForRun(stateDir, runId, 0);
   const events = eventsForRun(stateDir, runId, 0);
   const sessions = piSessionsForRun(stateDir, runId);
+  const benchmark = modelBenchmark(stateDir, runId);
+  const reportSnapshots = reportSnapshotsForRun(stateDir, runId);
   const directorCycles = directorCyclesForRun(stateDir, runId);
   const targetClaims = targetClaimsForRun(stateDir, runId);
   const epochTargets = epochTargetsForRun(stateDir, runId);
@@ -1554,6 +1706,8 @@ function runDetails(stateDir: string, explicitRunId = "", project: ResolvedProje
     workerStates,
     events,
     sessions,
+    modelBenchmark: benchmark,
+    reportSnapshots,
     directorCycles,
     targetClaims,
     epochTargets,
@@ -1728,6 +1882,11 @@ async function runDashboard(paths: DashboardProjectContext): Promise<JsonObject>
     epochTargets,
     workerStates,
     progressWorkerStates,
+    // Telemetry (Track B): per-model leaderboard, token/cost sessions, and the
+    // dense match-over-time series feeding the Model Benchmark panel.
+    modelBenchmark: runId ? modelBenchmark(stateDir, runId) : { leaderboard: [] },
+    piSessions: runId ? piSessionsForRun(stateDir, runId) : [],
+    reportSnapshots: runId ? reportSnapshotsForRun(stateDir, runId) : [],
     touchedFiles: touchedFilesFromWorkerStates(allWorkerStates),
     events: runId ? eventsForRun(stateDir, runId, 40) : [],
     process: dashboardDeps().processStatus(stateDir, paths.project),

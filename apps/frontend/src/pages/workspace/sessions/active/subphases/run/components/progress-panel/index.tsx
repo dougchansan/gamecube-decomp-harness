@@ -5,6 +5,8 @@ import type { Dashboard } from "@/lib/format";
 import { TimelineChart } from "./_components/timeline-chart";
 import type { ChartMode, ChartRange } from "./_lib/types";
 
+export { ModelBenchmarkPanel } from "./_components/model-benchmark-panel";
+
 function pp(value: number): string {
   if (!Number.isFinite(value)) return "n/a";
   if (Math.abs(value) < 0.0005) return "+0.000 pp";
@@ -74,6 +76,12 @@ export function ProgressPanel({
           </SegmentButton>
           <SegmentButton active={mode === "confirmed-code"} onClick={() => setSelectedMode("confirmed-code")}>
             Confirmed code
+          </SegmentButton>
+          <SegmentButton active={mode === "data"} onClick={() => setSelectedMode("data")}>
+            Data
+          </SegmentButton>
+          <SegmentButton active={mode === "functions"} onClick={() => setSelectedMode("functions")}>
+            Functions
           </SegmentButton>
         </div>
         <div className="flex flex-wrap items-center gap-1" role="tablist">

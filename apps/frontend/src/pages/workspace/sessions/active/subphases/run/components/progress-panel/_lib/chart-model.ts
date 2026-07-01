@@ -56,12 +56,35 @@ function makeScale(values: number[]) {
   return (value: number) => CHART_BASE - ((value - low) / (high - low)) * (CHART_BASE - CHART_TOP);
 }
 
-function confirmedCodePoints(dashboard: Dashboard | null, runId: string, range: ChartRange, nowMs: number): SeriesPoint[] {
+// Confirmed-code / data / functions modes all plot a full-board rebuild
+// measurement; they differ only by which measure key they read. Epoch marks
+// already carry the full `measures` block, so a new mode is just a new key.
+type MeasureMode = Exclude<ChartMode, "worker-gain">;
+
+interface MeasureSpec {
+  key: string;
+  label: string;
+  epochField?: string;
+}
+
+const MEASURE_BY_MODE: Record<MeasureMode, MeasureSpec> = {
+  "confirmed-code": { key: "matched_code_percent", label: "matched code", epochField: "matchedCodePercent" },
+  data: { key: "matched_data_percent", label: "matched data", epochField: "matchedDataPercent" },
+  functions: { key: "matched_functions_percent", label: "matched functions", epochField: "matchedFunctionsPercent" },
+};
+
+function epochMeasureValue(rawEpoch: Record<string, unknown>, spec: MeasureSpec): number {
+  const promoted = spec.epochField ? strictNumber(rawEpoch[spec.epochField]) : NaN;
+  if (Number.isFinite(promoted)) return promoted;
+  return strictNumber(asObject(rawEpoch.measures)[spec.key]);
+}
+
+function measurePoints(dashboard: Dashboard | null, runId: string, range: ChartRange, nowMs: number, spec: MeasureSpec): SeriesPoint[] {
   const run = asObject(dashboard?.status?.run);
   const initialMeasures = asObject(asObject(dashboard?.initial).measures);
   const currentMeasures = asObject(asObject(dashboard?.current).measures);
-  const initialMatched = strictNumber(initialMeasures.matched_code_percent);
-  const currentMatched = strictNumber(currentMeasures.matched_code_percent);
+  const initialMatched = strictNumber(initialMeasures[spec.key]);
+  const currentMatched = strictNumber(currentMeasures[spec.key]);
   const runStartMs = timeMs(run.createdAt) || nowMs;
   const includeAllRuns = range !== "run";
   const points: SeriesPoint[] = [];
@@ -80,7 +103,7 @@ function confirmedCodePoints(dashboard: Dashboard | null, runId: string, range: 
   for (const rawEpoch of asArray(dashboard?.epochs).map(asObject)) {
     if (!includeAllRuns && text(rawEpoch.runId) !== runId) continue;
     const atMs = timeMs(rawEpoch.createdAt);
-    const matched = strictNumber(rawEpoch.matchedCodePercent);
+    const matched = epochMeasureValue(rawEpoch, spec);
     if (atMs <= 0 || !Number.isFinite(matched)) continue;
     points.push({
       atMs,
@@ -200,10 +223,11 @@ function areaPointsForSegment(segment: ChartMark[], linePoints: string): string 
 }
 
 /**
- * The run's progress on a clock that runs left to right. Confirmed-code mode
- * plots full-board rebuild measurements. Worker-gain mode plots cumulative
- * accepted worker score movement so tentative progress is visible before the
- * next checkpoint rebuild.
+ * The run's progress on a clock that runs left to right. Confirmed-code / data /
+ * functions modes plot full-board rebuild measurements (differing only by which
+ * measure key they read). Worker-gain mode plots cumulative accepted worker
+ * score movement so tentative progress is visible before the next checkpoint
+ * rebuild.
  */
 export function chartModel(dashboard: Dashboard | null, options: ChartOptions = {}): ChartModel {
   const mode = options.mode ?? "confirmed-code";
@@ -213,14 +237,15 @@ export function chartModel(dashboard: Dashboard | null, options: ChartOptions = 
   const hasRun = Boolean(runId);
   const nowMs = Date.now();
   const runStartMs = timeMs(run.createdAt) || nowMs;
-  const sourcePoints = mode === "worker-gain" ? workerGainPoints(dashboard, nowMs) : confirmedCodePoints(dashboard, runId, range, nowMs);
+  const measureSpec = mode === "worker-gain" ? null : MEASURE_BY_MODE[mode];
+  const sourcePoints = measureSpec ? measurePoints(dashboard, runId, range, nowMs, measureSpec) : workerGainPoints(dashboard, nowMs);
   const startMs = rangeStartMs(range, runStartMs, nowMs, sourcePoints);
   const endMs = Math.max(nowMs, startMs + 60_000);
   const span = endMs - startMs;
   const x = (ms: number) => Math.min(X_END, Math.max(X_START, X_START + ((ms - startMs) / span) * (X_END - X_START)));
   const y = makeScale(sourcePoints.map((point) => point.value));
   const points = visiblePoints(sourcePoints, range, startMs, nowMs);
-  const metricLabel = mode === "worker-gain" ? "worker gain" : "matched code";
+  const metricLabel = measureSpec ? measureSpec.label : "worker gain";
 
   let previousValue = points[0]?.value ?? NaN;
   const marks: ChartMark[] = points.map((point, index) => {

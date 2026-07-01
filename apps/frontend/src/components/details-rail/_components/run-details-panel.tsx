@@ -68,6 +68,20 @@ export function RunDetailsPanel({ loadRunDetails, loadingRunDetails, runDetails 
                   {Number(item.delta || 0) > 0 ? ` / delta ${delta(item.delta)}` : ""}
                   {Number(item.exactMatches || 0) > 0 ? ` / exact ${num(item.exactMatches)}` : ""}
                 </div>
+                {item.tokens != null || item.escalationLevel != null ? (
+                  <div className="mt-1 flex flex-wrap gap-1">
+                    {item.tokens != null ? (
+                      <span className="rounded-none border border-line px-1 py-0.5 text-[10px] tabular-nums text-soft" title="Input + output tokens for this session">
+                        {num(item.tokens)} tok
+                      </span>
+                    ) : null}
+                    {item.escalationLevel != null ? (
+                      <span className="rounded-none border border-line px-1 py-0.5 text-[10px] tabular-nums text-dim" title="Escalation ladder rung">
+                        rung {num(item.escalationLevel)}
+                      </span>
+                    ) : null}
+                  </div>
+                ) : null}
               </article>
             ))}
             {timeline.length === 0 ? <div className="text-dim">No timeline entries</div> : null}

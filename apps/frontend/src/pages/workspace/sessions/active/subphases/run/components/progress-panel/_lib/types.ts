@@ -1,6 +1,6 @@
 import type { JsonObject } from "@/lib/format";
 
-export type ChartMode = "confirmed-code" | "worker-gain";
+export type ChartMode = "confirmed-code" | "worker-gain" | "data" | "functions";
 export type ChartRange = "run" | "6h" | "24h" | "all";
 
 export interface ChartDetailRow {
