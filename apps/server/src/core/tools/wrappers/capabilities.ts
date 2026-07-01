@@ -686,6 +686,59 @@ export const m2cDecompileToolRegistration = knowledgeApiTool({
   },
 });
 
+/** Tool for querying the trained SeedCoder V3 proposer for candidate C. */
+export const seedcoderV3ProposeToolRegistration = knowledgeApiTool({
+  id: "seedcoder_v3_propose",
+  toolId: "seedcoder_v3",
+  scriptName: "propose.py",
+  label: "SeedCoder V3 Propose",
+  purpose: "Ask the trained 3090 SeedCoder V3 service for proposal-only C candidates from target assembly.",
+  description: "Resolve the target function through the DTK report/objdiff artifacts, dump its target assembly, and query the trained SeedCoder V3 /gen service for candidate C without writing source.",
+  guidance: "Use seedcoder_v3_propose as an external hint only. Never paste its output blindly; naturalize the candidate, preserve local style, and validate retained edits with checkdiff/objdiff.",
+  parameters: {
+    type: "object",
+    properties: {
+      function: { type: "string", description: "Function symbol." },
+      n: { type: "number", description: "Number of candidates to request." },
+      temp: { type: "number", description: "Sampling temperature." },
+      max_new: { type: "number", description: "Maximum new tokens requested from the server." },
+      draft: { type: "string", description: "Optional current C draft for repair mode." },
+      diff: { type: "string", description: "Optional target-vs-current diff for repair mode." },
+      server: { type: "string", description: "Optional SeedCoder /gen endpoint override." },
+      timeout_seconds: { type: "number", description: "Maximum runtime in seconds." },
+    },
+    required: ["function"],
+    additionalProperties: false,
+  },
+  args(params, context) {
+    const fn = stringParam(params, "function");
+    if (!fn) return { status: "missing_function" };
+    const rawTemp = Number(params.temp ?? 0.35);
+    const temp = Number.isFinite(rawTemp) ? rawTemp : 0.35;
+    const args = [
+      "--repo-root",
+      context.repoRoot,
+      "--function",
+      fn,
+      "--n",
+      String(boundedNumber(params.n, 2, 1, 6)),
+      "--temp",
+      String(Math.max(0, Math.min(1.5, temp))),
+      "--max-new",
+      String(boundedNumber(params.max_new, 900, 32, 3000)),
+      "--timeout-seconds",
+      String(boundedNumber(params.timeout_seconds, 420, 10, 900)),
+    ];
+    const draft = stringParam(params, "draft");
+    const diff = stringParam(params, "diff");
+    const server = stringParam(params, "server");
+    if (draft) args.push("--draft", draft);
+    if (diff) args.push("--diff", diff);
+    if (server) args.push("--server", server);
+    return args;
+  },
+});
+
 /** Tool for previewing missing include additions. */
 export const includeFixerPreviewToolRegistration = knowledgeApiTool({
   id: "include_fixer_preview",
@@ -784,6 +837,7 @@ export const capabilityToolRegistrations = [
   typeOracleLookupToolRegistration,
   structInferFromAsmToolRegistration,
   m2cDecompileToolRegistration,
+  seedcoderV3ProposeToolRegistration,
   includeFixerPreviewToolRegistration,
   itemStateTablePreviewToolRegistration,
   reviewLintScanToolRegistration,

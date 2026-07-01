@@ -90,6 +90,26 @@
       "invocation_mode": "on_demand"
     },
     {
+      "id": "seedcoder_v3",
+      "category": "research",
+      "path": "research/seedcoder_v3",
+      "process_role": "trained_candidate_proposer",
+      "mutates_source": false,
+      "blocks_on_failure": false,
+      "triggers": [
+        "needs_candidate_source_shape",
+        "small_function_stalled",
+        "asm_to_c_hint_requested"
+      ],
+      "outputs": [
+        "candidate_c",
+        "target_assembly",
+        "source_context"
+      ],
+      "agent_guidance": "Use as an external hint generator only. The trained SeedCoder V3 output must be naturalized and validated through checkdiff/objdiff before any source edit is retained.",
+      "invocation_mode": "on_demand"
+    },
+    {
       "id": "checkdiff",
       "category": "validation",
       "path": "validation/checkdiff",

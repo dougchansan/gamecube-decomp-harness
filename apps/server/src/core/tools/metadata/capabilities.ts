@@ -97,6 +97,11 @@ export const capabilityToolPromptMetadata: Record<string, AgentToolPromptMetadat
     type: "exploration",
     useWhen: "Generate an m2c scaffold as a reading aid only; formatting is best-effort.",
   },
+  seedcoder_v3_propose: {
+    provider: "seedcoder_v3",
+    type: "external_hint",
+    useWhen: "Ask the trained 3090 SeedCoder V3 model for proposal-only C candidates; validate before retaining any edit.",
+  },
   include_fixer_preview: {
     provider: "include_fixer",
     type: "source_review",

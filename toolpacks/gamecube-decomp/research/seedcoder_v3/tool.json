@@ -1,0 +1,41 @@
+{
+  "id": "seedcoder_v3",
+  "title": "SeedCoder V3 candidate proposer",
+  "trust_tier": "external_hint",
+  "description": "Query the trained SeedCoder V3 Colosseum decomp model for candidate C from DTK target assembly.",
+  "operation_mode": "external_model_hint",
+  "runner_status": "on_demand",
+  "status_message": "Queries the trained 3090 SeedCoder V3 /gen service and returns proposal-only C candidates. It never writes source.",
+  "limitations": [
+    "The model is a proposer only; candidates must be reviewed, edited, and validated through the standard DTK/checkdiff/objdiff workflow.",
+    "Requires the trained server to be running, normally at http://100.116.145.17:8780/gen.",
+    "Output may contain invalid, partial, or unsafe C and must not be accepted without local evidence."
+  ],
+  "commands": {
+    "propose": "python3 toolpacks/gamecube-decomp/research/seedcoder_v3/api/propose.py --repo-root <repo_root> --function <symbol> --json"
+  },
+  "capabilities": [
+    "asm_to_c_candidate",
+    "trained_colosseum_hint",
+    "proposal_only"
+  ],
+  "category": "research",
+  "path": "research/seedcoder_v3",
+  "process_role": "trained_candidate_proposer",
+  "usage": {
+    "invocation_mode": "on_demand",
+    "mutates_source": false,
+    "blocks_on_failure": false,
+    "triggers": [
+      "needs_candidate_source_shape",
+      "small_function_stalled",
+      "asm_to_c_hint_requested"
+    ],
+    "outputs": [
+      "candidate_c",
+      "target_assembly",
+      "source_context"
+    ],
+    "agent_guidance": "Use as an external hint generator only. Do not paste output blindly; naturalize it, preserve source style, and validate with checkdiff/objdiff."
+  }
+}

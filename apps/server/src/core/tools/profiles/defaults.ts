@@ -32,6 +32,7 @@ export const defaultWorkerToolProfile = [
   "source_mutation_preview",
   "type_oracle_lookup",
   "m2c_decompile",
+  "seedcoder_v3_propose",
   "review_lint_scan",
 ] as const;
 
