@@ -56,7 +56,7 @@ import {
 import type { PiRunResult } from "@server/core/shared/types";
 import { numberArg, projectMetadata, stringArg, type GlobalArgs } from "@server/core/project-registry/runtime-options.js";
 import { assertSchedulableRun } from "@server/core/session-runtime/phases/running/jobs/shared.js";
-import { currentLadderLevel, ladderExhausted, pickRung, recordCrackTelemetry } from "@server/core/session-runtime/escalation/select-rung.js";
+import { currentLadderLevel, isRateLimitError, ladderExhausted, pickRung, recordCrackTelemetry } from "@server/core/session-runtime/escalation/select-rung.js";
 import type { LadderRung } from "@server/core/session-runtime/escalation/ladder.js";
 
 export interface WorkerCycleResult {
@@ -1834,11 +1834,16 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
     // level is monotonic (A3 bumps it by exactly one, closeWorkerState writes it atomically).
     // TODO(A6): mode "full-matrix"/"hybrid" reuse this re-admit machinery with a different stop
     // condition (re-admit until every rung has an attempt, even on exact); not yet implemented.
+    // A rung whose provider is quota/rate-limited errors on every attempt. That is not a
+    // genuine infra failure (the rung is just unavailable), so a rate-limit "error" is an
+    // escalation trigger too: skip the dead rung and climb. Every OTHER "error" stays
+    // non-escalating so a real infra failure never burns a rung.
+    const rateLimitedRung = lifecycleStatus === "error" && isRateLimitError(summaryText);
     const escalationReAdmit =
       escalationEnabled &&
       ladder != null &&
       ladder.mode === "escalation" &&
-      lifecycleStatus === "timeout" &&
+      (lifecycleStatus === "timeout" || rateLimitedRung) &&
       !ladderExhausted(ladder, escalationLevel);
 
     closeWorkerState(store, {

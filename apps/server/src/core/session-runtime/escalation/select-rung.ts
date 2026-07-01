@@ -20,6 +20,21 @@ export function ladderExhausted(ladder: LadderConfig, escalationLevel: number): 
   return escalationLevel >= ladder.rungs.length - 1;
 }
 
+const RATE_LIMIT_PATTERNS = ["429", "usage limit", "rate limit", "quota", "reached your session usage limit"];
+
+/**
+ * A3 rate-limit skip: a rung whose provider is quota/rate-limited errors on every attempt.
+ * Such an error is not a genuine infra failure — the rung is simply unavailable — so we
+ * treat it as an escalation trigger and skip to the next rung. Matches error_summary text
+ * (case-insensitive) against the known quota/429 markers. All OTHER errors stay
+ * non-escalating so a real infra failure never burns a rung.
+ */
+export function isRateLimitError(summary: string | null | undefined): boolean {
+  if (!summary) return false;
+  const lowered = summary.toLowerCase();
+  return RATE_LIMIT_PATTERNS.some((pattern) => lowered.includes(pattern));
+}
+
 /**
  * A2 source of truth (rung-counter fix): the target's current ladder level, read from
  * the monotonic epoch_targets.model_ladder_level column. A fresh target has NULL -> 0
