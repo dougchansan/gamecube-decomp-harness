@@ -126,6 +126,11 @@ function textFromMessage(message: unknown): string {
   return "";
 }
 
+// Telemetry (Track B): coerce a possibly-missing usage field to a finite number.
+function finiteNumber(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
 type SessionManagerWithCustomEntries = {
   appendCustomEntry?: (customType: string, data?: unknown) => string;
 };
@@ -409,6 +414,17 @@ async function runClaudeCodeAgent(options: PiRunOptions): Promise<PiRunResult> {
       parsed?.is_error === true
         ? String(parsed?.result ?? parsed?.api_error_status ?? "Claude Code returned an error")
         : undefined;
+    // Telemetry (Track B): the claude-code CLI reports token usage under
+    // `parsed.usage.*` (snake_case, cache fields) and `parsed.total_cost_usd`.
+    // All optional — guard so a shape drift never throws in the worker.
+    const usageRaw = (parsed?.usage ?? {}) as Record<string, unknown>;
+    const usage: PiRunResult["usage"] = {
+      inputTokens: finiteNumber(usageRaw.input_tokens),
+      outputTokens: finiteNumber(usageRaw.output_tokens),
+      cacheReadTokens: finiteNumber(usageRaw.cache_read_input_tokens),
+      cacheWriteTokens: finiteNumber(usageRaw.cache_creation_input_tokens),
+      costUsd: finiteNumber((parsed as Record<string, unknown> | undefined)?.total_cost_usd),
+    };
     return {
       sessionId: typeof parsed?.session_id === "string" ? parsed.session_id : sessionId,
       sessionFile,
@@ -419,6 +435,8 @@ async function runClaudeCodeAgent(options: PiRunOptions): Promise<PiRunResult> {
       rawText: outputText,
       dryRun: false,
       providerError,
+      usage,
+      endedAt: new Date().toISOString(),
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
@@ -507,6 +525,7 @@ export async function runPiAgent(options: PiRunOptions): Promise<PiRunResult> {
   const restoreEnv = applyProcessEnvPatch(options.env);
   let rawText = "";
   let finalAssistantText = "";
+  let lastUsage: PiRunResult["usage"];
   let session: any;
   let unsubscribe: (() => void) | undefined;
   let unsubscribeLifecycle: (() => void) | undefined;
@@ -538,6 +557,18 @@ export async function runPiAgent(options: PiRunOptions): Promise<PiRunResult> {
       if (event?.type === "message_update" && event.assistantMessageEvent?.type === "text_delta") {
         rawText += event.assistantMessageEvent.delta;
       }
+      if (event?.type === "agent_end") {
+        // Telemetry (Track B): hoist the final-turn token usage. Shape is the Pi
+        // SDK's `usage.input`/`usage.output`; guard so a missing field is undefined.
+        const messages = Array.isArray(event.messages) ? event.messages : [];
+        const last = messages.at(-1) as { usage?: { input?: number; output?: number } } | undefined;
+        if (last?.usage) {
+          lastUsage = {
+            inputTokens: typeof last.usage.input === "number" ? last.usage.input : undefined,
+            outputTokens: typeof last.usage.output === "number" ? last.usage.output : undefined,
+          };
+        }
+      }
       if (event?.type === "message_end" || event?.type === "turn_end") {
         const text = textFromMessage(event.message);
         if (text) finalAssistantText = text;
@@ -567,6 +598,8 @@ export async function runPiAgent(options: PiRunOptions): Promise<PiRunResult> {
       rawText: outputText,
       dryRun: false,
       providerError,
+      usage: lastUsage,
+      endedAt: new Date().toISOString(),
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
@@ -584,6 +617,8 @@ export async function runPiAgent(options: PiRunOptions): Promise<PiRunResult> {
       dryRun: false,
       failed: true,
       error: message,
+      usage: lastUsage,
+      endedAt: new Date().toISOString(),
     };
   } finally {
     unsubscribeLifecycle?.();

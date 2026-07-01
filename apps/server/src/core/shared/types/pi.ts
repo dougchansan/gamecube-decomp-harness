@@ -15,4 +15,16 @@ export interface PiRunResult {
   // (stopReason "error"), e.g. every retry timed out against the LLM endpoint.
   // The session "completed" from the SDK's perspective but produced no usable turn.
   providerError?: string;
+  // Telemetry (Track B): token/cost usage surfaced from the agent runtime.
+  // Fields are optional/best-effort — shapes differ between the Pi SDK and the
+  // claude-code CLI, so a parse miss leaves them undefined rather than throwing.
+  usage?: {
+    inputTokens?: number;
+    outputTokens?: number;
+    cacheReadTokens?: number;
+    cacheWriteTokens?: number;
+    costUsd?: number;
+  };
+  // ISO timestamp captured when runPiAgent returns.
+  endedAt?: string;
 }

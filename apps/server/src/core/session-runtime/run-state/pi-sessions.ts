@@ -14,6 +14,15 @@ export function addPiSession(params: {
   thinkingLevel?: string;
   status: PiSessionStatus;
   outputPath: string;
+  // Telemetry (Track B): token/cost usage + rung/attempt bookkeeping.
+  inputTokens?: number;
+  outputTokens?: number;
+  cacheReadTokens?: number;
+  cacheWriteTokens?: number;
+  costUsd?: number;
+  attemptIndex?: number;
+  escalationLevel?: number;
+  endedAt?: string;
 }): string {
   const id = randomUUID();
   immediateTransaction(params.store.db, () => {
@@ -32,6 +41,14 @@ export function addPiSession(params: {
         status: params.status,
         outputPath: params.outputPath,
         createdAt: now(),
+        inputTokens: params.inputTokens ?? null,
+        outputTokens: params.outputTokens ?? null,
+        cacheReadTokens: params.cacheReadTokens ?? null,
+        cacheWriteTokens: params.cacheWriteTokens ?? null,
+        costUsd: params.costUsd ?? null,
+        attemptIndex: params.attemptIndex ?? null,
+        escalationLevel: params.escalationLevel ?? null,
+        endedAt: params.endedAt ?? null,
       })
       .run();
   });

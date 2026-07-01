@@ -1480,6 +1480,16 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
         thinkingLevel: globals.thinkingLevel,
         status: result.failed || result.providerError ? "failed" : result.dryRun ? "dry_run" : "succeeded",
         outputPath: result.outputPath,
+        // Telemetry (Track B): token/cost usage from the agent runtime.
+        inputTokens: result.usage?.inputTokens,
+        outputTokens: result.usage?.outputTokens,
+        cacheReadTokens: result.usage?.cacheReadTokens,
+        cacheWriteTokens: result.usage?.cacheWriteTokens,
+        costUsd: result.usage?.costUsd,
+        attemptIndex,
+        // Track A wires the real rung value later; level 0 = fixed-model lane today.
+        escalationLevel: 0,
+        endedAt: result.endedAt,
       });
       appendWorkerSessionId(store, claimed.workerStateId, result.sessionId);
       appendWorkerActivityEvent(outputDir, {
