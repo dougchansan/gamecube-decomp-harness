@@ -378,6 +378,24 @@ export function ensureSchema(db: Database): void {
     CREATE INDEX IF NOT EXISTS save_points_campaign
       ON save_points (campaign_id, created_at);
 
+    CREATE TABLE IF NOT EXISTS report_snapshots (
+      id TEXT PRIMARY KEY,
+      run_id TEXT NOT NULL,
+      at TEXT NOT NULL,
+      source TEXT NOT NULL,
+      fuzzy_match_percent REAL,
+      matched_code_percent REAL,
+      complete_code_percent REAL,
+      matched_data_percent REAL,
+      matched_functions_percent REAL,
+      complete_units INTEGER,
+      total_units INTEGER,
+      report_path TEXT
+    );
+
+    CREATE INDEX IF NOT EXISTS report_snapshots_run_at
+      ON report_snapshots (run_id, at);
+
     CREATE TABLE IF NOT EXISTS project_sessions (
       id TEXT PRIMARY KEY,
       project_id TEXT NOT NULL,
@@ -415,4 +433,33 @@ export function ensureSchema(db: Database): void {
   ensureColumn(db, "runs", "project_local_override_path", "TEXT");
   ensureColumn(db, "pi_sessions", "target_claim_id", "TEXT");
   ensureColumn(db, "project_sessions", "kernel_trace_json", "TEXT NOT NULL DEFAULT '{}'");
+
+  // Telemetry (Track B): per-agent-invocation tokens / cost / rung / per-call duration.
+  ensureColumn(db, "pi_sessions", "input_tokens", "INTEGER");
+  ensureColumn(db, "pi_sessions", "output_tokens", "INTEGER");
+  ensureColumn(db, "pi_sessions", "cache_read_tokens", "INTEGER");
+  ensureColumn(db, "pi_sessions", "cache_write_tokens", "INTEGER");
+  ensureColumn(db, "pi_sessions", "cost_usd", "REAL");
+  ensureColumn(db, "pi_sessions", "attempt_index", "INTEGER");
+  ensureColumn(db, "pi_sessions", "escalation_level", "INTEGER");
+  ensureColumn(db, "pi_sessions", "ended_at", "TEXT");
+
+  // Telemetry (Track B): escalation ladder + "who cracked it" benchmark keys.
+  ensureColumn(db, "epoch_targets", "model_ladder_level", "INTEGER");
+  ensureColumn(db, "epoch_targets", "benchmark_mode", "TEXT");
+  ensureColumn(db, "epoch_targets", "rungs_attempted", "INTEGER");
+  ensureColumn(db, "epoch_targets", "cracked_by_provider", "TEXT");
+  ensureColumn(db, "epoch_targets", "cracked_by_model", "TEXT");
+  ensureColumn(db, "epoch_targets", "cracked_at_escalation", "INTEGER");
+  ensureColumn(db, "epoch_targets", "tokens_to_crack", "INTEGER");
+  ensureColumn(db, "epoch_targets", "time_to_crack_ms", "INTEGER");
+
+  // Telemetry (Track B): promote data/function percents for over-time charts.
+  ensureColumn(db, "save_points", "matched_data_percent", "REAL");
+  ensureColumn(db, "save_points", "matched_functions_percent", "REAL");
+
+  // Depends on pi_sessions.target_claim_id existing (ensured above).
+  db.run(
+    "CREATE INDEX IF NOT EXISTS pi_sessions_claim_model ON pi_sessions (target_claim_id, model)",
+  );
 }

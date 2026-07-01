@@ -55,6 +55,15 @@ export const piSessions = sqliteTable("pi_sessions", {
   status: text("status").$type<PiSessionStatus>().notNull(),
   outputPath: text("output_path"),
   createdAt: text("created_at").notNull(),
+  // Telemetry (Track B): per-invocation tokens / cost / rung / per-call duration.
+  inputTokens: integer("input_tokens"),
+  outputTokens: integer("output_tokens"),
+  cacheReadTokens: integer("cache_read_tokens"),
+  cacheWriteTokens: integer("cache_write_tokens"),
+  costUsd: real("cost_usd"),
+  attemptIndex: integer("attempt_index"),
+  escalationLevel: integer("escalation_level"),
+  endedAt: text("ended_at"),
 });
 
 export const dashboardArtifacts = sqliteTable(
@@ -136,6 +145,15 @@ export const epochTargets = sqliteTable(
     admittedAt: text("admitted_at").notNull(),
     claimedAt: text("claimed_at"),
     finishedAt: text("finished_at"),
+    // Telemetry (Track B): escalation ladder + "who cracked it" benchmark keys.
+    modelLadderLevel: integer("model_ladder_level"),
+    benchmarkMode: text("benchmark_mode"),
+    rungsAttempted: integer("rungs_attempted"),
+    crackedByProvider: text("cracked_by_provider"),
+    crackedByModel: text("cracked_by_model"),
+    crackedAtEscalation: integer("cracked_at_escalation"),
+    tokensToCrack: integer("tokens_to_crack"),
+    timeToCrackMs: integer("time_to_crack_ms"),
   },
   (table) => [
     uniqueIndex("epoch_targets_epoch_key").on(table.epochId, table.targetKey),
@@ -386,6 +404,9 @@ export const savePoints = sqliteTable(
     worktreeDirty: integer("worktree_dirty", { mode: "boolean" }).notNull().default(false),
     committed: integer("committed", { mode: "boolean" }).notNull().default(false),
     matchedCodePercent: real("matched_code_percent"),
+    // Telemetry (Track B): data/function percents for over-time charts.
+    matchedDataPercent: real("matched_data_percent"),
+    matchedFunctionsPercent: real("matched_functions_percent"),
     reportPath: text("report_path"),
     reportChangesPath: text("report_changes_path"),
     boardSnapshotPath: text("board_snapshot_path"),
@@ -394,6 +415,25 @@ export const savePoints = sqliteTable(
     createdAt: text("created_at").notNull(),
   },
   (table) => [index("save_points_campaign").on(table.campaignId, table.createdAt)],
+);
+
+export const reportSnapshots = sqliteTable(
+  "report_snapshots",
+  {
+    id: text("id").primaryKey(),
+    runId: text("run_id").notNull(),
+    at: text("at").notNull(),
+    source: text("source").notNull(),
+    fuzzyMatchPercent: real("fuzzy_match_percent"),
+    matchedCodePercent: real("matched_code_percent"),
+    completeCodePercent: real("complete_code_percent"),
+    matchedDataPercent: real("matched_data_percent"),
+    matchedFunctionsPercent: real("matched_functions_percent"),
+    completeUnits: integer("complete_units"),
+    totalUnits: integer("total_units"),
+    reportPath: text("report_path"),
+  },
+  (table) => [index("report_snapshots_run_at").on(table.runId, table.at)],
 );
 
 export const projectSessions = sqliteTable(
@@ -438,6 +478,7 @@ export const orchestratorStateSchema = {
   integrations,
   piSessions,
   projectSessions,
+  reportSnapshots,
   runCheckpoints,
   runs,
   savePoints,
@@ -469,6 +510,8 @@ export type RunCheckpointRow = typeof runCheckpoints.$inferSelect;
 export type CheckpointItemRow = typeof checkpointItems.$inferSelect;
 export type CampaignRow = typeof campaigns.$inferSelect;
 export type SavePointRow = typeof savePoints.$inferSelect;
+export type ReportSnapshotRow = typeof reportSnapshots.$inferSelect;
+export type NewReportSnapshotRow = typeof reportSnapshots.$inferInsert;
 export type ProjectSessionRow = typeof projectSessions.$inferSelect;
 export type NewProjectSessionRow = typeof projectSessions.$inferInsert;
 export type DashboardArtifactRow = typeof dashboardArtifacts.$inferSelect;
