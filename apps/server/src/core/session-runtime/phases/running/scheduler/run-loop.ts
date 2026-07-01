@@ -467,6 +467,8 @@ function workerCommand(
   if (globals.projectId) command.splice(2, 0, "--project", globals.projectId);
   if (globals.dryRunAgents) command.push("--dry-run-agents");
   if (globals.agentTimeoutSeconds != null) command.push("--agent-timeout-seconds", String(globals.agentTimeoutSeconds));
+  // Track A: propagate escalation flags so the spawned worker re-parses them onto its globals.
+  if (globals.escalationEnabled && globals.ladderPath) command.push("--escalation", "--ladder", globals.ladderPath);
   command.push(
     "worker",
     "--run-id",

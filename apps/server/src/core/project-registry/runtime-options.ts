@@ -2,6 +2,7 @@ import { resolve } from "node:path";
 import { resolveProject, type ResolvedProject } from "./resolver.js";
 import type { RunProjectMetadata } from "@server/core/shared/types";
 import { DEFAULT_PI_MODEL, DEFAULT_PI_PROVIDER, DEFAULT_PI_THINKING_LEVEL, DEFAULT_STATE_DIR_NAME } from "./runtime-defaults.js";
+import { loadLadder, type LadderConfig } from "@server/core/session-runtime/escalation/ladder.js";
 
 export interface GlobalArgs {
   repoRoot: string;
@@ -14,6 +15,11 @@ export interface GlobalArgs {
   model: string;
   thinkingLevel: string;
   agentTimeoutSeconds?: number;
+  // Track A — iterative model-escalation scheduling. Default OFF: when
+  // escalationEnabled is false the worker behaves exactly as a fixed-model lane.
+  escalationEnabled?: boolean;
+  ladderPath?: string;
+  ladder?: LadderConfig;
 }
 
 export interface ParsedArgs {
@@ -39,6 +45,7 @@ export function parse(argv: string[]): ParsedArgs {
     provider: DEFAULT_PI_PROVIDER,
     model: DEFAULT_PI_MODEL,
     thinkingLevel: DEFAULT_PI_THINKING_LEVEL,
+    escalationEnabled: false,
   };
   const args = new Map<string, string | true>();
   let command = "";
@@ -81,6 +88,11 @@ export function parse(argv: string[]): ParsedArgs {
         throw new Error(`Invalid --agent-timeout-seconds: ${String(argv[i + 1])}`);
       }
       i += 1;
+    } else if (arg === "--escalation") {
+      globals.escalationEnabled = true;
+    } else if (arg === "--ladder") {
+      globals.ladderPath = resolve(readFlag(argv, i));
+      i += 1;
     } else if (arg.startsWith("--")) {
       const value = argv[i + 1];
       if (value && !value.startsWith("--")) {
@@ -111,6 +123,10 @@ export function parse(argv: string[]): ParsedArgs {
     globals.graphDbPath = project.graphDbPath;
   } else if (!globals.stateDir) {
     globals.stateDir = resolve(defaultStateRoot, DEFAULT_STATE_DIR_NAME);
+  }
+  if (globals.escalationEnabled) {
+    if (!globals.ladderPath) throw new Error("--escalation requires --ladder <path>");
+    globals.ladder = loadLadder(globals.ladderPath);
   }
   return { command, globals, args };
 }

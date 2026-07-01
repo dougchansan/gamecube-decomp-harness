@@ -56,6 +56,8 @@ import {
 import type { PiRunResult } from "@server/core/shared/types";
 import { numberArg, projectMetadata, stringArg, type GlobalArgs } from "@server/core/project-registry/runtime-options.js";
 import { assertSchedulableRun } from "@server/core/session-runtime/phases/running/jobs/shared.js";
+import { countNonExactWorkerStates, ladderExhausted, pickRung, recordCrackTelemetry } from "@server/core/session-runtime/escalation/select-rung.js";
+import type { LadderRung } from "@server/core/session-runtime/escalation/ladder.js";
 
 export interface WorkerCycleResult {
   runId: string;
@@ -1356,6 +1358,33 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
     await writeFile(resolve(validationDir, "pre_worker_baseline.summary.json"), JSON.stringify(workerChangeBaseline, null, 2));
     const targetUnit = String(target.unit ?? "");
     const targetSymbol = String(target.symbol ?? "");
+    const targetKey = `${targetUnit}::${targetSymbol}`;
+
+    // A2 — iterative model-escalation. Compute the rung once per worker cycle from the
+    // number of prior non-exact attempts on this target. Everything is gated behind
+    // globals.escalationEnabled: when OFF the fixed-model lane behaves exactly as before.
+    const escalationEnabled = globals.escalationEnabled === true && globals.ladder != null;
+    const ladder = globals.ladder;
+    let escalationLevel = 0;
+    let failedAttempts = 0;
+    let rung: LadderRung | undefined;
+    if (escalationEnabled && ladder) {
+      failedAttempts = countNonExactWorkerStates(store, runId, targetKey);
+      const picked = pickRung(ladder, failedAttempts);
+      escalationLevel = picked.index;
+      rung = picked.rung;
+    }
+    const runProvider = rung ? rung.provider : globals.provider;
+    const runModel = rung ? rung.model : globals.model;
+    const runThinkingLevel = rung ? rung.thinking : globals.thinkingLevel;
+    const runTimeoutMs = rung
+      ? rung.budget.agentTimeoutSeconds * 1000
+      : globals.agentTimeoutSeconds
+        ? globals.agentTimeoutSeconds * 1000
+        : undefined;
+    // escalation_level recorded on pi_sessions: real rung index when escalating, else 0 (today's behavior).
+    const recordedEscalationLevel = escalationEnabled ? escalationLevel : 0;
+
     appendWorkerActivityEvent(outputDir, {
       claim_id: claimed.claimId,
       phase: "setup",
@@ -1401,7 +1430,7 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
           initialBoardPath,
           workerLogDir: outputDir,
         });
-        const providerGuidance = providerWorkerPromptGuidance(globals.provider);
+        const providerGuidance = providerWorkerPromptGuidance(runProvider);
         result = await runPiAgent({
           role: "worker",
           cwd: workerRepoRoot,
@@ -1410,10 +1439,10 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
             : basePrompt,
           outputDir,
           dryRun: globals.dryRunAgents,
-          provider: globals.provider,
-          model: globals.model,
-          thinkingLevel: globals.thinkingLevel,
-          timeoutMs: globals.agentTimeoutSeconds ? globals.agentTimeoutSeconds * 1000 : undefined,
+          provider: runProvider,
+          model: runModel,
+          thinkingLevel: runThinkingLevel,
+          timeoutMs: runTimeoutMs,
           env: workerAgentEnv,
           // Whole-file writes conflict with the preserve-dirty-work rule and were
           // used in 0% of confirmed exacts (-51pt lift); edit/bash cover the need.
@@ -1475,9 +1504,11 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
         role: "worker",
         sessionId: result.sessionId,
         sessionFile: result.sessionFile,
-        provider: globals.provider,
-        model: globals.model,
-        thinkingLevel: globals.thinkingLevel,
+        // A2 / B3: log the RUNG's model when escalating (else globals.*), so benchmarks
+        // attribute tokens to the model that actually ran.
+        provider: runProvider,
+        model: runModel,
+        thinkingLevel: runThinkingLevel,
         status: result.failed || result.providerError ? "failed" : result.dryRun ? "dry_run" : "succeeded",
         outputPath: result.outputPath,
         // Telemetry (Track B): token/cost usage from the agent runtime.
@@ -1487,8 +1518,7 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
         cacheWriteTokens: result.usage?.cacheWriteTokens,
         costUsd: result.usage?.costUsd,
         attemptIndex,
-        // Track A wires the real rung value later; level 0 = fixed-model lane today.
-        escalationLevel: 0,
+        escalationLevel: recordedEscalationLevel,
         endedAt: result.endedAt,
       });
       appendWorkerSessionId(store, claimed.workerStateId, result.sessionId);
@@ -1783,12 +1813,39 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
       );
     }
 
+    // A5 / B4 — denormalize "who cracked it" onto epoch_targets when this rung produced the exact.
+    if (escalationEnabled && lifecycleStatus === "exact") {
+      recordCrackTelemetry(store, {
+        runId,
+        epochTargetId: claimed.epochTargetId,
+        targetKey,
+        provider: runProvider,
+        model: runModel,
+        escalationLevel,
+      });
+    }
+
+    // A3 — the one control-flow change. On a non-exact "timeout" (the agent ran but did not
+    // crack the target), return the target to the claimable pool so the next generic worker
+    // re-attacks it one rung up. Infra "error" does NOT escalate — existing recovery re-runs
+    // the SAME rung. Gated on escalationEnabled; hard-capped at rungs.length to prevent loops.
+    // TODO(A6): mode "full-matrix"/"hybrid" reuse this re-admit machinery with a different stop
+    // condition (re-admit until every rung has an attempt, even on exact); not yet implemented.
+    const escalationReAdmit =
+      escalationEnabled &&
+      ladder != null &&
+      ladder.mode === "escalation" &&
+      lifecycleStatus === "timeout" &&
+      !ladderExhausted(ladder, failedAttempts) &&
+      failedAttempts < ladder.rungs.length;
+
     closeWorkerState(store, {
       workerStateId: claimed.workerStateId,
       lifecycleStatus,
       timeoutSummary: lifecycleStatus === "timeout" ? summaryText : null,
       errorSummary: lifecycleStatus === "error" ? summaryText : null,
       summary: workerStateSummary,
+      epochTargetStatus: escalationReAdmit ? "admitted" : "finished",
     });
     const wakeEvent = addEvent(store, runId, lifecycleStatus === "error" ? "worker_error" : "worker_finished", "worker", {
       worker_state_id: claimed.workerStateId,
