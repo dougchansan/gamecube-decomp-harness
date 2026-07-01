@@ -181,6 +181,8 @@ function globalFlags(globals: GlobalArgs): string[] {
   );
   if (globals.dryRunAgents) flags.push("--dry-run-agents");
   if (globals.agentTimeoutSeconds != null) flags.push("--agent-timeout-seconds", String(globals.agentTimeoutSeconds));
+  // Track A: forward escalation flags to the spawned run-loop so it (and, via run-loop.ts, its workers) escalate.
+  if (globals.escalationEnabled && globals.ladderPath) flags.push("--escalation", "--ladder", globals.ladderPath);
   return flags;
 }
 
