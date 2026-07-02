@@ -1,3 +1,4 @@
+import { writeFileSync } from "node:fs";
 import { mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -1564,6 +1565,60 @@ describe("kernel Pi runtime bridge", () => {
 
     expect(result.usage).toMatchObject({ inputTokens: 42, outputTokens: 7 });
     expect(result.usage?.costUsd).toBeUndefined();
+  });
+
+  test("falls back to the .jsonl transcript when in-memory messages carry no usage (zai/glm-5.2 path)", async () => {
+    const tempDir = await mkdtemp(join(tmpdir(), "colosseum-kernel-transcript-"));
+    const transcriptPath = join(tempDir, "session.jsonl");
+    // Real zai transcript shape: per-message usage nested under .message; cost.total 0 (flat-rate).
+    writeFileSync(
+      transcriptPath,
+      [
+        JSON.stringify({ type: "message", id: "a1", message: { role: "assistant", stopReason: "toolUse", usage: { input: 73665, output: 211, cacheRead: 6912, cacheWrite: 0, cost: { total: 0 } } } }),
+        JSON.stringify({ type: "message", id: "a2", message: { role: "assistant", stopReason: "stop", usage: { input: 1000, output: 50, cacheRead: 0, cacheWrite: 0, cost: { total: 0 } } } }),
+      ].join("\n") + "\n",
+      "utf8",
+    );
+    const runner = createColosseumKernelPiAgentRunner({
+      runPiAgent: async () => {
+        throw new Error("direct Pi runner should not be called for kernel strategy");
+      },
+      createKernelSpawnAgent: () => async () => ({
+        responseText: "{}",
+        aborted: false,
+        // in-memory messages have NO usage (the openai-completions/zai symptom); sessionFile points at the transcript.
+        session: { sessionId: "22222222-2222-5222-8222-222222222222", messages: [{ role: "assistant", stopReason: "stop" }], sessionFile: transcriptPath } as any,
+      }),
+    });
+
+    const result = await runner(usageSpawnRunOptions(tempDir, join(tempDir, "out")));
+
+    expect(result.usage).toMatchObject({ inputTokens: 74665, outputTokens: 261, cacheReadTokens: 6912, cacheWriteTokens: 0 });
+  });
+
+  test("uses in-memory usage and ignores the transcript when in-memory has tokens (codex path — no double-count)", async () => {
+    const tempDir = await mkdtemp(join(tmpdir(), "colosseum-kernel-inmemory-"));
+    const transcriptPath = join(tempDir, "session.jsonl");
+    // A transcript with wildly different numbers proves it is NOT read when in-memory already has tokens.
+    writeFileSync(
+      transcriptPath,
+      JSON.stringify({ type: "message", id: "x", message: { role: "assistant", stopReason: "stop", usage: { input: 999999, output: 999999 } } }) + "\n",
+      "utf8",
+    );
+    const runner = createColosseumKernelPiAgentRunner({
+      runPiAgent: async () => {
+        throw new Error("direct Pi runner should not be called for kernel strategy");
+      },
+      createKernelSpawnAgent: () => async () => ({
+        responseText: "{}",
+        aborted: false,
+        session: { sessionId: "22222222-2222-5222-8222-222222222222", messages: [{ role: "assistant", stopReason: "stop", usage: { input: 500, output: 25, cost: { total: 1.5 } } }], sessionFile: transcriptPath } as any,
+      }),
+    });
+
+    const result = await runner(usageSpawnRunOptions(tempDir, join(tempDir, "out")));
+
+    expect(result.usage).toMatchObject({ inputTokens: 500, outputTokens: 25, costUsd: 1.5 });
   });
 
   test("passes converted prompt-bundle context resolver into kernel createSpawnAgent", async () => {

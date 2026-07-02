@@ -19,7 +19,7 @@ import {
 import type { TraceEvent } from "@agent-kernel/protocol";
 import type { PiRunResult } from "@server/core/shared/types";
 import type { PiRunOptions } from "@server/infrastructure/agent-runtime/runtime";
-import { sumAssistantUsage } from "@server/infrastructure/agent-runtime/runtime/pi-agent.js";
+import { sumAssistantUsage, sumTranscriptAssistantUsage, usageHasTokens } from "@server/infrastructure/agent-runtime/runtime/pi-agent.js";
 import { applyProcessEnvPatch } from "@server/infrastructure/agent-runtime/runtime/process-env";
 
 import type { ColosseumKernelBridgeConfig } from "./config.js";
@@ -342,18 +342,26 @@ export function createColosseumKernelSpawnAgent(
       await writeOutput(paths.userPromptPath, userPrompt);
       await writeOutput(paths.outputPath, result.responseText);
       // Telemetry (Track B / token capture): the SDK-worker path holds per-message usage on
-      // result.session.messages. Read it BEFORE dispose() releases the session — this is the
-      // ordering correctness constraint. sumAssistantUsage is null-guarded (returns undefined
-      // on shape drift), so this can never throw.
-      const usage = sumAssistantUsage((result.session as { messages?: unknown }).messages);
+      // result.session.messages. Read it (and the transcript path) BEFORE dispose() releases the
+      // session — the ordering correctness constraint. sumAssistantUsage is null-guarded, so it
+      // never throws.
+      const inMemoryUsage = sumAssistantUsage((result.session as { messages?: unknown }).messages);
+      const sessionFile =
+        typeof (result.session as { sessionFile?: unknown }).sessionFile === "string"
+          ? (result.session as { sessionFile: string }).sessionFile
+          : undefined;
       result.session.dispose?.();
+      // Fallback: the openai-completions adapter (zai/glm-5.2) does NOT attach usage to the
+      // in-memory messages returned here (codex-responses does), so in-memory tokens come back
+      // empty for zai. The SessionManager still wrote per-message usage to the .jsonl transcript,
+      // so when in-memory has no tokens we sum it from the (now-flushed) transcript. Gated on
+      // usageHasTokens so codex — which already captures in-memory — never re-reads or
+      // double-counts. cost stays $0 for zai (flat-rate), which is correct; we need the tokens.
+      const usage = usageHasTokens(inMemoryUsage) ? inMemoryUsage : sumTranscriptAssistantUsage(sessionFile) ?? inMemoryUsage;
 
       return {
         sessionId,
-        sessionFile:
-          typeof (result.session as { sessionFile?: unknown }).sessionFile === "string"
-            ? (result.session as { sessionFile: string }).sessionFile
-            : undefined,
+        sessionFile,
         sessionDir: spawnContext.appSessionId
           ? sessionDirFor(options.runtime, spawnContext.appSessionId, options.piOptions)
           : undefined,

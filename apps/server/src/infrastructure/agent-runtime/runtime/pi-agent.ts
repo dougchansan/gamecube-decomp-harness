@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { spawn } from "node:child_process";
+import { existsSync, readFileSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -174,6 +175,45 @@ export function sumAssistantUsage(messages: unknown): PiRunResult["usage"] | und
   return sawUsage
     ? { inputTokens: input, outputTokens: output, cacheReadTokens: cacheRead, cacheWriteTokens: cacheWrite, ...(sawCost ? { costUsd: cost } : {}) }
     : undefined;
+}
+
+/**
+ * Fallback token capture from a persisted Pi session .jsonl transcript. Some provider adapters
+ * (notably openai-completions / zai glm-5.2) do NOT attach per-message `usage` to the in-memory
+ * `session.messages` returned to the spawn caller, even though the SessionManager writes that
+ * usage to the transcript. Each transcript line is a record; a `{type:"message"}` record carries
+ * the AgentMessage under `.message` (same {role, stopReason, usage} shape sumAssistantUsage
+ * reads), so we lift those out and reuse the identical summation. Returns undefined if the file
+ * is missing/unreadable or carries no assistant usage. Read-only; never throws.
+ */
+export function sumTranscriptAssistantUsage(transcriptPath: string | undefined): PiRunResult["usage"] | undefined {
+  if (!transcriptPath || !existsSync(transcriptPath)) return undefined;
+  let text: string;
+  try {
+    text = readFileSync(transcriptPath, "utf8");
+  } catch {
+    return undefined;
+  }
+  const messages: unknown[] = [];
+  for (const line of text.split("\n")) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    try {
+      const record = JSON.parse(trimmed) as Record<string, unknown>;
+      if (record?.type === "message" && record.message && typeof record.message === "object") {
+        messages.push(record.message);
+      }
+    } catch {
+      // Skip a malformed/partial transcript line rather than failing the whole capture.
+    }
+  }
+  return sumAssistantUsage(messages);
+}
+
+/** Whether a captured usage carries any non-zero token count (used to decide the transcript fallback). */
+export function usageHasTokens(usage: PiRunResult["usage"] | undefined): boolean {
+  if (!usage) return false;
+  return (usage.inputTokens ?? 0) > 0 || (usage.outputTokens ?? 0) > 0 || (usage.cacheReadTokens ?? 0) > 0 || (usage.cacheWriteTokens ?? 0) > 0;
 }
 
 type SessionManagerWithCustomEntries = {
