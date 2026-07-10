@@ -2220,7 +2220,6 @@ function activeRunsForDashboard(stateDir: string, limit = 12): JsonObject[] {
   const store = openState(stateDir);
   try {
     const sinceIso = new Date(Date.now() - ACTIVE_RUN_WINDOW_MS).toISOString();
-    const workerSinceIso = new Date(Date.now() - 60 * 60 * 1000).toISOString();
     const rows = store.db
       .query(
         `
@@ -2235,7 +2234,6 @@ function activeRunsForDashboard(stateDir: string, limit = 12): JsonObject[] {
               SELECT COUNT(*) FROM worker_state
               JOIN epoch_targets ON epoch_targets.id = worker_state.epoch_target_id
               WHERE epoch_targets.session_id = runs.id AND worker_state.lifecycle_status = 'running'
-                AND worker_state.started_at >= ?
             ) AS active_workers,
             (
               SELECT COUNT(*) FROM epoch_targets WHERE epoch_targets.session_id = runs.id
@@ -2253,13 +2251,12 @@ function activeRunsForDashboard(stateDir: string, limit = 12): JsonObject[] {
                SELECT 1 FROM worker_state
                JOIN epoch_targets ON epoch_targets.id = worker_state.epoch_target_id
                WHERE epoch_targets.session_id = runs.id AND worker_state.lifecycle_status = 'running'
-                 AND worker_state.started_at >= ?
              )
           ORDER BY runs.created_at DESC
           ${sqlLimit(limit)}
         `,
       )
-      .all(workerSinceIso, sinceIso, workerSinceIso) as JsonObject[];
+      .all(sinceIso) as JsonObject[];
 
     return rows.map((row) => {
       const runId = stringValue(row.id);
