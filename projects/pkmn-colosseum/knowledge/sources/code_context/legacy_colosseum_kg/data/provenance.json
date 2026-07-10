@@ -1,0 +1,32 @@
+{
+  "schema_version": "legacy_colosseum_kg_snapshot_v1",
+  "source_campaign": "pkmn-colosseum pre-dtk Windows campaign",
+  "source_database": "tools/decomp_work/kg/kg.db",
+  "source_database_size": 15216640,
+  "source_database_sha256": "AEE5649C54A5D1EB658900B8A0679327D552FE7FF322C149F44080D1AF9189F2",
+  "sqlite_integrity_check": "ok",
+  "schema_provenance_commit": "211843b6457a",
+  "schema_provenance_path": "archive/previous_campaign/tools/decomp_work/kg/",
+  "snapshot_date": "2026-07-09",
+  "trust_tier": "historical",
+  "authoritative_for_current_progress": false,
+  "commit_refs": {
+    "formatted_hex_refs": 46,
+    "resolved_in_colosseum_history": 46,
+    "invalid_labels_preserved_only_as_legacy_commit_ref": true
+  },
+  "filters": {
+    "levers": "all structured lever definitions",
+    "cracks": "rows whose delta states an explicit result, match, verification, port, or crack outcome",
+    "function_hints": "rows with notes, equivalence status, or a wall classification",
+    "synthetic_levers": "only missing slugs referenced by retained outcome rows"
+  },
+  "excluded_tables": [
+    "commits",
+    "externals",
+    "function_calls",
+    "function_tags",
+    "name_evidence"
+  ],
+  "warning": "Historical outcomes can contradict later snapshots. Revalidate every observation with the current dtk-template pipeline."
+}

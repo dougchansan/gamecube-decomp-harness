@@ -37,7 +37,8 @@
       "path_facts"
     ],
     "projectSources": [
-      "code_graph"
+      "code_graph",
+      "legacy_colosseum_kg"
     ]
   },
   "tools": {

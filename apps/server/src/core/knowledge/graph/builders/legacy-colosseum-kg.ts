@@ -1,14 +1,38 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { Database } from "bun:sqlite";
 import { resolve } from "node:path";
-import { legacyColosseumKgEnrichmentPath } from "../../paths.js";
+import { legacyColosseumKgEnrichmentPath, legacyColosseumRecoveryManifestPath } from "../../paths.js";
 import { fileEntityId, functionEntityId } from "./code-graph.js";
 import type { GraphEdge, GraphEntity, GraphFact, GraphRecords, SearchChunk } from "../types.js";
 import { ensureParentDir, filesFingerprint, numberValue, objectValue, readJson, readJsonlLazy, shortHash, stringValue, truncate } from "../util.js";
 
 const SOURCE_ID = "legacy_colosseum_kg";
+const OUTCOME_PREDICATE = `
+  length(trim(coalesce(c.delta, ''))) > 0 AND (
+    instr(lower(c.delta), '->') > 0 OR
+    instr(c.delta, '→') > 0 OR
+    instr(lower(c.delta), '100') > 0 OR
+    instr(lower(c.delta), 'verified') > 0 OR
+    instr(lower(c.delta), 'match') > 0 OR
+    instr(lower(c.delta), 'exact') > 0 OR
+    instr(lower(c.delta), 'ported') > 0 OR
+    instr(lower(c.delta), 'real c') > 0 OR
+    instr(lower(c.delta), 'crack') > 0
+  ) AND (
+    instr(lower(c.delta), 'mismatch') = 0 AND
+    instr(lower(c.delta), 'unmatched') = 0 AND
+    instr(lower(c.delta), 'uncracked') = 0 AND
+    instr(lower(c.delta), 'not exact') = 0 AND
+    instr(lower(c.delta), 'not a match') = 0 AND
+    instr(lower(c.delta), 'not matched') = 0 AND
+    instr(lower(c.delta), 'no match') = 0 AND
+    instr(lower(c.delta), 'did not match') = 0 AND
+    instr(lower(c.delta), 'failed to match') = 0 AND
+    instr(lower(c.delta), 'match failed') = 0
+  )
+`;
 
-type LegacyKgKind = "legacy_lever" | "legacy_crack" | "legacy_wall_class" | "legacy_function_hint" | "legacy_lever_doc";
+type LegacyKgKind = "legacy_lever" | "legacy_crack" | "legacy_wall_class" | "legacy_function_hint" | "legacy_lever_doc" | "legacy_recovery_candidate";
 
 interface LegacyKgRecord {
   kind: LegacyKgKind;
@@ -39,6 +63,7 @@ export interface ImportLegacyColosseumKgResult {
   output_path: string;
   records_written: number;
   levers: number;
+  synthetic_levers: number;
   cracks: number;
   wall_classes: number;
   function_hints: number;
@@ -51,6 +76,7 @@ export function importLegacyColosseumKg(options: ImportLegacyColosseumKgOptions)
   const outputPath = resolve(options.outputPath ?? legacyColosseumKgEnrichmentPath());
   const db = new Database(inputPath, { readonly: true });
   const records: LegacyKgRecord[] = [];
+  const syntheticLevers = new Set<string>();
   try {
     for (const row of db
       .query(
@@ -102,10 +128,12 @@ export function importLegacyColosseumKg(options: ImportLegacyColosseumKgOptions)
             f.wall_class,
             f.notes,
             l.title AS lever_title,
-            l.description AS lever_description
+            l.description AS lever_description,
+            l.slug AS defined_lever_slug
           FROM cracked_by c
           LEFT JOIN functions f ON f.addr = c.addr
           LEFT JOIN levers l ON l.slug = c.lever_slug
+          WHERE ${OUTCOME_PREDICATE}
           ORDER BY c.ts DESC, c.id DESC
         `,
       )
@@ -113,8 +141,25 @@ export function importLegacyColosseumKg(options: ImportLegacyColosseumKgOptions)
       const addr = compact(stringValue(row.addr));
       const leverSlug = compact(stringValue(row.lever_slug));
       if (!addr || !leverSlug) continue;
-      const commitSha = optionalText(row.commit_sha);
-      const rowId = String(row.id ?? shortHash(`${addr}:${leverSlug}:${commitSha ?? ""}`));
+      const legacyCommitRef = optionalText(row.commit_sha);
+      const commitSha = validCommitSha(legacyCommitRef);
+      const syntheticLever = !optionalText(row.defined_lever_slug);
+      if (syntheticLever && !syntheticLevers.has(leverSlug)) {
+        syntheticLevers.add(leverSlug);
+        records.push({
+          kind: "legacy_lever",
+          id: `legacy_synth_lever:${shortHash(leverSlug)}`,
+          slug: leverSlug,
+          raw_slug: leverSlug,
+          title: humanizeSlug(leverSlug),
+          source: "legacy cracked_by.lever_slug",
+          synthetic: true,
+          status: "proposal",
+          requires_current_revalidation: true,
+          evidence_ref: `legacy-colosseum-kg:synthetic-lever:${shortHash(leverSlug)}`,
+        });
+      }
+      const rowId = String(row.id ?? shortHash(`${addr}:${leverSlug}:${legacyCommitRef ?? ""}`));
       records.push({
         kind: "legacy_crack",
         id: `legacy_crack:${rowId}`,
@@ -123,6 +168,8 @@ export function importLegacyColosseumKg(options: ImportLegacyColosseumKgOptions)
         lever_title: optionalText(row.lever_title),
         lever_description: optionalText(row.lever_description),
         commit_sha: commitSha,
+        legacy_commit_ref: legacyCommitRef,
+        lever_synthetic: syntheticLever,
         delta: optionalText(row.delta),
         created_at: unixSecondsToIso(row.ts),
         source_path: sourcePathValue(row.tu),
@@ -132,8 +179,10 @@ export function importLegacyColosseumKg(options: ImportLegacyColosseumKgOptions)
         legacy_is_equivalent: Boolean(Number(row.is_equivalent ?? 0)),
         legacy_wall_class: optionalText(row.wall_class),
         legacy_notes: optionalText(row.notes),
-        status: "accepted",
-        evidence_ref: commitSha ? `legacy-colosseum-kg:cracked_by:${addr}:${leverSlug}:${commitSha}` : `legacy-colosseum-kg:cracked_by:${rowId}`,
+        historical_conflict: historicalOutcomeConflict(row),
+        requires_current_revalidation: true,
+        status: "stale",
+        evidence_ref: `legacy-colosseum-kg:cracked_by:${rowId}`,
       });
     }
 
@@ -160,7 +209,6 @@ export function importLegacyColosseumKg(options: ImportLegacyColosseumKgOptions)
           SELECT addr, name, tu, byte_pct, compiler, status, is_equivalent, wall_class, scratch_url, notes, updated_at
           FROM functions
           WHERE length(trim(coalesce(notes, ''))) > 0
-             OR byte_pct IS NOT NULL
              OR is_equivalent = 1
              OR length(trim(coalesce(wall_class, ''))) > 0
           ORDER BY updated_at DESC, addr
@@ -184,6 +232,7 @@ export function importLegacyColosseumKg(options: ImportLegacyColosseumKgOptions)
         scratch_url: optionalText(row.scratch_url),
         notes: optionalText(row.notes),
         updated_at: unixSecondsToIso(row.updated_at),
+        requires_current_revalidation: true,
         status: "stale",
         evidence_ref: `legacy-colosseum-kg:functions:${addr}`,
       });
@@ -212,7 +261,8 @@ export function importLegacyColosseumKg(options: ImportLegacyColosseumKgOptions)
     input_path: inputPath,
     output_path: outputPath,
     records_written: records.length,
-    levers: records.filter((record) => record.kind === "legacy_lever").length,
+    levers: records.filter((record) => record.kind === "legacy_lever" && !record.synthetic).length,
+    synthetic_levers: records.filter((record) => record.kind === "legacy_lever" && Boolean(record.synthetic)).length,
     cracks: records.filter((record) => record.kind === "legacy_crack").length,
     wall_classes: records.filter((record) => record.kind === "legacy_wall_class").length,
     function_hints: records.filter((record) => record.kind === "legacy_function_hint").length,
@@ -220,10 +270,16 @@ export function importLegacyColosseumKg(options: ImportLegacyColosseumKgOptions)
   };
 }
 
-export function buildLegacyColosseumKgGraphRecords(repoRoot: string, path = legacyColosseumKgEnrichmentPath()): GraphRecords | null {
+export function buildLegacyColosseumKgGraphRecords(
+  repoRoot: string,
+  path = legacyColosseumKgEnrichmentPath(),
+  recoveryManifestPath = legacyColosseumRecoveryManifestPath(),
+): GraphRecords | null {
   const enrichmentPath = resolve(path);
   if (!existsSync(enrichmentPath)) return null;
-  const sourceVersionId = `source-version:${SOURCE_ID}:${shortHash(filesFingerprint([enrichmentPath]))}`;
+  const manifestPath = resolve(recoveryManifestPath);
+  const sourcePaths = [enrichmentPath, ...(existsSync(manifestPath) ? [manifestPath] : [])];
+  const sourceVersionId = `source-version:${SOURCE_ID}:${shortHash(filesFingerprint(sourcePaths))}`;
   const currentFunctions = currentFunctionIndex(repoRoot);
   const entities: GraphEntity[] = [];
   const facts: GraphFact[] = [];
@@ -238,44 +294,68 @@ export function buildLegacyColosseumKgGraphRecords(repoRoot: string, path = lega
     else if (record.kind === "legacy_function_hint") addFunctionHint(record, currentFunctions, sourceVersionId, entities, facts, edges, chunks);
     else if (record.kind === "legacy_lever_doc") addLeverDoc(record, sourceVersionId, entities, facts, chunks);
   });
+  if (existsSync(manifestPath)) {
+    const manifest = readJson(manifestPath);
+    for (const value of Array.isArray(manifest.candidates) ? manifest.candidates : []) {
+      const candidate = objectValue(value);
+      const address = compact(stringValue(candidate.address));
+      if (!address) continue;
+      addRecoveryCandidate(
+        {
+          ...candidate,
+          kind: "legacy_recovery_candidate",
+          id: `legacy_recovery_candidate:${address}`,
+          evidence_ref: `legacy-recovery-manifest:${address}`,
+          requires_current_revalidation: true,
+        },
+        currentFunctions,
+        sourceVersionId,
+        entities,
+        facts,
+        edges,
+        chunks,
+      );
+    }
+  }
 
   return {
     sourceVersion: {
       id: sourceVersionId,
       sourceId: SOURCE_ID,
-      contentHash: shortHash(readFileSync(enrichmentPath, "utf8")),
-      sourcePaths: [enrichmentPath],
+      contentHash: shortHash(sourcePaths.map((sourcePath) => readFileSync(sourcePath, "utf8")).join("\n")),
+      sourcePaths,
     },
-    entities,
-    facts,
-    edges,
-    chunks,
+    entities: uniqueById(entities),
+    facts: uniqueById(facts),
+    edges: uniqueById(edges),
+    chunks: uniqueById(chunks),
   };
 }
 
 function addLever(record: LegacyKgRecord, sourceVersionId: string, entities: GraphEntity[], facts: GraphFact[], chunks: SearchChunk[]): void {
   const slug = compact(stringValue(record.slug));
   if (!slug) return;
-  const entityId = leverEntityId(slug);
+  const synthetic = Boolean(record.synthetic);
+  const entityId = leverEntityId(slug, synthetic);
   const payload = { ...record };
-  entities.push({ id: entityId, entityType: "legacy_lever", stableKey: slug, payload });
+  entities.push({ id: entityId, entityType: synthetic ? "legacy_synthetic_lever" : "legacy_lever", stableKey: slug, payload });
   facts.push({
     id: `fact:${SOURCE_ID}:lever:${shortHash(slug)}`,
     entityId,
     factType: "legacy_lever",
     payload,
-    confidence: 0.65,
+    confidence: synthetic ? 0.3 : 0.65,
     trustTier: "historical",
     evidenceRef: stringValue(record.evidence_ref),
     sourceVersionId,
-    status: "accepted",
+    status: synthetic ? "proposal" : "accepted",
   });
   chunks.push({
     id: `chunk:${SOURCE_ID}:lever:${shortHash(slug)}`,
     sourceId: SOURCE_ID,
     sourceVersionId,
     entityId,
-    title: `Legacy lever: ${stringValue(record.title, slug)}`,
+    title: `${synthetic ? "Unresolved historical lever" : "Legacy lever"}: ${stringValue(record.title, slug)}`,
     text: [slug, stringValue(record.title), stringValue(record.description), `crack_count=${numberValue(record.crack_count)}`, stringValue(record.source)]
       .filter(Boolean)
       .join("\n"),
@@ -298,31 +378,44 @@ function addCrack(
   if (!addr || !leverSlug) return;
   const current = currentForRecord(currentFunctions, record);
   const legacySourcePath = stringValue(record.source_path);
-  const crackEntityId = `legacy_crack:${shortHash(`${addr}:${leverSlug}:${stringValue(record.commit_sha)}`)}`;
+  const recordKey = stringValue(record.id, stringValue(record.evidence_ref, `${addr}:${leverSlug}:${stringValue(record.commit_sha)}`));
+  const crackEntityId = `legacy_crack:${shortHash(recordKey)}`;
   const targetEntityId = current?.entityId ?? legacyFunctionEntityId(addr);
   const payload = { ...record, current_function: current ?? null };
-  entities.push({ id: crackEntityId, entityType: "legacy_crack", stableKey: `${addr}:${leverSlug}:${stringValue(record.commit_sha)}`, payload });
+  entities.push({ id: crackEntityId, entityType: "legacy_crack", stableKey: recordKey, payload });
   if (!current) entities.push({ id: targetEntityId, entityType: "legacy_function", stableKey: addr, payload: { addr }, replace: false });
   if (legacySourcePath) addLegacySourceFile(entities, legacySourcePath);
   facts.push({
-    id: `fact:${SOURCE_ID}:crack:${shortHash(`${addr}:${leverSlug}:${stringValue(record.commit_sha)}`)}`,
+    id: `fact:${SOURCE_ID}:crack:${shortHash(recordKey)}`,
     entityId: targetEntityId,
     factType: "legacy_crack",
     payload,
-    confidence: 0.58,
+    confidence: Boolean(record.lever_synthetic) ? 0.3 : 0.45,
     trustTier: "historical",
     evidenceRef: stringValue(record.evidence_ref),
     sourceVersionId,
-    status: "accepted",
+    status: "stale",
   });
-  edges.push(edge(targetEntityId, "LEGACY_CRACKED_BY_LEVER", leverEntityId(leverSlug), sourceVersionId, stringValue(record.evidence_ref), 0.55));
-  edges.push(edge(targetEntityId, "HAS_LEGACY_LEVER_LESSON", crackEntityId, sourceVersionId, stringValue(record.evidence_ref), 0.45));
-  if (current?.fileEntityId) edges.push(edge(current.fileEntityId, "HAS_LEGACY_LEVER_LESSON", crackEntityId, sourceVersionId, stringValue(record.evidence_ref), 0.4));
-  if (legacySourcePath) edges.push(edge(fileEntityId(legacySourcePath), "HAS_LEGACY_LEVER_LESSON", crackEntityId, sourceVersionId, stringValue(record.evidence_ref), 0.35));
+  edges.push(
+    edge(
+      targetEntityId,
+      "LEGACY_CRACKED_BY_LEVER",
+      leverEntityId(leverSlug, Boolean(record.lever_synthetic)),
+      sourceVersionId,
+      stringValue(record.evidence_ref),
+      Boolean(record.lever_synthetic) ? 0.25 : 0.4,
+      "stale",
+    ),
+  );
+  edges.push(edge(targetEntityId, "HAS_LEGACY_LEVER_LESSON", crackEntityId, sourceVersionId, stringValue(record.evidence_ref), 0.45, "stale"));
+  if (current?.fileEntityId) edges.push(edge(current.fileEntityId, "HAS_LEGACY_LEVER_LESSON", crackEntityId, sourceVersionId, stringValue(record.evidence_ref), 0.4, "stale"));
+  if (legacySourcePath) edges.push(edge(fileEntityId(legacySourcePath), "HAS_LEGACY_LEVER_LESSON", crackEntityId, sourceVersionId, stringValue(record.evidence_ref), 0.35, "stale"));
 
   const text = [
     addr,
     current?.symbol,
+    Boolean(record.historical_conflict) ? "HISTORICAL CONFLICT: a later legacy snapshot disagrees with this outcome." : "",
+    "Historical evidence only; revalidate under the current dtk-template pipeline.",
     current?.sourcePath ?? legacySourcePath,
     legacySourcePath && current?.sourcePath && legacySourcePath !== current.sourcePath ? `legacy_source_path=${legacySourcePath}` : "",
     `lever=${leverSlug}`,
@@ -334,7 +427,7 @@ function addCrack(
     .filter(Boolean)
     .join("\n");
   chunks.push({
-    id: `chunk:${SOURCE_ID}:crack:${shortHash(`${addr}:${leverSlug}:${stringValue(record.commit_sha)}`)}`,
+    id: `chunk:${SOURCE_ID}:crack:${shortHash(recordKey)}`,
     sourceId: SOURCE_ID,
     sourceVersionId,
     entityId: current?.fileEntityId ?? targetEntityId,
@@ -345,7 +438,7 @@ function addCrack(
   });
   if (legacySourcePath && legacySourcePath !== current?.sourcePath) {
     chunks.push({
-      id: `chunk:${SOURCE_ID}:crack:${shortHash(`${addr}:${leverSlug}:${stringValue(record.commit_sha)}:${legacySourcePath}`)}`,
+      id: `chunk:${SOURCE_ID}:crack:${shortHash(`${recordKey}:${legacySourcePath}`)}`,
       sourceId: SOURCE_ID,
       sourceVersionId,
       entityId: fileEntityId(legacySourcePath),
@@ -419,7 +512,7 @@ function addFunctionHint(
   if (current?.fileEntityId) {
     edges.push(edge(current.fileEntityId, "HAS_LEGACY_FUNCTION_STATUS", targetEntityId, sourceVersionId, stringValue(record.evidence_ref), 0.25, "stale"));
   }
-  if (legacySourcePath) {
+  if (legacySourcePath && legacySourcePath !== current?.sourcePath) {
     edges.push(edge(fileEntityId(legacySourcePath), "HAS_LEGACY_FUNCTION_STATUS", targetEntityId, sourceVersionId, stringValue(record.evidence_ref), 0.2, "stale"));
   }
   chunks.push({
@@ -437,6 +530,7 @@ function addFunctionHint(
       stringValue(record.legacy_wall_class),
       finiteText(record.legacy_byte_pct, "legacy_byte_pct"),
       stringValue(record.notes),
+      "Historical evidence only; revalidate under the current dtk-template pipeline.",
     ]
       .filter(Boolean)
       .join("\n"),
@@ -457,6 +551,7 @@ function addFunctionHint(
         stringValue(record.legacy_wall_class),
         finiteText(record.legacy_byte_pct, "legacy_byte_pct"),
         stringValue(record.notes),
+        "Historical evidence only; revalidate under the current dtk-template pipeline.",
       ]
         .filter(Boolean)
         .join("\n"),
@@ -464,6 +559,66 @@ function addFunctionHint(
       payload,
     });
   }
+}
+
+function addRecoveryCandidate(
+  record: LegacyKgRecord,
+  currentFunctions: Map<string, CurrentFunction>,
+  sourceVersionId: string,
+  entities: GraphEntity[],
+  facts: GraphFact[],
+  edges: GraphEdge[],
+  chunks: SearchChunk[],
+): void {
+  const address = compact(stringValue(record.address));
+  if (!address) return;
+  const current = currentForRecord(currentFunctions, { ...record, addr: address });
+  const candidateEntityId = `legacy_recovery_candidate:${address}`;
+  const targetEntityId = current?.entityId ?? legacyFunctionEntityId(address);
+  const payload = { ...record, current_function: current ?? null };
+  entities.push({ id: candidateEntityId, entityType: "legacy_recovery_candidate", stableKey: address, payload });
+  if (!current) entities.push({ id: targetEntityId, entityType: "legacy_function", stableKey: address, payload: { addr: address }, replace: false });
+  facts.push({
+    id: `fact:${SOURCE_ID}:recovery_candidate:${shortHash(address)}`,
+    entityId: targetEntityId,
+    factType: "legacy_recovery_candidate",
+    payload,
+    confidence: recoveryCandidateConfidence(record),
+    trustTier: "historical",
+    evidenceRef: stringValue(record.evidence_ref),
+    sourceVersionId,
+    status: "stale",
+  });
+  edges.push(edge(targetEntityId, "HAS_LEGACY_RECOVERY_CANDIDATE", candidateEntityId, sourceVersionId, stringValue(record.evidence_ref), 0.35, "stale"));
+  if (current?.fileEntityId) {
+    edges.push(edge(current.fileEntityId, "HAS_LEGACY_RECOVERY_CANDIDATE", candidateEntityId, sourceVersionId, stringValue(record.evidence_ref), 0.3, "stale"));
+  }
+  const status = stringValue(record.status, "unknown");
+  const text = [
+    address,
+    stringValue(record.current_symbol, stringValue(record.legacy_symbol)),
+    `queue_status=${status}`,
+    finiteText(record.current_fuzzy_percent, "current_fuzzy_percent"),
+    finiteText(record.local_score, "legacy_permuter_diff_cost"),
+    stringValue(record.current_source),
+    stringValue(record.semantic_source),
+    stringValue(record.candidate_snapshot),
+    stringValue(record.warning),
+    stringValue(record.next_action),
+    "Historical evidence only; revalidate under the current dtk-template pipeline.",
+  ]
+    .filter(Boolean)
+    .join("\n");
+  chunks.push({
+    id: `chunk:${SOURCE_ID}:recovery_candidate:${shortHash(address)}`,
+    sourceId: SOURCE_ID,
+    sourceVersionId,
+    entityId: current?.fileEntityId ?? targetEntityId,
+    title: `Legacy recovery candidate: ${address} (${status})`,
+    text,
+    evidenceRef: stringValue(record.evidence_ref),
+    payload,
+  });
 }
 
 function addLeverDoc(record: LegacyKgRecord, sourceVersionId: string, entities: GraphEntity[], facts: GraphFact[], chunks: SearchChunk[]): void {
@@ -544,8 +699,8 @@ function objdiffSourceMap(objdiff: Record<string, unknown>): Map<string, string>
   return byUnit;
 }
 
-function leverEntityId(slug: string): string {
-  return `legacy_lever:${slug}`;
+function leverEntityId(slug: string, synthetic = false): string {
+  return synthetic ? `legacy_synth_lever:${shortHash(slug)}` : `legacy_lever:${slug}`;
 }
 
 function legacyFunctionEntityId(addr: string): string {
@@ -618,6 +773,34 @@ function optionalText(value: unknown): string | undefined {
   return text ? text : undefined;
 }
 
+function recoveryCandidateConfidence(record: LegacyKgRecord): number {
+  const status = stringValue(record.status);
+  const score = finiteNumber(record.local_score);
+  if (status === "closed_upstream_exact") return 0.8;
+  if (score === 0) return 0.65;
+  if (status === "near_exact") return 0.55;
+  return 0.35;
+}
+
+function validCommitSha(value: string | undefined): string | undefined {
+  return value && /^[0-9a-f]{7,40}$/i.test(value) ? value : undefined;
+}
+
+function humanizeSlug(value: string): string {
+  return compact(value.replace(/[_-]+/g, " ")) || value;
+}
+
+function historicalOutcomeConflict(row: Record<string, unknown>): boolean {
+  const percent = finiteNumber(row.byte_pct);
+  if (percent === undefined || percent >= 100) return false;
+  const delta = stringValue(row.delta).toLowerCase();
+  return delta.includes("100") || delta.includes("exact");
+}
+
 function compact(value: string): string {
   return value.replace(/\s+/g, " ").trim();
+}
+
+function uniqueById<T extends { id: string }>(records: T[]): T[] {
+  return [...new Map(records.map((record) => [record.id, record])).values()];
 }

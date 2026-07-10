@@ -127,7 +127,11 @@ export function knowledgeCuratorEnrichmentPath(): string {
 }
 
 export function legacyColosseumKgEnrichmentPath(): string {
-  return resolve(resourceGraphEnrichmentsRoot(), "legacy_colosseum_kg.jsonl");
+  return resolve(sourceDataRoot("legacy_colosseum_kg"), "legacy_colosseum_kg.jsonl");
+}
+
+export function legacyColosseumRecoveryManifestPath(): string {
+  return resolve(sourceDataRoot("legacy_colosseum_kg"), "recovery_manifest.json");
 }
 
 export function resourceGraphDbPath(): string {
