@@ -91,6 +91,14 @@ export interface Dashboard {
   piSessions?: JsonObject[];
   /** Telemetry (Track B): dense match-over-time snapshots. */
   reportSnapshots?: JsonObject[];
+  /** Observability: fuzzy-match distribution bucketed from the build report. */
+  fuzzyBands?: JsonObject | null;
+  /** Observability: per-function token/cost usage for the active run. */
+  functionTokens?: JsonObject[];
+  /** Observability: permuter-farm summary + active permutations. */
+  permuterFarms?: JsonObject | null;
+  /** Observability: top electricity cost per function across both permuter farms. */
+  functionCost?: JsonObject[];
 }
 
 export interface RunDetails {

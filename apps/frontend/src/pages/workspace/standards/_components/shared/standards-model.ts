@@ -15,6 +15,9 @@ export const STANDARD_FAMILY_OPTIONS = [
   "codegen_tactics",
   "names_defines_headers_and_prototypes",
   "pipeline_owned_verification",
+  "codegen_walls",
+  "reference_porting",
+  "campaign_strategy",
 ];
 export const STANDARD_DISPOSITION_OPTIONS = ["", "active", "merged", "workflow_only"];
 export const STANDARD_SEVERITY_OPTIONS = ["", "repair_required", "review_required", "evidence_required", "workflow_context", "workflow_only"];
@@ -39,6 +42,9 @@ const FAMILY_LABELS: Record<string, string> = {
   codegen_tactics: "Codegen Tactics",
   names_defines_headers_and_prototypes: "Names & Headers",
   pipeline_owned_verification: "Pipeline Verification",
+  codegen_walls: "Codegen Walls",
+  reference_porting: "Reference Porting",
+  campaign_strategy: "Campaign Strategy",
 };
 
 export function statusTone(status: string): string {

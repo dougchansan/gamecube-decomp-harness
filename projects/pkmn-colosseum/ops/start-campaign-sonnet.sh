@@ -16,7 +16,7 @@ export ORCH_AGENT_KERNEL_SPAWN_STRATEGY=auto
 ROOT=/Users/douglaswhittingham/gamecube-decomp-harness
 STATE="$ROOT/.decomp-orchestrator-state"
 LOG="$STATE/colosseum-sonnet.log"
-RUN="fb66ea56-8be0-4eba-be5b-886560ad5113"
+RUN="9f1986ac-be50-4246-b0d2-dba03e0165ff"
 MAXW="${MAXW:-3}"
 mkdir -p "$STATE"; cd "$ROOT"
 echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] starting CODEX->SONNET campaign run=$RUN max-workers=$MAXW" >> "$LOG"
@@ -30,7 +30,7 @@ while true; do
     --escalation --ladder projects/pkmn-colosseum/ladder.campaign.codex-tiered.json \
     --max-workers "$MAXW" --idle-sleep-ms 5000 --worker-thinking-level medium \
     --board-refresh-ms 15000 \
-    --candidate-limit 512 --queue-target-size 32 --candidate-window 512 --epoch-ready-queue-size 32 \
+    --candidate-limit 512 --queue-target-size 8 --candidate-window 512 --epoch-ready-queue-size 8 \
     --ttl-seconds 7200 \
     --exclude-sources src/game/gs_field_world.c,src/game/gs_task.c,src/dolphin/dvd/DVDFs.c,src/game/people/people_field.c \
     --target-exclude-sources src/game/people/people_field.c \

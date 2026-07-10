@@ -1191,7 +1191,11 @@ function median(values: number[]): number | null {
 // totals sum over every session. Medians of tokens-to-crack / time-to-crack are
 // computed in JS from epoch_targets (SQLite has no MEDIAN); they populate once
 // Track A writes the cracked-by denormalization.
-function modelBenchmark(stateDir: string, runId: string): JsonObject {
+// Cumulative across the whole campaign (all runs), NOT the active run. These
+// telemetry totals must survive a grind restart onto a fresh run — a per-run
+// filter blanks the leaderboard every time init-run mints a new run. `_runId`
+// is retained for call-site symmetry but intentionally unused.
+function modelBenchmark(stateDir: string, _runId: string): JsonObject {
   const store = openState(stateDir);
   try {
     const leaderboardRows = store.db
@@ -1207,12 +1211,11 @@ function modelBenchmark(stateDir: string, runId: string): JsonObject {
             SUM(ps.cost_usd) AS total_cost_usd
           FROM pi_sessions ps
           JOIN worker_state ws ON ws.target_claim_id = ps.target_claim_id
-          WHERE ps.run_id = ?
           GROUP BY ps.provider, ps.model, ps.thinking_level
           ORDER BY exacts DESC, attempts DESC
         `,
       )
-      .all(runId) as JsonObject[];
+      .all() as JsonObject[];
 
     const crackRows = store.db
       .query(
@@ -1220,10 +1223,10 @@ function modelBenchmark(stateDir: string, runId: string): JsonObject {
           SELECT cracked_by_provider AS provider, cracked_by_model AS model,
                  tokens_to_crack AS tokens_to_crack, time_to_crack_ms AS time_to_crack_ms
           FROM epoch_targets
-          WHERE session_id = ? AND cracked_by_model IS NOT NULL
+          WHERE cracked_by_model IS NOT NULL
         `,
       )
-      .all(runId) as JsonObject[];
+      .all() as JsonObject[];
 
     const tokensByModel = new Map<string, number[]>();
     const timeByModel = new Map<string, number[]>();
@@ -1287,6 +1290,226 @@ function reportSnapshotsForRun(stateDir: string, runId: string): JsonObject[] {
       completeUnits: numberOrNull(row.complete_units),
       totalUnits: numberOrNull(row.total_units),
       reportPath: row.report_path,
+    }));
+  } finally {
+    store.db.close();
+  }
+}
+
+// Panel: fuzzy-match distribution. Buckets every function in the build report
+// (functions live under unit.functions and, for older reports, section.functions)
+// by fuzzy_match_percent. When the report was generated without function-level
+// data (`available: false`) the frontend renders an empty-state instead of a
+// misleading all-zero donut.
+function fuzzyBandsFromReport(repoRoot: string): JsonObject {
+  const reportPath = repoRoot ? resolve(repoRoot, "build/GC6E01/report.json") : "";
+  const report = readJsonObject(reportPath);
+  const counts = { matched: 0, band90: 0, band80: 0, band70: 0, band50: 0, attempted: 0, unattacked: 0 };
+  let total = 0;
+  for (const unitValue of asArray(report.units)) {
+    const unit = asObject(unitValue);
+    const functions = [...asArray(unit.functions)];
+    for (const sectionValue of asArray(unit.sections)) functions.push(...asArray(asObject(sectionValue).functions));
+    for (const fnValue of functions) {
+      const fuzzy = numberValue(asObject(fnValue).fuzzy_match_percent, NaN);
+      if (!Number.isFinite(fuzzy)) continue;
+      total += 1;
+      if (fuzzy >= 100) counts.matched += 1;
+      else if (fuzzy >= 90) counts.band90 += 1;
+      else if (fuzzy >= 80) counts.band80 += 1;
+      else if (fuzzy >= 70) counts.band70 += 1;
+      else if (fuzzy >= 50) counts.band50 += 1;
+      else if (fuzzy >= 1) counts.attempted += 1;
+      else counts.unattacked += 1;
+    }
+  }
+  return { available: total > 0, total, reportPath, counts };
+}
+
+// Panel: per-function token/cost. Joins pi_sessions -> target_claims ->
+// epoch_targets so each worker invocation's usage is attributed to the symbol it
+// worked on. Escalation across models is folded into one per-function total; the
+// model that burned the most tokens is surfaced as the representative model.
+// Cumulative per-function token/cost across every run (grouped by symbol +
+// source_path, since epoch_targets are minted per-run so the same function has a
+// different et.id each run). `_runId` retained for call-site symmetry, unused.
+function functionTokenUsage(stateDir: string, _runId: string, limit = 30): JsonObject[] {
+  const store = openState(stateDir);
+  try {
+    const rows = store.db
+      .query(
+        `
+          SELECT
+            et.symbol AS symbol,
+            MAX(et.unit) AS unit,
+            et.source_path AS source_path,
+            ps.provider AS provider,
+            ps.model AS model,
+            COUNT(ps.id) AS sessions,
+            SUM(COALESCE(ps.input_tokens, 0)) AS input_tokens,
+            SUM(COALESCE(ps.output_tokens, 0)) AS output_tokens,
+            SUM(COALESCE(ps.input_tokens, 0) + COALESCE(ps.output_tokens, 0)) AS total_tokens,
+            SUM(COALESCE(ps.cost_usd, 0)) AS cost_usd
+          FROM pi_sessions ps
+          JOIN target_claims tc ON tc.id = ps.target_claim_id
+          JOIN epoch_targets et ON et.id = tc.epoch_target_id
+          GROUP BY et.symbol, et.source_path, ps.provider, ps.model
+        `,
+      )
+      .all() as JsonObject[];
+
+    interface FunctionTokenRow {
+      epochTargetId: string;
+      symbol: string;
+      unit: string;
+      sourcePath: string;
+      provider: string | null;
+      model: string | null;
+      sessions: number;
+      inputTokens: number;
+      outputTokens: number;
+      totalTokens: number;
+      costUsd: number;
+      topModelTokens: number;
+    }
+    const byFunction = new Map<string, FunctionTokenRow>();
+    for (const row of rows) {
+      const key = `${stringValue(row.symbol)}|${stringValue(row.source_path)}`;
+      const tokens = numberValue(row.total_tokens, 0);
+      const existing =
+        byFunction.get(key) ??
+        {
+          epochTargetId: key,
+          symbol: stringValue(row.symbol),
+          unit: stringValue(row.unit),
+          sourcePath: stringValue(row.source_path),
+          provider: null,
+          model: null,
+          sessions: 0,
+          inputTokens: 0,
+          outputTokens: 0,
+          totalTokens: 0,
+          costUsd: 0,
+          topModelTokens: -1,
+        };
+      existing.sessions += numberValue(row.sessions, 0);
+      existing.inputTokens += numberValue(row.input_tokens, 0);
+      existing.outputTokens += numberValue(row.output_tokens, 0);
+      existing.totalTokens += tokens;
+      existing.costUsd += numberValue(row.cost_usd, 0);
+      if (tokens > existing.topModelTokens) {
+        existing.topModelTokens = tokens;
+        existing.provider = stringValue(row.provider) || null;
+        existing.model = stringValue(row.model) || null;
+      }
+      byFunction.set(key, existing);
+    }
+    return [...byFunction.values()]
+      .sort((left, right) => right.totalTokens - left.totalTokens)
+      .slice(0, limit)
+      .map(({ topModelTokens: _topModelTokens, ...rest }) => rest as unknown as JsonObject);
+  } finally {
+    store.db.close();
+  }
+}
+
+function tableExists(db: Database, table: string): boolean {
+  const row = db.query("SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?").get(table);
+  return Boolean(row);
+}
+
+// Panel: permuter farm. The permuter_status / permuter_farm_summary tables are
+// owned by a separate process and may not exist yet, so every read is guarded by
+// a table-exists check; a missing pair returns `available: false` and the
+// frontend hides the panel rather than erroring.
+function permuterFarms(stateDir: string): JsonObject {
+  const store = openState(stateDir);
+  try {
+    const hasSummary = tableExists(store.db, "permuter_farm_summary");
+    const hasStatus = tableExists(store.db, "permuter_status");
+    if (!hasSummary && !hasStatus) return { available: false, farms: [], active: [] };
+    const hasPower = tableExists(store.db, "permuter_power");
+    const power = hasPower
+      ? new Map(
+          (
+            store.db.query(`SELECT farm, cpu_util, current_watts, cumulative_wh, cumulative_cost_usd FROM permuter_power`).all() as JsonObject[]
+          ).map((row) => [stringValue(row.farm), row]),
+        )
+      : new Map<string, JsonObject>();
+    const farms = hasSummary
+      ? (
+          store.db
+            .query(
+              `SELECT farm, workers, active, queued, wins, nowins, fails, updated_at
+               FROM permuter_farm_summary ORDER BY farm ASC`,
+            )
+            .all() as JsonObject[]
+        ).map((row) => {
+          const farm = stringValue(row.farm);
+          const powerRow = power.get(farm);
+          return {
+            farm,
+            workers: numberValue(row.workers, 0),
+            active: numberValue(row.active, 0),
+            queued: numberValue(row.queued, 0),
+            wins: numberValue(row.wins, 0),
+            nowins: numberValue(row.nowins, 0),
+            fails: numberValue(row.fails, 0),
+            updatedAt: stringValue(row.updated_at),
+            cpuUtil: powerRow ? numberOrNull(powerRow.cpu_util) : null,
+            currentWatts: powerRow ? numberOrNull(powerRow.current_watts) : null,
+            cumulativeKwh: powerRow ? numberValue(powerRow.cumulative_wh, 0) / 1000 : 0,
+            cumulativeCostUsd: powerRow ? numberValue(powerRow.cumulative_cost_usd, 0) : 0,
+          };
+        })
+      : [];
+    const active = hasStatus
+      ? (
+          store.db
+            .query(
+              `SELECT farm, function_name, state, worker, base_score, best_score, permutation_seconds, updated_at
+               FROM permuter_status WHERE state = 'active' ORDER BY permutation_seconds DESC`,
+            )
+            .all() as JsonObject[]
+        ).map((row) => ({
+          farm: stringValue(row.farm),
+          functionName: stringValue(row.function_name),
+          state: stringValue(row.state),
+          worker: stringValue(row.worker),
+          baseScore: numberOrNull(row.base_score),
+          bestScore: numberOrNull(row.best_score),
+          permutationSeconds: numberOrNull(row.permutation_seconds),
+          updatedAt: stringValue(row.updated_at),
+        }))
+      : [];
+    return { available: true, farms, active };
+  } finally {
+    store.db.close();
+  }
+}
+
+// Panel: electricity cost per function. permuter_function_energy accumulates
+// wh/cost for a function even after it completes (a completed function keeps
+// its accumulated row), so this is the top-25 most expensive functions across
+// both farms, not just the currently-active ones.
+function permuterFunctionCost(stateDir: string): JsonObject[] {
+  const store = openState(stateDir);
+  try {
+    if (!tableExists(store.db, "permuter_function_energy")) return [];
+    return (
+      store.db
+        .query(
+          `SELECT farm, function_name, cumulative_wh, cumulative_cost_usd, last_permutation_seconds, last_state
+           FROM permuter_function_energy ORDER BY cumulative_cost_usd DESC LIMIT 25`,
+        )
+        .all() as JsonObject[]
+    ).map((row) => ({
+      farm: stringValue(row.farm),
+      functionName: stringValue(row.function_name),
+      kwh: numberValue(row.cumulative_wh, 0) / 1000,
+      costUsd: numberValue(row.cumulative_cost_usd, 0),
+      permutationSeconds: numberOrNull(row.last_permutation_seconds),
+      state: stringValue(row.last_state),
     }));
   } finally {
     store.db.close();
@@ -1887,6 +2110,12 @@ async function runDashboard(paths: DashboardProjectContext): Promise<JsonObject>
     modelBenchmark: runId ? modelBenchmark(stateDir, runId) : { leaderboard: [] },
     piSessions: runId ? piSessionsForRun(stateDir, runId) : [],
     reportSnapshots: runId ? reportSnapshotsForRun(stateDir, runId) : [],
+    // Observability panels: fuzzy-match distribution (from the build report),
+    // per-function token/cost, and the permuter-farm status.
+    fuzzyBands: fuzzyBandsFromReport(repoRoot),
+    functionTokens: runId ? functionTokenUsage(stateDir, runId) : [],
+    permuterFarms: permuterFarms(stateDir),
+    functionCost: permuterFunctionCost(stateDir),
     touchedFiles: touchedFilesFromWorkerStates(allWorkerStates),
     events: runId ? eventsForRun(stateDir, runId, 40) : [],
     process: dashboardDeps().processStatus(stateDir, paths.project),

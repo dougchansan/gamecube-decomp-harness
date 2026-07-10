@@ -1,4 +1,11 @@
-import { ModelBenchmarkPanel, ProgressPanel } from "./components/progress-panel";
+import {
+  FunctionTokensPanel,
+  FuzzyBandPanel,
+  ModelBenchmarkPanel,
+  PermuterFarmPanel,
+  ProgressOverTimePanel,
+  ProgressPanel,
+} from "./components/progress-panel";
 import {
   type ImprovedMode,
   type WorkMode,
@@ -27,7 +34,11 @@ export function RunModePage(props: {
   return (
     <div className="grid gap-4">
       <ProgressPanel dashboard={props.dashboard} />
+      <ProgressOverTimePanel dashboard={props.dashboard} />
+      <FuzzyBandPanel dashboard={props.dashboard} />
       <ModelBenchmarkPanel dashboard={props.dashboard} />
+      <FunctionTokensPanel dashboard={props.dashboard} />
+      <PermuterFarmPanel dashboard={props.dashboard} />
       <WorkTables
         dashboard={props.dashboard}
         improvedMode={props.improvedMode}

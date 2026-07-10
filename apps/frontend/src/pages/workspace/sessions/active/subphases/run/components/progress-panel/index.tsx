@@ -6,6 +6,10 @@ import { TimelineChart } from "./_components/timeline-chart";
 import type { ChartMode, ChartRange } from "./_lib/types";
 
 export { ModelBenchmarkPanel } from "./_components/model-benchmark-panel";
+export { FuzzyBandPanel } from "./_components/fuzzy-band-panel";
+export { FunctionTokensPanel } from "./_components/function-tokens-panel";
+export { ProgressOverTimePanel } from "./_components/progress-over-time-panel";
+export { PermuterFarmPanel } from "./_components/permuter-farm-panel";
 
 function pp(value: number): string {
   if (!Number.isFinite(value)) return "n/a";

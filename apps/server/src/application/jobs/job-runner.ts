@@ -26,6 +26,7 @@ import {
   kgSources,
   kgStatus,
 } from "@server/core/knowledge/jobs/kg.js";
+import { permuterIngest } from "@server/core/knowledge/jobs/permuter-ingest.js";
 import { epochRun } from "@server/core/session-runtime/phases/running/epochs/epoch-run.js";
 import { integrationResolve } from "@server/core/session-runtime/phases/running/integration/index.js";
 import { recoverClaims } from "@server/core/session-runtime/phases/running/jobs/recover-claims.js";
@@ -78,6 +79,7 @@ export async function main(argv = process.argv.slice(2)): Promise<void> {
     else if (command === "kg-smoke") await kgSmoke(globals, args);
     else if (command === "kg-file-card") await kgFileCard(globals, args);
     else if (command === "kg-rank-features") await kgRankFeatures(globals, args);
+    else if (command === "permuter-ingest") await permuterIngest(globals, args);
     else if (command === "status") await status(globals);
     else throw new Error(`Unknown server job: ${command}`);
   } finally {
