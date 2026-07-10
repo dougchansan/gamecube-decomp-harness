@@ -63,7 +63,12 @@ def write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
 def main() -> int:
     args = parse_args()
     repo_root = args.repo_root.resolve()
-    wine = shutil.which("wine")
+    # Prefer wine, but this project's build runs MWCC through wibo (see the
+    # mwcc rule in build.ninja) and macOS hosts have no wine at all — without
+    # the fallback the probe always failed here and error'd every epoch
+    # boundary that refreshed this tool.
+    wibo = repo_root / "build" / "tools" / "wibo"
+    wine = shutil.which("wine") or (str(wibo) if wibo.exists() else None)
     compiler = repo_root / "build" / "compilers" / args.mw_version / "mwcceppc.exe"
     command = [wine or "wine", str(compiler), "-version"]
     proc = subprocess.run(command, cwd=repo_root, text=True, capture_output=True, check=False) if wine and compiler.exists() else None
