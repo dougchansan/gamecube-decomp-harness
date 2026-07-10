@@ -15,20 +15,23 @@
   ],
   "description": "Historical Colosseum decomp lever, wall, and cracked-by records imported from the previous campaign KG. These records are low-trust tactic hints only: current dtk-template report, objdiff, source, and runner validation remain authoritative.",
   "data_paths": [
-    "projects/pkmn-colosseum/knowledge/resource_graph/enrichments/legacy_colosseum_kg.jsonl"
+    "projects/pkmn-colosseum/knowledge/sources/code_context/legacy_colosseum_kg/data/legacy_colosseum_kg.jsonl",
+    "projects/pkmn-colosseum/knowledge/sources/code_context/legacy_colosseum_kg/data/recovery_manifest.json",
+    "projects/pkmn-colosseum/knowledge/sources/code_context/legacy_colosseum_kg/data/provenance.json"
   ],
   "index_outputs": [
     "projects/pkmn-colosseum/graph/graph.sqlite"
   ],
   "commands": {
-    "import": "bun run kg:import-legacy-colosseum-kg -- --project pkmn-colosseum",
+    "import": "bun run kg:import-legacy-colosseum-kg -- --project pkmn-colosseum --input <legacy-kg.db>",
     "index": "bun run kg:rebuild -- --project pkmn-colosseum --sources legacy_colosseum_kg",
-    "search": "bun run kg:search -- --project pkmn-colosseum --query <query> --sources legacy_colosseum_kg"
+    "search": "bun run kg:search -- --project pkmn-colosseum --query <query> --source legacy_colosseum_kg"
   },
   "capabilities": [
     "lever_lookup",
     "historical_crack_edges",
     "wall_taxonomy",
+    "legacy_recovery_queue",
     "low_trust_worker_hints"
   ]
 }
