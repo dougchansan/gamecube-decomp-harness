@@ -16,7 +16,9 @@ export ORCH_AGENT_KERNEL_SPAWN_STRATEGY=auto
 ROOT=/Users/douglaswhittingham/gamecube-decomp-harness
 STATE="$ROOT/.decomp-orchestrator-state"
 LOG="$STATE/colosseum-sonnet.log"
-RUN="9f1986ac-be50-4246-b0d2-dba03e0165ff"
+# Run id is read from the ops state file (written by init-run), not hardcoded, so
+# relaunching never leaves an edit in git. Override with RUN=... env if needed.
+RUN="${RUN:-$(cat /tmp/grind/harness_run.txt 2>/dev/null)}"
 MAXW="${MAXW:-3}"
 mkdir -p "$STATE"; cd "$ROOT"
 echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] starting CODEX->SONNET campaign run=$RUN max-workers=$MAXW" >> "$LOG"
