@@ -101,6 +101,39 @@ export interface Dashboard {
   functionCost?: JsonObject[];
   /** Escalation ladder: rungs actually exercised by this run, in rung order. */
   ladderRungs?: LadderRung[];
+  /** Every run with recent activity (parallel lanes), for the run/lane switcher. */
+  activeRuns?: ActiveRunLane[];
+  /** The currently-scoped run's open epoch, for the epoch-break button. */
+  activeEpoch?: ActiveEpochSummary | null;
+}
+
+/** One concurrently-running "lane" (e.g. a near-miss repair run vs a from-scratch recovery run). */
+export interface ActiveRunLane {
+  runId: string;
+  label: string;
+  laneKind: "from-scratch" | "near-miss" | "unknown";
+  goalKind: string;
+  goalValue: number;
+  status: string;
+  createdAt: string;
+  desiredWorkers: number;
+  activeWorkers: number;
+  epochOrdinal: number | null;
+  matchedPercent: number | null;
+  targetCount: number;
+}
+
+/** The active run's currently-open epoch, for the manual "epoch break" button. */
+export interface ActiveEpochSummary {
+  epochId: string;
+  ordinal: number;
+  status: string;
+  admitted: number;
+  available: number;
+  claimed: number;
+  remaining: number;
+  breakRequested: boolean;
+  breakRequestedAt: string | null;
 }
 
 /** One rung of the escalation ladder (kimi -> glm -> codex -> gpt-5.5 -> sonnet -> gpt-5.5 xhigh -> sol). */

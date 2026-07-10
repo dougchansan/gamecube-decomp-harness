@@ -19,11 +19,13 @@ function ErrorStrip({ error, onDismiss }: { error: string; onDismiss: () => void
   );
 }
 
-export function useWorkspaceNav(onNavigate: (route: AppRoute) => void, projectId: string | undefined): WorkspaceNav {
+export function useWorkspaceNav(onNavigate: (route: AppRoute) => void, route: Extract<AppRoute, { kind: "workspace" }>): WorkspaceNav {
+  const { projectId } = route;
   return {
     goToDashboard: () => onNavigate({ kind: "dashboard" }),
     goToSection: (section) => onNavigate({ kind: "workspace", section, projectId }),
     goToSession: (focus, sub?: SessionSubPage) => onNavigate({ kind: "workspace", section: "sessions", session: focus, sessionSub: sub, projectId }),
+    setRunId: (runId) => onNavigate({ ...route, runId }),
   };
 }
 

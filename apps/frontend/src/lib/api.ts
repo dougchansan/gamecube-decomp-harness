@@ -31,7 +31,10 @@ export async function fetchJson<T>(url: string, options?: RequestInit): Promise<
   return data as T;
 }
 
-export function dashboardParams(form: Pick<FormState, "projectId" | "usePathOverrides" | "repoRoot" | "stateDir" | "graphDbPath">): URLSearchParams {
+export function dashboardParams(
+  form: Pick<FormState, "projectId" | "usePathOverrides" | "repoRoot" | "stateDir" | "graphDbPath">,
+  runId?: string,
+): URLSearchParams {
   const params = new URLSearchParams();
   if (form.projectId) params.set("projectId", form.projectId);
   if (form.usePathOverrides) {
@@ -40,6 +43,7 @@ export function dashboardParams(form: Pick<FormState, "projectId" | "usePathOver
     params.set("stateDir", form.stateDir);
     params.set("graphDbPath", form.graphDbPath);
   }
+  if (runId) params.set("runId", runId);
   return params;
 }
 
@@ -61,8 +65,11 @@ export function loadConfig(): Promise<UiConfig> {
   return fetchJson<UiConfig>("/api/config");
 }
 
-export function fetchDashboard(form: Pick<FormState, "projectId" | "usePathOverrides" | "repoRoot" | "stateDir" | "graphDbPath">): Promise<Dashboard> {
-  return fetchJson<Dashboard>(`/api/dashboard?${dashboardParams(form)}`);
+export function fetchDashboard(
+  form: Pick<FormState, "projectId" | "usePathOverrides" | "repoRoot" | "stateDir" | "graphDbPath">,
+  runId?: string,
+): Promise<Dashboard> {
+  return fetchJson<Dashboard>(`/api/dashboard?${dashboardParams(form, runId)}`);
 }
 
 export function fetchProjectSessionState(

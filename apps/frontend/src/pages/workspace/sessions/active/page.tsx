@@ -49,12 +49,15 @@ function ActiveSessionSubPage(
   if (props.sub === "run") {
     return (
       <RunModePage
+        activeRunId={props.route.runId}
         busy={props.busy}
         dashboard={props.dashboard}
         form={props.form}
         improvedMode={props.improvedMode}
         improvedPage={props.improvedPage}
         onAction={props.onAction}
+        onEpochBreak={props.onEpochBreak}
+        onSelectRun={props.nav.setRunId}
         setForm={props.setForm}
         setImprovedMode={props.setImprovedMode}
         setImprovedPage={props.setImprovedPage}

@@ -315,6 +315,14 @@ export function App() {
     async (nextAction: Action, payload?: Record<string, unknown>) => {
       if (nextAction === "forceStop" && !window.confirm("Kill all workers immediately?\n\nIn-flight worker output is discarded and active claims are recovered. Committed work is not affected.")) return;
       if (
+        nextAction === "epochBreak" &&
+        !window.confirm(
+          "Force-close the current epoch now?\n\nThis commits whatever validated work has accumulated so far and opens a fresh epoch for the remaining targets. In-flight worker attempts are unaffected; their files stay uncommitted until they finish.",
+        )
+      ) {
+        return;
+      }
+      if (
         nextAction === "completeRun" &&
         !window.confirm("Close this legacy session?\n\nThis records a save point and marks the run complete. Use this when PR work is already shipped, closed, or intentionally carried forward. Stale ship/QA blockers will be overridden.")
       ) {
@@ -395,6 +403,14 @@ export function App() {
         } else if (nextAction === "forceStop") {
           await postJson("/api/process/stop", { ...body, recoverClaims: true });
           if (projectSessionPhase === "running") await postJson(projectSessionUrl("/api/project-session/running/stop", form), { ...body, stopReason: "manual_stop", manualStopMode: "hard_stop" });
+          await manualRefresh();
+        } else if (nextAction === "epochBreak") {
+          // body.runId is the payload's lane runId (payload always wins over the
+          // formBody default), so this targets whichever lane the operator has
+          // selected in the run view, not necessarily the project session's
+          // active run.
+          const result = asObject(await postJson<JsonObject>(projectSessionUrl("/api/run/epoch-break", form), body));
+          if (result.ok !== true) throw new Error(String(result.error || "Epoch break request failed."));
           await manualRefresh();
         } else if (nextAction === "init") {
           await postJson("/api/run/init", body);
@@ -551,6 +567,7 @@ export function App() {
         onAction={(nextAction) => void runAction(nextAction)}
         onCollapsedChange={setSidebarCollapsed}
         onDismissError={() => setErrorMessage("")}
+        onEpochBreak={(runId) => void runAction("epochBreak", { runId })}
         onNavigate={navigate}
         onOpenPr={(branch) => void runAction("openPr", { prBranch: branch })}
         onPrepareLocalPr={(branch) => void runAction("prepareLocalPr", { prBranch: branch })}

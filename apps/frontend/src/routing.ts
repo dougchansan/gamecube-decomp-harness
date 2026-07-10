@@ -28,7 +28,16 @@ export type SessionFocus = "active" | "new" | string;
 
 export type AppRoute =
   | { kind: "dashboard" }
-  | { kind: "workspace"; section: WorkspaceSection; projectId?: string; standardsView?: StandardsView; session?: SessionFocus; sessionSub?: SessionSubPage };
+  | {
+      kind: "workspace";
+      section: WorkspaceSection;
+      projectId?: string;
+      standardsView?: StandardsView;
+      session?: SessionFocus;
+      sessionSub?: SessionSubPage;
+      /** Selected run/lane for the sessions/run view's lane switcher (parallel babysit lanes). */
+      runId?: string;
+    };
 
 export const WORKSPACE_SECTIONS: ReadonlyArray<{ id: WorkspaceSection; label: string; description: string }> = [
   { id: "overview", label: "Overview", description: "Active session, PR gate, readiness, and next action." },
@@ -150,6 +159,7 @@ function workspaceRouteFromSearchParams(params: URLSearchParams): AppRoute | nul
     kind: "workspace",
     section,
     projectId: projectIdFromParams(params),
+    runId: params.get("runId") || undefined,
   } as const;
   if (section === "standards") {
     return {
@@ -189,6 +199,7 @@ function routeFromPathname(pathname: string, params: URLSearchParams): AppRoute 
     kind: "workspace" as const,
     section,
     projectId: projectIdFromParams(params),
+    runId: params.get("runId") || undefined,
   };
 
   if (section === "standards") {
@@ -231,6 +242,7 @@ export function routeToUrl(route: AppRoute): string {
     url.pathname = "/";
   } else {
     setProjectId(url, route.projectId);
+    if (route.runId) url.searchParams.set("runId", route.runId);
     if (route.section === "standards") {
       url.pathname = route.standardsView === "rendered" ? "/standards/rendered" : "/standards";
     } else if (route.section === "sessions") {

@@ -18,8 +18,9 @@ export interface SessionsApiRouteDeps {
   indexPrsForPrepare: (body: Record<string, unknown>) => Promise<unknown>;
   projectDefaults: (project: unknown) => unknown;
   projectToSummary: (project: unknown) => unknown;
+  requestEpochBreak: (stateDir: string, runId: string) => unknown;
   requestPaths: (url: URL, options: { useDefaultProject?: boolean }) => { project?: unknown; stateDir: string };
-  runDashboard: (paths: unknown) => Promise<unknown>;
+  runDashboard: (paths: unknown, runId?: string) => Promise<unknown>;
   runDetails: (stateDir: string, runId: string, project: unknown) => unknown;
   syncGitForPrepare: (body: Record<string, unknown>) => Promise<unknown>;
   syncProjectIntake: (body: Record<string, unknown>) => Promise<unknown>;
@@ -51,11 +52,17 @@ export async function handleSessionsApiRoute(req: Request, url: URL, deps: Sessi
   if (url.pathname === "/api/dashboard/events") return deps.dashboardEvents(url);
   if (url.pathname === "/api/dashboard") {
     const paths = deps.requestPaths(url, { useDefaultProject: true });
-    return deps.json(await deps.runDashboard(paths));
+    return deps.json(await deps.runDashboard(paths, url.searchParams.get("runId") || undefined));
   }
   if (url.pathname === "/api/run/details") {
     const paths = deps.requestPaths(url, { useDefaultProject: true });
     return deps.json(deps.runDetails(paths.stateDir, url.searchParams.get("runId") || "", paths.project ?? null));
+  }
+  if (url.pathname === "/api/run/epoch-break" && req.method === "POST") {
+    const paths = deps.requestPaths(url, { useDefaultProject: true });
+    const body = await requestBody(req);
+    const runId = String(body.runId || url.searchParams.get("runId") || "");
+    return deps.json(deps.requestEpochBreak(paths.stateDir, runId));
   }
   if (url.pathname === "/api/project/sync" && req.method === "POST") {
     return deps.json(await deps.syncProjectIntake(await requestBody(req)));

@@ -432,6 +432,43 @@ function availableCountForEpoch(store: StateStore, epochId: string): number {
   return Number(row?.count ?? 0);
 }
 
+export interface EpochBreakRequestResult {
+  epochId: string;
+  ordinal: number;
+  alreadyRequested: boolean;
+  requestedAt: string;
+}
+
+/**
+ * Marks the run's currently active epoch for an early, manual close ("epoch
+ * break"). This never touches git or the epoch worktree directly — the epoch
+ * commit/report pipeline is owned by whichever process is running the babysit
+ * loop (run-loop.ts), which polls this flag on its own schedule via
+ * `epochBreakRequested` and, once it is safe to do so, runs the exact same
+ * `runEpochCycle` path a normal epoch boundary uses. Writing only to
+ * `routing_summary_json` (an existing column, never mutated while an epoch is
+ * active) keeps this forward/backward compatible with a live orchestrator.sqlite
+ * — no schema migration required.
+ */
+export function requestEpochBreak(store: StateStore, sessionId: string): EpochBreakRequestResult | null {
+  return immediateTransaction(store.db, () => {
+    const epoch = activeSchedulerEpoch(store, sessionId);
+    if (!epoch) return null;
+    const alreadyRequested = epoch.routingSummary.breakRequested === true;
+    if (alreadyRequested) {
+      return { epochId: epoch.id, ordinal: epoch.ordinal, alreadyRequested: true, requestedAt: String(epoch.routingSummary.breakRequestedAt ?? "") };
+    }
+    const requestedAt = now();
+    const routingSummary = { ...epoch.routingSummary, breakRequested: true, breakRequestedAt: requestedAt };
+    store.db.query("UPDATE epochs SET routing_summary_json = ? WHERE id = ?").run(JSON.stringify(routingSummary), epoch.id);
+    return { epochId: epoch.id, ordinal: epoch.ordinal, alreadyRequested: false, requestedAt };
+  });
+}
+
+export function epochBreakRequested(epoch: Pick<SchedulerEpochRecord, "routingSummary"> | null): boolean {
+  return epoch?.routingSummary.breakRequested === true;
+}
+
 export function schedulerEpochProgress(store: StateStore, epochId: string): EpochProgressSummary {
   const epoch = store.db.query("SELECT * FROM epochs WHERE id = ?").get(epochId) as Record<string, unknown> | undefined;
   if (!epoch) throw new Error(`Epoch not found: ${epochId}`);

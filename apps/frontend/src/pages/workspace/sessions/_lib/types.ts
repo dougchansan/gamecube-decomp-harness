@@ -11,6 +11,7 @@ export interface SessionsPageProps {
   improvedPage: number;
   nav: WorkspaceNav;
   onAction: (action: DashboardAction) => void;
+  onEpochBreak: (runId: string) => void;
   onOpenPr: (branch: string) => void;
   onPrepareLocalPr: (branch: string) => void;
   onSetReviewState: (branch: string, subState: string) => void;

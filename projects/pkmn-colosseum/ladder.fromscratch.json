@@ -1,9 +1,9 @@
 {
   "id": "colosseum-fromscratch",
   "mode": "escalation",
-  "_note": "From-scratch lane: cheap codex-spark first pass skims easy fresh functions, gpt-5.5 high decompiles the rest. Efficient — reserves the strong model for hard fresh fns.",
+  "_note": "From-scratch lane. glm-5.2 (cheap, handles full worker context) gives the first pass on every fresh function; gpt-5.5 high decompiles the ones glm can't. codex-spark removed: its context window overflows on the worker packet (context_length_exceeded on all sizes).",
   "rungs": [
-    { "provider": "openai-codex", "model": "gpt-5.3-codex-spark", "thinking": "medium", "budget": { "agentTimeoutSeconds": 1500, "ttlSeconds": 7200, "maxAttempts": 1 } },
+    { "provider": "zai", "model": "glm-5.2", "thinking": "low", "budget": { "agentTimeoutSeconds": 1500, "ttlSeconds": 7200, "maxAttempts": 1 } },
     { "provider": "openai-codex", "model": "gpt-5.5", "thinking": "high", "budget": { "agentTimeoutSeconds": 2400, "ttlSeconds": 7200, "maxAttempts": 2 } }
   ]
 }

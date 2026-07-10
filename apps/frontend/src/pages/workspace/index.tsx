@@ -37,7 +37,7 @@ function WorkspaceSectionContent(props: ProjectWorkspaceProps & { nav: Workspace
 
 export function ProjectWorkspace(props: ProjectWorkspaceProps) {
   const view = deriveSessionView(props.dashboard, props.config, props.form);
-  const nav = useWorkspaceNav(props.onNavigate, props.route.projectId);
+  const nav = useWorkspaceNav(props.onNavigate, props.route);
   return (
     <WorkspaceLayout
       collapsed={props.collapsed}

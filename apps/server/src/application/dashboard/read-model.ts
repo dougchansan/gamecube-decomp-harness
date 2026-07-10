@@ -4,7 +4,14 @@ import { resolve } from "node:path";
 import { latestCheckpointSummary } from "@server/core/session-runtime/phases/pr/checkpoint";
 import { runningEpochCheckpointProgress, runningEpochHistory } from "@server/core/session-runtime/phases/running/epochs";
 import { knowledgeCuratorEnrichmentPath } from "@server/core/knowledge";
-import { openState, statusSnapshot } from "@server/core/session-runtime/run-state";
+import {
+  activeSchedulerEpoch,
+  epochBreakRequested,
+  openState,
+  requestEpochBreak as requestEpochBreakState,
+  schedulerEpochProgress,
+  statusSnapshot,
+} from "@server/core/session-runtime/run-state";
 import { latestDashboardArtifactPayload } from "@server/core/orchestrator-state";
 import { activeProjectSessionProjection } from "@server/core/project-session/store";
 import { projectToSummary as defaultProjectToSummary, type ProjectRuntimeContext, type ResolvedProject } from "@server/core/project-registry";
@@ -43,11 +50,12 @@ function readModelLog(stream: "stdout" | "stderr" | "ui", text: string): void {
 export function createDashboardReadModel(dependencies: DashboardReadModelDependencies): {
   dashboardStableSignature: (dashboard: JsonObject) => string;
   dashboardTick: (dashboard: JsonObject) => JsonObject;
-  runDashboard: (paths: DashboardProjectContext) => Promise<JsonObject>;
+  requestEpochBreak: (stateDir: string, runId: string) => JsonObject;
+  runDashboard: (paths: DashboardProjectContext, explicitRunId?: string) => Promise<JsonObject>;
   runDetails: (stateDir: string, explicitRunId?: string, project?: ResolvedProject | null) => JsonObject;
 } {
   readModelDependencies = dependencies;
-  return { dashboardStableSignature, dashboardTick, runDashboard, runDetails };
+  return { dashboardStableSignature, dashboardTick, requestEpochBreak, runDashboard, runDetails };
 }
 
 function asObject(value: unknown): JsonObject {
@@ -2190,7 +2198,144 @@ function runScopedTrustedReport(report: JsonObject, runCreatedAt: string, report
   return report;
 }
 
-async function runDashboard(paths: DashboardProjectContext): Promise<JsonObject> {
+// Multiple babysit lanes (e.g. a near-miss repair lane and a from-scratch
+// recovery lane) can run concurrently against the same orchestrator sqlite.
+// This lists every run with recent activity so the dashboard can offer a lane
+// switcher instead of only ever showing whichever run was created last
+// (the old activeSessionRunId/getLatestRun single-run behavior).
+const ACTIVE_RUN_WINDOW_MS = 30 * 60 * 1000; // 30 min: just-started runs; live lanes surface via running-worker EXISTS
+
+// Heuristic lane label: an epoch whose admitted targets are almost entirely
+// fuzzy-0 (never attempted) is a "from-scratch" recovery lane; anything else
+// with meaningful existing fuzzy match is a "near-miss" repair lane.
+function runLaneKind(zeroFuzzyTargets: number, totalTargets: number): "from-scratch" | "near-miss" | "unknown" {
+  if (totalTargets === 0) return "unknown";
+  return zeroFuzzyTargets / totalTargets >= 0.8 ? "from-scratch" : "near-miss";
+}
+
+// Cheap per-lane summary: a handful of aggregate COUNT/MAX queries plus the
+// already-cached "current" board snapshot for matched%, never a full
+// per-run payload rebuild (that's what runDashboard/runDetails are for).
+function activeRunsForDashboard(stateDir: string, limit = 12): JsonObject[] {
+  const store = openState(stateDir);
+  try {
+    const sinceIso = new Date(Date.now() - ACTIVE_RUN_WINDOW_MS).toISOString();
+    const workerSinceIso = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const rows = store.db
+      .query(
+        `
+          SELECT
+            runs.id,
+            runs.goal_kind,
+            runs.goal_value,
+            runs.desired_workers,
+            runs.status,
+            runs.created_at,
+            (
+              SELECT COUNT(*) FROM worker_state
+              JOIN epoch_targets ON epoch_targets.id = worker_state.epoch_target_id
+              WHERE epoch_targets.session_id = runs.id AND worker_state.lifecycle_status = 'running'
+                AND worker_state.started_at >= ?
+            ) AS active_workers,
+            (
+              SELECT COUNT(*) FROM epoch_targets WHERE epoch_targets.session_id = runs.id
+            ) AS target_count,
+            (
+              SELECT COUNT(*) FROM epoch_targets
+              WHERE epoch_targets.session_id = runs.id AND epoch_targets.baseline_score <= 0.0001
+            ) AS zero_fuzzy_count,
+            (
+              SELECT MAX(epochs.ordinal) FROM epochs WHERE epochs.session_id = runs.id
+            ) AS latest_epoch_ordinal
+          FROM runs
+          WHERE runs.created_at >= ?
+             OR EXISTS (
+               SELECT 1 FROM worker_state
+               JOIN epoch_targets ON epoch_targets.id = worker_state.epoch_target_id
+               WHERE epoch_targets.session_id = runs.id AND worker_state.lifecycle_status = 'running'
+                 AND worker_state.started_at >= ?
+             )
+          ORDER BY runs.created_at DESC
+          ${sqlLimit(limit)}
+        `,
+      )
+      .all(workerSinceIso, sinceIso, workerSinceIso) as JsonObject[];
+
+    return rows.map((row) => {
+      const runId = stringValue(row.id);
+      const targetCount = numberValue(row.target_count);
+      const zeroFuzzyCount = numberValue(row.zero_fuzzy_count);
+      const laneKind = runLaneKind(zeroFuzzyCount, targetCount);
+      const board = loadCurrentBoard(stateDir, runId);
+      return {
+        runId,
+        label: `${laneKind} · ${runId.slice(0, 8)}`,
+        laneKind,
+        goalKind: stringValue(row.goal_kind),
+        goalValue: numberValue(row.goal_value, NaN),
+        status: stringValue(row.status),
+        createdAt: stringValue(row.created_at),
+        desiredWorkers: numberValue(row.desired_workers),
+        activeWorkers: numberValue(row.active_workers),
+        epochOrdinal: numberOrNull(row.latest_epoch_ordinal),
+        matchedPercent: numberOrNull(asObject(board.measures).matched_code_percent),
+        targetCount,
+      };
+    });
+  } catch (error) {
+    readModelLog("stderr", `active runs read failed: ${error instanceof Error ? error.message : String(error)}`);
+    return [];
+  } finally {
+    store.db.close();
+  }
+}
+
+// Active-epoch summary for the "epoch break" button: whether one is open,
+// its progress, and whether a manual break is already pending.
+function activeEpochSummary(stateDir: string, runId: string): JsonObject | null {
+  if (!runId) return null;
+  const store = openState(stateDir);
+  try {
+    const epoch = activeSchedulerEpoch(store, runId);
+    if (!epoch) return null;
+    const progress = schedulerEpochProgress(store, epoch.id);
+    return {
+      epochId: epoch.id,
+      ordinal: epoch.ordinal,
+      status: epoch.status,
+      admitted: progress.admitted,
+      available: progress.available,
+      claimed: progress.claimed,
+      remaining: progress.remaining,
+      breakRequested: epochBreakRequested(epoch),
+      breakRequestedAt: stringValue(epoch.routingSummary.breakRequestedAt) || null,
+    };
+  } finally {
+    store.db.close();
+  }
+}
+
+// Marks the run's active epoch for an early manual close. Never touches git
+// or the epoch worktree: it only flips a flag the running babysit loop
+// (run-loop.ts) polls on its own schedule and honors once no local worker is
+// mid-attempt, via the exact same commit/report pipeline a normal epoch
+// boundary uses. See requestEpochBreak in run-state/epochs.ts for why this is
+// safe to call from the HTTP process without racing the babysit.
+function requestEpochBreak(stateDir: string, runId: string): JsonObject {
+  if (!runId) return { ok: false, error: "runId is required" };
+  const store = openState(stateDir);
+  try {
+    const result = requestEpochBreakState(store, runId);
+    if (!result) return { ok: false, error: "This run has no open epoch to break." };
+    return { ok: true, ...result };
+  } catch (error) {
+    return { ok: false, error: error instanceof Error ? error.message : String(error) };
+  } finally {
+    store.db.close();
+  }
+}
+
+async function runDashboard(paths: DashboardProjectContext, explicitRunId?: string): Promise<JsonObject> {
   const { stateDir } = paths;
   let repoRoot = paths.repoRoot;
   const store = openState(stateDir);
@@ -2200,7 +2345,7 @@ async function runDashboard(paths: DashboardProjectContext): Promise<JsonObject>
   let runDesiredWorkers = 0;
   let projectSession: JsonObject | null = null;
   try {
-    status = statusSnapshot(store);
+    status = statusSnapshot(store, explicitRunId);
     const run = asObject(status.run);
     runId = stringValue(run.id);
     runCreatedAt = stringValue(run.createdAt);
@@ -2312,5 +2457,11 @@ async function runDashboard(paths: DashboardProjectContext): Promise<JsonObject>
         })
       : null,
     prs: dashboardDeps().buildPrRecordsView(stateDir, runId),
+    // Parallel-lane support: every run with recent activity (for the lane
+    // switcher) and the currently-scoped run's open epoch (for the epoch
+    // break button). Cheap relative to the rest of this payload — a handful
+    // of aggregate queries plus already-cached board snapshots.
+    activeRuns: activeRunsForDashboard(stateDir),
+    activeEpoch: runId ? activeEpochSummary(stateDir, runId) : null,
   };
 }

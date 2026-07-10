@@ -17,6 +17,7 @@ export type DashboardAction =
   | "startWork"
   | "stop"
   | "forceStop"
+  | "epochBreak"
   | "pausePr"
   | "resumePr"
   | "checkpoint"
@@ -127,6 +128,8 @@ export interface WorkspaceNav {
   goToDashboard: () => void;
   goToSection: (section: Extract<AppRoute, { kind: "workspace" }>["section"]) => void;
   goToSession: (focus: SessionFocus, sub?: SessionSubPage) => void;
+  /** Selects a run/lane for the run view's lane switcher; persists in the URL. */
+  setRunId: (runId: string | undefined) => void;
 }
 
 export interface ProjectWorkspaceProps {
@@ -142,6 +145,7 @@ export interface ProjectWorkspaceProps {
   onAction: (action: DashboardAction) => void;
   onCollapsedChange: (collapsed: boolean) => void;
   onDismissError: () => void;
+  onEpochBreak: (runId: string) => void;
   onGrainSettingsChange: (updates: GrainSettingsPatch) => void;
   onNavigate: (route: AppRoute) => void;
   onOpenPr: (branch: string) => void;

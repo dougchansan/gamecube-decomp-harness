@@ -386,7 +386,7 @@ function dashboardEvents(url: URL): Response {
     if (!controllerRef || closed || inFlight) return;
     inFlight = true;
     try {
-      const dashboard = await dashboardReadModel.runDashboard(paths);
+      const dashboard = await dashboardReadModel.runDashboard(paths, url.searchParams.get("runId") || undefined);
       const signature = dashboardReadModel.dashboardStableSignature(dashboard);
       const payload = JSON.stringify(dashboard);
       if (force || signature !== lastSignature) {
@@ -453,8 +453,9 @@ async function handleApi(req: Request, url: URL): Promise<Response> {
     indexPrsForPrepare: preparingRuntime.indexPrsForPrepare,
     projectDefaults: (project) => projectContext.projectDefaults(project as ResolvedProject | null),
     projectToSummary: (project) => projectToSummary(project as ResolvedProject),
+    requestEpochBreak: (stateDir, runId) => dashboardReadModel.requestEpochBreak(stateDir, runId),
     requestPaths: projectContext.requestPaths,
-    runDashboard: (paths) => dashboardReadModel.runDashboard(paths as ProjectRuntimeContext),
+    runDashboard: (paths, runId) => dashboardReadModel.runDashboard(paths as ProjectRuntimeContext, runId),
     runDetails: (stateDir, runId, project) => dashboardReadModel.runDetails(stateDir, runId, project as ResolvedProject | null),
     syncGitForPrepare: preparingRuntime.syncGitForPrepare,
     syncProjectIntake: preparingRuntime.syncProjectIntake,

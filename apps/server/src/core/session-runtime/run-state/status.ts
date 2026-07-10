@@ -2,10 +2,16 @@ import { withBusyRetry, type StateStore } from "@server/core/orchestrator-state"
 import { activeSchedulerEpoch, schedulerEpochProgress } from "./epochs.js";
 import { activeWorkerCount } from "./worker-state.js";
 import { blockedAdmittedTargetCount, schedulableTargetCount } from "./target-pressure.js";
-import { getLatestRun } from "./runs.js";
+import { getLatestRun, getRun } from "./runs.js";
 
-export function statusSnapshot(store: StateStore): Record<string, unknown> {
-  const run = getLatestRun(store);
+/**
+ * Snapshot of one run's scheduler/worker/event counters. Defaults to the most
+ * recently created run (today's single-run behavior); pass `explicitRunId` to
+ * scope the snapshot to a specific run instead (e.g. the dashboard's lane
+ * switcher), falling back to the latest run when that id doesn't resolve.
+ */
+export function statusSnapshot(store: StateStore, explicitRunId?: string): Record<string, unknown> {
+  const run = (explicitRunId ? getRun(store, explicitRunId) : null) ?? getLatestRun(store);
   if (!run) return { runs: 0 };
   const activeEpoch = activeSchedulerEpoch(store, run.id);
   const schedulerEpoch = activeEpoch ? schedulerEpochProgress(store, activeEpoch.id) : null;

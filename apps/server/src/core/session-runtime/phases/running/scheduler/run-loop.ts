@@ -9,6 +9,7 @@ import {
   blockedAdmittedTargetCount,
   closeSchedulerEpoch,
   DEFAULT_WORKER_TTL_SECONDS,
+  epochBreakRequested,
   getLatestRun,
   getRun,
   nextUnhandledEvent,
@@ -1119,9 +1120,23 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
               created_by: "run-loop",
             });
             nextEpochAllowedMs = Date.now() + epochRetryMs;
-          } else if (epochResult.progress.admitted > 0 && epochResult.progress.remaining === 0 && epochResult.progress.claimed === 0 && runningWorkers.size === 0) {
-            didWork = true;
-            launchEpochCycle(`scheduler epoch ${epochResult.progress.ordinal} completed`, epochResult.epoch.id);
+          } else if (epochResult.progress.admitted > 0 && runningWorkers.size === 0) {
+            const epochFilled = epochResult.progress.remaining === 0 && epochResult.progress.claimed === 0;
+            const manualBreak = !epochFilled && epochBreakRequested(epochResult.epoch);
+            if (epochFilled || manualBreak) {
+              didWork = true;
+              // A manual break commits whatever is validated so far and reopens
+              // a fresh epoch for the remaining targets; commitEpochSnapshot
+              // already excludes any still-active claim's files from the
+              // commit, so firing early here is exactly as safe as the normal
+              // (epoch-filled) boundary, just earlier.
+              launchEpochCycle(
+                manualBreak
+                  ? `manual epoch break requested (epoch ${epochResult.progress.ordinal}, ${epochResult.progress.remaining} targets remaining, ${epochResult.progress.claimed} claimed)`
+                  : `scheduler epoch ${epochResult.progress.ordinal} completed`,
+                epochResult.epoch.id,
+              );
+            }
           }
         }
       }
