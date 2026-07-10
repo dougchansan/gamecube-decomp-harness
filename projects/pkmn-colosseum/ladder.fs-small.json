@@ -1,0 +1,5 @@
+{ "id":"fs-small","mode":"escalation","_note":"Tiny+small (<=256B) fresh fns. glm cheap first; codex-spark as a TEST rung (may still hit context_length on the worker packet — watch it).",
+  "rungs":[
+    {"provider":"zai","model":"glm-5.2","thinking":"low","budget":{"agentTimeoutSeconds":1200,"ttlSeconds":7200,"maxAttempts":1}},
+    {"provider":"openai-codex","model":"gpt-5.3-codex-spark","thinking":"medium","budget":{"agentTimeoutSeconds":1200,"ttlSeconds":7200,"maxAttempts":1}}
+  ]}

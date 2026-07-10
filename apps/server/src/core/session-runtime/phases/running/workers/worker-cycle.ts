@@ -1457,6 +1457,9 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
           project,
           initialBoardPath,
           workerLogDir: outputDir,
+          // Lean-context gate: small-context models (e.g. gpt-5.3-codex-spark) get
+          // the trimmed packet so they do not overflow. See LEAN_CONTEXT_MODELS.
+          model: runModel,
         });
         const providerGuidance = providerWorkerPromptGuidance(runProvider);
         const extraGuidance = [decompStyleRule(), providerGuidance].filter(Boolean).join("\n\n");

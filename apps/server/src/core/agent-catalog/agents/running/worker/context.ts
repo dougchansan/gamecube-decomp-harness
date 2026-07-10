@@ -30,7 +30,33 @@ export interface WorkerPromptOptions {
   project?: RunProjectMetadata;
   initialBoardPath: string;
   workerLogDir: string;
+  /**
+   * Model that will run this worker (from the claimed escalation rung). When the
+   * model is in LEAN_CONTEXT_MODELS the packet is rendered with the trimmed
+   * template so small-context models do not overflow. Omitted / unknown model =>
+   * byte-identical full-context behavior.
+   */
+  model?: string;
 }
+
+/**
+ * Models whose context window is too small for the full worker packet (full
+ * code-quality standards XML + KG file card + source). These render the lean
+ * template instead. Extend by adding more model ids.
+ */
+export const LEAN_CONTEXT_MODELS: ReadonlySet<string> = new Set(["gpt-5.3-codex-spark"]);
+
+export function isLeanContextModel(model?: string | null): boolean {
+  return typeof model === "string" && LEAN_CONTEXT_MODELS.has(model.trim().toLowerCase());
+}
+
+// Source larger than this (chars) gets trimmed for lean packets: file head
+// (includes / top-level decls) plus a window around the target symbol, so a
+// small-context model still sees the function to edit without the whole file.
+const LEAN_SOURCE_MAX_CHARS = 16000;
+const LEAN_SOURCE_HEAD_CHARS = 2000;
+const LEAN_SOURCE_SYMBOL_BEFORE_CHARS = 600;
+const LEAN_SOURCE_SYMBOL_AFTER_CHARS = 9000;
 
 export interface WorkerPromptInputXmlOptions {
   packet: Record<string, unknown>;
@@ -64,6 +90,32 @@ const WORKER_PACKET_CONTEXT_TEMPLATE = `<task>
 {{BASELINE_XML}}
 
 {{DECOMP_STANDARDS_XML}}
+
+{{AVAILABLE_TOOLS_XML}}
+
+{{CANONICAL_TOOL_PATHS_XML}}
+
+`;
+
+// Trimmed packet for small-context models (LEAN_CONTEXT_MODELS). Keeps the task,
+// target (incl. current source), baseline, essential tools, and canonical tool
+// paths. Drops the full standards XML (reduced to a one-line reminder) and the KG
+// file card entirely.
+const WORKER_PACKET_LEAN_CONTEXT_TEMPLATE = `<task>
+    Decompile this one claimed target toward exact match.
+    Use the target (symbol, address, size, unit, source_path, and current source), the baseline score, and the available tools below, then follow the system prompt for workflow, edit boundary, validation, continuation behavior, and checkpoint-note guidance.
+    When a repair_request block is present, the runner checkpointed your previous worktree and did not accept exact match. Address those reasons first.
+</task>
+
+<decomp_standards_reminder>
+    Write maintainable struct-access C, not obfuscated byte-matches. Never use type-erasing casts, asm wrappers, inline assembly, pointer-arithmetic-only access, or score-only tricks (they fail the QA gate). Preserve or improve the objdiff match.
+</decomp_standards_reminder>
+
+{{REPAIR_REQUEST_XML}}
+
+{{TARGET_XML}}
+
+{{BASELINE_XML}}
 
 {{AVAILABLE_TOOLS_XML}}
 
@@ -175,6 +227,52 @@ function targetFileXml(
 
 function targetXml(target: Record<string, unknown>, baseline: Record<string, unknown>, primarySourcePath: string, primarySourceAbs: string): string {
   return ["    <target>", jsonBlockXml("details_json", target), targetFileXml(target, baseline, primarySourcePath, primarySourceAbs, "        "), "    </target>"].join("\n");
+}
+
+// Trim a large source file for lean packets: keep the file head (includes /
+// top-level decls) plus a window around the target symbol so the model still
+// sees the function it must edit. Small files are returned whole.
+function leanTrimSource(source: string, targetSymbol: string | null): string {
+  if (source.length <= LEAN_SOURCE_MAX_CHARS) return source;
+  const head = source.slice(0, LEAN_SOURCE_HEAD_CHARS);
+  const symbolIndex = targetSymbol ? source.indexOf(targetSymbol, LEAN_SOURCE_HEAD_CHARS) : -1;
+  if (symbolIndex < 0) {
+    return `${head}\n\n/* [lean-context: file truncated; target symbol not located — use read/grep tools for the rest] */\n`;
+  }
+  const windowStart = Math.max(LEAN_SOURCE_HEAD_CHARS, symbolIndex - LEAN_SOURCE_SYMBOL_BEFORE_CHARS);
+  const windowEnd = Math.min(source.length, symbolIndex + LEAN_SOURCE_SYMBOL_AFTER_CHARS);
+  const window = source.slice(windowStart, windowEnd);
+  const tailNote = windowEnd < source.length ? "\n\n/* [lean-context: source truncated after target window; use read/grep tools for the rest] */\n" : "\n";
+  return `${head}\n\n/* [lean-context: ${windowStart - LEAN_SOURCE_HEAD_CHARS} chars elided; window around target symbol below] */\n\n${window}${tailNote}`;
+}
+
+function leanTargetFileXml(
+  target: Record<string, unknown>,
+  baseline: Record<string, unknown>,
+  primarySourcePath: string,
+  primarySourceAbs: string,
+  indent = "        ",
+): string {
+  const attrs = [
+    optionalAttribute("path", primarySourcePath),
+    optionalAttribute("unit", optionalString(target.unit)),
+    optionalAttribute("symbol", optionalString(target.symbol)),
+    optionalAttribute("size", optionalNumber(target.size)),
+    optionalAttribute("baseline_match_percent", optionalNumber(baseline.fuzzy_match_percent) ?? optionalNumber(target.fuzzy_match_percent)),
+  ].join("");
+  if (!primarySourceAbs || !existsSync(primarySourceAbs)) {
+    return [
+      `${indent}<target_file${attrs}>`,
+      `${indent}    <content unavailable="true">${xmlText(primarySourceAbs ? `File not found: ${primarySourceAbs}` : "No target source path provided.")}</content>`,
+      `${indent}</target_file>`,
+    ].join("\n");
+  }
+  const source = leanTrimSource(readFileSync(primarySourceAbs, "utf8"), optionalString(target.symbol));
+  return [`${indent}<target_file${attrs}>`, cdata(source), `${indent}</target_file>`].join("\n");
+}
+
+function leanTargetXml(target: Record<string, unknown>, baseline: Record<string, unknown>, primarySourcePath: string, primarySourceAbs: string): string {
+  return ["    <target>", jsonBlockXml("details_json", target), leanTargetFileXml(target, baseline, primarySourcePath, primarySourceAbs, "        "), "    </target>"].join("\n");
 }
 
 function baselineXml(baseline: Record<string, unknown>): string {
@@ -407,7 +505,44 @@ export function workerPromptInputXml(options: WorkerPromptInputXmlOptions): Work
   };
 }
 
+function buildLeanWorkerKernelContext(options: WorkerPromptOptions): NonNullable<PiPromptBundle["kernelContext"]> {
+  const target = asRecord(options.packet.target);
+  const baseline = asRecord(options.packet.baseline);
+  const primarySourcePath = String(target.source_path ?? "");
+  const primarySourceAbs = primarySourcePath ? resolve(options.repoRoot, primarySourcePath) : "";
+  const toolContext = {
+    role: "worker" as const,
+    cwd: options.repoRoot,
+    repoRoot: options.repoRoot,
+    stateDir: options.stateDir,
+    project: options.project,
+    packet: options.packet,
+    initialBoardPath: options.initialBoardPath,
+    workerLogDir: options.workerLogDir,
+  };
+  const values = {
+    AVAILABLE_TOOLS_XML: availableToolsPromptXml(toolContext),
+    BASELINE_XML: baselineXml(baseline),
+    CANONICAL_TOOL_PATHS_XML: workerCanonicalToolPathsXml(options.repoRoot),
+    REPAIR_REQUEST_XML: repairRequestXml(options.packet),
+    TARGET_XML: leanTargetXml(target, baseline, primarySourcePath, primarySourceAbs),
+  };
+  const workerPacketContext = renderTemplate(WORKER_PACKET_LEAN_CONTEXT_TEMPLATE, values).trim();
+  return {
+    turnPrompt: WORKER_TURN_PROMPT,
+    renderedContext: workerPacketContext,
+    inputs: [
+      {
+        loaderKind: "worker-packet",
+        inputRef: "worker-packet",
+        content: workerPacketContext,
+      },
+    ],
+  };
+}
+
 export function buildWorkerKernelContext(options: WorkerPromptOptions): NonNullable<PiPromptBundle["kernelContext"]> {
+  if (isLeanContextModel(options.model)) return buildLeanWorkerKernelContext(options);
   const inputXml = workerPromptInputXml({ packet: options.packet, repoRoot: options.repoRoot, project: options.project });
   const toolContext = {
     role: "worker" as const,

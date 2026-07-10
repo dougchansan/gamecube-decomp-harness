@@ -724,6 +724,8 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
       nonNegativeInt(numberArg(args, "--candidate-window", globals.project?.dashboard.candidateWindow ?? Math.max(candidateLimit, admissionTargetSize * 8))),
     );
     const fuzzyMax = numberArg(args, "--fuzzy-max", Number.POSITIVE_INFINITY);
+    const sizeMin = numberArg(args, "--size-min", Number.NEGATIVE_INFINITY);
+    const sizeMax = numberArg(args, "--size-max", Number.POSITIVE_INFINITY);
     const baseRev = stringArg(args, "--base-rev", "unknown");
     const ttlSeconds = numberArg(args, "--ttl-seconds", DEFAULT_WORKER_TTL_SECONDS);
     const postReturnCheckCommand = stringArg(args, "--post-return-check-command", "");
@@ -908,6 +910,8 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
               const nextEpoch = ensureSchedulerEpochFromBoard({
                 config: schedulerEpochConfig,
                 fuzzyMax,
+                sizeMin,
+                sizeMax,
                 globals,
                 graphDbPath,
                 runId,
@@ -1020,6 +1024,8 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
                   const board = loadKnowledgeBoardSnapshot(globals.repoRoot, schedulerEpochConfig.candidateWindow, {
                     excludeSourcePaths: sourceListArg(args, "--exclude-sources"),
                     fuzzyMax,
+                    sizeMin,
+                    sizeMax,
                     graphDbPath,
                     objdiffPath: globals.project?.validation.objdiffPath,
                     projectId: globals.project?.projectId ?? globals.projectId,
@@ -1078,6 +1084,8 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
           const epochResult = ensureSchedulerEpochFromBoard({
             config: schedulerEpochConfig,
             fuzzyMax,
+            sizeMin,
+            sizeMax,
             globals,
             graphDbPath,
             runId,

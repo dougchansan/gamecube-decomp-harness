@@ -10,6 +10,8 @@ export interface LoadKnowledgeBoardSnapshotOptions {
   objdiffPath?: string;
   projectId?: string;
   reportPath?: string;
+  sizeMin?: number;
+  sizeMax?: number;
 }
 
 export function loadKnowledgeBoardSnapshot(repoRoot: string, limit: number, options: LoadKnowledgeBoardSnapshotOptions = {}): BoardSnapshot {
@@ -22,6 +24,8 @@ export function loadKnowledgeBoardSnapshot(repoRoot: string, limit: number, opti
       objdiffPath: options.objdiffPath,
       rankFeatureProvider,
       reportPath: options.reportPath,
+      sizeMin: options.sizeMin,
+      sizeMax: options.sizeMax,
     }),
   );
 }

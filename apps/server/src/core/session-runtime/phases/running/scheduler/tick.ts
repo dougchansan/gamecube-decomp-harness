@@ -129,6 +129,8 @@ export function ensureSchedulerEpochFromBoard(params: {
   config: SchedulerEpochConfig;
   excludeSourcePaths?: string[];
   fuzzyMax?: number;
+  sizeMin?: number;
+  sizeMax?: number;
   globals: GlobalArgs;
   graphDbPath: string;
   runId: string;
@@ -148,6 +150,8 @@ export function ensureSchedulerEpochFromBoard(params: {
     const board = loadKnowledgeBoardSnapshot(params.globals.repoRoot, admissionCandidateWindow, {
       excludeSourcePaths: params.excludeSourcePaths,
       fuzzyMax: params.fuzzyMax,
+      sizeMin: params.sizeMin,
+      sizeMax: params.sizeMax,
       graphDbPath: params.graphDbPath,
       objdiffPath: params.globals.project?.validation.objdiffPath,
       projectId: params.globals.project?.projectId ?? params.globals.projectId,
@@ -171,6 +175,8 @@ export function ensureSchedulerEpochFromBoard(params: {
   const refreshBoard = loadKnowledgeBoardSnapshot(params.globals.repoRoot, candidateWindow, {
     excludeSourcePaths: params.excludeSourcePaths,
     fuzzyMax: params.fuzzyMax,
+    sizeMin: params.sizeMin,
+    sizeMax: params.sizeMax,
     graphDbPath: params.graphDbPath,
     objdiffPath: params.globals.project?.validation.objdiffPath,
     projectId: params.globals.project?.projectId ?? params.globals.projectId,
@@ -213,11 +219,15 @@ export async function runSchedulerTick(globals: GlobalArgs, args: Map<string, st
     const graphDbPath = stringArg(args, "--graph-db", globals.graphDbPath ?? resourceGraphDbPath());
     const excludeSourcePaths = sourceListArg(args, "--exclude-sources");
     const fuzzyMax = numberArg(args, "--fuzzy-max", Number.POSITIVE_INFINITY);
+    const sizeMin = numberArg(args, "--size-min", Number.NEGATIVE_INFINITY);
+    const sizeMax = numberArg(args, "--size-max", Number.POSITIVE_INFINITY);
     let epochResult: SchedulerEpochEnsureResult | null = null;
     epochResult = ensureSchedulerEpochFromBoard({
       config: schedulerEpochConfigFromArgs(globals, args, { admissionTargetSize, candidateWindow: requestedCandidateWindow }),
       excludeSourcePaths,
       fuzzyMax,
+      sizeMin,
+      sizeMax,
       globals,
       graphDbPath,
       runId,

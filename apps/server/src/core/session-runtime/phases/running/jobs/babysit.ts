@@ -94,6 +94,8 @@ const SYSTEM_ARG_ALLOWLIST = new Set([
   "--fast-kg-maintenance-report-count",
   "--full-kg-maintenance-mode",
   "--fuzzy-max",
+  "--size-min",
+  "--size-max",
   "--graph-db",
   "--idle-sleep-ms",
   "--knowledge-curator-enrichment",

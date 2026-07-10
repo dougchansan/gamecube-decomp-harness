@@ -1,0 +1,2 @@
+{ "id":"fs-medium","mode":"escalation","_note":"Medium (257B-1KB) fresh fns. gpt-5.5 high.",
+  "rungs":[ {"provider":"openai-codex","model":"gpt-5.5","thinking":"high","budget":{"agentTimeoutSeconds":2400,"ttlSeconds":7200,"maxAttempts":2}} ]}

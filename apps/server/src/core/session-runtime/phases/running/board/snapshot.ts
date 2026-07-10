@@ -22,6 +22,8 @@ export interface LoadBoardSnapshotOptions {
   objdiffPath?: string;
   rankFeatureProvider?: BoardRankFeatureProvider;
   reportPath?: string;
+  sizeMin?: number;
+  sizeMax?: number;
 }
 
 export type BoardRankFeatureProvider = (candidate: TargetCandidate) => BoardRankFeature | null | undefined;
@@ -125,6 +127,13 @@ function filterFuzzyMaxCandidates(candidates: TargetCandidate[], fuzzyMax: numbe
   return candidates.filter((candidate) => candidate.fuzzy <= fuzzyMax);
 }
 
+function filterSizeBandCandidates(candidates: TargetCandidate[], sizeMin: number | undefined, sizeMax: number | undefined): TargetCandidate[] {
+  const min = sizeMin != null && Number.isFinite(sizeMin) ? sizeMin : Number.NEGATIVE_INFINITY;
+  const max = sizeMax != null && Number.isFinite(sizeMax) ? sizeMax : Number.POSITIVE_INFINITY;
+  if (min === Number.NEGATIVE_INFINITY && max === Number.POSITIVE_INFINITY) return candidates;
+  return candidates.filter((candidate) => candidate.size >= min && candidate.size <= max);
+}
+
 function sourceConversionCandidate(params: {
   entry: FunctionSourceMapEntry;
   report: ReportFunctionInfo | undefined;
@@ -226,7 +235,11 @@ export function loadBoardSnapshot(repoRoot: string, limit: number, options: Load
     candidateKeys.add(key);
   }
 
-  const filteredCandidates = filterFuzzyMaxCandidates(filterExcludedCandidates(candidates, excluded), options.fuzzyMax);
+  const filteredCandidates = filterSizeBandCandidates(
+    filterFuzzyMaxCandidates(filterExcludedCandidates(candidates, excluded), options.fuzzyMax),
+    options.sizeMin,
+    options.sizeMax,
+  );
   rankBoardCandidates(filteredCandidates, options.rankFeatureProvider);
   filteredCandidates.sort((left, right) => right.priority - left.priority);
   const measures = asObject(report.measures) as BoardMeasures;
@@ -263,6 +276,8 @@ function loadBoardSnapshotFromCodeGraphIndex(
   let totalBytes = 0;
   let matchedBytes = 0;
   const missingFuzzyDefault = options.fuzzyMax != null && Number.isFinite(options.fuzzyMax) ? 0 : 100;
+  const sizeMin = options.sizeMin != null && Number.isFinite(options.sizeMin) ? options.sizeMin : Number.NEGATIVE_INFINITY;
+  const sizeMax = options.sizeMax != null && Number.isFinite(options.sizeMax) ? options.sizeMax : Number.POSITIVE_INFINITY;
 
   for (const row of rows) {
     const unit = stringValue(row.unit);
@@ -279,6 +294,7 @@ function loadBoardSnapshotFromCodeGraphIndex(
       continue;
     }
     if (options.fuzzyMax != null && Number.isFinite(options.fuzzyMax) && fuzzy > options.fuzzyMax) continue;
+    if (size < sizeMin || size > sizeMax) continue;
     candidates.push({
       unit,
       sourcePath,
