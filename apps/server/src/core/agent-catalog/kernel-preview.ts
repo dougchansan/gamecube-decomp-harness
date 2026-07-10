@@ -91,6 +91,13 @@ function samplePrompt(agentId: KernelAgentId, paths: KernelAgentCatalogContext):
                   },
                 ],
               },
+              resource_hits: [
+                {
+                  source_id: "legacy_colosseum_kg",
+                  title: "Legacy crack: ftDemo_KernelViewerSample via decl-order-reg-coloring",
+                  evidence_ref: "kernel-viewer:legacy-lever-sample",
+                },
+              ],
             },
             path_facts: {
               facts: [

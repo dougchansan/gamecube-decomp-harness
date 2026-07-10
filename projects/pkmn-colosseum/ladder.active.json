@@ -1,0 +1,37 @@
+{
+  "id": "colosseum-active-glm-to-fable",
+  "mode": "escalation",
+  "_note": "deepseek rung dropped 2026-07-01: SSH-tunnel (:11435) to remote Ollama hangs + quota was 429-dead. Re-add as rung 0 from ladder.json once endpoint+quota healthy. Per-rung agentTimeoutSeconds bound hangs; cheap rungs short, top rungs long.",
+  "rungs": [
+    {
+      "provider": "zai",
+      "model": "glm-5.2",
+      "thinking": "low",
+      "budget": { "agentTimeoutSeconds": 2400, "ttlSeconds": 7200, "maxAttempts": 2 }
+    },
+    {
+      "provider": "claude-code",
+      "model": "claude-sonnet-5",
+      "thinking": "medium",
+      "budget": { "agentTimeoutSeconds": 3600, "ttlSeconds": 7200, "maxAttempts": 2 }
+    },
+    {
+      "provider": "openai-codex",
+      "model": "gpt-5.5",
+      "thinking": "medium",
+      "budget": { "agentTimeoutSeconds": 3600, "ttlSeconds": 7200, "maxAttempts": 2 }
+    },
+    {
+      "provider": "claude-code",
+      "model": "claude-opus-4-8",
+      "thinking": "high",
+      "budget": { "agentTimeoutSeconds": 7200, "ttlSeconds": 10800, "maxAttempts": 2 }
+    },
+    {
+      "provider": "claude-code",
+      "model": "claude-fable-5",
+      "thinking": "high",
+      "budget": { "agentTimeoutSeconds": 10800, "ttlSeconds": 14400, "maxAttempts": 2 }
+    }
+  ]
+}

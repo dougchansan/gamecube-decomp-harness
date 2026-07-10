@@ -11,6 +11,7 @@ export const agent = defineAgent({
   coreTools: [
       "code_graph_file_card",
       "code_graph_search",
+      "legacy_lever_search",
       "path_facts_resolve",
       "ghidra_lookup",
       "opseq_similar_functions",

@@ -1,0 +1,23 @@
+{
+  "pr": {"number": 16, "title": "Progress: bank 23 gated current-tree wins", "url": "https://github.com/dougchansan/pkmn-colosseum/pull/16", "merged_at": "2026-06-28T03:47:31Z"},
+  "agent_status": "agent_completed",
+  "confidence": 0.7,
+  "summary": "Purely mechanical report-only PR: updates report.json/README to reflect 23 active real-C functions (across OS, field, battle, TRK, and other units) that were already at 100% match in the current tree but still showed stale sub-100% percentages in report.json. No source files changed.",
+  "categories": ["decomp", "data"],
+  "systems": ["report-pipeline"],
+  "decomp_lessons": [
+    "report.json can drift stale relative to the actual current-tree match state -- functions can genuinely re-measure at 100% while the committed report still shows an old lower percentage, requiring periodic 're-gate and bank' sweeps like this one rather than assuming report.json is always live-accurate.",
+    "This PR is purely a denominator/numerator bookkeeping fix (no .c changes, no .inc files, no asm wrappers, no pointer-arithmetic additions) -- it's the kind of low-risk 'banking' PR that should be distinguished from PRs claiming new decompilation work."
+  ],
+  "smart_moves": [
+    "Grouped a _gate_apply_clean.json re-measure pass across 21+ functions at once rather than banking one at a time, verified via tools/match_scan_file.py plus tools/check_report_sanity.py and tools/verify_commit.py --no-regression-check."
+  ],
+  "assembly_or_matching_tactics": [],
+  "naming_conventions": [],
+  "review_feedback": [],
+  "key_files": [
+    {"path": "report.json", "role": "Updated matched_functions/matched_code aggregates to 4,306/6,795 functions (~63.4%) reflecting 23 functions that were already 100% in-tree but stale in the report."},
+    {"path": "README.md", "role": "Synced top-level progress table to match the updated report.json numbers."}
+  ],
+  "searchable_terms": ["banking gated wins", "report.json stale percentage", "gate_apply_clean", "match_scan_file.py", "report-only PR", "OSTime", "fn_800A27FC", "fn_801EE0A8"]
+}

@@ -1,0 +1,33 @@
+diff --git a/src/game/gs_render.c b/src/game/gs_render.c
+index c6b9a4d8..231187c7 100644
+--- a/src/game/gs_render.c
++++ b/src/game/gs_render.c
+@@ -2107,9 +2107,9 @@ void fn_800D7A70(u32 obj) {
+     u8* entry;
+     u32 attr;
+ 
+-    for (i = 0; i < 14; i++) {
++    for (i = 0; (s32)i < 14; i++) {
+         entry = (u8*)(obj + i * 0x1c);
+-        if (entry[0x8] != 0 && i != 0) {
++        if (entry[0x8] != 0 && (s32)i != 0) {
+             attr = ((u32*)lbl_80314370)[i];
+             fn_800B7D74(*(u32*)(obj + 0x4), attr,
+                         ((u32*)lbl_803143B4)[*(u32*)(entry + 0x10)],
+@@ -2120,13 +2120,12 @@ void fn_800D7A70(u32 obj) {
+ 
+     fn_800B7D3C();
+ 
+-    for (i = 0; i < 14; i++) {
++    for (i = 0; (s32)i < 14; i++) {
+         entry = (u8*)(obj + i * 0x1c);
+         if (entry[0x8] != 0) {
+-            attr = ((u32*)lbl_80314370)[i];
+-            fn_800B7874(attr, ((u32*)lbl_803143A8)[*(u32*)(entry + 0xc)]);
++            fn_800B7874(((u32*)lbl_80314370)[i], ((u32*)lbl_803143A8)[*(u32*)(entry + 0xc)]);
+             if (*(u32*)(entry + 0x1c) != 0) {
+-                fn_800B84E0(attr, *(u32*)(entry + 0x1c), entry[0x20]);
++                fn_800B84E0(((u32*)lbl_80314370)[i], *(u32*)(entry + 0x1c), entry[0x20]);
+             }
+         }
+     }

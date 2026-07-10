@@ -1,0 +1,26 @@
+{
+  "pr": {"number": 8, "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "url": "https://github.com/dougchansan/pkmn-colosseum/pull/8", "merged_at": "2026-06-26T00:18:54Z"},
+  "agent_status": "agent_completed",
+  "confidence": 0.6,
+  "summary": "Mechanical cross-platform pass over ~47 decomp-workflow scripts that hardcoded Windows `.exe` suffixes and Windows-only paths, so the tooling could not run on macOS/Linux. mwcceppc/mwldeppc/sjiswrap intentionally kept `.exe` because they are Windows PE binaries meant to run under wibo.",
+  "categories": ["tooling", "infra"],
+  "systems": ["build-tooling", "objdiff", "decomp-agent-scripts"],
+  "decomp_lessons": [
+    "Tool binaries split into two classes: native (objdiff-cli, dtk) which must drop .exe on non-Windows, and vendored Windows PE compiler binaries (mwcceppc/mwldeppc/sjiswrap) which must KEEP .exe everywhere because they run under wibo, not natively.",
+    "Hardcoded LAN IPs/hosts (e.g. an Ollama GPU box) and hardcoded Windows Python paths should be env-var overridable (DECOMP_GPU_HOST, DECOMP_OLLAMA_PORT, DECOMP_GPU_SSH, CODEX_CMD, WINPY) so the same scripts work across contributors' machines and OSes."
+  ],
+  "smart_moves": [
+    "Verified safety cheaply: every modified .py passed `python -m py_compile`, and the PR explicitly notes no functional change on Windows before merging a 47-file mechanical sweep.",
+    "Used a single `os.name == 'nt'` ternary pattern repeated across all 42 tool scripts instead of a shared helper, keeping the diff trivially reviewable per-file."
+  ],
+  "assembly_or_matching_tactics": [],
+  "naming_conventions": [],
+  "review_feedback": [],
+  "key_files": [
+    {"path": "tools/compile_check.py", "role": "Central compile gate; switched OBJDIFF_CLI resolution to platform-conditional path (later extended further in PR #11)."},
+    {"path": "tools/decomp_agent.py", "role": "Replaced hardcoded 10.0.0.3 Ollama host and Windows codex.cmd path with DECOMP_GPU_HOST/CODEX_CMD env overrides."},
+    {"path": "tools/decomp_work/decomp.sh", "role": "Changed default interpreter from a hardcoded Windows python.exe path to PATH python3/python, with WINPY as an override for Windows/WSL."},
+    {"path": "tools/scan_all_files.py", "role": "Converted Windows backslash path handling to pathlib for cross-platform path joins."}
+  ],
+  "searchable_terms": ["cross-platform", "macOS", "Linux", "wibo", "objdiff-cli", ".exe suffix", "DECOMP_GPU_HOST", "WINPY", "codex.cmd", "os.name"]
+}

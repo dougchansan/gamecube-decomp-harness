@@ -1,0 +1,28 @@
+{
+  "pr": {"number": 22, "title": "[codex] reclaim exact DB and OS candidates", "url": "https://github.com/dougchansan/pkmn-colosseum/pull/22", "merged_at": "2026-06-30T19:06:34Z"},
+  "agent_status": "agent_completed",
+  "confidence": 0.6,
+  "summary": "Reclaims eight exact-match dolphin/OS and dolphin/DB translation units from the previous campaign's archive, registering each as a non-linked CodeCandidate under the dtk-template reporting path so they count in objdiff without affecting the linked main.dol.",
+  "categories": ["decomp", "tooling"],
+  "systems": ["dolphin/os", "dolphin/db"],
+  "decomp_lessons": [
+    "Reclaiming a small, verified-exact unit from the archive is low-risk: register it as CodeCandidate (compared, not linked), add its splits.txt range, run full configure/ninja/report validation, and it can't affect the linked build.",
+    "A function can be byte-exact in isolation yet still break the linker: __OSSetExceptionHandler's split range shares its start address with the global label __OSDBJUMPEND, causing mwldeppc to spin during full link validation, so it must stay deferred until the address-overlap is resolved.",
+    "Full-link validation (not just per-unit objdiff) is necessary before merging reclaimed units, because address/label collisions only surface at link time."
+  ],
+  "smart_moves": [
+    "Intentionally excluded one otherwise-ready function (__OSSetExceptionHandler) rather than merge a change that made the linker hang, keeping the PR scope to only units that fully validate."
+  ],
+  "assembly_or_matching_tactics": [
+    "Added splits.txt address ranges for each reclaimed unit (e.g. OSGetExceptionHandler.c 20/20 bytes, DBPrintf.c 80/80 bytes), each 100% function/byte matched per the previous campaign's data."
+  ],
+  "naming_conventions": [],
+  "review_feedback": [],
+  "key_files": [
+    {"path": "configure.py", "role": "Registers 8 reclaimed dolphin/os and dolphin/db units as Object(CodeCandidate, ...)"},
+    {"path": "config/GC6E01/splits.txt", "role": "Adds .text split ranges for the 8 reclaimed units"},
+    {"path": "src/dolphin/os/OSInterruptHandlers.c", "role": "Reclaimed exact unit, 2 functions / 48 bytes"},
+    {"path": "src/dolphin/db/DBPrintf.c", "role": "Reclaimed exact unit, 1 function / 80 bytes"}
+  ],
+  "searchable_terms": ["CodeCandidate", "reclaim", "OSSetExceptionHandler", "OSDBJUMPEND", "mwldeppc spin", "link-time collision", "splits.txt"]
+}

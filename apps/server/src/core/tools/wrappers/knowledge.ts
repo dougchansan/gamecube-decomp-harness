@@ -195,6 +195,18 @@ export const codeGraphSearchToolRegistration = sourceSearchTool({
   graphBacked: true,
 });
 
+/** Tool for searching historical Colosseum crack levers and cracked-by edges. */
+export const legacyLeverSearchToolRegistration = sourceSearchTool({
+  id: "legacy_lever_search",
+  sourceId: "legacy_colosseum_kg",
+  label: "Legacy Lever Search",
+  purpose: "Search historical Colosseum crack levers, cracked-by records, wall classes, and function hints.",
+  description: "Search the imported legacy Colosseum KG for lever names, function symbols, source paths, cracked-by edges, wall classes, and historical notes.",
+  guidance:
+    "Use legacy_lever_search early for a claimed function or source path to find low-trust historical lever hints. Treat results as hypotheses and verify with local source, objdiff, and runner validation.",
+  graphBacked: true,
+});
+
 /** Tool for searching indexed PowerPC reference documentation. */
 export const powerpcDocsSearchToolRegistration = sourceSearchTool({
   id: "powerpc_docs_search",
@@ -299,6 +311,7 @@ export const pathFactsProposalsToolRegistration = proposalSourceApiTool({
 export const knowledgeToolRegistrations = [
   codeGraphFileCardToolRegistration,
   codeGraphSearchToolRegistration,
+  legacyLeverSearchToolRegistration,
   powerpcDocsSearchToolRegistration,
   powerpcInstructionLookupToolRegistration,
   decompStandardsProposalsToolRegistration,

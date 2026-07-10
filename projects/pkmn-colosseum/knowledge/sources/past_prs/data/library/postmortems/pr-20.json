@@ -1,0 +1,30 @@
+{
+  "pr": {"number": 20, "title": "[codex] archive old campaign tooling", "url": "https://github.com/dougchansan/pkmn-colosseum/pull/20", "merged_at": "2026-06-30T00:53:09Z"},
+  "agent_status": "agent_completed",
+  "confidence": 0.6,
+  "summary": "Resets the live project shape to a clean dtk-template-style pipeline (configure.py/ninja/generated report.json), moving nearly 1,000 files of the prior campaign's custom tooling, docs, and a PC-port experiment wholesale into archive/previous_campaign/ while preserving recovered symbol names in the active symbols.txt.",
+  "categories": ["infra", "tooling"],
+  "systems": ["build", "ci"],
+  "decomp_lessons": [
+    "When resetting a repo to a template pipeline, moving prior work into an archive/ subdirectory (rather than deleting it) preserves it as source material for later reclaim PRs (see PRs 21-23) instead of losing it.",
+    "Keeping the active symbols.txt (recovered names) while stripping out old split/report/config variants lets naming knowledge survive a structural reset even though object/split data gets rebuilt from scratch.",
+    "This is a foundational reset PR: it explains why PRs 21-24 exist as separate 'reclaim from archive' follow-ups rather than one big migration."
+  ],
+  "smart_moves": [
+    "Validated the reset with the full pipeline (configure.py --no-progress, ninja all_source, ninja main build, progress report) plus an explicit scan for stray .inc/inline-asm before merging, and confirmed CI (build workflow) passed."
+  ],
+  "assembly_or_matching_tactics": [],
+  "naming_conventions": [
+    "Retained recovered function/symbol names in config/GC6E01/symbols.txt across the reset even though the underlying source tree was rebuilt from the dtk-template."
+  ],
+  "review_feedback": [],
+  "key_files": [
+    {"path": "configure.py", "role": "124 lines added / 102 removed, rebuilding object registration to match the dtk-template baseline"},
+    {"path": "config/GC6E01/symbols.txt", "role": "1465 lines changed, reformatted/realigned to the reset template while keeping recovered names"},
+    {"path": "config/GC6E01/splits.txt", "role": "181 lines added, rebuilt split ranges for the reset baseline"},
+    {"path": "AGENTS.md", "role": "Rewritten (30 lines vs prior 445) to describe the new dtk-template-based workflow for future agents"},
+    {"path": "README.md", "role": "Rewritten around the reset baseline pipeline"},
+    {"path": "archive/previous_campaign/", "role": "New archive root holding the entire prior campaign's tooling, docs, and PC-port experiment (~970 moved files)"}
+  ],
+  "searchable_terms": ["archive/previous_campaign", "dtk-template reset", "campaign reset", "AGENTS.md rewrite", "PC port archive", "CI build workflow", "symbols.txt reformat"]
+}

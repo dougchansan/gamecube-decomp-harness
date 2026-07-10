@@ -1,0 +1,23 @@
+{
+  "pr": {"number": 10, "title": "Fix fresh-checkout `ninja` failure at the report step (#5)", "url": "https://github.com/dougchansan/pkmn-colosseum/pull/10", "merged_at": "2026-06-26T01:14:17Z"},
+  "agent_status": "agent_completed",
+  "confidence": 0.65,
+  "summary": "Fixed a fresh-checkout build break where the default ninja target (`progress`/`report` -> objdiff-cli report generate) crashed trying to open source-built base objects that don't exist when config.libs is empty (the all-asm byte-match baseline). One-line guard in configure.py disables the report target when no libs are declared, falling back to the sha256 `ok` check which correctly passes.",
+  "categories": ["infra", "tooling"],
+  "systems": ["configure.py", "ninja-build", "objdiff"],
+  "decomp_lessons": [
+    "The curated objdiff.json (unit base_path list, used by the objdiff GUI and tools/gen_decomp_report.py) can reference source objects that config.libs never actually builds -- on a fresh checkout with no libs declared, `build/<ver>/base/` is empty and the ninja `report` target dies on the first missing object (e.g. crt/__init_cpp_exceptions.o).",
+    "main.dol building and byte-matching (`build.sha1: OK`) is independent from the ninja report step succeeding -- don't assume a green ninja run on a maintainer's machine (who tracks progress via tools/gen_decomp_report.py, not the ninja report) means the report target itself works for a fresh contributor."
+  ],
+  "smart_moves": [
+    "Root-caused via a real repro (fresh checkout + ROM) rather than guessing, and cross-checked it against an independently reported Windows 11 failure of the same issue (issue #5) to confirm it wasn't macOS-specific.",
+    "Minimal, self-documenting fix: single `if not config.libs: config.progress = False` guard with an inline comment explaining why, instead of restructuring the build graph."
+  ],
+  "assembly_or_matching_tactics": [],
+  "naming_conventions": [],
+  "review_feedback": [],
+  "key_files": [
+    {"path": "configure.py", "role": "Added `if not config.libs: config.progress = False` so the ninja default target falls back to the sha `ok` check instead of the objdiff report generator when no source libs are declared yet."}
+  ],
+  "searchable_terms": ["ninja fresh checkout", "objdiff-cli report generate", "config.libs", "config.progress", "build.sha1", "issue #5", "fresh clone build failure"]
+}

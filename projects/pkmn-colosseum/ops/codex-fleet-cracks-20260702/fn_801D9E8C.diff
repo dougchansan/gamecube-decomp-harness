@@ -1,0 +1,112 @@
+diff --git a/src/game/battle/battle_waza.c b/src/game/battle/battle_waza.c
+index 1ac60f44..e6f1fbd5 100644
+--- a/src/game/battle/battle_waza.c
++++ b/src/game/battle/battle_waza.c
+@@ -106,7 +106,7 @@ extern f32   fn_801C4864(s32 slot);                        /* get slot Z */
+ extern s32   fn_801190DC(s32, s32, s32);
+ extern void  fn_80118C88(s32, s32);
+ extern void* fn_800EE150(s32, s32);
+-extern void  fn_800E01F4(void*, f32, f32);
++void  fn_800E01F4(void*, f32, f32, f32);
+ extern void  fn_80118FB0(s32, s32, s32, s32, s32, s32);
+ extern void  fn_80118D18(s32, s32);
+ extern void  fn_80118DE0(s32, void*, s32, s32);
+@@ -1232,11 +1232,19 @@ void fn_801D9E34(void* obj) {
+ 
+ /* Waza effect data table entry (stride 0xD4) */
+ typedef struct WazaEffectTblEntry {
+-    /* 0x00 */ u8 pad_00[0x50];
+-    /* 0x50 */ s32 val_idx;
+-    /* 0x54 */ u8 pad_54[0x80];
++    /* 0x00 */ u8 bytes[0xD4];
+ } WazaEffectTblEntry;
+ 
++#define WAZA_SDATA2_FLOAT(addr) extern const f32 lbl_##addr
++#define WAZA_SDATA2_VALUE(addr) lbl_##addr
++WAZA_SDATA2_FLOAT(8047E388);
++WAZA_SDATA2_FLOAT(8047E38C);
++WAZA_SDATA2_FLOAT(8047E390);
++WAZA_SDATA2_FLOAT(8047E394);
++WAZA_SDATA2_FLOAT(8047E398);
++WAZA_SDATA2_FLOAT(8047E39C);
++#undef WAZA_SDATA2_FLOAT
++
+ /* Waza battle effect object (size 0x8C) */
+ typedef struct WazaEffect {
+     /* 0x00 */ u8 pad_00[0x10];
+@@ -1246,11 +1254,14 @@ typedef struct WazaEffect {
+     /* 0x19 */ u8 pad_19[0x0B];
+     /* 0x24 */ s32 handle;                   /* owner handle */
+     /* 0x28 */ u8 pad_28[0x04];
+-    /* 0x2C */ WazaEffectTblEntry* table;   /* effect data table */
++    /* 0x2C */ union {
++        WazaEffectTblEntry* table;           /* effect data table */
++        char* table_bytes;
++    };
+     /* 0x30 */ u8 pad_30[0x02];
+     /* 0x32 */ u16 index;                    /* table index */
+     /* 0x34 */ u8 pad_34[0x50];
+-    /* 0x84 */ s32 effect_handle;            /* effect handle */
++    /* 0x84 */ u32 effect_handle;            /* effect handle */
+     /* 0x88 */ u8 pad_88[0x04];
+ } WazaEffect;
+ 
+@@ -1261,8 +1272,9 @@ typedef struct WazaEffect {
+ void fn_801D9E8C(void* effect) {
+     WazaEffect* fx;
+     void* target;
+-    s32 ctx;
++    u32 ctx;
+     f32 val;
++    s32 scale_selector;
+     u8 scale_buf[4];
+ 
+     if (effect == NULL) return;
+@@ -1279,7 +1291,7 @@ void fn_801D9E8C(void* effect) {
+     }
+ 
+     {
+-        s32 val_idx = fx->table[fx->index].val_idx;
++        s32 val_idx = *(s32*)(fx->table_bytes + fx->index * sizeof(WazaEffectTblEntry) + 0x50);
+         if (val_idx > 0) {
+             target = fn_800EE150(fx->handle, val_idx);
+         } else {
+@@ -1289,23 +1301,29 @@ void fn_801D9E8C(void* effect) {
+ 
+     if (target == NULL) return;
+ 
+-    switch (fx->scale_selector) {
+-    case -2: val = 0.5f;    break;
+-    case -1: val = 0.75f;   break;
+-    case 0:  val = 1.0f;    break;
+-    case 1:  val = 1.3333f; break;
+-    case 2:  val = 2.0f;    break;
+-    case 3:  val = 3.25f;   break;
+-    default: val = 1.0f;    break;
++    if (effect != NULL) {
++        scale_selector = fx->scale_selector;
++    } else {
++        scale_selector = 0;
++    }
++
++    switch (scale_selector) {
++    case -2: val = WAZA_SDATA2_VALUE(8047E388); break;
++    case -1: val = WAZA_SDATA2_VALUE(8047E38C); break;
++    case 1:  val = WAZA_SDATA2_VALUE(8047E390); break;
++    case 2:  val = WAZA_SDATA2_VALUE(8047E394); break;
++    case 3:  val = WAZA_SDATA2_VALUE(8047E398); break;
++    default: val = WAZA_SDATA2_VALUE(8047E39C); break;
+     }
+ 
+-    fn_800E01F4(scale_buf, val, val);
++    fn_800E01F4(scale_buf, val, val, val);
+ 
+     fn_80118FB0(fx->effect_handle, (s32)target, 4, 0, 1, 0);
+     fn_80118D18(fx->effect_handle, 1);
+     fn_80118DE0(fx->effect_handle, scale_buf, 1, 0);
+     fn_800EE828((s32)target);
+ }
++#undef WAZA_SDATA2_VALUE
+ 
+ /**
+  * fn_801DA014 - Waza effect get interpolation progress.

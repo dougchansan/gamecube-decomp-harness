@@ -1,0 +1,26 @@
+{
+  "pr": {"number": 25, "title": "symbols: apply PObj HSD names", "url": "https://github.com/dougchansan/pkmn-colosseum/pull/25", "merged_at": "2026-07-05T21:29:27Z"},
+  "agent_status": "agent_completed",
+  "confidence": 0.6,
+  "summary": "Renames four fn_XXXXXX placeholder symbols in the HSD PObj subsystem (PObjAmnesia, PObjRelease, HSD_PObjResolveRefsAll, HSD_PObjLoadDesc) to verified A-tier names, propagating the rename through symbols.txt and the extern declarations/call sites in the two source files that reference them.",
+  "categories": ["symbols", "decomp"],
+  "systems": ["hsd"],
+  "decomp_lessons": [
+    "Renaming a fn_XXXXXX symbol requires updating symbols.txt AND every extern forward-declaration and call site across all TUs that reference it, not just the defining file.",
+    "Pure symbol-naming PRs don't change objdiff match percentage/progress numbers, only readability."
+  ],
+  "smart_moves": [
+    "Batched multiple verified HSD PObj names into a single small PR instead of one-off renames, keeping the change reviewable."
+  ],
+  "assembly_or_matching_tactics": [],
+  "naming_conventions": [
+    "HSD PObj lifecycle functions named PObjAmnesia/PObjRelease (short verb-object) while public API entry points keep the HSD_PObj* prefix (HSD_PObjResolveRefsAll, HSD_PObjLoadDesc)."
+  ],
+  "review_feedback": [],
+  "key_files": [
+    {"path": "config/GC6E01/symbols.txt", "role": "Renamed 4 fn_XXXXXX entries to verified HSD PObj names"},
+    {"path": "src/hsd/hsd_dobj.c", "role": "Updated extern decl and call sites for HSD_PObjResolveRefsAll and HSD_PObjLoadDesc"},
+    {"path": "src/hsd/hsd_pobj_range_801AA608.c", "role": "Renamed defining functions fn_801AA6D0->PObjAmnesia, fn_801AA788->PObjRelease"}
+  ],
+  "searchable_terms": ["HSD_PObj", "PObjAmnesia", "PObjRelease", "PObjLoad", "symbol renaming", "hsd_dobj", "hsd_pobj"]
+}

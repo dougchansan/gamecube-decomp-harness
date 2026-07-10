@@ -1,0 +1,662 @@
+{"pr": 25, "file": "config/GC6E01/symbols.txt", "title": "symbols: apply PObj HSD names", "added": 5, "deleted": 5, "hunks": 0}
+{"pr": 25, "file": "src/hsd/hsd_dobj.c", "title": "symbols: apply PObj HSD names", "added": 4, "deleted": 4, "hunks": 0}
+{"pr": 25, "file": "src/hsd/hsd_pobj_range_801AA608.c", "title": "symbols: apply PObj HSD names", "added": 1, "deleted": 1, "hunks": 0}
+{"pr": 24, "file": "README.md", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 19, "deleted": 2, "hunks": 0}
+{"pr": 24, "file": "archive/previous_campaign/_analyze_out.json", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 1, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "config/GC6E01/object_map.freeze.json", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 4164, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "config/GC6E01/splits.txt", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 312, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "configure.py", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 450, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "docs/CLAUDE_HANDOFF.md", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 308, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "report.json", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 1, "deleted": 1, "hunks": 0}
+{"pr": 24, "file": "src/crt/exit.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 519, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/crt/global_destructor_chain.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 100, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/crt/mem.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 18, "deleted": 9, "hunks": 0}
+{"pr": 24, "file": "src/crt/printf.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 76, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/crt/stdio_range_800C7558.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 11, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/crt/string.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 23, "deleted": 16, "hunks": 0}
+{"pr": 24, "file": "src/dolphin/dvd/DVD.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 878, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/dolphin/exi/EXI2_range_800CEA3C.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 57, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/dolphin/os/OSCache.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 528, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/dolphin/os/OSMemory.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 394, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/dolphin/os/OSReset.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 287, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/dolphin/vi/VI_fn_800AB5B4.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 27, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/battle/battle_grid.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 1477, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/battle/battle_main.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 1165, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/battle/battle_waza.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 2515, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/colosseum_battle.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 36926, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/colosseum_event.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 10822, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/effect/effect_util.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 5096, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/effect/effect_visual.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 3629, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/effect/gs_effect.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 1174, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/effect/tracefx.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 942, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/fsys/fsys_file.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 2159, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/gba/gba_conv.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 5735, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/gba/gba_misc.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 10660, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/gs_colsys.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 2222, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/gs_dvd.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 1037, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/gs_event_exec.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 1626, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/gs_field_colquery.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 1683, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/gs_field_resource.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 513, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/gs_field_world.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 15024, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/gs_floor.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 1301, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/gs_floor_data.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 691, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/gs_gfx.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 789, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/gs_model.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 2248, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/gs_npc_event.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 2462, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/gs_npc_interact.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 3470, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/gs_party_access.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 1580, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/gs_pcbox.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 7263, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/gs_pokemon_summary.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 2036, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/gs_render.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 6114, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/gs_render_util.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 1262, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/gs_scene.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 1060, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/gs_task.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 2313, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/gs_texture.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 1446, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/gs_thread.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 7825, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/gs_thread_hi.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 7825, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/gs_title.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 4294, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/gs_worldmap.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 9341, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/input/input.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 1195, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/main.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 1271, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/menu/menu_bag.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 2, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/menu/menu_carde_matrix.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 3371, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/menu/menu_middle.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 8277, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/movie.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 819, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/people/people_data.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 2014, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/people/people_field.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 3392, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/pokemon.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 5075, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/game/trainer.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 9504, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/hsd/hsd_class.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 618, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/hsd/hsd_cobj.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 2747, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/hsd/hsd_displayfunc.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 502, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/hsd/hsd_dobj.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 1064, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/hsd/hsd_fog.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 780, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/hsd/hsd_initialize.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 383, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/hsd/hsd_jobj.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 1992, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/hsd/hsd_lobj.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 1485, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/hsd/hsd_mobj_range_801A8478.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 9, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/hsd/hsd_mobj_range_801A84B4.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 9, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/hsd/hsd_mobj_range_801A84F0.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 52, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/hsd/hsd_mobj_range_801A86B4.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 89, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/hsd/hsd_object.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 332, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/hsd/hsd_pobj_range_801AA608.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 187, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/hsd/hsd_shadow.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 153, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/hsd/hsd_texp.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 1150, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/hsd/hsd_wobj.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 794, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/trk/TRKBoard_range_800C33BC.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 32, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/trk/TRKComm_range_800C3678.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 25, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/trk/TRKDispatch_range_800C0CD8.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 60, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/trk/TRKInit.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 29, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/trk/TRKNub_range_800BE47C.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 153, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/trk/TRKNub_range_800BEE74.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 12, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/trk/TRKTarget_range_800C1310.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 9, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/trk/TRKTarget_range_800C1348.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 120, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/trk/ddh_cc_range_800C3C00.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 30, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/trk/ddh_cc_range_800C3E90.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 19, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/trk/gdev_cc_range_800C41AC.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 30, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "src/trk/gdev_cc_range_800C4444.c", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 14, "deleted": 0, "hunks": 0}
+{"pr": 24, "file": "tools/check_object_map_freeze.py", "title": "recover: reintroduce prior-campaign decomp via DTK pipeline (110 \u2192 3,306 matched functions, 38.43%)", "added": 280, "deleted": 0, "hunks": 0}
+{"pr": 23, "file": "archive/previous_campaign/src/crt/printf.c", "title": "[codex] preserve validated previous-campaign archive wins", "added": 14, "deleted": 29, "hunks": 0}
+{"pr": 23, "file": "archive/previous_campaign/src/game/gs_field_resource.c", "title": "[codex] preserve validated previous-campaign archive wins", "added": 7, "deleted": 4, "hunks": 0}
+{"pr": 23, "file": "archive/previous_campaign/src/game/gs_floor_data.c", "title": "[codex] preserve validated previous-campaign archive wins", "added": 4, "deleted": 1, "hunks": 0}
+{"pr": 23, "file": "archive/previous_campaign/src/game/gs_render.c", "title": "[codex] preserve validated previous-campaign archive wins", "added": 11, "deleted": 7, "hunks": 0}
+{"pr": 22, "file": "config/GC6E01/splits.txt", "title": "[codex] reclaim exact DB and OS candidates", "added": 24, "deleted": 0, "hunks": 0}
+{"pr": 22, "file": "configure.py", "title": "[codex] reclaim exact DB and OS candidates", "added": 40, "deleted": 0, "hunks": 0}
+{"pr": 22, "file": "report.json", "title": "[codex] reclaim exact DB and OS candidates", "added": 1, "deleted": 1, "hunks": 0}
+{"pr": 22, "file": "src/dolphin/db/DBPrintf.c", "title": "[codex] reclaim exact DB and OS candidates", "added": 4, "deleted": 0, "hunks": 0}
+{"pr": 22, "file": "src/dolphin/os/OSAlarmCreate.c", "title": "[codex] reclaim exact DB and OS candidates", "added": 6, "deleted": 0, "hunks": 0}
+{"pr": 22, "file": "src/dolphin/os/OSContextClear.c", "title": "[codex] reclaim exact DB and OS candidates", "added": 14, "deleted": 0, "hunks": 0}
+{"pr": 22, "file": "src/dolphin/os/OSContextCurrent.c", "title": "[codex] reclaim exact DB and OS candidates", "added": 5, "deleted": 0, "hunks": 0}
+{"pr": 22, "file": "src/dolphin/os/OSGetExceptionHandler.c", "title": "[codex] reclaim exact DB and OS candidates", "added": 11, "deleted": 0, "hunks": 0}
+{"pr": 22, "file": "src/dolphin/os/OSInterruptHandlers.c", "title": "[codex] reclaim exact DB and OS candidates", "added": 13, "deleted": 0, "hunks": 0}
+{"pr": 22, "file": "src/dolphin/os/OSState_fn_8009FAEC.c", "title": "[codex] reclaim exact DB and OS candidates", "added": 7, "deleted": 0, "hunks": 0}
+{"pr": 22, "file": "src/dolphin/os/OSThreadQueue.c", "title": "[codex] reclaim exact DB and OS candidates", "added": 10, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "config/GC6E01/splits.txt", "title": "[codex] reclaim exact SDK candidates", "added": 197, "deleted": 2, "hunks": 0}
+{"pr": 21, "file": "configure.py", "title": "[codex] reclaim exact SDK candidates", "added": 326, "deleted": 1, "hunks": 0}
+{"pr": 21, "file": "report.json", "title": "[codex] reclaim exact SDK candidates", "added": 1, "deleted": 1, "hunks": 0}
+{"pr": 21, "file": "src/crt/critical_regions.c", "title": "[codex] reclaim exact SDK candidates", "added": 10, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/crt/mwtrace_helpers.c", "title": "[codex] reclaim exact SDK candidates", "added": 2, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/crt/stdio_atexit.c", "title": "[codex] reclaim exact SDK candidates", "added": 10, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/dolphin/db/DBGetFirstCallback.c", "title": "[codex] reclaim exact SDK candidates", "added": 11, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/dolphin/db/DBInit.c", "title": "[codex] reclaim exact SDK candidates", "added": 11, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/dolphin/db/DBIsExceptionMarked.c", "title": "[codex] reclaim exact SDK candidates", "added": 8, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/dolphin/dvd/DVDError.c", "title": "[codex] reclaim exact SDK candidates", "added": 31, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/dolphin/dvd/DVDFs.c", "title": "[codex] reclaim exact SDK candidates", "added": 22, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/dolphin/dvd/DVDLowInitWA.c", "title": "[codex] reclaim exact SDK candidates", "added": 20, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/dolphin/dvd/DVDLowSetWAType.c", "title": "[codex] reclaim exact SDK candidates", "added": 14, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/dolphin/dvd/DVDQueue.c", "title": "[codex] reclaim exact SDK candidates", "added": 29, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/dolphin/exi/EXI2Stubs.c", "title": "[codex] reclaim exact SDK candidates", "added": 39, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/dolphin/gx/GX_fn_800B71F0.c", "title": "[codex] reclaim exact SDK candidates", "added": 6, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/dolphin/gx/GX_fn_800B770C.c", "title": "[codex] reclaim exact SDK candidates", "added": 7, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/dolphin/gx/GX_fn_800B7714.c", "title": "[codex] reclaim exact SDK candidates", "added": 7, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/dolphin/gx/GX_fn_800B856C.c", "title": "[codex] reclaim exact SDK candidates", "added": 5, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/dolphin/gx/GX_fn_800BA198.c", "title": "[codex] reclaim exact SDK candidates", "added": 20, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/dolphin/gx/GX_fn_800BA414.c", "title": "[codex] reclaim exact SDK candidates", "added": 14, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/dolphin/gx/GX_fn_800BA424.c", "title": "[codex] reclaim exact SDK candidates", "added": 14, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/dolphin/gx/GX_fn_800BA440.c", "title": "[codex] reclaim exact SDK candidates", "added": 14, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/dolphin/gx/GX_fn_800BAE5C.c", "title": "[codex] reclaim exact SDK candidates", "added": 10, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/dolphin/gx/GX_fn_800BB2E4.c", "title": "[codex] reclaim exact SDK candidates", "added": 14, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/dolphin/gx/GX_fn_800BB2F8.c", "title": "[codex] reclaim exact SDK candidates", "added": 14, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/dolphin/os/OSArena.c", "title": "[codex] reclaim exact SDK candidates", "added": 29, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/dolphin/os/OSEXI_fn_8009E7A8.c", "title": "[codex] reclaim exact SDK candidates", "added": 4, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/dolphin/os/OSEXI_fn_8009E7AC.c", "title": "[codex] reclaim exact SDK candidates", "added": 4, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/dolphin/os/OSReboot_WriteSram.c", "title": "[codex] reclaim exact SDK candidates", "added": 30, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/dolphin/os/OSReboot_fn_800A064C.c", "title": "[codex] reclaim exact SDK candidates", "added": 19, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/dolphin/os/PPCArch.c", "title": "[codex] reclaim exact SDK candidates", "added": 10, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/dolphin/si/SITypeDecode.c", "title": "[codex] reclaim exact SDK candidates", "added": 67, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/dolphin/si/SI_fn_800CF708.c", "title": "[codex] reclaim exact SDK candidates", "added": 10, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/dolphin/si/SI_fn_800CF728.c", "title": "[codex] reclaim exact SDK candidates", "added": 13, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/dolphin/si/SI_fn_800D0F44.c", "title": "[codex] reclaim exact SDK candidates", "added": 8, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/dolphin/si/SI_fn_800D104C.c", "title": "[codex] reclaim exact SDK candidates", "added": 8, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/dolphin/vi/VI_fn_800AA280.c", "title": "[codex] reclaim exact SDK candidates", "added": 7, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/dolphin/vi/VI_fn_800AA498.c", "title": "[codex] reclaim exact SDK candidates", "added": 14, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/hsd/hsd_mobj_clear_flags.c", "title": "[codex] reclaim exact SDK candidates", "added": 9, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/hsd/hsd_mobj_get_flags.c", "title": "[codex] reclaim exact SDK candidates", "added": 9, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/hsd/hsd_mobj_set_current.c", "title": "[codex] reclaim exact SDK candidates", "added": 8, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/hsd/hsd_mobj_set_flags.c", "title": "[codex] reclaim exact SDK candidates", "added": 9, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/hsd/hsd_mtx_get_alloc_data.c", "title": "[codex] reclaim exact SDK candidates", "added": 8, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/hsd/hsd_mtx_scaled_add.c", "title": "[codex] reclaim exact SDK candidates", "added": 20, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/hsd/hsd_pobj_empty.c", "title": "[codex] reclaim exact SDK candidates", "added": 5, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/hsd/hsd_robj_find_by_type.c", "title": "[codex] reclaim exact SDK candidates", "added": 21, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/hsd/hsd_robj_get_alloc_data.c", "title": "[codex] reclaim exact SDK candidates", "added": 8, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/hsd/hsd_robj_get_alloc_data2.c", "title": "[codex] reclaim exact SDK candidates", "added": 8, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/hsd/hsd_robj_update_func.c", "title": "[codex] reclaim exact SDK candidates", "added": 18, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/hsd/hsd_vec_get_alloc_data.c", "title": "[codex] reclaim exact SDK candidates", "added": 8, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/trk/TRKBufferReset.c", "title": "[codex] reclaim exact SDK candidates", "added": 26, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/trk/TRKCommState.c", "title": "[codex] reclaim exact SDK candidates", "added": 11, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/trk/TRKConstructEvent.c", "title": "[codex] reclaim exact SDK candidates", "added": 7, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/trk/TRKDispatchConnected.c", "title": "[codex] reclaim exact SDK candidates", "added": 11, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/trk/TRKDispatchInit.c", "title": "[codex] reclaim exact SDK candidates", "added": 5, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/trk/TRKDispatchMutex.c", "title": "[codex] reclaim exact SDK candidates", "added": 13, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/trk/TRKGetBuffer.c", "title": "[codex] reclaim exact SDK candidates", "added": 13, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/trk/TRKTargetState.c", "title": "[codex] reclaim exact SDK candidates", "added": 7, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/trk/TRKTargetStopped.c", "title": "[codex] reclaim exact SDK candidates", "added": 11, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/trk/TRKTerminateSerialHandler.c", "title": "[codex] reclaim exact SDK candidates", "added": 5, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/trk/circle_buffer_count.c", "title": "[codex] reclaim exact SDK candidates", "added": 14, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/trk/ddh_cc_close.c", "title": "[codex] reclaim exact SDK candidates", "added": 5, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/trk/ddh_cc_shutdown.c", "title": "[codex] reclaim exact SDK candidates", "added": 5, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/trk/gdev_cc_close.c", "title": "[codex] reclaim exact SDK candidates", "added": 5, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/trk/gdev_cc_shutdown.c", "title": "[codex] reclaim exact SDK candidates", "added": 5, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/trk/udp_cc.c", "title": "[codex] reclaim exact SDK candidates", "added": 56, "deleted": 0, "hunks": 0}
+{"pr": 21, "file": "src/trk/usr_put_initialize.c", "title": "[codex] reclaim exact SDK candidates", "added": 2, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": ".gitattributes", "title": "[codex] archive old campaign tooling", "added": 9, "deleted": 19, "hunks": 0}
+{"pr": 20, "file": ".github/workflows/build.yml", "title": "[codex] archive old campaign tooling", "added": 61, "deleted": 28, "hunks": 0}
+{"pr": 20, "file": ".github/workflows/decomp-dev-report.yml", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 29, "hunks": 0}
+{"pr": 20, "file": ".github/workflows/progress.yml", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 85, "hunks": 0}
+{"pr": 20, "file": ".gitignore", "title": "[codex] archive old campaign tooling", "added": 11, "deleted": 191, "hunks": 0}
+{"pr": 20, "file": ".vscode/extensions.json", "title": "[codex] archive old campaign tooling", "added": 10, "deleted": 5, "hunks": 0}
+{"pr": 20, "file": ".vscode/settings.json", "title": "[codex] archive old campaign tooling", "added": 23, "deleted": 26, "hunks": 0}
+{"pr": 20, "file": "AGENTS.md", "title": "[codex] archive old campaign tooling", "added": 30, "deleted": 445, "hunks": 0}
+{"pr": 20, "file": "CONTRIBUTING.md", "title": "[codex] archive old campaign tooling", "added": 29, "deleted": 89, "hunks": 0}
+{"pr": 20, "file": "README.md", "title": "[codex] archive old campaign tooling", "added": 45, "deleted": 111, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/.dockerignore", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/.github/workflows/report-sanity.yml", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/.github/workflows/verify.yml", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/.omc/battle_colosseum_scope.md", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/.omc/pc_port_anim_status.md", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/AGENT_ONBOARDING.md", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/DOLRECOMP_FEASIBILITY.md", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/Dockerfile", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/README.md", "title": "[codex] archive old campaign tooling", "added": 20, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/README_MATCHING.md", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/WALLS.md", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/build_pc/bodies/game_menu_msgbox/fn_80056C54.c", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/build_pc/bodies/game_menu_msgbox/fn_80057270.c", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/build_pc/bodies/game_script_callback/fn_80053778.c", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/build_pc/bodies/gs_field_world/GSfield_ObjectBatchUpdate.c", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/build_pc/bodies/gs_field_world/GSfield_ProcessTriggers.c", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/build_pc/bodies/gs_field_world/GSfield_RenderPass.c", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/build_pc/bodies/gs_field_world/GSfield_TransitionStateMachine.c", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/build_pc/bodies/gs_field_world/fn_8011538C.c", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/build_pc/bodies/gs_field_world/fn_80116164.c", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/build_pc/bodies/gs_field_world/fn_801190DC.c", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/build_pc/bodies/gs_field_world/fn_80119BD0.c", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/build_pc/bodies/gs_field_world/fn_8011F260.c", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/build_pc/bodies/gs_field_world/fn_8011F77C.c", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/build_pc/bodies/gs_field_world/fn_80123C54.c", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/build_pc/bodies/gs_field_world/fn_80124410.c", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/build_pc/bodies/gs_field_world/fn_80129280.c", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/build_pc/bodies/gs_field_world/fn_80129840.c", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/build_pc/bodies/gs_field_world/fn_8012BCA4.c", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/build_pc/bodies/gs_field_world/fn_8012BEB4.c", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/build_pc/bodies/gs_field_world/fn_8012C0B4.c", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/build_pc/bodies/gs_field_world/fn_8012DE94.c", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/build_pc/bodies/gs_field_world/fn_8012E388.c", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/build_pc/bodies/gs_field_world/fn_8012E7B8.c", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/build_pc/bodies/gs_field_world/fn_8012FCD4.c", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/build_pc/bodies/gs_field_world/fn_80130660.c", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/build_pc/bodies/gs_field_world/fn_80130770.c", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/build_pc/bodies/gs_field_world/fn_80130890.c", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/build_pc/bodies/gs_field_world/fn_801309A0.c", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/build_pc/bodies/gs_field_world/fn_80130A88.c", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/build_pc/bodies/gs_field_world/fn_80130BB0.c", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/build_pc/bodies/hsd_cobj/fn_80194400.c", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/build_pc/bodies/hsd_jobj/fn_801A0744.c", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/build_pc/bodies/hsd_jobj/fn_801A0FBC.c", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/build_pc/bodies/hsd_mobj/fn_801A6E24.c", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/build_pc/bodies/hsd_mobj/fn_801A7128.c", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/build_pc/bodies/hsd_mobj/fn_801A7B24.c", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/build_pc/bodies/hsd_mobj/fn_801A7D58.c", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/build_pc/bodies/hsd_mobj/fn_801A7E84.c", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/build_pc/render_anim.py", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/compiler_comparison_results.json", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/config/GC6E01/compile_config.json", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/config/GC6E01/config.build.yml", "title": "[codex] archive old campaign tooling", "added": 5, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/config/GC6E01/config.swap.yml", "title": "[codex] archive old campaign tooling", "added": 5, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/config/GC6E01/data_progress.json", "title": "[codex] archive old campaign tooling", "added": 2, "deleted": 2, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/config/GC6E01/func_tu_map.json", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/config/GC6E01/link_order.txt", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/config/GC6E01/objdiff_report.json", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/config/GC6E01/splits.build.txt", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/config/GC6E01/splits_refined.txt", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/config/GC6E01/symbolmap/.gitignore", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/config/GC6E01/symbolmap/_complete_all.txt", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/config/GC6E01/symbolmap/_complete_conflict.txt", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/config/GC6E01/symbolmap/_complete_keep.txt", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/config/GC6E01/symbolmap/_high_keep.txt", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/config/GC6E01/symbolmap/_retmap.txt", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/config/GC6E01/symbolmap/applied_symbols.txt", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/config/GC6E01/symbolmap/leads_needs_wiring.md", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/config/GC6E01/symbolmap/name_proposals.json", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/config/GC6E01/symbolmap/name_proposals.md", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/config/GC6E01/symbolmap/name_proposals_high.txt", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/config/GC6E01/symbolmap/proposed_symbols.txt", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/config/GC6E01/symbolmap/strings.json", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/config/GC6E01/symbolmap/structural_applied.txt", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/config/GC6E01/symbolmap/structural_ports.json", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/config/GC6E01/symbolmap/tu_attribution.md", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/config/GC6E01/symbolmap/tu_evidence.json", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/config/GC6E01/symbolmap/xd_port.json", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/config/GC6E01/symbolmap/xd_port.md", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/config/GC6E01/symbolmap/xd_port_apply.txt", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/config/GC6E01/symbolmap/xd_vocabulary.json", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/config/GC6E01/symbols.build.txt", "title": "[codex] archive old campaign tooling", "added": 774, "deleted": 774, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/config/GC6E01/symdb.json", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/docker/README.md", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/docker/entrypoint.sh", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/docs/CRACK_LEVERS.md", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/docs/ORCHESTRATOR_HANDOFF.md", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/docs/PC_PORT_ENGINE_FIBRE_SPIKE.md", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/docs/PC_PORT_HANDOFF.md", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 20, "file": "archive/previous_campaign/docs/PC_PORT_TO_PLAYABLE.md", "title": "[codex] archive old campaign tooling", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 19, "file": "README.md", "title": "Add data progress measures to report", "added": 1, "deleted": 0, "hunks": 0}
+{"pr": 19, "file": "report.json", "title": "Add data progress measures to report", "added": 1, "deleted": 1, "hunks": 0}
+{"pr": 19, "file": "tools/check_report_sanity.py", "title": "Add data progress measures to report", "added": 29, "deleted": 7, "hunks": 0}
+{"pr": 19, "file": "tools/decomp_work/progress.json", "title": "Add data progress measures to report", "added": 4, "deleted": 1, "hunks": 0}
+{"pr": 19, "file": "tools/gen_decomp_report.py", "title": "Add data progress measures to report", "added": 113, "deleted": 11, "hunks": 0}
+{"pr": 19, "file": "tools/measure_cache.py", "title": "Add data progress measures to report", "added": 9, "deleted": 5, "hunks": 0}
+{"pr": 19, "file": "tools/sync_progress_metadata.py", "title": "Add data progress measures to report", "added": 16, "deleted": 0, "hunks": 0}
+{"pr": 18, "file": "tools/check_report_sanity.py", "title": "Progress: enforce synced report metadata", "added": 18, "deleted": 0, "hunks": 0}
+{"pr": 18, "file": "tools/decomp_work/AGENTS.md", "title": "Progress: enforce synced report metadata", "added": 1, "deleted": 1, "hunks": 0}
+{"pr": 18, "file": "tools/decomp_work/auto_push.sh", "title": "Progress: enforce synced report metadata", "added": 4, "deleted": 3, "hunks": 0}
+{"pr": 18, "file": "tools/decomp_work/progress.json", "title": "Progress: enforce synced report metadata", "added": 3437, "deleted": 8, "hunks": 0}
+{"pr": 18, "file": "tools/decomp_work/report_cadence.py", "title": "Progress: enforce synced report metadata", "added": 6, "deleted": 10, "hunks": 0}
+{"pr": 18, "file": "tools/decomp_work/surgical_report_update.py", "title": "Progress: enforce synced report metadata", "added": 8, "deleted": 0, "hunks": 0}
+{"pr": 18, "file": "tools/decomp_work/update_report.py", "title": "Progress: enforce synced report metadata", "added": 15, "deleted": 26, "hunks": 0}
+{"pr": 18, "file": "tools/sync_progress_metadata.py", "title": "Progress: enforce synced report metadata", "added": 201, "deleted": 0, "hunks": 0}
+{"pr": 17, "file": "README.md", "title": "Progress: bank two SI current-tree wins", "added": 2, "deleted": 2, "hunks": 0}
+{"pr": 17, "file": "report.json", "title": "Progress: bank two SI current-tree wins", "added": 1, "deleted": 1, "hunks": 0}
+{"pr": 16, "file": "README.md", "title": "Progress: bank 23 gated current-tree wins", "added": 2, "deleted": 2, "hunks": 0}
+{"pr": 16, "file": "report.json", "title": "Progress: bank 23 gated current-tree wins", "added": 1, "deleted": 1, "hunks": 0}
+{"pr": 15, "file": "README.md", "title": "Decomp cleanup: type six matched wins", "added": 2, "deleted": 2, "hunks": 0}
+{"pr": 15, "file": "report.json", "title": "Decomp cleanup: type six matched wins", "added": 1, "deleted": 1, "hunks": 0}
+{"pr": 15, "file": "src/game/battle/battle_scene.c", "title": "Decomp cleanup: type six matched wins", "added": 8, "deleted": 3, "hunks": 0}
+{"pr": 15, "file": "src/game/gs_field_world.c", "title": "Decomp cleanup: type six matched wins", "added": 6, "deleted": 1, "hunks": 0}
+{"pr": 15, "file": "src/game/gs_model.c", "title": "Decomp cleanup: type six matched wins", "added": 12, "deleted": 3, "hunks": 0}
+{"pr": 15, "file": "src/hsd/hsd_shadow.c", "title": "Decomp cleanup: type six matched wins", "added": 22, "deleted": 6, "hunks": 0}
+{"pr": 15, "file": "src/trk/TRKNub.c", "title": "Decomp cleanup: type six matched wins", "added": 21, "deleted": 14, "hunks": 0}
+{"pr": 14, "file": ".gitignore", "title": "Decomp campaign: 16 real-C wins + fleet audit tooling", "added": 1, "deleted": 0, "hunks": 0}
+{"pr": 14, "file": "README.md", "title": "Decomp campaign: 16 real-C wins + fleet audit tooling", "added": 4, "deleted": 3, "hunks": 0}
+{"pr": 14, "file": "docs/CRACK_LEVERS.md", "title": "Decomp campaign: 16 real-C wins + fleet audit tooling", "added": 2, "deleted": 0, "hunks": 0}
+{"pr": 14, "file": "report.json", "title": "Decomp campaign: 16 real-C wins + fleet audit tooling", "added": 1, "deleted": 1, "hunks": 0}
+{"pr": 14, "file": "src/dolphin/dvd/DVDFs.c", "title": "Decomp campaign: 16 real-C wins + fleet audit tooling", "added": 25, "deleted": 13, "hunks": 0}
+{"pr": 14, "file": "src/dolphin/os/OSInterrupt.c", "title": "Decomp campaign: 16 real-C wins + fleet audit tooling", "added": 6, "deleted": 2, "hunks": 0}
+{"pr": 14, "file": "src/dolphin/os/OSTime.c", "title": "Decomp campaign: 16 real-C wins + fleet audit tooling", "added": 65, "deleted": 241, "hunks": 0}
+{"pr": 14, "file": "src/game/colosseum_battle.c", "title": "Decomp campaign: 16 real-C wins + fleet audit tooling", "added": 186, "deleted": 660, "hunks": 0}
+{"pr": 14, "file": "src/game/menu/menu_bag.c", "title": "Decomp campaign: 16 real-C wins + fleet audit tooling", "added": 223, "deleted": 13, "hunks": 0}
+{"pr": 14, "file": "tools/decomp_work/CAMPAIGN_2026_06_27.md", "title": "Decomp campaign: 16 real-C wins + fleet audit tooling", "added": 129, "deleted": 0, "hunks": 0}
+{"pr": 14, "file": "tools/decomp_work/audit_real_c_debt.py", "title": "Decomp campaign: 16 real-C wins + fleet audit tooling", "added": 222, "deleted": 0, "hunks": 0}
+{"pr": 14, "file": "tools/decomp_work/auto_gate.sh", "title": "Decomp campaign: 16 real-C wins + fleet audit tooling", "added": 1, "deleted": 1, "hunks": 0}
+{"pr": 14, "file": "tools/decomp_work/band.py", "title": "Decomp campaign: 16 real-C wins + fleet audit tooling", "added": 3, "deleted": 2, "hunks": 0}
+{"pr": 14, "file": "tools/decomp_work/band_integrate.py", "title": "Decomp campaign: 16 real-C wins + fleet audit tooling", "added": 2, "deleted": 1, "hunks": 0}
+{"pr": 14, "file": "tools/decomp_work/bank_nearmiss.py", "title": "Decomp campaign: 16 real-C wins + fleet audit tooling", "added": 1, "deleted": 1, "hunks": 0}
+{"pr": 14, "file": "tools/decomp_work/fleet_dashboard.py", "title": "Decomp campaign: 16 real-C wins + fleet audit tooling", "added": 68, "deleted": 10, "hunks": 0}
+{"pr": 14, "file": "tools/decomp_work/fleet_down_mac.sh", "title": "Decomp campaign: 16 real-C wins + fleet audit tooling", "added": 4, "deleted": 0, "hunks": 0}
+{"pr": 14, "file": "tools/decomp_work/fleet_mac.sh", "title": "Decomp campaign: 16 real-C wins + fleet audit tooling", "added": 27, "deleted": 4, "hunks": 0}
+{"pr": 14, "file": "tools/decomp_work/lane_seed.py", "title": "Decomp campaign: 16 real-C wins + fleet audit tooling", "added": 132, "deleted": 10, "hunks": 0}
+{"pr": 14, "file": "tools/decomp_work/lane_worker.sh", "title": "Decomp campaign: 16 real-C wins + fleet audit tooling", "added": 17, "deleted": 2, "hunks": 0}
+{"pr": 14, "file": "tools/decomp_work/live_real_c_queue.py", "title": "Decomp campaign: 16 real-C wins + fleet audit tooling", "added": 150, "deleted": 0, "hunks": 0}
+{"pr": 14, "file": "tools/decomp_work/permuter/grind2.py", "title": "Decomp campaign: 16 real-C wins + fleet audit tooling", "added": 2, "deleted": 0, "hunks": 0}
+{"pr": 14, "file": "tools/decomp_work/permuter_poll.sh", "title": "Decomp campaign: 16 real-C wins + fleet audit tooling", "added": 89, "deleted": 4, "hunks": 0}
+{"pr": 14, "file": "tools/decomp_work/rl/build_sft_wins.py", "title": "Decomp campaign: 16 real-C wins + fleet audit tooling", "added": 2, "deleted": 1, "hunks": 0}
+{"pr": 14, "file": "tools/decomp_work/rl/build_sft_wins_v2.py", "title": "Decomp campaign: 16 real-C wins + fleet audit tooling", "added": 1, "deleted": 1, "hunks": 0}
+{"pr": 14, "file": "tools/decomp_work/tmux_control/cockpit.sh", "title": "Decomp campaign: 16 real-C wins + fleet audit tooling", "added": 2, "deleted": 2, "hunks": 0}
+{"pr": 14, "file": "tools/decomp_work/wall_ledger.py", "title": "Decomp campaign: 16 real-C wins + fleet audit tooling", "added": 18, "deleted": 1, "hunks": 0}
+{"pr": 14, "file": "tools/measure_cache.py", "title": "Decomp campaign: 16 real-C wins + fleet audit tooling", "added": 14, "deleted": 1, "hunks": 0}
+{"pr": 14, "file": "tools/verify_commit.py", "title": "Decomp campaign: 16 real-C wins + fleet audit tooling", "added": 70, "deleted": 2, "hunks": 0}
+{"pr": 12, "file": "AGENTS.md", "title": "Bank low-bucket decomp fleet wins", "added": 8, "deleted": 1, "hunks": 0}
+{"pr": 12, "file": "src/crt/global_destructor_chain.c", "title": "Bank low-bucket decomp fleet wins", "added": 33, "deleted": 23, "hunks": 0}
+{"pr": 12, "file": "src/dolphin/os/OSMemory.c", "title": "Bank low-bucket decomp fleet wins", "added": 18, "deleted": 20, "hunks": 0}
+{"pr": 12, "file": "src/dolphin/os/OSReboot.c", "title": "Bank low-bucket decomp fleet wins", "added": 21, "deleted": 30, "hunks": 0}
+{"pr": 12, "file": "src/dolphin/si/SI.c", "title": "Bank low-bucket decomp fleet wins", "added": 91, "deleted": 14, "hunks": 0}
+{"pr": 12, "file": "src/game/battle/battle_logic.c", "title": "Bank low-bucket decomp fleet wins", "added": 23, "deleted": 39, "hunks": 0}
+{"pr": 12, "file": "src/game/battle/battle_scene.c", "title": "Bank low-bucket decomp fleet wins", "added": 5, "deleted": 1, "hunks": 0}
+{"pr": 12, "file": "src/game/colosseum_event.c", "title": "Bank low-bucket decomp fleet wins", "added": 10, "deleted": 34, "hunks": 0}
+{"pr": 12, "file": "src/game/fsys/fsys_load.c", "title": "Bank low-bucket decomp fleet wins", "added": 16, "deleted": 10, "hunks": 0}
+{"pr": 12, "file": "src/game/gba/gba_comm_ext.c", "title": "Bank low-bucket decomp fleet wins", "added": 117, "deleted": 185, "hunks": 0}
+{"pr": 12, "file": "src/game/gba/gba_conv.c", "title": "Bank low-bucket decomp fleet wins", "added": 6, "deleted": 0, "hunks": 0}
+{"pr": 12, "file": "src/game/gs_colsys.c", "title": "Bank low-bucket decomp fleet wins", "added": 50, "deleted": 6, "hunks": 0}
+{"pr": 12, "file": "src/game/gs_field_colquery.c", "title": "Bank low-bucket decomp fleet wins", "added": 607, "deleted": 42, "hunks": 0}
+{"pr": 12, "file": "src/game/gs_field_resource.c", "title": "Bank low-bucket decomp fleet wins", "added": 31, "deleted": 4, "hunks": 0}
+{"pr": 12, "file": "src/game/gs_field_world.c", "title": "Bank low-bucket decomp fleet wins", "added": 4, "deleted": 4, "hunks": 0}
+{"pr": 12, "file": "src/game/gs_floor_data.c", "title": "Bank low-bucket decomp fleet wins", "added": 82, "deleted": 29, "hunks": 0}
+{"pr": 12, "file": "src/game/gs_model.c", "title": "Bank low-bucket decomp fleet wins", "added": 22, "deleted": 2, "hunks": 0}
+{"pr": 12, "file": "src/game/gs_party_access.c", "title": "Bank low-bucket decomp fleet wins", "added": 16, "deleted": 11, "hunks": 0}
+{"pr": 12, "file": "src/game/gs_pcbox.c", "title": "Bank low-bucket decomp fleet wins", "added": 16, "deleted": 12, "hunks": 0}
+{"pr": 12, "file": "src/game/gs_scene.c", "title": "Bank low-bucket decomp fleet wins", "added": 2, "deleted": 0, "hunks": 0}
+{"pr": 12, "file": "src/game/input/input.c", "title": "Bank low-bucket decomp fleet wins", "added": 43, "deleted": 56, "hunks": 0}
+{"pr": 12, "file": "src/game/menu/menu_common_ext.c", "title": "Bank low-bucket decomp fleet wins", "added": 9, "deleted": 4, "hunks": 0}
+{"pr": 12, "file": "src/game/menu/menu_exdisc.c", "title": "Bank low-bucket decomp fleet wins", "added": 204, "deleted": 85, "hunks": 0}
+{"pr": 12, "file": "src/game/menu/menu_precine.c", "title": "Bank low-bucket decomp fleet wins", "added": 37, "deleted": 77, "hunks": 0}
+{"pr": 12, "file": "src/game/save/save_carde.c", "title": "Bank low-bucket decomp fleet wins", "added": 112, "deleted": 180, "hunks": 0}
+{"pr": 12, "file": "src/game/trainer.c", "title": "Bank low-bucket decomp fleet wins", "added": 39, "deleted": 140, "hunks": 0}
+{"pr": 12, "file": "src/hsd/hsd_pobj_ext.c", "title": "Bank low-bucket decomp fleet wins", "added": 2, "deleted": 0, "hunks": 0}
+{"pr": 12, "file": "src/hsd/hsd_render.c", "title": "Bank low-bucket decomp fleet wins", "added": 289, "deleted": 412, "hunks": 0}
+{"pr": 12, "file": "src/hsd/hsd_shadow.c", "title": "Bank low-bucket decomp fleet wins", "added": 46, "deleted": 3, "hunks": 0}
+{"pr": 12, "file": "src/hsd/hsd_tev.c", "title": "Bank low-bucket decomp fleet wins", "added": 7, "deleted": 4, "hunks": 0}
+{"pr": 12, "file": "src/hsd/hsd_texp.c", "title": "Bank low-bucket decomp fleet wins", "added": 34, "deleted": 8, "hunks": 0}
+{"pr": 12, "file": "src/hsd/hsd_tobj_ext.c", "title": "Bank low-bucket decomp fleet wins", "added": 24, "deleted": 13, "hunks": 0}
+{"pr": 12, "file": "src/hsd/hsd_util.c", "title": "Bank low-bucket decomp fleet wins", "added": 109, "deleted": 181, "hunks": 0}
+{"pr": 12, "file": "src/trk/TRKDispatch.c", "title": "Bank low-bucket decomp fleet wins", "added": 50, "deleted": 52, "hunks": 0}
+{"pr": 12, "file": "src/trk/TRKNub.c", "title": "Bank low-bucket decomp fleet wins", "added": 32, "deleted": 71, "hunks": 0}
+{"pr": 12, "file": "src/trk/TRKSerial.c", "title": "Bank low-bucket decomp fleet wins", "added": 17, "deleted": 12, "hunks": 0}
+{"pr": 12, "file": "tools/compile_check.py", "title": "Bank low-bucket decomp fleet wins", "added": 49, "deleted": 10, "hunks": 0}
+{"pr": 12, "file": "tools/decomp_work/anneal_farm.sh", "title": "Bank low-bucket decomp fleet wins", "added": 45, "deleted": 0, "hunks": 0}
+{"pr": 12, "file": "tools/decomp_work/auto_gate.sh", "title": "Bank low-bucket decomp fleet wins", "added": 1, "deleted": 1, "hunks": 0}
+{"pr": 12, "file": "tools/decomp_work/benchmark/bench_v3_vs.py", "title": "Bank low-bucket decomp fleet wins", "added": 197, "deleted": 0, "hunks": 0}
+{"pr": 12, "file": "tools/decomp_work/coordination/codex_audit_2026-06-27.md", "title": "Bank low-bucket decomp fleet wins", "added": 31, "deleted": 0, "hunks": 0}
+{"pr": 12, "file": "tools/decomp_work/equivalent.txt", "title": "Bank low-bucket decomp fleet wins", "added": 13, "deleted": 0, "hunks": 0}
+{"pr": 12, "file": "tools/decomp_work/fleet_dashboard.py", "title": "Bank low-bucket decomp fleet wins", "added": 320, "deleted": 0, "hunks": 0}
+{"pr": 12, "file": "tools/decomp_work/fleet_down_mac.sh", "title": "Bank low-bucket decomp fleet wins", "added": 14, "deleted": 0, "hunks": 0}
+{"pr": 12, "file": "tools/decomp_work/fleet_mac.sh", "title": "Bank low-bucket decomp fleet wins", "added": 58, "deleted": 0, "hunks": 0}
+{"pr": 12, "file": "tools/decomp_work/fleet_monitor.sh", "title": "Bank low-bucket decomp fleet wins", "added": 41, "deleted": 0, "hunks": 0}
+{"pr": 12, "file": "tools/decomp_work/lane_seed.py", "title": "Bank low-bucket decomp fleet wins", "added": 162, "deleted": 0, "hunks": 0}
+{"pr": 12, "file": "tools/decomp_work/lane_worker.sh", "title": "Bank low-bucket decomp fleet wins", "added": 92, "deleted": 0, "hunks": 0}
+{"pr": 12, "file": "tools/decomp_work/permuter_poll.sh", "title": "Bank low-bucket decomp fleet wins", "added": 36, "deleted": 0, "hunks": 0}
+{"pr": 12, "file": "tools/decomp_work/rl/phased_demo.py", "title": "Bank low-bucket decomp fleet wins", "added": 102, "deleted": 0, "hunks": 0}
+{"pr": 12, "file": "tools/decomp_work/rl/serve_v3.py", "title": "Bank low-bucket decomp fleet wins", "added": 110, "deleted": 0, "hunks": 0}
+{"pr": 12, "file": "tools/decomp_work/seed_permute.py", "title": "Bank low-bucket decomp fleet wins", "added": 96, "deleted": 0, "hunks": 0}
+{"pr": 12, "file": "tools/decomp_work/tmux_control/cockpit.sh", "title": "Bank low-bucket decomp fleet wins", "added": 30, "deleted": 17, "hunks": 0}
+{"pr": 12, "file": "tools/lane_glm.py", "title": "Bank low-bucket decomp fleet wins", "added": 271, "deleted": 0, "hunks": 0}
+{"pr": 11, "file": "tools/compile_check.py", "title": "GLM-driven decomp lane + Mac-native compile gate", "added": 49, "deleted": 10, "hunks": 0}
+{"pr": 11, "file": "tools/lane_glm.py", "title": "GLM-driven decomp lane + Mac-native compile gate", "added": 271, "deleted": 0, "hunks": 0}
+{"pr": 10, "file": "configure.py", "title": "Fix fresh-checkout `ninja` failure at the report step (#5)", "added": 12, "deleted": 0, "hunks": 0}
+{"pr": 9, "file": "tools/decomp_work/tmux_control/COCKPIT_MAC.md", "title": "Mac/Linux multi-agent tmux cockpit (cockpit.sh)", "added": 56, "deleted": 0, "hunks": 0}
+{"pr": 9, "file": "tools/decomp_work/tmux_control/cockpit.sh", "title": "Mac/Linux multi-agent tmux cockpit (cockpit.sh)", "added": 191, "deleted": 0, "hunks": 0}
+{"pr": 8, "file": "tools/automatch.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 2, "deleted": 1, "hunks": 0}
+{"pr": 8, "file": "tools/compile_check.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 1, "deleted": 1, "hunks": 0}
+{"pr": 8, "file": "tools/compiler_compare.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 1, "deleted": 1, "hunks": 0}
+{"pr": 8, "file": "tools/decomp_agent.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 11, "deleted": 4, "hunks": 0}
+{"pr": 8, "file": "tools/decomp_benchmark.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 3, "deleted": 3, "hunks": 0}
+{"pr": 8, "file": "tools/decomp_work/band.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 1, "deleted": 1, "hunks": 0}
+{"pr": 8, "file": "tools/decomp_work/benchmark/bench_compile_match.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 5, "deleted": 1, "hunks": 0}
+{"pr": 8, "file": "tools/decomp_work/benchmark/local_iterate.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 2, "deleted": 1, "hunks": 0}
+{"pr": 8, "file": "tools/decomp_work/decomp.sh", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 6, "deleted": 5, "hunks": 0}
+{"pr": 8, "file": "tools/decomp_work/dump_diff.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 2, "deleted": 1, "hunks": 0}
+{"pr": 8, "file": "tools/decomp_work/dump_sym.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 2, "deleted": 1, "hunks": 0}
+{"pr": 8, "file": "tools/decomp_work/dumpdiff.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 2, "deleted": 1, "hunks": 0}
+{"pr": 8, "file": "tools/decomp_work/dumpmany.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 2, "deleted": 1, "hunks": 0}
+{"pr": 8, "file": "tools/decomp_work/extract_target_asm.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 1, "deleted": 1, "hunks": 0}
+{"pr": 8, "file": "tools/decomp_work/flag_sweep.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 2, "deleted": 1, "hunks": 0}
+{"pr": 8, "file": "tools/decomp_work/fndiff.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 2, "deleted": 1, "hunks": 0}
+{"pr": 8, "file": "tools/decomp_work/hsd_match.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 1, "deleted": 1, "hunks": 0}
+{"pr": 8, "file": "tools/decomp_work/lane_ollama.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 4, "deleted": 2, "hunks": 0}
+{"pr": 8, "file": "tools/decomp_work/maindec_check.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 2, "deleted": 1, "hunks": 0}
+{"pr": 8, "file": "tools/decomp_work/mmdiff.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 2, "deleted": 1, "hunks": 0}
+{"pr": 8, "file": "tools/decomp_work/mmdiff_all.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 2, "deleted": 1, "hunks": 0}
+{"pr": 8, "file": "tools/decomp_work/near_large.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 2, "deleted": 1, "hunks": 0}
+{"pr": 8, "file": "tools/decomp_work/near_realc.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 2, "deleted": 1, "hunks": 0}
+{"pr": 8, "file": "tools/decomp_work/overnight/queue_attack.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 1, "deleted": 1, "hunks": 0}
+{"pr": 8, "file": "tools/decomp_work/pokemon_dashboard/pokedex_dashboard.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 1, "deleted": 1, "hunks": 0}
+{"pr": 8, "file": "tools/decomp_work/ra/walltriage.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 2, "deleted": 1, "hunks": 0}
+{"pr": 8, "file": "tools/decomp_work/rl/build_sft_wins.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 2, "deleted": 1, "hunks": 0}
+{"pr": 8, "file": "tools/decomp_work/rl/build_sft_wins_v2.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 1, "deleted": 1, "hunks": 0}
+{"pr": 8, "file": "tools/decomp_work/scratch_measure.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 2, "deleted": 2, "hunks": 0}
+{"pr": 8, "file": "tools/decomp_work/sd3.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 2, "deleted": 1, "hunks": 0}
+{"pr": 8, "file": "tools/decomp_work/sdiff.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 1, "deleted": 1, "hunks": 0}
+{"pr": 8, "file": "tools/decomp_work/show_target_asm.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 2, "deleted": 1, "hunks": 0}
+{"pr": 8, "file": "tools/decomp_work/showdiff.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 2, "deleted": 1, "hunks": 0}
+{"pr": 8, "file": "tools/diffclass.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 2, "deleted": 1, "hunks": 0}
+{"pr": 8, "file": "tools/distribute.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 1, "deleted": 1, "hunks": 0}
+{"pr": 8, "file": "tools/extract_dol.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 2, "deleted": 1, "hunks": 0}
+{"pr": 8, "file": "tools/ghidra_seed.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 2, "deleted": 1, "hunks": 0}
+{"pr": 8, "file": "tools/lane_3090.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 7, "deleted": 3, "hunks": 0}
+{"pr": 8, "file": "tools/match_test.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 2, "deleted": 1, "hunks": 0}
+{"pr": 8, "file": "tools/measure_cache.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 2, "deleted": 1, "hunks": 0}
+{"pr": 8, "file": "tools/near_miss_report.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 2, "deleted": 1, "hunks": 0}
+{"pr": 8, "file": "tools/progress.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 2, "deleted": 1, "hunks": 0}
+{"pr": 8, "file": "tools/quick_diff.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 2, "deleted": 1, "hunks": 0}
+{"pr": 8, "file": "tools/scan_all_files.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 3, "deleted": 3, "hunks": 0}
+{"pr": 8, "file": "tools/symbolmap/renaming_dashboard.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 1, "deleted": 1, "hunks": 0}
+{"pr": 8, "file": "tools/verify_commit.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 2, "deleted": 1, "hunks": 0}
+{"pr": 8, "file": "tools/weak_order_diff.py", "title": "Cross-platform decomp tooling (macOS/Linux contributors)", "added": 2, "deleted": 1, "hunks": 0}
+{"pr": 7, "file": "README.md", "title": "progress: sync README + report.json to current match (4266/6795 fn 62\u2026", "added": 3, "deleted": 3, "hunks": 0}
+{"pr": 7, "file": "report.json", "title": "progress: sync README + report.json to current match (4266/6795 fn 62\u2026", "added": 1, "deleted": 1, "hunks": 0}
+{"pr": 6, "file": "DOLRECOMP_FEASIBILITY.md", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 42, "deleted": 0, "hunks": 0}
+{"pr": 6, "file": "WALLS.md", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 6, "deleted": 0, "hunks": 0}
+{"pr": 6, "file": "report.json", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 1, "deleted": 1, "hunks": 0}
+{"pr": 6, "file": "src/game/colosseum_battle.c", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 259, "deleted": 803, "hunks": 0}
+{"pr": 6, "file": "src/game/effect/effect_util.c", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 53, "deleted": 214, "hunks": 0}
+{"pr": 6, "file": "src/game/effect/effect_visual.c", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 29, "deleted": 2, "hunks": 0}
+{"pr": 6, "file": "src/game/gs_texture.c", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 97, "deleted": 5, "hunks": 0}
+{"pr": 6, "file": "src/game/input/input.c", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 28, "deleted": 2, "hunks": 0}
+{"pr": 6, "file": "src/game/movie.c", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 0, "deleted": 1, "hunks": 0}
+{"pr": 6, "file": "src/game/pokemon.c", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 96, "deleted": 81, "hunks": 0}
+{"pr": 6, "file": "src/game/pokemon/poke_detail.c", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 37, "deleted": 28, "hunks": 0}
+{"pr": 6, "file": "src/game/ui/ui_core.c", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 15, "deleted": 27, "hunks": 0}
+{"pr": 6, "file": "src/hsd/hsd_cobj.c", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 1, "deleted": 0, "hunks": 0}
+{"pr": 6, "file": "src/hsd/hsd_mobj.c", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 26, "deleted": 10, "hunks": 0}
+{"pr": 6, "file": "src/hsd/hsd_mtx.c", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 339, "deleted": 17, "hunks": 0}
+{"pr": 6, "file": "src/hsd/hsd_pobj_ext.c", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 3, "deleted": 5, "hunks": 0}
+{"pr": 6, "file": "src/hsd/hsd_state.c", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 2, "deleted": 2, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/ECONOMIC_MODEL.md", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 55, "deleted": 0, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/agent_limits.json", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 17, "deleted": 1, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/auto_rebatch.sh", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 50, "deleted": 7, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/band.py", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 83, "deleted": 2, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/band_integrate.py", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 27, "deleted": 8, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/bank_nearmiss.py", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 178, "deleted": 0, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/coordination/locks.py", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 358, "deleted": 0, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/crack_batch_worklist.py", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 79, "deleted": 0, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/equivalent.txt", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 3, "deleted": 0, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/fleet_driver.sh", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 39, "deleted": 2, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/gen_bucket_queue.py", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 67, "deleted": 8, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/measure_db.py", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 120, "deleted": 0, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/oracle/README.md", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 274, "deleted": 0, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/oracle/auto_harness.c", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 411, "deleted": 0, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/oracle/batch_run.sh", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 35, "deleted": 0, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/oracle/bside_shim.h", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 23, "deleted": 0, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/oracle/extract_src_fns.py", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 121, "deleted": 0, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/oracle/gen_fieldmap.py", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 241, "deleted": 0, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/oracle/gen_lbls.py", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 76, "deleted": 0, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/oracle/gen_thunks.py", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 76, "deleted": 0, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/oracle/harness_fightSideGetStatus.c", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 334, "deleted": 0, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/oracle/harness_fn_80194510.c", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 204, "deleted": 0, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/oracle/oracle_auto.sh", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 201, "deleted": 0, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/oracle/oracle_diff.sh", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 86, "deleted": 0, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/oracle/oracle_runtime.h", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 90, "deleted": 0, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/oracle/resolve_abi.py", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 113, "deleted": 0, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/pane_io.sh", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 112, "deleted": 11, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/permuter/LLM_FLYWHEEL_RUNBOOK.md", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 60, "deleted": 0, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/permuter/crackable_stubs.txt", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 40, "deleted": 0, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/permuter/inject_body.py", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 66, "deleted": 0, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/permuter/m2c_clean.py", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 134, "deleted": 0, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/permuter/opt_sweep.sh", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 47, "deleted": 0, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/permuter/optsweep_candidates.txt", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 47, "deleted": 0, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/permuter/permute_box_solo.sh", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 31, "deleted": 0, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/permuter/run_equiv_farm.sh", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 59, "deleted": 0, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/permuter/run_stub_farm.sh", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 168, "deleted": 0, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/permuter/setup_mac_wibo.sh", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 64, "deleted": 0, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/rl/build_sft_wins.py", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 87, "deleted": 0, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/rl/build_sft_wins_v2.py", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 321, "deleted": 0, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/rl/clone_decomp_farm.sh", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 29, "deleted": 0, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/rl/gen_candidate.py", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 60, "deleted": 0, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/rl/train_sft_wins.py", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 85, "deleted": 0, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/spawn_pane_io.ps1", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 11, "deleted": 0, "hunks": 0}
+{"pr": 6, "file": "tools/decomp_work/workflows/lever-crack-batch.js", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 101, "deleted": 0, "hunks": 0}
+{"pr": 6, "file": "tools/symbolmap/renaming_dashboard.py", "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "added": 614, "deleted": 5, "hunks": 0}
+{"pr": 4, "file": ".github/workflows/report-sanity.yml", "title": "Drop phantom band-scratch units from progress metric + add CI guard", "added": 26, "deleted": 0, "hunks": 0}
+{"pr": 4, "file": "report.json", "title": "Drop phantom band-scratch units from progress metric + add CI guard", "added": 1, "deleted": 1, "hunks": 0}
+{"pr": 4, "file": "tools/check_report_sanity.py", "title": "Drop phantom band-scratch units from progress metric + add CI guard", "added": 102, "deleted": 0, "hunks": 0}
+{"pr": 4, "file": "tools/progress.py", "title": "Drop phantom band-scratch units from progress metric + add CI guard", "added": 22, "deleted": 0, "hunks": 0}
+{"pr": 3, "file": ".gitignore", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 4, "deleted": 0, "hunks": 0}
+{"pr": 3, "file": "AGENT_ONBOARDING.md", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 19, "deleted": 3, "hunks": 0}
+{"pr": 3, "file": "README.md", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 3, "deleted": 3, "hunks": 0}
+{"pr": 3, "file": "WALLS.md", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 48, "deleted": 1, "hunks": 0}
+{"pr": 3, "file": "config/GC6E01/symbolmap/xd_port.json", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 1, "deleted": 1546, "hunks": 0}
+{"pr": 3, "file": "config/GC6E01/symbolmap/xd_port.md", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 1, "deleted": 122, "hunks": 0}
+{"pr": 3, "file": "config/GC6E01/symbolmap/xd_port_apply.txt", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 1, "deleted": 17, "hunks": 0}
+{"pr": 3, "file": "docs/decompilation_roadmap.md", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 112, "deleted": 0, "hunks": 0}
+{"pr": 3, "file": "include/game/gs_colsys.h", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 16, "deleted": 13, "hunks": 0}
+{"pr": 3, "file": "report.json", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 1, "deleted": 1, "hunks": 0}
+{"pr": 3, "file": "src/dolphin/dvd/DVDFs.c", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 2, "deleted": 2, "hunks": 0}
+{"pr": 3, "file": "src/dolphin/dvd/DVDQueue.c", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 22, "deleted": 12, "hunks": 0}
+{"pr": 3, "file": "src/dolphin/gx/GXInit.c", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 288, "deleted": 0, "hunks": 0}
+{"pr": 3, "file": "src/dolphin/os/OSThread.c", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 1, "deleted": 1, "hunks": 0}
+{"pr": 3, "file": "src/game/battle/battle_waza.c", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 3, "deleted": 6, "hunks": 0}
+{"pr": 3, "file": "src/game/colosseum_script.c", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 11, "deleted": 11, "hunks": 0}
+{"pr": 3, "file": "src/game/colosseum_ui.c", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 13, "deleted": 2, "hunks": 0}
+{"pr": 3, "file": "src/game/fsys/fsys_file.c", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 7, "deleted": 2, "hunks": 0}
+{"pr": 3, "file": "src/game/gba/gba_misc.c", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 252, "deleted": 303, "hunks": 0}
+{"pr": 3, "file": "src/game/gs_colsys.c", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 19, "deleted": 20, "hunks": 0}
+{"pr": 3, "file": "src/game/gs_event_exec.c", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 6, "deleted": 5, "hunks": 0}
+{"pr": 3, "file": "src/game/gs_field_world.c", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 24, "deleted": 2, "hunks": 0}
+{"pr": 3, "file": "src/game/gs_party_access.c", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 18, "deleted": 0, "hunks": 0}
+{"pr": 3, "file": "src/game/gs_pcbox.c", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 2, "deleted": 2, "hunks": 0}
+{"pr": 3, "file": "src/game/gs_pokemon_summary.c", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 39, "deleted": 18, "hunks": 0}
+{"pr": 3, "file": "src/game/gs_render_util.c", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 3, "deleted": 3, "hunks": 0}
+{"pr": 3, "file": "src/game/gs_worldmap.c", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 10, "deleted": 24, "hunks": 0}
+{"pr": 3, "file": "src/game/people/people_field.c", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 412, "deleted": 77, "hunks": 0}
+{"pr": 3, "file": "src/game/pokemon.c", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 18, "deleted": 12, "hunks": 0}
+{"pr": 3, "file": "src/game/scene_init.c", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 14, "deleted": 3, "hunks": 0}
+{"pr": 3, "file": "src/game/script/script_callback.c", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 3, "deleted": 3, "hunks": 0}
+{"pr": 3, "file": "src/game/trainer.c", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 1, "deleted": 1, "hunks": 0}
+{"pr": 3, "file": "src/game/ui/ui_core.c", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 17, "deleted": 1, "hunks": 0}
+{"pr": 3, "file": "src/hsd/hsd_dobj.c", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 8, "deleted": 0, "hunks": 0}
+{"pr": 3, "file": "src/hsd/hsd_initialize.c", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 13, "deleted": 0, "hunks": 0}
+{"pr": 3, "file": "src/hsd/hsd_lobj.c", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 1, "deleted": 1, "hunks": 0}
+{"pr": 3, "file": "src/hsd/hsd_mobj.c", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 2, "deleted": 2, "hunks": 0}
+{"pr": 3, "file": "tools/asm_wrapper_sweep.py", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 14, "deleted": 1, "hunks": 0}
+{"pr": 3, "file": "tools/decomp_work/agent_limits.json", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 23, "deleted": 1, "hunks": 0}
+{"pr": 3, "file": "tools/decomp_work/band.py", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 44, "deleted": 0, "hunks": 0}
+{"pr": 3, "file": "tools/decomp_work/benchmark/attack_function.py", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 10, "deleted": 4, "hunks": 0}
+{"pr": 3, "file": "tools/decomp_work/benchmark/bench_opencode.py", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 43, "deleted": 1, "hunks": 0}
+{"pr": 3, "file": "tools/decomp_work/cs_splice.py", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 14, "deleted": 1, "hunks": 0}
+{"pr": 3, "file": "tools/decomp_work/equivalent.txt", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 8, "deleted": 0, "hunks": 0}
+{"pr": 3, "file": "tools/decomp_work/kg/README.md", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 153, "deleted": 0, "hunks": 0}
+{"pr": 3, "file": "tools/decomp_work/kg/candidates/fn_80017990/glm-5.2.bench.md", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 9, "deleted": 2, "hunks": 0}
+{"pr": 3, "file": "tools/decomp_work/kg/kg.py", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 628, "deleted": 0, "hunks": 0}
+{"pr": 3, "file": "tools/decomp_work/kg/kg_callgraph.py", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 675, "deleted": 0, "hunks": 0}
+{"pr": 3, "file": "tools/symbolmap/renaming_dashboard.py", "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "added": 3903, "deleted": 310, "hunks": 0}
+{"pr": 2, "file": "src/game/gs_pokemon_summary.c", "title": "[codex] Preserve GLM-discovered fn_80017990 byte-match", "added": 23, "deleted": 7, "hunks": 0}
+{"pr": 2, "file": "tools/decomp_work/kg/candidates/fn_80017990/glm-5.2.bench.md", "title": "[codex] Preserve GLM-discovered fn_80017990 byte-match", "added": 46, "deleted": 0, "hunks": 0}
+{"pr": 2, "file": "tools/decomp_work/kg/candidates/fn_80017990/glm-5.2.c", "title": "[codex] Preserve GLM-discovered fn_80017990 byte-match", "added": 12, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": ".flake8", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 4, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": ".github/workflows/build.yml", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 17, "deleted": 15, "hunks": 0}
+{"pr": 1, "file": ".gitignore", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 13, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": ".vscode/tasks.json", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 16, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "README.md", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 17, "deleted": 13, "hunks": 0}
+{"pr": 1, "file": "asm/GC6E01/nonmatching/colosseum_ui/fn_80039A50.s", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 1, "hunks": 0}
+{"pr": 1, "file": "asm/GC6E01/nonmatching/colosseum_ui/fn_80039A84.s", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 1, "hunks": 0}
+{"pr": 1, "file": "asm/GC6E01/nonmatching/evolution/fn_800495C8.s", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 1, "hunks": 0}
+{"pr": 1, "file": "asm/GC6E01/nonmatching/evolution/fn_800499BC.s", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 1, "hunks": 0}
+{"pr": 1, "file": "asm/GC6E01/nonmatching/menu_bag/fn_8004EADC.s", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 1, "hunks": 0}
+{"pr": 1, "file": "asm/GC6E01/nonmatching/menu_bag/fn_80050844.s", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 1, "hunks": 0}
+{"pr": 1, "file": "asm/GC6E01/nonmatching/menu_dialog/fn_80057B34.s", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 1, "hunks": 0}
+{"pr": 1, "file": "asm/GC6E01/nonmatching/menu_dialog/fn_80059034.s", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 1, "hunks": 0}
+{"pr": 1, "file": "asm/GC6E01/nonmatching/menu_msgbox/fn_80056C54.s", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 1, "hunks": 0}
+{"pr": 1, "file": "asm/GC6E01/nonmatching/menu_msgbox/fn_80057270.s", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 1, "hunks": 0}
+{"pr": 1, "file": "asm/GC6E01/nonmatching/menu_pokemon/fn_8003D1FC.s", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 1, "hunks": 0}
+{"pr": 1, "file": "asm/GC6E01/nonmatching/menu_pokemon/fn_80044630.s", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 1, "hunks": 0}
+{"pr": 1, "file": "asm/GC6E01/nonmatching/menu_shop/fn_8003AEF0.s", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 1, "hunks": 0}
+{"pr": 1, "file": "asm/GC6E01/nonmatching/menu_shop/fn_8003B85C.s", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 1, "hunks": 0}
+{"pr": 1, "file": "asm/GC6E01/nonmatching/menu_status/fn_80054914.s", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 1, "hunks": 0}
+{"pr": 1, "file": "asm/GC6E01/nonmatching/menu_status/fn_800552D4.s", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 1, "hunks": 0}
+{"pr": 1, "file": "asm/GC6E01/nonmatching/poke_detail/fn_8004BE0C.s", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 1, "hunks": 0}
+{"pr": 1, "file": "asm/GC6E01/nonmatching/poke_detail/fn_8004C120.s", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 1, "hunks": 0}
+{"pr": 1, "file": "asm/GC6E01/nonmatching/scene_init/fn_8003686C.s", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 1, "hunks": 0}
+{"pr": 1, "file": "asm/GC6E01/nonmatching/scene_init/fn_8003708C.s", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 1, "hunks": 0}
+{"pr": 1, "file": "asm/GC6E01/nonmatching/scene_init/fn_800370E0.s", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 1, "hunks": 0}
+{"pr": 1, "file": "asm/GC6E01/nonmatching/script_callback/fn_80053110.s", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 1, "hunks": 0}
+{"pr": 1, "file": "asm/GC6E01/nonmatching/script_callback/fn_80053778.s", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 1, "hunks": 0}
+{"pr": 1, "file": "config/GC6E01/build.sha1", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 1, "deleted": 1, "hunks": 0}
+{"pr": 1, "file": "config/GC6E01/config.yml", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 1, "deleted": 1, "hunks": 0}
+{"pr": 1, "file": "configure.py", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 237, "deleted": 313, "hunks": 0}
+{"pr": 1, "file": "docs/comment_section.md", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 111, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "docs/common_bss.md", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 69, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "docs/dependencies.md", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 31, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "docs/getting_started.md", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 148, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "docs/github_actions.md", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 46, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "docs/images/github_actions_secrets.png", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "docs/images/github_build_repo_create.png", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "docs/images/github_build_repo_packages.png", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "docs/images/github_package_settings.png", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "docs/images/github_package_settings_access.png", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "docs/splits.md", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 74, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "docs/symbols.md", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 38, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "pcport/audio_shim.c", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "pcport/audio_shim.h", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "pcport/dvd_shim.c", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "pcport/dvd_shim.h", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "pcport/engine_boot.c", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "pcport/engine_host.c", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "pcport/engine_host.h", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "pcport/engine_spike.c", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "pcport/gs_gfx_host_support.c", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "pcport/gs_sched_host.c", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "pcport/gs_sched_host.h", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "pcport/gx_shim.c", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 4, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "pcport/gx_shim.h", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 8, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "pcport/gx_tev.c", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 29, "deleted": 7, "hunks": 0}
+{"pr": 1, "file": "pcport/gx_tev.h", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 12, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "pcport/gx_texture.c", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "pcport/gx_texture.h", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "pcport/hsd_host.c", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "pcport/os_shim.c", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "pcport/os_shim.h", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "pcport/os_thread_host.c", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "pcport/os_thread_host.h", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "pcport/pad_shim.c", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "pcport/pad_shim.h", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "pcport/pcport_compat.h", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "pcport/pcport_font.h", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "pcport/pcport_main.c", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 50, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "pcport/pcport_window.h", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "pcport/real_content_host.c", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "pcport/real_content_host.h", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "pcport/thp_player.c", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "pcport/thp_player.h", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 0, "hunks": 0}
+{"pr": 1, "file": "src/crt/__init_cpp_exceptions__ExitProcess.inc", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 9, "hunks": 0}
+{"pr": 1, "file": "src/crt/__init_cpp_exceptions___init_cpp.inc", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 26, "hunks": 0}
+{"pr": 1, "file": "src/dolphin/dvd/DVDFsExtras_cb.inc", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 59, "hunks": 0}
+{"pr": 1, "file": "src/dolphin/dvd/DVDFs_fn_800A4D28.inc", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 229, "hunks": 0}
+{"pr": 1, "file": "src/dolphin/dvd/DVDFs_fn_800A501C.inc", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 56, "hunks": 0}
+{"pr": 1, "file": "src/dolphin/dvd/DVDFs_fn_800A50E4.inc", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 10, "hunks": 0}
+{"pr": 1, "file": "src/dolphin/dvd/DVDFs_fn_800A5108.inc", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 101, "hunks": 0}
+{"pr": 1, "file": "src/dolphin/dvd/DVDFs_fn_800A5268.inc", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 56, "hunks": 0}
+{"pr": 1, "file": "src/dolphin/dvd/DVDFs_fn_800A532C.inc", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 53, "hunks": 0}
+{"pr": 1, "file": "src/dolphin/dvd/DVDFs_fn_800A53EC.inc", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 14, "hunks": 0}
+{"pr": 1, "file": "src/dolphin/dvd/DVDFs_fn_800A541C.inc", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 82, "hunks": 0}
+{"pr": 1, "file": "src/dolphin/dvd/DVDFs_fn_800A5534.inc", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 10, "hunks": 0}
+{"pr": 1, "file": "src/dolphin/dvd/DVDFs_fn_800A5558.inc", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 41, "hunks": 0}
+{"pr": 1, "file": "src/dolphin/dvd/DVDFs_fn_800A55F0.inc", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 14, "hunks": 0}
+{"pr": 1, "file": "src/dolphin/dvd/DVDFs_fn_800A5620.inc", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 2, "hunks": 0}
+{"pr": 1, "file": "src/dolphin/dvd/DVDLow_fn_800A41D0.inc", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 36, "hunks": 0}
+{"pr": 1, "file": "src/dolphin/dvd/DVDLow_fn_800A42C4.inc", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 71, "hunks": 0}
+{"pr": 1, "file": "src/dolphin/dvd/DVDLow_fn_800A43D4.inc", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 35, "hunks": 0}
+{"pr": 1, "file": "src/dolphin/dvd/DVDLow_fn_800A4454.inc", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 181, "hunks": 0}
+{"pr": 1, "file": "src/dolphin/dvd/DVDLow_fn_800A46EC.inc", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 38, "hunks": 0}
+{"pr": 1, "file": "src/dolphin/dvd/DVDLow_fn_800A47AC.inc", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 42, "hunks": 0}
+{"pr": 1, "file": "src/dolphin/dvd/DVDLow_fn_800A48DC.inc", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 36, "hunks": 0}
+{"pr": 1, "file": "src/dolphin/dvd/DVDLow_fn_800A4968.inc", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 40, "hunks": 0}
+{"pr": 1, "file": "src/dolphin/dvd/DVDLow_fn_800A4A04.inc", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 39, "hunks": 0}
+{"pr": 1, "file": "src/dolphin/dvd/DVDLow_fn_800A4A9C.inc", "title": "Migrate to canonical dtk-template + copyright cleanup", "added": 0, "deleted": 36, "hunks": 0}

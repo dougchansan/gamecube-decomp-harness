@@ -1,0 +1,19 @@
+{
+  "id": "colosseum-validation-glm-codex",
+  "mode": "escalation",
+  "_note": "Gate-fix validation ladder (2026-07-01). glm(free) -> codex(openai, non-Claude-sub). Used with --target-sources battle_waza.c,gs_render.c --target-min-fuzzy 75 to re-run the 3 gate-rejected byte-exacts (fn_801D167C, fn_801DB088, GSbezierCalculateVector) on the A+C-fixed harness. Success = a credited crack at escalation_level>=1 (codex), which the old gate discarded 0-for-3.",
+  "rungs": [
+    {
+      "provider": "zai",
+      "model": "glm-5.2",
+      "thinking": "low",
+      "budget": { "agentTimeoutSeconds": 2400, "ttlSeconds": 7200, "maxAttempts": 2 }
+    },
+    {
+      "provider": "openai-codex",
+      "model": "gpt-5.5",
+      "thinking": "medium",
+      "budget": { "agentTimeoutSeconds": 3600, "ttlSeconds": 7200, "maxAttempts": 2 }
+    }
+  ]
+}

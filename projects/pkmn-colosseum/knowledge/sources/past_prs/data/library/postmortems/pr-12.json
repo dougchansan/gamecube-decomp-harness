@@ -1,0 +1,34 @@
+{
+  "pr": {"number": 12, "title": "Bank low-bucket decomp fleet wins", "url": "https://github.com/dougchansan/pkmn-colosseum/pull/12", "merged_at": "2026-06-28T00:20:23Z"},
+  "agent_status": "agent_completed",
+  "confidence": 0.55,
+  "summary": "Banks 715 committed, gated byte-exact function wins from a multi-lane decomp fleet (pl_codex2, pl_codex, pl_party, pl_glm, pl_trainer, pl_colosseum_event, pl_sonnet, pl_gs_scene) across CRT/dolphin-SDK/game/hsd/TRK sources, plus AGENTS.md policy tightening (ban committing .inc truth files, ban asm-wrapper/pointer-arithmetic fraud, add a readability policy) and new fleet-orchestration tooling (fleet_dashboard.py, lane_glm.py, anneal_farm.sh, lane_seed.py, lane_worker.sh, tmux cockpit updates).",
+  "categories": ["decomp", "tooling", "infra"],
+  "systems": ["fleet-orchestration", "dolphin-sdk", "hsd", "crt", "trk", "battle", "gs_field", "trainer"],
+  "decomp_lessons": [
+    "When a stub function only had a comment describing its behavior (no real C), replace the placeholder with real typed C rather than leaving `void fn_X(void) { /* comment */ }` -- several dolphin/SI.c and OSReboot.c stubs in this PR went from empty bodies to full decoded logic.",
+    "Repeated `*(u32*)(ptr + offset)` access patterns across a function are a signal to recover a typed struct (e.g. OSMessageQueue in OSMemory.c: sendQueue/recvQueue/buffer/capacity/head/count) instead of leaving raw pointer arithmetic, per the new AGENTS.md readability policy.",
+    "A function can be a legitimate, permanently non-byte-exact 'Equivalent' when the target was hand-written PPC that no available CodeWarrior version can reproduce (e.g. __cvt_fp2unsigned uses fcmpu + direct bge/blt, but all CW 1.2.5n/1.3/1.3.2/2.0 emit fcmpo + cror for float comparisons) -- leave the real C active and log it, do not re-wrap as asm to force a fake byte match.",
+    "New hard rule: never add/stage/commit `.inc` truth/asm-snippet files -- they are ROM-derived scaffolding, not decompiled C, and must not appear in public PRs even if a local tool generates them.",
+    "New hard rule: raw pointer-arithmetic or register-dump C no longer counts as 'done' when a struct can be recovered from the evidence; if byte-matching genuinely requires raw access, isolate it narrowly and log it as cleanup debt rather than calling it finished."
+  ],
+  "smart_moves": [
+    "Counted wins objectively from git history (`git log --format=%s origin/master..HEAD`, summing `decomp: gate ... (+N byte-exact)` commit subjects) rather than trusting agent self-reported percentages, and explicitly excluded pending/unverified permuter or agent claims until re-measured as active real C.",
+    "Every counted win commit is individually gated (62 of 71 branch commits are gate commits), so the fleet's aggregate number is a verifiable sum of small, re-measurable increments rather than one large unverified batch.",
+    "Tracked per-lane attribution (pl_codex2: 456, pl_codex: 237, pl_party: 5, pl_glm: 4, etc.) which lets future work identify which generation strategy/model is actually producing wins."
+  ],
+  "assembly_or_matching_tactics": [],
+  "naming_conventions": [
+    "Renamed several dolphin SDK stub functions from generic fn_XXXXXXXX to their real SDK names once decoded (e.g. fn_800A06AC -> WriteSram in OSReboot.c) when the behavior matched a known libogc/SDK function."
+  ],
+  "review_feedback": [],
+  "key_files": [
+    {"path": "AGENTS.md", "role": "Codified new hard rules: never commit .inc truth files, ban asm-wrapper/inline-asm/pointer-arithmetic as counted decomp wins, added the 'readability policy' requiring typed structs over raw offsets."},
+    {"path": "src/dolphin/os/OSMemory.c", "role": "Recovered OSMessageQueue as a typed struct (sendQueue/recvQueue/buffer/capacity/head/count) replacing raw `*(u32*)(queue + offset)` access in fn_8009F230."},
+    {"path": "src/dolphin/si/SI.c", "role": "Decoded two previously-empty SI stub functions (type/status callback registration, raw SI type-word decode into device/error codes) into full real C."},
+    {"path": "src/crt/global_destructor_chain.c", "role": "Documented and cleaned up __cvt_fp2unsigned as a confirmed permanent CW-toolchain wall (fcmpu vs fcmpo/cror), correctly left as active real C rather than re-wrapped as asm."},
+    {"path": "src/hsd/hsd_render.c", "role": "Large net-negative-line refactor (289 add / 412 del) of the HSD renderer as part of the fleet's low-bucket sweep."},
+    {"path": "tools/decomp_work/fleet_dashboard.py", "role": "New dashboard tooling for monitoring the multi-lane fleet's live progress across pl_codex2/pl_codex/pl_glm/etc lanes."}
+  ],
+  "searchable_terms": ["fleet wins", "byte-exact", "decomp: gate", "pl_codex2", "pl_glm", "asm-wrapper policy", "readability policy", "OSMessageQueue", "WriteSram", "Equivalent wall", "fleet_dashboard.py", "lane attribution"]
+}

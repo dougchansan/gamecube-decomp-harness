@@ -1,0 +1,31 @@
+{
+  "pr": {"number": 23, "title": "[codex] preserve validated previous-campaign archive wins", "url": "https://github.com/dougchansan/pkmn-colosseum/pull/23", "merged_at": "2026-06-30T19:11:01Z"},
+  "agent_status": "agent_completed",
+  "confidence": 0.6,
+  "summary": "Preserves six validated byte-exact fixes made in the previous campaign by applying them only inside archive/previous_campaign, without touching the active dtk-template source units or objdiff progress numbers.",
+  "categories": ["decomp", "infra"],
+  "systems": ["crt", "game"],
+  "decomp_lessons": [
+    "Small C-shape rewrites can flip a near-miss to byte-exact: replacing a static forward declaration with an extern one (when the function is defined non-static later in the same TU) changed codegen enough to matter for __pformatter.",
+    "Explicit narrowing casts to u16 (instead of relying on implicit truncation) can match MWCC's register-narrowing behavior exactly.",
+    "Extracting a literal into a named local variable, or wrapping a statement in an explicit block scope, can nudge MWCC's register allocation/stack layout to match the target even when the logic is unchanged.",
+    "Archive-only changes (files under archive/previous_campaign) don't affect active build/progress and can be validated independently via a git merge-tree dry run against master to prove a clean, non-conflicting merge."
+  ],
+  "smart_moves": [
+    "Validated the PR wouldn't disturb the active tree by running git diff --check and a git merge-tree dry run against origin/master before merging, plus a scan confirming no .inc files were introduced."
+  ],
+  "assembly_or_matching_tactics": [
+    "Replaced 'static s32 __pformatter(...)' forward-decl with 'extern s32 __pformatter(...)' while keeping the same later definition, changing the compiler's calling-convention/linkage assumptions to match target.",
+    "Cast vertCount arithmetic in fn_800D6A80 (gs_render.c) to (u16) at each accumulation step to match target register truncation for 16-bit vertex/primitive counts.",
+    "Hoisted the dereferenced base address of lbl_8047AA80 into a local 'base' variable in fn_800D75F4/fn_800D7650 to match the compiler's expected load scheduling."
+  ],
+  "naming_conventions": [],
+  "review_feedback": [],
+  "key_files": [
+    {"path": "archive/previous_campaign/src/crt/printf.c", "role": "__pformatter forward-decl changed from static to extern to match target linkage/codegen"},
+    {"path": "archive/previous_campaign/src/game/gs_render.c", "role": "Added explicit u16 casts and hoisted base-address locals in fn_800D6A80/fn_800D75F4/fn_800D7650 to match register behavior"},
+    {"path": "archive/previous_campaign/src/game/gs_floor_data.c", "role": "Wrapped isActive assignment in a block-scoped local to match compiler stack layout"},
+    {"path": "archive/previous_campaign/src/game/gs_field_resource.c", "role": "Minor pointer-cast/null-check cleanup in fn_801143EC"}
+  ],
+  "searchable_terms": ["archive/previous_campaign", "byte-exact", "static vs extern linkage", "register narrowing", "u16 cast", "git merge-tree validation"]
+}

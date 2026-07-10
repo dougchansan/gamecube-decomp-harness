@@ -1,0 +1,34 @@
+{
+  "pr": {"number": 3, "title": "HSD cobj/dobj symbolication + portable-decomp source batch", "url": "https://github.com/dougchansan/pkmn-colosseum/pull/3", "merged_at": "2026-06-17T00:17:21Z"},
+  "agent_status": "agent_completed",
+  "confidence": 0.55,
+  "summary": "Large 39-commit batch mixing HSD cobj/dobj symbolication with a wide portable-decomp sweep across people_field.c (the MusyX-audio-adjacent 'people_field' unit), gs_pokemon_summary.c, gba_misc.c, and several HSD files, converting cast-only pointer-arithmetic accessors into typed structs/bitfields while preserving existing byte-matches, plus a new KG (knowledge graph) callgraph tool and a renaming_dashboard.py rewrite (+3903/-310).",
+  "categories": ["decomp", "symbols", "tooling"],
+  "systems": ["hsd", "people_field", "gs_pokemon_summary", "gba_misc", "kg"],
+  "decomp_lessons": [
+    "Converting cast-only struct views (e.g. u8 (*)[0xF4] arrays) into named typed structs with explicit field_XX/pad_XX members can be done without regressing an existing byte-match, if the field layout and access widths are preserved exactly.",
+    "Bitfields and small accessor helpers need portable (non-pointer-arithmetic) paths for readability, but must be verified per-function against objdiff since MWCC register allocation is sensitive to indexing style (see PR #2 for a concrete regression case).",
+    "Early asm .inc includes can predate a symbol-map rename; a scoped #define (e.g. '#define fn_80162118 sndBSearch' bracketed by #undef) lets old asm blocks keep compiling under the new name without a full rename sweep."
+  ],
+  "smart_moves": [
+    "Introduced tools/decomp_work/kg/kg_callgraph.py (675 lines) to let the knowledge-graph dashboard rank/suggest symbol names from KG relationships (callers/callees) rather than guessing in isolation.",
+    "Documented the emerging decompilation roadmap in docs/decompilation_roadmap.md to track the honest-C conversion effort as distinct from raw byte-match percentage."
+  ],
+  "assembly_or_matching_tactics": [
+    "Typed PeopleFieldMoveSlot / PeopleFieldState structs replace u8[0xF4]-style raw byte-offset casts, with pad_XX filler fields keeping the struct size and access offsets identical to the verified-matching layout."
+  ],
+  "naming_conventions": [
+    "field_XX / pad_XX convention for not-yet-understood struct members recovered from byte offsets (e.g. field_1C, pad_20) pending semantic naming.",
+    "'people_field' subsystem confirmed to be MusyX-audio-runtime-adjacent territory, not generic overworld field logic."
+  ],
+  "review_feedback": [],
+  "key_files": [
+    {"path": "src/game/people/people_field.c", "role": "Largest source diff (+412/-77): PeopleFieldMoveSlot/PeopleFieldState typed structs replace raw offset casts across many move-slot and studio-helper accessors."},
+    {"path": "src/game/gba/gba_misc.c", "role": "252/-303 rewrite recovering GBA status helpers with more portable/typed C."},
+    {"path": "src/hsd/hsd_dobj.c", "role": "HSD dobj symbolication additions as part of the cobj/dobj batch."},
+    {"path": "src/hsd/hsd_initialize.c", "role": "HSD init callback aliases kept local to preserved setup asm during symbolication."},
+    {"path": "tools/decomp_work/kg/kg_callgraph.py", "role": "New callgraph-aware knowledge-graph tool feeding name suggestions into the renaming dashboard."},
+    {"path": "tools/symbolmap/renaming_dashboard.py", "role": "Major rewrite (+3903/-310) to rank names from KG relationships."}
+  ],
+  "searchable_terms": ["HSD cobj dobj symbolication", "people_field typed structs", "PeopleFieldMoveSlot", "kg_callgraph.py", "renaming_dashboard.py", "portable-decomp batch", "MusyX audio people_field", "gba_misc"]
+}

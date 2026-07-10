@@ -1,0 +1,65 @@
+diff --git a/src/game/battle/battle_waza.c b/src/game/battle/battle_waza.c
+index b5484879..87fc3549 100644
+--- a/src/game/battle/battle_waza.c
++++ b/src/game/battle/battle_waza.c
+@@ -118,6 +118,7 @@ void  fn_800E01F4(void*, f32, f32, f32);
+ extern void  fn_80118FB0(s32, s32, s32, s32, s32, s32);
+ extern void  fn_80118D18(s32, s32);
+ extern void  fn_80118DE0(s32, void*, s32, s32);
++void  fn_80118A68(u32, s32);
+ extern void  fn_800EE828(s32);
+ 
+ /* Forward declarations for converted functions */
+@@ -1232,8 +1233,6 @@ u8 fn_801D9E1C(void* obj) {
+  * Address: 0x801D9E34 | Size: 0x58
+  */
+ void fn_801D9E34(void* obj) {
+-    extern void fn_80118A68();
+-
+     if (*(u32*)(lbl_80467CC0 + 0xC) != 0 && *(u32*)((u8*)obj + 0x84) != 0) {
+         fn_80118A68(*(u32*)((u8*)obj + 0x84), 1);
+         *(u32*)((u8*)obj + 0x84) = 0;
+@@ -1274,7 +1273,8 @@ typedef struct WazaEffect {
+     };
+     /* 0x30 */ u8 pad_30[0x02];
+     /* 0x32 */ u16 index;                    /* table index */
+-    /* 0x34 */ u8 pad_34[0x50];
++    /* 0x34 */ u8 pad_34[0x4C];
++    /* 0x80 */ u32 field_80;
+     /* 0x84 */ u32 effect_handle;            /* effect handle */
+     /* 0x88 */ u8 pad_88[0x04];
+ } WazaEffect;
+@@ -1343,8 +1343,17 @@ void fn_801D9E8C(void* effect) {
+  * fn_801DA014 - Waza effect get interpolation progress.
+  * Address: 0x801DA014 | Size: 0x5C
+  */
+-f32 fn_801DA014(void* effect) {
+-    return 0.0f;
++void fn_801DA014(void* effect) {
++    WazaEffect* fx;
++
++    fx = (WazaEffect*)effect;
++    if (fx == (WazaEffect*)-1) {
++        fn_801DA014(NULL);
++    }
++    if (fx != NULL && *(u32*)(lbl_80467CC0 + 0x08) != 0 && fx->field_80 != 0) {
++        fn_80118A68(fx->field_80, 1);
++        fx->field_80 = 0;
++    }
+ }
+ 
+ /**
+@@ -2230,10 +2239,11 @@ void fn_801DCF00(u32 color, f32 intensity) {
+  * Address: 0x801DCF84 | Size: 0x54
+  */
+ void fn_801DCF84(void* obj) {
+-    u8 flags = *(u8*)((u8*)obj + 0x18);
++    WazaEffect* fx = (WazaEffect*)obj;
++    u8 flags = fx->flags;
+ 
+     if ((flags & 8) == 8) {
+-        *(u8*)((u8*)obj + 0x18) = flags ^ 8;
++        fx->flags = flags ^ 8;
+         fn_801DEF0C(obj, 1, 1);
+         fn_801DA014(obj);
+     }

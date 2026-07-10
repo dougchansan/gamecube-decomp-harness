@@ -553,7 +553,15 @@ function linkMissingTree(sourceDir: string, targetDir: string): number {
   for (const entry of readdirSync(sourceDir)) {
     const sourcePath = resolve(sourceDir, entry);
     const targetPath = resolve(targetDir, entry);
-    if (statSync(sourcePath).isDirectory()) {
+    // lstat (not stat) so we never FOLLOW a symlink: a self-referential tracked
+    // symlink like `orig/orig -> <repo>/orig` would otherwise make this recurse
+    // into itself forever (ELOOP) and crash the worker before it starts.
+    const stat = lstatSync(sourcePath);
+    if (stat.isSymbolicLink()) {
+      if (existsSync(targetPath)) continue;
+      symlinkSync(sourcePath, targetPath);
+      linked += 1;
+    } else if (stat.isDirectory()) {
       linked += linkMissingTree(sourcePath, targetPath);
     } else if (existsSync(targetPath)) {
       continue;

@@ -1,0 +1,9 @@
+{
+  "id": "colosseum-sonnet-only",
+  "mode": "escalation",
+  "_note": "2026-07-09: sonnet-only while codex is usage-limited (codex OAuth call HANGS on rate limit instead of failing fast, stalling workers). Swap back to ladder.campaign.codex-sonnet.json after codex resets (~11:56 AM).",
+  "rungs": [
+    { "provider": "claude-code", "model": "claude-sonnet-5", "thinking": "medium",
+      "budget": { "agentTimeoutSeconds": 2400, "ttlSeconds": 7200, "maxAttempts": 2 } }
+  ]
+}

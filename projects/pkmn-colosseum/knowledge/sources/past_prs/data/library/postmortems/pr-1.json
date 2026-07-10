@@ -1,0 +1,31 @@
+{
+  "pr": {"number": 1, "title": "Migrate to canonical dtk-template + copyright cleanup", "url": "https://github.com/dougchansan/pkmn-colosseum/pull/1", "merged_at": "2026-06-03T20:06:36Z"},
+  "agent_status": "agent_completed",
+  "confidence": 0.65,
+  "summary": "Foundational PR migrating the project onto the canonical encounter/dtk-template decomp build (configure.py + decomp-toolkit driven split/link/elf2dol, byte-exact to the retail DOL), auto-downloading dtk/objdiff-cli/Metrowerks compilers instead of vendoring them, and stripping copyright-sensitive committed game binary (raw DOL segments, Ghidra project image) plus untracking 7,508 .inc + 23 asm/*.s per-function disassembly files (kept local/gitignored, off the public repo).",
+  "categories": ["infra", "tooling"],
+  "systems": ["build-system", "dtk-template"],
+  "decomp_lessons": [
+    "The retail linker interleaved some translation units (OSException.c's code sits inside OSInit.c's .text range), so dtk cannot carve clean per-file objects there -- per-file splits / matched-C linking for those TUs is infeasible without large de-interleaving work; the build stays all-asm for them and config.libs is empty.",
+    "Committed .inc files use a project-specific mwasm inline asm{} include format incompatible with dtk's GNU-as asm; regenerating them from the ROM would need a custom PPC-to-mwasm disassembler (deferred, not solved here).",
+    "Public decomp repos should not commit game-derived binary (raw DOL segments, Ghidra project images) or the full corpus of per-function disassembly (.inc/asm) -- these were removed/untracked and git history for those paths scrubbed separately on master only."
+  ],
+  "smart_moves": [
+    "tools/project.py and helpers brought in verbatim from the dtk-template upstream, with configure.py rewritten to the canonical ProjectConfig/generate_build form -- keeps future template upstream merges tractable.",
+    "dtk_tag/objdiff_tag/compilers_tag auto-download compilers and tools per-platform instead of vendoring binaries in the repo.",
+    "Documented the one intentional divergence from upstream project.py (tools/split_dol.py patches the ldscript debug-stack gap 0x2000 -> 0x8000, the retail value dtk has no knob for) rather than silently forking.",
+    "Moved the PC port from src/pcport into its own top-level pcport/ directory so src/ holds only the game's own C, keeping decomp and port concerns separated.",
+    "CI (build.yml) repointed to config-validation since the byte-match ninja build needs the (non-public) ROM."
+  ],
+  "assembly_or_matching_tactics": [],
+  "naming_conventions": [],
+  "review_feedback": [],
+  "key_files": [
+    {"path": "configure.py", "role": "Rewritten to canonical dtk-template ProjectConfig/generate_build form (237 additions, 313 deletions) -- now the source of truth for the split/link/elf2dol pipeline."},
+    {"path": "tools/project.py", "role": "Brought in verbatim from upstream dtk-template to drive the canonical build."},
+    {"path": "tools/split_dol.py", "role": "Documented one-line intentional divergence from upstream: patches ldscript debug-stack gap 0x2000 -> 0x8000 for the retail value."},
+    {"path": "config/GC6E01/config.yml", "role": "Updated to match the dtk-template canonical config shape."},
+    {"path": ".github/workflows/build.yml", "role": "Repointed CI from full byte-match build (needs ROM) to config-validation only."}
+  ],
+  "searchable_terms": ["dtk-template migration", "decomp-toolkit", "configure.py rewrite", "ProjectConfig", "copyright cleanup", "untrack .inc asm", "interleaved translation units", "split_dol.py ldscript patch", "pcport split", "byte-exact DOL"]
+}

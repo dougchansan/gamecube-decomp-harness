@@ -1,0 +1,25 @@
+{
+  "pr": {"number": 9, "title": "Mac/Linux multi-agent tmux cockpit (cockpit.sh)", "url": "https://github.com/dougchansan/pkmn-colosseum/pull/9", "merged_at": "2026-06-26T01:14:14Z"},
+  "agent_status": "agent_completed",
+  "confidence": 0.6,
+  "summary": "Added a self-contained macOS/Linux tmux cockpit (`tools/decomp_work/tmux_control/cockpit.sh` + COCKPIT_MAC.md) for driving GLM and Codex agents on the decomp pipeline, replacing an uncommitted Windows control.sh/txk.sh/psmux setup with real tmux.",
+  "categories": ["tooling", "infra"],
+  "systems": ["cockpit", "tmux", "agent-orchestration", "glm", "codex"],
+  "decomp_lessons": [
+    "TUI apps (opencode, codex) rewrite pane_title via OSC escapes, making title-based pane lookup unreliable; tag panes with a tmux pane user-option (@role) instead, which the TUI cannot overwrite.",
+    "For orchestration reliability prefer headless dispatch (`opencode run`, `codex exec`) over scripting keystrokes into an interactive TUI pane — the interactive panes are for a human at the keyboard, not for automated driving.",
+    "Idle/busy detection for a tmux pane can be approximated cheaply by capturing the pane tail twice ~1.6s apart and comparing for equality, without needing an app-specific status API."
+  ],
+  "smart_moves": [
+    "Sourced API keys from an env file OUTSIDE the repo (~/.config/decomp-keys/cockpit.env, override via DECOMP_COCKPIT_ENV) so credentials are never committed.",
+    "Kept the launch command self-healing: each TUI pane's launch string ends with `exec $SHELL` so a TUI crash/exit drops back to a shell instead of destroying the pane."
+  ],
+  "assembly_or_matching_tactics": [],
+  "naming_conventions": [],
+  "review_feedback": [],
+  "key_files": [
+    {"path": "tools/decomp_work/tmux_control/cockpit.sh", "role": "New tmux cockpit: bootstrap/attach a 2x2 orchestrator|glm|codex|shell grid, headless ask-glm/ask-codex dispatch, idle detection, pane-role tagging."},
+    {"path": "tools/decomp_work/tmux_control/COCKPIT_MAC.md", "role": "Setup/usage docs: prerequisites, credential file layout, headless vs interactive driving modes, troubleshooting (opencode DB reset, codex login refresh)."}
+  ],
+  "searchable_terms": ["tmux", "cockpit.sh", "GLM", "opencode", "codex exec", "z.ai", "@role pane option", "headless dispatch", "multi-agent orchestration"]
+}

@@ -449,6 +449,24 @@ async function runEpochCycleInner(store: StateStore, runId: string, repoRoot: st
   await copyFile(worktreeChangesPath, resolve(artifactDir, "report_changes.json"));
   await writeFile(resolve(artifactDir, "pr_report.md"), regressionReport.markdown);
 
+  // Keep the README progress table in sync with the just-committed report. The epoch's
+  // fresh report reflects the committed state; regenerate README.md so the next epoch's
+  // `git add -A` commits it alongside the following batch of matched functions. Best-effort:
+  // a README-updater failure must never abort the epoch cycle.
+  try {
+    const readmeUpdater = resolve(repoRoot, "tools/update_readme_progress.py");
+    if (existsSync(readmeUpdater) && existsSync(worktreeReportPath)) {
+      const proc = Bun.spawn(
+        ["python3", readmeUpdater, "--report", worktreeReportPath, "--readme", resolve(repoRoot, "README.md")],
+        { cwd: repoRoot, stdout: "pipe", stderr: "pipe" },
+      );
+      const [stderr, exitCode] = await Promise.all([new Response(proc.stderr).text(), proc.exited]);
+      if (exitCode !== 0) console.error(`[epoch] README progress update failed: ${stderr.trim().slice(-400)}`);
+    }
+  } catch (error) {
+    console.error(`[epoch] README progress update skipped: ${error instanceof Error ? error.message : String(error)}`);
+  }
+
   // QA scan of this epoch's diff, recorded for observability. Any failure here
   // (including a broken scanner) must never abort the epoch cycle: the L2 ship
   // gate in regression-check is the hard stop, this is the dashboard's view.

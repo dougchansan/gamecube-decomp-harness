@@ -1,0 +1,13 @@
+{
+  "id": "colosseum-typerecovery-codex-only",
+  "mode": "escalation",
+  "_note": "Type-recovery campaign, CODEX-ONLY (2026-07-01, per user: glm@L0 cracked 0, codex@L1 did all the work — so drop glm, run codex directly). openai-codex/gpt-5.5, zero Claude subscription. decompStyleRule enforces named-struct/field-access/meaningful-locals. Single rung => codex tries with the repair-to-clean loop, cracks or finishes as near-miss. glm parked (see repurposing options in session).",
+  "rungs": [
+    {
+      "provider": "openai-codex",
+      "model": "gpt-5.5",
+      "thinking": "medium",
+      "budget": { "agentTimeoutSeconds": 1800, "ttlSeconds": 7200, "maxAttempts": 2 }
+    }
+  ]
+}

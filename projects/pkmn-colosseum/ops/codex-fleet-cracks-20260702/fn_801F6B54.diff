@@ -1,0 +1,46 @@
+diff --git a/src/game/pokemon.c b/src/game/pokemon.c
+index 5577b1f7..95bdf64b 100644
+--- a/src/game/pokemon.c
++++ b/src/game/pokemon.c
+@@ -4239,16 +4239,14 @@ void fn_801F6B54(u32 param_1, u32 param_2, u32 param_3, u32 param_4, u32 param_5
+     extern u32 fn_801FB1C0(u32, u32, u16, u32);
+     extern u8 fn_802062FC(u32);
+     extern u32 fn_8012640C(u32, u32, u16, u32);
+-    extern void fn_801FAA58(u32, u32, u16, u32);
++    extern void fn_801FAA58(u32, u32, u16, u32, s16);
+     u32 outerObj;
+     u32 innerObj;
+     u32 outerIndex;
+-    s32 status;
+-    u16 outerCount;
++    s16 status;
+ 
+-    outerCount = (u16)param_4;
+     outerIndex = 0;
+-    for (; (outerIndex & 0xFFFF) < (outerCount & 0xFFFF); outerIndex = outerIndex + 1) {
++    for (; (u16)outerIndex < (u16)param_4; outerIndex = outerIndex + 1) {
+         if (param_1 == 0) {
+             outerObj = 0;
+         } else {
+@@ -4256,19 +4254,17 @@ void fn_801F6B54(u32 param_1, u32 param_2, u32 param_3, u32 param_4, u32 param_5
+         }
+         status = fn_801FA634(outerObj);
+         if (status != 0) {
+-            u16 innerCount;
+             u32 innerIndex;
+ 
+-            innerCount = param_5;
+             innerIndex = 0;
+-            for (; (innerIndex & 0xFFFF) < (innerCount & 0xFFFF); innerIndex = innerIndex + 1) {
++            for (; (u16)innerIndex < (u16)param_5; innerIndex = innerIndex + 1) {
+                 innerObj = fn_801FB1C0(outerObj, 0, 0x46, innerIndex);
+                 status = fn_802062FC(innerObj);
+                 if (status != 0) {
+                     innerObj = fn_8012640C(innerObj, 0, 0xD5, 0);
+                     status = fn_8012640C(innerObj, 0, 0xCE, 0);
+                     if ((s16)status >= 0) {
+-                        fn_801FAA58(param_2, 0, 0x57, 0);
++                        fn_801FAA58(param_2, 0, 0x57, 0, status);
+                     }
+                 }
+             }

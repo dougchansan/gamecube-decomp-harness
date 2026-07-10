@@ -315,6 +315,7 @@ function compactTargetGraphFileCard(packet: Record<string, unknown>, project?: R
         follow_up_queries: [
           compactObject({ tool: "code_graph_file_card", source_path: sourcePath }),
           compactObject({ tool: "code_graph_search", query: sourcePath }),
+          compactObject({ tool: "legacy_lever_search", query: sourcePath }),
           compactObject({ tool: "path_facts_resolve", source_path: sourcePath }),
         ],
       },
@@ -345,6 +346,7 @@ function compactTargetGraphFileCard(packet: Record<string, unknown>, project?: R
   const followUpQueries = [
     compactObject({ tool: "code_graph_file_card", source_path: sourcePath }),
     compactObject({ tool: "code_graph_search", query: [sourcePath, targetSymbol].filter(Boolean).join(" ") }),
+    compactObject({ tool: "legacy_lever_search", query: [targetSymbol, sourcePath].filter(Boolean).join(" ") }),
     ...(mismatchQueries.length ? [compactObject({ tool: "mismatch_db_search", query: mismatchQueries.join(" OR ") })] : []),
     compactObject({ tool: "path_facts_resolve", source_path: sourcePath }),
   ];

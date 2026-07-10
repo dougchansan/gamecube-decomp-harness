@@ -148,6 +148,15 @@ ESTABLISHED_PRAGMAS = {
     "global_optimizer",
     "pool_data",
     "clang diagnostic",
+    # Validated MWCC codegen-match tricks (see global_standard:validated-mwcc-match-tricks,
+    # trick-pragma-peephole-off, peephole-off-epilogue-order). These steer instruction
+    # scheduling / peephole / optimization to reproduce the target's exact codegen and are
+    # in wide use across src/; an evidence-backed, tightly-scoped (push/pop) use is accepted,
+    # not "novel". Keep them scoped and backed by an objdiff improvement.
+    "peephole",
+    "scheduling",
+    "optimization_level",
+    "optimize_for_size",
 }
 CODEGEN_PRAGMAS = {"dont_inline", "auto_inline", "global_optimizer", "pool_data"}
 VOLATILE_LOCAL_DECL_RE = re.compile(

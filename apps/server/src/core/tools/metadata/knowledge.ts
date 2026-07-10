@@ -12,6 +12,11 @@ export const knowledgeToolPromptMetadata: Record<string, AgentToolPromptMetadata
     type: "local_search",
     useWhen: "Search local source paths, symbols, functions, units, and graph metadata.",
   },
+  legacy_lever_search: {
+    provider: "legacy_colosseum_kg",
+    type: "historical_lever_search",
+    useWhen: "Search historical Colosseum crack levers and cracked-by records for a symbol or source path.",
+  },
   powerpc_docs_search: {
     provider: "powerpc_docs",
     type: "reference_data",

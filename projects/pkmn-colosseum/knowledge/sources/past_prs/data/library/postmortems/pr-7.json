@@ -1,0 +1,18 @@
+{
+  "pr": {"number": 7, "title": "progress: sync README + report.json to current match (4266/6795 fn 62…", "url": "https://github.com/dougchansan/pkmn-colosseum/pull/7", "merged_at": "2026-06-25T23:36:32Z"},
+  "agent_status": "agent_completed",
+  "confidence": 0.6,
+  "summary": "Pure metrics-sync PR: README status table and report.json were stale (4194/6800, 38.7%) relative to the session's gated wins (4258->4266 fn, 39.16->39.50% code). No source code changed.",
+  "categories": ["infra"],
+  "systems": ["reporting"],
+  "decomp_lessons": ["README/report.json can drift from actual gated wins between sessions; re-running gen_decomp_report.py catches band_wins that were gated but not yet remeasured."],
+  "smart_moves": [],
+  "assembly_or_matching_tactics": [],
+  "naming_conventions": [],
+  "review_feedback": [],
+  "key_files": [
+    {"path": "report.json", "role": "Regenerated aggregate match stats to reflect gated-but-unsynced wins from the prior session."},
+    {"path": "README.md", "role": "Status table numbers synced to match report.json."}
+  ],
+  "searchable_terms": ["progress sync", "report.json", "README status table", "gen_decomp_report.py", "metrics drift"]
+}

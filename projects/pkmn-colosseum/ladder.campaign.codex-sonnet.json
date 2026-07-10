@@ -1,0 +1,19 @@
+{
+  "id": "colosseum-codex-then-sonnet",
+  "mode": "escalation",
+  "_note": "2026-07-09: codex primary, claude-code/claude-sonnet-5 fallback. The A3 rate-limit skip auto-advances a rung whose provider errors with 'usage limit'/'429'/'quota' — so when codex is exhausted (resets ~11:56 AM), targets fall through to sonnet and keep grinding; when codex is available it cracks at rung 0. glm/deepseek dropped (Jul-2 run died on '402 Insufficient Balance' / 'No API key'). decompStyleRule / repair-to-clean still enforced by the worker.",
+  "rungs": [
+    {
+      "provider": "openai-codex",
+      "model": "gpt-5.5",
+      "thinking": "medium",
+      "budget": { "agentTimeoutSeconds": 1800, "ttlSeconds": 7200, "maxAttempts": 2 }
+    },
+    {
+      "provider": "claude-code",
+      "model": "claude-sonnet-5",
+      "thinking": "medium",
+      "budget": { "agentTimeoutSeconds": 2400, "ttlSeconds": 7200, "maxAttempts": 2 }
+    }
+  ]
+}

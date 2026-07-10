@@ -1,0 +1,30 @@
+{
+  "pr": {"number": 2, "title": "[codex] Preserve GLM-discovered fn_80017990 byte-match", "url": "https://github.com/dougchansan/pkmn-colosseum/pull/2", "merged_at": "2026-06-16T03:21:17Z"},
+  "agent_status": "agent_completed",
+  "confidence": 0.7,
+  "summary": "Small, precise byte-match PR: GLM-5.2 (via the diff-aware repair loop) isolated a single commutative operand-order mismatch (add r5,r6,r8 vs add r5,r8,r6) in fn_80017990's compare-load, and the fix rewrote the array-index expression as pointer-arithmetic to force base-first codegen. Also added a named SummaryPageEntry accessor layer over lbl_80266918 so the byte-match source no longer exposes raw 0x4C offset arithmetic in the function bodies.",
+  "categories": ["decomp", "symbols"],
+  "systems": ["gs_pokemon_summary"],
+  "decomp_lessons": [
+    "MWCC operand order for a commutative add depends on source spelling: '*(s32*)(&arr[idx*SZ+OFF])' (address-of-array-element) lowers index-first; '*(s32*)((u8*)arr + idx*SZ + OFF)' (pointer-arithmetic) lowers base-first. Swapping forms is a legitimate lever for commutative-operand-order mismatches beyond the plain add/sub case.",
+    "Directly indexing a typed array (SummaryPageEntry arr[idx]) instead of raw byte-offset pointer math changed MWCC register allocation and regressed the match (99.67742% -> 80.6452%) -- proof that readability refactors must be verified per-function, not assumed safe just because the struct shape is correct.",
+    "A volatile-qualified typed table view also regressed the match (to 73.5294%, with added instructions) -- volatile changes MWCC codegen shape, not just semantics.",
+    "This PR explicitly documents itself as byte-match evidence, not final PC-port-ready source: the accessor macros still centralize MWCC-sensitive address spelling as portability debt to resolve later."
+  ],
+  "smart_moves": [
+    "GLM-5.2 succeeded where deepseek-v4-pro, kimi-k2.7-code, and mimo-v2.5-pro all stalled at baseline (99.67742%) in the diff-aware repair loop -- confirms GLM-5.2 as the primary 'cracker' model for single-instruction diff-repair tasks per the 2026-06-15 benchmark.",
+    "Recorded the win to the knowledge graph via bestof.py with lever tag 'commutative-operand-order' so future agents can search for this exact technique."
+  ],
+  "assembly_or_matching_tactics": [
+    "Lever: commutative-operand-order. Rewrite '&arr[idx*SZ+OFF]' as '(u8*)arr + idx*SZ + OFF' to flip which operand MWCC emits first in a commutative add, without changing the +OFF load displacement.",
+    "SUMMARY_PAGE_ENTRY_AT / SUMMARY_PAGE_DISPLAY_COLOR macros wrap the sensitive byte-offset math so callers read as typed accessors while preserving the exact matching codegen underneath."
+  ],
+  "naming_conventions": ["SummaryPageEntry struct (0x4C bytes) for lbl_80266918 entries: displayColor[3], dataSource, gaugeMatchId, drawHandler, messageId fields identified from access patterns."],
+  "review_feedback": ["Rejected: direct SummaryPageEntry array indexing (regressed fn_80017990 to 80.6452%).", "Rejected: volatile typed table view (regressed to 73.5294%, added instructions)."],
+  "key_files": [
+    {"path": "src/game/gs_pokemon_summary.c", "role": "fn_80017990 restored to 100% byte-match via base-first pointer-arithmetic compare load; SummaryPageEntry typed accessor macros added for lbl_80266918."},
+    {"path": "tools/decomp_work/kg/candidates/fn_80017990/glm-5.2.c", "role": "GLM-5.2's winning one-line diff-repair candidate, recorded as KG evidence."},
+    {"path": "tools/decomp_work/kg/candidates/fn_80017990/glm-5.2.bench.md", "role": "Benchmark note documenting the model comparison and the exact instruction-level wall that was cracked."}
+  ],
+  "searchable_terms": ["commutative-operand-order", "fn_80017990", "SummaryPageEntry", "lbl_80266918", "GLM-5.2 diff-repair", "MWCC register allocation regression", "byte-match evidence PR", "kg_diff_repair"]
+}

@@ -1,0 +1,116 @@
+{
+  "run": "d21d475d-d8b8-4d72-b540-28052a1a66c7",
+  "count": 12,
+  "copied": 12,
+  "missing_diff": 0,
+  "cracks": [
+    {
+      "symbol": "fn_801C40F0",
+      "size": 116,
+      "source": "src/game/battle/battle_grid.c",
+      "model": "gpt-5.5",
+      "rung": 0,
+      "diff": "fn_801C40F0.diff",
+      "src_diff": "/Users/douglaswhittingham/gamecube-decomp-harness/projects/pkmn-colosseum/state/runs/d21d475d-d8b8-4d72-b540-28052a1a66c7/worker_state/01d7957b-4ad1-4ed3-9c80-43b4605ae567/runner_validation/attempt-1.write_set.diff"
+    },
+    {
+      "symbol": "fn_801DCFD8",
+      "size": 80,
+      "source": "src/game/battle/battle_waza.c",
+      "model": "gpt-5.5",
+      "rung": 0,
+      "diff": "fn_801DCFD8.diff",
+      "src_diff": "/Users/douglaswhittingham/gamecube-decomp-harness/projects/pkmn-colosseum/state/runs/d21d475d-d8b8-4d72-b540-28052a1a66c7/worker_state/b23453cd-29c0-4de2-8a7b-a2feeb96907b/runner_validation/attempt-1.write_set.diff"
+    },
+    {
+      "symbol": "fn_801D9E8C",
+      "size": 392,
+      "source": "src/game/battle/battle_waza.c",
+      "model": "gpt-5.5",
+      "rung": 1,
+      "diff": "fn_801D9E8C.diff",
+      "src_diff": "/Users/douglaswhittingham/gamecube-decomp-harness/projects/pkmn-colosseum/state/runs/d21d475d-d8b8-4d72-b540-28052a1a66c7/worker_state/20172f45-7375-435e-b5a3-5cc0c2750c05/runner_validation/attempt-1.write_set.diff"
+    },
+    {
+      "symbol": "fn_801DCF84",
+      "size": 84,
+      "source": "src/game/battle/battle_waza.c",
+      "model": "gpt-5.5",
+      "rung": 0,
+      "diff": "fn_801DCF84.diff",
+      "src_diff": "/Users/douglaswhittingham/gamecube-decomp-harness/projects/pkmn-colosseum/state/runs/d21d475d-d8b8-4d72-b540-28052a1a66c7/worker_state/28f79bc0-d595-4bd6-a1b1-66e75dc2afff/runner_validation/attempt-2.write_set.diff"
+    },
+    {
+      "symbol": "fn_8020341C",
+      "size": 320,
+      "source": "src/game/colosseum_event.c",
+      "model": "gpt-5.5",
+      "rung": 1,
+      "diff": "fn_8020341C.diff",
+      "src_diff": "/Users/douglaswhittingham/gamecube-decomp-harness/projects/pkmn-colosseum/state/runs/d21d475d-d8b8-4d72-b540-28052a1a66c7/worker_state/3e691242-cca2-45cc-820b-31120414e8e9/runner_validation/attempt-0.write_set.diff"
+    },
+    {
+      "symbol": "fn_80135FBC",
+      "size": 60,
+      "source": "src/game/effect/effect_util.c",
+      "model": "gpt-5.5",
+      "rung": 0,
+      "diff": "fn_80135FBC.diff",
+      "src_diff": "/Users/douglaswhittingham/gamecube-decomp-harness/projects/pkmn-colosseum/state/runs/d21d475d-d8b8-4d72-b540-28052a1a66c7/worker_state/e8485d15-a438-4329-b9f9-57e8277a9075/runner_validation/attempt-2.write_set.diff"
+    },
+    {
+      "symbol": "fn_801325C4",
+      "size": 104,
+      "source": "src/game/effect/effect_util.c",
+      "model": "gpt-5.5",
+      "rung": 1,
+      "diff": "fn_801325C4.diff",
+      "src_diff": "/Users/douglaswhittingham/gamecube-decomp-harness/projects/pkmn-colosseum/state/runs/d21d475d-d8b8-4d72-b540-28052a1a66c7/worker_state/2dfb4590-bbd8-4120-84f3-752d3e89695b/runner_validation/attempt-2.write_set.diff"
+    },
+    {
+      "symbol": "fn_80131574",
+      "size": 20,
+      "source": "src/game/effect/effect_util.c",
+      "model": "gpt-5.5",
+      "rung": 1,
+      "diff": "fn_80131574.diff",
+      "src_diff": "/Users/douglaswhittingham/gamecube-decomp-harness/projects/pkmn-colosseum/state/runs/d21d475d-d8b8-4d72-b540-28052a1a66c7/worker_state/ae52270a-c5d2-4dc2-b696-2c0f861a341d/runner_validation/attempt-0.write_set.diff"
+    },
+    {
+      "symbol": "fn_800E0790",
+      "size": 84,
+      "source": "src/game/gs_render.c",
+      "model": "gpt-5.5",
+      "rung": 0,
+      "diff": "fn_800E0790.diff",
+      "src_diff": "/Users/douglaswhittingham/gamecube-decomp-harness/projects/pkmn-colosseum/state/runs/d21d475d-d8b8-4d72-b540-28052a1a66c7/worker_state/da0a40e3-eda8-499b-a20d-02754d22137e/runner_validation/attempt-1.write_set.diff"
+    },
+    {
+      "symbol": "fn_800D7A70",
+      "size": 272,
+      "source": "src/game/gs_render.c",
+      "model": "gpt-5.5",
+      "rung": 0,
+      "diff": "fn_800D7A70.diff",
+      "src_diff": "/Users/douglaswhittingham/gamecube-decomp-harness/projects/pkmn-colosseum/state/runs/d21d475d-d8b8-4d72-b540-28052a1a66c7/worker_state/9c981c8b-38b8-4c0b-a209-42d8a916ec84/runner_validation/attempt-0.write_set.diff"
+    },
+    {
+      "symbol": "fn_801F6B54",
+      "size": 248,
+      "source": "src/game/pokemon.c",
+      "model": "gpt-5.5",
+      "rung": 0,
+      "diff": "fn_801F6B54.diff",
+      "src_diff": "/Users/douglaswhittingham/gamecube-decomp-harness/projects/pkmn-colosseum/state/runs/d21d475d-d8b8-4d72-b540-28052a1a66c7/worker_state/d2317c53-f69c-4b3e-808e-1f9375df14cd/runner_validation/attempt-1.write_set.diff"
+    },
+    {
+      "symbol": "fn_801FEF74",
+      "size": 584,
+      "source": "src/game/trainer.c",
+      "model": "gpt-5.5",
+      "rung": 1,
+      "diff": "fn_801FEF74.diff",
+      "src_diff": "/Users/douglaswhittingham/gamecube-decomp-harness/projects/pkmn-colosseum/state/runs/d21d475d-d8b8-4d72-b540-28052a1a66c7/worker_state/90770167-7710-476d-ba71-6025ce2633d2/runner_validation/attempt-1.write_set.diff"
+    }
+  ]
+}

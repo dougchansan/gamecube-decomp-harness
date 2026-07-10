@@ -35,7 +35,9 @@
     "server:job": "bun apps/server/src/job-runner.ts"
   },
   "dependencies": {
-    "@earendil-works/pi-coding-agent": "latest",
+    "@earendil-works/pi-agent-core": "0.80.6",
+    "@earendil-works/pi-ai": "0.80.6",
+    "@earendil-works/pi-coding-agent": "0.80.6",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "tokenizr": "^2.2.1"

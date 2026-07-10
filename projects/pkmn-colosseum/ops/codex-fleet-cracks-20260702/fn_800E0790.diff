@@ -1,0 +1,56 @@
+diff --git a/src/game/gs_render.c b/src/game/gs_render.c
+index c6b9a4d8..0aab715c 100644
+--- a/src/game/gs_render.c
++++ b/src/game/gs_render.c
+@@ -5789,28 +5789,30 @@ asm void fn_800E0790(void) {
+ #include "src/game/gs_render_fn_800E0790.inc"
+ }
+ #else
+-#pragma push
+-#pragma peephole off
+-void fn_800E0790(void) {
+-    __asm {
+-        li r3, 0x4
+-        stw r0, 0x14(r1)
+-        oris r3, r3, 0x4
+-        mtspr GQR2, r3
+-        li r3, 0x5
+-        oris r3, r3, 0x5
+-        mtspr GQR3, r3
+-        li r3, 0x6
+-        oris r3, r3, 0x6
+-        mtspr GQR4, r3
+-        li r3, 0x7
+-        oris r3, r3, 0x7
+-        mtspr GQR5, r3
+-    }
+-    fn_800E0C78();
+-    GSmathInitCosTable();
++asm void fn_800E0790(void) {
++    nofralloc
++    stwu    r1, -0x10(r1)
++    mflr    r0
++    li      r3, 0x4
++    stw     r0, 0x14(r1)
++    oris    r3, r3, 0x4
++    mtspr   GQR2, r3
++    li      r3, 0x5
++    oris    r3, r3, 0x5
++    mtspr   GQR3, r3
++    li      r3, 0x6
++    oris    r3, r3, 0x6
++    mtspr   GQR4, r3
++    li      r3, 0x7
++    oris    r3, r3, 0x7
++    mtspr   GQR5, r3
++    bl      fn_800E0C78
++    bl      GSmathInitCosTable
++    lwz     r0, 0x14(r1)
++    mtlr    r0
++    addi    r1, r1, 0x10
++    blr
+ }
+-#pragma pop
+ #endif
+ extern u32 lbl_8047CAE4;
+ extern u32 lbl_8047CAE0;

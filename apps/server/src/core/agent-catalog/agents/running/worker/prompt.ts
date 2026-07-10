@@ -153,6 +153,7 @@ export const prompt = definePrompt({
         bulletList([
           "Use the injected target graph file card as a first-pass map of solved neighbors and follow-up leads.",
           "Search graph/history for 100% matched functions/files that resemble this target before broad exploration.",
+          "Use `legacy_lever_search` early with the target symbol and source path to find historical crack levers; treat those results as low-trust hypotheses until local validation confirms them.",
           item("Prefer reference matches that share:", [
             bulletList(["Character or module family", "Behavior role", "Call graph shape", "Data ownership", "Nearby human-authored idioms"]),
           ]),
@@ -161,6 +162,7 @@ export const prompt = definePrompt({
           item("Useful evidence can come from:", [
             bulletList([
               "Code graph facts",
+              "Legacy Colosseum crack levers and cracked-by records",
               "Path facts",
               "Decomp standards",
               "Curated worker lessons",
@@ -226,6 +228,7 @@ export const prompt = definePrompt({
         "`summary` should describe the retained source intent.",
         "`evidence` should name commands, artifacts, or observations you personally used.",
         "`facts`, `rejected_hypotheses`, `blockers`, and `next_exact_hypothesis` are useful when they help the next turn or curator.",
+        "`facts` should include reusable lever outcomes when observed, using compact objects such as `{ kind: \"lever_result\", symbol, source_path, lever, result, evidence }` where `result` is `exact`, `improved`, `rejected`, or `blocked`.",
       ]),
       "Never invent artifact paths or validation results. If a tool/API/build/validation infrastructure failure prevents trustworthy evaluation, use `status: \"tool_error\"`; optional or recovered tool issues belong in `evidence`, not `blockers`.",
     ]),

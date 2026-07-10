@@ -1,0 +1,29 @@
+{
+  "pr": {"number": 11, "title": "GLM-driven decomp lane + Mac-native compile gate", "url": "https://github.com/dougchansan/pkmn-colosseum/pull/11", "merged_at": "2026-06-26T01:44:30Z"},
+  "agent_status": "agent_completed",
+  "confidence": 0.6,
+  "summary": "Added `tools/lane_glm.py`, a new decomp lane using GLM (z.ai coding plan) as a candidate generator behind the same hardened remote-generate/local-gated-verify loop the retired Ollama lanes used, and extended `tools/compile_check.py` to run natively on macOS/Linux (resolving mwcceppc.exe and objdiff-cli from build/ download locations, running mwcceppc through wibo).",
+  "categories": ["decomp", "tooling", "infra"],
+  "systems": ["glm-lane", "compile_check", "wibo", "objdiff"],
+  "decomp_lessons": [
+    "A safe LLM-assisted decomp lane pattern: generate a candidate remotely, then gate strictly locally -- compile, objdiff-measure, and KEEP a candidate only if that function's match% strictly improves AND the file's whole fully-matched count does not regress; otherwise always revert. The generator can never damage the tree because the local gate is authoritative.",
+    "mwcceppc.exe is a Windows PE binary; on macOS/Linux it must be invoked through wibo, and wibo/mwcceppc/objdiff-cli should be resolved from both the vendored tools/ location (Windows) and the configure.py-downloaded build/ location (mac/linux) via a first-existing-path helper.",
+    "A useful compiler-quirk crib for LLM-generated match candidates: CodeWarrior for Gekko is C89-only (declarations before statements), `subf rD,rA,rB` computes rB-rA, signed vs unsigned comparisons pick cmpwi vs cmplwi, repeated SDA loads of the same global from r13 need explicit block scoping to match, and float literals should be avoided in favor of `extern f32 lbl_XXXXXXXX;` references."
+  ],
+  "smart_moves": [
+    "Reused the compile_check.py module directly as a library (`import compile_check as cc`) inside lane_glm.py instead of reimplementing compile/measure logic, keeping the gate identical to what other tooling uses.",
+    "Supports both a single `--symbol` target and a `--min-pct/--max-pct` band with `--best-first` ordering to prioritize near-miss functions (higher ROI) over worst-first sweeps.",
+    "Loads the ZAI_API_KEY from an out-of-repo cockpit env file as a fallback to the environment variable, keeping the lane usable both standalone and from the tmux cockpit."
+  ],
+  "assembly_or_matching_tactics": [
+    "Extracts a compact target-side instruction listing per symbol from objdiff JSON (capped at 6000 chars) to keep the LLM prompt focused on just the asm for the function being matched.",
+    "Uses brace-depth counting to isolate a function's C definition (distinguishing a real definition with `{` from a forward declaration with `;`) when splicing an LLM candidate back into the source file."
+  ],
+  "naming_conventions": [],
+  "review_feedback": [],
+  "key_files": [
+    {"path": "tools/lane_glm.py", "role": "New GLM-driven lane: builds a compiler-quirk-aware prompt with target asm, calls z.ai GLM, splices the candidate C into the file, gates via compile+objdiff, reverts non-improving trials."},
+    {"path": "tools/compile_check.py", "role": "Made the compile gate mac-native: resolves objdiff-cli/mwcceppc.exe from build/ (configure.py download) as well as tools/, and wraps mwcceppc invocation in wibo on non-Windows."}
+  ],
+  "searchable_terms": ["GLM", "glm-5.2", "z.ai", "lane_glm.py", "wibo", "mwcceppc", "compile_check.py", "remote generation local gate", "band targeting", "best-first", "CW_CRIB"]
+}

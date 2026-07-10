@@ -1,0 +1,37 @@
+{
+  "pr": {"number": 14, "title": "Decomp campaign: 16 real-C wins + fleet audit tooling", "url": "https://github.com/dougchansan/pkmn-colosseum/pull/14", "merged_at": "2026-06-28T03:12:55Z"},
+  "agent_status": "agent_completed",
+  "confidence": 0.6,
+  "summary": "Gates 16 byte-exact functions (5 Dolphin OS wins, 9 register-dump-to-readable colosseum_battle.c rewrites, 2 menu_bag.c asm-wrapper-to-typed-C conversions), starts pointer-arithmetic cleanup in DVDFs.c, and adds a real-C debt audit + richer fleet dashboard so the campaign can track asm-wrapper/register-var/raw-pointer debt repeatably.",
+  "categories": ["decomp", "tooling"],
+  "systems": ["dolphin-os", "dolphin-dvd", "game-battle", "game-menu", "fleet-tooling"],
+  "decomp_lessons": [
+    "Functions can be byte-exact matched while still being 'register-dump' garbage (raw r0-r31 locals mirroring register allocation); converting those to real parameter/variable names and control flow is a distinct readability pass that must re-verify the objdiff match, not just a cosmetic rename.",
+    "OSInterrupt.c's __OSMaskInterrupts/__OSUnmaskInterrupts needed `#pragma peephole off` plus renaming the internal call target from __OSSetInterruptMask to SetInterruptMask (matching the real symbol) to keep byte-exact output after cleanup.",
+    "menu_bag.c asm-wrapper functions (fn_8004EADC, fn_80050844) were converted from `asm void fn(...) { #include \".../fn.s\" }` stubs to typed C using a new BagCacheEntry struct, proving asm wrappers in this codebase are often just unconverted matches, not unmatched functions.",
+    "DVDFs.c FST (file system table) access was still raw `FstStart_8047A7CC[entrynum*3+N]` pointer arithmetic; introduced a DVDFstEntry struct + DVD_FST_* macros as typed accessors without changing codegen or regressing existing matches."
+  ],
+  "smart_moves": [
+    "Added tools/decomp_work/audit_real_c_debt.py: a repeatable audit (regex-based) for asm wrappers/stubs, tracked .inc includes, raw pointer-offset lines, and register-named (rN) locals across all tracked src/*.c, emitting build/real_c_debt_audit.json + .md for campaign planning.",
+    "Wired the debt audit and a permuter_status.json feed into tools/decomp_work/fleet_dashboard.py (band_win_stats, debt_stats, permuter_status) so the live dashboard shows real-C debt trend alongside the ASM-bucket/permuter telemetry, not just raw match percentage.",
+    "Restored the dashboard's ASM bucket and added per-target Windows permuter telemetry (cores, workers, effective slots, budget, queue/done/wins) to make fleet lane health visible during multi-agent campaigns."
+  ],
+  "assembly_or_matching_tactics": [
+    "`#pragma peephole off` combined with renaming an extern call target to the compiler-emitted symbol name (SetInterruptMask vs __OSSetInterruptMask) is a specific lever for keeping matches byte-exact through readability cleanup of low-level OS functions.",
+    "For register-dump functions, replacing manual r3/r4/.../r31 = ... sequences with direct nested calls (e.g. fn_80239EE8(0xEC64, ctx, fn_80205B8C(param1), 0, 0, param2, 0, 0x18A)) preserved the byte-exact match while removing the fake register variables entirely."
+  ],
+  "naming_conventions": [
+    "New struct BagCacheEntry (5x u32 words) for the menu_bag.c item cache replaces raw `u8 lbl_803A6AB0[]` byte-array typing.",
+    "New DVDFstEntry struct + DVD_FST_TYPE_MASK/DVD_FST_ENTRY/DVD_FST_WORD/DVD_FST_TYPE_NAME/DVD_FST_PARENT_OR_START/DVD_FST_NEXT_OR_LENGTH macros standardize DVD filesystem table field access."
+  ],
+  "review_feedback": [],
+  "key_files": [
+    {"path": "src/game/colosseum_battle.c", "role": "9 functions (fn_80242FEC, fn_80243C5C, fn_802457B0, fn_80247048, fn_802471B0, fn_80248170, fn_8024E0CC, fn_8024E320, fn_802516C4) rewritten from raw register-dump C to readable parameter/variable-based C, preserving 100% objdiff matches."},
+    {"path": "src/game/menu/menu_bag.c", "role": "fn_8004EADC and fn_80050844 converted from asm-wrapper stubs (#include .s) to typed C using new BagCacheEntry struct; first real decompilation of these two functions."},
+    {"path": "src/dolphin/os/OSInterrupt.c", "role": "__OSMaskInterrupts/__OSUnmaskInterrupts: added #pragma peephole off and renamed call target to SetInterruptMask to preserve byte match while cleaning up."},
+    {"path": "src/dolphin/dvd/DVDFs.c", "role": "Started pointer-arithmetic cleanup: introduced DVDFstEntry struct and DVD_FST_* accessor macros for the FST table without regressing existing matches (readability-only, no new match claimed)."},
+    {"path": "tools/decomp_work/audit_real_c_debt.py", "role": "New tool: regex-based repeatable audit of asm wrappers, .inc includes, raw pointer-offset lines, and register-named locals across src/, for campaign debt tracking."},
+    {"path": "tools/decomp_work/fleet_dashboard.py", "role": "Extended with debt_stats(), permuter_status(), band_win_stats() to surface real-C debt and Windows permuter fleet health in the live dashboard."}
+  ],
+  "searchable_terms": ["register-dump cleanup", "asm wrapper conversion", "BagCacheEntry", "DVDFstEntry", "pragma peephole off", "SetInterruptMask", "audit_real_c_debt.py", "fleet_dashboard.py", "real-C debt audit", "colosseum_battle.c", "menu_bag.c", "OSInterrupt.c", "DVDFs.c"]
+}

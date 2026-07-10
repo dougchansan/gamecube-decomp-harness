@@ -1,0 +1,26 @@
+{
+  "pr": {"number": 4, "title": "Drop phantom band-scratch units from progress metric + add CI guard", "url": "https://github.com/dougchansan/pkmn-colosseum/pull/4", "merged_at": "2026-06-17T03:39:23Z"},
+  "agent_status": "agent_completed",
+  "confidence": 0.6,
+  "summary": "Fixed progress.py to skip 3 transient band-harness scratch objects (band_trainer_integrated, manual_integrated, band_mtool) that were being counted as real translation units, inflating the function denominator by +783 and silently dropping published code% from ~53% to ~44%. Added a CI sanity gate to prevent recurrence; confirmed the DOL still byte-matched the ROM throughout, so this was a pure measurement fix, not a lost-work regression.",
+  "categories": ["infra", "tooling"],
+  "systems": ["reporting", "band-harness"],
+  "decomp_lessons": [
+    "The band/near-miss test harness can leave transient scratch .o files (band_*, *_integrated, _int_*, _evt_*, cs_*) in build/GC6E01/base/ that look like real translation units to a naive object-enumerator — always filter these before counting units for progress metrics.",
+    "When a progress% metric drops sharply, first check the DOL sha1 against config build.sha1 before assuming real work was lost; here fn/code% dropped ~9 points purely from denominator inflation while the build stayed byte-exact.",
+    "fuzzy% staying flat while total_functions jumps is a strong signal of phantom/duplicate units, not real regression."
+  ],
+  "smart_moves": [
+    "Added a pure-Python CI gate (no ROM/compiler needed) that fails on any scratch-pattern unit, an out-of-sync denominator, or a duplicate unit signature (same total/matched function counts under a different name) -- catches this class of bug automatically going forward."
+  ],
+  "assembly_or_matching_tactics": [],
+  "naming_conventions": ["SKIP_BASE_SCRATCH regex: ^(band_|manual_integrated|_int_|_evt_|cs_)|_integrated$ -- shared/kept in sync between tools/progress.py and tools/check_report_sanity.py"],
+  "review_feedback": [],
+  "key_files": [
+    {"path": "tools/progress.py", "role": "iter_base_objects() now skips scratch objects via SKIP_BASE_SCRATCH regex; gen_decomp_report.py reuses this enumeration so the report generator is fixed too."},
+    {"path": "tools/check_report_sanity.py", "role": "New CI-gate script: validates report.json has no phantom/scratch units, declared total_functions matches the per-unit sum, and no duplicate unit signatures."},
+    {"path": ".github/workflows/report-sanity.yml", "role": "Wires check_report_sanity.py into CI on push/PR to catch this class of measurement bug automatically."},
+    {"path": "report.json", "role": "Recomputed aggregates after dropping the 3 phantom units: total_functions 7969, matched 4952, fn% 62.14, code% 44.56."}
+  ],
+  "searchable_terms": ["phantom units", "band scratch objects", "progress.py", "check_report_sanity.py", "SKIP_BASE_SCRATCH", "denominator inflation", "code% metric fix", "band_trainer_integrated", "manual_integrated"]
+}

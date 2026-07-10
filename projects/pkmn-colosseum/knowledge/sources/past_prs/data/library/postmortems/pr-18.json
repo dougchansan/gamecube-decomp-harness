@@ -1,0 +1,27 @@
+{
+  "pr": {"number": 18, "title": "Progress: enforce synced report metadata", "url": "https://github.com/dougchansan/pkmn-colosseum/pull/18", "merged_at": "2026-06-28T04:13:02Z"},
+  "agent_status": "agent_completed",
+  "confidence": 0.6,
+  "summary": "Adds tools/sync_progress_metadata.py as the single canonical sync/check command for README + tools/decomp_work/progress.json derived from report.json, wires it into check_report_sanity.py so staleness now fails the existing sanity gate, and refreshes progress.json from 11 stale entries to 3,432 real actively-completed functions (excluding asm wrappers/stubs).",
+  "categories": ["tooling", "infra"],
+  "systems": ["report-pipeline", "progress-tracking"],
+  "decomp_lessons": [
+    "tools/decomp_work/progress.json had drifted badly stale (only 11 completed entries recorded vs 3,432 actual real-C completed functions in report.json) -- progress bookkeeping files can silently rot when agents update report.json/README directly without also updating progress.json.",
+    "Completed-function tracking must explicitly exclude asm wrappers and stubs, counting only active real-C matched functions, to avoid inflating campaign progress metrics with unconverted asm-wrapper stubs that merely happen to byte-match."
+  ],
+  "smart_moves": [
+    "Made check_report_sanity.py itself call `sync_progress_metadata.py --check` as a subprocess when checking the committed root report.json, so metadata staleness fails the existing CI-style sanity gate without needing a separate workflow file change.",
+    "Wired the new sync command through all existing auto-update paths (surgical_report_update.py, update_report.py, auto_push.sh, report_cadence.py) in one PR so no code path could bypass the new canonical sync and silently re-introduce drift.",
+    "auto_push.sh now commits both README.md and tools/decomp_work/progress.json together (previously only README.md), preventing progress.json from falling out of sync again during unattended pushes."
+  ],
+  "assembly_or_matching_tactics": [],
+  "naming_conventions": [],
+  "review_feedback": [],
+  "key_files": [
+    {"path": "tools/sync_progress_metadata.py", "role": "New canonical --sync/--check command deriving README progress table and tools/decomp_work/progress.json completed list from report.json."},
+    {"path": "tools/check_report_sanity.py", "role": "Added a check that, when validating the committed root report.json, also runs sync_progress_metadata.py --check and fails sanity if metadata is stale."},
+    {"path": "tools/decomp_work/progress.json", "role": "Regenerated from 11 stale entries to 3,432 active real-C completed function entries derived from current report.json."},
+    {"path": "tools/decomp_work/auto_push.sh", "role": "Auto-push loop now runs sync_progress_metadata.py --sync and commits README.md + progress.json together instead of README.md alone."}
+  ],
+  "searchable_terms": ["sync_progress_metadata.py", "check_report_sanity.py", "progress.json drift", "stale metadata gate", "auto_push.sh", "report_cadence.py", "surgical_report_update.py", "asm wrapper exclusion"]
+}

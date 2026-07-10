@@ -46,6 +46,7 @@ describe("workerPrompt", () => {
 	    expect(renderedContext).toContain('relative_path="build/binutils/powerpc-eabi-objdump"');
 	    expect(renderedContext).toContain("Broad find roots");
 	    expect(renderedContext).toContain("<target_graph_file_card");
+    expect(renderedContext).toContain("legacy_lever_search");
     expect(renderedContext).not.toContain("<standard_examples");
     expect(renderedContext).not.toContain("<bad_pattern>");
     expect(renderedContext).not.toContain("<preferred_shape>");
@@ -60,6 +61,8 @@ describe("workerPrompt", () => {
     expect(systemPrompt).toContain("Use already-solved references as the first pass:");
     expect(systemPrompt).toContain("Solved sibling squares can constrain what belongs in this square.");
     expect(systemPrompt).toContain("Assume a small original author pool left repeatable idioms");
+    expect(systemPrompt).toContain("Use `legacy_lever_search` early with the target symbol and source path");
+    expect(systemPrompt).toContain('{ kind: "lever_result", symbol, source_path, lever, result, evidence }');
 	    expect(systemPrompt).toContain(
 	      "`source_permuter_run` is expensive and opportunistic. Use it only as a last resort",
 	    );

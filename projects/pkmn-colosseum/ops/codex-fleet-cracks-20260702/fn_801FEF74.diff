@@ -1,0 +1,44 @@
+diff --git a/src/game/trainer.c b/src/game/trainer.c
+index 3cc7709d..0d998053 100644
+--- a/src/game/trainer.c
++++ b/src/game/trainer.c
+@@ -121,6 +121,10 @@ extern void fn_801FE7EC(void* trainer, u32 eventId, u32 param1, u32 param2);
+ extern u8   fn_801FECD4(void* trainer);
+ extern void fn_801FE710(void* trainer, u32 eventId, u32 param);
+ 
++/* Item/Pokemon field access helpers used by battle item flow. */
++u8 fn_80121574(void* obj, s32 arg);
++u8 fn_8011A3E4(void* obj, s32 arg);
++
+ /* SDA table pointers for trainer data arrays */
+ extern u32* lbl_80478F08;  /* Party config header */
+ extern u8*  lbl_80478F0C;  /* Party config data */
+@@ -6962,8 +6966,6 @@ u8 fn_801FEF74(void* trainer) {
+     extern u16 fn_80119ED0(s32 id);
+     extern u8 fn_8011B67C(void* obj, s32 arg);
+     extern u8 fn_80121ADC(void* obj, u32 field);
+-    extern void fn_80121574(void* obj, s32 arg);
+-    extern void fn_8011A3E4(void* obj, s32 arg);
+     void* obj;
+     void* target;
+     void* obj2;
+@@ -7001,16 +7003,16 @@ u8 fn_801FEF74(void* trainer) {
+                 } else {
+                     target2 = fn_8012640C(obj2, 0, 0xCC, 0);
+                 }
+-                fn_80121574(target2, 0x14);
++                return fn_80121574(target2, 0x14);
+             } else if (fn_80119ED0(0x14) != 0xCD) {
+                 return 0;
+             } else {
+-                fn_8011A3E4(obj2, 0x14);
++                return fn_8011A3E4(obj2, 0x14);
+             }
+         } else if (fn_80119ED0(0x14) != 0xD8) {
+             return 0;
+         } else {
+-            fn_8011A3E4(trainer, 0x14);
++            return fn_8011A3E4(trainer, 0x14);
+         }
+     }
+     return 0;

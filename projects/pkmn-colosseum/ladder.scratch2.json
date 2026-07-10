@@ -1,0 +1,18 @@
+{
+  "id": "colosseum-scratch-glm-sonnet",
+  "mode": "escalation",
+  "rungs": [
+    {
+      "provider": "zai",
+      "model": "glm-5.2",
+      "thinking": "low",
+      "budget": { "agentTimeoutSeconds": 14400, "ttlSeconds": 7200, "maxAttempts": 2 }
+    },
+    {
+      "provider": "claude-code",
+      "model": "claude-sonnet-5",
+      "thinking": "medium",
+      "budget": { "agentTimeoutSeconds": 14400, "ttlSeconds": 7200, "maxAttempts": 2 }
+    }
+  ]
+}

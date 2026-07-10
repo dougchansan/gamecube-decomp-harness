@@ -1,0 +1,28 @@
+{
+  "pr": {"number": 19, "title": "Add data progress measures to report", "url": "https://github.com/dougchansan/pkmn-colosseum/pull/19", "merged_at": "2026-06-28T04:59:40Z"},
+  "agent_status": "agent_completed",
+  "confidence": 0.6,
+  "summary": "Adds top-level total_data/matched_data/complete_data measures to report.json (sourced from dtk's build config loadable-section sizes) so decomp.dev can render the Data progress bar, syncs README/progress.json with the new data denominator, and hardens gen_decomp_report.py against stale/partial local builds silently shrinking the reported function/unit denominator.",
+  "categories": ["tooling", "data", "infra"],
+  "systems": ["report-pipeline", "objdiff", "decomp.dev"],
+  "decomp_lessons": [
+    "decomp.dev's Data progress bar requires total_data/matched_data/matched_data_percent (and complete_data variants) in report.json's top-level measures; these were previously omitted entirely (all-zero fields are proto3-JSON-omitted) which meant the Data bar simply didn't render.",
+    "The data denominator (1,276,195 bytes) comes from build/GC6E01/config.json (dtk-generated build config), filtering to loadable data/rodata sections and explicitly excluding bss/sbss section objects by name/object substring match, since decomp.dev tracks loadable data, not BSS.",
+    "Data bytes are counted (denominator) but matched_data/complete_data are deliberately kept at 0 -- data symbols are not yet promoted into source-owned diffable units, so reporting any nonzero matched-data would be fabricated progress.",
+    "A real risk this PR guards against: running gen_decomp_report.py locally against a partial/incomplete build/GC6E01/base can silently produce a report with a SMALLER function/unit denominator than the committed one, which would look like a regression when pushed; the tool now refuses to overwrite in that case unless --allow-denominator-shrink is passed explicitly."
+  ],
+  "smart_moves": [
+    "Split fuzzy_match_percent into two fields: the new blended fuzzy (over code+data) that decomp.dev consumes, plus a separate code_fuzzy_match_percent that preserves the pre-existing code-only meaning, avoiding a silent semantic change to the primary progress metric.",
+    "_check_denominator_shrink() compares old vs new total_functions/total_units before overwriting report.json's output path and hard-exits with a clear message if the new denominator is smaller, protecting against accidental local-build regressions being pushed as if they were real."
+  ],
+  "assembly_or_matching_tactics": [],
+  "naming_conventions": [],
+  "review_feedback": [],
+  "key_files": [
+    {"path": "tools/gen_decomp_report.py", "role": "Adds _loadable_data_size() (reads build config, excludes bss/sbss), extends _measures()/build_report() to emit total_data/matched_data/complete_data, adds --allow-denominator-shrink guard against partial local builds overwriting a fuller committed report."},
+    {"path": "report.json", "role": "Now carries total_data=1,276,195 (matched_data=0) alongside existing function/code measures so decomp.dev renders a Data bar at 0%."},
+    {"path": "tools/check_report_sanity.py", "role": "Sanity checks extended to validate matched_data<=total_data and complete_data<=total_data alongside existing function/code sanity checks."},
+    {"path": "tools/sync_progress_metadata.py", "role": "Updated to keep README/progress.json data-denominator lines in sync with the new report.json data fields."}
+  ],
+  "searchable_terms": ["data progress bar", "decomp.dev Data bar", "total_data", "matched_data", "loadable data size", "bss exclusion", "denominator shrink guard", "allow-denominator-shrink", "code_fuzzy_match_percent", "gen_decomp_report.py"]
+}

@@ -93,3 +93,6 @@ projects/*/local.project.json
 !testdata/smoke_repo/build/
 !testdata/smoke_repo/build/GC6E01/
 !testdata/smoke_repo/build/GC6E01/report.json
+
+# Campaign scratch: harvested WIP candidate patches (regenerable, not source)
+projects/*/harvested_wip_*/

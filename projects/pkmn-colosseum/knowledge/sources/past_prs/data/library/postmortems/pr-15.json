@@ -1,0 +1,36 @@
+{
+  "pr": {"number": 15, "title": "Decomp cleanup: type six matched wins", "url": "https://github.com/dougchansan/pkmn-colosseum/pull/15", "merged_at": "2026-06-28T03:37:13Z"},
+  "agent_status": "agent_completed",
+  "confidence": 0.6,
+  "summary": "Converts 6 already-matched functions across TRKNub.c, gs_model.c, hsd_shadow.c, battle_scene.c, and gs_field_world.c from raw offset-pointer casts to typed struct field access, preserving byte-exact matches while removing pointer-arithmetic debt. Report-only progress numbers updated alongside.",
+  "categories": ["decomp"],
+  "systems": ["trk", "hsd", "game-battle", "game-field", "game-model"],
+  "decomp_lessons": [
+    "Typing a previously byte-matched raw-pointer function (e.g. `*(u32*)(ptr+0x10)` -> `struct->field`) is safe cleanup as long as the struct layout exactly reproduces the original offsets/sizes and the objdiff match is re-verified per function -- this PR treats it as a distinct 'cleanup' category separate from new matches.",
+    "TRKNub.c's TRK debug-message ring buffer (mutex/inUse/length/position/data[0x880]) was still raw offset math (buf+0xC, buf+0x8, buf+writepos+0x10) despite being matched; introducing TRKMessageBuffer struct clarified the real field semantics (length vs position) without touching codegen.",
+    "Partial/opaque structs with `u8 unk_00[N]` padding fields are the standard pattern here for typing a struct when only one field at a known offset is actually used/matched (see BattleSceneTransitionState, GSFieldWorldResourceState, HSDShadowOwner/Object/Data)."
+  ],
+  "smart_moves": [
+    "Used per-function match_scan_file.py checks after each typing change instead of a full regression build, since the Mac dev box cannot run the Windows mwcceppc.exe directly for whole-file batch verification.",
+    "Kept struct definitions minimal/local to each source file rather than centralizing them, since offsets are function-specific inferred struct shapes rather than confirmed full struct layouts."
+  ],
+  "assembly_or_matching_tactics": [
+    "Verified each retyped function individually via `tools/match_scan_file.py <file> <fn>` rather than trusting a full-repo regression pass, because the local build environment could not execute the Windows compiler binary for a full verify_commit.py regression run."
+  ],
+  "naming_conventions": [
+    "BattleSceneTransitionState { u8 unk_00[0x3C]; u8 phase; } for battle_scene.c's lbl_8047B3D4.",
+    "GSFieldWorldResourceState { u8 unk_00[0x10]; u32 field_10; } for gs_field_world.c's lbl_804083D0.",
+    "GSModelStateHeader { count, entryHandle, unk_04, entries } with GS_MODEL_STATE macro cast of lbl_80404ACC in gs_model.c.",
+    "HSDShadowOwner/HSDShadowObject/HSDShadowData chain (object/shadow/width/height) in hsd_shadow.c replacing raw void*/u8* offset casts.",
+    "TRKMessageBuffer { mutex, inUse, length, position, data[0x880] } for TRKNub.c's debug message ring buffer."
+  ],
+  "review_feedback": [],
+  "key_files": [
+    {"path": "src/trk/TRKNub.c", "role": "fn_800BED14/fn_800BEDA0 retyped to use new TRKMessageBuffer struct (length/position/data) instead of raw buf+0x8/0xC/0x10 offset casts."},
+    {"path": "src/game/gs_model.c", "role": "fn_80105410 retyped to use GS_MODEL_STATE macro/GSModelStateHeader struct instead of raw lbl_80404ACC+0x0/0x2/0x8 casts."},
+    {"path": "src/hsd/hsd_shadow.c", "role": "fn_801B16C0 retyped through HSDShadowOwner->object->shadow->width/height chain instead of nested void*/u8* offset casts."},
+    {"path": "src/game/battle/battle_scene.c", "role": "fn_801D0080 retyped to BattleSceneTransitionState->phase instead of u8* offset 0x3c cast."},
+    {"path": "src/game/gs_field_world.c", "role": "fn_80117AD4 retyped to GSFieldWorldResourceState->field_10 instead of raw u32* offset 0x10 cast."}
+  ],
+  "searchable_terms": ["typed struct cleanup", "pointer-offset removal", "TRKMessageBuffer", "GSModelStateHeader", "HSDShadowObject", "BattleSceneTransitionState", "GSFieldWorldResourceState", "match_scan_file.py", "matched wins retyping"]
+}

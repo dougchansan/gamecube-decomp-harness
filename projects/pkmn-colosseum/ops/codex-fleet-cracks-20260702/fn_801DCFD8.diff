@@ -1,0 +1,109 @@
+diff --git a/src/game/battle/battle_waza.c b/src/game/battle/battle_waza.c
+index b5484879..c98b6869 100644
+--- a/src/game/battle/battle_waza.c
++++ b/src/game/battle/battle_waza.c
+@@ -1246,9 +1246,21 @@ void fn_801D9E34(void* obj) {
+ 
+ /* Waza effect data table entry (stride 0xD4) */
+ typedef struct WazaEffectTblEntry {
+-    /* 0x00 */ u8 bytes[0xD4];
++    /* 0x00 */ u8 pad_00[0x50];
++    /* 0x50 */ s32 field_50;
++    /* 0x54 */ s32 field_54;
++    /* 0x58 */ u8 pad_58[0x7C];
+ } WazaEffectTblEntry;
+ 
++/* Waza effect pool/global header at lbl_80467CC0. */
++typedef struct WazaEffectPoolHeader {
++    /* 0x00 */ void* entries;
++    /* 0x04 */ u16 count;
++    /* 0x06 */ u8 pad_06[0x02];
++    /* 0x08 */ void* field_08;
++    /* 0x0C */ u32 field_0C;
++} WazaEffectPoolHeader;
++
+ #define WAZA_SDATA2_FLOAT(addr) extern const f32 lbl_##addr
+ #define WAZA_SDATA2_VALUE(addr) lbl_##addr
+ WAZA_SDATA2_FLOAT(8047E388);
+@@ -1274,7 +1286,8 @@ typedef struct WazaEffect {
+     };
+     /* 0x30 */ u8 pad_30[0x02];
+     /* 0x32 */ u16 index;                    /* table index */
+-    /* 0x34 */ u8 pad_34[0x50];
++    /* 0x34 */ u8 pad_34[0x4C];
++    /* 0x80 */ u32 field_80;                 /* secondary effect handle */
+     /* 0x84 */ u32 effect_handle;            /* effect handle */
+     /* 0x88 */ u8 pad_88[0x04];
+ } WazaEffect;
+@@ -1351,8 +1364,70 @@ f32 fn_801DA014(void* effect) {
+  * fn_801DA070 - Waza effect bezier curve eval.
+  * Address: 0x801DA070 | Size: 0x1B4
+  */
++BOOL fn_800E6BC8(s32 handle);
++s32 fn_800EE0E8(s32 handle);
++void fn_80118CAC(s32 handle, s32 arg);
+ void fn_801DA070(void* effect) {
+-    /* TODO: Bezier curve evaluation (0x1B4 bytes) */
++    WazaEffect* fx;
++    WazaEffectPoolHeader* pool;
++    void* ctx;
++    void* target;
++    WazaEffectTblEntry* tableEntry;
++    s32 val_idx;
++    s32 scale_selector;
++    f32 val;
++    u8 scale_buf[0xC];
++
++    fx = effect;
++    if (fx == NULL) return;
++    pool = (WazaEffectPoolHeader*)lbl_80467CC0;
++    ctx = pool->field_08;
++    if (ctx == NULL) return;
++    if (fx->field_80 != 0) return;
++
++    fx->field_80 = fn_801190DC((s32)ctx, 0, 0);
++    if (fx->field_80 == 0) return;
++
++    if ((fx->flags & 1) != 1) {
++        fn_80118C88(fx->field_80, 0);
++    }
++
++    tableEntry = fx->table + fx->index;
++    if (fn_800E6BC8(fx->handle) != 0) {
++        val_idx = fn_800EE0E8(fx->handle) - 1;
++    } else {
++        val_idx = tableEntry->field_54;
++    }
++
++    if (val_idx > 0) {
++        target = fn_800EE150(fx->handle, val_idx);
++    } else {
++        target = NULL;
++    }
++
++    if (target == NULL) return;
++
++    if (effect != NULL) {
++        scale_selector = fx->scale_selector;
++    } else {
++        scale_selector = 0;
++    }
++
++    switch (scale_selector) {
++    case -2: val = lbl_8047E388; break;
++    case -1: val = lbl_8047E38C; break;
++    case 1:  val = lbl_8047E390; break;
++    case 2:  val = lbl_8047E394; break;
++    case 3:  val = lbl_8047E398; break;
++    default: val = lbl_8047E39C; break;
++    }
++
++    fn_800E01F4(scale_buf, val, val, val);
++    fn_80118FB0(fx->field_80, (s32)target, 4, 0, 1, 0);
++    fn_80118D18(fx->field_80, 1);
++    fn_80118CAC(fx->field_80, 1);
++    fn_80118DE0(fx->field_80, scale_buf, 1, 0);
++    fn_800EE828((s32)target);
+ }
+ 
+ /**

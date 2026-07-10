@@ -1,0 +1,28 @@
+{
+  "pr": {"number": 21, "title": "[codex] reclaim exact SDK candidates", "url": "https://github.com/dougchansan/pkmn-colosseum/pull/21", "merged_at": "2026-06-30T02:55:19Z"},
+  "agent_status": "agent_completed",
+  "confidence": 0.6,
+  "summary": "Restores dozens of small template-compatible SDK translation units (dolphin OS/GX/VI/SI/DVD/EXI, trk, crt) from the previous campaign archive as non-linked CodeCandidate units, raising matched functions 9->22 and matched code bytes 616->720 across 90 total units.",
+  "categories": ["decomp", "tooling"],
+  "systems": ["dolphin/os", "dolphin/gx", "dolphin/vi", "dolphin/si", "dolphin/dvd", "dolphin/db", "dolphin/exi", "trk", "crt"],
+  "decomp_lessons": [
+    "When a reclaimed unit is byte-exact standalone but fails the final DOL SHA check as a *linked* Matching substitution, keep it registered as a non-linked CodeCandidate instead of forcing it in as Matching -- this preserves the canonical build while still surfacing honest progress in objdiff/decomp.dev.",
+    "Small SDK leaf functions (OSArena.c 4/4 funcs, udp_cc.c 9/9 funcs) are cheap, low-risk reclaims: verify each unit's function/byte counts individually before folding many into one PR."
+  ],
+  "smart_moves": [
+    "Explicitly trialed the units as linked Matching first, caught the DOL SHA failure, and downgraded them to non-linked CodeCandidate rather than silently merging a broken linked state."
+  ],
+  "assembly_or_matching_tactics": [
+    "Verified per-unit metrics before merging: OSArena 4/4 functions 32/32 bytes 100%, udp_cc 9/9 functions 72/72 bytes 100%.",
+    "Ran an active-tree scan for .inc includes / inline asm across src, include, configure.py, tools to ensure no asm-wrapper stubs snuck into the reclaim."
+  ],
+  "naming_conventions": [],
+  "review_feedback": [],
+  "key_files": [
+    {"path": "configure.py", "role": "Registers ~50 reclaimed SDK/trk/crt units as Object(CodeCandidate, ...), 326 lines added"},
+    {"path": "config/GC6E01/splits.txt", "role": "Adds dtk text splits for OSArena.c, udp_cc.c, and dozens of other tiny SDK units"},
+    {"path": "src/dolphin/os/OSArena.c", "role": "Reclaimed exact unit, 4/4 functions, 32/32 bytes, 100% match"},
+    {"path": "src/trk/udp_cc.c", "role": "Reclaimed exact unit, 9/9 functions, 72/72 bytes, 100% match"}
+  ],
+  "searchable_terms": ["CodeCandidate", "reclaim", "SDK candidates", "OSArena", "udp_cc", "linked Matching vs CodeCandidate", "DOL SHA failure"]
+}

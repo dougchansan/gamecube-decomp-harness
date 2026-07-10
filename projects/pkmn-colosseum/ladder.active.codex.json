@@ -1,0 +1,25 @@
+{
+  "id": "colosseum-active-glm-sonnet-codex",
+  "mode": "escalation",
+  "_note": "opus+fable DROPPED 2026-07-01 as a protective hold (user away). In the first ~55min of run 0254b3f0 the top rungs cracked 0 functions: 3/3 hard fns reached fuzzy-100 but exhausted the whole ladder byte-exact-uncracked (opus 6 sessions/~123k tok, fable 3 sessions). Signature = likely per-TU compiler-flags/structural issue (see pkmn-colosseum-mwcc-compiler-map), NOT model capability — stronger C won't fix it. Full ladder preserved in ladder.active.json (glm..fable) and ladder.json (incl deepseek). Re-add opus/fable when a top-rung crack is demonstrated or the flags root-cause is fixed. NOTE sonnet-5 is also claude-code (subscription); drop it too (-> glm->codex, zero Claude subscription) if this session gets rate-limited.",
+  "rungs": [
+    {
+      "provider": "zai",
+      "model": "glm-5.2",
+      "thinking": "low",
+      "budget": { "agentTimeoutSeconds": 2400, "ttlSeconds": 7200, "maxAttempts": 2 }
+    },
+    {
+      "provider": "claude-code",
+      "model": "claude-sonnet-5",
+      "thinking": "medium",
+      "budget": { "agentTimeoutSeconds": 3600, "ttlSeconds": 7200, "maxAttempts": 2 }
+    },
+    {
+      "provider": "openai-codex",
+      "model": "gpt-5.5",
+      "thinking": "medium",
+      "budget": { "agentTimeoutSeconds": 3600, "ttlSeconds": 7200, "maxAttempts": 2 }
+    }
+  ]
+}

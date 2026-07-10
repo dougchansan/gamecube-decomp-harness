@@ -1,0 +1,34 @@
+{
+  "pr": {"number": 6, "title": "Decomp campaign: pipeline hardening, near-miss banking, batched cracking + wins", "url": "https://github.com/dougchansan/pkmn-colosseum/pull/6", "merged_at": "2026-06-25T23:30:59Z"},
+  "agent_status": "agent_completed",
+  "confidence": 0.6,
+  "summary": "Large 62-commit campaign PR combining real decomp wins (colosseum_battle +53 byte-exact, MObj/GSthread/gs_material matches) with major fleet-orchestration hardening: near-miss banking so 90-99% matches are no longer discarded, an atomic file-lock rewrite, a single source-of-truth measure cache, and batched cheap-agent cracking.",
+  "categories": ["decomp", "tooling", "infra"],
+  "systems": ["colosseum_battle", "hsd", "pokemon", "fleet-orchestration", "permuter"],
+  "decomp_lessons": [
+    "Near-misses (90-99% real-C the fleet can't fully close) were being thrown away; banking them (band.py bank / bank-file) and splicing with a strict no-regress + asm/.inc fraud guard feeds the permuter queue instead of wasting the work.",
+    "A dashboard/DONE bucket count can freeze and silently understate progress by hundreds of wins if band_wins aren't re-bucketed live.",
+    "sqlite-based dispatch locks caused a hot-path bottleneck; O_EXCL file-based atomic locks (locks.py) fixed cost/correctness together.",
+    "Draining a work lane only when it's *currently* idle (not on every /clear) avoids wiping in-progress agent work."
+  ],
+  "smart_moves": [
+    "Reshape mode: from-scratch m2c-draft -> real-C conversion specifically for LOW-confidence Ghidra drafts, gated behind .reshape_first.",
+    "lever-crack-batch workflow: Sonnet cracks + Haiku independently verifies the mechanical REG-COLORING subset, documented in ECONOMIC_MODEL.md as the cheap tier between free permuter and expensive Opus reshape.",
+    "pane_io wedge-watchdog auto-restarts a stuck capture loop, addressing agents idling too long under load."
+  ],
+  "assembly_or_matching_tactics": [
+    "Jump-table walls in pokemon.c stopped from re-grinding once identified as unproductive.",
+    "GSthread sibling stubs (gs_texture, gs_thread destroy/unlink) matched to 100% as a batch once one was solved."
+  ],
+  "naming_conventions": [],
+  "review_feedback": [],
+  "key_files": [
+    {"path": "src/game/colosseum_battle.c", "role": "Large Ghidra-draft reshape landed +53 byte-exact functions, gated behind no-regress check."},
+    {"path": "src/hsd/hsd_mtx.c", "role": "Largest single-file diff in the PR (+339/-17); matrix helper matches from the campaign."},
+    {"path": "tools/decomp_work/bank_nearmiss.py", "role": "New: splices banked near-miss (90-99%) reshapes into canon with strict no-regress + fraud guard."},
+    {"path": "tools/decomp_work/coordination/locks.py", "role": "Rewrote dispatch locking from sqlite to atomic O_EXCL file locks; removes 'list' from the dispatch hot path."},
+    {"path": "tools/decomp_work/measure_db.py", "role": "New write-on-every-measure cache acting as single source of truth so dashboard buckets reflect reality between ledger rebuilds."},
+    {"path": "tools/symbolmap/renaming_dashboard.py", "role": "Re-buckets band_wins into DONE live, fixing a frozen ~400-win-understated DONE count."}
+  ],
+  "searchable_terms": ["near-miss banking", "bank_nearmiss.py", "atomic file locks", "reshape mode", "lever-crack-batch", "wedge-watchdog", "pane_io", "measure_db", "colosseum_battle reshape", "ECONOMIC_MODEL"]
+}

@@ -1,0 +1,20 @@
+{
+  "pr": {"number": 17, "title": "Progress: bank two SI current-tree wins", "url": "https://github.com/dougchansan/pkmn-colosseum/pull/17", "merged_at": "2026-06-28T03:50:24Z"},
+  "agent_status": "agent_completed",
+  "confidence": 0.7,
+  "summary": "Small mechanical report-only follow-up to PR #16: banks 2 more active real-C SI (Serial Interface) functions in src/dolphin/si/SI.c that re-measure at 100% in the current tree but had stale report percentages. No source files changed.",
+  "categories": ["decomp", "data"],
+  "systems": ["dolphin-si", "report-pipeline"],
+  "decomp_lessons": [
+    "Same stale-report pattern as PR #16: dolphin/si/SI.c had functions (fn_800D0CBC, fn_800D0DF8) already at 100% match in-tree that hadn't been banked into report.json yet, indicating these small banking sweeps are done per-unit/incrementally rather than as one giant catch-all pass."
+  ],
+  "smart_moves": [],
+  "assembly_or_matching_tactics": [],
+  "naming_conventions": [],
+  "review_feedback": [],
+  "key_files": [
+    {"path": "report.json", "role": "Banked fn_800D0CBC and fn_800D0DF8 in src/dolphin/si/SI.c, bringing totals to 4,308/6,795 functions (~63.4%) and 542,148/1,368,604 code bytes (~39.6%)."},
+    {"path": "README.md", "role": "Synced top-level progress table to match updated report.json numbers."}
+  ],
+  "searchable_terms": ["banking gated wins", "SI.c", "fn_800D0CBC", "fn_800D0DF8", "report.json stale percentage", "report-only PR"]
+}

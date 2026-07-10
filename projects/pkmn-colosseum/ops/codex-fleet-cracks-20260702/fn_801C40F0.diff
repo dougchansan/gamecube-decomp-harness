@@ -1,0 +1,49 @@
+diff --git a/src/game/battle/battle_grid.c b/src/game/battle/battle_grid.c
+index 0b7dfb23..cb8dd4fe 100644
+--- a/src/game/battle/battle_grid.c
++++ b/src/game/battle/battle_grid.c
+@@ -25,7 +25,17 @@
+  * (getters, setters, wrappers) are fully decompiled.
+  */
+ 
+-#include "game/battle/battle.h"
++#include "dolphin/types.h"
++
++#define BATTLE_POS_ENEMY_LEFT    2
++#define BATTLE_TOTAL_POKEMON     4
++
++void fn_801C3430(void);
++void fn_801C3A64(void);
++void fn_801C3B80(void);
++void fn_801C4164(s32 mode, void* callback, s32 flags, f32 a, f32 b);
++void fn_801C431C(s32 arg0);
++f32 fn_801C5F6C(void);
+ 
+ /* =========================================================================
+  * External function declarations
+@@ -803,9 +813,23 @@ void fn_801C409C(void) {
+  * Address: 0x801C40F0 | Size: 0x74
+  * Referenced by battle_main.c as "battle grid set flag".
+  */
+-void fn_801C40F0(s32 flag) {
+-    /* Set rendering flag for the battle grid */
++#pragma peephole off
++s32 fn_801C40F0(u8 flag) {
++    extern u8 lbl_80466E30[];
++    u8* gridState;
++
++    if (flag <= 0) {
++        return (s8)lbl_80466E30[1];
++    }
++
++    gridState = lbl_80466E30;
++    while (gridState[1] == 1) {
++        _threadSwitch();
++    }
++    _threadSwitch();
++    return (s8)lbl_80466E30[1];
+ }
++#pragma peephole on
+ 
+ /**
+  * fn_801C4164 - Schedule grid update callback with arguments.

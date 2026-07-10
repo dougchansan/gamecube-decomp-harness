@@ -1439,6 +1439,7 @@ async function main(): Promise<void> {
     workerUserPrompt.includes("<available_tools>") &&
       workerUserPrompt.includes('<tool_group provider="code_graph" type="target_context">') &&
       workerUserPrompt.includes('name="code_graph_file_card"') &&
+      workerUserPrompt.includes('name="legacy_lever_search"') &&
       workerUserPrompt.includes('use_when="Get the file card for a specific source file."'),
   );
   assertSmoke(
@@ -1453,6 +1454,7 @@ async function main(): Promise<void> {
       workerUserPrompt.includes('"path_facts"') &&
       workerUserPrompt.includes('"follow_up_queries"') &&
       workerUserPrompt.includes('"path_facts_resolve"') &&
+      workerUserPrompt.includes('"legacy_lever_search"') &&
       !workerUserPrompt.includes('"scheduling_signals"') &&
       !workerUserPrompt.includes('"priority_bonus"'),
   );
