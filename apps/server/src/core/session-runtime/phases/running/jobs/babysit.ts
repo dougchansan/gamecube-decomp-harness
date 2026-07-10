@@ -422,6 +422,20 @@ export async function runBabysit(globals: GlobalArgs, args: Map<string, string |
   process.once("SIGTERM", stop);
 
   try {
+    // A previous babysit/run-loop that was killed (watchdog, crash, manual
+    // restart) leaves active-but-dead claims occupying every worker slot; the
+    // fresh run-loop then idles forever. Recovery used to fire only on a
+    // mid-run child incident, so a boot after an external kill never cleaned
+    // them up. Recover once at startup when forced recovery is enabled.
+    if (booleanArg(args, "--force-recover-claims") && !booleanArg(args, "--no-recover-claims")) {
+      const startupRunId = await currentRunId(globals, args);
+      if (startupRunId) {
+        recoveries.push(
+          await runRecoveryCommand(globals, "babysit startup: recover claims left by a previous process", startupRunId, recoveryOrdinal, ["--force"]),
+        );
+        recoveryOrdinal += 1;
+      }
+    }
     while (!stopRequested) {
       const runId = await currentRunId(globals, args);
       const child = await runChild(globals, args, systemRuns.length + 1, commandName);
