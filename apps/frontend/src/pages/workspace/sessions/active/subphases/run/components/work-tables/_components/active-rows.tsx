@@ -1,6 +1,7 @@
 import { ArrowRight } from "@/icons";
-import { asObject, text, type JsonObject } from "@/lib/format";
+import { asObject, text, type JsonObject, type LadderRung } from "@/lib/format";
 import { activeRuntime, activityScoreCompact, latestActivity } from "@/lib/workerActivity";
+import { LadderTrace } from "./ladder-trace";
 
 function attemptNumber(activity: JsonObject, lastEvent: JsonObject): string {
   const activityAttempt = Number(activity.attemptIndex);
@@ -9,7 +10,11 @@ function attemptNumber(activity: JsonObject, lastEvent: JsonObject): string {
   return Number.isFinite(attemptIndex) ? String(attemptIndex + 1) : "1";
 }
 
-export function ActiveRows({ rows }: { rows: JsonObject[] }) {
+function currentRungOf(file: JsonObject): number | null {
+  return typeof file.currentRung === "number" && Number.isFinite(file.currentRung) ? file.currentRung : null;
+}
+
+export function ActiveRows({ ladderRungs, rows }: { ladderRungs: LadderRung[]; rows: JsonObject[] }) {
   return (
     <>
       {rows.map((file, index) => {
@@ -37,6 +42,15 @@ export function ActiveRows({ rows }: { rows: JsonObject[] }) {
               )}
             </td>
             <td className="w-24 text-right text-dim" title={timing.secondary}>{timing.primary}</td>
+            <td className="w-[210px]">
+              <LadderTrace
+                currentRung={currentRungOf(file)}
+                latestModel={typeof file.latestModel === "string" ? file.latestModel : null}
+                latestProvider={typeof file.latestProvider === "string" ? file.latestProvider : null}
+                latestThinking={typeof file.latestThinking === "string" ? file.latestThinking : null}
+                rungs={ladderRungs}
+              />
+            </td>
           </tr>
         );
       })}

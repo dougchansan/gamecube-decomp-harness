@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 import { asArray, asObject, clock, text, type JsonObject } from "@/lib/format";
 
-import { traceEventLabel, traceEventTone, traceScoreText } from "../../_lib/worker-reports";
+import { traceEventAgentTag, traceEventLabel, traceEventTone, traceScoreText } from "../../_lib/worker-reports";
 
 export function MetaItem({ label, value, valueClassName = "" }: { label: string; value: ReactNode; valueClassName?: string }) {
   return (
@@ -38,11 +38,20 @@ export function TraceSection({
       <div className="grid gap-1 border-l-2 border-line pl-2.5">
         {events.map((event, index) => {
           const scoreText = traceScoreText(event);
+          const agentTag = traceEventAgentTag(event);
           return (
             <div className="grid grid-cols-[52px_minmax(0,1fr)] gap-2 text-xs leading-5" key={`${text(event.createdAt)}-${index}`}>
               <span className="whitespace-nowrap pt-px text-[10px] text-faint" title={text(event.createdAt)}>{clock(event.createdAt)}</span>
               <span className="min-w-0">
                 <span className={`mr-1.5 font-semibold ${traceEventTone(text(event.eventType))}`}>{traceEventLabel(event)}</span>
+                {agentTag ? (
+                  <span
+                    className="mr-1.5 whitespace-nowrap rounded-none border border-line bg-inset px-1 py-px font-mono text-[10px] text-cyan"
+                    title={`ran on ${text(event.provider)} / ${text(event.model)}`}
+                  >
+                    {agentTag}
+                  </span>
+                ) : null}
                 <span className="[overflow-wrap:anywhere] text-soft">{text(event.summary)}</span>
                 {scoreText ? <span className="ml-1.5 whitespace-nowrap text-dim">{scoreText}</span> : null}
               </span>

@@ -99,6 +99,17 @@ export interface Dashboard {
   permuterFarms?: JsonObject | null;
   /** Observability: top electricity cost per function across both permuter farms. */
   functionCost?: JsonObject[];
+  /** Escalation ladder: rungs actually exercised by this run, in rung order. */
+  ladderRungs?: LadderRung[];
+}
+
+/** One rung of the escalation ladder (kimi -> glm -> codex -> gpt-5.5 -> sonnet -> gpt-5.5 xhigh -> sol). */
+export interface LadderRung {
+  level: number;
+  provider: string | null;
+  model: string | null;
+  thinking: string | null;
+  label: string;
 }
 
 export interface RunDetails {

@@ -1,0 +1,9 @@
+{
+  "id": "colosseum-fromscratch",
+  "mode": "escalation",
+  "_note": "From-scratch lane: cheap codex-spark first pass skims easy fresh functions, gpt-5.5 high decompiles the rest. Efficient — reserves the strong model for hard fresh fns.",
+  "rungs": [
+    { "provider": "openai-codex", "model": "gpt-5.3-codex-spark", "thinking": "medium", "budget": { "agentTimeoutSeconds": 1500, "ttlSeconds": 7200, "maxAttempts": 1 } },
+    { "provider": "openai-codex", "model": "gpt-5.5", "thinking": "high", "budget": { "agentTimeoutSeconds": 2400, "ttlSeconds": 7200, "maxAttempts": 2 } }
+  ]
+}

@@ -18,6 +18,7 @@ function readJson(path: string): JsonObject {
 export interface LoadBoardSnapshotOptions {
   codeGraphFunctionsIndexPath?: string;
   excludeSourcePaths?: string[];
+  fuzzyMax?: number;
   objdiffPath?: string;
   rankFeatureProvider?: BoardRankFeatureProvider;
   reportPath?: string;
@@ -119,6 +120,11 @@ function filterExcludedCandidates(candidates: TargetCandidate[], excluded: Set<s
   return candidates.filter((candidate) => !excluded.has(normalizeSourcePath(candidate.sourcePath)));
 }
 
+function filterFuzzyMaxCandidates(candidates: TargetCandidate[], fuzzyMax: number | undefined): TargetCandidate[] {
+  if (fuzzyMax == null || !Number.isFinite(fuzzyMax)) return candidates;
+  return candidates.filter((candidate) => candidate.fuzzy <= fuzzyMax);
+}
+
 function sourceConversionCandidate(params: {
   entry: FunctionSourceMapEntry;
   report: ReportFunctionInfo | undefined;
@@ -174,6 +180,11 @@ export function loadBoardSnapshot(repoRoot: string, limit: number, options: Load
   const candidateKeys = new Set<string>();
   const excluded = excludedSources(options);
   const candidates: TargetCandidate[] = [];
+  // When a fuzzyMax filter is active, functions objdiff never scored (no fuzzy_match_percent field —
+  // typically because no matching target function exists yet, i.e. genuinely from-scratch) are treated
+  // as fuzzy 0 so they can surface as from-scratch candidates. Without a fuzzyMax filter, they keep the
+  // historical fallback of 100 (excluded as already-matched) to preserve existing default behavior.
+  const missingFuzzyDefault = options.fuzzyMax != null && Number.isFinite(options.fuzzyMax) ? 0 : 100;
 
   for (const unitValue of asArray(report.units)) {
     const unit = asObject(unitValue);
@@ -195,6 +206,7 @@ export function loadBoardSnapshot(repoRoot: string, limit: number, options: Load
         unitName,
         sourcePath,
         fn,
+        defaultFuzzy: missingFuzzyDefault,
       });
       if (candidate) {
         candidates.push(candidate);
@@ -214,7 +226,7 @@ export function loadBoardSnapshot(repoRoot: string, limit: number, options: Load
     candidateKeys.add(key);
   }
 
-  const filteredCandidates = filterExcludedCandidates(candidates, excluded);
+  const filteredCandidates = filterFuzzyMaxCandidates(filterExcludedCandidates(candidates, excluded), options.fuzzyMax);
   rankBoardCandidates(filteredCandidates, options.rankFeatureProvider);
   filteredCandidates.sort((left, right) => right.priority - left.priority);
   const measures = asObject(report.measures) as BoardMeasures;
@@ -250,13 +262,14 @@ function loadBoardSnapshotFromCodeGraphIndex(
   let matchedFunctions = 0;
   let totalBytes = 0;
   let matchedBytes = 0;
+  const missingFuzzyDefault = options.fuzzyMax != null && Number.isFinite(options.fuzzyMax) ? 0 : 100;
 
   for (const row of rows) {
     const unit = stringValue(row.unit);
     const sourcePath = stringValue(row.sourcePath, stringValue(row.source_path));
     const symbol = stringValue(row.symbol);
     const size = numberValue(row.size);
-    const fuzzy = numberValue(row.fuzzy, numberValue(row.fuzzy_match_percent, 100));
+    const fuzzy = numberValue(row.fuzzy, numberValue(row.fuzzy_match_percent, missingFuzzyDefault));
     if (!unit || !sourcePath || !symbol || size <= 0 || excluded.has(normalizeSourcePath(sourcePath))) continue;
     totalFunctions += 1;
     totalBytes += size;
@@ -265,6 +278,7 @@ function loadBoardSnapshotFromCodeGraphIndex(
       matchedBytes += size;
       continue;
     }
+    if (options.fuzzyMax != null && Number.isFinite(options.fuzzyMax) && fuzzy > options.fuzzyMax) continue;
     candidates.push({
       unit,
       sourcePath,

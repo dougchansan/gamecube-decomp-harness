@@ -495,6 +495,29 @@ function workerStatesForRun(stateDir: string, runId: string, limit = 100): JsonO
             epoch_targets.cracked_at_escalation AS cracked_at_escalation,
             epoch_targets.tokens_to_crack AS tokens_to_crack,
             epoch_targets.time_to_crack_ms AS time_to_crack_ms,
+            COALESCE(
+              epoch_targets.model_ladder_level,
+              (
+                SELECT escalation_level FROM pi_sessions
+                WHERE target_claim_id IN (SELECT id FROM target_claims WHERE epoch_target_id = worker_state.epoch_target_id)
+                ORDER BY escalation_level DESC, attempt_index DESC LIMIT 1
+              )
+            ) AS current_rung,
+            (
+              SELECT model FROM pi_sessions
+              WHERE target_claim_id IN (SELECT id FROM target_claims WHERE epoch_target_id = worker_state.epoch_target_id)
+              ORDER BY escalation_level DESC, attempt_index DESC LIMIT 1
+            ) AS latest_model,
+            (
+              SELECT provider FROM pi_sessions
+              WHERE target_claim_id IN (SELECT id FROM target_claims WHERE epoch_target_id = worker_state.epoch_target_id)
+              ORDER BY escalation_level DESC, attempt_index DESC LIMIT 1
+            ) AS latest_provider,
+            (
+              SELECT thinking_level FROM pi_sessions
+              WHERE target_claim_id IN (SELECT id FROM target_claims WHERE epoch_target_id = worker_state.epoch_target_id)
+              ORDER BY escalation_level DESC, attempt_index DESC LIMIT 1
+            ) AS latest_thinking,
             best.id AS best_checkpoint_id,
             best.attempt_index AS best_attempt_index,
             best.validation_time AS best_validation_time,
@@ -592,6 +615,12 @@ function workerStatesForRun(stateDir: string, runId: string, limit = 100): JsonO
         targetClaimId: row.target_claim_id,
         workerId: row.worker_id,
         lifecycleStatus: row.lifecycle_status,
+        // Escalation ladder (Track B): the target's current rung and the model/provider/
+        // thinking level of the most recent pi_session on it, for the LadderTrace panel.
+        currentRung: numberOrNull(row.current_rung),
+        latestModel: stringValue(row.latest_model) || null,
+        latestProvider: stringValue(row.latest_provider) || null,
+        latestThinking: stringValue(row.latest_thinking) || null,
         validationStatus,
         result,
         stopReason: result === "exact" ? "target_complete" : "stalled",
@@ -692,17 +721,100 @@ function readJsonLines(path: string, maxLines: number): JsonObject[] {
   }
 }
 
-function compactActivityEvent(event: JsonObject): JsonObject {
+// Which pi_sessions rung (provider/model/thinking) actually ran a given
+// (claim, attempt) — see resolveModelInfo for how attempts without a
+// resolved rung (e.g. events with no attempt_index) fall back.
+type PiSessionModelInfo = {
+  model: string | null;
+  provider: string | null;
+  thinkingLevel: string | null;
+  escalationLevel: number | null;
+  agentLabel: string | null;
+};
+
+// Per-claim, per-attempt map of the model/provider that actually ran the
+// attempt. An attempt can have multiple pi_sessions rows at different
+// escalation_levels (the ladder escalates mid-attempt on rate-limit skips);
+// the row with the HIGHEST escalation_level is the one that actually ran.
+// Best-effort: any store failure yields an empty map rather than breaking
+// the activity payload.
+function piSessionModelMap(stateDir: string, claimIds: string[]): Map<string, Map<number, PiSessionModelInfo>> {
+  const result = new Map<string, Map<number, PiSessionModelInfo>>();
+  const ids = [...new Set(claimIds.filter(Boolean))];
+  if (ids.length === 0) return result;
+  try {
+    const store = openState(stateDir);
+    try {
+      const placeholders = ids.map(() => "?").join(", ");
+      const rows = store.db
+        .query(
+          `
+            SELECT target_claim_id, attempt_index, escalation_level, model, provider, thinking_level
+            FROM pi_sessions
+            WHERE target_claim_id IN (${placeholders}) AND attempt_index IS NOT NULL
+            ORDER BY target_claim_id, attempt_index, escalation_level
+          `,
+        )
+        .all(...ids) as JsonObject[];
+      for (const row of rows) {
+        const claimId = stringValue(row.target_claim_id);
+        const attemptIndex = numberOrNull(row.attempt_index);
+        if (!claimId || attemptIndex === null) continue;
+        const escalationLevel = numberOrNull(row.escalation_level);
+        const byAttempt = result.get(claimId) ?? new Map<number, PiSessionModelInfo>();
+        const existing = byAttempt.get(attemptIndex);
+        if (existing && (existing.escalationLevel ?? -1) >= (escalationLevel ?? -1)) continue;
+        const model = stringValue(row.model) || null;
+        byAttempt.set(attemptIndex, {
+          model,
+          provider: stringValue(row.provider) || null,
+          thinkingLevel: stringValue(row.thinking_level) || null,
+          escalationLevel,
+          agentLabel: model ? (LADDER_MODEL_LABELS[model] ?? model) : null,
+        });
+        result.set(claimId, byAttempt);
+      }
+    } finally {
+      store.db.close();
+    }
+  } catch {
+    // Model tagging is best-effort; never let it break the activity payload.
+  }
+  return result;
+}
+
+// Resolves the model rung for an event's (claim, attempt). Events without an
+// attempt_index (claim_started, worker_state_closed) fall back to the lowest
+// attempt actually recorded for the claim, since that's the closest rung.
+function resolveModelInfo(
+  modelMap: Map<string, Map<number, PiSessionModelInfo>>,
+  claimId: string,
+  attemptIndex: number,
+): PiSessionModelInfo | null {
+  const byAttempt = modelMap.get(claimId);
+  if (!byAttempt || byAttempt.size === 0) return null;
+  if (Number.isFinite(attemptIndex) && byAttempt.has(attemptIndex)) return byAttempt.get(attemptIndex) ?? null;
+  const lowest = [...byAttempt.keys()].sort((left, right) => left - right)[0];
+  return byAttempt.get(lowest) ?? null;
+}
+
+function compactActivityEvent(event: JsonObject, modelMap?: Map<string, Map<number, PiSessionModelInfo>>): JsonObject {
   const score = asObject(event.score);
+  const attemptIndex = numberValue(event.attempt_index, NaN);
+  const modelInfo = modelMap ? resolveModelInfo(modelMap, stringValue(event.claim_id), attemptIndex) : null;
   return {
     createdAt: stringValue(event.created_at),
-    attemptIndex: numberValue(event.attempt_index, NaN),
+    attemptIndex,
     phase: stringValue(event.phase),
     eventType: stringValue(event.event_type),
     summary: stringValue(event.summary),
     score: Object.keys(score).length > 0 ? { before: score.before ?? null, after: score.after ?? null, exact: score.exact === true } : null,
     artifactPath: stringValue(event.artifact_path),
     sessionId: stringValue(event.session_id),
+    model: modelInfo?.model ?? null,
+    provider: modelInfo?.provider ?? null,
+    escalationLevel: modelInfo?.escalationLevel ?? null,
+    agentLabel: modelInfo?.agentLabel ?? null,
   };
 }
 
@@ -758,6 +870,10 @@ function activeClaimActivity(stateDir: string, runId: string, workerStateId: str
     source = events.length > 0 ? "return_gates" : "none";
   }
   const toolEvents = readJsonLines(resolve(workerLogDir, "tool_events.jsonl"), 30);
+  const modelMap = piSessionModelMap(
+    stateDir,
+    events.map((event) => stringValue(event.claim_id)),
+  );
   const lastEvent = events.length > 0 ? events[events.length - 1] : null;
   const lastTool = toolEvents.length > 0 ? toolEvents[toolEvents.length - 1] : null;
   const lastScoreEvent = [...events].reverse().find((event) => {
@@ -771,7 +887,7 @@ function activeClaimActivity(stateDir: string, runId: string, workerStateId: str
     workerLogDir,
     attemptIndex: attemptIndex >= 0 ? attemptIndex : null,
     phase: lastEvent ? stringValue(lastEvent.phase) : "",
-    lastEvent: lastEvent ? compactActivityEvent(lastEvent) : null,
+    lastEvent: lastEvent ? compactActivityEvent(lastEvent, modelMap) : null,
     lastTool: lastTool
       ? {
           createdAt: stringValue(lastTool.created_at),
@@ -784,7 +900,7 @@ function activeClaimActivity(stateDir: string, runId: string, workerStateId: str
       : null,
     lastScore: lastScoreEvent ? asObject(lastScoreEvent.score) : null,
     lastRepairSummary: lastRepair ? stringValue(lastRepair.summary) : "",
-    recentEvents: events.slice(-12).map(compactActivityEvent),
+    recentEvents: events.slice(-12).map((event) => compactActivityEvent(event, modelMap)),
     toolEventCount: toolEvents.length,
   };
 }
@@ -1134,6 +1250,68 @@ function countBy(rows: JsonObject[], key: string): JsonObject {
     counts.set(value, (counts.get(value) ?? 0) + 1);
   }
   return Object.fromEntries([...counts.entries()].sort((left, right) => right[1] - left[1]));
+}
+
+// Short human label for an escalation-ladder rung's model. Hand-picked for the
+// live campaign ladder (kimi -> glm -> codex-spark -> gpt-5.5 -> sonnet-5 ->
+// gpt-5.5 xhigh -> sol); unrecognized models fall back to the raw model id.
+const LADDER_MODEL_LABELS: Record<string, string> = {
+  "kimi-k2.7-code": "kimi",
+  "glm-5.2": "glm-5.2",
+  "gpt-5.3-codex-spark": "codex-spark",
+  "gpt-5.5": "gpt-5.5",
+  "claude-sonnet-5": "sonnet-5",
+  "gpt-5.6-sol": "sol",
+};
+
+// Escalation-ladder rungs actually used by a run, in rung order. Sourced from
+// pi_sessions (the source of truth for which provider/model/thinking a rung
+// ran with) rather than a hardcoded ladder, so it reflects reality even if
+// the ladder config changes mid-campaign. Labels are deduped by appending the
+// thinking level when two rungs share a model (e.g. gpt-5.5 med vs xhigh).
+function ladderRungs(stateDir: string, runId: string): JsonObject[] {
+  // Show the FULL campaign ladder (all configured rungs) so unreached top rungs
+  // (e.g. sol) still render as faint pending targets. Prefer the ladder config;
+  // fall back to the rungs actually observed in pi_sessions if it's absent.
+  let rows: JsonObject[] = [];
+  const configPath = resolve(stateDir, "..", "ladder.campaign.codex-tiered.json");
+  const configRungs = existsSync(configPath) ? asArray(readJsonObject(configPath).rungs).map(asObject) : [];
+  if (configRungs.length > 0) {
+    rows = configRungs.map((rung, index) => ({
+      escalation_level: index,
+      provider: stringValue(rung.provider),
+      model: stringValue(rung.model),
+      thinking_level: stringValue(rung.thinking),
+    }));
+  } else {
+    const store = openState(stateDir);
+    try {
+      rows = store.db
+        .query(
+          `SELECT DISTINCT escalation_level, provider, model, thinking_level FROM pi_sessions WHERE run_id = ? AND escalation_level IS NOT NULL ORDER BY escalation_level`,
+        )
+        .all(runId) as JsonObject[];
+    } finally {
+      store.db.close();
+    }
+  }
+
+  const baseLabels = rows.map((row) => LADDER_MODEL_LABELS[stringValue(row.model)] ?? stringValue(row.model));
+  const labelCounts = new Map<string, number>();
+  for (const label of baseLabels) labelCounts.set(label, (labelCounts.get(label) ?? 0) + 1);
+
+  return rows.map((row, index) => {
+    const baseLabel = baseLabels[index];
+    const thinking = stringValue(row.thinking_level);
+    const label = (labelCounts.get(baseLabel) ?? 0) > 1 && thinking ? `${baseLabel}·${thinking}` : baseLabel;
+    return {
+      level: numberOrNull(row.escalation_level),
+      provider: stringValue(row.provider) || null,
+      model: stringValue(row.model) || null,
+      thinking: thinking || null,
+      label,
+    };
+  });
 }
 
 function piSessionsForRun(stateDir: string, runId: string): JsonObject[] {
@@ -2109,6 +2287,8 @@ async function runDashboard(paths: DashboardProjectContext): Promise<JsonObject>
     // dense match-over-time series feeding the Model Benchmark panel.
     modelBenchmark: runId ? modelBenchmark(stateDir, runId) : { leaderboard: [] },
     piSessions: runId ? piSessionsForRun(stateDir, runId) : [],
+    // Escalation-ladder rungs actually exercised by this run, for the LadderTrace panel.
+    ladderRungs: runId ? ladderRungs(stateDir, runId) : [],
     reportSnapshots: runId ? reportSnapshotsForRun(stateDir, runId) : [],
     // Observability panels: fuzzy-match distribution (from the build report),
     // per-function token/cost, and the permuter-farm status.

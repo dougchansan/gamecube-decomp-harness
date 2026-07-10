@@ -225,6 +225,58 @@
     color: var(--color-faint);
   }
 
+  /* Escalation-ladder stepper: compact rung dots + the current agent label,
+     shown in the active-runner table's Rung column. */
+  .ladder-trace {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .ladder-trace-dots {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .ladder-dot {
+    flex: 0 0 auto;
+    width: 6px;
+    height: 6px;
+    border: 1px solid var(--color-line2);
+    background: transparent;
+  }
+
+  .ladder-dot-climbed {
+    border-color: var(--color-line2);
+    background: var(--color-dim);
+    opacity: 0.55;
+  }
+
+  .ladder-dot-active {
+    width: 8px;
+    height: 8px;
+    border-color: var(--color-cyan);
+    background: var(--color-cyan);
+    box-shadow: 0 0 5px rgba(79, 210, 242, 0.65);
+  }
+
+  .ladder-dot-pending {
+    border-color: var(--color-line);
+    background: transparent;
+    opacity: 0.5;
+  }
+
+  .ladder-trace-label {
+    overflow: hidden;
+    color: var(--color-cyan);
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   tbody tr:hover td {
     background: rgba(255, 255, 255, 0.03);
   }

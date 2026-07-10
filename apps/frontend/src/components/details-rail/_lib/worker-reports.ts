@@ -289,6 +289,13 @@ export function traceEventLabel(event: JsonObject): string {
   return Number.isFinite(attemptIndex) ? `a${attemptIndex} ${eventType}` : eventType;
 }
 
+// Compact model/agent tag for a trace row, e.g. "glm-5.2" — resolved
+// server-side (read-model.ts) from pi_sessions at the max escalation_level
+// for the event's (claim, attempt). Empty when no rung could be resolved.
+export function traceEventAgentTag(event: JsonObject): string {
+  return text(event.agentLabel);
+}
+
 export function traceScoreText(event: JsonObject): string {
   const score = asObject(event.score);
   const before = Number(score.before);

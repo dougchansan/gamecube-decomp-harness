@@ -6,11 +6,29 @@ import { EpochRows } from "./queue-rows";
 import { TabButton } from "./tab-button";
 import { activeWorkPageSize, epochWorkPageSize } from "../_lib/constants";
 import type { WorkMode } from "../_lib/types";
-import { num, type Dashboard } from "@/lib/format";
+import { num, text, type Dashboard, type JsonObject } from "@/lib/format";
+
+// Active-run claims (dashboard.activeFiles) and worker states (dashboard.workerStates)
+// are sourced from separate queries but share the same claimId, so escalation-ladder
+// fields (only queried on the worker-state view) are joined in here by claimId.
+function withLadderFields(activeFiles: JsonObject[], workerStates: JsonObject[]): JsonObject[] {
+  const byClaimId = new Map(workerStates.map((state) => [text(state.claimId), state]));
+  return activeFiles.map((file) => {
+    const state = byClaimId.get(text(file.claimId));
+    if (!state) return file;
+    return {
+      ...file,
+      currentRung: state.currentRung ?? null,
+      latestModel: state.latestModel ?? null,
+      latestProvider: state.latestProvider ?? null,
+      latestThinking: state.latestThinking ?? null,
+    };
+  });
+}
 
 export function WorkStatusTable({ dashboard, mode, setMode }: { dashboard: Dashboard | null; mode: WorkMode; setMode: (mode: WorkMode) => void }) {
   const [page, setPage] = useState(0);
-  const activeFiles = dashboard?.activeFiles || [];
+  const activeFiles = withLadderFields(dashboard?.activeFiles || [], dashboard?.workerStates || []);
   const epochFiles = (dashboard?.epochTargets || []).filter((target) => target.epochTargetStatus === "admitted");
   const activeMode = mode === "active";
   const pageSize = activeMode ? activeWorkPageSize : epochWorkPageSize;
@@ -19,8 +37,9 @@ export function WorkStatusTable({ dashboard, mode, setMode }: { dashboard: Dashb
   const safePage = Math.min(page, pages - 1);
   const rows = allRows.slice(safePage * pageSize, safePage * pageSize + pageSize);
   const emptyText = mode === "epoch" ? "No admitted epoch targets right now" : "No active claims right now";
-  const columns = activeMode ? 4 : 3;
+  const columns = activeMode ? 5 : 3;
   const placeholderCount = pageSize - rows.length - (rows.length === 0 ? 1 : 0);
+  const ladderRungs = dashboard?.ladderRungs || [];
 
   function selectMode(nextMode: WorkMode) {
     setMode(nextMode);
@@ -57,6 +76,7 @@ export function WorkStatusTable({ dashboard, mode, setMode }: { dashboard: Dashb
                 <th className="w-20 text-right">Attempt</th>
                 <th className="w-[150px] text-right">Score</th>
                 <th className="w-24 text-right" title="Elapsed worker claim time. Hover a row value for remaining time.">Elapsed</th>
+                <th className="w-[210px]" title="Escalation ladder rung and the agent currently working the function.">Rung</th>
               </tr>
             ) : (
               <tr>
@@ -67,7 +87,7 @@ export function WorkStatusTable({ dashboard, mode, setMode }: { dashboard: Dashb
             )}
           </thead>
           <tbody>
-            {activeMode ? <ActiveRows rows={rows} /> : <EpochRows rows={rows} />}
+            {activeMode ? <ActiveRows ladderRungs={ladderRungs} rows={rows} /> : <EpochRows rows={rows} />}
             {rows.length === 0 ? (
               <tr className={activeMode ? "row-rhythm-1" : "row-rhythm-2"}>
                 <td className="text-dim" colSpan={columns}>{emptyText}</td>
