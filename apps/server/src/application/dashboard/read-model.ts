@@ -1283,7 +1283,10 @@ function ladderRungs(stateDir: string, runId: string): JsonObject[] {
   // fall back to the rungs actually observed in pi_sessions if it's absent.
   let rows: JsonObject[] = [];
   const configPath = resolve(stateDir, "..", "ladder.campaign.codex-tiered.json");
-  const configRungs = existsSync(configPath) ? asArray(readJsonObject(configPath).rungs).map(asObject) : [];
+  // Per-run rungs: each lane (near-miss / fs-small / fs-medium / fs-large) has its OWN
+  // ladder, so derive the rungs actually used by THIS run from pi_sessions instead of a
+  // fixed campaign-ladder file (which would show the wrong rungs for the size lanes).
+  const configRungs: JsonObject[] = [];
   if (configRungs.length > 0) {
     rows = configRungs.map((rung, index) => ({
       escalation_level: index,
