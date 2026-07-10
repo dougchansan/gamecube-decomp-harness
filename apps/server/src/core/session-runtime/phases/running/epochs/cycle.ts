@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, symlinkSync } from "node:fs";
+import { existsSync, lstatSync, mkdirSync, readFileSync, readdirSync, statSync, symlinkSync } from "node:fs";
 import { chmod, copyFile, mkdir, rm, writeFile } from "node:fs/promises";
 import { dirname, isAbsolute, relative, resolve } from "node:path";
 import { closenessScore } from "../board/candidates.js";
@@ -206,9 +206,20 @@ function linkMissingTree(sourceDir: string, targetDir: string): number {
   for (const entry of readdirSync(sourceDir)) {
     const sourcePath = resolve(sourceDir, entry);
     const targetPath = resolve(targetDir, entry);
-    if (statSync(sourcePath).isDirectory()) {
+    // lstat (not stat) so we never FOLLOW a symlink: the tracked self-referential
+    // symlink `orig/orig -> <repo>/orig` would otherwise make this recurse into
+    // itself forever (ELOOP) and fail the epoch boundary. Mirrors the guard in
+    // workers/worker-cycle.ts linkMissingTree.
+    const stat = lstatSync(sourcePath);
+    if (stat.isSymbolicLink()) {
+      if (existsSync(targetPath)) continue;
+      symlinkSync(sourcePath, targetPath);
+      linked += 1;
+    } else if (stat.isDirectory()) {
       linked += linkMissingTree(sourcePath, targetPath);
-    } else if (!existsSync(targetPath)) {
+    } else if (existsSync(targetPath)) {
+      continue;
+    } else {
       symlinkSync(sourcePath, targetPath);
       linked += 1;
     }
