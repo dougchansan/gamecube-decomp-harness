@@ -1,6 +1,6 @@
-{ "id":"fs-small","mode":"escalation","_note":"Tiny+small (<=256B) fresh fns. Three cheap passes before anything pricier: glm (9 wins) -> kimi (11 wins, 262k ctx) -> codex-spark (lean ctx, testing).",
+{ "id":"fs-small","mode":"escalation","_note":"Tiny+small (<=256B) fresh fns. codex-spark rung 0 (separate ample codex quota + lean context so it fits); glm/kimi as backups since their plans (zai weekly / ollama monthly) can exhaust.",
   "rungs":[
+    {"provider":"openai-codex","model":"gpt-5.3-codex-spark","thinking":"medium","budget":{"agentTimeoutSeconds":1200,"ttlSeconds":7200,"maxAttempts":1}},
     {"provider":"zai","model":"glm-5.2","thinking":"low","budget":{"agentTimeoutSeconds":1200,"ttlSeconds":7200,"maxAttempts":1}},
-    {"provider":"ollama-cloud","model":"kimi-k2.7-code","thinking":"medium","budget":{"agentTimeoutSeconds":1500,"ttlSeconds":7200,"maxAttempts":1}},
-    {"provider":"openai-codex","model":"gpt-5.3-codex-spark","thinking":"medium","budget":{"agentTimeoutSeconds":1200,"ttlSeconds":7200,"maxAttempts":1}}
+    {"provider":"ollama-cloud","model":"kimi-k2.7-code","thinking":"medium","budget":{"agentTimeoutSeconds":1500,"ttlSeconds":7200,"maxAttempts":1}}
   ]}
