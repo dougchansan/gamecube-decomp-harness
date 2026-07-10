@@ -163,6 +163,9 @@ function build3090RemoteScript(base: string): string {
     `cat "${base}/queue.tsv" 2>/dev/null`,
     `echo '@@@RESULT_BASE_SCORES@@@'`,
     `for d in "${base}"/results/*/; do fn=$(basename "$d"); [ -f "$d/summary.json" ] && printf '%s\\t%s\\n' "$fn" "$(jq -r '.base_score // "null"' "$d/summary.json" 2>/dev/null)"; done`,
+    // Best-so-far score per ACTIVE permutation: min <score> among dirs/<fn>/output-<score>-* dir names.
+    `echo '@@@ACTIVE_BEST@@@'`,
+    `for d in "${base}"/dirs/*/; do fn=$(basename "$d"); best=$(ls "$d" 2>/dev/null | grep '^output-' | awk -F- '{print $2}' | sort -n | head -1); [ -n "$best" ] && printf '%s\\t%s\\n' "$fn" "$best"; done`,
     // CPU utilization sample for the electricity estimate — two /proc/stat
     // reads 1s apart, piggy-backed onto this same SSH round-trip.
     `echo '@@@CPU_STAT@@@'`,
@@ -209,6 +212,7 @@ function parse3090Status(stdout: string, nowSeconds: number): Farm3090Parsed {
     "@@@TERMINAL_FULL@@@",
     "@@@QUEUE@@@",
     "@@@RESULT_BASE_SCORES@@@",
+    "@@@ACTIVE_BEST@@@",
     "@@@CPU_STAT@@@",
   ]);
   const summaryLine = sections["__head__"].split(/\r?\n/).find((line) => line.startsWith("workers=")) ?? "";
@@ -306,6 +310,21 @@ function parse3090Status(stdout: string, nowSeconds: number): Farm3090Parsed {
       // duration isn't reliably recoverable from farm state alone.
       permutationSeconds: null,
     });
+  }
+
+  // 5. Best-so-far score for still-ACTIVE permutations: min <score> among the
+  //    dirs/<fn>/output-<score>-* candidate dirs (lower = closer; 0 = match).
+  const activeBestScores = new Map<string, number>();
+  for (const line of (sections["@@@ACTIVE_BEST@@@"] ?? "").split(/\r?\n/)) {
+    if (!line.trim()) continue;
+    const [fn, rawScore] = line.split("\t");
+    if (!fn) continue;
+    const score = Number(rawScore);
+    if (Number.isFinite(score)) activeBestScores.set(fn, score);
+  }
+  for (const [fn, best] of activeBestScores) {
+    const row = rows.get(fn);
+    if (row && row.state === "active") row.bestScore = best;
   }
 
   // The raw "queue=N" the farm reports is the total size of queue.tsv (a
