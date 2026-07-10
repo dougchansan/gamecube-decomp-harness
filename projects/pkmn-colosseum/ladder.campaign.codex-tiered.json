@@ -1,11 +1,77 @@
 {
-  "id": "colosseum-codex-tiered-5p3-first",
+  "id": "colosseum-codex-tiered-sol-phase",
   "mode": "escalation",
-  "_note": "2026-07-09: rung0 gpt-5.3-codex-spark (cheap first pass) -> 5.5 medium/high/xhigh. SOL PAUSED (limits refresh 4:43 PM) — sol rung re-added by /tmp/grind/resume_sol.sh at 16:43.",
+  "_note": "sol resumed: gpt-5.3-codex-spark -> 5.5 medium/high/xhigh -> gpt-5.6-sol xhigh (hard survivors).",
   "rungs": [
-    { "provider": "openai-codex", "model": "gpt-5.3-codex-spark", "thinking": "medium", "budget": { "agentTimeoutSeconds": 1200, "ttlSeconds": 7200, "maxAttempts": 1 } },
-    { "provider": "openai-codex", "model": "gpt-5.5", "thinking": "medium", "budget": { "agentTimeoutSeconds": 1500, "ttlSeconds": 7200, "maxAttempts": 1 } },
-    { "provider": "openai-codex", "model": "gpt-5.5", "thinking": "high",   "budget": { "agentTimeoutSeconds": 2100, "ttlSeconds": 7200, "maxAttempts": 1 } },
-    { "provider": "openai-codex", "model": "gpt-5.5", "thinking": "xhigh",  "budget": { "agentTimeoutSeconds": 2400, "ttlSeconds": 7200, "maxAttempts": 1 } }
-  ]
+    {
+        "provider": "ollama-cloud",
+        "model": "kimi-k2.7-code",
+        "thinking": "medium",
+        "budget": {
+            "agentTimeoutSeconds": 1500,
+            "ttlSeconds": 7200,
+            "maxAttempts": 1
+        }
+    },
+    {
+        "provider": "zai",
+        "model": "glm-5.2",
+        "thinking": "low",
+        "budget": {
+            "agentTimeoutSeconds": 1500,
+            "ttlSeconds": 7200,
+            "maxAttempts": 1
+        }
+    },
+    {
+        "provider": "openai-codex",
+        "model": "gpt-5.3-codex-spark",
+        "thinking": "medium",
+        "budget": {
+            "agentTimeoutSeconds": 1200,
+            "ttlSeconds": 7200,
+            "maxAttempts": 1
+        }
+    },
+    {
+        "provider": "openai-codex",
+        "model": "gpt-5.5",
+        "thinking": "medium",
+        "budget": {
+            "agentTimeoutSeconds": 1500,
+            "ttlSeconds": 7200,
+            "maxAttempts": 1
+        }
+    },
+    {
+        "provider": "claude-code",
+        "model": "claude-sonnet-5",
+        "thinking": "high",
+        "budget": {
+            "agentTimeoutSeconds": 2400,
+            "ttlSeconds": 7200,
+            "maxAttempts": 1
+        }
+    },
+    {
+        "provider": "openai-codex",
+        "model": "gpt-5.5",
+        "thinking": "xhigh",
+        "budget": {
+            "agentTimeoutSeconds": 2400,
+            "ttlSeconds": 7200,
+            "maxAttempts": 1
+        }
+    },
+    {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "thinking": "xhigh",
+        "budget": {
+            "agentTimeoutSeconds": 3000,
+            "ttlSeconds": 7200,
+            "maxAttempts": 2
+        }
+    }
+]
 }

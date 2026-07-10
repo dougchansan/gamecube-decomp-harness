@@ -1,0 +1,9 @@
+{
+  "_note": "Permuter-farm electricity model. Software metering unavailable (3090 RAPL root-only; Windows no LHM/nvidia-smi), so power is estimated from sampled CPU utilization: watts = idle_watts + (load_watts - idle_watts) * cpu_util_fraction. Wattages are whole-system wall-draw estimates (spec-derived, PSU loss folded in) — recalibrate against a smart plug if available.",
+  "electricity_rate_usd_per_kwh": 0.42,
+  "rate_source": "HECO Hawaii residential avg (HST farms)",
+  "farms": {
+    "3090":    { "idle_watts": 90,  "load_watts": 260, "hardware": "Ryzen 9 5900X + RTX 3090 (GPU idle during CPU-bound permuter)" },
+    "windows": { "idle_watts": 110, "load_watts": 360, "hardware": "Ryzen 9 9950X3D + Radeon RX 9070 XT" }
+  }
+}

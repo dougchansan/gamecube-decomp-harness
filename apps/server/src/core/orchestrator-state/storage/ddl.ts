@@ -422,6 +422,58 @@ export function ensureSchema(db: Database): void {
     CREATE UNIQUE INDEX IF NOT EXISTS project_sessions_one_active_project
       ON project_sessions (project_id)
       WHERE status IN ('active', 'blocked');
+
+    CREATE TABLE IF NOT EXISTS permuter_status (
+      farm TEXT NOT NULL,
+      function_name TEXT NOT NULL,
+      state TEXT NOT NULL,
+      worker TEXT,
+      base_score REAL,
+      best_score REAL,
+      permutation_seconds REAL,
+      updated_at TEXT NOT NULL,
+      PRIMARY KEY (farm, function_name)
+    );
+
+    CREATE INDEX IF NOT EXISTS permuter_status_farm_state
+      ON permuter_status (farm, state);
+
+    CREATE TABLE IF NOT EXISTS permuter_farm_summary (
+      farm TEXT PRIMARY KEY,
+      workers INTEGER,
+      active INTEGER,
+      queued INTEGER,
+      wins INTEGER,
+      nowins INTEGER,
+      fails INTEGER,
+      updated_at TEXT NOT NULL
+    );
+
+    -- Electricity estimate (power is not directly metered on either farm; it
+    -- is derived from sampled CPU utilization — see permuter-ingest.ts and
+    -- projects/pkmn-colosseum/config/power.json).
+    CREATE TABLE IF NOT EXISTS permuter_power (
+      farm TEXT PRIMARY KEY,
+      cpu_util REAL,
+      current_watts REAL,
+      cumulative_wh REAL DEFAULT 0,
+      cumulative_cost_usd REAL DEFAULT 0,
+      updated_at TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS permuter_function_energy (
+      farm TEXT,
+      function_name TEXT,
+      cumulative_wh REAL DEFAULT 0,
+      cumulative_cost_usd REAL DEFAULT 0,
+      last_permutation_seconds INTEGER,
+      last_state TEXT,
+      updated_at TEXT,
+      PRIMARY KEY (farm, function_name)
+    );
+
+    CREATE INDEX IF NOT EXISTS permuter_function_energy_cost
+      ON permuter_function_energy (cumulative_cost_usd DESC);
   `);
 
   ensureColumn(db, "runs", "project_id", "TEXT");
