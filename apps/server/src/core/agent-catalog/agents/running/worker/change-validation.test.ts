@@ -308,6 +308,30 @@ describe("captureWorkerChangeBaseline source snapshot", () => {
     // the source snapshot must survive that.
     expect(baseline.snapshot).toBeNull();
   });
+
+  test("preserves the first source snapshot when a ladder rung is re-admitted", async () => {
+    const root = await mkdtemp(join(tmpdir(), "qa-l1-ladder-baseline-"));
+    const repoRoot = join(root, "repo");
+    const outputDir = join(root, "validation");
+    const sourcePath = "src/game/foo.c";
+    await mkdir(join(repoRoot, "src/game"), { recursive: true });
+    await writeFile(join(repoRoot, sourcePath), "int original;\n");
+
+    await captureWorkerChangeBaseline({
+      repoRoot,
+      outputDir,
+      target: { unit: "main/game/foo", symbol: "foo", source_path: sourcePath },
+    });
+    await writeFile(join(repoRoot, sourcePath), "int original;\nextern int rejected_qa_hack;\n");
+    const retryBaseline = await captureWorkerChangeBaseline({
+      repoRoot,
+      outputDir,
+      target: { unit: "main/game/foo", symbol: "foo", source_path: sourcePath },
+    });
+
+    expect(retryBaseline.sourceSnapshotPaths).toEqual([sourcePath]);
+    expect(await readFile(resolve(outputDir, "pre_worker_source", sourcePath), "utf8")).toBe("int original;\n");
+  });
 });
 
 describe("compareWorkerUnitSnapshots source progress", () => {

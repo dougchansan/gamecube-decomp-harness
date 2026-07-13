@@ -368,7 +368,12 @@ async function snapshotPreWorkerSources(params: { repoRoot: string; outputDir: s
     const destination = resolve(dir, relPath);
     try {
       await mkdir(dirname(destination), { recursive: true });
-      await copyFile(source, destination);
+      // A worker_state/output directory survives ladder re-admission so the
+      // stronger rung can repair the weaker rung's candidate. Keep the first
+      // source snapshot immutable; otherwise a rejected candidate becomes the
+      // next rung's QA baseline and its original findings disappear from the
+      // delta scan.
+      if (!existsSync(destination)) await copyFile(source, destination);
       copied.push(relPath);
     } catch {
       // A failed copy only degrades the QA lint scan to "skipped" later;
