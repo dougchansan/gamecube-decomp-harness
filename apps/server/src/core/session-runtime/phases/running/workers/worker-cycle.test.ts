@@ -6,14 +6,18 @@ import { delimiter, join, resolve } from "node:path";
 import { QA_LINT_REPAIR_INSTRUCTION, type WorkerChangeValidation, type WorkerQaLint } from "@server/core/agent-catalog/agents/running/worker/change-validation";
 import type { QaScanFinding } from "@server/core/validation/qa";
 import type { PiRunResult } from "@server/core/shared/types";
+import type { LadderConfig } from "@server/core/session-runtime/escalation/ladder";
 import {
   classifyWorkerError,
   configureCommandWithWorkerToolPaths,
   isReworkErrorKind,
   seedWorkerToolArtifacts,
+  shouldReAdmitEscalatedWorker,
   shouldRequestWorkerRepairAfterAttempt,
   WORKER_ATTEMPT_TAIL_POLICY,
   workerContinuationDecision,
+  workerCycleIncidentFlags,
+  workerSessionFailed,
   workerAgentToolEnvironment,
   workerBuildNinjaNeedsToolReconfigure,
   workerAttemptRepairReasons,
@@ -66,6 +70,27 @@ function continuationCheckpoint(
     selectable: false,
     newScore: null,
     ...overrides,
+  };
+}
+
+function escalationLadder(): LadderConfig {
+  return {
+    id: "spark-to-sol",
+    mode: "escalation",
+    rungs: [
+      {
+        provider: "openai-codex",
+        model: "gpt-5.3-codex-spark",
+        thinking: "medium",
+        budget: { agentTimeoutSeconds: 1200, ttlSeconds: 1800, maxAttempts: 1 },
+      },
+      {
+        provider: "openai-codex",
+        model: "gpt-5.6-codex",
+        thinking: "xhigh",
+        budget: { agentTimeoutSeconds: 2400, ttlSeconds: 3600, maxAttempts: 1 },
+      },
+    ],
   };
 }
 
@@ -413,6 +438,22 @@ describe("workerContinuationDecision", () => {
     expect(decision.rungMaxAttempts).toBe(1);
   });
 
+  test("a failed worker session never retries the same rung even when attempt budget and TTL remain", () => {
+    const decision = workerContinuationDecision({
+      attemptIndex: 0,
+      checkpoints: [continuationCheckpoint(0)],
+      repairReasons: ["write_set diff changed but runner validation was skipped"],
+      dryRun: false,
+      sessionFailed: true,
+      rungMaxAttempts: 3,
+      claimDeadlineMs: futureDeadline,
+    });
+
+    expect(decision.shouldContinue).toBe(false);
+    expect(decision.exhausted).toBe(true);
+    expect(decision.stopReason).toBe("worker_session_failed");
+  });
+
   test("the rung cap also bounds failed-gate exact repair", () => {
     const decision = workerContinuationDecision({
       attemptIndex: 0,
@@ -625,6 +666,82 @@ describe("workerContinuationDecision", () => {
     expect(decision.exhausted).toBe(true);
     expect(decision.stopReason).toBe("gate_failed_exact_followup_budget_exhausted");
     expect(decision.followUpsSinceFailedGateExact).toBe(WORKER_ATTEMPT_TAIL_POLICY.followUpAttemptsAfterGateFailedExact);
+  });
+});
+
+describe("worker ladder failure escalation", () => {
+  test("context-length return failure advances Spark to Sol when no checkpoint is validation-ready", () => {
+    const result = { ...piResult(), providerError: "context_length_exceeded" };
+
+    expect(workerSessionFailed(result)).toBe(true);
+    const escalationReAdmitted = shouldReAdmitEscalatedWorker({
+      escalationEnabled: true,
+      ladder: escalationLadder(),
+      escalationLevel: 0,
+      lifecycleStatus: "error",
+      summaryText: "LLM provider failed: context_length_exceeded",
+      sessionFailed: workerSessionFailed(result),
+      hasValidationReadyCheckpoint: false,
+    });
+
+    expect(escalationReAdmitted).toBe(true);
+    expect(workerCycleIncidentFlags({ lifecycleStatus: "error", errorKind: "provider_error", escalationReAdmitted })).toEqual({
+      failed: false,
+      providerFailure: false,
+    });
+  });
+
+  test("model-launch worker-session failure advances when a stronger rung exists", () => {
+    const result = { ...piResult(), failed: true, error: "Pi model not found: openai-codex/gpt-missing" };
+
+    expect(workerSessionFailed(result)).toBe(true);
+    expect(
+      shouldReAdmitEscalatedWorker({
+        escalationEnabled: true,
+        ladder: escalationLadder(),
+        escalationLevel: 0,
+        lifecycleStatus: "error",
+        summaryText: result.error,
+        sessionFailed: workerSessionFailed(result),
+        hasValidationReadyCheckpoint: false,
+      }),
+    ).toBe(true);
+  });
+
+  test("the same failure is terminal on the final rung", () => {
+    const result = { ...piResult(), providerError: "context_length_exceeded" };
+
+    const escalationReAdmitted = shouldReAdmitEscalatedWorker({
+      escalationEnabled: true,
+      ladder: escalationLadder(),
+      escalationLevel: 1,
+      lifecycleStatus: "error",
+      summaryText: result.providerError,
+      sessionFailed: workerSessionFailed(result),
+      hasValidationReadyCheckpoint: false,
+    });
+
+    expect(escalationReAdmitted).toBe(false);
+    expect(workerCycleIncidentFlags({ lifecycleStatus: "error", errorKind: "provider_error", escalationReAdmitted })).toEqual({
+      failed: false,
+      providerFailure: true,
+    });
+  });
+
+  test("a selectable validation checkpoint keeps a generic session failure terminal", () => {
+    const result = { ...piResult(), failed: true, error: "worker session closed unexpectedly" };
+
+    expect(
+      shouldReAdmitEscalatedWorker({
+        escalationEnabled: true,
+        ladder: escalationLadder(),
+        escalationLevel: 0,
+        lifecycleStatus: "error",
+        summaryText: result.error,
+        sessionFailed: workerSessionFailed(result),
+        hasValidationReadyCheckpoint: true,
+      }),
+    ).toBe(false);
   });
 });
 
