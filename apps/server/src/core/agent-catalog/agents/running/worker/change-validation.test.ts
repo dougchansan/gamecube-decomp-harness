@@ -218,7 +218,7 @@ describe("qaLintRepairReasons", () => {
     );
     expect(reasons[2]).toBe(QA_LINT_REPAIR_INSTRUCTION);
     expect(QA_LINT_REPAIR_INSTRUCTION).toBe(
-      "Remove every QA lint finding; a lower match % without it is the correct outcome. Do not re-add maintainer-rejected patterns.",
+      "Remove every QA lint finding WHILE preserving the exact byte match; if a finding cannot be removed without losing the exact match, prove it is a false positive instead of regressing the match. Do not re-add maintainer-rejected patterns.",
     );
   });
 
@@ -322,6 +322,111 @@ describe("compareWorkerUnitSnapshots source progress", () => {
     expect(validation.status).toBe("passed");
     expect(validation.sourceProgress).toEqual({ before: "ASM", after: "REAL_C", converted: true });
     expect(validation.reasons.some((reason) => reason.includes("converted active source"))).toBe(true);
+  });
+});
+
+describe("compareWorkerUnitSnapshots newly materialized targets", () => {
+  function snapshots(afterScore = 9.375) {
+    const before = {
+      schemaVersion: 1 as const,
+      capturedAt: "2026-07-13T00:00:00.000Z",
+      unit: "main/hsd/hsd_texp",
+      symbol: "fn_target",
+      sourcePath: "src/hsd/hsd_texp.c",
+      objectTarget: "build/GC6E01/src/hsd/hsd_texp.o",
+      metrics: [{ name: "matched_code_percent", score: 50, size: 128 }],
+      functions: [{ name: "fn_neighbor", score: 100, size: 64 }],
+      sections: [
+        { name: ".text", score: 50, size: 128 },
+        { name: ".data", score: 100, size: 16 },
+      ],
+      targetScore: null,
+    };
+    const after = {
+      ...before,
+      capturedAt: "2026-07-13T00:01:00.000Z",
+      metrics: [{ name: "matched_code_percent", score: 40, size: 192 }],
+      functions: [
+        { name: "fn_neighbor", score: 100, size: 64 },
+        { name: "fn_target", score: afterScore, size: 64 },
+      ],
+      sections: [
+        { name: ".text", score: 40, size: 192 },
+        { name: ".data", score: 100, size: 16 },
+      ],
+      targetScore: afterScore,
+    };
+    return { before, after };
+  }
+
+  test("treats a newly scored REAL_C target as baseline zero and ignores aggregate text denominator movement", () => {
+    const { before, after } = snapshots();
+    const validation = compareWorkerUnitSnapshots({
+      before,
+      after,
+      claimedExact: false,
+      sourceProgress: { before: null, after: "REAL_C" },
+    });
+
+    expect(validation.status).toBe("passed");
+    expect(validation.target).toMatchObject({ before: 0, after: 9.375, improved: true, exact: false });
+    expect(validation.regressions).toEqual([]);
+    expect(validation.improvements).toContainEqual({ kind: "function", unit: before.unit, item: before.symbol, before: 0, after: 9.375 });
+  });
+
+  test("keeps sibling-function regression protection when the target materializes", () => {
+    const { before, after } = snapshots(100);
+    after.functions[0] = { name: "fn_neighbor", score: 80, size: 64 };
+    const validation = compareWorkerUnitSnapshots({
+      before,
+      after,
+      claimedExact: true,
+      sourceProgress: { before: null, after: "REAL_C" },
+    });
+
+    expect(validation.status).toBe("same_unit_regression");
+    expect(validation.regressions).toContainEqual({ kind: "function", unit: before.unit, item: "fn_neighbor", before: 100, after: 80 });
+  });
+
+  test("keeps non-text section regression protection when the target materializes", () => {
+    const { before, after } = snapshots(100);
+    after.sections[1] = { name: ".data", score: 75, size: 16 };
+    const validation = compareWorkerUnitSnapshots({
+      before,
+      after,
+      claimedExact: true,
+      sourceProgress: { before: null, after: "REAL_C" },
+    });
+
+    expect(validation.status).toBe("same_unit_regression");
+    expect(validation.regressions).toContainEqual({ kind: "section", unit: before.unit, item: ".data", before: 100, after: 75 });
+  });
+
+  test("rejects unclaimed function symbols materialized beside the claimed target", () => {
+    const { before, after } = snapshots(100);
+    after.functions.push({ name: "fn_unclaimed", score: 25, size: 32 });
+    const validation = compareWorkerUnitSnapshots({
+      before,
+      after,
+      claimedExact: true,
+      sourceProgress: { before: null, after: "REAL_C" },
+    });
+
+    expect(validation.status).toBe("failed");
+    expect(validation.reasons).toContain("worker materialized unclaimed function symbol(s): fn_unclaimed");
+  });
+
+  test("does not convert a newly scored inline-assembly target into accepted C progress", () => {
+    const { before, after } = snapshots(100);
+    const validation = compareWorkerUnitSnapshots({
+      before,
+      after,
+      claimedExact: true,
+      sourceProgress: { before: null, after: "ASM" },
+    });
+
+    expect(validation.status).toBe("no_official_score_change");
+    expect(validation.target).toMatchObject({ before: null, after: 100, improved: false, exact: false });
   });
 });
 
