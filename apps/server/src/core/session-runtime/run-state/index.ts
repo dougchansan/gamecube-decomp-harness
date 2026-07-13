@@ -66,6 +66,8 @@ export {
   unhandledPoolEventCount,
 } from "./target-pressure.js";
 export {
+  loadTargetKeysManifest,
+  parseTargetKeysManifest,
   targetClaimFilterCommandArgs,
   targetClaimFilterFromArgs,
   targetClaimFilterSql,

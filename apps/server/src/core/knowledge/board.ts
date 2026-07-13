@@ -12,6 +12,7 @@ export interface LoadKnowledgeBoardSnapshotOptions {
   reportPath?: string;
   sizeMin?: number;
   sizeMax?: number;
+  targetKeys?: string[];
 }
 
 export function loadKnowledgeBoardSnapshot(repoRoot: string, limit: number, options: LoadKnowledgeBoardSnapshotOptions = {}): BoardSnapshot {
@@ -26,6 +27,7 @@ export function loadKnowledgeBoardSnapshot(repoRoot: string, limit: number, opti
       reportPath: options.reportPath,
       sizeMin: options.sizeMin,
       sizeMax: options.sizeMax,
+      targetKeys: options.targetKeys,
     }),
   );
 }

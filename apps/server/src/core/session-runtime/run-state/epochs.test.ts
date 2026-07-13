@@ -165,6 +165,24 @@ describe("epoch admission selection", () => {
 });
 
 describe("scheduler epoch and worker state lifecycle", () => {
+  test("claims only exact target keys with a 371-key SQL allowlist", () => {
+    const { store } = tempState();
+    try {
+      const { run } = setupEpoch(store, [candidate(1, "src/a.c", 500), candidate(2, "src/b.c", 100)], 2);
+      const targetFilter = {
+        targetKeys: [...Array.from({ length: 370 }, (_, index) => `other/unit_${index}::fn_${index}`), "unit_2::fn_2"],
+      };
+
+      const claim = claimNextEpochTarget({ store, sessionId: run.id, workerId: "worker-1", baseRev: "base", targetFilter });
+      const noSecondClaim = claimNextEpochTarget({ store, sessionId: run.id, workerId: "worker-2", baseRev: "base", targetFilter });
+
+      expect(`${claim?.target.unit}::${claim?.target.symbol}`).toBe("unit_2::fn_2");
+      expect(noSecondClaim).toBeNull();
+    } finally {
+      store.db.close();
+    }
+  });
+
   test("persists fixed admission and claims admitted targets directly", () => {
     const { store } = tempState();
     try {

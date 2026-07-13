@@ -505,7 +505,7 @@ function workerProcessEnv(globals: Pick<GlobalArgs, "stateDir">): Record<string,
   return env;
 }
 
-function workerCommand(
+export function runLoopWorkerCommand(
   globals: GlobalArgs,
   params: {
     runId: string;
@@ -622,7 +622,7 @@ async function runWorkerProcess(
   },
   procRegistry?: WorkerProcRegistry,
 ): Promise<WorkerCycleResult> {
-  const command = workerCommand(globals, params);
+  const command = runLoopWorkerCommand(globals, params);
   const proc = Bun.spawn(command, {
     cwd: orchestratorRoot(),
     env: workerProcessEnv(globals),
@@ -718,10 +718,12 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
     const admissionTargetSize = nonNegativeInt(
       numberArg(args, "--queue-target-size", globals.project?.dashboard.queueTargetSize ?? Math.max(candidateLimit, maxWorkers * 2)),
     );
+    const targetFilter = targetClaimFilterFromArgs(args);
     const candidateWindow = Math.max(
       candidateLimit,
       admissionTargetSize,
       nonNegativeInt(numberArg(args, "--candidate-window", globals.project?.dashboard.candidateWindow ?? Math.max(candidateLimit, admissionTargetSize * 8))),
+      targetFilter?.targetKeys?.length ?? 0,
     );
     const fuzzyMax = numberArg(args, "--fuzzy-max", Number.POSITIVE_INFINITY);
     const sizeMin = numberArg(args, "--size-min", Number.NEGATIVE_INFINITY);
@@ -734,7 +736,6 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
     const exitOnWorkerError = booleanArg(args, "--exit-on-worker-error");
     const workerThinkingLevel = stringArg(args, "--worker-thinking-level", globals.thinkingLevel);
     const workerConfigureCommand = stringArg(args, "--worker-configure-command", defaultConfigureCommand(globals));
-    const targetFilter = targetClaimFilterFromArgs(args);
     const maintenanceIntervalMs = knowledgeMaintenanceIntervalMs(globals, args);
     const epochCycleEnabled = !booleanArg(args, "--no-epoch-cycle");
     const schedulerEpochConfig = schedulerEpochConfigFromArgs(globals, args, { admissionTargetSize, candidateWindow });
@@ -918,6 +919,7 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
                 graphDbPath,
                 runId,
                 store,
+                targetKeys: targetFilter?.targetKeys,
               });
               lastSchedulerEpoch = nextEpoch.progress;
               epochAdmissions += (nextEpoch.admission?.admitted ?? 0) + (nextEpoch.existingAdmission?.admitted ?? 0);
@@ -1032,6 +1034,7 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
                     objdiffPath: globals.project?.validation.objdiffPath,
                     projectId: globals.project?.projectId ?? globals.projectId,
                     reportPath: globals.project?.validation.reportPath,
+                    targetKeys: targetFilter?.targetKeys,
                   });
                   priorityRefreshes = refreshEpochTargetPriorities(store, {
                     epochId: epoch.id,
@@ -1093,6 +1096,7 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
             graphDbPath,
             runId,
             store,
+            targetKeys: targetFilter?.targetKeys,
           });
           lastSchedulerEpoch = epochResult.progress;
           const admittedNow = (epochResult.admission?.admitted ?? 0) + (epochResult.existingAdmission?.admitted ?? 0);
