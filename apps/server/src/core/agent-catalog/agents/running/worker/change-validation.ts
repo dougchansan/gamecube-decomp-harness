@@ -520,8 +520,14 @@ export function compareWorkerUnitSnapshots(params: {
   const regressions: NonNullable<WorkerRunnerValidation["regressions"]> = [];
   const improvements: NonNullable<WorkerRunnerValidation["improvements"]> = [];
   const reasons: string[] = [];
-  const beforeTarget = params.before.targetScore;
+  const rawBeforeTarget = params.before.targetScore;
   const afterTarget = params.after.targetScore;
+  const targetMaterialized = rawBeforeTarget === null && afterTarget !== null;
+  const materializedAsRealC = targetMaterialized && params.sourceProgress?.after === "REAL_C";
+  // A target with no candidate-side symbol has no objdiff score before its first C
+  // implementation. Once the claimed symbol materializes as REAL_C, its truthful
+  // baseline is zero rather than "unavailable".
+  const beforeTarget = materializedAsRealC ? 0 : rawBeforeTarget;
   const targetHasScores = beforeTarget !== null && afterTarget !== null;
   const targetImproved = targetHasScores && afterTarget > beforeTarget + SCORE_EPSILON;
   const targetReachedExact = targetHasScores && beforeTarget < EXACT_SCORE && afterTarget >= EXACT_SCORE;
@@ -542,14 +548,39 @@ export function compareWorkerUnitSnapshots(params: {
   // run first, so a byte-exact that regresses a neighbor continues to fail.
   const targetAccepted = targetImproved || targetReachedExact || sourceConverted || (targetHasScores && afterTarget >= EXACT_SCORE);
 
-  compareRows({ kind: "unit", unit: params.before.unit, beforeRows: params.before.metrics, afterRows: params.after.metrics, regressions, improvements, reasons });
+  const beforeFunctionNames = new Set(params.before.functions.map((row) => row.name));
+  const unexpectedMaterializedFunctions = params.after.functions
+    .filter((row) => !beforeFunctionNames.has(row.name) && row.name !== params.before.symbol)
+    .map((row) => row.name);
+
+  // Materializing a missing text symbol changes the aggregate code/function
+  // denominators even when every existing sibling is unchanged. In that one case,
+  // compare sibling functions and non-.text sections directly instead of treating
+  // the expected aggregate percentage movement as a regression.
+  if (!targetMaterialized) {
+    compareRows({ kind: "unit", unit: params.before.unit, beforeRows: params.before.metrics, afterRows: params.after.metrics, regressions, improvements, reasons });
+  }
   compareRows({ kind: "function", unit: params.before.unit, beforeRows: params.before.functions, afterRows: params.after.functions, regressions, improvements, reasons });
-  compareRows({ kind: "section", unit: params.before.unit, beforeRows: params.before.sections, afterRows: params.after.sections, regressions, improvements, reasons });
+  compareRows({
+    kind: "section",
+    unit: params.before.unit,
+    beforeRows: targetMaterialized ? params.before.sections.filter((row) => row.name !== ".text") : params.before.sections,
+    afterRows: targetMaterialized ? params.after.sections.filter((row) => row.name !== ".text") : params.after.sections,
+    regressions,
+    improvements,
+    reasons,
+  });
+  if (materializedAsRealC && afterTarget !== null && afterTarget > SCORE_EPSILON) {
+    improvements.push({ kind: "function", unit: params.before.unit, item: params.before.symbol, before: 0, after: afterTarget });
+  }
 
   let status: WorkerRunnerValidation["status"] = "passed";
-  if (!targetHasScores) {
+  if (unexpectedMaterializedFunctions.length > 0) {
+    status = "failed";
+    reasons.push(`worker materialized unclaimed function symbol(s): ${unexpectedMaterializedFunctions.join(", ")}`);
+  } else if (!targetHasScores) {
     status = "no_official_score_change";
-    reasons.push(`target symbol score unavailable in ${beforeTarget === null ? "baseline" : "current"} same-unit snapshot`);
+    reasons.push(`target symbol score unavailable in ${rawBeforeTarget === null ? "baseline" : "current"} same-unit snapshot`);
   } else if (targetRegressed) {
     status = "target_regressed";
     reasons.push(`target ${params.before.symbol} regressed from ${beforeTarget} to ${afterTarget}`);
