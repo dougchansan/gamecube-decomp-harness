@@ -17,8 +17,17 @@ interface BranchFrame {
 }
 
 const DEFAULT_FUNC_TU_MAP = "config/GC6E01/func_tu_map.json";
+const DEFAULT_SYMBOLS = "config/GC6E01/symbols.txt";
 const FUNCTION_DEF =
   /^[ \t]*((?:static\s+|asm\s+|inline\s+)*)((?:[A-Za-z_]\w*[\s*]+)+)(fn_[0-9A-Fa-f]+|[A-Za-z_]\w*)\s*\([^;]*\)\s*\{?\s*$/;
+
+export interface CanonicalFunctionSourceIdentity {
+  canonicalSymbol: string;
+  canonicalAddress: string | null;
+  traceAlias: string | null;
+  canonicalClass: SourceProgressClass | null;
+  traceAliasClass: SourceProgressClass | null;
+}
 
 function recordValue(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : {};
@@ -108,11 +117,36 @@ function bodyClass(qualifiers: string, bodyText: string): SourceProgressClass {
     /\/\*TODO/i.test(compact) ||
     /\/\*stub/i.test(compact) ||
     bodyOnly === "return;" ||
-    /^return[-0-9xa-fA-F]*;?$/.test(bodyOnly)
+    /^return[-0-9xa-fA-F]*;?$/.test(bodyOnly) ||
+    /^(?:return)?[A-Za-z_]\w*\([^;{}]*\);?$/.test(bodyOnly)
   ) {
     return "STUB";
   }
   return "REAL_C";
+}
+
+function functionDefinitionAt(lines: string[], start: number): { match: RegExpExecArray; braceLine: number } | null {
+  const signature: string[] = [];
+  for (let index = start; index < lines.length && index < start + 8; index += 1) {
+    const line = lines[index] ?? "";
+    if (index > start && /^\s*#/.test(line)) break;
+    signature.push(line);
+    const text = signature.join("\n");
+    if (text.includes(";")) return null;
+    const match = FUNCTION_DEF.exec(text);
+    if (!match) {
+      if (text.includes("{")) return null;
+      continue;
+    }
+
+    let braceLine = index;
+    while (braceLine < lines.length && !String(lines[braceLine]).includes("{") && braceLine < index + 4) {
+      braceLine += 1;
+    }
+    if (braceLine >= lines.length || !String(lines[braceLine]).includes("{")) return null;
+    return { match, braceLine };
+  }
+  return null;
 }
 
 export function classifySourceText(text: string): Map<string, SourceProgressClass> {
@@ -123,20 +157,12 @@ export function classifySourceText(text: string): Map<string, SourceProgressClas
     const line = lines[i] ?? "";
     if (updateBranchStack(line, stack)) continue;
     if (!branchIsActive(stack)) continue;
-    const match = FUNCTION_DEF.exec(line);
-    if (!match) continue;
+    const definition = functionDefinitionAt(lines, i);
+    if (!definition) continue;
+    const { match, braceLine } = definition;
     const qualifiers = match[1] ?? "";
     const symbol = match[3] ?? "";
     if (!symbol) continue;
-
-    let braceLine = i;
-    while (braceLine < lines.length && !String(lines[braceLine]).includes("{") && braceLine < i + 4) {
-      braceLine += 1;
-    }
-    if (braceLine >= lines.length || !String(lines[braceLine]).includes("{")) {
-      classes.set(symbol, "REAL_C");
-      continue;
-    }
 
     const bodyParts: string[] = [];
     let depth = 0;
@@ -154,6 +180,41 @@ export function classifySourceText(text: string): Map<string, SourceProgressClas
 export function classifyFunctionInFile(path: string, symbol: string): SourceProgressClass | null {
   if (!path || !symbol || !existsSync(path)) return null;
   return classifySourceText(readFileSync(path, "utf8")).get(symbol) ?? null;
+}
+
+function canonicalFunctionAddress(repoRoot: string, symbol: string, relPath = DEFAULT_SYMBOLS): string | null {
+  const path = resolve(repoRoot, relPath);
+  if (!symbol || !existsSync(path)) return null;
+  for (const line of readFileSync(path, "utf8").split(/\r?\n/)) {
+    const match = /^\s*([A-Za-z_]\w*)\s*=\s*\.text:0x([0-9A-Fa-f]+)\s*;\s*\/\/.*\btype:function\b/.exec(line);
+    if (!match || match[1] !== symbol) continue;
+    return `0x${String(match[2]).toUpperCase().padStart(8, "0")}`;
+  }
+  return null;
+}
+
+/**
+ * Classify the canonical function and its address-style trace alias in one
+ * source file. The alias is derived only from the canonical function address
+ * in symbols.txt; similarly named or same-file functions are never inferred as
+ * replacements.
+ */
+export function classifyCanonicalFunctionSource(
+  repoRoot: string,
+  path: string,
+  canonicalSymbol: string,
+): CanonicalFunctionSourceIdentity {
+  const classes = path && existsSync(path) ? classifySourceText(readFileSync(path, "utf8")) : new Map<string, SourceProgressClass>();
+  const canonicalAddress = canonicalFunctionAddress(repoRoot, canonicalSymbol);
+  const traceAlias = canonicalAddress ? `fn_${canonicalAddress.slice(2)}` : null;
+  const distinctTraceAlias = traceAlias && traceAlias !== canonicalSymbol ? traceAlias : null;
+  return {
+    canonicalSymbol,
+    canonicalAddress,
+    traceAlias: distinctTraceAlias,
+    canonicalClass: classes.get(canonicalSymbol) ?? null,
+    traceAliasClass: distinctTraceAlias ? classes.get(distinctTraceAlias) ?? null : null,
+  };
 }
 
 export function classifySourceFunctions(repoRoot: string, sourceMap: Map<string, FunctionSourceMapEntry>): Map<string, SourceProgressClass> {
