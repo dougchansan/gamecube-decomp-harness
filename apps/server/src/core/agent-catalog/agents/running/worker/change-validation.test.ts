@@ -3,10 +3,12 @@ import { existsSync } from "node:fs";
 import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
+import { gunzipSync } from "node:zlib";
 import type { QaScanFinding, QaScanInvocation, QaScanResult, RunQaScanDiffOptions } from "@server/core/validation/qa";
 import {
   applyQaLintToValidation,
   captureWorkerChangeBaseline,
+  compressValidationDiffArtifact,
   compareWorkerUnitSnapshots,
   objectBuildDirFromReportPath,
   QA_LINT_REPAIR_INSTRUCTION,
@@ -31,6 +33,21 @@ function finding(overrides: Partial<QaScanFinding> = {}): QaScanFinding {
     ...overrides,
   };
 }
+
+describe("compressValidationDiffArtifact", () => {
+  test("retains a readable gzip and removes the expanded JSON", async () => {
+    const root = await mkdtemp(join(tmpdir(), "worker-diff-gzip-"));
+    const diffPath = join(root, "attempt-0.unit_diff.json");
+    const payload = JSON.stringify({ rows: Array.from({ length: 1_000 }, (_, index) => ({ index, score: 100 })) });
+    await writeFile(diffPath, payload);
+
+    const retainedPath = await compressValidationDiffArtifact(diffPath);
+
+    expect(retainedPath).toBe(`${diffPath}.gz`);
+    expect(existsSync(diffPath)).toBe(false);
+    expect(gunzipSync(await readFile(retainedPath)).toString("utf8")).toBe(payload);
+  });
+});
 
 function scanResult(findings: QaScanFinding[], status: QaScanResult["status"]): QaScanResult {
   return {

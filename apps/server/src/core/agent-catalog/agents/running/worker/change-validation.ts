@@ -1,6 +1,8 @@
-import { existsSync, statSync } from "node:fs";
+import { createReadStream, createWriteStream, existsSync, statSync } from "node:fs";
 import { copyFile, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { basename, dirname, isAbsolute, resolve } from "node:path";
+import { pipeline } from "node:stream/promises";
+import { createGzip } from "node:zlib";
 import { runQaScanDiff, type QaScanFinding, type QaScanInvocation, type RunQaScanDiffOptions } from "@server/core/validation/qa";
 import { runCommand, type CommandResult } from "@server/infrastructure/shell";
 import { packageRoot } from "@server/core/knowledge";
@@ -101,6 +103,23 @@ function numberValue(value: unknown, fallback = NaN): number {
     if (Number.isFinite(parsed)) return parsed;
   }
   return fallback;
+}
+
+/**
+ * Retain detailed objdiff evidence without leaving tens of megabytes of
+ * pretty-printed JSON behind for every worker attempt. The original stays in
+ * place if compression fails so validation evidence is never lost.
+ */
+export async function compressValidationDiffArtifact(diffPath: string): Promise<string> {
+  const compressedPath = `${diffPath}.gz`;
+  try {
+    await pipeline(createReadStream(diffPath), createGzip({ level: 1 }), createWriteStream(compressedPath));
+    await rm(diffPath, { force: true });
+    return compressedPath;
+  } catch {
+    await rm(compressedPath, { force: true }).catch(() => undefined);
+    return diffPath;
+  }
 }
 
 function scoreFromRow(row: Record<string, unknown>): number {
@@ -481,12 +500,13 @@ export async function captureWorkerChangeBaseline(params: {
 
   const snapshotPath = resolve(params.outputDir, "pre_worker_unit_snapshot.json");
   await writeFile(snapshotPath, JSON.stringify(snapshot, null, 2));
+  const retainedDiffPath = await compressValidationDiffArtifact(diffPath);
   return {
     status: "available",
     reasons: [],
     snapshot,
     snapshotPath,
-    diffPath,
+    diffPath: retainedDiffPath,
     objectTarget,
     objectBuild,
     unitDiff,
@@ -986,7 +1006,7 @@ async function validateWorkerScoreChange(
   validation.exitCode = 0;
   validation.stdoutPath = objectBuild.stdoutPath;
   validation.stderrPath = unitDiff.stderrPath;
-  validation.diffPath = diffPath;
+  validation.diffPath = await compressValidationDiffArtifact(diffPath);
   validation.objectTarget = objectTarget;
   return validation;
 }
