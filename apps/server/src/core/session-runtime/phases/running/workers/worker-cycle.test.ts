@@ -397,6 +397,60 @@ describe("shouldRequestWorkerRepairAfterAttempt", () => {
 describe("workerContinuationDecision", () => {
   const futureDeadline = Date.now() + 60_000;
 
+  test("a one-attempt rung stops after its first cold checkpoint", () => {
+    const decision = workerContinuationDecision({
+      attemptIndex: 0,
+      checkpoints: [continuationCheckpoint(0)],
+      repairReasons: ["runner checkpoint was not exact"],
+      dryRun: false,
+      rungMaxAttempts: 1,
+      claimDeadlineMs: futureDeadline,
+    });
+
+    expect(decision.shouldContinue).toBe(false);
+    expect(decision.exhausted).toBe(true);
+    expect(decision.stopReason).toBe("rung_attempt_budget_exhausted");
+    expect(decision.rungMaxAttempts).toBe(1);
+  });
+
+  test("the rung cap also bounds failed-gate exact repair", () => {
+    const decision = workerContinuationDecision({
+      attemptIndex: 0,
+      checkpoints: [continuationCheckpoint(0, { exactMatch: true, hardGatesPassed: false, selectable: false, newScore: 100 })],
+      repairReasons: ["runner validation: qa lint failed"],
+      dryRun: false,
+      rungMaxAttempts: 1,
+      claimDeadlineMs: futureDeadline,
+    });
+
+    expect(decision.shouldContinue).toBe(false);
+    expect(decision.stopReason).toBe("rung_attempt_budget_exhausted");
+  });
+
+  test("a two-attempt rung allows exactly one repair", () => {
+    const first = workerContinuationDecision({
+      attemptIndex: 0,
+      checkpoints: [continuationCheckpoint(0)],
+      repairReasons: ["runner checkpoint was not exact"],
+      dryRun: false,
+      rungMaxAttempts: 2,
+      claimDeadlineMs: futureDeadline,
+    });
+    const second = workerContinuationDecision({
+      attemptIndex: 1,
+      checkpoints: [continuationCheckpoint(0), continuationCheckpoint(1)],
+      repairReasons: ["runner checkpoint was not exact"],
+      dryRun: false,
+      rungMaxAttempts: 2,
+      claimDeadlineMs: futureDeadline,
+    });
+
+    expect(first.shouldContinue).toBe(true);
+    expect(first.continueReason).toBe("cold_attempt_budget_available");
+    expect(second.shouldContinue).toBe(false);
+    expect(second.stopReason).toBe("rung_attempt_budget_exhausted");
+  });
+
   test("stops cold workers after the configured human attempt budget when nothing improved", () => {
     const checkpoints = [0, 1, 2].map((attempt) => continuationCheckpoint(attempt));
     const decision = workerContinuationDecision({
