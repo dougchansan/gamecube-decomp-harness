@@ -231,7 +231,10 @@ function parseJsonOutput(text: string): TriggerProcessResult | null {
   }
 }
 
-function classifyChild(exitCode: number, parsed: TriggerProcessResult | null): Pick<ChildRun, "classification" | "reason" | "workerErrors"> {
+export function classifyChild(
+  exitCode: number,
+  parsed: TriggerProcessResult | null,
+): Pick<ChildRun, "classification" | "reason" | "workerErrors"> {
   const workerErrors = parsed?.workerErrors ?? [];
   if (parsed?.stoppedReason === "signal") {
     return { classification: "signal", reason: "child_received_signal", workerErrors };
@@ -239,11 +242,17 @@ function classifyChild(exitCode: number, parsed: TriggerProcessResult | null): P
   if (exitCode !== 0) {
     return { classification: "incident", reason: `child_exit_${exitCode}`, workerErrors };
   }
-  if (parsed?.stoppedReason === "worker_error" || workerErrors.length > 0) {
-    return { classification: "incident", reason: "worker_error", workerErrors };
-  }
   if (Number(parsed?.finalStatus?.activeWorkers ?? 0) > 0) {
     return { classification: "incident", reason: "active_workers_after_child_exit", workerErrors };
+  }
+  // A drain is an explicit, successful epoch-boundary stop. Worker errors may
+  // describe earlier failed ladder rungs even when a later rung completed the
+  // target, so they must not turn the requested drain into a guardian restart.
+  if (parsed?.stoppedReason === "drained") {
+    return { classification: "clean", reason: "drained", workerErrors };
+  }
+  if (parsed?.stoppedReason === "worker_error" || workerErrors.length > 0) {
+    return { classification: "incident", reason: "worker_error", workerErrors };
   }
   return { classification: "clean", reason: parsed?.stoppedReason ?? "child_clean_exit", workerErrors };
 }
