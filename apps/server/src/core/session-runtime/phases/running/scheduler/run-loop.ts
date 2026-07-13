@@ -726,6 +726,7 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
     const fuzzyMax = numberArg(args, "--fuzzy-max", Number.POSITIVE_INFINITY);
     const sizeMin = numberArg(args, "--size-min", Number.NEGATIVE_INFINITY);
     const sizeMax = numberArg(args, "--size-max", Number.POSITIVE_INFINITY);
+    const excludeSourcePaths = sourceListArg(args, "--exclude-sources");
     const baseRev = stringArg(args, "--base-rev", "unknown");
     const ttlSeconds = numberArg(args, "--ttl-seconds", DEFAULT_WORKER_TTL_SECONDS);
     const postReturnCheckCommand = stringArg(args, "--post-return-check-command", "");
@@ -909,6 +910,7 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
 
               const nextEpoch = ensureSchedulerEpochFromBoard({
                 config: schedulerEpochConfig,
+                excludeSourcePaths,
                 fuzzyMax,
                 sizeMin,
                 sizeMax,
@@ -1022,7 +1024,7 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
                 if (epoch) {
                   recordSchedulerEpochFastRefresh(store, epoch.id);
                   const board = loadKnowledgeBoardSnapshot(globals.repoRoot, schedulerEpochConfig.candidateWindow, {
-                    excludeSourcePaths: sourceListArg(args, "--exclude-sources"),
+                    excludeSourcePaths,
                     fuzzyMax,
                     sizeMin,
                     sizeMax,
@@ -1083,6 +1085,7 @@ export async function runRunLoop(globals: GlobalArgs, args: Map<string, string |
           nextPriorityRefreshMs = Date.now() + boardRefreshMs;
           const epochResult = ensureSchedulerEpochFromBoard({
             config: schedulerEpochConfig,
+            excludeSourcePaths,
             fuzzyMax,
             sizeMin,
             sizeMax,
