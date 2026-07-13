@@ -57,7 +57,7 @@ import type { PiRunResult } from "@server/core/shared/types";
 import { numberArg, projectMetadata, stringArg, type GlobalArgs } from "@server/core/project-registry/runtime-options.js";
 import { assertSchedulableRun } from "@server/core/session-runtime/phases/running/jobs/shared.js";
 import { currentLadderLevel, isRateLimitError, ladderExhausted, pickRung, recordCrackTelemetry } from "@server/core/session-runtime/escalation/select-rung.js";
-import type { LadderRung } from "@server/core/session-runtime/escalation/ladder.js";
+import type { LadderConfig, LadderRung } from "@server/core/session-runtime/escalation/ladder.js";
 
 export interface WorkerCycleResult {
   runId: string;
@@ -80,6 +80,7 @@ export interface WorkerCycleResult {
   providerFailure?: boolean;
   errorKind?: string;
   error?: string;
+  escalationReAdmitted?: boolean;
   workerOutputIntegration?: {
     itemId: string;
     processed: WorkerOutputIntegrationApplyResult[];
@@ -102,6 +103,40 @@ interface WorkerErrorClassification {
   kind: string;
   summary: string;
   reasons: string[];
+}
+
+export function workerSessionFailed(result: Pick<PiRunResult, "failed" | "providerError">): boolean {
+  return result.failed === true || Boolean(result.providerError);
+}
+
+export function shouldReAdmitEscalatedWorker(params: {
+  escalationEnabled: boolean;
+  ladder: LadderConfig | null | undefined;
+  escalationLevel: number;
+  lifecycleStatus: string;
+  summaryText?: string | null;
+  sessionFailed: boolean;
+  hasValidationReadyCheckpoint: boolean;
+}): boolean {
+  const ladder = params.ladder;
+  if (!params.escalationEnabled || !ladder || ladder.mode !== "escalation" || ladderExhausted(ladder, params.escalationLevel)) {
+    return false;
+  }
+  if (params.lifecycleStatus === "timeout") return true;
+  if (params.lifecycleStatus !== "error") return false;
+  if (isRateLimitError(params.summaryText)) return true;
+  return params.sessionFailed && !params.hasValidationReadyCheckpoint;
+}
+
+export function workerCycleIncidentFlags(params: {
+  lifecycleStatus: string;
+  errorKind?: string;
+  escalationReAdmitted: boolean;
+}): Pick<WorkerCycleResult, "failed" | "providerFailure"> {
+  return {
+    failed: params.lifecycleStatus === "error" && params.errorKind !== "provider_error" && !params.escalationReAdmitted,
+    providerFailure: params.errorKind === "provider_error" && !params.escalationReAdmitted,
+  };
 }
 
 type PostReturnCheckValidation = WorkerRunnerValidation & { status: "passed" | "failed" | "skipped" };
@@ -345,6 +380,7 @@ export function workerContinuationDecision(params: {
   checkpoints: WorkerContinuationCheckpoint[];
   repairReasons: string[];
   dryRun: boolean;
+  sessionFailed?: boolean;
   rungMaxAttempts?: number | null;
   claimDeadlineMs?: number | null;
   nowMs?: number;
@@ -396,6 +432,10 @@ export function workerContinuationDecision(params: {
     continueReason,
   });
 
+  // A provider/model launch failure or an errored final return cannot be repaired by
+  // another attempt on the same rung. End this rung immediately; ladder scheduling may
+  // re-admit the target one rung higher after the worker state is closed.
+  if (params.sessionFailed) return stop("worker_session_failed", true);
   if (acceptedExact) return stop("accepted_exact", false);
   if (!shouldRequestWorkerRepairAfterAttempt(params)) {
     if (params.dryRun) return stop("dry_run", false);
@@ -1681,6 +1721,7 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
         checkpoints: workerCheckpointsForWorkerState(store, claimed.workerStateId),
         repairReasons,
         dryRun: result.dryRun,
+        sessionFailed: workerSessionFailed(result),
         rungMaxAttempts: rung?.budget.maxAttempts ?? null,
         claimDeadlineMs: Number.isFinite(claimDeadlineMs) ? claimDeadlineMs : null,
       });
@@ -1727,9 +1768,6 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
       );
 
       finalEvaluation = evaluation;
-      // A dead provider can't repair anything — retrying just burns ~20 minutes of
-      // timeout-retries per attempt while the endpoint is down.
-      if (result.providerError && !agentNote) break;
       if (!continuationDecision.shouldContinue) break;
 
       const repairFeedbackPath = resolve(validationDir, `attempt-${attemptIndex}.repair_request.json`);
@@ -1875,25 +1913,24 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
       });
     }
 
-    // A3 — the one control-flow change. On a non-exact "timeout" (the agent ran but did not
-    // crack the target), return the target to the claimable pool so the next generic worker
-    // re-attacks it one rung up. Infra "error" does NOT escalate — existing recovery re-runs
-    // the SAME rung. Gated on escalationEnabled. The climb stops once escalationLevel reaches
-    // the top rung (ladderExhausted), which is also the hard cap against re-admit loops: the
-    // level is monotonic (A3 bumps it by exactly one, closeWorkerState writes it atomically).
+    // A3 — return a non-exact timeout to the claimable pool so the next generic worker
+    // re-attacks it one rung up. Provider/model launch or return failures also advance when
+    // this rung produced no validation-ready checkpoint: retrying the same failed session
+    // only burns its max-attempt/TTL budget. The climb stops at the top rung, and the level
+    // remains monotonic because closeWorkerState writes the increment atomically.
     // TODO(A6): mode "full-matrix"/"hybrid" reuse this re-admit machinery with a different stop
     // condition (re-admit until every rung has an attempt, even on exact); not yet implemented.
-    // A rung whose provider is quota/rate-limited errors on every attempt. That is not a
-    // genuine infra failure (the rung is just unavailable), so a rate-limit "error" is an
-    // escalation trigger too: skip the dead rung and climb. Every OTHER "error" stays
-    // non-escalating so a real infra failure never burns a rung.
-    const rateLimitedRung = lifecycleStatus === "error" && isRateLimitError(summaryText);
-    const escalationReAdmit =
-      escalationEnabled &&
-      ladder != null &&
-      ladder.mode === "escalation" &&
-      (lifecycleStatus === "timeout" || rateLimitedRung) &&
-      !ladderExhausted(ladder, escalationLevel);
+    // Rate-limited rungs retain their existing skip behavior. Other runner/tool errors stay
+    // terminal, as do failures after a selectable checkpoint or failures on the final rung.
+    const escalationReAdmit = shouldReAdmitEscalatedWorker({
+      escalationEnabled,
+      ladder,
+      escalationLevel,
+      lifecycleStatus,
+      summaryText,
+      sessionFailed: workerSessionFailed(result),
+      hasValidationReadyCheckpoint: bestCheckpoint != null,
+    });
 
     closeWorkerState(store, {
       workerStateId: claimed.workerStateId,
@@ -1963,6 +2000,13 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
         : undefined,
       artifact_path: summaryPath,
     });
+    // An error already handled by monotonic ladder promotion is not a fleet incident:
+    // pausing/stopping the scheduler here would prevent the stronger rung from launching.
+    const incidentFlags = workerCycleIncidentFlags({
+      lifecycleStatus,
+      errorKind: errorClassification?.kind,
+      escalationReAdmitted: escalationReAdmit,
+    });
     return {
       runId,
       claimId: claimed.claimId,
@@ -1980,10 +2024,10 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
       exact: Boolean(bestCheckpoint?.exactMatch),
       wakeEvent,
       dryRun: result.dryRun,
-      failed: lifecycleStatus === "error" && errorClassification?.kind !== "provider_error",
-      providerFailure: errorClassification?.kind === "provider_error",
+      ...incidentFlags,
       errorKind: errorClassification?.kind,
       error: errorClassification?.summary,
+      escalationReAdmitted: escalationReAdmit,
       workerOutputIntegration,
     };
   } finally {
