@@ -374,6 +374,132 @@ describe("compareWorkerUnitSnapshots newly materialized targets", () => {
     expect(validation.improvements).toContainEqual({ kind: "function", unit: before.unit, item: before.symbol, before: 0, after: 9.375 });
   });
 
+  test("accepts an exact canonical symbol replacing its address-equivalent REAL_C trace alias", () => {
+    const { before, after } = snapshots(100);
+    const validation = compareWorkerUnitSnapshots({
+      before: { ...before, symbol: "hwSetVolume" },
+      after: { ...after, symbol: "hwSetVolume", functions: [{ name: "fn_neighbor", score: 100, size: 64 }, { name: "hwSetVolume", score: 100, size: 64 }] },
+      claimedExact: true,
+      sourceProgress: { before: null, after: "REAL_C" },
+      sourceIdentity: {
+        before: {
+          canonicalSymbol: "hwSetVolume",
+          canonicalAddress: "0x80162A58",
+          traceAlias: "fn_80162A58",
+          canonicalClass: null,
+          traceAliasClass: "REAL_C",
+        },
+        after: {
+          canonicalSymbol: "hwSetVolume",
+          canonicalAddress: "0x80162A58",
+          traceAlias: "fn_80162A58",
+          canonicalClass: "REAL_C",
+          traceAliasClass: null,
+        },
+      },
+    });
+
+    expect(validation.status).toBe("passed");
+    expect(validation.target).toMatchObject({ symbol: "hwSetVolume", before: 0, after: 100, improved: true, exact: true });
+    expect(validation.reasons).toContain(
+      "target hwSetVolume replaced address-equivalent REAL_C trace alias fn_80162A58 at 0x80162A58",
+    );
+  });
+
+  test("rejects a canonical wrapper that leaves the address-equivalent trace body active", () => {
+    const { before, after } = snapshots(100);
+    const validation = compareWorkerUnitSnapshots({
+      before: { ...before, symbol: "hwSetVolume" },
+      after: { ...after, symbol: "hwSetVolume", functions: [{ name: "fn_neighbor", score: 100, size: 64 }, { name: "hwSetVolume", score: 100, size: 64 }] },
+      claimedExact: true,
+      sourceProgress: { before: null, after: "REAL_C" },
+      sourceIdentity: {
+        before: {
+          canonicalSymbol: "hwSetVolume",
+          canonicalAddress: "0x80162A58",
+          traceAlias: "fn_80162A58",
+          canonicalClass: null,
+          traceAliasClass: "REAL_C",
+        },
+        after: {
+          canonicalSymbol: "hwSetVolume",
+          canonicalAddress: "0x80162A58",
+          traceAlias: "fn_80162A58",
+          canonicalClass: "REAL_C",
+          traceAliasClass: "REAL_C",
+        },
+      },
+    });
+
+    expect(validation.status).toBe("failed");
+    expect(validation.target).toMatchObject({ before: null, after: 100, improved: false, exact: false });
+    expect(validation.reasons).toContain(
+      "worker materialized canonical target hwSetVolume without removing address-equivalent trace alias fn_80162A58",
+    );
+  });
+
+  test("rejects a materialization whose canonical address identity changed", () => {
+    const { before, after } = snapshots(100);
+    const validation = compareWorkerUnitSnapshots({
+      before: { ...before, symbol: "hwSetVolume" },
+      after: { ...after, symbol: "hwSetVolume", functions: [{ name: "fn_neighbor", score: 100, size: 64 }, { name: "hwSetVolume", score: 100, size: 64 }] },
+      claimedExact: true,
+      sourceProgress: { before: null, after: "REAL_C" },
+      sourceIdentity: {
+        before: {
+          canonicalSymbol: "hwSetVolume",
+          canonicalAddress: "0x80162A58",
+          traceAlias: "fn_80162A58",
+          canonicalClass: null,
+          traceAliasClass: "REAL_C",
+        },
+        after: {
+          canonicalSymbol: "hwSetVolume",
+          canonicalAddress: "0x80163000",
+          traceAlias: "fn_80163000",
+          canonicalClass: "REAL_C",
+          traceAliasClass: null,
+        },
+      },
+    });
+
+    expect(validation.status).toBe("failed");
+    expect(validation.reasons).toContain("worker materialized hwSetVolume without stable canonical-address trace-alias identity");
+  });
+
+  test("keeps QA findings blocking for an otherwise valid stale-trace replacement", () => {
+    const { before, after } = snapshots(100);
+    const scoreValidation = compareWorkerUnitSnapshots({
+      before: { ...before, symbol: "hwSetVolume" },
+      after: { ...after, symbol: "hwSetVolume", functions: [{ name: "fn_neighbor", score: 100, size: 64 }, { name: "hwSetVolume", score: 100, size: 64 }] },
+      claimedExact: true,
+      sourceProgress: { before: null, after: "REAL_C" },
+      sourceIdentity: {
+        before: {
+          canonicalSymbol: "hwSetVolume",
+          canonicalAddress: "0x80162A58",
+          traceAlias: "fn_80162A58",
+          canonicalClass: null,
+          traceAliasClass: "REAL_C",
+        },
+        after: {
+          canonicalSymbol: "hwSetVolume",
+          canonicalAddress: "0x80162A58",
+          traceAlias: "fn_80162A58",
+          canonicalClass: "REAL_C",
+          traceAliasClass: null,
+        },
+      },
+    });
+    const qaLint = qaLintFromInvocation(
+      invocation({ exitCode: 2, result: scanResult([finding({ severity: "warning" })], "warned") }),
+      "/tmp/scan.patch",
+    );
+
+    expect(scoreValidation.status).toBe("passed");
+    expect(applyQaLintToValidation(scoreValidation, qaLint).status).toBe("failed");
+  });
+
   test("keeps sibling-function regression protection when the target materializes", () => {
     const { before, after } = snapshots(100);
     after.functions[0] = { name: "fn_neighbor", score: 80, size: 64 };
@@ -423,6 +549,19 @@ describe("compareWorkerUnitSnapshots newly materialized targets", () => {
       after,
       claimedExact: true,
       sourceProgress: { before: null, after: "ASM" },
+    });
+
+    expect(validation.status).toBe("no_official_score_change");
+    expect(validation.target).toMatchObject({ before: null, after: 100, improved: false, exact: false });
+  });
+
+  test("does not convert a newly scored forwarding wrapper into accepted C progress", () => {
+    const { before, after } = snapshots(100);
+    const validation = compareWorkerUnitSnapshots({
+      before,
+      after,
+      claimedExact: true,
+      sourceProgress: { before: null, after: "STUB" },
     });
 
     expect(validation.status).toBe("no_official_score_change");

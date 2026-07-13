@@ -4,7 +4,11 @@ import { basename, dirname, isAbsolute, resolve } from "node:path";
 import { runQaScanDiff, type QaScanFinding, type QaScanInvocation, type RunQaScanDiffOptions } from "@server/core/validation/qa";
 import { runCommand, type CommandResult } from "@server/infrastructure/shell";
 import { packageRoot } from "@server/core/knowledge";
-import { classifyFunctionInFile, type SourceProgressClass } from "@server/core/session-runtime/phases/running/source-progress.js";
+import {
+  classifyCanonicalFunctionSource,
+  type CanonicalFunctionSourceIdentity,
+  type SourceProgressClass,
+} from "@server/core/session-runtime/phases/running/source-progress.js";
 import type { WorkerRunnerValidation } from "./runner-validation.js";
 
 const SCORE_EPSILON = 0.000001;
@@ -53,6 +57,8 @@ export interface WorkerChangeBaseline {
   sourceSnapshotPaths?: string[];
   /** Active source-body class for the target function before the worker edit. */
   sourceProgressClass?: SourceProgressClass | null;
+  /** Canonical/address-trace source identity captured before the worker edit. */
+  sourceIdentity?: CanonicalFunctionSourceIdentity;
 }
 
 /** Injectable scan_diff runner so tests (and callers) can fake the QA scanner. */
@@ -385,14 +391,26 @@ export async function captureWorkerChangeBaseline(params: {
   });
   const sourceSnapshotDir = sourceSnapshot.dir;
   const sourceSnapshotPaths = sourceSnapshot.copied;
-  const sourceProgressClass = sourcePath ? classifyFunctionInFile(resolve(sourceSnapshotDir, sourcePath), symbol) : null;
+  const sourceIdentity = sourcePath
+    ? classifyCanonicalFunctionSource(params.repoRoot, resolve(sourceSnapshotDir, sourcePath), symbol)
+    : undefined;
+  const sourceProgressClass = sourceIdentity?.canonicalClass ?? null;
 
   if (!unit) reasons.push("target unit is missing");
   if (!symbol) reasons.push("target symbol is missing");
   if (!sourcePath) reasons.push("target source_path is missing");
   if (!objectTarget) reasons.push("could not derive object target from target source_path");
   if (reasons.length > 0 || !objectTarget) {
-    return { status: "snapshot_unavailable", reasons, snapshot: null, objectTarget, sourceSnapshotDir, sourceSnapshotPaths, sourceProgressClass };
+    return {
+      status: "snapshot_unavailable",
+      reasons,
+      snapshot: null,
+      objectTarget,
+      sourceSnapshotDir,
+      sourceSnapshotPaths,
+      sourceProgressClass,
+      sourceIdentity,
+    };
   }
 
   const objectBuild = await runValidationCommand(
@@ -411,6 +429,7 @@ export async function captureWorkerChangeBaseline(params: {
       sourceSnapshotDir,
       sourceSnapshotPaths,
       sourceProgressClass,
+      sourceIdentity,
     };
   }
 
@@ -433,6 +452,7 @@ export async function captureWorkerChangeBaseline(params: {
       sourceSnapshotDir,
       sourceSnapshotPaths,
       sourceProgressClass,
+      sourceIdentity,
     };
   }
 
@@ -455,6 +475,7 @@ export async function captureWorkerChangeBaseline(params: {
       sourceSnapshotDir,
       sourceSnapshotPaths,
       sourceProgressClass,
+      sourceIdentity,
     };
   }
 
@@ -472,6 +493,7 @@ export async function captureWorkerChangeBaseline(params: {
     sourceSnapshotDir,
     sourceSnapshotPaths,
     sourceProgressClass,
+    sourceIdentity,
   };
 }
 
@@ -513,6 +535,10 @@ export function compareWorkerUnitSnapshots(params: {
     before: SourceProgressClass | null;
     after: SourceProgressClass | null;
   };
+  sourceIdentity?: {
+    before: CanonicalFunctionSourceIdentity;
+    after: CanonicalFunctionSourceIdentity;
+  };
   summaryPath?: string;
   reportPath?: string;
   baselinePath?: string;
@@ -523,7 +549,33 @@ export function compareWorkerUnitSnapshots(params: {
   const rawBeforeTarget = params.before.targetScore;
   const afterTarget = params.after.targetScore;
   const targetMaterialized = rawBeforeTarget === null && afterTarget !== null;
-  const materializedAsRealC = targetMaterialized && params.sourceProgress?.after === "REAL_C";
+  const beforeIdentity = params.sourceIdentity?.before;
+  const afterIdentity = params.sourceIdentity?.after;
+  const traceAliasWasActive = Boolean(beforeIdentity?.traceAlias && beforeIdentity.traceAliasClass !== null);
+  const traceAliasReplacement = Boolean(
+    traceAliasWasActive &&
+      beforeIdentity?.canonicalAddress &&
+      beforeIdentity.canonicalAddress === afterIdentity?.canonicalAddress &&
+      beforeIdentity.traceAlias === afterIdentity?.traceAlias &&
+      beforeIdentity.canonicalClass === null &&
+      afterIdentity?.canonicalClass === "REAL_C" &&
+      afterIdentity.traceAliasClass === null,
+  );
+  const staleRealCTraceAliasReplacement = traceAliasReplacement && beforeIdentity?.traceAliasClass === "REAL_C";
+  const duplicateTraceAliasMaterialization = Boolean(
+    targetMaterialized &&
+      afterIdentity?.canonicalClass === "REAL_C" &&
+      afterIdentity.traceAlias &&
+      afterIdentity.traceAliasClass !== null,
+  );
+  const invalidTraceAliasReplacement = Boolean(
+    targetMaterialized && params.sourceProgress?.after === "REAL_C" && traceAliasWasActive && !traceAliasReplacement,
+  );
+  const materializedAsRealC =
+    targetMaterialized &&
+    params.sourceProgress?.after === "REAL_C" &&
+    !duplicateTraceAliasMaterialization &&
+    !invalidTraceAliasReplacement;
   // A target with no candidate-side symbol has no objdiff score before its first C
   // implementation. Once the claimed symbol materializes as REAL_C, its truthful
   // baseline is zero rather than "unavailable".
@@ -578,6 +630,14 @@ export function compareWorkerUnitSnapshots(params: {
   if (unexpectedMaterializedFunctions.length > 0) {
     status = "failed";
     reasons.push(`worker materialized unclaimed function symbol(s): ${unexpectedMaterializedFunctions.join(", ")}`);
+  } else if (duplicateTraceAliasMaterialization) {
+    status = "failed";
+    reasons.push(
+      `worker materialized canonical target ${params.before.symbol} without removing address-equivalent trace alias ${afterIdentity?.traceAlias}`,
+    );
+  } else if (invalidTraceAliasReplacement) {
+    status = "failed";
+    reasons.push(`worker materialized ${params.before.symbol} without stable canonical-address trace-alias identity`);
   } else if (!targetHasScores) {
     status = "no_official_score_change";
     reasons.push(`target symbol score unavailable in ${rawBeforeTarget === null ? "baseline" : "current"} same-unit snapshot`);
@@ -601,6 +661,10 @@ export function compareWorkerUnitSnapshots(params: {
   } else if (sourceConverted) {
     reasons.push(
       `target ${params.before.symbol} converted active source from ${params.sourceProgress?.before} to REAL_C without official score regression`,
+    );
+  } else if (staleRealCTraceAliasReplacement) {
+    reasons.push(
+      `target ${params.before.symbol} replaced address-equivalent REAL_C trace alias ${beforeIdentity?.traceAlias} at ${beforeIdentity?.canonicalAddress}`,
     );
   }
 
@@ -898,7 +962,8 @@ async function validateWorkerScoreChange(
 
   const snapshotPath = resolve(params.outputDir, `attempt-${params.attemptIndex}.unit_snapshot.json`);
   await writeFile(snapshotPath, JSON.stringify(after, null, 2));
-  const afterSourceProgressClass = classifyFunctionInFile(resolve(params.repoRoot, sourcePath), symbol);
+  const afterSourceIdentity = classifyCanonicalFunctionSource(params.repoRoot, resolve(params.repoRoot, sourcePath), symbol);
+  const afterSourceProgressClass = afterSourceIdentity.canonicalClass;
   const validation = compareWorkerUnitSnapshots({
     before: params.baseline.snapshot,
     after,
@@ -907,6 +972,12 @@ async function validateWorkerScoreChange(
       before: params.baseline.sourceProgressClass ?? null,
       after: afterSourceProgressClass,
     },
+    sourceIdentity: params.baseline.sourceIdentity
+      ? {
+          before: params.baseline.sourceIdentity,
+          after: afterSourceIdentity,
+        }
+      : undefined,
     summaryPath,
     reportPath: snapshotPath,
     baselinePath: params.baseline.snapshotPath,
