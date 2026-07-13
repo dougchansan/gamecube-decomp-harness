@@ -168,17 +168,21 @@ A worker continues only while runner-owned evidence says more attempts are
 worth spending:
 
 - An accepted exact checkpoint stops immediately.
-- A cold worker with no selectable improvement and no failed-gate exact
-  checkpoint stops after the fifth human attempt.
+- When a model ladder is active, the current rung's `budget.maxAttempts` is a
+  hard ceiling on total attempts at that model. Exhaustion returns the target
+  for promotion instead of spending the global repair tail on the same rung.
+- Without a tighter rung cap, a cold worker with no selectable improvement and
+  no failed-gate exact checkpoint stops after the third human attempt.
 - The first selectable non-exact improvement is saved immediately. The worker
-  can spend up to three follow-up checkpoints looking for a new best or exact.
-- A higher selectable best resets the three-follow-up budget.
-- If three follow-up checkpoints after the latest best do not produce a higher
+  can spend up to two follow-up checkpoints looking for a new best or exact.
+- A higher selectable best resets the two-follow-up budget.
+- If two follow-up checkpoints after the latest best do not produce a higher
   selectable best or exact, the worker stops and the saved best checkpoint is
   preserved.
 - An exact score that fails hard gates starts a failed-gate exact repair lane.
-  The runner can spend up to three follow-up checkpoints repairing the gates,
-  even when the cold budget would otherwise stop the worker.
+  The runner can spend up to two follow-up checkpoints repairing the gates,
+  even when the cold budget would otherwise stop the worker, but never beyond
+  the current rung's hard attempt cap.
 - If the failed-gate exact repair lane does not produce an accepted exact or a
   selectable best within its follow-up budget, the worker stops.
 

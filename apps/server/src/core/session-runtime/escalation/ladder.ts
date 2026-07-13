@@ -17,7 +17,7 @@ export interface RungBudget {
   agentTimeoutSeconds: number;
   /** -> claim hold (claimNextEpochTarget ttl). Enforcement deferred to A4. */
   ttlSeconds: number;
-  /** Per-rung repair-loop cap. Enforcement deferred to A4. */
+  /** Hard cap on total worker attempts spent on this rung. */
   maxAttempts: number;
 }
 
@@ -63,6 +63,9 @@ function validateLadder(ladder: LadderConfig, source: string): LadderConfig {
     }
     if (!rung.budget || typeof rung.budget.agentTimeoutSeconds !== "number") {
       throw new Error(`Ladder ${source} rung ${index} must define budget.agentTimeoutSeconds`);
+    }
+    if (!Number.isInteger(rung.budget.maxAttempts) || rung.budget.maxAttempts < 1) {
+      throw new Error(`Ladder ${source} rung ${index} must define a positive integer budget.maxAttempts`);
     }
   });
   return ladder;

@@ -297,6 +297,7 @@ export interface WorkerContinuationDecision {
   continueReason: string | null;
   attemptIndex: number;
   humanAttempt: number;
+  rungMaxAttempts: number | null;
   maxColdAttempts: number;
   followUpAttemptsAfterBest: number;
   followUpAttemptsAfterGateFailedExact: number;
@@ -344,10 +345,15 @@ export function workerContinuationDecision(params: {
   checkpoints: WorkerContinuationCheckpoint[];
   repairReasons: string[];
   dryRun: boolean;
+  rungMaxAttempts?: number | null;
   claimDeadlineMs?: number | null;
   nowMs?: number;
 }): WorkerContinuationDecision {
   const attemptIndex = Math.max(0, Math.trunc(params.attemptIndex));
+  const rungMaxAttempts =
+    params.rungMaxAttempts != null && Number.isFinite(params.rungMaxAttempts)
+      ? Math.max(1, Math.trunc(params.rungMaxAttempts))
+      : null;
   const checkpoints = orderedContinuationCheckpoints(params.checkpoints, attemptIndex);
   const acceptedExact = checkpoints.some((checkpoint) => checkpoint.selectable && checkpoint.exactMatch && checkpoint.hardGatesPassed);
   const best = latestBestSelectableCheckpoint(checkpoints);
@@ -361,6 +367,7 @@ export function workerContinuationDecision(params: {
     policy: WORKER_ATTEMPT_TAIL_POLICY.mode,
     attemptIndex,
     humanAttempt: attemptIndex + 1,
+    rungMaxAttempts,
     maxColdAttempts: WORKER_ATTEMPT_TAIL_POLICY.maxColdAttempts,
     followUpAttemptsAfterBest: WORKER_ATTEMPT_TAIL_POLICY.followUpAttemptsAfterBest,
     followUpAttemptsAfterGateFailedExact: WORKER_ATTEMPT_TAIL_POLICY.followUpAttemptsAfterGateFailedExact,
@@ -394,6 +401,14 @@ export function workerContinuationDecision(params: {
     if (params.dryRun) return stop("dry_run", false);
     if (stoppedByDeadline) return stop("claim_deadline", false);
     return stop("accepted_or_no_repair_reasons", false);
+  }
+
+  // Ladder budgets are a hard per-rung ceiling. Without this guard every rung
+  // inherited the global cold/follow-up tail, so maxAttempts: 1 still launched
+  // repeated sessions on the same model instead of returning the target for
+  // promotion to the next rung.
+  if (rungMaxAttempts != null && attemptIndex + 1 >= rungMaxAttempts) {
+    return stop("rung_attempt_budget_exhausted", true);
   }
 
   if (failedGateExactAttemptIndex != null) {
@@ -1666,6 +1681,7 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
         checkpoints: workerCheckpointsForWorkerState(store, claimed.workerStateId),
         repairReasons,
         dryRun: result.dryRun,
+        rungMaxAttempts: rung?.budget.maxAttempts ?? null,
         claimDeadlineMs: Number.isFinite(claimDeadlineMs) ? claimDeadlineMs : null,
       });
       const attemptGatePath = resolve(validationDir, `attempt-${attemptIndex}.return_gate.json`);
@@ -1687,6 +1703,7 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
             repair_policy: {
               mode: WORKER_ATTEMPT_TAIL_POLICY.mode,
               claim_ttl: claimed.ttl,
+              rung_max_attempts: rung?.budget.maxAttempts ?? null,
               max_cold_attempts: WORKER_ATTEMPT_TAIL_POLICY.maxColdAttempts,
               follow_up_attempts_after_best: WORKER_ATTEMPT_TAIL_POLICY.followUpAttemptsAfterBest,
               follow_up_attempts_after_gate_failed_exact: WORKER_ATTEMPT_TAIL_POLICY.followUpAttemptsAfterGateFailedExact,
@@ -1809,6 +1826,7 @@ export async function runWorkerCycle(globals: GlobalArgs, args: Map<string, stri
       continuation_attempts: {
         policy: WORKER_ATTEMPT_TAIL_POLICY.mode,
         configured: {
+          rung_max_attempts: rung?.budget.maxAttempts ?? null,
           max_cold_attempts: WORKER_ATTEMPT_TAIL_POLICY.maxColdAttempts,
           follow_up_attempts_after_best: WORKER_ATTEMPT_TAIL_POLICY.followUpAttemptsAfterBest,
           follow_up_attempts_after_gate_failed_exact: WORKER_ATTEMPT_TAIL_POLICY.followUpAttemptsAfterGateFailedExact,
