@@ -10,6 +10,32 @@ function writeJson(path: string, value: unknown): void {
 }
 
 describe("loadBoardSnapshot", () => {
+  test("applies target key allowlists before the candidate limit", () => {
+    const root = mkdtempSync(join(tmpdir(), "board-target-keys-"));
+    try {
+      writeJson(resolve(root, "build/GC6E01/report.json"), {
+        measures: {},
+        units: [
+          {
+            name: "unit/a",
+            metadata: { source_path: "src/a.c" },
+            functions: [
+              { name: "high_priority", size: 2048, fuzzy_match_percent: 99.99 },
+              { name: "allowed", size: 64, fuzzy_match_percent: 1 },
+            ],
+          },
+        ],
+      });
+      writeJson(resolve(root, "objdiff.json"), { units: [{ name: "unit/a", metadata: { source_path: "src/a.c" } }] });
+
+      const snapshot = loadBoardSnapshot(root, 1, { targetKeys: ["unit/a::allowed"] });
+
+      expect(snapshot.candidates.map((candidate) => `${candidate.unit}::${candidate.symbol}`)).toEqual(["unit/a::allowed"]);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
   test("loads the upstream-current baseline for session worktrees without local reports", () => {
     const root = mkdtempSync(join(tmpdir(), "board-session-baseline-"));
     try {

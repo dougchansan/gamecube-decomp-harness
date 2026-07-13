@@ -1,5 +1,13 @@
 import { describe, expect, test } from "bun:test";
-import { evaluateFastKnowledgeMaintenanceDecision, integrationResolveCommand, PENDING_CLAIM_TIMEOUT_MS, reapStuckPendingWorkers, shouldRefreshSchedulerBoard, workerOpenSlots } from "./run-loop.js";
+import {
+  evaluateFastKnowledgeMaintenanceDecision,
+  integrationResolveCommand,
+  PENDING_CLAIM_TIMEOUT_MS,
+  reapStuckPendingWorkers,
+  runLoopWorkerCommand,
+  shouldRefreshSchedulerBoard,
+  workerOpenSlots,
+} from "./run-loop.js";
 import type { GlobalArgs } from "@server/core/project-registry/runtime-options.js";
 
 type WorkerProcRegistry = Map<string, { proc: { kill: (signal?: number) => void; exited: Promise<number> }; spawnedAtMs: number }>;
@@ -170,6 +178,43 @@ describe("integrationResolveCommand (auto conflict-resolver child)", () => {
       { runId: "r", itemPath: "a.json", queueSummaryPath: "b.json", resolverProvider: "zai", resolverModel: "glm-5.2", resolverThinkingLevel: "low" },
     );
     expect(cmd).toContain("--dry-run-agents");
+  });
+});
+
+describe("runLoopWorkerCommand", () => {
+  test("forwards the exact target manifest to each worker child", () => {
+    const command = runLoopWorkerCommand(
+      {
+        repoRoot: "/repo",
+        stateDir: "/state",
+        projectId: "pkmn-colosseum",
+        dryRunAgents: true,
+        provider: "openai-codex",
+        model: "gpt-5.6",
+        thinkingLevel: "xhigh",
+      },
+      {
+        runId: "run-1",
+        workerId: "worker-1",
+        baseRev: "origin/master",
+        ttlSeconds: 3000,
+        thinkingLevel: "xhigh",
+        postReturnCheckCommand: "",
+        workerConfigureCommand: "python3 configure.py --no-progress",
+        graphDbPath: "/state/graph.sqlite",
+        targetFilter: {
+          targetKeys: ["unit/a::fn_a"],
+          targetKeysFile: "/manifests/small.tsv",
+        },
+      },
+    );
+
+    expect(command).toContain("worker");
+    expect(command).toContain("--dry-run-agents");
+    expect(command.slice(command.indexOf("--target-keys-file"), command.indexOf("--target-keys-file") + 2)).toEqual([
+      "--target-keys-file",
+      "/manifests/small.tsv",
+    ]);
   });
 });
 

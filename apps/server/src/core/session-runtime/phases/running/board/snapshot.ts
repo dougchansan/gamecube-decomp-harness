@@ -24,6 +24,7 @@ export interface LoadBoardSnapshotOptions {
   reportPath?: string;
   sizeMin?: number;
   sizeMax?: number;
+  targetKeys?: string[];
 }
 
 export type BoardRankFeatureProvider = (candidate: TargetCandidate) => BoardRankFeature | null | undefined;
@@ -134,6 +135,12 @@ function filterSizeBandCandidates(candidates: TargetCandidate[], sizeMin: number
   return candidates.filter((candidate) => candidate.size >= min && candidate.size <= max);
 }
 
+function filterTargetKeyCandidates(candidates: TargetCandidate[], targetKeys: string[] | undefined): TargetCandidate[] {
+  const allowed = new Set((targetKeys ?? []).map((value) => value.trim()).filter(Boolean));
+  if (allowed.size === 0) return candidates;
+  return candidates.filter((candidate) => allowed.has(`${candidate.unit}::${candidate.symbol}`));
+}
+
 function sourceConversionCandidate(params: {
   entry: FunctionSourceMapEntry;
   report: ReportFunctionInfo | undefined;
@@ -236,7 +243,7 @@ export function loadBoardSnapshot(repoRoot: string, limit: number, options: Load
   }
 
   const filteredCandidates = filterSizeBandCandidates(
-    filterFuzzyMaxCandidates(filterExcludedCandidates(candidates, excluded), options.fuzzyMax),
+    filterTargetKeyCandidates(filterFuzzyMaxCandidates(filterExcludedCandidates(candidates, excluded), options.fuzzyMax), options.targetKeys),
     options.sizeMin,
     options.sizeMax,
   );
@@ -308,8 +315,9 @@ function loadBoardSnapshotFromCodeGraphIndex(
     });
   }
 
-  rankBoardCandidates(candidates, options.rankFeatureProvider);
-  candidates.sort((left, right) => right.priority - left.priority);
+  const filteredCandidates = filterTargetKeyCandidates(candidates, options.targetKeys);
+  rankBoardCandidates(filteredCandidates, options.rankFeatureProvider);
+  filteredCandidates.sort((left, right) => right.priority - left.priority);
   const measures: BoardMeasures = {
     matched_functions_percent: percent(matchedFunctions, totalFunctions),
     matched_code_percent: percent(matchedBytes, totalBytes),
@@ -320,7 +328,7 @@ function loadBoardSnapshotFromCodeGraphIndex(
     reportPath: functionsIndex,
     objdiffPath: "",
     measures,
-    candidates: candidates.slice(0, limit),
+    candidates: filteredCandidates.slice(0, limit),
   };
 }
 

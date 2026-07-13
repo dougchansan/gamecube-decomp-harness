@@ -15,6 +15,7 @@ import {
   nextUnhandledEvent,
   openState,
   targetPressureSnapshot,
+  targetClaimFilterFromArgs,
   type EpochAdmissionResult,
   type ExistingEpochAdmissionResult,
   type EpochProgressSummary,
@@ -135,9 +136,10 @@ export function ensureSchedulerEpochFromBoard(params: {
   graphDbPath: string;
   runId: string;
   store: StateStore;
+  targetKeys?: string[];
 }): SchedulerEpochEnsureResult {
   let epoch = activeSchedulerEpoch(params.store, params.runId) ?? startSchedulerEpoch(params.store, params.runId, params.config);
-  let candidateWindow = Math.max(1, params.config.candidateWindow);
+  let candidateWindow = Math.max(1, params.config.candidateWindow, params.targetKeys?.length ?? 0);
   let progress = schedulerEpochProgress(params.store, epoch.id);
   let admission: EpochAdmissionResult | undefined;
   let existingAdmission: ExistingEpochAdmissionResult | undefined;
@@ -156,6 +158,7 @@ export function ensureSchedulerEpochFromBoard(params: {
       objdiffPath: params.globals.project?.validation.objdiffPath,
       projectId: params.globals.project?.projectId ?? params.globals.projectId,
       reportPath: params.globals.project?.validation.reportPath,
+      targetKeys: params.targetKeys,
     });
     const passSize: EpochSizeSpec = params.config.size.mode === "full" ? params.config.size : { mode: "fixed", value: remaining };
     admission = combineEpochAdmissions(
@@ -181,6 +184,7 @@ export function ensureSchedulerEpochFromBoard(params: {
     objdiffPath: params.globals.project?.validation.objdiffPath,
     projectId: params.globals.project?.projectId ?? params.globals.projectId,
     reportPath: params.globals.project?.validation.reportPath,
+    targetKeys: params.targetKeys,
   });
   const priorityRefreshes = refreshEpochTargetPriorities(params.store, {
     epochId: epoch.id,
@@ -211,10 +215,12 @@ export async function runSchedulerTick(globals: GlobalArgs, args: Map<string, st
     const admissionTargetSize = nonNegativeInt(
       numberArg(args, "--queue-target-size", globals.project?.dashboard.queueTargetSize ?? Math.max(candidateLimit, run.desiredWorkers * 2)),
     );
+    const targetFilter = targetClaimFilterFromArgs(args);
     const requestedCandidateWindow = Math.max(
       candidateLimit,
       admissionTargetSize,
       nonNegativeInt(numberArg(args, "--candidate-window", globals.project?.dashboard.candidateWindow ?? Math.max(candidateLimit, admissionTargetSize * 8))),
+      targetFilter?.targetKeys?.length ?? 0,
     );
     const graphDbPath = stringArg(args, "--graph-db", globals.graphDbPath ?? resourceGraphDbPath());
     const excludeSourcePaths = sourceListArg(args, "--exclude-sources");
@@ -232,6 +238,7 @@ export async function runSchedulerTick(globals: GlobalArgs, args: Map<string, st
       graphDbPath,
       runId,
       store,
+      targetKeys: targetFilter?.targetKeys,
     });
     markEventHandled(store, String(event.id));
     const targetPressure = targetPressureSnapshot(store, runId);

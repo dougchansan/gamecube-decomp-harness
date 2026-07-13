@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { isAbsolute, resolve } from "node:path";
 import { packageRoot } from "@server/core/knowledge";
 import { getLatestRun, openState, statusSnapshot } from "@server/core/session-runtime/run-state";
 import { booleanArg, numberArg, stringArg, type GlobalArgs } from "@server/core/project-registry/runtime-options.js";
@@ -139,6 +139,7 @@ const SYSTEM_ARG_ALLOWLIST = new Set([
   "--target-max-size",
   "--target-min-fuzzy",
   "--target-min-size",
+  "--target-keys-file",
   "--target-sources",
   "--ttl-seconds",
   "--worker-limit",
@@ -201,12 +202,14 @@ function systemCommandArg(args: Map<string, string | true>): SystemCommand {
   throw new Error("--system-command must be run-loop");
 }
 
-function systemArgs(args: Map<string, string | true>): string[] {
+export function babysitSystemArgs(args: Map<string, string | true>, cwd = process.cwd()): string[] {
   const out: string[] = [];
   for (const [key, value] of args.entries()) {
     if (GUARDIAN_ONLY_ARGS.has(key) || !SYSTEM_ARG_ALLOWLIST.has(key)) continue;
     out.push(key);
-    if (typeof value === "string") out.push(value);
+    if (typeof value === "string") {
+      out.push(key === "--target-keys-file" && !isAbsolute(value) ? resolve(cwd, value) : value);
+    }
   }
   return out;
 }
@@ -272,7 +275,7 @@ async function runChild(globals: GlobalArgs, args: Map<string, string | true>, o
   const stdoutPath = resolve(outputDir, "stdout.txt");
   const stderrPath = resolve(outputDir, "stderr.txt");
   const resultPath = resolve(outputDir, "result.json");
-  const command = ["bun", packageBin(), ...globalFlags(globals), commandName, ...systemArgs(args)];
+  const command = ["bun", packageBin(), ...globalFlags(globals), commandName, ...babysitSystemArgs(args)];
   const startedAt = new Date().toISOString();
   const proc = Bun.spawn(command, {
     cwd: orchestratorRoot(),
