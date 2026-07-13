@@ -15,6 +15,8 @@ import type { TargetCandidate } from "@server/core/shared/types/index.js";
 
 /** Paths never staged by an epoch commit: the nested orchestrator repo and generated state. */
 const EPOCH_COMMIT_EXCLUDES = ["decomp-orchestrator", ".decomp-orchestrator-state"];
+/** A snapshot needs at least one staged change under these paths to create a commit. */
+const DEFAULT_EPOCH_PAYLOAD_PATHS = ["src", "include"];
 
 export interface EpochCycleOptions {
   baseRef?: string;
@@ -25,6 +27,8 @@ export interface EpochCycleOptions {
   linkPaths?: string[];
   /** Extra live-checkout paths that must never be staged by epoch snapshots. */
   extraExcludePaths?: string[];
+  /** Paths containing substantive worker output. Metadata-only changes do not trigger a commit. */
+  commitPayloadPaths?: string[];
   projectId?: string | null;
   /** Above this many regressed report rows the cycle pauses instead of admitting repairs. */
   regressionPauseThreshold?: number;
@@ -90,6 +94,7 @@ export interface EpochCycleResult {
 }
 
 interface GitResult {
+  exitCode: number;
   ok: boolean;
   text: string;
 }
@@ -97,7 +102,7 @@ interface GitResult {
 async function git(cwd: string, args: string[]): Promise<GitResult> {
   const proc = Bun.spawn(["git", "-C", cwd, ...args], { stdout: "pipe", stderr: "pipe" });
   const [stdout, stderr, exitCode] = await Promise.all([new Response(proc.stdout).text(), new Response(proc.stderr).text(), proc.exited]);
-  return { ok: exitCode === 0, text: exitCode === 0 ? stdout.trimEnd() : stderr.trim() };
+  return { exitCode, ok: exitCode === 0, text: exitCode === 0 ? stdout.trimEnd() : stderr.trim() };
 }
 
 function artifactTimestamp(): string {
@@ -114,11 +119,12 @@ function pathspecExcludes(paths: string[]): string[] {
  * half-finished attempt must not poison the checkpoint build. Work excluded
  * here simply lands in the next epoch's commit.
  */
-async function commitEpochSnapshot(params: {
+export async function commitEpochSnapshot(params: {
   repoRoot: string;
   excludePaths: string[];
   stateDirRelative: string | null;
   message: string;
+  payloadPaths?: string[];
 }): Promise<{ commitSha: string | null; committed: boolean; warning: string | null }> {
   const candidateExcludes = [...EPOCH_COMMIT_EXCLUDES, ...(params.stateDirRelative ? [params.stateDirRelative] : []), ...params.excludePaths];
   // Gitignored paths can never be staged by `add -A`, and naming one in a
@@ -135,9 +141,22 @@ async function commitEpochSnapshot(params: {
   if (!add.ok) {
     warning = `git add failed: ${add.text}`;
   } else {
-    const commit = await git(params.repoRoot, ["commit", "-m", params.message]);
-    if (commit.ok) committed = true;
-    else if (!/nothing to commit|nothing added to commit/.test(commit.text)) warning = `git commit failed: ${commit.text}`;
+    const payloadPaths = params.payloadPaths?.length ? params.payloadPaths : DEFAULT_EPOCH_PAYLOAD_PATHS;
+    const payload = await git(params.repoRoot, [
+      "diff",
+      "--cached",
+      "--quiet",
+      "--",
+      ...payloadPaths,
+      ...pathspecExcludes(excludes),
+    ]);
+    if (payload.exitCode > 1) {
+      warning = `git staged-payload check failed: ${payload.text}`;
+    } else if (payload.exitCode === 1) {
+      const commit = await git(params.repoRoot, ["commit", "-m", params.message]);
+      if (commit.ok) committed = true;
+      else if (!/nothing to commit|nothing added to commit/.test(commit.text)) warning = `git commit failed: ${commit.text}`;
+    }
   }
   const head = await git(params.repoRoot, ["rev-parse", "HEAD"]);
   return { commitSha: head.ok ? head.text : null, committed, warning };
@@ -402,6 +421,7 @@ async function runEpochCycleInner(store: StateStore, runId: string, repoRoot: st
     excludePaths: lockedPaths,
     stateDirRelative,
     message: `epoch(${runId.slice(0, 8)}): ${label ?? artifactTimestamp()}`,
+    payloadPaths: options.commitPayloadPaths,
   });
   if (snapshot.warning) console.error(`[epoch] ${snapshot.warning}`);
   if (!snapshot.commitSha) throw new Error("epoch commit failed: could not resolve HEAD");
