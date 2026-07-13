@@ -1,6 +1,5 @@
-{ "id":"fs-small","mode":"escalation","_note":"Tiny+small (<=256B) fresh fns. glm/kimi lead (own plans). codex-spark THROTTLED to last: its 5h codex quota is near-empty (10%, resets ~02:22) — the A3 rate-limit skip auto-uses it only when the 5h window has room and skips it when exhausted, so it self-manages against the reset without slamming the limit.",
+{ "id":"fs-small","mode":"escalation","_note":"Small <=256B partial-band. Spend Codex Spark quota first; promote survivors to gpt-5.6-sol xhigh.",
   "rungs":[
-    {"provider":"zai","model":"glm-5.2","thinking":"low","budget":{"agentTimeoutSeconds":1200,"ttlSeconds":7200,"maxAttempts":1}},
-    {"provider":"ollama-cloud","model":"kimi-k2.7-code","thinking":"medium","budget":{"agentTimeoutSeconds":1500,"ttlSeconds":7200,"maxAttempts":1}},
-    {"provider":"openai-codex","model":"gpt-5.3-codex-spark","thinking":"medium","budget":{"agentTimeoutSeconds":1200,"ttlSeconds":7200,"maxAttempts":1}}
+    {"provider":"openai-codex","model":"gpt-5.3-codex-spark","thinking":"medium","budget":{"agentTimeoutSeconds":1200,"ttlSeconds":7200,"maxAttempts":1}},
+    {"provider":"openai-codex","model":"gpt-5.6-sol","thinking":"xhigh","budget":{"agentTimeoutSeconds":3000,"ttlSeconds":7200,"maxAttempts":2}}
   ]}

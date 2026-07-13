@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, symlinkSync } from "node:fs";
+import { existsSync, lstatSync, mkdirSync, readFileSync, readdirSync, statSync, symlinkSync } from "node:fs";
 import { chmod, copyFile, mkdir, rm, writeFile } from "node:fs/promises";
 import { dirname, isAbsolute, relative, resolve } from "node:path";
 import { closenessScore } from "../board/candidates.js";
@@ -109,6 +109,28 @@ function artifactTimestamp(): string {
   return new Date().toISOString().replace(/[:.]/g, "-");
 }
 
+/**
+ * After a report build fails, run `ninja -k 0` (keep-going) in the worktree to
+ * collect EVERY failing unit, then map each failing object back to its source
+ * file. Used by the epoch build-gate to quarantine exactly the non-building
+ * files that a concurrent worker integration produced, without discarding the
+ * good matches committed alongside them.
+ */
+async function collectBrokenSourceFiles(worktreeDir: string): Promise<string[]> {
+  const proc = Bun.spawn(["ninja", "-k", "0"], { cwd: worktreeDir, stdout: "pipe", stderr: "pipe" });
+  const [stdout, stderr] = await Promise.all([new Response(proc.stdout).text(), new Response(proc.stderr).text()]);
+  await proc.exited;
+  const text = `${stdout}\n${stderr}`;
+  const files = new Set<string>();
+  // FAILED: [code=1] build/GC6E01/src/musyx/musyx_range_80157280.o  ->  src/musyx/musyx_range_80157280.c
+  const re = /FAILED:[^\n]*?\bbuild\/[^/]+\/(src\/\S+?)\.o\b/g;
+  let match: RegExpExecArray | null;
+  while ((match = re.exec(text)) !== null) {
+    files.add(`${match[1]}.c`);
+  }
+  return [...files];
+}
+
 function pathspecExcludes(paths: string[]): string[] {
   return paths.map((path) => `:(exclude)${path}`);
 }
@@ -206,9 +228,20 @@ function linkMissingTree(sourceDir: string, targetDir: string): number {
   for (const entry of readdirSync(sourceDir)) {
     const sourcePath = resolve(sourceDir, entry);
     const targetPath = resolve(targetDir, entry);
-    if (statSync(sourcePath).isDirectory()) {
+    // lstat (not stat) so we never FOLLOW a symlink: the tracked self-referential
+    // symlink `orig/orig -> <repo>/orig` would otherwise make this recurse into
+    // itself forever (ELOOP) and fail the epoch boundary. Mirrors the guard in
+    // workers/worker-cycle.ts linkMissingTree.
+    const stat = lstatSync(sourcePath);
+    if (stat.isSymbolicLink()) {
+      if (existsSync(targetPath)) continue;
+      symlinkSync(sourcePath, targetPath);
+      linked += 1;
+    } else if (stat.isDirectory()) {
       linked += linkMissingTree(sourcePath, targetPath);
-    } else if (!existsSync(targetPath)) {
+    } else if (existsSync(targetPath)) {
+      continue;
+    } else {
       symlinkSync(sourcePath, targetPath);
       linked += 1;
     }
@@ -416,36 +449,88 @@ async function runEpochCycleInner(store: StateStore, runId: string, repoRoot: st
   const lockedPaths = [...new Set([...activeLockedSourcePaths(store), ...(options.extraExcludePaths ?? [])])].sort();
   const stateDirRelative = options.stateDirRelative !== undefined ? options.stateDirRelative : stateDirRelativeToRepo(repoRoot, stateDir);
 
-  const snapshot = await commitEpochSnapshot({
-    repoRoot,
-    excludePaths: lockedPaths,
-    stateDirRelative,
-    message: `epoch(${runId.slice(0, 8)}): ${label ?? artifactTimestamp()}`,
-    payloadPaths: options.commitPayloadPaths,
-  });
+  // Last-good branch tip before this epoch's commit — the build-gate reverts to
+  // it (file-level, never `reset --hard`) when a worker integration fails to build.
+  const originalHeadResult = await git(repoRoot, ["rev-parse", "HEAD"]);
+  const originalHead = originalHeadResult.ok ? originalHeadResult.text : null;
+
+  const commitEpoch = (quarantineNote: string) =>
+    commitEpochSnapshot({
+      repoRoot,
+      excludePaths: lockedPaths,
+      stateDirRelative,
+      message: `epoch(${runId.slice(0, 8)}): ${label ?? artifactTimestamp()}${quarantineNote}`,
+      payloadPaths: options.commitPayloadPaths,
+    });
+
+  let snapshot = await commitEpoch("");
   if (snapshot.warning) console.error(`[epoch] ${snapshot.warning}`);
   if (!snapshot.commitSha) throw new Error("epoch commit failed: could not resolve HEAD");
 
-  await ensureEpochWorktree({
-    repoRoot,
-    worktreeDir: options.worktreeDir,
-    commitSha: snapshot.commitSha,
-    linkPaths: options.linkPaths ?? ["orig"],
-  });
-  const hasLocalWibo = await seedEpochWibo(options.worktreeDir, stateDir, repoRoot);
-  const configureCommand = hasLocalWibo
-    ? configureCommandWithLocalWrapper(options.configureCommand ?? "python3 configure.py --require-protos", "build/tools/wibo")
-    : (options.configureCommand ?? "python3 configure.py --require-protos");
-  await runConfigure(options.worktreeDir, configureCommand);
+  const prepareWorktree = async (commitSha: string) => {
+    await ensureEpochWorktree({
+      repoRoot,
+      worktreeDir: options.worktreeDir,
+      commitSha,
+      linkPaths: options.linkPaths ?? ["orig"],
+    });
+    const hasLocalWibo = await seedEpochWibo(options.worktreeDir, stateDir, repoRoot);
+    const configureCommand = hasLocalWibo
+      ? configureCommandWithLocalWrapper(options.configureCommand ?? "python3 configure.py --require-protos", "build/tools/wibo")
+      : (options.configureCommand ?? "python3 configure.py --require-protos");
+    await runConfigure(options.worktreeDir, configureCommand);
+  };
+  await prepareWorktree(snapshot.commitSha);
 
   const worktreeBaselinePath = resolve(options.worktreeDir, baselineRelPath);
-  const buildResult = await forceReportRun(options.worktreeDir, {
-    baselinePath: baselineRelPath,
-    changesTarget: options.changesTarget,
-    reportChangesPath: reportChangesRelPath,
-    reportPath: reportRelPath,
-    resetBaseline: !existsSync(worktreeBaselinePath),
-  });
+  const runReport = () =>
+    forceReportRun(options.worktreeDir, {
+      baselinePath: baselineRelPath,
+      changesTarget: options.changesTarget,
+      reportChangesPath: reportChangesRelPath,
+      reportPath: reportRelPath,
+      resetBaseline: !existsSync(worktreeBaselinePath),
+    });
+
+  // Epoch build-gate. Concurrent worker integrations can concatenate into a
+  // file that fails to build even though each worker validated its own unit in
+  // isolation (conflicting extern types, use-before-decl). Committing first and
+  // building second (as the report run does) would leave a broken branch tip.
+  // On a build failure, quarantine exactly the non-building source files (revert
+  // them to the last-good commit) and re-commit, preserving the good matches
+  // that landed alongside. If it cannot converge, revert all of src/ so the tip
+  // is guaranteed to build. Never uses `reset --hard`.
+  const quarantined = new Set<string>();
+  let buildResult: ReportRunResult | null = null;
+  for (let attempt = 0; attempt < 3 && buildResult === null; attempt++) {
+    try {
+      buildResult = await runReport();
+    } catch (buildError) {
+      if (!originalHead) throw buildError;
+      const broken = (await collectBrokenSourceFiles(options.worktreeDir)).filter((file) => !quarantined.has(file));
+      if (broken.length === 0) throw buildError;
+      const reset = await git(repoRoot, ["reset", "--soft", originalHead]);
+      if (!reset.ok) throw buildError;
+      broken.forEach((file) => quarantined.add(file));
+      for (const file of quarantined) {
+        await git(repoRoot, ["checkout", originalHead, "--", file]);
+      }
+      console.error(`[epoch] build-gate: quarantined ${broken.length} non-building file(s): ${broken.join(", ")}`);
+      snapshot = await commitEpoch(` [build-gate quarantined ${quarantined.size} file(s)]`);
+      if (!snapshot.commitSha) throw buildError;
+      await prepareWorktree(snapshot.commitSha);
+    }
+  }
+  if (buildResult === null) {
+    if (!originalHead) throw new Error("epoch build-gate: build failed and no last-good HEAD to recover to");
+    await git(repoRoot, ["reset", "--soft", originalHead]);
+    await git(repoRoot, ["checkout", originalHead, "--", "src"]);
+    console.error("[epoch] build-gate: could not converge by file quarantine; reverted all src/ to last-good (no source progress this epoch)");
+    snapshot = await commitEpoch(" [build-gate reverted src/ — unrecoverable build]");
+    if (!snapshot.commitSha) throw new Error("epoch build-gate: recovery commit failed to resolve HEAD");
+    await prepareWorktree(snapshot.commitSha);
+    buildResult = await runReport();
+  }
 
   const worktreeReportPath = resolve(options.worktreeDir, reportRelPath);
   const worktreeChangesPath = resolve(options.worktreeDir, reportChangesRelPath);
