@@ -14,6 +14,8 @@ project-specific GameCube decompilation workspaces.
 
 ## What It Does
 
+- Supports the local Claude/Codex/local-model tmux workflow with portable pane
+  controls and a documented compile-and-verify handoff contract.
 - Runs director and worker Pi agents against queued decompilation targets.
 - Coordinates many workers through SQLite leases, file locks, events, reports,
   and run artifacts instead of agent-to-agent chat.
@@ -129,6 +131,7 @@ operational notes live in the docs.
 
 ## Docs
 
+- [Local Claude, Codex and model tmux workflow](docs/20-implementation/local-tmux-workflow.md)
 - [Docs map](docs/README.md)
 - [Evidence refresh cadence](EVIDENCE_REFRESH_CADENCE.md)
 - [Foundation overview](docs/00-foundation/00-overview.md)

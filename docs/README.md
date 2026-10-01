@@ -22,6 +22,8 @@ docs/
 
 ## Start Here
 
+- [Local tmux workflow](20-implementation/local-tmux-workflow.md) covers direct
+  Claude/Codex/local-model coordination, work packets and validation handoffs.
 - [Foundation overview](00-foundation/00-overview.md) explains what the
   orchestrator is for and what it should avoid becoming.
 - [System design overview](10-system-design/00-overview.md) maps the scheduler,
